@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Base64;
@@ -8,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -20,6 +23,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
@@ -31,7 +35,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -239,10 +242,17 @@ public class ClusterController implements ClusterApiDelegate {
       CdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
+    String host = null;
+    try {
+      host = new URL(workbenchConfigProvider.get().server.apiBaseUrl).getHost();
+    } catch (MalformedURLException e) {
+      log.log(Level.SEVERE, "bad apiBaseUrl config value; failing", e);
+      throw new ServerErrorException("Failed to generate AoU notebook config");
+    }
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
-    config.put(API_HOST_KEY, workbenchConfigProvider.get().server.apiBaseUrl);
+    config.put(API_HOST_KEY, host);
     config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
     config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
     config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
