@@ -28,7 +28,7 @@ const routes: Routes = [
     data: {title: 'Quick Search'}
   },
   {
-    path: 'surveys',
+    path: 'quick-search/surveys',
     component: SurveysComponent,
     data: {title: 'Browse Survey Instruments'}
   },

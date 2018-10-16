@@ -64,9 +64,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
             for (const aa of this.analyses.measurementValueGenderAnalysis) {
                 this.unitNames.push(aa.unitName);
             }
-            this.selectedUnit = this.unitNames[0];
-            this.toDisplayMeasurementGenderAnalysis =  this.analyses.measurementValueGenderAnalysis.
-            find(aa => aa.unitName === this.selectedUnit);
+            this.showMeasurementGenderHistogram(this.unitNames[0]);
         }
         this.loadingStack.pop();
       }));
@@ -126,7 +124,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     }
   }
 
-    showHistogram(unit: string) {
+    showMeasurementGenderHistogram(unit: string) {
         this.selectedUnit = unit;
         this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
         find(aa => aa.unitName === unit);

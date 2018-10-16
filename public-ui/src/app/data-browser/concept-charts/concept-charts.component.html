@@ -5,7 +5,7 @@
 </div>
 
 <div *ngIf="unitNames.length > 1" class="col-md">
-  <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showHistogram(u)" class="btn btn-link">{{u}} </button>
+  <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showMeasurementGenderHistogram(u)" class="btn btn-link">{{u}} </button>
 </div>
 
 <div *ngIf="!loading()" class="row concept-charts chart">
