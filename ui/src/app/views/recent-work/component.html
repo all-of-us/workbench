@@ -9,14 +9,24 @@
     <div class="card-area">
       <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
            (click)="scrollLeft()">
-        <app-left-scroll-icon></app-left-scroll-icon>
+        <div *ngIf="workspace; else homepageLeft" style="position: absolute; left: 1.2rem; z-index: 99">
+          <app-left-scroll-light-icon></app-left-scroll-light-icon>
+        </div>
+        <ng-template #homepageLeft>
+          <app-left-scroll-icon></app-left-scroll-icon>
+        </ng-template>
       </div>
       <div *ngFor="let resource of resourceList">
         <app-resource-card [resourceCard]="resource" [cssClass]="cssClass" (onUpdate)="updateList($event)"></app-resource-card>
       </div>
       <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
            style="position: absolute; right: -1.5rem;" (click)="scrollRight()">
-        <app-right-scroll-icon></app-right-scroll-icon>
+        <div *ngIf="workspace; else homepageRight" style="position: absolute; right: 1.3rem; top: .3rem">
+          <app-right-scroll-light-icon></app-right-scroll-light-icon>
+        </div>
+        <ng-template #homepageRight>
+          <app-right-scroll-icon></app-right-scroll-icon>
+        </ng-template>
       </div>
     </div>
   </div>
