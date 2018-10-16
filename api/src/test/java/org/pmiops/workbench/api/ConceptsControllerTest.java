@@ -16,6 +16,8 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
+import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoId;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -186,6 +188,19 @@ public class ConceptsControllerTest {
           .standardConceptCount(3)
           .allConceptCount(4);
 
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V1_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V1"))
+          .standardConceptCount(1).allConceptCount(1);
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V3_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V3"))
+          .allConceptCount(1);
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V5_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V5"))
+          .allConceptCount(2).standardConceptCount(1);
+
   @TestConfiguration
   @Import({
       WorkspaceServiceImpl.class
@@ -211,6 +226,8 @@ public class ConceptsControllerTest {
   @Autowired
   private DomainInfoDao domainInfoDao;
   @Autowired
+  private DomainVocabularyInfoDao domainVocabularyInfoDao;
+  @Autowired
   FireCloudService fireCloudService;
 
   @PersistenceContext
@@ -225,7 +242,7 @@ public class ConceptsControllerTest {
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
     conceptsController = new ConceptsController(conceptService, workspaceService,
-        domainInfoDao, conceptDao);
+        domainInfoDao, domainVocabularyInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -270,6 +287,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsBlankQueryWithVocabAllCounts() throws Exception{
     saveConcepts();
     saveDomains();
+    saveDomainVocabularyInfos();
     ResponseEntity<ConceptListResponse> response =
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().includeVocabularyCounts(true).domain(Domain.CONDITION));
@@ -288,6 +306,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsBlankQueryWithVocabStandardCounts() throws Exception{
     saveConcepts();
     saveDomains();
+    saveDomainVocabularyInfos();
     ResponseEntity<ConceptListResponse> response =
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().includeVocabularyCounts(true).domain(Domain.CONDITION)
@@ -343,6 +362,7 @@ public class ConceptsControllerTest {
   public void testSearchConceptsBlankQueryWithDomainAndVocabStandardCounts() throws Exception{
     saveConcepts();
     saveDomains();
+    saveDomainVocabularyInfos();
     // When no query is provided, domain concept counts come from domain info directly.
     ResponseEntity<ConceptListResponse> response =
         conceptsController.searchConcepts("ns", "name",
@@ -373,6 +393,7 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsBlankQueryInDomainWithVocabularyIds() throws Exception{
     saveConcepts();
+    saveDomainVocabularyInfos();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().domain(Domain.CONDITION).vocabularyIds(
@@ -709,6 +730,12 @@ public class ConceptsControllerTest {
     domainInfoDao.save(PROCEDURE_DOMAIN);
     domainInfoDao.save(CONDITION_DOMAIN);
     domainInfoDao.save(DRUG_DOMAIN);
+  }
+
+  private void saveDomainVocabularyInfos() {
+    domainVocabularyInfoDao.save(CONDITION_V1_INFO);
+    domainVocabularyInfoDao.save(CONDITION_V3_INFO);
+    domainVocabularyInfoDao.save(CONDITION_V5_INFO);
   }
 
   private DomainCount toDomainCount(org.pmiops.workbench.cdr.model.DomainInfo domainInfo, boolean standardCount) {
