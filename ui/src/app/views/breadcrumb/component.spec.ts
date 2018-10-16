@@ -177,6 +177,6 @@ describe('BreadcrumbComponent', () => {
     tick();
     expect(testComponent.breadcrumbs.pop().label)
         .toBe('Concept Set Name', 'Breadcrumb label should be "Concept Set Name"');
-  }))
+  }));
 
 });
