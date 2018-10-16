@@ -19,6 +19,7 @@ import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -96,6 +97,7 @@ describe('WorkspaceComponent', () => {
         RecentWorkComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        TopBoxComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
