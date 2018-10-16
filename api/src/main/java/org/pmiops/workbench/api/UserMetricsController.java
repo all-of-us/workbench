@@ -95,6 +95,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   @Override
   public ResponseEntity<RecentResource> updateRecentResource(String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
+    // this is only ever used for Notebooks because we update/add to the cache for the other resources in the backend
+    // Because we don't store notebooks in our database the way we do other resources.
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
     String notebookPath;
