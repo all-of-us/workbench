@@ -105,7 +105,7 @@
 .app-container {
   width: 100%;
   padding-right: 0.6rem;
-  padding-left: 1rem;
+  padding-left: 0.6rem;
   flex-grow: 1;
   /* Needed for absolute positioned child elements, e.g. spinner. */
   position: relative;
