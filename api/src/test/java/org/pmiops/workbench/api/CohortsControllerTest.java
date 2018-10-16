@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
@@ -104,7 +105,8 @@ public class CohortsControllerTest {
       .vocabularyId("V1")
       .domainId("Condition")
       .countValue(123L)
-      .prevalence(0.2F);
+      .prevalence(0.2F)
+      .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
       .conceptId(789L)
@@ -115,7 +117,8 @@ public class CohortsControllerTest {
       .vocabularyId("V3")
       .domainId("Condition")
       .countValue(789L)
-      .prevalence(0.4F);
+      .prevalence(0.4F)
+      .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
