@@ -51,6 +51,8 @@ public class ClusterController implements ClusterApiDelegate {
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
+  // The billing project to use for the analysis.
+  private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
@@ -208,7 +210,7 @@ public class ClusterController implements ClusterApiDelegate {
             .put("pattern", "\\.ipynb$")));
     localizeMap.put(
         localDir + "/" + AOU_CONFIG_FILENAME,
-        aouConfigDataUri(fcWorkspace, cdrVersion));
+        aouConfigDataUri(fcWorkspace, cdrVersion, projectName));
 
     // Localize the requested notebooks, if any.
     if (body.getNotebookNames() != null) {
@@ -233,7 +235,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   private String aouConfigDataUri(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      CdrVersion cdrVersion) {
+      CdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
@@ -242,6 +244,7 @@ public class ClusterController implements ClusterApiDelegate {
     config.put(API_HOST_KEY, this.apiHostName);
     config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
     config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
+    config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
     return jsonToDataUri(config);
   }
 }

@@ -32,7 +32,7 @@
     "shortName": "Prod"
   },
   "admin": {
-    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
+    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
   },
   "jira": {

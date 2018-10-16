@@ -26,7 +26,9 @@ import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
 
+import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
+import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 
 
@@ -45,7 +47,9 @@ describe('RecentWorkComponent', () => {
       declarations: [
         RecentWorkComponent,
         LeftScrollComponent,
+        LeftScrollLightComponent,
         RightScrollComponent,
+        RightScrollLightComponent,
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
