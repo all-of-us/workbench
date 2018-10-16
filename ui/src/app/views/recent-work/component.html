@@ -9,7 +9,7 @@
     <div class="card-area">
       <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
            (click)="scrollLeft()">
-        <div *ngIf="workspace; else homepageLeft" style="position: absolute; left: 1.2rem; z-index: 99">
+        <div *ngIf="workspace; else homepageLeft" style="position: absolute; left: 1.2rem; z-index: 99; top: .3rem">
           <app-left-scroll-light-icon></app-left-scroll-light-icon>
         </div>
         <ng-template #homepageLeft>
