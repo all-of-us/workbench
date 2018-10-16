@@ -188,8 +188,7 @@ public class DomainInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(domain, name, description, conceptId, allConceptCount, standardConceptCount,
-        participantCount);
+    return Objects.hash(domain, name, description, conceptId, allConceptCount, standardConceptCount, participantCount);
   }
 
   @Override
