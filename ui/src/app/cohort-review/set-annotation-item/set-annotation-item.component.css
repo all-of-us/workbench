@@ -10,6 +10,7 @@
 .name {
   flex: 1;
   padding-top: 0.25rem;
+  word-break:break-word;
 }
 
 .type {
