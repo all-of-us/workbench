@@ -95,13 +95,14 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         label = child.snapshot.data['conceptSet'].name;
       }
 
-      if ((label === 'Cohorts') || (label === 'Notebooks')) {
+      if ((label === 'Cohorts') || (label === 'Notebooks') || (label === 'Concepts')) {
         console.log(child.url);
         if (!child.firstChild) {
           return breadcrumbs;
         }
         else {
-          if (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Cohorts') {
+          // some of these routes have repeats in the nested structure? looking for clarification 
+          if ((child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Cohorts') || (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === 'Concepts')) {
             if (!child.firstChild.firstChild) {
               return breadcrumbs;
             }
