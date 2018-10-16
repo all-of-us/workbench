@@ -32,7 +32,8 @@ public class ParameterPredicates {
   private static final List<String> CODE_TYPES =
     Arrays.asList(TreeType.ICD9.toString(),
       TreeType.ICD10.toString(),
-      TreeType.CPT.toString());
+      TreeType.CPT.toString(),
+      TreeType.SNOMED.toString());
 
   private static final List<String> CODE_SUBTYPES =
     Arrays.asList(TreeSubType.CM.toString(),
@@ -141,6 +142,10 @@ public class ParameterPredicates {
 
   public static Predicate<SearchParameter> visitTypeInvalid() {
     return sp -> !TreeType.VISIT.toString().equalsIgnoreCase(sp.getType());
+  }
+
+  public static Predicate<SearchParameter> snomedTypeInvalid() {
+    return sp -> !TreeType.SNOMED.toString().equalsIgnoreCase(sp.getType());
   }
 
   public static Predicate<SearchParameter> ppiTypeInvalid() {

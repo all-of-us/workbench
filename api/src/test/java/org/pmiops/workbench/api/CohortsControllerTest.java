@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
@@ -50,6 +51,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -59,7 +61,6 @@ import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -104,7 +105,8 @@ public class CohortsControllerTest {
       .vocabularyId("V1")
       .domainId("Condition")
       .countValue(123L)
-      .prevalence(0.2F);
+      .prevalence(0.2F)
+      .conceptSynonyms(new ArrayList<String>());
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
       .conceptId(789L)
@@ -115,7 +117,8 @@ public class CohortsControllerTest {
       .vocabularyId("V3")
       .domainId("Condition")
       .countValue(789L)
-      .prevalence(0.4F);
+      .prevalence(0.4F)
+      .conceptSynonyms(new ArrayList<String>());
 
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
       makeConcept(CLIENT_CONCEPT_1);
@@ -448,10 +451,10 @@ public class CohortsControllerTest {
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
     conceptSet = conceptSetsController.createConceptSet(workspace.getNamespace(), workspace.getId(),
-        conceptSet).getBody();
-    conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
-        conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(), CLIENT_CONCEPT_1.getConceptId(),
-            CLIENT_CONCEPT_2.getConceptId()));
+        new CreateConceptSetRequest().conceptSet(conceptSet)
+            .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_2.getConceptId()))).getBody();
+
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -474,10 +477,9 @@ public class CohortsControllerTest {
     cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
     conceptSet = conceptSetsController.createConceptSet(workspace.getNamespace(), workspace.getId(),
-        conceptSet).getBody();
-    conceptSetsController.updateConceptSetConcepts(workspace.getNamespace(), workspace.getId(),
-        conceptSet.getId(), addConceptsRequest(conceptSet.getEtag(), CLIENT_CONCEPT_1.getConceptId(),
-            CLIENT_CONCEPT_2.getConceptId()));
+        new CreateConceptSetRequest().conceptSet(conceptSet)
+            .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_2.getConceptId()))).getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -552,12 +554,5 @@ public class CohortsControllerTest {
         .thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
-  }
-
-  private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
-    UpdateConceptSetRequest request = new UpdateConceptSetRequest();
-    request.setEtag(etag);
-    request.setAddedIds(ImmutableList.copyOf(conceptIds));
-    return request;
   }
 }

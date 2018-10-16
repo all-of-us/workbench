@@ -1,5 +1,5 @@
-import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {DOCUMENT} from '@angular/common';
+import {Component, Inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
   private overriddenPublicUrl: string = null;
 
   constructor(
+    @Inject(DOCUMENT) private doc: any,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private titleService: Title
@@ -83,6 +84,8 @@ export class AppComponent implements OnInit {
         this.initialSpinner = false;
       }
     });
+
+    this.setGTagManager();
   }
 
   /**
@@ -102,4 +105,30 @@ export class AppComponent implements OnInit {
     }
   }
 
+  /**
+   * Setting the Google Analytics ID here.
+   * This first injects Google's gtag script via iife, then secondarily defines
+   * the global gtag function.
+   */
+  private setGTagManager() {
+    const s = this.doc.createElement('script');
+    s.type = 'text/javascript';
+    s.innerHTML =
+      '(function(w,d,s,l,i){' +
+        'w[l]=w[l]||[];' +
+        'var f=d.getElementsByTagName(s)[0];' +
+        'var j=d.createElement(s);' +
+        'var dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';' +
+        'j.async=true;' +
+        'j.src=\'https://www.googletagmanager.com/gtag/js?id=\'+i+dl;' +
+        'f.parentNode.insertBefore(j,f);' +
+      '})' +
+      '(window, document, \'script\', \'dataLayer\', \'' + environment.gaId + '\');' +
+      'window.dataLayer = window.dataLayer || [];' +
+      'function gtag(){dataLayer.push(arguments);}' +
+      'gtag(\'js\', new Date());' +
+      'gtag(\'config\', \'' + environment.gaId + '\');';
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(s);
+  }
 }

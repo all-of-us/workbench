@@ -9,6 +9,8 @@ import java.util.Objects;
 @Entity
 //TODO need to add a way to dynamically switch between database versions
 //this dynamic connection will eliminate the need for the catalog attribute
+// NOTE: This class and ConceptSynonymDao exist only to make CriteriaDao work in tests;
+// if we stop using concept_synonym there at some point we can get rid of them.
 @Table(name = "concept_synonym")
 public class ConceptSynonym {
 

@@ -15,7 +15,7 @@
   height: 3%;
   width: 0%;
   color: rgba(48,41,115,1);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 20px;
   line-height: 24px;
 }
@@ -72,10 +72,9 @@ clr-icon {
 }
 
 .user-role {
-  font-weight: 300;
   line-height: 0.8rem;
   color: #565656;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 0.4rem
 }
 
@@ -187,10 +186,5 @@ clr-dropdown > button {
 
 .row {
   margin-left: 0rem;
-}
-
-a, a:link, a:visited {
-  color: #83C3EC;
-  text-decoration: underline;
 }
 

@@ -9,6 +9,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -133,24 +134,24 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                Map<String, QueryParameterValue> queryParams,
                                String domain, QueryParameterValue codes,
                                String groupOrChildSql) {
-    String typeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(type));
-    String subtypeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(subtype));
-    String codeNamedParameter = null;
-    String conceptIdsNamedParameter = null;
     ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder()
       .put("${tableName}", DomainTableEnum.getTableName(domain))
-      .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) +
-        " as entry_date, " + DomainTableEnum.getSourceConceptId(domain))
-      .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
-      .put("${type}", "@" + typeNamedParameter)
-      .put("${subtype}", "@" + subtypeNamedParameter);
+        .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) +
+            " as entry_date, " + DomainTableEnum.getSourceConceptId(domain))
+        .put("${tableId}", TreeType.SNOMED.name().equalsIgnoreCase(type) ?
+          DomainTableEnum.getConceptId(domain) :
+          DomainTableEnum.getSourceConceptId(domain));
 
     if (codes.getType().equals(StandardSQLTypeName.ARRAY)) {
-      conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
+      String conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
       paramNames.put("${conceptIds}", "@" + conceptIdsNamedParameter);
     } else {
-      codeNamedParameter = addQueryParameterValue(queryParams, codes);
+      String codeNamedParameter = addQueryParameterValue(queryParams, codes);
       paramNames.put("${code}", "@" + codeNamedParameter);
+      String typeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(type));
+      paramNames.put("${type}", "@" + typeNamedParameter);
+      String subtypeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(subtype));
+      paramNames.put("${subtype}", "@" + subtypeNamedParameter);
     }
 
     queryParts.add(filterSql(CODES_SQL_TEMPLATE + groupOrChildSql, paramNames.build()));
