@@ -70,7 +70,7 @@ create_tables=(p_all_events p_condition p_drug p_measurement p_observation p_pro
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
-    bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/$t.json $BQ_DATASET.$t
+    bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/$t.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.$t
 done
 
 # Populate some tables from cdr data
