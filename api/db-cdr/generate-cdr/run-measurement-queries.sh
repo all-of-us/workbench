@@ -646,7 +646,7 @@ join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_con
 where m1.value_as_concept_id != 0
 and m1.measurement_concept_id > 0 and m1.measurement_concept_id not in (4091452,4065279,3027018)
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
-group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id
+group by m1.measurement_concept_id,m1.value_as_concept_id,c2.concept_name,p1.gender_concept_id
 union all
 SELECT 0,1900 as analysis_id,
 cast(m1.measurement_source_concept_id as string) as stratum_1,CAST(p1.gender_concept_id AS STRING) as stratum_2,'Measurement' as stratum_3,
@@ -661,7 +661,7 @@ join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on m1.value_as_concept_id=c2.con
 where m1.value_as_concept_id != 0
 and ar.analysis_id = 3000 and ar.stratum_3='Measurement' and ar.stratum_4 != 'unknown'
 and m1.measurement_source_concept_id > 0 and m1.measurement_source_concept_id != m1.measurement_concept_id
-group by m1.measurement_source_concept_id,c2.concept_name,p1.gender_concept_id"
+group by m1.measurement_source_concept_id,m1.value_as_concept_id,c2.concept_name,p1.gender_concept_id"
 
 # 1901 Measurement response, age decile histogram data (age decile > 2)
 # We do not yet generate the binned source counts of standard concepts

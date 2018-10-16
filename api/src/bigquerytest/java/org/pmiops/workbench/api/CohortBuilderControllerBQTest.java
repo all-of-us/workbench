@@ -103,6 +103,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(TreeType.ICD9.name(), new ArrayList<>(), new ArrayList<>());
     assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
 
+    //icd10 no search attributes
+    searchRequest = createSearchRequests(TreeType.ICD10.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //condition no search attributes
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //procedure no search attributes
+    searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
     //demo no search parameters
     searchRequest = createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
     assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
@@ -222,6 +234,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = createSearchRequests(TreeType.ICD9.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CODE, icd9.getValue());
+
+    //snomed no type
+    Criteria snomedCrtieria =
+      createCriteriaChild(null, null, 0, "", null, null);
+    SearchParameter snomed = createSearchParameter(snomedCrtieria, "");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, snomed.getType());
+
+    //snomed bad type
+    snomed.type(TreeType.VISIT.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, snomed.getType());
+
+    //snomed no domain
+    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, snomed.getDomain());
+
+    //snomed bad domain
+    snomed.domain("baddomain");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, snomed.getDomain());
+
+    //snomed child no concept id
+    snomed.domain(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, snomed.getConceptId());
 
     //demo no type
     Criteria demo =
@@ -1073,6 +1117,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Q", DomainType.MEASUREMENT.name(), "10");
     SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
     SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsConditionsSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "", DomainType.CONDITION.name(), "6");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsProceduresSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.PCS.name(), 0, "", DomainType.PROCEDURE.name(), "4");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
