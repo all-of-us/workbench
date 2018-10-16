@@ -70,6 +70,7 @@ export class SetAnnotationCreateComponent {
       const hasVal = this.enumValues.includes(val);
       if (val && val !== '' && !hasVal) {
         request.enumValues = [...this.enumValues, val];
+        this.addValue.reset();
       }
     }
 
