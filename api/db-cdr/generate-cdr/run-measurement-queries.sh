@@ -677,7 +677,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
  (id, analysis_id, stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
  SELECT 0,1900 as analysis_id,
- cast(m1.measurement_concept_id as string) as stratum_1,'' as stratum_2,
+ cast(m1.measurement_concept_id as string) as stratum_1,'0' as stratum_2,
  CAST(p1.gender_concept_id AS STRING) as stratum_3,
  c2.concept_name as stratum_4,
  cast(m1.value_as_concept_id as string) as stratum_5,
@@ -691,7 +691,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id,m1.value_as_concept_id
  union all
  SELECT 0,1900 as analysis_id,
- cast(m1.measurement_source_concept_id as string) as stratum_1,'' as stratum_2,
+ cast(m1.measurement_source_concept_id as string) as stratum_1,'0' as stratum_2,
  CAST(p1.gender_concept_id AS STRING) as stratum_3,
  c2.concept_name as stratum_4,
  cast(m1.value_as_concept_id as string) as stratum_5,
@@ -935,7 +935,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5, count_value,source_count_value)
 SELECT 0,1901 as analysis_id,
-cast(m1.measurement_concept_id as string) as stratum_1,'' as stratum_2,
+cast(m1.measurement_concept_id as string) as stratum_1,'0' as stratum_2,
 CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
 c2.concept_name as stratum_4,
 cast(m1.value_as_concept_id as string) as stratum_5,
@@ -951,7 +951,7 @@ and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 group by m1.measurement_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_3
 union all
 SELECT 0,1901 as analysis_id,
-cast(m1.measurement_source_concept_id as string) as stratum_1,'' as stratum_2,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
+cast(m1.measurement_source_concept_id as string) as stratum_1,'0' as stratum_2,CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS STRING) as stratum_3,
 c2.concept_name as stratum_4,
 cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
@@ -971,7 +971,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, stratum_4, stratum_5,count_value,source_count_value)
 SELECT 0,1901 as analysis_id,
-cast(m1.measurement_concept_id as string) as stratum_1,'' as stratum_2,'2' as stratum_3,
+cast(m1.measurement_concept_id as string) as stratum_1,'0' as stratum_2,'2' as stratum_3,
 c2.concept_name as stratum_4,
 cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
@@ -985,7 +985,7 @@ and (extract(year from m1.measurement_date) - p1.year_of_birth) >= 18 and (extra
 group by m1.measurement_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_3
 union all
 SELECT 0,1901 as analysis_id,
-cast(m1.measurement_source_concept_id as string) as stratum_1,'' as stratum_2,'2' as stratum_3,
+cast(m1.measurement_source_concept_id as string) as stratum_1,'0' as stratum_2,'2' as stratum_3,
 c2.concept_name as stratum_4,
 cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
