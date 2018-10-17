@@ -1,5 +1,5 @@
 import {DebugElement} from '@angular/core';
-import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
 import {QuickTourModalComponent} from './component';
@@ -35,9 +35,9 @@ describe('QuickTourModalComponent', () => {
   it('should move forward and backward with next and previous clicks', fakeAsync(() => {
     const nextButton = de.query(By.css('#next'));
     const prevButton = de.query(By.css('#previous'));
+    const panelTitle = de.query(By.css('.panel-title'));
     simulateClick(fixture, nextButton);
     updateAndTick(fixture);
-    const panelTitle = de.query(By.css('.panelTitle'));
     const nextPanelTitle = fixture.componentInstance.panelTitles[1].toString();
     expect(panelTitle.nativeElement.innerText).toMatch(nextPanelTitle);
     simulateClick(fixture, prevButton);
@@ -50,7 +50,7 @@ describe('QuickTourModalComponent', () => {
     const circleToSelect = de.query(By.css('#Cohorts'));
     simulateClick(fixture, circleToSelect);
     updateAndTick(fixture);
-    const panelTitle = de.query(By.css('.panelTitle'));
+    const panelTitle = de.query(By.css('.panel-title'));
     expect(panelTitle.nativeElement.innerText).toMatch('Cohorts');
   }));
 
