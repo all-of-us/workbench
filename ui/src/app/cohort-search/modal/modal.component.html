@@ -117,7 +117,7 @@
                     </button>
                     <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode === 'modifiers'"
                              type="button"
-                             (click)="mode = 'tree'"
+                             (click)="setMode('tree')"
                              class="btn btn-primary">
                       Back
                     </button>
