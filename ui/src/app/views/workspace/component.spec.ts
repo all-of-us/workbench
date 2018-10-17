@@ -57,6 +57,7 @@ import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
+import {NewNotebookModalComponent} from '../new-notebook-modal/component';
 
 const activatedRouteStub  = {
   snapshot: {
@@ -94,6 +95,7 @@ describe('WorkspaceComponent', () => {
         BugReportComponent,
         ConfirmDeleteModalComponent,
         EditModalComponent,
+        NewNotebookModalComponent,
         RecentWorkComponent,
         RenameModalComponent,
         ResourceCardComponent,
