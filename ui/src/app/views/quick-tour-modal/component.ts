@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-quick-tour-modal',
-  styleUrls:['./component.css'],
+  styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
 
@@ -16,17 +16,17 @@ export class QuickTourModalComponent implements OnInit {
   selectedIndex: number;
   learning = false;
 
-  constructor(){}
+  constructor() {}
 
   ngOnInit(): void {
-    this.panelTitles = ["Intro", "Workspaces", "Concepts",
-      "Cohorts", "Notebooks"];
-    this.panels.set("Intro", "Lots of content here");
-    this.panels.set("Workspaces", "Lots more content here");
-    this.panels.set("Concepts", "Even more content");
-    this.panels.set("Cohorts", "Still more content");
-    this.panels.set("Notebooks", "Finally, last of the content");
-    this.selected = "Intro";
+    this.panelTitles = ['Intro', 'Workspaces', 'Concepts',
+      'Cohorts', 'Notebooks'];
+    this.panels.set('Intro', 'Lots of content here');
+    this.panels.set('Workspaces', 'Lots more content here');
+    this.panels.set('Concepts', 'Even more content');
+    this.panels.set('Cohorts', 'Still more content');
+    this.panels.set('Notebooks', 'Finally, last of the content');
+    this.selected = 'Intro';
     this.selectedIndex = 0;
   }
 

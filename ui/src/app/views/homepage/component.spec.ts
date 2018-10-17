@@ -89,5 +89,5 @@ describe('HomepageComponent', () => {
     simulateClick(fixture, fixture.debugElement.query(By.css('#close')));
     updateAndTick(fixture);
     expect(fixture.debugElement.query(By.css('#quick-tour'))).toBeNull();
-  }))
+  }));
 });

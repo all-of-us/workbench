@@ -1,24 +1,22 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {QuickTourModalComponent} from "./component";
-import {simulateClick, updateAndTick} from "../../../testing/test-helpers";
-import {RouterTestingModule} from "@angular/router/testing";
+import {DebugElement} from '@angular/core';
 import {By} from '@angular/platform-browser';
-import {DebugElement} from "@angular/core";
+
+import {QuickTourModalComponent} from './component';
+
+import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 describe('QuickTourModalComponent', () => {
   let fixture: ComponentFixture<QuickTourModalComponent>;
   let de: DebugElement;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-      ],
-      declarations: [
-        QuickTourModalComponent
-      ],
+      imports: [],
+      declarations: [QuickTourModalComponent],
       providers: []
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(QuickTourModalComponent);
-      //make sure modal is displaying
+      // make sure modal is displaying
       fixture.componentInstance.learning = true;
       updateAndTick(fixture);
       de = fixture.debugElement;
