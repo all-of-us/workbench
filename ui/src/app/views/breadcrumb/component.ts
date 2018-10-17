@@ -19,8 +19,6 @@ export interface Breadcrumb {
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
-  routeDataBreadcrumb = 'breadcrumb';
-  routeDataIntermediateBreadcrumb = 'intermediateBreadcrumb';
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {}
@@ -71,11 +69,12 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
                            url: string = '',
                            breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
     const children: ActivatedRoute[] = route.children;
+    const ROUTE_DATA_BREADCRUMB = 'breadcrumb';
     if (children.length === 0) {
       return breadcrumbs;
     }
     for (const child of children) {
-      if (!child.snapshot.data.hasOwnProperty(this.routeDataBreadcrumb)) {
+      if (!child.snapshot.data.hasOwnProperty(ROUTE_DATA_BREADCRUMB)) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
@@ -83,8 +82,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         url += `/${routeURL}`;
       }
 
-      let label = child.snapshot.data[this.routeDataBreadcrumb].value;
-      let isIntermediate = child.snapshot.data[this.routeDataBreadcrumb].intermediate;
+      let label = child.snapshot.data[ROUTE_DATA_BREADCRUMB].value;
+      const isIntermediate = child.snapshot.data[ROUTE_DATA_BREADCRUMB].intermediate;
 
       if (label === 'Param: Workspace Name') {
         label = child.snapshot.data['workspace'].name;
@@ -109,7 +108,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * This ensures that breadcrumb headers are displayed correctly while still tracking
    * intermediate pages.
    */
-  private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
+  private static filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
     if (breadcrumbs.length > 0) {
       let last = breadcrumbs[breadcrumbs.length - 1];
       while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
