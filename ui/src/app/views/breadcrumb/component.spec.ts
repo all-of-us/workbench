@@ -156,7 +156,7 @@ describe('BreadcrumbComponent', () => {
     }
   }));
 
-  it('should populate parent value in label', fakeAsync(() => {
+  it('should populate parameter value in label', fakeAsync(() => {
     router.navigate(['params', 'P1']);
     tick();
     expect(testComponent.breadcrumbs.pop().label)
