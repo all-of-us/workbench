@@ -119,22 +119,12 @@ set count_value =
     end
 where count_value >= 0"
 
-# achilles_results_dist
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.achilles_results_dist\`
-set count_value =
-    case when count_value < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end
-where count_value >= 0"
 
 #delete concepts with 0 count / source count value
 
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') "
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') and lower(vocabulary_id) not in ('ppi')"
 
 #delete concepts from concept_relationship that are not in concepts
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -171,7 +161,7 @@ set count_value =
         else
             0.00
     end
-where count_value >= 0"
+where count_value > 0 or lower(vocabulary_id) ='ppi' "
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
