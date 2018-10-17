@@ -19,8 +19,8 @@ export interface Breadcrumb {
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
-  ROUTE_DATA_BREADCRUMB = 'breadcrumb';
-  ROUTE_DATA_INTERMIEDIATE_BREADCRUMB = 'intermediateBreadcrumb';
+  routeDataBreadcrumb = 'breadcrumb';
+  routeDataIntermediateBreadcrumb = 'intermediateBreadcrumb';
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {}
@@ -75,8 +75,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       return breadcrumbs;
     }
     for (const child of children) {
-      if ((!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB))
-          && (!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB))) {
+      if ((!child.snapshot.data.hasOwnProperty(this.routeDataBreadcrumb))
+          && (!child.snapshot.data.hasOwnProperty(this.routeDataIntermediateBreadcrumb))) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
@@ -86,12 +86,12 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
 
       let label;
       let breadcrumbType;
-      if (child.snapshot.data[this.ROUTE_DATA_BREADCRUMB] != null) {
-        label = child.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
-        breadcrumbType = this.ROUTE_DATA_BREADCRUMB;
+      if (child.snapshot.data[this.routeDataBreadcrumb] != null) {
+        label = child.snapshot.data[this.routeDataBreadcrumb];
+        breadcrumbType = this.routeDataBreadcrumb;
       } else {
-        label = child.snapshot.data[this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB];
-        breadcrumbType = this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB;
+        label = child.snapshot.data[this.routeDataIntermediateBreadcrumb];
+        breadcrumbType = this.routeDataIntermediateBreadcrumb;
       }
 
       if (label === 'Param: Workspace Name') {
@@ -119,7 +119,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    */
   private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
     let last = breadcrumbs[breadcrumbs.length - 1];
-    while ((breadcrumbs.length > 1) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
+    while ((breadcrumbs.length > 1) && (last.type === this.routeDataIntermediateBreadcrumb)) {
       breadcrumbs.pop();
       last = breadcrumbs[breadcrumbs.length - 1];
     }

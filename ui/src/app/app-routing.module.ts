@@ -99,7 +99,7 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
-                intermediateBreadcrumb: 'Edit Workspace'
+                breadcrumb: 'Edit Workspace'
               }
             }, {
               path: 'clone',
@@ -107,7 +107,7 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
-                intermediateBreadcrumb: 'Clone Workspace'
+                breadcrumb: 'Clone Workspace'
               }
             },
             {
