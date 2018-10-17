@@ -48,6 +48,22 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     };
   }
 
+  /**
+   * Filters an array of Breadcrumbs so that the last element is never an intermediateBreadcrumb
+   * This ensures that breadcrumb headers are displayed correctly while still tracking
+   * intermediate pages.
+   */
+  private static filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
+      if (breadcrumbs.length > 0) {
+          let last = breadcrumbs[breadcrumbs.length - 1];
+          while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
+              breadcrumbs.pop();
+              last = breadcrumbs[breadcrumbs.length - 1];
+          }
+      }
+      return breadcrumbs;
+  }
+
   ngOnInit() {
     this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
 
@@ -101,22 +117,6 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       }
       return this.buildBreadcrumbs(child, url, breadcrumbs);
     }
-  }
-
-  /**
-   * Filters an array of Breadcrumbs so that the last element is never an intermediateBreadcrumb
-   * This ensures that breadcrumb headers are displayed correctly while still tracking
-   * intermediate pages.
-   */
-  private static filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
-    if (breadcrumbs.length > 0) {
-      let last = breadcrumbs[breadcrumbs.length - 1];
-      while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
-          breadcrumbs.pop();
-          last = breadcrumbs[breadcrumbs.length - 1];
-      }
-    }
-    return breadcrumbs;
   }
 
 }
