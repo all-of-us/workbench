@@ -19,8 +19,8 @@ export interface Breadcrumb {
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
-  ROUTE_DATA_BREADCRUMB: string = 'breadcrumb';
-  ROUTE_DATA_INTERMIEDIATE_BREADCRUMB: string = 'intermediateBreadcrumb';
+  ROUTE_DATA_BREADCRUMB = 'breadcrumb';
+  ROUTE_DATA_INTERMIEDIATE_BREADCRUMB = 'intermediateBreadcrumb';
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {}
@@ -75,7 +75,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       return breadcrumbs;
     }
     for (const child of children) {
-      if ((!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) && (!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB))) {
+      if ((!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB))
+          && (!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB))) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
@@ -118,7 +119,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    */
   private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
     let last = breadcrumbs[breadcrumbs.length - 1];
-    while((breadcrumbs.length > 1) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
+    while ((breadcrumbs.length > 1) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
       breadcrumbs.pop();
       last = breadcrumbs[breadcrumbs.length - 1];
     }
