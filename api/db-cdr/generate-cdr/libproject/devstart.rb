@@ -22,13 +22,13 @@ def update_bq_acl(cmd_name, args)
   # TODO: add controlled authorization domains here later; choose controlled vs. registered based
   # on data access level of CDR version.
   if op.opts.bq_project == "all-of-us-ehr-dev"
-    # TODO: add prod authorization domain here once it's created.
-    authorization_domains = ["GROUP_all-of-us-registered-stable@firecloud.org",
+    # We include prod in here for now since it uses synthetic data. We might remove this in future.
+    authorization_domains = ["all-of-us-registered-prod@firecloud.org",
+                             "GROUP_all-of-us-registered-stable@firecloud.org",
                              "GROUP_all-of-us-registered-staging@firecloud.org",
                              "GROUP_all-of-us-registered-test@dev.test.firecloud.org"]
   elsif op.opts.bq_project == "aou-res-curation-prod"
-    # This authorization domain doesn't actually exist yet -- but it will be the one we use in prod.
-    authorization_domains = ["GROUP_all-of-us-registered-prod@firecloud.org"]
+    authorization_domains = ["all-of-us-registered-prod@firecloud.org"]
   else
     raise ArgumentError.new("bq-project must be all-of-us-ehr-dev (synthetic) or aou-res-curation-prod (prod)")
   end
