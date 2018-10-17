@@ -2,6 +2,7 @@ require_relative "../../../../aou-utils/utils/common"
 require_relative "../../../libproject/wboptionsparser"
 require "json"
 require "set"
+require "tempfile"
 
 def update_bq_acl(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
@@ -33,28 +34,32 @@ def update_bq_acl(cmd_name, args)
   end
 
   common = Common.new
-  config_filename = "/tmp/#{op.opts.bq_dataset}-config.json"
-  common.run_inline %{bq show --format=prettyjson #{op.opts.bq_project}:#{op.opts.bq_dataset} > #{config_filename}}
-  json = JSON.parse(File.read(config_filename))
-  existing_groups = Set[]
-  for entry in json["access"]
-    if entry.key?("groupByEmail")
-      existing_groups.add(entry["groupByEmail"])
+  config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
+  begin
+    common.run_inline %{bq show --format=prettyjson #{op.opts.bq_project}:#{op.opts.bq_dataset} > #{config_file.path}}
+    json = JSON.parse(File.read(config_file.path))
+    existing_groups = Set[]
+    for entry in json["access"]
+      if entry.key?("groupByEmail")
+        existing_groups.add(entry["groupByEmail"])
+      end
     end
-  end
-  for domain in authorization_domains
-    if existing_groups.include?(domain)
-      puts "#{domain} already in ACL, skipping..."
-    else
-      puts "Adding #{domain} to ACL..."
-      new_entry = { "groupByEmail" => domain, "role" => "READER"}
-      json["access"].push(new_entry)
+    for domain in authorization_domains
+      if existing_groups.include?(domain)
+        puts "#{domain} already in ACL, skipping..."
+      else
+        puts "Adding #{domain} to ACL..."
+        new_entry = { "groupByEmail" => domain, "role" => "READER"}
+        json["access"].push(new_entry)
+      end
     end
+    File.open(config_file.path, "w") do |f|
+      f.write(JSON.pretty_generate(json))
+    end
+    common.run_inline %{bq update --source #{config_file.path} #{op.opts.bq_project}:#{op.opts.bq_dataset}}
+  ensure
+    config_file.unlink
   end
-  File.open(config_filename, "w") do |f|
-    f.write(JSON.pretty_generate(json))
-  end
-  common.run_inline %{bq update --source #{config_filename} #{op.opts.bq_project}:#{op.opts.bq_dataset}}
 end
 
 Common.register_command({
