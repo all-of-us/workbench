@@ -7,11 +7,12 @@
         class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
         [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
-               class="annotation-name-input"
+          class="annotation-name-input"
           name="name"
           formControlName="name"
           type="text"
-               placeholder="ANNOTATION NAME"
+          placeholder="ANNOTATION NAME"
+          maxlength="255"
           autofocus >
         <span class="tooltip-content">
           A Name is required

@@ -11,6 +11,7 @@ import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {
   CdrVersion,
   Cohort,
@@ -105,6 +106,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
+  @ViewChild(NewNotebookModalComponent)
+  newNotebookModal: NewNotebookModalComponent;
+
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
@@ -189,44 +193,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.openNotebook();
-  }
-
-  openNotebook(nb?: FileDetail): void {
-    let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
-    if (nb) {
-      nbUrl += encodeURIComponent(nb.name);
-    } else {
-      nbUrl += 'create';
-    }
-    const notebook = window.open(nbUrl, '_blank');
-
-    // TODO(RW-474): Remove the authHandler integration. This is messy,
-    // non-standard, and currently will break in the following situation:
-    // - User opens a new notebook tab.
-    // - While that tab is loading, user immediately navigates away from this
-    //   page.
-    // This is not easily fixed without leaking listeners outside the lifespan
-    // of the workspace component.
-    const authHandler = (e: MessageEvent) => {
-      if (e.source !== notebook) {
-        return;
-      }
-      if (e.origin !== environment.leoApiUrl) {
-        return;
-      }
-      if (e.data.type !== 'bootstrap-auth.request') {
-        return;
-      }
-      notebook.postMessage({
-        'type': 'bootstrap-auth.response',
-        'body': {
-          'googleClientId': this.signInService.clientId
-        }
-      }, environment.leoApiUrl);
-    };
-    window.addEventListener('message', authHandler);
-    this.notebookAuthListeners.push(authHandler);
+    this.newNotebookModal.open();
   }
 
   buildCohort(): void {

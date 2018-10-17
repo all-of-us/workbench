@@ -13,6 +13,7 @@ export class ConceptTableComponent {
   @Output() getSelectedConcepts = new EventEmitter<any>();
   @Input() loading = false;
   @Input() searchTerm = '';
+  @Input() placeholderValue = '';
 
 
   selectedConcepts: Array<any> = [];

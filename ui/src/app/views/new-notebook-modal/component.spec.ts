@@ -7,6 +7,9 @@ import {ClarityModule} from '@clr/angular';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {Kernels} from 'app/utils/notebook-kernels';
+import {UserMetricsService} from 'generated';
+
+import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {
@@ -34,7 +37,8 @@ describe('NewNotebookModalComponent', () => {
         NewNotebookModalComponent
       ],
       providers: [
-        {provide: SignInService, useValue: new SignInServiceStub()}
+        {provide: SignInService, useValue: new SignInServiceStub()},
+        {provide: UserMetricsService, useValue: new UserMetricsServiceStub()}
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(NewNotebookModalComponent);
