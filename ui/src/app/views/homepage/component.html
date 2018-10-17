@@ -22,43 +22,45 @@
       </div>
     </div>
   </div>
-  <div class="footer">
-    <div class="row" style="display: flex; flex-direction:column; margin-left:5%; margin-right: 5%;">
-      <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
-      <div class="footerRtLink">
-        <div class="tooltip">
-          <a href="#" class="footerLink">
-            See all documentation</a>
-          <span class="tooltiptext">Coming Soon</span>
+  <div>
+    <div class="footer">
+      <div class="row" style="display: flex; flex-direction:column; margin-left:5%; margin-right: 5%;">
+        <div class="footerTitle">How to Use the All of Us Researcher Workbench</div>
+        <div class="footerRtLink">
+          <div class="tooltip">
+            <a href="#" class="footerLink">
+              See all documentation</a>
+            <span class="tooltiptext">Coming Soon</span>
+          </div>
         </div>
-      </div>
-      <div class="row" style="display: flex; flex-grow: 1; flex-wrap: nowrap; justify-content: space-between; width: 87.34%;">
-        <div *ngFor="let footer of footerLinks" class="linksBlock">
-          <div class="footerText">
-            <div class="title">
-              <div>{{footer.title}}</div>
-            </div>
-            <ul class="bullets">
-              <div *ngFor="let link of footer.links">
-                <li>
-                  <a href="#" class="bullets">{{link}}</a>
-                </li>
+        <div class="row" style="display: flex; flex-grow: 1; flex-wrap: nowrap; justify-content: space-between; width: 87.34%;">
+          <div *ngFor="let footer of footerLinks" class="linksBlock">
+            <div class="footerText">
+              <div class="title">
+                <div>{{footer.title}}</div>
               </div>
-            </ul>
+              <ul class="bullets">
+                <div *ngFor="let link of footer.links">
+                  <li>
+                    <a href="#" class="bullets">{{link}}</a>
+                  </li>
+                </div>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="bottom-banner">
-    <div class="logo">
-      <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
-    </div>
-    <div class="bottom-links">
-      Privacy Policy
-    </div>
-    <div class="bottom-links">
-      Terms of Service
+    <div class="bottom-banner">
+      <div class="logo">
+        <img [src]="'/assets/images/all-of-us-logo-footer.svg'">
+      </div>
+      <div class="bottom-links">
+        Privacy Policy
+      </div>
+      <div class="bottom-links">
+        Terms of Service
+      </div>
     </div>
   </div>
 </div>

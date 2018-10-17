@@ -11,16 +11,16 @@
       Concepts
     </div>
   </clr-button>
-  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId, 'notebooks']" routerLinkActive="active"
-              [routerLinkActiveOptions]="{exact: true}">
-    <div class="tab-inner" [class.selected-tab-inner]="tabPath == 'notebooks'">
-      Notebooks
-    </div>
-  </clr-button>
   <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId, 'cohorts']" routerLinkActive="active"
               [routerLinkActiveOptions]="{exact: true}">
     <div class="tab-inner" [class.selected-tab-inner]="tabPath == 'cohorts'">
       Cohorts
+    </div>
+  </clr-button>
+  <clr-button class="btn btn-primary btn-top" [routerLink]="['/workspaces', wsNamespace, wsId, 'notebooks']" routerLinkActive="active"
+              [routerLinkActiveOptions]="{exact: true}">
+    <div class="tab-inner" [class.selected-tab-inner]="tabPath == 'notebooks'">
+      Notebooks
     </div>
   </clr-button>
   <clr-button class="btn btn-primary btn-top btn-dropdown">
@@ -61,7 +61,6 @@
       </clr-dropdown-menu>
     </clr-dropdown>
   </clr-button>
-
 </clr-button-group>
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
   <h3 class="modal-title">Error:</h3>
