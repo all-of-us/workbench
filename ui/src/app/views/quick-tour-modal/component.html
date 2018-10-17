@@ -22,11 +22,18 @@
     <div class="divider"></div>
   </div>
   <div class="panel">
-    <div class="panel-title">
-      {{selected}}
+    <div class="panel-left">
+      <div class="panel-title">
+        {{selectedTitle(selected)}}
+      </div>
+      <div class="panel-contents">
+        <div class="panel-text">
+          {{panels.get(selected)}}
+        </div>
+      </div>
     </div>
-    <div class="panel-contents">
-      {{panels.get(selected)}}
+    <div class="panel-right">
+      <img [src]="panelImages.get(selected)" class="panel-image">
     </div>
   </div>
   <div class="controls">

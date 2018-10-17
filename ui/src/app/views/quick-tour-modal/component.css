@@ -21,7 +21,7 @@
   color: #FFFFFF;
   font-size: 48px;
   width: 100%;
-  margin-top: 1%;
+  margin-top: 3%;
   margin-left: 3%;
   font-weight: 600;
 }
@@ -99,6 +99,11 @@
 
 .panel {
   margin-top: 5%;
+  display: flex;
+}
+
+.panel-left {
+  width: 65%;
 }
 
 .panel-title {
@@ -110,11 +115,25 @@
 }
 
 .panel-contents {
-  width: 100%;
-  margin-left: 5%;
+  padding-left: 5%;
   margin-top: 5%;
   color: #FFFFFF;
   font-size: 14px;
+}
+
+.panel-text {
+  margin-right: 2%;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.panel-right {
+  margin-right: 5%;
+  margin-bottom: 5%;
+}
+
+.panel-image {
+  width: 100%;
 }
 
 .controls {

@@ -60,7 +60,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
         'Collaborating with other researchers',
         'Sharing and Publishing Notebooks']
     }];
-  firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   @ViewChild(RecentWorkComponent)
@@ -79,6 +78,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.profile$.subscribe((profile) => {
       if (this.firstSignIn === undefined) {
         this.firstSignIn = new Date(profile.firstSignInTime);
+        this.learn();
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
