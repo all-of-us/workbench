@@ -658,6 +658,7 @@ Common.register_command({
 Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
 })
+
 def generate_cdr_counts(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
@@ -672,12 +673,11 @@ Generates databases in bigquery with data from a cdr that will be imported to my
 })
 
 def generate_cloudsql_db(cmd_name, *args)
-  #ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project for Cloud Sql instancer"
+    "Project the Cloud Sql instance is in"
   )
   op.add_option(
     "--instance [instance]",
@@ -694,9 +694,7 @@ def generate_cloudsql_db(cmd_name, *args)
     ->(opts, v) { opts.bucket = v},
     "Name of the GCS bucket containing the SQL dump"
   )
-  #gcc = GcloudContextV2.new(op)
   op.parse.validate
-  #gcc.validate
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
@@ -712,6 +710,48 @@ Common.register_command({
 Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
   :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
+
+def cloudsql_import(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project the Cloud Sql instance is in"
+  )
+  op.add_option(
+      "--instance [instance]",
+      ->(opts, v) { opts.instance = v},
+      "Cloud SQL instance"
+  )
+  op.add_option(
+      "--database [database]",
+      ->(opts, v) { opts.database = v},
+      "Database name"
+  )
+  op.add_option(
+      "--bucket [bucket]",
+      ->(opts, v) { opts.bucket = v},
+      "Name of the GCS bucket containing the SQL dump"
+  )
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
+    common.run_inline %W{docker-compose run db-cloudsql-import
+          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
+          --bucket #{op.opts.bucket}}
+  end
+end
+
+
+Common.register_command({
+  :invocation => "cloudsql-import",
+  :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
+   --database <DATABASE> --bucket <BUCKET> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
+Import bucket of files or a single file in a bucket to a cloudsql database",
+                            :fn => ->(*args) { cloudsql_import("cloud-sql-import", *args) }
+                        })
 
 def generate_local_cdr_db(*args)
   common = Common.new
@@ -751,20 +791,6 @@ Common.register_command({
 Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => ->(*args) { mysqldump_db(*args) }
 })
-
-
-def cloudsql_import(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cloudsql-import} + args
-end
-
-Common.register_command({
-                            :invocation => "cloudsql-import",
-                            :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
-                            --bucket <BUCKET> --database <DATABASE> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
-Import bucket of files or a single file in a bucket to a cloudsql database",
-                            :fn => ->(*args) { cloudsql_import(*args) }
-                        })
 
 def local_mysql_import(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
