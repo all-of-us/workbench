@@ -32,7 +32,10 @@ const routes: Routes = [{
     component: CreateReviewPage,
     data: {
       title: 'Create a New Cohort Review',
-      breadcrumb: 'Create a New Cohort Review',
+      breadcrumb: {
+        value: 'Create a New Cohort Review',
+        intermediate: false
+      },
     },
   }, {
     path: 'participants',
@@ -41,8 +44,10 @@ const routes: Routes = [{
           concepts: DemographicConceptMapsResolver,
       },
       data: {
-          intermediateBreadcrumb: 'Participants',
-          breadcrumb: null
+          breadcrumb: {
+            value: 'Participants',
+            intermediate: true
+          },
       }
   }, {
     path: 'participants/:pid',
@@ -52,7 +57,10 @@ const routes: Routes = [{
       annotations: ParticipantAnnotationsResolver,
     },
     data: {
-      breadcrumb: 'Participant :pid'
+      breadcrumb: {
+        value: 'Participant :pid',
+        intermediate: false
+      }
     }
   }],
 }];

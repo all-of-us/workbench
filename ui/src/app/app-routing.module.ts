@@ -63,7 +63,10 @@ const routes: Routes = [
       }, {
       path: 'workspaces',
       data: {
-        breadcrumb: 'Workspaces'
+        breadcrumb: {
+          value: 'Workspaces',
+          intermediate: true
+        }
       },
       children: [
         {
@@ -79,7 +82,10 @@ const routes: Routes = [
           component: WorkspaceNavBarComponent,
           data: {
             title: 'View Workspace Details',
-            breadcrumb: 'Param: Workspace Name'
+            breadcrumb: {
+              value: 'Param: Workspace Name',
+              intermediate: false
+            }
           },
           runGuardsAndResolvers: 'always',
           resolve: {
@@ -91,7 +97,6 @@ const routes: Routes = [
               component: WorkspaceComponent,
               data: {
                 title: 'View Workspace Details',
-                intermediateBreadcrumb: 'View Workspace Details'
               }
             }, {
               path: 'edit',
@@ -99,7 +104,10 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
-                breadcrumb: 'Edit Workspace'
+                breadcrumb: {
+                  value: 'Edit Workspace',
+                  intermediate: false
+                }
               }
             }, {
               path: 'clone',
@@ -107,7 +115,10 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
-                breadcrumb: 'Clone Workspace'
+                breadcrumb: {
+                  value: 'Clone Workspace',
+                  intermediate: false
+                }
               }
             },
             {
@@ -115,15 +126,19 @@ const routes: Routes = [
               component: NotebookListComponent,
               data: {
                 title: 'View Notebooks',
-                intermediateBreadcrumb: 'Notebooks',
-                breadcrumb: null
+                breadcrumb: {
+                  value: 'Notebooks',
+                  intermediate: true
+                }
               }
             },
             {
               path: 'cohorts',
               data: {
-                intermediateBreadcrumb: 'Cohorts',
-                breadcrumb: null
+                breadcrumb: {
+                  value: 'Cohorts',
+                    intermediate: true
+                }
               },
               children: [
                 {
@@ -137,7 +152,10 @@ const routes: Routes = [
                   path: 'build',
                   loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                   data: {
-                    breadcrumb: 'Add a Cohort'
+                    breadcrumb: {
+                      value: 'Add a Cohort',
+                      intermediate: false
+                    }
                   }
                 },
                 {
@@ -145,7 +163,10 @@ const routes: Routes = [
                   loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
                   data: {
                     title: 'Cohort',
-                    breadcrumb: 'Param: Cohort Name'
+                    breadcrumb: {
+                      value: 'Param: Cohort Name',
+                      intermediate: false
+                    }
                   },
                   resolve: {
                     cohort: CohortResolver,
@@ -155,39 +176,44 @@ const routes: Routes = [
             },
             {
               path: 'concepts',
+              component: ConceptHomepageComponent,
               data: {
-                intermediateBreadcrumb: 'Concepts',
-                breadcrumb: null
-              },
-              children: [{
-                path: '',
-                component: ConceptHomepageComponent,
-                data: {
-                  title: 'Search Concepts',
+                title: 'Search Concepts',
+                breadcrumb: {
+                  value: 'Concepts',
+                  intermediate: true
                 }
-              },
-              {
-                 path: 'sets',
-                 component: ConceptSetListComponent,
-                 data: {
-                   title: 'View Concept Sets',
-                   intermediateBreadcrumb: 'Concept Sets',
-                   breadcrumb: null
-                 }
-               },
-               {
-                path: 'sets/:csid',
-                component: ConceptSetDetailsComponent,
+              }
+            },
+            {
+                path: 'concepts/sets',
+                component: ConceptSetListComponent,
                 data: {
-                  title: 'Concept Set',
-                  breadcrumb: 'Param: Concept Set Name'
+                    title: 'View Concept Sets',
+                    breadcrumb: {
+                      value: 'Concept Sets',
+                      intermediate: true
+                    }
                 },
-                resolve: {
-                  conceptSet: ConceptSetResolver,
-                }
-              }]
-            }]
-          }
+                children: [
+                    {
+                        path: ':csid',
+                        component: ConceptSetDetailsComponent,
+                        data: {
+                            title: 'Concept Set',
+                            breadcrumb: {
+                              value: 'Param: Concept Set Name',
+                              intermediate: false
+                            }
+                        },
+                        resolve: {
+                            conceptSet: ConceptSetResolver,
+                        }
+                    }
+                ]
+            },
+            ]
+        }
         ]
       },
       {

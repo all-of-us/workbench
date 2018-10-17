@@ -4,7 +4,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 export interface Breadcrumb {
   label: string;
-  type: string;
+  isIntermediate: boolean;
   url: string;
 }
 @Component({
@@ -32,7 +32,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * do substitution with the 'wsid' value in the route's paramMap.
    */
   private static makeBreadcrumb(label: string,
-                                type: string,
+                                isIntermediate: boolean,
                                 url: string,
                                 route: ActivatedRoute): Breadcrumb {
     let newLabel = label;
@@ -45,7 +45,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
     return {
       label: newLabel,
-      type: type,
+      isIntermediate: isIntermediate,
       url: url
     };
   }
@@ -75,8 +75,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       return breadcrumbs;
     }
     for (const child of children) {
-      if ((!child.snapshot.data.hasOwnProperty(this.routeDataBreadcrumb))
-          && (!child.snapshot.data.hasOwnProperty(this.routeDataIntermediateBreadcrumb))) {
+      if (!child.snapshot.data.hasOwnProperty(this.routeDataBreadcrumb)) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
@@ -84,15 +83,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         url += `/${routeURL}`;
       }
 
-      let label;
-      let breadcrumbType;
-      if (child.snapshot.data[this.routeDataBreadcrumb] != null) {
-        label = child.snapshot.data[this.routeDataBreadcrumb];
-        breadcrumbType = this.routeDataBreadcrumb;
-      } else {
-        label = child.snapshot.data[this.routeDataIntermediateBreadcrumb];
-        breadcrumbType = this.routeDataIntermediateBreadcrumb;
-      }
+      let label = child.snapshot.data[this.routeDataBreadcrumb].value;
+      let isIntermediate = child.snapshot.data[this.routeDataBreadcrumb].intermediate;
 
       if (label === 'Param: Workspace Name') {
         label = child.snapshot.data['workspace'].name;
@@ -105,7 +97,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
       }
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
-        const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, breadcrumbType, url, child);
+        const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, isIntermediate, url, child);
         breadcrumbs.push(breadcrumb);
       }
       return this.buildBreadcrumbs(child, url, breadcrumbs);
@@ -118,10 +110,12 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * intermediate pages.
    */
   private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
-    let last = breadcrumbs[breadcrumbs.length - 1];
-    while ((breadcrumbs.length > 1) && (last.type === this.routeDataIntermediateBreadcrumb)) {
-      breadcrumbs.pop();
-      last = breadcrumbs[breadcrumbs.length - 1];
+    if (breadcrumbs.length > 0) {
+      let last = breadcrumbs[breadcrumbs.length - 1];
+      while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
+          breadcrumbs.pop();
+          last = breadcrumbs[breadcrumbs.length - 1];
+      }
     }
     return breadcrumbs;
   }

@@ -16,7 +16,10 @@ const testRoutes: Routes = [
         component: Component,
         data: {
           title: 'params',
-          breadcrumb: ':p1'
+          breadcrumb: {
+            value: ':p1',
+            intermediate: false
+          }
         }
       },
       {
@@ -24,7 +27,10 @@ const testRoutes: Routes = [
         component: Component,
         data: {
           title: 'child1',
-          breadcrumb: 'child1'
+          breadcrumb: {
+            value: 'child1',
+            intermediate: false
+          }
         },
         children: [
           {
@@ -32,7 +38,10 @@ const testRoutes: Routes = [
             component: Component,
             data: {
               title: 'grandchild',
-              breadcrumb: 'grandchild'
+              breadcrumb: {
+                value: 'grandchild',
+                intermediate: false
+              }
             }
           }
         ]
@@ -42,7 +51,10 @@ const testRoutes: Routes = [
         component: Component,
         data: {
           title: 'child2',
-          breadcrumb: 'child2'
+          breadcrumb: {
+            value: 'child2',
+            intermediate: false
+          }
         }
       },
       {
@@ -50,7 +62,10 @@ const testRoutes: Routes = [
         component: Component,
         data: {
           title: 'workspaceChild',
-          breadcrumb: 'Param: Workspace Name',
+          breadcrumb: {
+            value: 'Param: Workspace Name',
+            intermediate: false
+          },
           workspace: {
             name: 'Workspace Name'
           }
@@ -62,11 +77,14 @@ const testRoutes: Routes = [
         data: {title: 'child3'}
       },
       {
-        path: 'intermediateParent',
+        path: 'parent',
         component: Component,
         data: {
-          title: 'intermediateParent',
-          breadcrumb: 'intermediateParent'
+          title: 'parent',
+          breadcrumb: {
+            value: 'parent',
+            intermediate: false
+          }
         },
         children: [
           {
@@ -74,16 +92,21 @@ const testRoutes: Routes = [
             component: Component,
             data: {
               title: 'intermediateChild',
-              breadcrumb: null,
-              intermediateBreadcrumb: 'intermediateChild'
+              breadcrumb: {
+                value: 'intermediateChild',
+                intermediate: true
+              }
             },
             children: [
               {
-                path: 'intermediateGrandchild',
+                path: 'grandchild',
                 component: Component,
                 data: {
-                  title: 'intermediateGrandchild',
-                  breadcrumb: 'intermediateGrandchild'
+                  title: 'grandchild',
+                  breadcrumb: {
+                    value: 'grandchild',
+                    intermediate: false
+                  }
                 }
               }
             ]
@@ -95,8 +118,10 @@ const testRoutes: Routes = [
         component: Component,
         data: {
           title: 'intermediateRoot',
-          breadcrumb: null,
-          intermediateBreadcrumb: 'intermediateRoot'
+          breadcrumb: {
+            value: 'intermediateRoot',
+            intermediate: true
+          }
         }
       }
     ]
@@ -171,19 +196,19 @@ describe('BreadcrumbComponent', () => {
   }));
 
   it('should show intermediateBreadcrumbs when they have children', fakeAsync( () => {
-    router.navigate(['intermediateParent', 'intermediateChild', 'intermediateGrandchild']);
+    router.navigate(['parent', 'intermediateChild', 'grandchild']);
     tick();
     expect(testComponent.breadcrumbs.length).toBe(3);
-    expect(testComponent.breadcrumbs[0].label).toBe('intermediateParent');
+    expect(testComponent.breadcrumbs[0].label).toBe('parent');
     expect(testComponent.breadcrumbs[1].label).toBe('intermediateChild');
-    expect(testComponent.breadcrumbs[2].label).toBe('intermediateGrandchild');
+    expect(testComponent.breadcrumbs[2].label).toBe('grandchild');
   }));
 
   it('should not show intermediateBreadcrumbs when they are the last child', fakeAsync( () => {
-    router.navigate(['intermediateParent', 'intermediateChild']);
+    router.navigate(['parent', 'intermediateChild']);
     tick();
     expect(testComponent.breadcrumbs.length).toBe(1);
-    expect(testComponent.breadcrumbs.pop().label).toBe('intermediateParent');
+    expect(testComponent.breadcrumbs.pop().label).toBe('parent');
   }));
 
   it('should show intermediateBreadcrumb if it is the root', fakeAsync( () => {
