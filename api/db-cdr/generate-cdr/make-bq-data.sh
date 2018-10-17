@@ -103,7 +103,7 @@ do
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(domain_info survey_module achilles_analysis criteria criteria_attribute unit_map)
+load_tables=(domain_info survey_module achilles_analysis unit_map)
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do
@@ -111,6 +111,26 @@ do
 done
 
 # Populate some tables from cdr data
+
+############
+# criteria #
+############
+echo "Inserting criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\`
+ (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
+SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`"
+
+######################
+# criteria_attribute #
+######################
+echo "Inserting criteria_attribute"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria_attribute\`
+ (id, concept_id, value_as_concept_id, concept_name, type, est_count)
+SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
 
 ##########
 # domain #
