@@ -156,8 +156,6 @@ then
   fi
 else
     grant_access_to_files gs://$BUCKET/*
-    echo "CSVS in bucet "
-    gsutil ls -p $PROJECT gs://$BUCKET/*.csv.*
     # gsutil returns error if no files match thus the "2> /dev/null || true" part to ignore error
     sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true) )
     csvs=( $(gsutil ls gs://$BUCKET/*.csv.gz 2> /dev/null || true) )
