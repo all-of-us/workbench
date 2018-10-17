@@ -1034,6 +1034,9 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
+            # this is currently only ever used by Notebooks because other
+            # resources are stored in our db, and therefore cache ops are
+            # done for them in the backend
             $ref: "#/definitions/RecentResourceRequest"
       responses:
         200:
@@ -1087,10 +1090,10 @@ paths:
       operationId: "createConceptSet"
       parameters:
         - in: body
-          name: conceptSet
-          description: concept set definition
+          name: request
+          description: create concept set request
           schema:
-            $ref: "#/definitions/ConceptSet"
+            $ref: "#/definitions/CreateConceptSetRequest"
       responses:
         200:
           description: The concept set that was created.
@@ -1753,6 +1756,21 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Concept"
+
+  CreateConceptSetRequest:
+    type: object
+    required:
+      - conceptSet
+    properties:
+      conceptSet:
+        description: Concept set to be created; concepts is ignored
+        $ref: "#/definitions/ConceptSet"
+      addedIds:
+        type: array
+        description: The IDs of concepts to be added to the concept set.
+        items:
+          type: integer
+          format: int64
 
   UpdateConceptSetRequest:
     type: object

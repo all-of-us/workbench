@@ -202,7 +202,9 @@ public class MailServiceImpl implements MailService {
       action = "contact our support team at support@researchallofus.org for further information";
     } else {
       idVerificationReport = "approved for use";
-      action = "login to the workbench via <a class=\"link\">" + workbenchConfigProvider.get().admin.loginUrl + "</a>";
+      action = "login to the workbench via <a class=\"link\" href=\"" +
+          workbenchConfigProvider.get().admin.loginUrl + "\">" +
+          workbenchConfigProvider.get().admin.loginUrl + "</a>";
     }
     ImmutableMap<String, String> replaceMap = new ImmutableMap.Builder<String, String>()
         .put("ACTION", action)

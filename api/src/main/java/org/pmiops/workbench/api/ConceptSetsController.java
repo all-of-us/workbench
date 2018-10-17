@@ -4,8 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Streams;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Comparator;
@@ -16,8 +16,6 @@ import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -30,6 +28,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetListResponse;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
@@ -47,8 +46,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final WorkspaceService workspaceService;
   private final ConceptSetDao conceptSetDao;
   private final ConceptDao conceptDao;
-  private final ConceptService conceptService;
-  private final ConceptSynonymDao conceptSynonymDao;
   private final UserRecentResourceService userRecentResourceService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
@@ -100,14 +97,12 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Autowired
   ConceptSetsController(WorkspaceService workspaceService, ConceptSetDao conceptSetDao,
-      ConceptDao conceptDao, ConceptSynonymDao conceptSynonymDao, ConceptService conceptService,
-      ConceptBigQueryService conceptBigQueryService, UserRecentResourceService userRecentResourceService,
-                        Provider<User> userProvider, Clock clock) {
+      ConceptDao conceptDao, ConceptBigQueryService conceptBigQueryService,
+      UserRecentResourceService userRecentResourceService,
+      Provider<User> userProvider, Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
     this.conceptDao = conceptDao;
-    this.conceptService = conceptService;
-    this.conceptSynonymDao = conceptSynonymDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
@@ -122,10 +117,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @Override
   public ResponseEntity<ConceptSet> createConceptSet(String workspaceNamespace, String workspaceId,
-      ConceptSet conceptSet) {
+      CreateConceptSetRequest request) {
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    org.pmiops.workbench.db.model.ConceptSet dbConceptSet = FROM_CLIENT_CONCEPT_SET.apply(conceptSet);
+    org.pmiops.workbench.db.model.ConceptSet dbConceptSet = FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setCreator(userProvider.get());
     dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
@@ -133,6 +128,17 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     dbConceptSet.setVersion(1);
     dbConceptSet.setParticipantCount(0);
+    if (request.getAddedIds() != null && !request.getAddedIds().isEmpty()) {
+      addConceptsToSet(dbConceptSet, request.getAddedIds());
+      if (dbConceptSet.getConceptIds().size() > maxConceptsPerSet) {
+        throw new BadRequestException("Exceeded " + maxConceptsPerSet + " in concept set");
+      }
+      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
+      dbConceptSet.setParticipantCount(
+          conceptBigQueryService.getParticipantCountForConcepts(omopTable,
+              dbConceptSet.getConceptIds()));
+    }
+
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
       userRecentResourceService.updateConceptSetEntry(workspace.getWorkspaceId(), userProvider.get().getUserId(), dbConceptSet.getConceptSetId(), now);
@@ -148,8 +154,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
-      List<org.pmiops.workbench.cdr.model.Concept> conceptList = conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
-      result.setConcepts(conceptList.stream()
+      result.setConcepts(Streams.stream(concepts)
               .map(ConceptsController.TO_CLIENT_CONCEPT)
               .sorted(CONCEPT_NAME_ORDERING)
               .collect(Collectors.toList()));
@@ -225,6 +230,24 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
   }
 
+  private void addConceptsToSet(org.pmiops.workbench.db.model.ConceptSet dbConceptSet,
+      List<Long> addedIds) {
+    Domain domainEnum = dbConceptSet.getDomainEnum();
+    Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
+    List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
+        ImmutableList.copyOf(concepts).stream().filter(concept -> {
+          Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
+          return !domainEnum.equals(domain);
+        }).collect(Collectors.toList());
+    if (!mismatchedConcepts.isEmpty()) {
+      String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()
+          .map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList()));
+      throw new BadRequestException(
+          String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
+    }
+    dbConceptSet.getConceptIds().addAll(addedIds);
+  }
+
   @Override
   public ResponseEntity<ConceptSet> updateConceptSetConcepts(String workspaceNamespace,
       String workspaceId, Long conceptSetId, UpdateConceptSetRequest request) {
@@ -238,23 +261,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
 
-    final Domain domainEnum = dbConceptSet.getDomainEnum();
     if (request.getAddedIds() != null) {
-      Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(request.getAddedIds());
-      conceptService.fetchConceptSynonyms(Lists.newArrayList(concepts));
-      List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
-          ImmutableList.copyOf(concepts).stream().filter(concept -> {
-          Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
-          return !domainEnum.equals(domain);
-        }).collect(Collectors.toList());
-      if (!mismatchedConcepts.isEmpty()) {
-        String mismatchedConceptIds = Joiner.on(", ").join(mismatchedConcepts.stream()
-            .map(org.pmiops.workbench.cdr.model.Concept::getConceptId).collect(Collectors.toList()));
-        throw new BadRequestException(
-            String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
-      }
-
-      dbConceptSet.getConceptIds().addAll(request.getAddedIds());
+      addConceptsToSet(dbConceptSet, request.getAddedIds());
     }
     if (request.getRemovedIds() != null) {
       dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
@@ -265,7 +273,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (dbConceptSet.getConceptIds().isEmpty()) {
       dbConceptSet.setParticipantCount(0);
     } else {
-      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domainEnum);
+      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(omopTable,
               dbConceptSet.getConceptIds()));

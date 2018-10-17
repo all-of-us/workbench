@@ -29,93 +29,40 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     List<Concept> findByConceptName(String conceptName);
 
-    @Query(value = "select c.concept_id, " +
-      "c.concept_name, " +
-      "c.domain_id, " +
-      "c.vocabulary_id, " +
-      "c.concept_class_id, " +
-      "c.standard_concept, " +
-      "c.concept_code, " +
-      "c.count_value, " +
-      "c.source_count_value, " +
-      "c.prevalence " +
-      "from concept c " +
+    @Query(value = "select c.* from concept c " +
       "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
-
-    @Query(value = "select distinct c.conceptId from Concept c left join c.synonyms as cs " +
-            "where match(cs.conceptSynonymName,?1) > 0 or match(c.conceptName,?1) > 0")
-    List<Long> findConceptSynonyms(String query);
 
     /**
      * Return the number of standard concepts in each vocabulary for the specified domain matching the
      * specified expression, matching concept name, synonym, ID, or code.
      * @param matchExp SQL MATCH expression to match concept name or synonym
-     * @param query query expression to match concept code (exactly)
-     * @param conceptId ID representation of the query (or null) for matching concept IDs
      * @param domainId domain ID to use when filtering concepts
      * @return per-vocabulary concept counts
      */
     @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "(match(c.conceptName, ?1) > 0 or\n" +
-        "match(cs.conceptSynonymName, ?1) > 0 or\n" +
-        "c.conceptId=?3 or c.conceptCode=?2) and\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
         "c.standardConcept IN ('S', 'C') and\n" +
-        "c.domainId = ?4\n" +
+        "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyStandardConceptCounts(String matchExp, String query,
-        Long conceptId, String domainId);
+    List<VocabularyCount> findVocabularyStandardConceptCounts(String matchExp, String domainId);
 
     /**
      * Return the number of concepts (standard or non-standard) in each vocabulary
      * for the specified domain matching the specified expression, matching concept name, synonym,
      * ID, or code.
      * @param matchExp SQL MATCH expression to match concept name or synonym
-     * @param query query expression to match concept code (exactly)
-     * @param conceptId ID representation of the query (or null) for matching concept IDs
      * @param domainId domain ID to use when filtering concepts
      * @return per-vocabulary concept counts
      */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
+    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
         "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "(match(c.conceptName, ?1) > 0 or\n" +
-        "match(cs.conceptSynonymName, ?1) > 0 or\n" +
-        "c.conceptId=?3 or c.conceptCode=?2) and\n" +
-        "c.domainId = ?4\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+        "c.domainId = ?2\n" +
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String query, Long conceptId, String domainId);
-
-    /**
-     * Return the number of standard concepts in each vocabulary for the specified domain.
-     * @param domainId domain ID to use when filtering concepts
-     * @return per-vocabulary concept counts
-     */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-             "c.standardConcept IN ('S', 'C') and\n" +
-        "c.domainId = ?1\n" +
-        "group by c.vocabularyId\n" +
-        "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyStandardConceptCountsInDomain(String domainId);
-
-    /**
-     * Return the number of concepts (standard or non-standard) in each vocabulary
-     * for the specified domain.
-     * @param domainId domain ID to use when filtering concepts
-     * @return per-vocabulary concept counts
-     */
-    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
-        "left join c.synonyms cs\n" +
-        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-        "c.domainId = ?1\n" +
-        "group by c.vocabularyId\n" +
-        "order by c.vocabularyId\n")
-    List<VocabularyCount> findVocabularyAllConceptCountsInDomain(String domainId);
-
+    List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String domainId);
 }

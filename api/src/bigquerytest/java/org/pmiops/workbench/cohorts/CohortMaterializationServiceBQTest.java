@@ -27,7 +27,6 @@ import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -102,9 +101,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Autowired
   private ConceptDao conceptDao;
 
-  @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
-
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -170,7 +166,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 1L, CohortStatus.INCLUDED));
     participantCohortStatusDao.save(makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao, conceptSynonymDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
 
     this.cohortMaterializationService = new CohortMaterializationService(fieldSetQueryBuilder,
         annotationQueryBuilder, participantCohortStatusDao, cdrBigQuerySchemaConfigService, conceptService);

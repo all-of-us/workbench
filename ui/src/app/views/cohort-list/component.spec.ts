@@ -23,6 +23,7 @@ import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/compon
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
   Cohort,
@@ -86,7 +87,8 @@ describe('CohortListComponent', () => {
         CohortListComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
-        ResourceCardComponent
+        ResourceCardComponent,
+        TopBoxComponent
       ],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub},
