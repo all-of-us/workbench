@@ -124,7 +124,7 @@ where count_value >= 0"
 
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') "
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') and vocabulary_id not in ('ppi')"
 
 #delete concepts from concept_relationship that are not in concepts
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -161,36 +161,7 @@ set count_value =
         else
             0.00
     end
-where count_value > 0"
-
-# 0 counts of ppi concepts are rounded upto 20
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-set count_value =
-    case when count_value < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end,
-    source_count_value =
-    case when source_count_value < ${BIN_SIZE}
-        then ${BIN_SIZE}
-    else
-        cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
-    end,
-    prevalence =
-    case when count_value  > 0 and count_value < ${BIN_SIZE}
-            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
-        when count_value  > 0 and count_value >= ${BIN_SIZE}
-            then ROUND(CEIL(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
-        when source_count_value  > 0 and source_count_value < ${BIN_SIZE}
-            then ROUND(CEIL(${BIN_SIZE} / ${person_count}),2)
-        when source_count_value  > 0 and source_count_value >= ${BIN_SIZE}
-            then ROUND(CEIL(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE}/ ${person_count}), 2)
-        else
-            0.00
-    end
-where count_value = 0 and vocabulary_id='ppi' "
+where count_value > 0 or vocabulary_id='ppi' "
 
 # criteria
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
