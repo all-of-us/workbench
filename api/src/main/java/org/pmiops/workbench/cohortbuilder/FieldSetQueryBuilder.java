@@ -616,8 +616,10 @@ public class FieldSetQueryBuilder {
       outerOrderByExpressions.add(column.descending ? columnAlias + " DESC" : columnAlias);
     }
     outerSql.append(commaJoiner.join(outerOrderByExpressions));
-    outerSql.append("\nlimit ");
-    outerSql.append(resultSize);
+    if (resultSize != null) {
+      outerSql.append("\nlimit ");
+      outerSql.append(resultSize);
+    }
 
     return outerSql.toString();
   }
