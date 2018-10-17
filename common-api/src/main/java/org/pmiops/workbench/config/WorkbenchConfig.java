@@ -53,6 +53,7 @@ public class WorkbenchConfig {
   }
 
   public static class ServerConfig {
+    public String apiBaseUrl;
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;

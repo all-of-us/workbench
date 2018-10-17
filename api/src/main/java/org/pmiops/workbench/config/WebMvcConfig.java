@@ -65,13 +65,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     return userAuthentication.getUser();
   }
 
-  @Bean("apiHostName")
-  public String getHostName() {
-    ApiProxy.Environment env = ApiProxy.getCurrentEnvironment();
-    // TODO: see if there's a better way of doing this?
-    return "api-dot-" + (String) env.getAttributes().get("com.google.appengine.runtime.default_version_hostname");
-  }
-
   @Bean
   public WorkbenchEnvironment workbenchEnvironment() {
     return new WorkbenchEnvironment();

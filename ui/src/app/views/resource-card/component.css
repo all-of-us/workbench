@@ -22,6 +22,11 @@
   padding: 0.75rem;
 }
 
+.card.item-card.workspace-about {
+  height: 13.93rem;
+  width: 12.5rem;
+}
+
 .card.item-card .name {
   cursor: pointer;
   word-wrap: break-word;

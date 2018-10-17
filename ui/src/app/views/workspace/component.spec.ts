@@ -19,6 +19,7 @@ import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
@@ -56,6 +57,7 @@ import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
+import {NewNotebookModalComponent} from '../new-notebook-modal/component';
 
 const activatedRouteStub  = {
   snapshot: {
@@ -93,9 +95,11 @@ describe('WorkspaceComponent', () => {
         BugReportComponent,
         ConfirmDeleteModalComponent,
         EditModalComponent,
+        NewNotebookModalComponent,
         RecentWorkComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        TopBoxComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent

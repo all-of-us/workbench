@@ -1034,6 +1034,9 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
+            # this is currently only ever used by Notebooks because other
+            # resources are stored in our db, and therefore cache ops are
+            # done for them in the backend
             $ref: "#/definitions/RecentResourceRequest"
       responses:
         200:

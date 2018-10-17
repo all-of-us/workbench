@@ -35,7 +35,7 @@
         <div style="display: flex; justify-content: left" *ngIf="profileLoaded else loading">
           <div class="field">
             <input type="text"
-              [(ngModel)]="workingProfile.contactEmail" id="contactEmail" [disabled]="!editing">
+              [(ngModel)]="workingProfile.contactEmail" id="contactEmail" [disabled]="true">
             <label class="long-text-field" style="padding-top: 1.5rem">Username:</label>
             <div *ngIf="profileLoaded else loading">{{workingProfile.username}}</div>
           </div>

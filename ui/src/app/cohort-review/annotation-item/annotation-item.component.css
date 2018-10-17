@@ -134,6 +134,7 @@ input[type=text]:not([readonly]):focus {
 .text-container {
   padding-top: 0.5rem;
   padding-bottom: 0.15rem;
+  word-break: break-all;
 }
 
 .success {
