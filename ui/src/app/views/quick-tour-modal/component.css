@@ -1,0 +1,146 @@
+.main {
+  height: 79.23%;
+  width: 64.92%;
+  border-radius: 8px;
+  background-color: #262262;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+  position: absolute;
+  left: 18%;
+  top: 5%;
+}
+
+.title {
+  color: #FFFFFF;
+  margin-top: 2%;
+  margin-left: 3%;
+  font-size: 21px;
+  width: 100%;
+}
+
+.intro {
+  color: #FFFFFF;
+  font-size: 48px;
+  width: 100%;
+  margin-top: 1%;
+  margin-left: 3%;
+  font-weight: 600;
+}
+
+.breadcrumbs {
+  width: 100%;
+  margin-top: 5%;
+  padding-left: 25%;
+  display: flex;
+  flex-direction: row;
+}
+
+.breadcrumb-component {
+  width: 128px;
+}
+
+.circle {
+  border: 2px solid #8C9BA5;
+  border-radius: 50%;
+  height: 21.92px;
+  width: 21.92px;
+  left: 21.92px;
+}
+
+.current {
+  min-height: 12px;
+  min-width: 12px;
+  margin-left: 3px;
+  margin-bottom: 2px;
+  background-color: #2691D0;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.circle.completed {
+  left: 0px;
+  border: 2px solid #2691D0;
+}
+
+.check {
+  min-height: 10px;
+  min-width: 10px;
+  margin-left: 2px;
+  margin-top: -3px;
+}
+
+.breadcrumb-title {
+  transform: translate(-40%);
+  text-align: center;
+  color: #2691D0;
+}
+
+.connector.completed {
+  border: 2px solid #2691D0;
+}
+
+.connector {
+  border: 2px solid #8C9BA5;
+  box-sizing: border-box;
+  height: 3px;
+  width: 107px;
+  position: relative;
+  left: 21.92px;
+  top: -36px;
+}
+
+.divider {
+  box-sizing: border-box;
+  height: 2px;
+  width: 953px;
+  border: 0.5px solid #FFFFFF;
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
+  margin: auto;
+}
+
+.panel {
+  margin-top: 5%;
+}
+
+.panel-title {
+  width: 100%;
+  margin-left: 5%;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.panel-contents {
+  width: 100%;
+  margin-left: 5%;
+  margin-top: 5%;
+  color: #FFFFFF;
+  font-size: 14px;
+}
+
+.controls {
+  width: 100%;
+  position: absolute;
+  bottom: 5%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.controls>.left {
+  width: 50%;
+}
+
+.controls>.right {
+  display: flex;
+  justify-content: flex-end;
+  width: 49%;
+}
+
+.btn.btn-close {
+  border: 0px;
+  margin-left: 10%;
+  color: #FFFFFF;
+}
+
+.btn.btn-primary {
+  margin-right: 10%;
+}

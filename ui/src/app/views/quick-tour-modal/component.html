@@ -1,0 +1,41 @@
+<div class="main" *ngIf="learning">
+  <div class="title">
+    All of Us Researcher Workbench
+  </div>
+  <div class="intro">
+    Quick Tour
+  </div>
+  <div class="breadcrumbs">
+    <div *ngFor="let panel of panelTitles">
+      <div class="breadcrumb-component">
+        <div class="circle" [class.completed]="panelTitles.indexOf(panel) <= selectedIndex" (click)="selectPanel(panel)">
+          <div *ngIf="panel === selected" class="current"></div>
+          <div *ngIf="panelTitles.indexOf(panel) < selectedIndex" class="check"><img [src]="checkImg"></div>
+        </div>
+        <div class="breadcrumb-title">{{panel}}</div>
+        <div *ngIf="!(panel === panelTitles[panelTitles.length-1])" class="connector"
+             [class.completed]="panelTitles.indexOf(panel) < selectedIndex"></div>
+      </div>
+    </div>
+  </div>
+  <div style="width: 100%; padding-top: 5%">
+    <div class="divider"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">
+      {{selected}}
+    </div>
+    <div class="panel-contents">
+      {{panels.get(selected)}}
+    </div>
+  </div>
+  <div class="controls">
+    <div class="left">
+      <button type="button" class="btn btn-close" (click)="previous()" [disabled]="selectedIndex <= 0">PREVIOUS</button>
+    </div>
+    <div class="right">
+      <button type="button" class="btn btn-close" (click)="close()">Close</button>
+      <button type="button" class="btn btn-primary" (click)="next()" [disabled]="selectedIndex >= (panelTitles.length-1)">Next</button>
+    </div>
+  </div>
+</div>
