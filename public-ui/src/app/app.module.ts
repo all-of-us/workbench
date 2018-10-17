@@ -18,8 +18,13 @@ import {
 
 import {AppRoutingModule} from './app-routing.module';
 import {DataBrowserModule} from './data-browser/data-browser.module';
+import { ServerConfigService } from './services/server-config.service';
+import { SignInService } from './services/sign-in.service';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
 import { DbHomeComponent } from './views/db-home/db-home.component';
+import { LoginComponent } from './views/login/login.component';
+import { PageTemplateSignedOutComponent }
+  from './views/page-template-signed-out/page-template-signed-out.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';
 import { SurveysComponent } from './views/surveys/surveys.component';
 
@@ -28,7 +33,7 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
 (<any>window).StackTrace = StackTrace;
 
-import {DataBrowserService} from 'publicGenerated';
+import {ConfigService, DataBrowserService} from 'publicGenerated';
 import {DbConfigService} from './utils/db-config.service';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
@@ -42,6 +47,10 @@ function getPublicBasePath() {
 
 const DataBrowserServiceFactory = (http: Http) => {
   return new DataBrowserService(http, getPublicBasePath(), null);
+};
+
+export function getConfigService(http: Http) {
+  return new ConfigService(http, getPublicBasePath(), null);
 };
 
 @NgModule({
@@ -63,18 +72,27 @@ const DataBrowserServiceFactory = (http: Http) => {
     DbHeaderComponent,
     SurveyViewComponent,
     DbHomeComponent,
+    LoginComponent,
     QuickSearchComponent,
     EhrViewComponent,
+    PageTemplateSignedOutComponent,
     HighlightSearchPipe,
     PhysicalMeasurementsComponent,
   ],
   providers: [
+    {
+      provide: ConfigService,
+      useFactory: getConfigService,
+      deps: [Http]
+    },
     DbConfigService,
     {
       provide: DataBrowserService,
       useFactory: DataBrowserServiceFactory,
       deps: [Http]
     },
+    ServerConfigService,
+    SignInService,
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent]
