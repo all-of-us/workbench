@@ -8,6 +8,9 @@
   height: 100%;
   margin-left: -1rem;
   margin-right: -0.6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .card.double {

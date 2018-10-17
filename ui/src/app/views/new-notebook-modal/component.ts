@@ -6,8 +6,7 @@ import {Kernels} from 'app/utils/notebook-kernels';
 
 import {environment} from 'environments/environment';
 
-import {FileDetail, Workspace} from 'generated';
-
+import {FileDetail, UserMetricsService, Workspace} from 'generated';
 
 @Component({
   selector: 'app-new-notebook-modal',
@@ -31,6 +30,7 @@ export class NewNotebookModalComponent implements OnDestroy {
 
   constructor(
     private signInService: SignInService,
+    private userMetricsService: UserMetricsService,
   ) {}
 
   ngOnDestroy(): void {
@@ -54,6 +54,8 @@ export class NewNotebookModalComponent implements OnDestroy {
       this.nameConflict = true;
       return;
     }
+    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
+      {notebookName: this.newName}).subscribe();
     const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
         `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
         `&kernel-type=${this.kernelType}`;

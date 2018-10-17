@@ -528,7 +528,8 @@ public class ProfileController implements ProfileApiDelegate {
 
     if (updatedProfile.getContactEmail() != null &&
         !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-      user.setContactEmail(updatedProfile.getContactEmail());
+      // See RW-1588.
+      throw new BadRequestException("Changing email is not currently supported");
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()

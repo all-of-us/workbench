@@ -25,6 +25,8 @@
   font-size: 20px;
   line-height: 24px;
   font-weight: 600;
+  margin-top: 0;
+  padding-top: 0.5rem;
 }
 
 .header-area {
