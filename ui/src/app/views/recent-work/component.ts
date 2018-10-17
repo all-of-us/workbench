@@ -59,7 +59,12 @@ export class RecentWorkComponent implements OnInit {
 
   calculateSize(el: ElementRef): number {
     const width = el.nativeElement.offsetWidth;
-    const division = Math.floor((width - 50) / 200);
+    let division;
+    if (this.workspace) {
+      division = Math.floor((width - 200) / 200);
+    } else {
+      division = Math.floor((width - 50) / 200);
+    }
     if (division >= 2) {
       return division;
     } else {
@@ -70,7 +75,6 @@ export class RecentWorkComponent implements OnInit {
   updateList(): void {
     if (this.workspace) {
       this.cssClass = 'for-list';
-      this.headerText = '';
       const wsData: WorkspaceData = this.route.snapshot.data.workspace;
       this.accessLevel = wsData.accessLevel;
       const notebookCall = this.workspacesService

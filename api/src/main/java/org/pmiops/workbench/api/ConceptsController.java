@@ -5,11 +5,14 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
 import org.pmiops.workbench.cdr.model.DomainInfo;
+import org.pmiops.workbench.cdr.model.DomainVocabularyInfo;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -36,6 +39,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptService conceptService;
   private final WorkspaceService workspaceService;
   private final DomainInfoDao domainInfoDao;
+  private final DomainVocabularyInfoDao domainVocabularyInfoDao;
   private final ConceptDao conceptDao;
 
   static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
@@ -51,18 +55,33 @@ public class ConceptsController implements ConceptsApiDelegate {
             .vocabularyId(concept.getVocabularyId())
             .conceptSynonyms(concept.getSynonyms());
 
+  static final Function<DomainVocabularyInfo, VocabularyCount> TO_VOCABULARY_STANDARD_CONCEPT_COUNT =
+      (domainVocabularyInfo) -> new VocabularyCount()
+          .conceptCount(domainVocabularyInfo.getStandardConceptCount())
+          .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
+
+  static final Function<DomainVocabularyInfo, VocabularyCount> TO_VOCABULARY_ALL_CONCEPT_COUNT =
+      (domainVocabularyInfo) -> new VocabularyCount()
+          .conceptCount(domainVocabularyInfo.getAllConceptCount())
+          .vocabularyId(domainVocabularyInfo.getId().getVocabularyId());
+
   private static final Function<org.pmiops.workbench.cdr.model.VocabularyCount, VocabularyCount>
       TO_CLIENT_VOCAB_COUNT =
       (vocabCount) -> new VocabularyCount()
           .conceptCount(vocabCount.getConceptCount())
           .vocabularyId(vocabCount.getVocabularyId());
 
+  private static final Predicate<VocabularyCount> NOT_ZERO =
+      (vocabCount) -> vocabCount.getConceptCount() > 0;
+
   @Autowired
   public ConceptsController(ConceptService conceptService, WorkspaceService workspaceService,
-                            DomainInfoDao domainInfoDao, ConceptDao conceptDao) {
+                            DomainInfoDao domainInfoDao, DomainVocabularyInfoDao domainVocabularyInfoDao,
+                            ConceptDao conceptDao) {
     this.conceptService = conceptService;
     this.workspaceService = workspaceService;
     this.domainInfoDao = domainInfoDao;
+    this.domainVocabularyInfoDao = domainVocabularyInfoDao;
     this.conceptDao = conceptDao;
   }
 
@@ -118,25 +137,28 @@ public class ConceptsController implements ConceptsApiDelegate {
       return;
     }
     String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
-    List<org.pmiops.workbench.cdr.model.VocabularyCount> vocabularyCounts;
+    List<VocabularyCount> vocabularyCounts;
     if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
       if (matchExp == null) {
-        vocabularyCounts = conceptDao.findVocabularyAllConceptCountsInDomain(domainId);
+        vocabularyCounts = domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId)
+            .stream().map(TO_VOCABULARY_ALL_CONCEPT_COUNT).filter(NOT_ZERO).collect(Collectors.toList());
       } else {
-        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, domainId);
+        vocabularyCounts = conceptDao.findVocabularyAllConceptCounts(matchExp, domainId)
+            .stream().map(TO_CLIENT_VOCAB_COUNT).collect(Collectors.toList());
       }
     } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
       if (matchExp == null) {
-        vocabularyCounts = conceptDao.findVocabularyStandardConceptCountsInDomain(domainId);
+        vocabularyCounts = domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId)
+            .stream().map(TO_VOCABULARY_STANDARD_CONCEPT_COUNT).filter(NOT_ZERO).collect(Collectors.toList());
       } else {
         vocabularyCounts = conceptDao
-            .findVocabularyStandardConceptCounts(matchExp, domainId);
+            .findVocabularyStandardConceptCounts(matchExp, domainId).stream()
+            .map(TO_CLIENT_VOCAB_COUNT).collect(Collectors.toList());
       }
     } else {
       return;
     }
-    response.setVocabularyCounts(vocabularyCounts.stream().map(TO_CLIENT_VOCAB_COUNT)
-        .collect(Collectors.toList()));
+    response.setVocabularyCounts(vocabularyCounts);
   }
 
   @Override

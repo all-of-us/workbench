@@ -66,7 +66,12 @@ export class SetAnnotationCreateComponent {
     };
 
     if (this.isEnum) {
-      request.enumValues = [...this.enumValues];
+      const val = this.addValue.value;
+      const hasVal = this.enumValues.includes(val);
+      if (val && val !== '' && !hasVal) {
+        request.enumValues = [...this.enumValues, val];
+        this.addValue.reset();
+      }
     }
 
     this.annotationAPI
@@ -117,7 +122,8 @@ export class SetAnnotationCreateComponent {
   }
 
   get formIsInvalid() {
-    const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
+    const val = this.addValue.value;
+    const isEmptyEnum = this.isEnum && !val && !(this.enumValues.length > 0);
     return (this.form.invalid || isEmptyEnum);
   }
 
