@@ -12,13 +12,6 @@ public class TestWebMvcConfig extends WebMvcConfig {
 
     @Bean
     @Primary
-    @Qualifier("apiHostName")
-    public String getHostName() {
-        return "https://api.blah.com";
-    }
-
-    @Bean
-    @Primary
     public WorkbenchEnvironment workbenchEnvironment() {
         return new WorkbenchEnvironment(true, "appId");
     }
