@@ -167,12 +167,12 @@ where count_value > 0 or lower(vocabulary_id) ='ppi' "
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.criteria\`
 set est_count =
-    case when est_count < ${BIN_SIZE}
-        then ${BIN_SIZE}
+    case when cast(est_count as int64) < ${BIN_SIZE}
+        then cast(${BIN_SIZE} as string)
     else
-        cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
+        cast(ROUND(cast(est_count as int64) / ${BIN_SIZE}) * ${BIN_SIZE} as string)
     end
-where est_count > 0"
+where cast(est_count as int64) > 0"
 
 # domain_info
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
