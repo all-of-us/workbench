@@ -17,17 +17,7 @@ const testRoutes: Routes = [
         data: {
           title: 'params',
           breadcrumb: ':p1'
-        },
-          children: [
-            {
-              path: 'paramsChild',
-              component: Component,
-                data: {
-                  title: 'paramsChild',
-                  breadcrumb: 'paramschild'
-                }
-            }
-          ]
+        }
       },
       {
         path: 'child1',
@@ -64,17 +54,7 @@ const testRoutes: Routes = [
           workspace: {
             name: 'Workspace Name'
           }
-        },
-          children: [
-              {
-                path: 'workspaceGrandChild',
-                component: Component,
-                data: {
-                  title: 'workspaceGrandChild',
-                    breadcrumb: 'workspacegrandchild'
-                }
-              }
-          ]
+        }
       },
       {
         path: 'child3',
@@ -82,14 +62,41 @@ const testRoutes: Routes = [
         data: {title: 'child3'}
       },
       {
-        path: 'conceptSets/:conceptset',
+        path: 'intermediateParent',
         component: Component,
         data: {
-          title: 'conceptSets',
-          breadcrumb: 'Param: Concept Set Name',
-          conceptSet: {
-            name: 'Concept Set Name'
+          title: 'intermediateParent',
+          breadcrumb: 'intermediateParent'
+        },
+        children: [
+          {
+            path: 'intermediateChild',
+            component: Component,
+            data: {
+              title: 'intermediateChild',
+              breadcrumb: null,
+              intermediateBreadcrumb: 'intermediateChild'
+            },
+            children: [
+              {
+                path: 'intermediateGrandchild',
+                component: Component,
+                data: {
+                  title: 'intermediateGrandchild',
+                  breadcrumb: 'intermediateGrandchild'
+                }
+              }
+            ]
           }
+        ]
+      },
+      {
+        path: 'intermediateRoot',
+        component: Component,
+        data: {
+          title: 'intermediateRoot',
+          breadcrumb: null,
+          intermediateBreadcrumb: 'intermediateRoot'
         }
       }
     ]
@@ -129,13 +136,13 @@ describe('BreadcrumbComponent', () => {
     expect(testComponent).toBeTruthy('Breadcrumbs should have instantiated');
   }));
 
-  it('should have populated breadcrumbs for all supported paths with parents', fakeAsync(() => {
+  it('should have populated breadcrumbs for all supported paths', fakeAsync(() => {
     for (const p of supportedPaths) {
       const pathArray = [].concat.apply([], [p]);
       router.navigate(pathArray);
       tick();
       expect(testComponent.breadcrumbs.length).toBe(
-          pathArray.length - 1,
+          pathArray.length,
           'Breadcrumbs should exist for each element of the supported path: ' + p);
     }
   }));
@@ -149,34 +156,40 @@ describe('BreadcrumbComponent', () => {
     }
   }));
 
-  it('should have empty breadcrumbs for path without a parent', fakeAsync(() => {
-    router.navigate((['child2']));
-    tick();
-    expect(testComponent.breadcrumbs.length)
-        .toBe(0, 'Breadcrumbs should be empty for path without a parent');
-
-  }));
-
   it('should populate parent value in label', fakeAsync(() => {
-    router.navigate(['params', 'P1', 'paramsChild']);
+    router.navigate(['params', 'P1']);
     tick();
     expect(testComponent.breadcrumbs.pop().label)
         .toBe('P1', 'Breadcrumb label should be "P1"');
   }));
 
   it('should lookup name when there is a workspace name param', fakeAsync(() => {
-    router.navigate(['workspaceChild', 'workspaceGrandChild']);
+    router.navigate(['workspaceChild']);
     tick();
     expect(testComponent.breadcrumbs.pop().label).toBe('Workspace Name',
       'Breadcrumb label should be "Workspace Name"');
   }));
 
-  // Test out the exception case
-  it('should display the child as a label for Param: Concept Set Name', fakeAsync( () => {
-    router.navigate(['conceptSets', 'myConceptSet']);
+  it('should show intermediateBreadcrumbs when they have children', fakeAsync( () => {
+    router.navigate(['intermediateParent', 'intermediateChild', 'intermediateGrandchild']);
     tick();
-    expect(testComponent.breadcrumbs.pop().label)
-        .toBe('Concept Set Name', 'Breadcrumb label should be "Concept Set Name"');
+    expect(testComponent.breadcrumbs.length).toBe(3);
+    expect(testComponent.breadcrumbs[0].label).toBe('intermediateParent');
+    expect(testComponent.breadcrumbs[1].label).toBe('intermediateChild');
+    expect(testComponent.breadcrumbs[2].label).toBe('intermediateGrandchild');
+  }));
+
+  it('should not show intermediateBreadcrumbs when they are the last child', fakeAsync( () => {
+    router.navigate(['intermediateParent', 'intermediateChild']);
+    tick();
+    expect(testComponent.breadcrumbs.length).toBe(1);
+    expect(testComponent.breadcrumbs.pop().label).toBe('intermediateParent');
+  }));
+
+  it('should show intermediateBreadcrumb if it is the root', fakeAsync( () => {
+    router.navigate(['intermediateRoot']);
+    tick();
+    expect(testComponent.breadcrumbs.pop().label).toBe('intermediateRoot');
   }));
 
 });

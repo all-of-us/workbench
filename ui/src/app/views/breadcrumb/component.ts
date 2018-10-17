@@ -118,7 +118,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    */
   private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
     let last = breadcrumbs[breadcrumbs.length - 1];
-    while((last) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
+    while((breadcrumbs.length > 1) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
       breadcrumbs.pop();
       last = breadcrumbs[breadcrumbs.length - 1];
     }
