@@ -4,6 +4,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 export interface Breadcrumb {
   label: string;
+  type: string;
   url: string;
 }
 @Component({
@@ -18,6 +19,8 @@ export interface Breadcrumb {
 export class BreadcrumbComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
+  ROUTE_DATA_BREADCRUMB: string = 'breadcrumb';
+  ROUTE_DATA_INTERMIEDIATE_BREADCRUMB: string = 'intermediateBreadcrumb';
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router) {}
@@ -29,6 +32,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * do substitution with the 'wsid' value in the route's paramMap.
    */
   private static makeBreadcrumb(label: string,
+                                type: string,
                                 url: string,
                                 route: ActivatedRoute): Breadcrumb {
     let newLabel = label;
@@ -41,6 +45,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
     return {
       label: newLabel,
+      type: type,
       url: url
     };
   }
@@ -50,7 +55,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
 
     this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(event => {
-        this.breadcrumbs = this.buildBreadcrumbs(this.activatedRoute.root);
+        this.breadcrumbs = this.filterBreadcrumbs(this.buildBreadcrumbs(this.activatedRoute.root));
       });
   }
 
@@ -65,53 +70,59 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   private buildBreadcrumbs(route: ActivatedRoute,
                            url: string = '',
                            breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
-    const ROUTE_DATA_BREADCRUMB = 'breadcrumb';
     const children: ActivatedRoute[] = route.children;
     if (children.length === 0) {
       return breadcrumbs;
     }
     for (const child of children) {
-      if (!child.snapshot.data.hasOwnProperty(ROUTE_DATA_BREADCRUMB)) {
+      if ((!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) && (!child.snapshot.data.hasOwnProperty(this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB))) {
         return this.buildBreadcrumbs(child, url, breadcrumbs);
       }
       const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
       if (routeURL.length > 0) {
         url += `/${routeURL}`;
       }
-      let label = child.snapshot.data[ROUTE_DATA_BREADCRUMB];
+
+      let label;
+      let breadcrumbType;
+      if (child.snapshot.data[this.ROUTE_DATA_BREADCRUMB] != null) {
+        label = child.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
+        breadcrumbType = this.ROUTE_DATA_BREADCRUMB;
+      } else {
+        label = child.snapshot.data[this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB];
+        breadcrumbType = this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB;
+      }
+
       if (label === 'Param: Workspace Name') {
         label = child.snapshot.data['workspace'].name;
       }
       if (label === 'Param: Cohort Name') {
         label = child.snapshot.data['cohort'].name;
       }
-      if (label === 'Param: Concept Sets Name') {
-        label = child.snapshot.data['workspace'].name;
-        if (breadcrumbs.length > 2) {
-          breadcrumbs = breadcrumbs.filter(b => !b.url.endsWith('/concepts'));
-        }
-      }
       if (label === 'Param: Concept Set Name') {
         label = child.snapshot.data['conceptSet'].name;
-        // For the most part, we don't want to append the current label to the breadcrumbs
-        //      since we want the label to stop at the parent.
-        // In this case, we want the breadcrumb header to be the Concept Set Name
-        const conceptSetBreadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
-        breadcrumbs.push(conceptSetBreadcrumb);
-      }
-      // Return if  child is a leaf, or if child's child has same breadcrumb as its parent
-      if ((!child.firstChild) ||
-          (child.firstChild.snapshot.data[ROUTE_DATA_BREADCRUMB] === label)) {
-        return breadcrumbs;
       }
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {
-        const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, url, child);
+        const breadcrumb = BreadcrumbComponent.makeBreadcrumb(label, breadcrumbType, url, child);
         breadcrumbs.push(breadcrumb);
       }
       return this.buildBreadcrumbs(child, url, breadcrumbs);
     }
+  }
 
+  /**
+   * Filters an array of Breadcrumbs so that the last element is never an intermediateBreadcrumb
+   * This ensures that breadcrumb headers are displayed correctly while still tracking
+   * intermediate pages.
+   */
+  private filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
+    let last = breadcrumbs[breadcrumbs.length - 1];
+    while((last) && (last.type === this.ROUTE_DATA_INTERMIEDIATE_BREADCRUMB)) {
+      breadcrumbs.pop();
+      last = breadcrumbs[breadcrumbs.length - 1];
+    }
+    return breadcrumbs;
   }
 
 }

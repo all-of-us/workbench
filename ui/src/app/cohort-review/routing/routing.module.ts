@@ -41,7 +41,8 @@ const routes: Routes = [{
           concepts: DemographicConceptMapsResolver,
       },
       data: {
-          breadcrumb: 'Participants'
+          intermediateBreadcrumb: 'Participants',
+          breadcrumb: null
       }
   }, {
     path: 'participants/:pid',

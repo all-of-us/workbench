@@ -62,7 +62,9 @@ const routes: Routes = [
         }
       }, {
       path: 'workspaces',
-      data: {breadcrumb: 'Workspaces'},
+      data: {
+        breadcrumb: 'Workspaces'
+      },
       children: [
         {
           path: '',
@@ -89,7 +91,7 @@ const routes: Routes = [
               component: WorkspaceComponent,
               data: {
                 title: 'View Workspace Details',
-                breadcrumb: 'View Workspace Details'
+                intermediateBreadcrumb: 'View Workspace Details'
               }
             }, {
               path: 'edit',
@@ -97,7 +99,7 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
-                breadcrumb: 'Edit Workspace'
+                intermediateBreadcrumb: 'Edit Workspace'
               }
             }, {
               path: 'clone',
@@ -105,7 +107,7 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
-                breadcrumb: 'Clone Workspace'
+                intermediateBreadcrumb: 'Clone Workspace'
               }
             },
             {
@@ -113,12 +115,16 @@ const routes: Routes = [
               component: NotebookListComponent,
               data: {
                 title: 'View Notebooks',
-                breadcrumb: 'Notebooks'
+                intermediateBreadcrumb: 'Notebooks',
+                breadcrumb: null
               }
             },
             {
               path: 'cohorts',
-              data: { breadcrumb: 'Cohorts' },
+              data: {
+                intermediateBreadcrumb: 'Cohorts',
+                breadcrumb: null
+              },
               children: [
                 {
                   path: '',
@@ -150,7 +156,8 @@ const routes: Routes = [
             {
               path: 'concepts',
               data: {
-                breadcrumb: 'Concepts'
+                intermediateBreadcrumb: 'Concepts',
+                breadcrumb: null
               },
               children: [{
                 path: '',
@@ -164,7 +171,8 @@ const routes: Routes = [
                  component: ConceptSetListComponent,
                  data: {
                    title: 'View Concept Sets',
-                   breadcrumb: 'Param: Concept Sets Name'
+                   intermediateBreadcrumb: 'Concept Sets',
+                   breadcrumb: null
                  }
                },
                {
