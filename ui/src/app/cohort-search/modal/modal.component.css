@@ -204,7 +204,11 @@ h5.selection-title {
   padding-bottom: 0.5rem;
 }
 
-h6.selection-header {
+.and-style {
+  padding-left: 0.25rem;
+}
+
+.selection-header {
   margin-top: 0.25rem;
   margin-left: 0.25rem;
   color: #262262;
