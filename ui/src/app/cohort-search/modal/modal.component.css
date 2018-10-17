@@ -98,6 +98,11 @@ button.tab.active {
   font-size: 14px;
 }
 
+.btn-group > .btn.tab {
+  letter-spacing: normal;
+  margin: 0 1rem
+}
+
 .test:target {
   border-bottom: 5px solid red;
 }
