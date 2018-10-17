@@ -158,7 +158,7 @@ else
     grant_access_to_files gs://$BUCKET/*
     # gsutil returns error if no files match thus the "2> /dev/null || true" part to ignore error
     sqls=( $(gsutil ls gs://$BUCKET/*.sql* 2> /dev/null || true) )
-    csvs=( $(gsutil ls gs://$BUCKET/*.csv.gz 2> /dev/null || true) )
+    csvs=( $(gsutil ls gs://$BUCKET/*.csv* 2> /dev/null || true) )
 fi
 
 for gs_file in "${sqls[@]}"
