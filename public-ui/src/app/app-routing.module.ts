@@ -4,7 +4,7 @@ import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 import {SignInGuard} from './guards/sign-in-guard.service';
 import {DbHomeComponent} from './views/db-home/db-home.component';
 import {EhrViewComponent} from './views/ehr-view/ehr-view.component';
-import {LoginComponent} from './views/login/login.component'
+import {LoginComponent} from './views/login/login.component';
 import {PhysicalMeasurementsComponent} from './views/pm/pm.component';
 import {QuickSearchComponent} from './views/quick-search/quick-search.component';
 import {SurveyViewComponent} from './views/survey-view/survey-view.component';

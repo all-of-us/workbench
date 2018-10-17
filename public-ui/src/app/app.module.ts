@@ -23,8 +23,9 @@ import { SignInService } from './services/sign-in.service';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
 import { DbHomeComponent } from './views/db-home/db-home.component';
 import { LoginComponent } from './views/login/login.component';
-import { PageTemplateSignedOutComponent }
-  from './views/page-template-signed-out/page-template-signed-out.component';
+import {
+  PageTemplateSignedOutComponent
+} from './views/page-template-signed-out/page-template-signed-out.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';
 import { SurveysComponent } from './views/surveys/surveys.component';
 
@@ -51,7 +52,7 @@ const DataBrowserServiceFactory = (http: Http) => {
 
 export function getConfigService(http: Http) {
   return new ConfigService(http, getPublicBasePath(), null);
-};
+}
 
 @NgModule({
   imports: [
