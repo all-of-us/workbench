@@ -12,7 +12,8 @@
      (keyup.arrowdown)="moveDown()"
      [formControl]="searchTerm"/>
   </div>
-  <div *ngIf="noResults" class="dropdown-menu">
+
+  <div *ngIf="noResults && searchTerm.value.length !== 0" class="dropdown-menu">
     <button class="dropdown-item disabled">
       <em>No results based on your search</em>
     </button>
