@@ -66,7 +66,7 @@ export class QuickTourModalComponent implements OnInit {
       'Welcome to the All of Us Workbench. This space contains a variety ' +
       'of cloud-based tools that will allow you to access and analyze program ' +
       'data.');
-    this.panelImages.set(this.panelTitles[0], '');
+    this.panelImages.set(this.panelTitles[0], '/assets/images/intro.png');
     this.panels.set(this.panelTitles[1],
       'A workspace is your place to store and analyze data for a specific ' +
       'project. Each workspace is a separate Google bucket that serves as a ' +
