@@ -83,7 +83,6 @@ const testRoutes: Routes = [
           title: 'parent',
           breadcrumb: {
             value: 'parent',
-            intermediate: false
           }
         },
         children: [
@@ -105,7 +104,6 @@ const testRoutes: Routes = [
                   title: 'grandchild',
                   breadcrumb: {
                     value: 'grandchild',
-                    intermediate: false
                   }
                 }
               }

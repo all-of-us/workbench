@@ -84,7 +84,6 @@ const routes: Routes = [
             title: 'View Workspace Details',
             breadcrumb: {
               value: 'Param: Workspace Name',
-              intermediate: false
             }
           },
           runGuardsAndResolvers: 'always',
@@ -106,7 +105,6 @@ const routes: Routes = [
                 mode: WorkspaceEditMode.Edit,
                 breadcrumb: {
                   value: 'Edit Workspace',
-                  intermediate: false
                 }
               }
             }, {
@@ -117,7 +115,6 @@ const routes: Routes = [
                 mode: WorkspaceEditMode.Clone,
                 breadcrumb: {
                   value: 'Clone Workspace',
-                  intermediate: false
                 }
               }
             },
@@ -137,7 +134,7 @@ const routes: Routes = [
               data: {
                 breadcrumb: {
                   value: 'Cohorts',
-                    intermediate: true
+                  intermediate: true
                 }
               },
               children: [
@@ -154,7 +151,6 @@ const routes: Routes = [
                   data: {
                     breadcrumb: {
                       value: 'Add a Cohort',
-                      intermediate: false
                     }
                   }
                 },
@@ -165,7 +161,6 @@ const routes: Routes = [
                     title: 'Cohort',
                     breadcrumb: {
                       value: 'Param: Cohort Name',
-                      intermediate: false
                     }
                   },
                   resolve: {
@@ -203,7 +198,6 @@ const routes: Routes = [
                             title: 'Concept Set',
                             breadcrumb: {
                               value: 'Param: Concept Set Name',
-                              intermediate: false
                             }
                         },
                         resolve: {
