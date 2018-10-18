@@ -84,10 +84,10 @@ export class ConceptHomepageComponent implements OnInit {
   ) {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-    this.selectedConceptDomainMap = new Map<string, number>();
   }
 
   ngOnInit(): void {
+    this.selectedConceptDomainMap = new Map<string, number>();
     this.loadingDomains = true;
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
@@ -114,6 +114,9 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   selectDomain(domainCount: DomainCount) {
+    if (!this.selectedConceptDomainMap[domainCount.domain]) {
+      this.selectedConceptDomainMap[domainCount.domain] = 0;
+    }
     this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainCount.domain]);
     this.selectedDomain = domainCount;
     this.placeholderValue = this.noConceptsConstant;

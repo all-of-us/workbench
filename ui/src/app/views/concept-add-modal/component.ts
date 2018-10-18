@@ -38,7 +38,7 @@ export class ConceptAddModalComponent {
 
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
-  @Output('saved') saveComplete = new EventEmitter<void>();
+  @Output('saveComplete') saveComplete = new EventEmitter<void>();
 
   constructor(
     private conceptSetsService: ConceptSetsService,
