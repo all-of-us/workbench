@@ -48,6 +48,7 @@ import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.CdrJpaConfig;
@@ -179,6 +180,46 @@ public class CohortMaterializationServiceTest {
     assertParameterArray(genderParam, 8507, 8532, 2);
     assertParameterArray(personIdBlacklistParam, 2L);
   }
+
+  @Test
+  public void testGetCdrQueryWithTableQuery() {
+    CdrQuery cdrQuery = cohortMaterializationService.getCdrQuery(
+        SearchRequests.allGenders(), new DataTableSpecification().tableQuery(
+            new TableQuery().tableName("measurement").columns(
+                ImmutableList.of("person_id", "measurement_concept.concept_name"))), cohortReview,
+        null);
+    assertThat(cdrQuery.getBigqueryDataset()).isEqualTo(DATA_SET_ID);
+    assertThat(cdrQuery.getBigqueryProject()).isEqualTo(PROJECT_ID);
+    assertThat(cdrQuery.getColumns()).isEqualTo(
+        ImmutableList.of("person_id", "measurement_concept.concept_name"));
+    assertThat(cdrQuery.getSql()).isEqualTo(
+        "select inner_results.person_id, "
+            + "measurement_concept.concept_name measurement_concept__concept_name\n"
+            + "from (select measurement.person_id person_id, "
+            + "measurement.measurement_concept_id measurement_measurement_concept_id, "
+            + "measurement.person_id measurement_person_id, "
+            + "measurement.measurement_id measurement_measurement_id\n"
+            + "from `project_id.data_set_id.measurement` measurement\n"
+            + "where\n"
+            + "measurement.person_id in (select person_id\n"
+            + "from `project_id.data_set_id.person` p\n"
+            + "where\n"
+            + "p.gender_concept_id in unnest(@p0)\n"
+            + ")\n"
+            + "and measurement.person_id not in unnest(@person_id_blacklist)\n"
+            + "\n"
+            + "order by measurement.person_id, measurement.measurement_id\n"
+            + ") inner_results\n"
+            + "LEFT OUTER JOIN `project_id.data_set_id.concept` measurement_concept ON "
+            + "inner_results.measurement_measurement_concept_id = measurement_concept.concept_id\n"
+            + "order by measurement_person_id, measurement_measurement_id");
+    Map<String, Map<String, Object>> params = getParameters(cdrQuery);
+    Map<String, Object> genderParam = params.get("p0");
+    Map<String, Object> personIdBlacklistParam = params.get("person_id_blacklist");
+    assertParameterArray(genderParam, 8507, 8532, 2);
+    assertParameterArray(personIdBlacklistParam, 2L);
+  }
+
 
   private Map<String, Map<String, Object>> getParameters(CdrQuery cdrQuery) {
     Map<String, Object> configuration = (Map<String, Object>) cdrQuery.getConfiguration();

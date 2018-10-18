@@ -62,7 +62,12 @@ const routes: Routes = [
         }
       }, {
       path: 'workspaces',
-      data: {breadcrumb: 'Workspaces'},
+      data: {
+        breadcrumb: {
+          value: 'Workspaces',
+          intermediate: true
+        }
+      },
       children: [
         {
           path: '',
@@ -77,7 +82,9 @@ const routes: Routes = [
           component: WorkspaceNavBarComponent,
           data: {
             title: 'View Workspace Details',
-            breadcrumb: 'Param: Workspace Name'
+            breadcrumb: {
+              value: 'Param: Workspace Name',
+            }
           },
           runGuardsAndResolvers: 'always',
           resolve: {
@@ -89,7 +96,6 @@ const routes: Routes = [
               component: WorkspaceComponent,
               data: {
                 title: 'View Workspace Details',
-                breadcrumb: 'View Workspace Details'
               }
             }, {
               path: 'edit',
@@ -97,7 +103,9 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
-                breadcrumb: 'Edit Workspace'
+                breadcrumb: {
+                  value: 'Edit Workspace',
+                }
               }
             }, {
               path: 'clone',
@@ -105,7 +113,9 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
-                breadcrumb: 'Clone Workspace'
+                breadcrumb: {
+                  value: 'Clone Workspace',
+                }
               }
             },
             {
@@ -113,12 +123,20 @@ const routes: Routes = [
               component: NotebookListComponent,
               data: {
                 title: 'View Notebooks',
-                breadcrumb: 'Notebooks'
+                breadcrumb: {
+                  value: 'Notebooks',
+                  intermediate: true
+                }
               }
             },
             {
               path: 'cohorts',
-              data: { breadcrumb: 'Cohorts' },
+              data: {
+                breadcrumb: {
+                  value: 'Cohorts',
+                  intermediate: true
+                }
+              },
               children: [
                 {
                   path: '',
@@ -131,7 +149,9 @@ const routes: Routes = [
                   path: 'build',
                   loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                   data: {
-                    breadcrumb: 'Add a Cohort'
+                    breadcrumb: {
+                      value: 'Add a Cohort',
+                    }
                   }
                 },
                 {
@@ -139,7 +159,9 @@ const routes: Routes = [
                   loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
                   data: {
                     title: 'Cohort',
-                    breadcrumb: 'Param: Cohort Name'
+                    breadcrumb: {
+                      value: 'Param: Cohort Name',
+                    }
                   },
                   resolve: {
                     cohort: CohortResolver,
@@ -149,37 +171,43 @@ const routes: Routes = [
             },
             {
               path: 'concepts',
+              component: ConceptHomepageComponent,
               data: {
-                breadcrumb: 'Concepts'
-              },
-              children: [{
-                path: '',
-                component: ConceptHomepageComponent,
-                data: {
-                  title: 'Search Concepts',
+                title: 'Search Concepts',
+                breadcrumb: {
+                  value: 'Concepts',
+                  intermediate: true
                 }
-              },
-              {
-                 path: 'sets',
-                 component: ConceptSetListComponent,
-                 data: {
-                   title: 'View Concept Sets',
-                   breadcrumb: 'Param: Concept Sets Name'
-                 }
-               },
-               {
-                path: 'sets/:csid',
-                component: ConceptSetDetailsComponent,
+              }
+            },
+            {
+                path: 'concepts/sets',
+                component: ConceptSetListComponent,
                 data: {
-                  title: 'Concept Set',
-                  breadcrumb: 'Param: Concept Set Name'
+                    title: 'View Concept Sets',
+                    breadcrumb: {
+                      value: 'Concept Sets',
+                      intermediate: true
+                    }
                 },
-                resolve: {
-                  conceptSet: ConceptSetResolver,
-                }
-              }]
-            }]
-          }
+                children: [
+                    {
+                        path: ':csid',
+                        component: ConceptSetDetailsComponent,
+                        data: {
+                            title: 'Concept Set',
+                            breadcrumb: {
+                              value: 'Param: Concept Set Name',
+                            }
+                        },
+                        resolve: {
+                            conceptSet: ConceptSetResolver,
+                        }
+                    }
+                ]
+            },
+            ]
+        }
         ]
       },
       {
