@@ -46,12 +46,39 @@ fi
 # Next Populate achilles_results
 echo "Running achilles queries..."
 
+# 0 Make person gender identity table
+echo "making person_gender_identity table "
+schema_path=generate-cdr/bq-schemas
+# Person gender identity table to use in place of person in places
+person_gi=person_gender_identity
+gi_question_concept_id=1585838
+
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\` (person_id, gender_concept_id, gi_concept_id)
+select p.person_id, p.gender_concept_id, o.value_source_concept_id as gi_concept_id
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p
+left join  \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+and o.observation_source_concept_id = $gi_question_concept_id"
+
+# 1 Person count
 echo "Getting person count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, count_value,source_count_value) select 0 as id, 1 as analysis_id,  COUNT(distinct person_id) as count_value, 0 as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\`"
+from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\`"
 
+# 2 Gender Count
+echo "Getting gender count"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, stratum_2,
+count_value,source_count_value)
+select 0, 2 as analysis_id,  cast (gender_concept_id as STRING) as stratum_1, cast (gi_concept_id as STRING) as stratum_2,
+ COUNT(distinct person_id) as count_value, 0 as source_count_value
+from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\`
+group by gender_concept_id, gi_concept_id"
+
+exit 0
 
 # Gender count
 echo "Getting gender count"

@@ -94,7 +94,9 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info unit_map)
+create_tables=(person_gender_identity achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept \
+concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor \
+concept_synonym domain_vocabulary_info unit_map)
 
 for t in "${create_tables[@]}"
 do
