@@ -1,7 +1,7 @@
 <clr-main-container *ngIf="signedIn else login">
+  <app-db-header [noMenu]="noHeaderMenu"></app-db-header>
   <div class="content-container">
     <div class="content-area">
-      <app-db-header [noMenu]="noHeaderMenu"></app-db-header>
       <router-outlet></router-outlet>
     </div>
     <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
