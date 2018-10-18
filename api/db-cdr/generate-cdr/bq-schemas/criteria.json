@@ -63,5 +63,10 @@
         "mode": "NULLABLE",
         "name": "path",
         "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "synonyms",
+        "type": "STRING"
       }
 ]

@@ -122,6 +122,123 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
 FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`"
 
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'SNOMED' and subtype = 'PCS'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'ICD9' and subtype = 'CM'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'ICD9' and subtype = 'PROC'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'ICD10' and subtype = 'CM'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'ICD10' and subtype = 'PCS'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'CPT'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'MEAS' and subtype = 'CLIN'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'MEAS' and subtype = 'LAB'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
+echo "Updating criteria"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` ct
+set ct.synonyms = crit.synonyms
+from (
+select c.id, concat(cast(c.name as string),'|',cast(c.code as string),'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|')) as synonyms
+from \`${BQ_PROJECT}.${BQ_DATASET}.criteria\` c
+join \`${BQ_PROJECT}.${BQ_DATASET}.concept_synonym\` cs
+on c.concept_id=cs.concept_id
+and type = 'PPI'
+group by c.id, c.name, c.code) as crit
+where crit.id = ct.id"
+
 ######################
 # criteria_attribute #
 ######################
