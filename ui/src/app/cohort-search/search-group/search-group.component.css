@@ -58,6 +58,7 @@
   border-color: rgb(195, 195, 195);
   font-weight: 100 !important;
   width:10rem;
+  text-align: start;
 }
 .time-selection-button:hover {
   background-color: rgb(219, 228, 233);
