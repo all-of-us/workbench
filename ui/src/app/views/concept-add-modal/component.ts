@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
@@ -38,6 +38,7 @@ export class ConceptAddModalComponent {
 
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
+  @Output('saved') saveComplete = new EventEmitter<void>();
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -99,6 +100,7 @@ export class ConceptAddModalComponent {
           this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
           .subscribe((response) => {
             this.modalOpen = false;
+            this.saveComplete.emit();
           }, (error) => {
             this.errorMsg = error.toString();
           });
@@ -128,6 +130,7 @@ export class ConceptAddModalComponent {
     this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
           this.modalOpen = false;
+          this.saveComplete.emit();
         }, (error) => {
           this.errorSaving = true;
           if (error.status === 400) {
