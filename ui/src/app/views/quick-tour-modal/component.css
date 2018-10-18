@@ -29,7 +29,7 @@
 .breadcrumbs {
   width: 100%;
   margin-top: 5%;
-  padding-left: 25%;
+  justify-content: center;
   display: flex;
   flex-direction: row;
 }

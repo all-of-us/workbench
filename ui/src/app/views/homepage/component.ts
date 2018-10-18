@@ -62,8 +62,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }];
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(RecentWorkComponent)
-  recentWorkComponent: RecentWorkComponent;
   @ViewChild(QuickTourModalComponent)
   quickTourModal: QuickTourModalComponent;
 
@@ -76,9 +74,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.profileStorageService.profile$.subscribe((profile) => {
-      if (this.firstSignIn === undefined) {
-        this.firstSignIn = new Date(profile.firstSignInTime);
-        this.learn();
+      if (profile.firstSignInTime === undefined) {
+        this.openQuickTour();
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
@@ -93,7 +90,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.reload();
   }
 
-  learn(): void {
+  openQuickTour(): void {
     this.quickTourModal.open();
   }
 

@@ -70,7 +70,7 @@ export class QuickTourModalComponent implements OnInit {
     this.panels.set(this.panelTitles[1],
       'A workspace is your place to store and analyze data for a specific ' +
       'project. Each workspace is a separate Google bucket that serves as a ' +
-      'dedicated space for file storage. You can share this workspace with other' +
+      'dedicated space for file storage. You can share this workspace with other ' +
       'users, allowing them to view or edit your work.');
     this.panelImages.set(this.panelTitles[1], '/assets/images/workspaces.png');
     this.panels.set(this.panelTitles[2],
