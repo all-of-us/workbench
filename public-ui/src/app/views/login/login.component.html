@@ -1,0 +1,19 @@
+<div class="sign-in-container">
+  <app-page-template-signed-out style="width: 100%" [imageSrc]=backgroundImgSrc [smallerImageSrc]=smallerBackgroundImgSrc>
+    <div *ngIf="!showCreateAccount;" style="margin-top: 6.5rem;  padding-left: 3rem;">
+      <h3>Already have an account?</h3>
+      <div style="display: flex;">
+        <button (click)="signIn()" class="btn btn-lg btn-primary">
+          <img class="google-icon" [src]="googleIcon">
+          <div>Sign In with Google</div>
+        </button>
+      </div>
+      <div style="padding-top: 1rem;">
+        <h4>Don't have an account?</h4>
+        <a style="display: flex; align-items: center; width: 11.5rem"
+           href="{{environment.workbenchUrl}}" class="btn btn-secondary">
+          Create Account in Workbench</a>
+      </div>
+    </div>
+  </app-page-template-signed-out>
+</div>
