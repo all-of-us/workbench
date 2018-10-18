@@ -16,8 +16,8 @@ import {Observable} from 'rxjs/Observable';
 
 import {environment} from 'environments/environment';
 
+import {SignInService} from 'app/services/sign-in.service';
 
-declare const gapi: any;
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 
@@ -32,6 +32,7 @@ export class AppComponent implements OnInit {
   private baseTitle: string;
   private overriddenPublicUrl: string = null;
   public noHeaderMenu = false;
+  signedIn = false;
 
   constructor(
     /* Ours */
@@ -40,12 +41,17 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private locationService: Location,
     private router: Router,
+    private signInService: SignInService,
     private titleService: Title
   ) {}
 
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
     this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
+
+    this.signInService.isSignedIn$.subscribe((isSignedIn) => {
+      this.signedIn = isSignedIn;
+    });
 
     window['setPublicApiUrl'] = (url: string) => {
       if (url) {

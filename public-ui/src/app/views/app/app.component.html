@@ -1,4 +1,4 @@
-<clr-main-container>
+<clr-main-container *ngIf="signedIn else login">
   <app-db-header [noMenu]="noHeaderMenu"></app-db-header>
   <div class="content-container">
     <div class="content-area">
@@ -9,3 +9,6 @@
     </div>
   </div>
 </clr-main-container>
+<ng-template #login>
+  <router-outlet></router-outlet>
+</ng-template>
