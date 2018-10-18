@@ -39,7 +39,7 @@ export class ChartComponent implements OnChanges {
   }
 
   public hcChartOptions(): any {
-    let options = this.makeChartOptions();
+    const options = this.makeChartOptions();
 
     // Override title if they passed one
     if (this.chartTitle) {
