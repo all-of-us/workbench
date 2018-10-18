@@ -245,12 +245,12 @@ export class ConceptHomepageComponent implements OnInit {
     this.selectedConcept = selectedConcepts;
     const domainName = this.selectedDomain.domain;
     if (selectedConcepts && selectedConcepts.length > 0 ) {
-      const numOfFilterConcepts = this.selectedConcept
+      const filterConceptsCount = this.selectedConcept
           .filter(concept =>
           concept.domainId.toLowerCase() === this.selectedDomain.domain.toString().toLowerCase())
           .length;
-      this.selectedConceptDomainMap[domainName] = numOfFilterConcepts;
-      this.isConceptSelected = numOfFilterConcepts > 0 ;
+      this.selectedConceptDomainMap[domainName] = filterConceptsCount;
+      this.isConceptSelected = filterConceptsCount > 0 ;
     } else {
       this.isConceptSelected = false;
       this.selectedConceptDomainMap[domainName] = 0;
