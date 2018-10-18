@@ -17,7 +17,13 @@ import {SearchRequest} from 'generated';
 export class SearchGroupComponent {
   @Input() group;
   @Input() role: keyof SearchRequest;
-
+  temporalDropdown = false;
+  whichMention = ['Any mention', 'First mention', 'Last mention'];
+  timeDropDown = ['During same encounter as',
+                  'X Days before', 'X Days after',
+    'Within X days of', 'On or X days before', 'On or X days after',];
+  dropdownOption: any;
+  timeDropdownOption: any;
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
 
@@ -48,5 +54,21 @@ export class SearchGroupComponent {
     const {role, groupId} = this;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
+  }
+
+  getTemporal(e){
+    if(e.target.checked === true){
+      this.temporalDropdown = true;
+    } else {
+      this.temporalDropdown = false;
+    }
+
+  }
+  getMentionTitle(mention) {
+    this.dropdownOption = mention;
+  }
+  getTimeTitle(time){
+    this.timeDropdownOption = time;
+
   }
 }
