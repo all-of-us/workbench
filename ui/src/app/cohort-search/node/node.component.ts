@@ -202,11 +202,12 @@ export class NodeComponent implements OnInit, OnDestroy {
     it is fetching data for multiple trees */
     if (_type === TreeType[TreeType.DRUG]) {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
-    } else if (this.fullTree && _type ===TreeType[TreeType.PM]) {
+    } else if (this.fullTree && _type === TreeType[TreeType.PM]) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else if (this.codes && this.node.get('subtype')) {
       this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
-    } else if (_type === [TreeType[TreeType.VISIT]] && [TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
+    } else if (_type === [TreeType[TreeType.VISIT]]
+              && [TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
       this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
     } else if (_type === TreeType[TreeType.PPI]) {
       this.actions.fetchCriteria(_type, parentId);
