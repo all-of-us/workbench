@@ -102,9 +102,9 @@ export class ConceptHomepageComponent implements OnInit {
           name: domain.name,
           conceptCount: 0
         });
+        this.selectedDomain = this.conceptDomainCounts[0];
       });
       this.loadingDomains = false;
-      this.selectedDomain = this.conceptDomainCounts[0];
     });
   }
 
