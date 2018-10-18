@@ -20,8 +20,8 @@ export class SearchGroupComponent {
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
   timeDropDown = ['During same encounter as',
-                  'X Days before', 'X Days after',
-    'Within X days of', 'On or X days before', 'On or X days after',];
+                  'X Days before', 'X Days after', 'Within X days of',
+    'On or X days before', 'On or X days after'];
   dropdownOption: any;
   timeDropdownOption: any;
   readonly domainTypes = DOMAIN_TYPES;
@@ -56,18 +56,19 @@ export class SearchGroupComponent {
     this.actions.openWizard(itemId, criteria.type, context);
   }
 
-  getTemporal(e){
-    if(e.target.checked === true){
+  getTemporal(e) {
+    if (e.target.checked === true) {
       this.temporalDropdown = true;
     } else {
       this.temporalDropdown = false;
     }
 
   }
+
   getMentionTitle(mention) {
     this.dropdownOption = mention;
   }
-  getTimeTitle(time){
+  getTimeTitle(time) {
     this.timeDropdownOption = time;
 
   }
