@@ -8,6 +8,13 @@
 .card-header {
   display: flex;
   justify-content: space-between;
+  min-width: 100%;
+}
+
+.temporal-sub-card-header {
+  display: flex;
+  justify-content: space-between;
+  padding: .5rem .75rem;
 }
 
 .card-footer {
@@ -46,7 +53,17 @@
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
 }
-
+.time-selection-button{
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+  font-weight: 100 !important;
+  width:10rem;
+}
+.time-selection-button:hover {
+  background-color: rgb(219, 228, 233);
+  color: rgb(114, 114, 114);
+  border-color: rgb(195, 195, 195);
+}
 .dropdown-item:hover {
   background-color: rgb(219, 228, 233);
 }
@@ -115,4 +132,17 @@
 .toggle-switch input[type=checkbox]:checked+label::after {
   right: -1.666667rem;
   transition: right .15s ease-in;
+}
+
+.time-inputbox {
+  width: 2rem;
+  border: 1px solid #9a9a9a;
+  padding: 0.6rem;
+  border-radius: 0.1rem;
+  text-align: center;
+}
+.of-text{
+  padding-right: 12rem;
+  padding-top: 0.2rem;
+  font-size: 14px;
 }
