@@ -1,4 +1,13 @@
-import {AfterContentChecked, ChangeDetectorRef, Component, Input, OnChanges, OnInit} from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output
+} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {
@@ -33,7 +42,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   myDate: any;
-  testSpinner = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -72,6 +80,13 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         } , 2000 );
   }
 
+  integerOnly(event): boolean {
+    const charCode = (event.charCode) ? event.charCode : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      return false;
+    }
+    return true;
+  }
 
   handleInput() {
       this.textSpinnerFlag = false;
