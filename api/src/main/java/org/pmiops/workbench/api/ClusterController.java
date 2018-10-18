@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Base64;
@@ -8,10 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -19,6 +23,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
@@ -30,7 +35,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,6 +55,8 @@ public class ClusterController implements ClusterApiDelegate {
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
   private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
   private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
+  // The billing project to use for the analysis.
+  private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
 
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
@@ -81,7 +87,7 @@ public class ClusterController implements ClusterApiDelegate {
   private Provider<User> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
-  private final String apiHostName;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private UserService userService;
   private UserRecentResourceService userRecentResourceService;
   private Clock clock;
@@ -91,7 +97,7 @@ public class ClusterController implements ClusterApiDelegate {
       Provider<User> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      @Qualifier("apiHostName") String apiHostName,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       UserRecentResourceService userRecentResourceService,
       Clock clock) {
@@ -99,7 +105,7 @@ public class ClusterController implements ClusterApiDelegate {
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
-    this.apiHostName = apiHostName;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
     this.clock = clock;
@@ -208,7 +214,7 @@ public class ClusterController implements ClusterApiDelegate {
             .put("pattern", "\\.ipynb$")));
     localizeMap.put(
         localDir + "/" + AOU_CONFIG_FILENAME,
-        aouConfigDataUri(fcWorkspace, cdrVersion));
+        aouConfigDataUri(fcWorkspace, cdrVersion, projectName));
 
     // Localize the requested notebooks, if any.
     if (body.getNotebookNames() != null) {
@@ -233,15 +239,23 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   private String aouConfigDataUri(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      CdrVersion cdrVersion) {
+      CdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
+    String host = null;
+    try {
+      host = new URL(workbenchConfigProvider.get().server.apiBaseUrl).getHost();
+    } catch (MalformedURLException e) {
+      log.log(Level.SEVERE, "bad apiBaseUrl config value; failing", e);
+      throw new ServerErrorException("Failed to generate AoU notebook config");
+    }
     config.put(WORKSPACE_NAMESPACE_KEY, fcWorkspace.getNamespace());
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
-    config.put(API_HOST_KEY, this.apiHostName);
+    config.put(API_HOST_KEY, host);
     config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
     config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
+    config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
     return jsonToDataUri(config);
   }
 }

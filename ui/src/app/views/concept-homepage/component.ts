@@ -45,13 +45,10 @@ export class ConceptHomepageComponent implements OnInit {
   searching = false;
   currentSearchString: string;
   searchLoading = false;
-  selectedDomain: DomainInfo = {
+  selectedDomain: DomainCount = {
     name: '',
-    description: '',
-    standardConceptCount: 0,
-    allConceptCount: 0,
-    participantCount: 0,
-    domain: undefined
+    domain: undefined,
+    conceptCount: 0
   };
   addTextHovering = true;
   isConceptSelected = false;
@@ -107,7 +104,7 @@ export class ConceptHomepageComponent implements OnInit {
         });
       });
       this.loadingDomains = false;
-      this.selectedDomain = this.conceptDomainList[0];
+      this.selectedDomain = this.conceptDomainCounts[0];
     });
   }
 
@@ -116,9 +113,9 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptAddModal.open();
   }
 
-  selectDomain(domainInfo: DomainInfo) {
-    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainInfo.domain]);
-    this.selectedDomain = domainInfo;
+  selectDomain(domainCount: DomainCount) {
+    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainCount.domain]);
+    this.selectedDomain = domainCount;
     this.placeholderValue = this.noConceptsConstant;
     this.setConceptsAndVocabularies();
   }
@@ -130,7 +127,8 @@ export class ConceptHomepageComponent implements OnInit {
 
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
-    this.selectedDomain = domain;
+    this.selectedDomain =
+      this.conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
     this.searchConcepts();
   }
 
@@ -176,6 +174,8 @@ export class ConceptHomepageComponent implements OnInit {
           if (activeTabSearch) {
             this.searchLoading = false;
             this.conceptDomainCounts = response.domainCounts;
+            this.selectedDomain =
+              this.conceptDomainCounts.find(domainCount => domainCount.domain === request.domain);
             this.setConceptsAndVocabularies();
           }
       });
@@ -266,8 +266,9 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   setConceptsSaveText() {
-    this.conceptsSavedText = this.selectedConceptDomainMap[this.selectedDomain.domain]
-        + ' concept ' + this.selectedDomain.name + ' have been added ';
+    const numOfConcepts = this.selectedConceptDomainMap[this.selectedDomain.domain];
+    this.conceptsSavedText = numOfConcepts + ' ' + this.selectedDomain.name +
+        (numOfConcepts > 1 ? ' concepts ' : ' concept ') + 'have been added ';
     setTimeout(() => {
       this.conceptsSavedText = '';
     }, 5000);

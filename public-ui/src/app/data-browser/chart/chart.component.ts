@@ -31,15 +31,22 @@ export class ChartComponent implements OnChanges {
 
   // Render new chart on changes
   ngOnChanges() {
-    if ((this.analysis && this.analysis.results.length) ||
+    if ((this.analysis && this.analysis.results && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
       // HC automatically redraws when changing chart options
+      this.chartOptions = this.hcChartOptions();
+    } else {
       this.chartOptions = this.hcChartOptions();
     }
   }
 
   public hcChartOptions(): any {
-    const options = this.makeChartOptions();
+    let options;
+    if (!this.analysis) {
+      options = this.makeEmptyChartOptions();
+    } else {
+      options = this.makeChartOptions();
+    }
     // Override title if they passed one
     if (this.chartTitle) {
       options.title.text = this.chartTitle;
@@ -410,7 +417,7 @@ export class ChartComponent implements OnChanges {
     // Hack to filter gender
     let results = this.analysis.results.concat([]);
     if (this.genderId) {
-      results = results.filter(r => r.stratum2 === this.genderId);
+      results = results.filter(r => r.stratum3 === this.genderId);
     }
     for (const a  of results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});
@@ -482,5 +489,19 @@ export class ChartComponent implements OnChanges {
     };
 
   }
+
+    public makeEmptyChartOptions() {
+        const data = [];
+        const cats = [];
+
+        return {
+            chart: {type: 'column', backgroundColor: this.backgroundColor},
+            title: { text: 'No data to chart' },
+            series: data,
+            categories: cats,
+            xAxisTitle: 'No data to chart'
+        };
+
+    }
 
 }

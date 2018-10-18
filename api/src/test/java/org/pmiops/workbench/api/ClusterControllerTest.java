@@ -73,6 +73,8 @@ public class ClusterControllerTest {
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final String API_HOST = "api.stable.fake-research-aou.org";
+  private static final String API_BASE_URL = "https://" + API_HOST;
 
   @TestConfiguration
   @Import({
@@ -87,9 +89,11 @@ public class ClusterControllerTest {
   })
   static class Configuration {
     @Bean
-    @Qualifier("apiHostName")
-    String apiHostName() {
-      return "https://api.blah.com";
+    public WorkbenchConfig workbenchConfig() {
+      WorkbenchConfig config = new WorkbenchConfig();
+      config.server = new WorkbenchConfig.ServerConfig();
+      config.server.apiBaseUrl = API_BASE_URL;
+      return config;
     }
     @Bean
     Clock clock() {
@@ -251,6 +255,8 @@ public class ClusterControllerTest {
     assertThat(delocJson.getString("destination")).isEqualTo("gs://workspace-bucket/notebooks");
     JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/wsid/.all_of_us_config.json"));
     assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
+    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
     verify(userRecentResourceService, times(1)).updateNotebookEntry(anyLong(), anyLong() , anyString(), any(Timestamp.class));
   }
 
@@ -265,9 +271,12 @@ public class ClusterControllerTest {
         clusterController.localize("other-proj", "cluster", req).getBody();
     verify(notebookService).localize(eq("other-proj"), eq("cluster"), mapCaptor.capture());
 
-    assertThat(mapCaptor.getValue()).containsEntry(
+    Map<String, String> localizeMap = mapCaptor.getValue();
+    assertThat(localizeMap).containsEntry(
         "~/workspaces/proj:wsid/foo.ipynb", "gs://workspace-bucket/notebooks/foo.ipynb");
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/proj:wsid");
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces/proj:wsid/.all_of_us_config.json"));
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo("other-proj");
   }
 
   @Test
