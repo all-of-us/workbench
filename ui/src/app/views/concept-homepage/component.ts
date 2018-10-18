@@ -269,9 +269,9 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   setConceptsSaveText() {
-    const numOfConcepts = this.selectedConceptDomainMap[this.selectedDomain.domain];
-    this.conceptsSavedText = numOfConcepts + ' ' + this.selectedDomain.name +
-        (numOfConcepts > 1 ? ' concepts ' : ' concept ') + 'have been added ';
+    const conceptsCount = this.selectedConceptDomainMap[this.selectedDomain.domain];
+    this.conceptsSavedText = conceptsCount + ' ' + this.selectedDomain.name +
+        (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added ';
     setTimeout(() => {
       this.conceptsSavedText = '';
     }, 5000);
