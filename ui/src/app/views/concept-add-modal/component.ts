@@ -23,6 +23,7 @@ import {
 export class ConceptAddModalComponent {
   public modalOpen = false;
   loading = true;
+  saving = false;
   conceptSets: ConceptSet[] = [];
   wsNamespace: string;
   wsId: string;
@@ -86,6 +87,7 @@ export class ConceptAddModalComponent {
   save(): void {
     this.errorSaving = false;
     this.errorNameReq = false;
+    this.saving = true;
 
     const conceptIds = [];
     this.selectConceptList.forEach((selected) => {
