@@ -129,4 +129,3 @@ describe('LoginComponent', () => {
     expect(de.queryAll(By.css('app-fake-root')).length).toEqual(1);
   }));
 });
-
