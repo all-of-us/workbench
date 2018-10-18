@@ -15,6 +15,7 @@
   background-color: rgb(226, 226, 233);
   font-size: 14px;
   font-weight: 600;
+  min-width: 100%;
 }
 
 .card-footer >span{
@@ -48,4 +49,70 @@
 
 .dropdown-item:hover {
   background-color: rgb(219, 228, 233);
+}
+.toggle-switch, .toggle-switch label {
+  display: inline-block;
+  position: relative;
+  height: 1rem;
+  margin-right: 0rem!important;
+  margin-left: -0.2rem;
+}
+
+.toggle-switch input[type=checkbox] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  position: absolute;
+  top: .25rem;
+  right: .25rem;
+  height: .666667rem;
+  width: .666667rem;
+  opacity: 0;
+}
+
+[type=checkbox], [type=radio], legend {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.toggle-switch input[type=checkbox]+label::before {
+  position: absolute;
+  display: inline-block;
+  content: '';
+  height: .75rem;
+  width: 1.375rem;
+  border: 2px solid #737373;
+  border-radius: .375rem;
+  background-color: #737373;
+  top: .125rem;
+  right: -1.75rem;
+  transition: .15s ease-in;
+  transition-property: border-color,background-color;
+}
+
+.toggle-switch input[type=checkbox]+label::after {
+  position: absolute;
+  display: inline-block;
+  content: '';
+  height: .5833rem;
+  width: .5833rem;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background-color: #fff;
+  top: .20835rem;
+  right: -1.041667rem;
+  transition: right .15s ease-in;
+}
+
+.toggle-switch input[type=checkbox]:checked+label::before {
+  border-color: #62a420;
+  background-color: #62a420;
+  transition: .15s ease-in;
+  transition-property: border-color,background-color;
+}
+
+.toggle-switch input[type=checkbox]:checked+label::after {
+  right: -1.666667rem;
+  transition: right .15s ease-in;
 }
