@@ -1,6 +1,7 @@
 package org.pmiops.workbench.jira;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -11,23 +12,24 @@ import org.pmiops.workbench.jira.model.IssueResponse;
 import org.pmiops.workbench.jira.model.IssueType;
 import org.pmiops.workbench.jira.model.ProjectDetails;
 import org.pmiops.workbench.model.BugReport;
+import org.pmiops.workbench.model.BugReportType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+
 import javax.inject.Provider;
 
 @Service
 public class JiraServiceImpl implements JiraService {
+  private static final String JIRA_CDR_PROJECT = "CDR";
+  private static final String JIRA_WORKBENCH_PROJECT = "RW";
 
   private JiraApi api = new JiraApi();
-  private final Provider<WorkbenchConfig> configProvider;
   private CloudStorageService cloudStorageService;
 
   @Autowired
-  public JiraServiceImpl(Provider<WorkbenchConfig> configProvider,
-      Provider<CloudStorageService> cloudStorageServiceProvider) {
-    this.configProvider = configProvider;
+  public JiraServiceImpl(Provider<CloudStorageService> cloudStorageServiceProvider) {
     this.cloudStorageService = cloudStorageServiceProvider.get();
   }
 
@@ -49,11 +51,14 @@ public class JiraServiceImpl implements JiraService {
     setJiraCredentials();
     IssueRequest issueDetails = new IssueRequest();
     IssueType issueType = new IssueType().name(IssueTypeEnum.Bug.name());
-    ProjectDetails projectDetails = new ProjectDetails().key(configProvider.get().jira.projectKey);
+    String projectKey = JIRA_WORKBENCH_PROJECT;
+    if (BugReportType.DATA.equals(bugReport.getBugType())) {
+      projectKey = JIRA_CDR_PROJECT;
+    }
     FieldsDetails fieldsDetail = new FieldsDetails()
         .description(String.format("%s %nContact Email: %s", bugReport.getReproSteps(), bugReport.getContactEmail()))
-        .summary(bugReport.getShortDescription())
-        .project(projectDetails)
+        .summary("User Reported: " + bugReport.getShortDescription())
+        .project(new ProjectDetails().key(projectKey))
         .issuetype(issueType);
     issueDetails.setFields(fieldsDetail);
     return api.createIssue(issueDetails);
@@ -65,4 +70,3 @@ public class JiraServiceImpl implements JiraService {
     api.addAttachments(issueKey, attachment, "nocheck");
   }
 }
-

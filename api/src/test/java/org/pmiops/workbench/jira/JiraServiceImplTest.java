@@ -28,8 +28,6 @@ public class JiraServiceImplTest {
   private JiraServiceImpl service;
 
   @Mock
-  private WorkbenchConfig workbenchConfig;
-  @Mock
   private CloudStorageService cloudStorageService;
   @Mock
   private JiraApi jiraApi;
@@ -50,10 +48,7 @@ public class JiraServiceImplTest {
     jiraCredentials.putOnce("username", "username");
     jiraCredentials.putOnce("password", "password");
     when(cloudStorageService.getJiraCredentials()).thenReturn(jiraCredentials);
-    workbenchConfig.jira = new WorkbenchConfig.JiraConfig();
-    workbenchConfig.jira.projectKey = "RW";
     service = new JiraServiceImpl(
-        Providers.of(workbenchConfig),
         Providers.of(cloudStorageService)
     );
     doThrow(new ApiException("Missing the required parameter 'issueKey' when calling addAttachments(Async)"))

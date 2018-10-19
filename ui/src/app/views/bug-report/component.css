@@ -2,6 +2,10 @@
   width: 100%;
 }
 
+#bug-report-type {
+  text-transform: capitalize;
+}
+
 .form-section {
   margin-top: 1rem;
 }
