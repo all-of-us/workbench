@@ -181,34 +181,34 @@ const routes: Routes = [
               }
             },
             {
-                path: 'concepts/sets',
+              path: 'concepts/sets',
+              data: {
+                breadcrumb: {
+                  value: 'Concept Sets',
+                  intermediate: true
+                }
+              },
+              children: [{
+                path: '',
                 component: ConceptSetListComponent,
                 data: {
-                    title: 'View Concept Sets',
-                    breadcrumb: {
-                      value: 'Concept Sets',
-                      intermediate: true
-                    }
+                  title: 'View Concept Sets',
+                }
+              }, {
+                path: ':csid',
+                component: ConceptSetDetailsComponent,
+                data: {
+                  title: 'Concept Set',
+                  breadcrumb: {
+                    value: 'Param: Concept Set Name',
+                  }
                 },
-                children: [
-                    {
-                        path: ':csid',
-                        component: ConceptSetDetailsComponent,
-                        data: {
-                            title: 'Concept Set',
-                            breadcrumb: {
-                              value: 'Param: Concept Set Name',
-                            }
-                        },
-                        resolve: {
-                            conceptSet: ConceptSetResolver,
-                        }
-                    }
-                ]
-            },
-            ]
-        }
-        ]
+                resolve: {
+                  conceptSet: ConceptSetResolver,
+                }
+              }]
+            }]
+        }]
       },
       {
         path: 'admin/review-workspace',
