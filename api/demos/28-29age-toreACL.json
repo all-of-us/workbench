@@ -1,42 +1,50 @@
 {
-  "includes": [
-    {
-      "id": "includes_91dz5j9lf",
-      "temporal": false,
-      "mention": "",
-      "time": "",
-      "timeValue": 0,
-      "timeFrame": "",
-      "items": [
+  "type": "cohort",
+  "cohort": {
+    "name": "28-29age-toreACL",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes": [
         {
-          "id": "items_9fznmx9id",
-          "type": "CONDITION",
-          "temporalGroup": 0,
-          "searchParameters": [
+          "id": "includes_91dz5j9lf",
+          "temporal": false,
+          "mention": "",
+          "time": "",
+          "timeValue": 0,
+          "timeFrame": "",
+          "items": [
             {
-              "parameterId": "param86376",
-              "name": "Dislocation and sprain of joints and ligaments of knee",
-              "value": "S83",
-              "type": "ICD10",
-              "subtype": "CM",
-              "group": true,
-              "conceptId": null,
-              "domainId": ""
-            }
-          ],
-          "modifiers": [
-            {
-              "name": "AGE_AT_EVENT",
-              "operator": "BETWEEN",
-              "operands": [
-                "28",
-                "29"
+              "id": "items_9fznmx9id",
+              "type": "CONDITION",
+              "temporalGroup": 0,
+              "searchParameters": [
+                {
+                  "parameterId": "param86376",
+                  "name": "Dislocation and sprain of joints and ligaments of knee",
+                  "value": "S83",
+                  "type": "ICD10",
+                  "subtype": "CM",
+                  "group": true,
+                  "conceptId": null,
+                  "domainId": ""
+                }
+              ],
+              "modifiers": [
+                {
+                  "name": "AGE_AT_EVENT",
+                  "operator": "BETWEEN",
+                  "operands": [
+                    "28",
+                    "29"
+                  ]
+                }
               ]
             }
           ]
         }
-      ]
+      ],
+      "excludes": []
     }
-  ],
-  "excludes": []
+  }
 }
