@@ -101,6 +101,7 @@ export class ConceptAddModalComponent {
       this.conceptSetsService.updateConceptSetConcepts(
           this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
           .subscribe((response) => {
+            this.saving = false;
             this.modalOpen = false;
             this.saveComplete.emit();
           }, (error) => {
@@ -131,6 +132,7 @@ export class ConceptAddModalComponent {
 
     this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
+          this.saving = false;
           this.modalOpen = false;
           this.saveComplete.emit();
         }, (error) => {

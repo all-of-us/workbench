@@ -62,7 +62,9 @@ export class ConceptHomepageComponent implements OnInit {
 
   conceptDomainList: Array<DomainInfo> = [];
   conceptDomainCounts: Array<DomainCount> = [];
-  selectedConceptDomainMap: Map<String, number>;
+
+  // Maps Domain Name with number of concept selected
+  selectedConceptDomainMap: Map<String, number>  = new Map<string, number>();
   concepts: Array<Concept> = [];
   conceptsCache: Array<ConceptCacheSet> = [];
   completedDomainSearches: Array<Domain> = [];
@@ -87,7 +89,6 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.selectedConceptDomainMap = new Map<string, number>();
     this.loadingDomains = true;
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
@@ -125,9 +126,18 @@ export class ConceptHomepageComponent implements OnInit {
 
   searchButton() {
     this.currentSearchString = this.searchTerm;
+    this.reset();
     this.searchConcepts();
   }
 
+  reset() {
+    this.selectedConcept = [];
+    this.selectedConceptDomainMap = new Map<string, number>();
+    this.conceptDomainCounts = [];
+    this.addToSetText = 'Add to set';
+    this.isConceptSelected = false;
+
+  }
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
     this.selectedDomain =
@@ -136,7 +146,7 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchConcepts() {
-    if ( this.conceptTable) {
+    if (this.conceptTable) {
       this.conceptTable.selectedConcepts = [];
     }
     this.searching = true;
@@ -241,11 +251,11 @@ export class ConceptHomepageComponent implements OnInit {
       });
   }
 
-  selectConcept(selectedConcepts) {
-    this.selectedConcept = selectedConcepts;
+  selectConcept(concepts) {
+    this.selectedConcept = concepts;
     const domainName = this.selectedDomain.domain;
-    if (selectedConcepts && selectedConcepts.length > 0 ) {
-      const filterConceptsCount = this.selectedConcept
+    if (concepts && concepts.length > 0 ) {
+      const filterConceptsCount = concepts
           .filter(concept =>
           concept.domainId.toLowerCase() === this.selectedDomain.domain.toString().toLowerCase())
           .length;
@@ -277,6 +287,8 @@ export class ConceptHomepageComponent implements OnInit {
     }, 5000);
   }
 
+  /* This is done because clr-datagrid has a bug which causes unselected entries to
+    appear as selected on refresh*/
   cloneCacheConcepts() {
     const cacheItem = this.conceptsCache.find(
         conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
@@ -288,7 +300,7 @@ export class ConceptHomepageComponent implements OnInit {
     return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
   }
 
-  getAddToSetText(selectedConcepts): string {
-    return selectedConcepts === 0 ? 'Add to set' : 'Add (' + selectedConcepts + ') to set';
+  getAddToSetText(conceptsCount): string {
+    return conceptsCount === 0 ? 'Add to set' : 'Add (' + conceptsCount + ') to set';
   }
 }

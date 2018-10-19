@@ -75,12 +75,9 @@
                          [placeholderValue]="placeholderValue"
                          (getSelectedConcepts)="selectConcept($event)">
       </app-concept-table>
-      <div (mouseenter)="addTextHovering=true" (mouseleave)="addTextHovering=false" (click)="openAddModal()">
-        <div [class.hovering]="addTextHovering">Add to set</div>
-        <app-sliding-fab [expanded]=addToSetText (submit)="openAddModal()" [disable]="!isConceptSelected">
-          <clr-icon class="add-icon" shape="plus"></clr-icon>
-        </app-sliding-fab>
-      </div>
+      <app-sliding-fab [expanded]=addToSetText (submit)="openAddModal()" [disable]="!isConceptSelected">
+        <clr-icon class="add-icon" shape="plus"></clr-icon>
+      </app-sliding-fab>
     </div>
   </app-top-box>
 </ng-template>
