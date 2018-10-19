@@ -17,7 +17,7 @@ import {
               '../../styles/inputs.css']
 })
 export class BugReportComponent {
-  bugReportTypes = Object.keys(BugReportType);
+  BugReportType = BugReportType;
 
   reporting = false;
   submitting = false;

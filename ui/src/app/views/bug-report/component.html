@@ -13,9 +13,8 @@
           <label>Bug Type:</label>
           <select id="bug-report-type" type="text" class="input" name="bug-type"
                   [(ngModel)]="bugReport.bugType">
-            <option *ngFor="let t of bugReportTypes" [value]="t">
-              {{t.toLowerCase()}}
-            </option>
+            <option [value]="BugReportType.APPLICATION">Workbench Application</option>
+            <option [value]="BugReportType.DATA">Data Quality</option>
           </select>
         </div>
         <div class="form-section">
@@ -28,7 +27,9 @@
           <clr-checkbox id="bug-report-notebook-logs" class="notebook-logs" name="notebook-logs"
               [(ngModel)]="bugReport.includeNotebookLogs">
           </clr-checkbox>
-          <label>Attach notebook logs?</label>
+          <div>
+            <label class="notebook-logs-label">Attach notebook logs?</label>
+          </div>
         </div>
         <div class="form-section">
           <label>Contact Email:</label>
