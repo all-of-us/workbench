@@ -1,8 +1,10 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {SignInGuard} from './guards/sign-in-guard.service';
 import {DbHomeComponent} from './views/db-home/db-home.component';
 import {EhrViewComponent} from './views/ehr-view/ehr-view.component';
+import {LoginComponent} from './views/login/login.component';
 import {PhysicalMeasurementsComponent} from './views/pm/pm.component';
 import {QuickSearchComponent} from './views/quick-search/quick-search.component';
 import {SurveyViewComponent} from './views/survey-view/survey-view.component';
@@ -13,39 +15,52 @@ declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
+    path: 'login',
+    component: LoginComponent,
+    data: {title: 'Sign In'}
+  },
+  {
     path: '',
-    component: DbHomeComponent,
-    data: {title: 'Data Browser Home'}
-  },
-  {
-    path: 'quick-search',
-    component: QuickSearchComponent,
-    data: {title: 'Quick Search'}
-  },
-  {
-    path: 'quick-search/:dataType',
-    component: QuickSearchComponent,
-    data: {title: 'Quick Search'}
-  },
-  {
-    path: 'surveys',
-    component: SurveysComponent,
-    data: {title: 'Browse Survey Instruments'}
-  },
-  {
-    path: 'survey/:id',
-    component: SurveyViewComponent,
-    data: {title: 'View Survey Questions and Answers'}
-  },
-  {
-    path: 'ehr/:id',
-    component: EhrViewComponent,
-    data: {title: 'View Full Results'}
-  },
-  {
-    path: 'physical-measurements',
-    component: PhysicalMeasurementsComponent,
-    data: {title: 'Physical Measurements from Enrollment'}
+    canActivate: [SignInGuard],
+    canActivateChild: [SignInGuard],
+    runGuardsAndResolvers: 'always',
+    children: [
+      {
+        path: '',
+        component: DbHomeComponent,
+        data: {title: 'Data Browser Home'}
+      },
+      {
+        path: 'quick-search',
+        component: QuickSearchComponent,
+        data: {title: 'Quick Search'}
+      },
+      {
+        path: 'quick-search/:dataType',
+        component: QuickSearchComponent,
+        data: {title: 'Quick Search'}
+      },
+      {
+        path: 'surveys',
+        component: SurveysComponent,
+        data: {title: 'Browse Survey Instruments'}
+      },
+      {
+        path: 'survey/:id',
+        component: SurveyViewComponent,
+        data: {title: 'View Survey Questions and Answers'}
+      },
+      {
+        path: 'ehr/:id',
+        component: EhrViewComponent,
+        data: {title: 'View Full Results'}
+      },
+      {
+        path: 'physical-measurements',
+        component: PhysicalMeasurementsComponent,
+        data: {title: 'Physical Measurements from Enrollment'}
+      }
+    ]
   },
 
 ];
@@ -54,6 +69,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'})],
   exports: [RouterModule],
   providers: [
+    SignInGuard
   ]
 })
 export class AppRoutingModule {
