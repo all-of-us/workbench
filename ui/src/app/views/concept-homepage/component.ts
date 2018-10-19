@@ -50,7 +50,6 @@ export class ConceptHomepageComponent implements OnInit {
     domain: undefined,
     conceptCount: 0
   };
-  addTextHovering = true;
   isConceptSelected = false;
   selectedConcept: Concept[] = [];
 
@@ -256,8 +255,10 @@ export class ConceptHomepageComponent implements OnInit {
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
       const filterConceptsCount = concepts
-          .filter(concept =>
-          concept.domainId.toLowerCase() === this.selectedDomain.domain.toString().toLowerCase())
+          .filter(concept => {
+          return concept.domainId.toLowerCase() ===
+              this.selectedDomain.domain.toString().toLowerCase();
+          })
           .length;
       this.selectedConceptDomainMap[domainName] = filterConceptsCount;
       this.isConceptSelected = filterConceptsCount > 0 ;
