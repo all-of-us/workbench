@@ -91,7 +91,7 @@
 .divider {
   box-sizing: border-box;
   height: 2px;
-  width: 953px;
+  width: 90%;
   border: 0.5px solid #FFFFFF;
   box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
   margin: auto;
@@ -99,11 +99,12 @@
 
 .panel {
   margin-top: 5%;
+  width: 100%;
   display: flex;
 }
 
 .panel-left {
-  width: 65%;
+  width: 75%;
 }
 
 .panel-title {
@@ -116,24 +117,32 @@
 
 .panel-contents {
   padding-left: 5%;
-  margin-top: 5%;
+  margin-top: 1%;
   color: #FFFFFF;
   font-size: 14px;
+  text-align: left;
 }
 
 .panel-text {
   margin-right: 2%;
-  font-size: 14px;
+  padding-top: .5%;
+  font-size: 16px;
   line-height: 24px;
+  white-space: pre-line;
+  text-align: left;
 }
 
 .panel-right {
   margin-right: 5%;
   margin-bottom: 5%;
+  width: 40%;
+  height: 90%;
 }
 
 .panel-image {
-  width: 100%;
+  width: 80%;
+  margin-top: 11%;
+  margin-left: 11%;
 }
 
 .controls {

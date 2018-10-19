@@ -27,9 +27,7 @@
         {{selectedTitle(selected)}}
       </div>
       <div class="panel-contents">
-        <div class="panel-text">
-          {{panels.get(selected)}}
-        </div>
+        <div class="panel-text" [innerHtml]="panels.get(selected)"></div>
       </div>
     </div>
     <div class="panel-right">
