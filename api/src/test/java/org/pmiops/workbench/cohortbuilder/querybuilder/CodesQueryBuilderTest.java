@@ -25,14 +25,14 @@ public class CodesQueryBuilderTest {
 
     @Test
     public void getMappedParameters() throws Exception {
-        final SearchParameter searchParam1 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.CM.name()).group(false).domain("Condition").value("001").conceptId(1L);
-        final SearchParameter searchParam2 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domain("Procedure").value("002").conceptId(1L);
-        final SearchParameter searchParam3 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domain("Procedure").value("003").conceptId(1L);
-        final SearchParameter searchParam4 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(true).domain("Procedure").value("0").conceptId(1L);
-        final SearchParameter searchParam5 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.CM.name()).group(false).domain("Condition").value("A001").conceptId(1L);
-        final SearchParameter searchParam6 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domain("Procedure").value("A002").conceptId(1L);
-        final SearchParameter searchParam7 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domain("Procedure").value("A003").conceptId(1L);
-        final SearchParameter searchParam8 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(true).domain("Procedure").value("A0").conceptId(1L);
+        final SearchParameter searchParam1 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.CM.name()).group(false).domainId("Condition").value("001").conceptId(1L);
+        final SearchParameter searchParam2 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("002").conceptId(1L);
+        final SearchParameter searchParam3 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("003").conceptId(1L);
+        final SearchParameter searchParam4 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(true).domainId("Procedure").value("0").conceptId(1L);
+        final SearchParameter searchParam5 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.CM.name()).group(false).domainId("Condition").value("A001").conceptId(1L);
+        final SearchParameter searchParam6 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("A002").conceptId(1L);
+        final SearchParameter searchParam7 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("A003").conceptId(1L);
+        final SearchParameter searchParam8 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(true).domainId("Procedure").value("A0").conceptId(1L);
         SearchGroupItem item = new SearchGroupItem()
           .type(TreeType.ICD9.name())
           .searchParameters(
