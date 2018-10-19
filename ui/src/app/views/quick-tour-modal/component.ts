@@ -100,15 +100,16 @@ export class QuickTourModalComponent implements OnInit {
       'refer to subject areas such as conditions, drugs, measurements etc. as “domains”. You can ' +
       'search for and save collections of concepts from a particular domain as a “Concept set”. ' +
       '\n\n' +
-      'For example, if you want to select height, weight and blood pressure information (concepts) ' +
-      'from your “diabetes cases” cohort, you can search for the 3 concepts from the “Measurements” ' +
-      'domain and call it “biometrics” concept set. You can then use Notebooks to extract that ' +
-      'information from your cohort.');
+      'For example, if you want to select height, weight and blood pressure information ' +
+      '(concepts) from your “diabetes cases” cohort, you can search for the 3 concepts ' +
+      'from the “Measurements” domain and call it “biometrics” concept set. You can then ' +
+      'use Notebooks to extract that information from your cohort.');
     this.panelImages.set(this.panelTitles[3], '/assets/images/concepts.png');
     this.panels.set(this.panelTitles[4],
-      'A Notebook is a computational environment where you can analyze data with basic programming ' +
-      'knowledge in R or Python. Several template notebooks and resources are available within your ' +
-      'Workspace that will guide you how to import your cohort(s) and concept set(s) into the ' +
+      'A Notebook is a computational environment where you can analyze data with basic ' +
+      'programming knowledge in R or Python. Several template notebooks and resources ' +
+      'are available within your Workspace that will guide you how to import your ' +
+      'cohort(s) and concept set(s) into the ' +
       'Notebook and can assist with basic analyses. \n\nFor example, you can launch a Notebook ' +
       'to import your “diabetes cases” cohort and then select your “biometrics” concept set, to ' +
       'get biometrics data for the participants in your cohort. You can then analyze the data to ' +
