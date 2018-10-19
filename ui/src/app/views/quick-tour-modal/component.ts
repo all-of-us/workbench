@@ -74,23 +74,25 @@ export class QuickTourModalComponent implements OnInit {
       'A Workspace is your place to store and analyze data for a specific project. ' +
       'You can share this Workspace with other users, allowing them to view or edit ' +
       'your work. The dataset referenced by a workspace is in ' +
-      '<a href="https://www.ohdsi.org/data-standardization/the-common-data-model/" target="_blank">' +
-      'OMOP common data model</a> format. ' +
+      '<a href="https://www.ohdsi.org/data-standardization/the-common-data-model/" ' +
+      'target="_blank">OMOP common data model</a> format. ' +
       '<a href="https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data' +
       '-model-and-standardized-vocabularies/" target="_blank">Here</a> are some tutorials to ' +
       'understand OMOP data model.\n\nWhen you create your workspace, you you will be prompted ' +
       'to state your research purpose.  For example, when you create a Workspace to study Type ' +
       '2 Diabetes, for research purpose you could enter: “I will use this Workspace to ' +
-      'investigate the impact of Geography on use of different medications to treat Type 2 Diabetes.”');
+      'investigate the impact of Geography on use of different medications to treat Type 2 ' +
+      'Diabetes.”');
     this.panelImages.set(this.panelTitles[1], '/assets/images/workspaces.png');
     this.panels.set(this.panelTitles[2],
-      'A “Cohort” is a group of participants you are interested in researching. The cohort builder ' +
-      'allows you to create and review cohorts and annotate participants in your study group.\n' +
-      '\nFor example, you can build a cohort called “diabetes cases”, to include people who have ' +
-      'been diagnosed with type II diabetes, using a combination of billing codes and laboratory ' +
-      'values. You can also have a “controls” cohort. Once you build your cohorts, you can go through ' +
-      'and manually review the records for each participant and decide if you want to include or ' +
-      'exclude them from your cohort and make specific annotations/notes to each record.');
+      'A “Cohort” is a group of participants you are interested in researching. The cohort ' +
+      'builder allows you to create and review cohorts and annotate participants in your study ' +
+      'group.\n\nFor example, you can build a cohort called “diabetes cases”, to include people ' +
+      'who have been diagnosed with type II diabetes, using a combination of billing codes and ' +
+      'laboratory values. You can also have a “controls” cohort. Once you build your cohorts, ' +
+      'you can go through and manually review the records for each participant and decide if ' +
+      'you want to include or exclude them from your cohort and make specific ' +
+      'annotations/notes to each record.');
     this.panelImages.set(this.panelTitles[2], '/assets/images/cohorts.png');
     this.panels.set(this.panelTitles[3],
       'Concepts describe information in a patient’s medical record, such as a condition they have, ' +
