@@ -214,6 +214,20 @@
   width: 3rem;
 }
 
+.pill {
+  width: 18%;
+  height: 1.5em;
+  border-radius: 20px;
+  text-align: center;
+  background-color: #2691D0;
+  font-family: Montserrat, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 13px;
+  color: white;
+  margin-right: 0;
+}
+
 .showing-count {
   color: #262262;
   font-size: 14px;
