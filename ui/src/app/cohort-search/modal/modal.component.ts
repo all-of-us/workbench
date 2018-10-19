@@ -191,7 +191,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     return Map({
       type: TreeType.SNOMED,
       subtype: this.subtype === TreeSubType[TreeSubType.CM]
-        || this.subtype === TreeSubType[TreeSubType.ICD10CM]
         ? TreeSubType.CM : TreeSubType.PCS,
       fullTree: this.fullTree,
       id: 0,    // root parent ID is always 0

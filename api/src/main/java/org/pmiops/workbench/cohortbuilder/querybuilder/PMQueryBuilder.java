@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.Attribute;
