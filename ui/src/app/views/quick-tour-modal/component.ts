@@ -95,10 +95,11 @@ export class QuickTourModalComponent implements OnInit {
       'annotations/notes to each record.');
     this.panelImages.set(this.panelTitles[2], '/assets/images/cohorts.png');
     this.panels.set(this.panelTitles[3],
-      'Concepts describe information in a patient’s medical record, such as a condition they have, ' +
-      'a  prescription they are taking or their physical measurements. In the Workbench we refer ' +
-      'to subject areas such as conditions, drugs, measurements etc. as “domains”. You can search ' +
-      'for and save collections of concepts from a particular domain as a “Concept set”. \n\n' +
+      'Concepts describe information in a patient’s medical record, such as a condition they ' +
+      'have, a  prescription they are taking or their physical measurements. In the Workbench we ' +
+      'refer to subject areas such as conditions, drugs, measurements etc. as “domains”. You can ' +
+      'search for and save collections of concepts from a particular domain as a “Concept set”. ' +
+      '\n\n' +
       'For example, if you want to select height, weight and blood pressure information (concepts) ' +
       'from your “diabetes cases” cohort, you can search for the 3 concepts from the “Measurements” ' +
       'domain and call it “biometrics” concept set. You can then use Notebooks to extract that ' +
