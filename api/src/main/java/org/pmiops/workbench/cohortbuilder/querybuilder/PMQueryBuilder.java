@@ -58,6 +58,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
@@ -94,7 +95,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         for (Attribute attribute : parameter.getAttributes()) {
           validateAttribute(attribute);
-          String domain = parameter.getDomain().toLowerCase();
+          String domain = parameter.getDomainId().toLowerCase();
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             String namedParameterConceptId = addQueryParameterValue(queryParams,
@@ -138,7 +139,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
             QueryParameterValue.int64(parameter.getConceptId()));
         String namedParameter = addQueryParameterValue(queryParams,
             QueryParameterValue.int64(new Long(parameter.getValue())));
-        String domain = parameter.getDomain().toLowerCase();
+        String domain = parameter.getDomainId().toLowerCase();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
           .replace("${value}","@" + namedParameter)
           .replace("${tableName}", DomainTableEnum.getTableName(domain))
@@ -169,7 +170,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
       }
     } else {
-      String domain = param.getDomain();
+      String domain = param.getDomainId();
       String value = param.getValue();
       Long conceptId = param.getConceptId();
       from(domainBlank().or(domainNotMeasurement())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);

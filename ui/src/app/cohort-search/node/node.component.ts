@@ -206,10 +206,10 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.actions.fetchAllCriteria(_type, parentId);
     } else if (this.codes && this.node.get('subtype')) {
       this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
-    } else if (_type === [TreeType[TreeType.VISIT]]
-              && [TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
+    } else if (_type === TreeType[TreeType.VISIT]) {
       this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
-    } else if (_type === TreeType[TreeType.PPI]) {
+    } else if (_type === TreeType[TreeType.PPI] || _type === TreeType[TreeType.CPT]
+      || _type === TreeType[TreeType.MEAS]) {
       this.actions.fetchCriteria(_type, parentId);
     }
 

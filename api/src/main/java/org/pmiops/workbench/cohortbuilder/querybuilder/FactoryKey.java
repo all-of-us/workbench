@@ -43,9 +43,6 @@ public enum FactoryKey {
      */
     private static Map<String, Object> initializeMapping() {
         Map<String, Object> tMap = new HashMap<String, Object>();
-        tMap.put(TreeType.ICD9.name(), FactoryKey.CODES);
-        tMap.put(TreeType.ICD10.name(), FactoryKey.CODES);
-        tMap.put(TreeType.CPT.name(), FactoryKey.CODES);
         tMap.put(TreeType.CONDITION.name(), FactoryKey.CODES);
         tMap.put(TreeType.PROCEDURE.name(), FactoryKey.CODES);
         tMap.put(TreeType.DEMO.name(), FactoryKey.DEMO);

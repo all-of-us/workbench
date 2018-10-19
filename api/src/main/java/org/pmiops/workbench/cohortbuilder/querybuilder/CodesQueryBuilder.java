@@ -97,7 +97,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomain(),
+            parameter.getDomainId(),
             QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class),
             CHILD_CODE_IN_CLAUSE_TEMPLATE);
         } else {
@@ -108,7 +108,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomain(),
+            parameter.getDomainId(),
             QueryParameterValue.string(codeParam),
             GROUP_CODE_LIKE_TEMPLATE);
         }
@@ -123,7 +123,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private void validateSearchParameter(SearchParameter param) {
     from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
     from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
-    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomain());
+    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomainId());
     from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
@@ -191,7 +191,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     public MultiKey(SearchParameter searchParameter) {
       this.group = searchParameter.getGroup() ? GROUP : NOT_GROUP;
       this.type = searchParameter.getType();
-      this.domain = searchParameter.getDomain();
+      this.domain = searchParameter.getDomainId();
     }
 
     public String getKey() {
