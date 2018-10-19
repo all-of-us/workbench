@@ -1,54 +1,62 @@
 {
-  "includes": [
-    {
-      "id": "includes_9aqxl7htb",
-      "temporal": false,
-      "mention": "",
-      "time": "",
-      "timeValue": 0,
-      "timeFrame": "",
-      "items": [
+  "type": "cohort",
+  "cohort": {
+    "name": "28-30-Females",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes": [
         {
-          "id": "items_rq7x0v3ox",
-          "type": "DEMO",
-          "temporalGroup": 0,
-          "searchParameters": [
+          "id": "includes_9aqxl7htb",
+          "temporal": false,
+          "mention": "",
+          "time": "",
+          "timeValue": 0,
+          "timeFrame": "",
+          "items": [
             {
-              "parameterId": "age-param988266344",
-              "name": "20",
-              "value": "20",
+              "id": "items_rq7x0v3ox",
               "type": "DEMO",
-              "subtype": "AGE",
-              "group": false,
-              "attributes": [
+              "temporalGroup": 0,
+              "searchParameters": [
                 {
-                  "name": "Age",
-                  "operator": "BETWEEN",
-                  "operands": [
-                    20,
-                    30
+                  "parameterId": "age-param988266344",
+                  "name": "20",
+                  "value": "20",
+                  "type": "DEMO",
+                  "subtype": "AGE",
+                  "group": false,
+                  "attributes": [
+                    {
+                      "name": "Age",
+                      "operator": "BETWEEN",
+                      "operands": [
+                        20,
+                        30
+                      ],
+                      "conceptId": null
+                    }
                   ],
-                  "conceptId": null
+                  "conceptId": null,
+                  "domainId": ""
+                },
+                {
+                  "parameterId": "param8532",
+                  "name": "Female",
+                  "value": "F",
+                  "type": "DEMO",
+                  "subtype": "GEN",
+                  "group": false,
+                  "conceptId": 8532,
+                  "domainId": ""
                 }
               ],
-              "conceptId": null,
-              "domainId": ""
-            },
-            {
-              "parameterId": "param8532",
-              "name": "Female",
-              "value": "F",
-              "type": "DEMO",
-              "subtype": "GEN",
-              "group": false,
-              "conceptId": 8532,
-              "domainId": ""
+              "modifiers": []
             }
-          ],
-          "modifiers": []
+          ]
         }
-      ]
+      ],
+      "excludes": []
     }
-  ],
-  "excludes": []
+  }
 }
