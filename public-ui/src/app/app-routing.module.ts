@@ -41,11 +41,6 @@ const routes: Routes = [
         data: {title: 'Quick Search'}
       },
       {
-        path: 'quick-search/surveys',
-        component: SurveysComponent,
-        data: {title: 'Browse Survey Instruments'}
-      },
-      {
         path: 'survey/:id',
         component: SurveyViewComponent,
         data: {title: 'View Survey Questions and Answers'}
