@@ -596,12 +596,12 @@ round((case when m1.value_as_number < p10_value then p10_value
      end),2)
      end) as string) as stratum_4,
 count(distinct p1.person_id) as count_value,
-0 as source_count_value
+count(distinct p1.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data on m1.measurement_concept_id=concept
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m1.unit_source_value=um.unit_source_value
-where m1.measurement_concept_id != 0
+where m1.measurement_concept_id != 0 and measurement_source_concept_id = measurement_concept_id
 and m1.value_as_number is not null and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or cast(um.unit_concept_id as string)=unit)
 group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
 union all
@@ -662,12 +662,12 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  c2.concept_name as stratum_4,
  cast(m1.value_as_concept_id as string) as stratum_5,
  count(distinct p1.person_id) as count_value,
- 0 as source_count_value
+ count(distinct p1.person_id) as source_count_value
  FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
  join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
  join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
  where m1.value_as_concept_id != 0
- and m1.measurement_concept_id > 0
+ and m1.measurement_concept_id > 0 and m1.measurement_concept_id = m1.measurement_source_concept_id
  group by m1.measurement_concept_id,c2.concept_name,p1.gender_concept_id,m1.value_as_concept_id
  union all
  SELECT 0,1900 as analysis_id,
@@ -733,13 +733,13 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
        end),2)
        end) as string) as stratum_4,
  count(distinct p1.person_id) as count_value,
- 0 as source_count_value
+ count(distinct p1.person_id) as source_count_value
  FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
  join measurement_quartile_data ar on
  m1.measurement_concept_id=ar.concept
  join  \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
  join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m1.unit_source_value=um.unit_source_value
- where m1.measurement_concept_id > 0
+ where m1.measurement_concept_id > 0 and m1.measurement_concept_id = m1.measurement_source_concept_id
  and m1.value_as_number is not null
  and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
  and (cast(m1.unit_concept_id as string)=unit or cast(um.unit_concept_id as string)=unit)
@@ -845,13 +845,13 @@ round((case when m1.value_as_number < p10_value then p10_value
       end),2)
       end) as string) as stratum_4,
 count(distinct p1.person_id) as count_value,
-0 as source_count_value
+count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join measurement_quartile_data ar on
 m1.measurement_concept_id=ar.concept
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m1.unit_source_value=um.unit_source_value
-where m1.measurement_concept_id > 0
+where m1.measurement_concept_id > 0 and m1.measurement_concept_id = m1.measurement_source_concept_id
 and m1.value_as_number is not null
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10)=ar.age_decile
 and (cast(m1.unit_concept_id as string)=unit or cast(um.unit_concept_id as string)=unit)
@@ -920,13 +920,13 @@ CAST(floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) AS ST
 c2.concept_name as stratum_4,
 cast(m1.value_as_concept_id as string) as stratum_5,
 count(distinct p1.person_id) as count_value,
-0 as source_count_value
+count(distinct p1.person_id) as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m1
 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 on p1.person_id = m1.person_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c2 on c2.concept_id=m1.value_as_concept_id
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 where m1.value_as_concept_id != 0
-and m1.measurement_concept_id > 0
+and m1.measurement_concept_id > 0 and m1.measurement_concept_id = m1.measurement_source_concept_id
 and floor((extract(year from m1.measurement_date) - p1.year_of_birth)/10) >=3
 group by m1.measurement_concept_id,c2.concept_name,m1.value_as_concept_id,stratum_3
 union all
