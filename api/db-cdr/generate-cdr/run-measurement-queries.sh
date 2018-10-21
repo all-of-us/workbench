@@ -998,3 +998,15 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 set stratum_2 = (select distinct concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where cast(concept_id as string)=stratum_2)
 where analysis_id in (1900,1901) and stratum_2 is not null and stratum_2 != '' "
+
+# Update no unit concept name in achilles_results_dist(For nice display)
+echo "Replacing no matching concept unit name to no unit"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` set stratum_2 = 'No unit'
+where stratum_2 = 'No matching concept' "
+
+# Update no unit concept name in achilles_results(For nice display)
+echo "Replacing no matching concept unit name to no unit"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` set stratum_2 = 'No unit'
+where stratum_2 = 'No matching concept' "
