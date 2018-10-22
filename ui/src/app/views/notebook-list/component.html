@@ -17,13 +17,14 @@
       </div>
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
     </div>
-
-    <div *ngFor="let notebook of resourceList">
-      <app-resource-card [resourceCard]="notebook" [cssClass]="'for-list'"
-                         (onUpdate)="updateList($event)"
-                         (duplicateNameError)="duplicateNameError($event)"
-                         (invalidNameError)="invalidNameError($event)">
-      </app-resource-card>
+    <div style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+      <div *ngFor="let notebook of resourceList">
+        <app-resource-card [resourceCard]="notebook" [cssClass]="'for-list'"
+                           (onUpdate)="updateList($event)"
+                           (duplicateNameError)="duplicateNameError($event)"
+                           (invalidNameError)="invalidNameError($event)">
+        </app-resource-card>
+      </div>
     </div>
   </div>
 </app-top-box>

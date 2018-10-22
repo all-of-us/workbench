@@ -150,4 +150,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
       || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
+
+  get actionsDisabled(): boolean {
+      return !this.writePermission;
+  }
 }
