@@ -86,6 +86,7 @@ export class ConceptSetDetailsComponent {
   }
 
   removeConcepts() {
+    this.removeSubmitting = true;
     this.conceptSetsService.updateConceptSetConcepts(
       this.wsNamespace, this.wsId, this.conceptSet.id, {
         etag: this.conceptSet.etag,

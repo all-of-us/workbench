@@ -14,7 +14,7 @@
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create concept sets.</span>
     </div>
 
-    <div style="display: flex; flex-direction: row; margin-left: 1%">
+    <div style="display: flex; flex-direction: row; flex-wrap: wrap; margin-left: 1%">
       <div *ngFor="let conceptSet of resourceList">
         <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
                            (onUpdate)="loadConceptSets()"

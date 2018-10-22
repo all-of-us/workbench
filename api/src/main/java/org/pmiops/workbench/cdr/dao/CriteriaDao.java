@@ -15,7 +15,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   @Query(value = "select * " +
     "from criteria " +
     "where type = :type " +
-    "and path like %:parentId% " +
+    "and (path like concat('%.',:parentId) or path like concat('%.',:parentId, '.%')) " +
     "and is_group = 0 " +
     "and is_selectable = 1", nativeQuery = true)
   List<Criteria> findCriteriaChildrenByTypeAndParentId(@Param("type") String type,

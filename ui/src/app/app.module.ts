@@ -48,6 +48,7 @@ import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
+import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
 import {RenameModalComponent} from './views/rename-modal/component';
 import {ResourceCardComponent} from './views/resource-card/component';
@@ -79,6 +80,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import {ToolTipComponent} from './views/tooltip/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -153,6 +155,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
+    QuickTourModalComponent,
     RecentWorkComponent,
     RenameModalComponent,
     ResourceCardComponent,
@@ -161,6 +164,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
+    ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
     WorkspaceComponent,

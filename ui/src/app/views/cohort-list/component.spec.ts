@@ -23,6 +23,7 @@ import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/compon
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
@@ -88,6 +89,7 @@ describe('CohortListComponent', () => {
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ToolTipComponent,
         TopBoxComponent
       ],
       providers: [

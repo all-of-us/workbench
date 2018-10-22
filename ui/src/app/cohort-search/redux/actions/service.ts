@@ -3,6 +3,7 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {stripHtml} from '../../utils';
 
 import {
   activeGroupId,
@@ -442,7 +443,14 @@ export class CohortSearchActions {
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{id: groupId, items};
+    return <SearchGroup>{
+      id: groupId,
+      temporal: group.get('temporal'),
+      mention: group.get('mention'),
+      time: group.get('time'),
+      timeValue: group.get('timeValue'),
+      timeFrame: group.get('timeFrame'),
+      items};
   }
 
   mapGroupItem = (itemId: string): SearchGroupItem => {
@@ -459,6 +467,7 @@ export class CohortSearchActions {
     return <SearchGroupItem>{
       id: itemId,
       type: item.get('type', '').toUpperCase(),
+      temporalGroup: item.get('temporalGroup'),
       searchParameters: params,
       modifiers: item.get('modifiers', List()).toJS(),
     };
@@ -467,7 +476,7 @@ export class CohortSearchActions {
   mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
-      name: immParam.get('name', ''),
+      name: stripHtml(immParam.get('name', '')),
       value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
@@ -475,8 +484,7 @@ export class CohortSearchActions {
       group: immParam.get('group'),
       attributes: immParam.get('attributes'),
       conceptId: immParam.get('conceptId'),
-      domain: immParam.get('domainId')
-          ? immParam.get('domainId') : immParam.get('domain')
+      domainId: immParam.get('domainId')
     };
 
     return param;
