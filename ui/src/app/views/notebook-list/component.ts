@@ -20,6 +20,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -53,6 +54,9 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
   @ViewChild(NewNotebookModalComponent)
   newNotebookModal: NewNotebookModalComponent;
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
+
 
   constructor(
     private route: ActivatedRoute,

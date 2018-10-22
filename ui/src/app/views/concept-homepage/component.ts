@@ -15,6 +15,7 @@ import {
   StandardConceptFilter,
   VocabularyCount,
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 interface ConceptCacheSet {
   domain: Domain;
@@ -35,6 +36,7 @@ interface VocabularyCountSelected extends VocabularyCount {
     '../../styles/headers.css',
     '../../styles/inputs.css',
     '../../styles/errors.css',
+    '../../styles/tooltip.css',
     './component.css'],
   templateUrl: './component.html',
 })
@@ -59,6 +61,9 @@ export class ConceptHomepageComponent implements OnInit {
 
   @ViewChild(ConceptAddModalComponent)
   conceptAddModal: ConceptAddModalComponent;
+
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
 
   conceptDomainList: Array<DomainInfo> = [];
   conceptDomainCounts: Array<DomainCount> = [];

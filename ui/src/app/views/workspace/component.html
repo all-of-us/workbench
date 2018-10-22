@@ -8,8 +8,31 @@
     <div class="padding-wrapper">
       <div class="main-body">
         <div style="display: flex; flex-direction: row">
-          <h2 class="greeting" style="width: 200px; padding-left: .5%">Actions</h2>
-          <h2 class="greeting" style="margin-left:2.3rem; font-size: 16px">Recently Modified</h2>
+          <h2 class="greeting" style="width: 200px; padding-left: .5%">
+            Actions
+            <app-tooltip>
+              <div style="display:flex; flex-direction:column; padding-left:0.1rem;
+              ;">
+                <div class="tooltip-header">Create a new Cohort</div>
+                <div class="tooltip-label">A “Cohort” is a group of participants you are interested in researching.
+                  <br>The cohort builder allows you to create and review cohorts and annotate participants in your study group.
+                </div>
+                <div class="tooltip-header">Create a new Notebook</div>
+                <div class="tooltip-label">A Notebook is a computational environment
+                  where you can analyze data with basic programming knowledge
+                  in R or Python.
+                </div>
+              </div>
+            </app-tooltip>
+          </h2>
+          <h2 class="greeting" style="margin-left:2.3rem; font-size: 16px">
+            Recently Modified
+            <app-tooltip>
+              <div class="tooltip-label">This section shows the items in your workspace sorted by their last modified date.
+              </div>
+            </app-tooltip>
+
+          </h2>
         </div>
         <div style="display: flex; flex-direction: row; align-items: center; width: 100%">
           <div style="width: 200px;">
@@ -38,7 +61,8 @@
         </div>
         <div style="padding-top: 1rem;">
           <h4 class="subheader">Research Purpose
-            <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
+            <span role="tooltip"
+                  aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
           <button [disabled]="!writePermission"
                   [class.disabled]="!writePermission"
                   routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
@@ -47,6 +71,10 @@
           </button>
           <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
         </span>
+            <app-tooltip [direction]="'top-right'">
+              <div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.
+              </div>
+            </app-tooltip>
           </h4>
           <div class="description-text">
             {{workspace.description}}
@@ -69,7 +97,14 @@
   </app-top-box>
   <div class="right-sidebar">
     <div>
-      <h6 class="collaborator-text">Collaborators:</h6>
+      <h6 class="collaborator-text">
+        Collaborators:
+        <app-tooltip [direction]="'left'">
+          <div class="tooltip-label" style="overflow-wrap: break-word;">
+            Here you can add a collaborator to your Workspace and see the list of users with whom you share your workspace.
+          </div>
+        </app-tooltip>
+      </h6>
       <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
         <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="share()">Share</button>
         <span *ngIf="!ownerPermission" class="tooltip-content">
@@ -80,7 +115,22 @@
     <div *ngFor="let user of workspace.userRoles">
       <div>{{user.role}}: {{user.email}}</div>
     </div>
-    <h6>Workspace Information</h6>
+    <h6>
+      Workspace Information
+      <app-tooltip [direction]="'top-left'">
+        <div class="tooltip-header"> Dataset</div>
+        <div class="tooltip-label">
+          The version of the dataset used by this workspace is displayed here
+        </div>
+        <div class="tooltip-header" style="padding-top:0.3rem"> Creation date</div>
+        <div class="tooltip-label">The date you created your Workspace.</div>
+        <div class="tooltip-header" style="padding-top:0.3rem"> Access level</div>
+        <div class="tooltip-label">To make sure data is accessed only by authorized users, there are three data access tiers within the All of Us Research Program - “Public”, “Registered” and “Controlled”.
+        Estimated monthly cost
+          Estimated monthly cost of your cloud computing time.</div>
+
+      </app-tooltip>
+    </h6>
     <div class="information-area">
       <div class="information-box">
         <div class="information-header">
