@@ -8,7 +8,7 @@ import {Component, Input, OnInit} from '@angular/core';
 export class ToolTipComponent {
   @Input('direction') direction = 'right';
 
-  findPosition(element): void {
+  findPosition(): void {
     const el = document.getElementById('toolTip');
     const bottom = el.getBoundingClientRect().bottom;
     if (bottom <= 0) {
