@@ -1,0 +1,9 @@
+.tooltip-header {
+  text-decoration: underline;
+  padding-bottom: 0.5rem;
+}
+
+.tooltip-label {
+  padding-bottom: 0.5rem;
+  word-wrap: break-word;
+}
