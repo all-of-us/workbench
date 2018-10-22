@@ -46,13 +46,21 @@ fi
 # Next Populate achilles_results
 echo "Running achilles queries..."
 
+# Current year for age decile calculation
+cur_year=$(date +"%Y")
+
+# Analysis Ids
+COUNT_ANALYSIS_ID=3000;
+GENDER_ANALYSIS_ID=3101;
+AGE_ANALYSIS_ID=3102;
+
 # 0 Make person gender identity table
 echo "making person_gender_identity table "
 schema_path=generate-cdr/bq-schemas
-# Person gender identity table to use in place of person in places
+# Person gender identity table has person_id, gender_concept_id, and gi_concept_id (gender identity)
+# The gender identity concept is from their answer to the gi question concept
 person_gi=person_gender_identity
 gi_question_concept_id=1585838
-
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\` (person_id, gender_concept_id, gi_concept_id)
@@ -78,15 +86,6 @@ select 0, 2 as analysis_id,  cast (gender_concept_id as STRING) as stratum_1, ca
 from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\`
 group by gender_concept_id, gi_concept_id"
 
-exit 0
-
-# Gender count
-echo "Getting gender count"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value,source_count_value)
-select 0, 2 as analysis_id,  cast (gender_concept_id as STRING) as stratum_1, COUNT(distinct person_id) as count_value, 0 as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
-group by GENDER_CONCEPT_ID"
 
 # Age count
 # 3	Number of persons by year of birth
@@ -115,23 +114,23 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
 group by ETHNICITY_CONCEPT_ID"
 
 
-# 6	Number of persons by age decile
+# 6	Number of persons by age decile (age deciles 3 +)
 echo "Getting age decile count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value,source_count_value)
-select 0, 6 as analysis_id,  CAST(floor((2018 - year_of_birth)/10) AS STRING) as stratum_2,
+select 0, 6 as analysis_id,  CAST(floor((${cur_year} - year_of_birth)/10) AS STRING) as stratum_2,
 COUNT(distinct person_id) as count_value, 0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
-where floor((2018 - year_of_birth)/10) >=3
+where floor((${cur_year} - year_of_birth)/10) >=3
 group by stratum_2"
 
-# Age decile 2 count
+# Age decile 2 (18-29 yrs old) count
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` (id, analysis_id, stratum_1, count_value,source_count_value)
 select 0, 6 as analysis_id,  '2' as stratum_2,
 COUNT(distinct person_id) as count_value, 0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\`
-where ((2018 - year_of_birth) > 18 and (2018 - year_of_birth) < 30)"
+where ((${cur_year} - year_of_birth) > 18 and (${cur_year} - year_of_birth) < 30)"
 
 
 # 10	Number of all persons by year of birth and by gender
@@ -159,7 +158,7 @@ echo "Getting visit count and source count"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
  (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
- select 0 as id,3000 as analysis_id,CAST(vo1.visit_concept_id AS STRING) as stratum_1,'Visit' as stratum_3,
+ select 0 as id,${COUNT_ANALYSIS_ID} as analysis_id,CAST(vo1.visit_concept_id AS STRING) as stratum_1,'Visit' as stratum_3,
  	COUNT(distinct vo1.PERSON_ID) as count_value,(select COUNT(distinct vo2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo2 where vo2.visit_source_concept_id=vo1.visit_concept_id) as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
  where vo1.visit_concept_id > 0
@@ -177,7 +176,7 @@ echo "Querying condition_occurrence ..."
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
-select 0, 3000 as analysis_id,
+select 0, ${COUNT_ANALYSIS_ID} as analysis_id,
 	CAST(co1.condition_CONCEPT_ID AS STRING) as stratum_1,'Condition' as stratum_3,
 	COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
 	where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
@@ -185,7 +184,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 where co1.condition_concept_id > 0
 group by co1.condition_CONCEPT_ID
 union all
- select 0 as id,3000 as analysis_id,CAST(co1.condition_source_concept_id AS STRING) as stratum_1,'Condition' as stratum_3,
+select 0 as id,3000 as analysis_id,CAST(co1.condition_source_concept_id AS STRING) as stratum_1,'Condition' as stratum_3,
  COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
  from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
  where co1.condition_concept_id != co1.condition_source_concept_id
@@ -195,11 +194,14 @@ union all
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
-select 0, 3101 as analysis_id,
+select 0, ${GENDER_ANALYSIS_ID} as analysis_id,
 	CAST(co1.condition_concept_id AS STRING) as stratum_1,
 	CAST(p1.gender_concept_id AS STRING) as stratum_2,'Condition' as stratum_3,
 	COUNT(distinct p1.PERSON_ID) as count_value,
-	(select COUNT(distinct p2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p2 inner join \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id where co2.condition_source_concept_id=co1.condition_concept_id and p2.gender_concept_id = p1.gender_concept_id) as source_count_value
+	(select COUNT(distinct p2.PERSON_ID) from \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.${person_gi}\` p2 inner join
+	  \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2 on p2.person_id=co2.person_id
+	  where co2.condition_source_concept_id=co1.condition_concept_id and p2.gender_concept_id = p1.gender_concept_id and
+	   p2.gi_concept_id = p1.gi_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 on p1.person_id = co1.person_id
