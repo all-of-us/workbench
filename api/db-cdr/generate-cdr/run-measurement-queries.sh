@@ -602,7 +602,7 @@ join measurement_quartile_data on m1.measurement_concept_id=concept
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on m1.measurement_concept_id=c1.concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on m1.unit_source_value=um.unit_source_value
 where m1.measurement_concept_id != 0 and measurement_source_concept_id = measurement_concept_id
-and m1.value_as_number is not null and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or cast(um.unit_concept_id as string)=unit)
+and m1.value_as_number >= 0 and p1.gender_concept_id=gender and (cast(m1.unit_concept_id as string)=unit or cast(um.unit_concept_id as string)=unit)
 group by m1.measurement_concept_id,stratum_2,stratum_3,stratum_4
 union all
 select 0 as id, 1900 as analysis_id,

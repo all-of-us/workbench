@@ -219,17 +219,17 @@ public class Criteria {
         if (o == null || getClass() != o.getClass()) return false;
         Criteria criteria = (Criteria) o;
         return id == criteria.id &&
-                parentId == criteria.parentId &&
-                group == criteria.group &&
-                selectable == criteria.selectable &&
-                Objects.equals(type, criteria.type) &&
-                Objects.equals(code, criteria.code) &&
-                Objects.equals(name, criteria.name) &&
-                Objects.equals(count, criteria.count) &&
-                Objects.equals(conceptId, criteria.conceptId) &&
-                Objects.equals(domainId, criteria.domainId) &&
-                Objects.equals(attribute, criteria.attribute) &&
-                Objects.equals(path, criteria.path);
+          parentId == criteria.parentId &&
+          group == criteria.group &&
+          selectable == criteria.selectable &&
+          Objects.equals(type, criteria.type) &&
+          Objects.equals(code, criteria.code) &&
+          Objects.equals(name, criteria.name) &&
+          Objects.equals(count, criteria.count) &&
+          Objects.equals(conceptId, criteria.conceptId) &&
+          Objects.equals(domainId, criteria.domainId) &&
+          Objects.equals(attribute, criteria.attribute) &&
+          Objects.equals(path, criteria.path);
     }
 
     @Override
