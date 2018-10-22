@@ -38,8 +38,8 @@ public class ParameterPredicates {
   private static final List<String> CODE_SUBTYPES =
     Arrays.asList(TreeSubType.CM.toString(),
       TreeSubType.PROC.toString(),
-      TreeSubType.ICD10CM.toString(),
-      TreeSubType.ICD10PCS.toString(),
+      TreeSubType.CM.toString(),
+      TreeSubType.PCS.toString(),
       TreeSubType.CPT4.toString());
 
   private static final List<String> DEMO_SUBTYPES =
@@ -101,19 +101,19 @@ public class ParameterPredicates {
   }
 
   public static Predicate<SearchParameter> domainInvalid() {
-    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomain()::equalsIgnoreCase);
+    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomainId()::equalsIgnoreCase);
   }
 
   public static Predicate<SearchParameter> domainNotMeasurement() {
-    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomain());
+    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> domainNotObservation() {
-    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomain());
+    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> domainBlank() {
-    return sp -> StringUtils.isBlank(sp.getDomain());
+    return sp -> StringUtils.isBlank(sp.getDomainId());
   }
 
   public static Predicate<SearchParameter> typeBlank() {

@@ -17,6 +17,7 @@ const dummyItem = fromJS({
   searchParameters: ['param0', 'param1'],
   modifiers: [],
   count: null,
+  temporalGroup: 0,
   isRequesting: false,
 });
 
@@ -28,7 +29,6 @@ const zeroCrit = fromJS({
   type: TreeType[TreeType.ICD9],
   group: false,
   domainId: null,
-  domain: null,
   conceptId: 12345
 }).set('attributes', []);
 
@@ -40,7 +40,6 @@ const oneCrit = fromJS({
   type: TreeType[TreeType.ICD9],
   group: true,
   domainId: null,
-  domain: null,
   conceptId: 12345
 }).set('attributes', []);
 
@@ -54,18 +53,27 @@ const DEMO_crit = fromJS({
   group: false,
   conceptId: 12345,
   domainId: null,
-  domain: null
 }).set('attributes', []);
 
 const groups = fromJS({
   include0: {
     id: 'include0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [],
     count: null,
     isRequesting: false,
   },
   exclude0: {
     id: 'exclude0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [],
     count: null,
     isRequesting: false,
@@ -84,9 +92,15 @@ const dummyState = initialState
 const expectedSR = {
   includes: [{
     id: 'include0',
+    temporal: false,
+    mention: '',
+    time: '',
+    timeValue: 0,
+    timeFrame: '',
     items: [{
       id: 'item001',
       type: TreeType[TreeType.ICD9],
+      temporalGroup: 0,
       searchParameters: [{
           parameterId: 'param0',
           name: 'CodeA',
@@ -94,7 +108,7 @@ const expectedSR = {
           type: TreeType[TreeType.ICD9],
           subtype: '',
           group: false,
-          domain: null,
+          domainId: null,
           attributes: [],
           conceptId: 12345
         }, {
@@ -104,7 +118,7 @@ const expectedSR = {
           type: TreeType[TreeType.ICD9],
           subtype: '',
           group: true,
-          domain: null,
+          domainId: null,
           attributes: [],
           conceptId: 12345
         }],
@@ -187,6 +201,11 @@ describe('CohortSearchActions', () => {
     const secondItem = dummyItem.set('id', 'item002');
     const secondGroup = fromJS({
       id: 'include1',
+      temporal: false,
+      mention: '',
+      time: '',
+      timeValue: 0,
+      timeFrame: '',
       items: ['item002'],
       count: null,
       isRequesting: false,
@@ -204,9 +223,15 @@ describe('CohortSearchActions', () => {
     const newExpectedSR = {
       includes: [{
         id: 'include0',
+        temporal: false,
+        mention: '',
+        time: '',
+        timeValue: 0,
+        timeFrame: '',
         items: [{
           id: 'item001',
           type: TreeType[TreeType.ICD9],
+          temporalGroup: 0,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',
@@ -214,7 +239,7 @@ describe('CohortSearchActions', () => {
               type: TreeType[TreeType.ICD9],
               subtype: '',
               group: false,
-              domain: null,
+              domainId: null,
               conceptId: 12345,
               attributes: []
             }, {
@@ -224,7 +249,7 @@ describe('CohortSearchActions', () => {
               type: TreeType[TreeType.ICD9],
               subtype: '',
               group: true,
-              domain: null,
+              domainId: null,
               conceptId: 12345,
               attributes: []
           }],
@@ -232,9 +257,15 @@ describe('CohortSearchActions', () => {
         }]
       }, {
         id: 'include1',
+        temporal: false,
+        mention: '',
+        time: '',
+        timeValue: 0,
+        timeFrame: '',
         items: [{
           id: 'item002',
           type: TreeType[TreeType.ICD9],
+          temporalGroup: 0,
           searchParameters: [{
               parameterId: 'param0',
               name: 'CodeA',
@@ -242,7 +273,7 @@ describe('CohortSearchActions', () => {
               type: TreeType[TreeType.ICD9],
               subtype: '',
               group: false,
-              domain: null,
+              domainId: null,
               conceptId: 12345,
               attributes: []
             }, {
@@ -252,7 +283,7 @@ describe('CohortSearchActions', () => {
               type: TreeType[TreeType.ICD9],
               subtype: '',
               group: true,
-              domain: null,
+              domainId: null,
               conceptId: 12345,
               attributes: []
           }],
@@ -311,7 +342,7 @@ describe('CohortSearchActions', () => {
       type: TreeType[TreeType.ICD9],
       subtype: '',
       group: false,
-      domain: null,
+      domainId: null,
       conceptId: 12345,
       attributes: []
     });
@@ -325,7 +356,7 @@ describe('CohortSearchActions', () => {
       subtype: 'GEN',
       group: false,
       conceptId: 12345,
-      domain: null,
+      domainId: null,
       attributes: DEMO_crit.get('attributes'),
     });
   });

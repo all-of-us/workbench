@@ -72,12 +72,12 @@ public class CriteriaDaoTest {
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
     demoCriteria2 = createCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), "Age", "demo age", 0, false, true, null);
-    icd10Criteria1 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "002", "icd10 test 1", 0, false, true, null);
-    icd10Criteria2 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "001", "icd10 test 2", 0, false, true, null);
+    icd10Criteria1 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "002", "icd10 test 1", 0, false, true, null);
+    icd10Criteria2 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "001", "icd10 test 2", 0, false, true, null);
     cptCriteria1 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0039T", "zzzcptzzz", 0, false, true, null);
     cptCriteria2 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0001T", "zzzCPTxxx", 0, false, true, null);
     parentIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003", "name", 0, true, true, null);
-    parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "003", "name", 0, true, true, "1.2");
+    parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003", "name", 0, true, true, "1.2");
     pmCriteria = createCriteria(TreeType.PM.name(), TreeSubType.BP.name(), "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true, "1.2.3.4");
     drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
@@ -98,7 +98,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(parentIcd10);
     childIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003.1", "name", parentIcd9.getId(), false, true, null);
     criteriaDao.save(childIcd9);
-    childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
+    childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
     criteriaDao.save(childIcd10);
     criteriaDao.save(pmCriteria);
     criteriaDao.save(drugCriteriaIngredient);
@@ -299,7 +299,7 @@ public class CriteriaDaoTest {
     final List<String> icd10DomainList =
       criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
         TreeType.ICD10.name(),
-        TreeSubType.ICD10PCS.name(),
+        TreeSubType.PCS.name(),
         "003");
 
     assertEquals(1, icd10DomainList.size());

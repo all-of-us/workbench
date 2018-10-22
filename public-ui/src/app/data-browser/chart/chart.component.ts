@@ -35,18 +35,11 @@ export class ChartComponent implements OnChanges {
       (this.concepts && this.concepts.length)) {
       // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
-    } else {
-      this.chartOptions = this.hcChartOptions();
     }
   }
 
   public hcChartOptions(): any {
-    let options;
-    if (!this.analysis) {
-      options = this.makeEmptyChartOptions();
-    } else {
-      options = this.makeChartOptions();
-    }
+    const options = this.makeChartOptions();
     // Override title if they passed one
     if (this.chartTitle) {
       options.title.text = this.chartTitle;
@@ -489,19 +482,5 @@ export class ChartComponent implements OnChanges {
     };
 
   }
-
-    public makeEmptyChartOptions() {
-        const data = [];
-        const cats = [];
-
-        return {
-            chart: {type: 'column', backgroundColor: this.backgroundColor},
-            title: { text: 'No data to chart' },
-            series: data,
-            categories: cats,
-            xAxisTitle: 'No data to chart'
-        };
-
-    }
 
 }

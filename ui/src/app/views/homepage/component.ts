@@ -3,6 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 
 import {
@@ -59,9 +60,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
         'Collaborating with other researchers',
         'Sharing and Publishing Notebooks']
     }];
-  firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
+  @ViewChild(QuickTourModalComponent)
+  quickTourModal: QuickTourModalComponent;
 
   constructor(
     private profileService: ProfileService,
@@ -72,8 +74,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.profileStorageService.profile$.subscribe((profile) => {
-      if (this.firstSignIn === undefined) {
-        this.firstSignIn = new Date(profile.firstSignInTime);
+      if (profile.firstSignInTime === undefined) {
+        this.openQuickTour();
       }
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
@@ -86,6 +88,10 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.reloadSpinner();
     });
     this.profileStorageService.reload();
+  }
+
+  openQuickTour(): void {
+    this.quickTourModal.open();
   }
 
   public get completedTasks() {
