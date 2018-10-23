@@ -157,13 +157,13 @@ public class ProfileController implements ProfileApiDelegate {
 
   private User saveUserWithConflictHandling(User user) {
     if (user.getGivenName().length() > 80) {
-      throw new BadRequestException("Given Name length exceeds character limit. (80)")
+      throw new BadRequestException("Given Name length exceeds character limit. (80)");
     }
     if (user.getFamilyName().length() > 80) {
-      throw new BadRequestException("Family Name length exceeds character limit. (80)")
+      throw new BadRequestException("Family Name length exceeds character limit. (80)");
     }
     if (user.getAreaOfResearch().length() > 255) {
-      throw new BadRequestException("Area of Research length exceeds character limit. (255)")
+      throw new BadRequestException("Area of Research length exceeds character limit. (255)");
     }
     try {
       return userDao.save(user);
