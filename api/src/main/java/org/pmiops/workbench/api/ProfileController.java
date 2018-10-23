@@ -521,6 +521,18 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     User user = userProvider.get();
+    if (updatedProfile.getGivenName().length() > 255) {
+      throw new BadRequestException("Length of given name exceeds character limit.");
+    }
+    if (updatedProfile.getFamilyName().length() > 255) {
+      throw new BadRequestException("Length of family name exceeds character limit.");
+    }
+    if (updatedProfile.getAboutYou().length() > 255) {
+      throw new BadRequestException("Length of 'About You' exceeds character limit.");
+    }
+    if (updatedProfile.getAreaOfResearch().length() > 255) {
+      throw new BadRequestException("Length of 'Area of Research' exceeds character limit.");
+    }
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     user.setAboutYou(updatedProfile.getAboutYou());
