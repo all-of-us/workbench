@@ -20,17 +20,11 @@
     <dropIndex indexName="idx_criteria_name"
                tableName="criteria"/>
 
-    <createIndex
-      indexName="idx_synonyms"
-      tableName="criteria"
-      unique="false">
-      <column name="synonyms"/>
-    </createIndex>
-
-    <comment>The following modify sql tag replaces index</comment>
-    <modifySql dbms="mysql">
-      <replace replace="INDEX" with="FULLTEXT INDEX"/>
-    </modifySql>
+    <sql dbms="mysql">
+      ALTER TABLE criteria
+      ADD FULLTEXT INDEX criteria_synonyms
+      (synonyms);
+    </sql>
 
   </changeSet>
 </databaseChangeLog>

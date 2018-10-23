@@ -928,29 +928,31 @@ group by co1.measurement_source_concept_id, stratum_2
 # Set the survey answer count for all the survey questions that belong to each module
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,count_value,source_count_value)
+(id,analysis_id,stratum_1,stratum_2,stratum_3,stratum_4,stratum_5,count_value,source_count_value)
 SELECT 0 as id, 3110 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
-CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
+CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,cast(sq.id as string) stratum_5,
 Count(*) as count_value, 0 as source_count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-On o.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
-Where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
-Group by o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,sm.concept_id"
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+group by o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,sm.concept_id,sq.id
+order by sq.id asc"
 
 # Set the survey answer count for all the survey questions that belong to each module(value as number)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
-(id,analysis_id,stratum_1,stratum_2,stratum_4,count_value,source_count_value)
+(id,analysis_id,stratum_1,stratum_2,stratum_4,stratum_5,count_value,source_count_value)
 SELECT 0 as id, 3110 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
-CAST(o.value_as_number as string) as stratum_4,Count(*) as count_value,0 as source_count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-On o.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+CAST(o.value_as_number as string) as stratum_4,cast(sq.id as string) stratum_5,
+Count(*) as count_value,0 as source_count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 Where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and (cr.concept_id_1 != 1585966 and o.value_as_number > 0)
-Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id"
-
+and (sq.question_concept_id != 1585966 and o.value_as_number > 0)
+Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id,sq.id
+order by sq.id asc"
 
 # Survey question answers count by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -960,11 +962,12 @@ select 0,3111 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.o
 CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
 CAST(p.gender_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value,0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id=cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id where
-(o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
-group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_number,o.value_as_string,p.gender_concept_id"
-
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_number,o.value_as_string,p.gender_concept_id,sq.id
+order by sq.id asc"
 
 # Survey question answers count by gender(value_as_number not null)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -973,12 +976,13 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select 0,3111 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
 CAST(o.value_as_number as string) as stratum_4,CAST(p.gender_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value,0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id=cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
 and (o.observation_source_concept_id != 1585966)
-group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id"
-
+group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id,sq.id
+order by sq.id asc"
 
 # Survey Question Answer Count by age decile  30+ yr old deciles
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -988,12 +992,13 @@ select 0, 3112 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.
 CAST(o.value_source_concept_id as string) as stratum_3,o.value_as_string as stratum_4,
 CAST(floor((extract(year from o.observation_date) - p.year_of_birth)/10) AS STRING) as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id where
-(o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
-group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5"
-
+group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5,sq.id
+order by sq.id asc"
 
 # Survey Question Answer Count by age decile  18-29 yr old decile 2
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1004,11 +1009,13 @@ CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_source
 o.value_as_string as stratum_4,
 '2' as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
-group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5"
+group by sm.concept_id,o.observation_source_concept_id,o.value_source_concept_id,o.value_as_string,stratum_5,sq.id
+order by sq.id asc"
 
 
 # Survey Question Answer Count by age decile  30+ yr old deciles(value as number not null)
@@ -1019,12 +1026,14 @@ select 0, 3112 as analysis_id,CAST(sm.concept_id as string) as stratum_1,
 CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_as_number as string) as stratum_4,
 CAST(floor((extract(year from o.observation_date) - p.year_of_birth)/10) AS STRING) as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
 and (o.observation_source_concept_id != 1585966)
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
-group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5"
+group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
+order by sq.id asc"
 
 
 # Survey Question Answer Count by age decile  18-29 yr old decile 2(value as number not null)
@@ -1036,12 +1045,14 @@ select 0, 3112 as analysis_id,CAST(sm.concept_id as string) as stratum_1,
 CAST(o.observation_source_concept_id as string) as stratum_2,CAST(o.value_as_number as string) as stratum_4,
 '2' as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr on o.observation_source_concept_id = cr.concept_id_1
-join  \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2=sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
 and (o.observation_source_concept_id != 1585966)
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
-group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5"
+group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
+order by sq.id asc"
 
 # Condition Domain participant counts
 echo "Getting domain participant counts"
@@ -1079,9 +1090,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT 0 as id, 3000 as analysis_id,CAST(sm.concept_id as string) as stratum_1,
 'Survey' as stratum_3,
 count(distinct o.person_id) as count_value, count(distinct o.person_id) as source_count_value
-FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on o.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 Where (o.observation_source_concept_id > 0 and o.value_source_concept_id > 0)
 Group by sm.concept_id"
 
@@ -1096,9 +1107,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 group by sm.concept_id, p1.gender_concept_id"
 
@@ -1114,9 +1125,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 and floor((extract(year from ob1.observation_date) - p1.year_of_birth)/10) >=3
 group by sm.concept_id, stratum_2"
@@ -1133,9 +1144,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 and (extract(year from ob1.observation_date) - p1.year_of_birth) >= 18 and (extract(year from ob1.observation_date) - p1.year_of_birth) < 30
 group by sm.concept_id, stratum_2"
@@ -1152,9 +1163,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 and floor((extract(year from current_date()) - p1.year_of_birth)/10) >=3
 group by sm.concept_id, stratum_2"
@@ -1171,9 +1182,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 and (extract(year from current_date()) - p1.year_of_birth) >= 18 and (extract(year from current_date()) - p1.year_of_birth) < 30
 group by sm.concept_id, stratum_2"
@@ -1191,9 +1202,9 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 and p1.race_concept_id > 0
 group by sm.concept_id, stratum_2"
@@ -1210,8 +1221,8 @@ COUNT(distinct p1.PERSON_ID) as count_value,COUNT(distinct p1.PERSON_ID) as sour
 from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1 inner join
 \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob1
 on p1.person_id = ob1.person_id
-join  \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob1.observation_source_concept_id=cr.concept_id_1 and cr.relationship_id = 'Has Module'
-join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on cr.concept_id_2 = sm.concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On ob1.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (ob1.observation_source_concept_id > 0 and ob1.value_source_concept_id > 0)
 group by sm.concept_id, stratum_2"
