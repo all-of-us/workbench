@@ -1,4 +1,4 @@
-<div class="page-container">
+<div *ngIf="!inNotebookFrame" class="page-container">
   <div class="header-container">
     <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
       <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"
