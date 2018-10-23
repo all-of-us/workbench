@@ -26,11 +26,14 @@ public class JiraServiceImpl implements JiraService {
   private static final String JIRA_WORKBENCH_PROJECT = "RW";
 
   private JiraApi api = new JiraApi();
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private CloudStorageService cloudStorageService;
 
   @Autowired
-  public JiraServiceImpl(Provider<CloudStorageService> cloudStorageServiceProvider) {
-    this.cloudStorageService = cloudStorageServiceProvider.get();
+  public JiraServiceImpl(Provider<WorkbenchConfig> configProvider,
+      CloudStorageService cloudStorageService) {
+    this.workbenchConfigProvider = configProvider;
+    this.cloudStorageService = cloudStorageService;
   }
 
   @VisibleForTesting
@@ -56,7 +59,9 @@ public class JiraServiceImpl implements JiraService {
       projectKey = JIRA_CDR_PROJECT;
     }
     FieldsDetails fieldsDetail = new FieldsDetails()
-        .description(String.format("%s %nContact Email: %s", bugReport.getReproSteps(), bugReport.getContactEmail()))
+        .description(String.format("%s %nContact Email: %s%nEnvironment: %s",
+                bugReport.getReproSteps(), bugReport.getContactEmail(),
+                workbenchConfigProvider.get().server.shortName))
         .summary("User Reported: " + bugReport.getShortDescription())
         .project(new ProjectDetails().key(projectKey))
         .issuetype(issueType);
