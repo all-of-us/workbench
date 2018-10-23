@@ -32,6 +32,7 @@ export class SignedInComponent implements OnInit {
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
+  inNotebookFrame = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -60,6 +61,10 @@ export class SignedInComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (this.locationService.path().toString().match('/notebooks/') &&
+      !this.locationService.path().toString().match('/frame')) {
+      this.inNotebookFrame = true;
+    }
     this.serverConfigService.getConfig().subscribe((config) => {
       this.profileStorageService.profile$.subscribe((profile) => {
         this.hasDataAccess =
