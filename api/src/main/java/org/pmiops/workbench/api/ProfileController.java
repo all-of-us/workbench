@@ -55,6 +55,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -156,18 +157,16 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private User saveUserWithConflictHandling(User user) {
-    if (user.getGivenName().length() > 255) {
-      throw new BadRequestException("Length of given name exceeds character limit.");
+    if (user.getGivenName().length() > 80) {
+      throw new BadRequestException("Given Name length exceeds character limit.")
     }
-    if (user.getFamilyName().length() > 255) {
-      throw new BadRequestException("Length of family name exceeds character limit.");
-    }
-    if (user.getAboutYou().length() > 255) {
-      throw new BadRequestException("Length of 'About You' exceeds character limit.");
+    if (user.getFamilyName().length() > 80) {
+      throw new BadRequestException("Family Name length exceeds character limit.")
     }
     if (user.getAreaOfResearch().length() > 255) {
-      throw new BadRequestException("Length of 'Area of Research' exceeds character limit.");
-    }    try {
+      throw new BadRequestException("Area of Research length exceeds character limit.")
+    }
+    try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
