@@ -16,6 +16,7 @@ import {
 } from 'generated';
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
+import {ToolTipComponent} from '../tooltip/component';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -36,6 +37,9 @@ export class CohortListComponent implements OnInit, OnDestroy {
 
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
+
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
 
   constructor(
     private route: ActivatedRoute,

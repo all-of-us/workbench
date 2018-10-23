@@ -950,7 +950,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.$
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 Where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and (sq.question_concept_id != 1585966 and o.value_as_number > 0)
+and o.value_as_number > 0
 Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id,sq.id
 order by sq.id asc"
 
@@ -980,7 +980,6 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and (o.observation_source_concept_id != 1585966)
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id,sq.id
 order by sq.id asc"
 
@@ -1030,14 +1029,12 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and (o.observation_source_concept_id != 1585966)
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
 order by sq.id asc"
 
 
 # Survey Question Answer Count by age decile  18-29 yr old decile 2(value as number not null)
-# Excluded Zipcode question (1585966)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value,source_count_value)
@@ -1049,7 +1046,6 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and (o.observation_source_concept_id != 1585966)
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
 order by sq.id asc"

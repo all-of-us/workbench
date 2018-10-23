@@ -24,13 +24,7 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.QuestionConceptDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.AchillesAnalysis;
-import org.pmiops.workbench.cdr.model.AchillesResult;
-import org.pmiops.workbench.cdr.model.AchillesResultDist;
-import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.DomainInfo;
-import org.pmiops.workbench.cdr.model.QuestionConcept;
-import org.pmiops.workbench.cdr.model.SurveyModule;
+import org.pmiops.workbench.cdr.model.*;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.model.ConceptAnalysis;
@@ -423,7 +417,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
 
         // Get questions for survey
-        List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(longSurveyConceptId);
+        List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(surveyConceptId);
 
         // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
