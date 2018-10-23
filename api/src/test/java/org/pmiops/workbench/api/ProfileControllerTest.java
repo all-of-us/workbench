@@ -649,6 +649,38 @@ public class ProfileControllerTest {
     assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
+  @Test(expected = BadRequestException.class)
+  public void updateGivenName_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
+      "lifegoesonrahlalalalifegoeson";
+    profile.setGivenName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateFamilyName_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
+      "lifegoesonrahlalalalifegoeson";
+    profile.setFamilyName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateAreaOfResearch_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String areaOfResearch = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
+      "lifegoesonrahlalalalifegoesonobladidobladalifegoesonyalalalalalifegoeson" +
+      "obladiobladaobladidobladalifegoesonyalalalalalifegoesonobladiobladalife" +
+      "goesonrahlalalalifegoesonobladidobladalifegoesonyalalalalalifegoeson";
+    profile.setAreaOfResearch(areaOfResearch);
+    profileController.updateProfile(profile);
+  }
+
   @Test
   public void resendWelcomeEmail_messagingException() throws Exception {
     createUser();
