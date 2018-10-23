@@ -57,6 +57,7 @@ public class WorkbenchConfig {
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;
+    public String oauthClientId;
   }
 
   public static class AdminConfig {
