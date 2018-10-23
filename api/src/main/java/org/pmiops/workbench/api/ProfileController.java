@@ -162,7 +162,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (user.getFamilyName().length() > 80) {
       throw new BadRequestException("Family Name length exceeds character limit. (80)");
     }
-    if (user.getAreaOfResarch() != null && user.getAreaOfResearch().length() > 255) {
+    if (user.getAreaOfResearch() != null && user.getAreaOfResearch().length() > 255) {
       throw new BadRequestException("Area of Research length exceeds character limit. (255)");
     }
     try {
