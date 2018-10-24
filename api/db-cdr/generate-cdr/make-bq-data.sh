@@ -344,7 +344,7 @@ else concat(c.name,'|',c.code)
 end as synonyms
 from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
 join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.criteria\` cs on c.id = cs.id
-where c.type in (MEAS','CPT','ICD10','ICD9','SNOMED')
+where c.type in ('MEAS','CPT','ICD10','ICD9','SNOMED')
 and cs.synonyms is null) as crit
 where crit.id = ct.id"
 

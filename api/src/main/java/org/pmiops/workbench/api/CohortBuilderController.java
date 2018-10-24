@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -110,13 +111,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    String matchExp = ConceptService.modifyMultipleMatchKeyword(value);
     List<Criteria> criteriaList;
     if (subtype == null) {
       criteriaList =  TreeType.PPI.name().equals(type) ?
-        criteriaDao.findCriteriaByTypeForName(type, value, resultLimit) :
-        criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit);
+        criteriaDao.findCriteriaByTypeForName(type, matchExp, resultLimit) :
+        criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, resultLimit);
     } else {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, resultLimit);
     }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
