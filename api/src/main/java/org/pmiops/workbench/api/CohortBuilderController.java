@@ -15,11 +15,13 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -114,9 +116,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     String matchExp = modifyKeywordMatch(value);
     List<Criteria> criteriaList;
     if (subtype == null) {
-      criteriaList =  criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, resultLimit);
+      criteriaList =  criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
     } else {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, resultLimit);
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
     }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();

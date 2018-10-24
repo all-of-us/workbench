@@ -28,6 +28,7 @@ public class Criteria {
     private String domainId;
     private boolean attribute;
     private String path;
+    private String synonyms;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -210,6 +211,20 @@ public class Criteria {
 
     public Criteria path(String path) {
         this.path = path;
+        return this;
+    }
+
+    @Column(name = "synonyms")
+    public String getSynonyms() {
+        return synonyms;
+    }
+
+    public void setSynonyms(String synonyms) {
+        this.synonyms = synonyms;
+    }
+
+    public Criteria synonyms(String synonyms) {
+        this.synonyms = synonyms;
         return this;
     }
 
