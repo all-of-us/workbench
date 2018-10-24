@@ -1,4 +1,3 @@
-import {Location} from '@angular/common';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -105,6 +104,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private wsNamespace: string;
   private loadingSub: Subscription;
   private cluster: Cluster;
+  private progressComplete = new Map<Progress, boolean>();
 
   constructor(
     @Inject(WINDOW_REF) private window: Window,
@@ -116,9 +116,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.initializeProgressMap();
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.data.creating;
+    this.incrementProgress(Progress.Initializing);
 
     if (this.creating) {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
@@ -130,13 +132,14 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
-        if (c.status === ClusterStatus.Starting ||
-            c.status === ClusterStatus.Stopping ||
-            c.status === ClusterStatus.Stopped) {
-          this.progress = Progress.Resuming;
-        } else {
-          this.progress = Progress.Initializing;
-        }
+        this.incrementProgress(Progress.Initializing);
+        // if (c.status === ClusterStatus.Starting ||
+        //     c.status === ClusterStatus.Stopping ||
+        //     c.status === ClusterStatus.Stopped) {
+        //   this.incrementProgress(Progress.Resuming);
+        // } else {
+        //   this.incrementProgress(Progress.Initializing);
+        // }
 
         if (c.status === ClusterStatus.Running) {
           return Observable.from([c]);
@@ -154,18 +157,18 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .retryWhen(errs => this.clusterRetryDelay(errs))
       .do((c) => {
         this.cluster = c;
-        this.progress = Progress.Authenticating;
+        this.incrementProgress(Progress.Authenticating);
       })
       .flatMap(c => this.initializeNotebookCookies(c))
       .flatMap(c => {
         let localizeObs: Observable<string>;
         // This will contain the Jupyter-local path to the localized notebook.
         if (!this.creating) {
-          this.progress = Progress.Copying;
+          this.incrementProgress(Progress.Copying);
           localizeObs = this.localizeNotebooks([this.notebookName])
             .map(localDir => `${localDir}/${this.notebookName}`);
         } else {
-          this.progress = Progress.Creating;
+          this.incrementProgress(Progress.Creating);
           localizeObs = this.newNotebook();
         }
         // The cluster may be running, but we've observed some 504s on localize
@@ -175,7 +178,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         return localizeObs.retry(3);
       })
       .subscribe((nbName) => {
-        this.progress = Progress.Redirecting;
+        this.incrementProgress(Progress.Redirecting);
         this.window.location.href = this.notebookUrl(this.cluster, nbName);
       });
   }
@@ -236,5 +239,16 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         notebookNames: notebookNames
       })
       .map(resp => resp.clusterLocalDirectory);
+  }
+
+  private initializeProgressMap(): void {
+    for (let p in Progress) {
+      this.progressComplete[p] = false;
+    }
+  }
+
+  private incrementProgress(p: Progress): void {
+    this.progressComplete[p] = true;
+    this.progress = p;
   }
 }

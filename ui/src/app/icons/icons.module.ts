@@ -7,6 +7,7 @@ import {RightScrollLightComponent} from './right-scroll-light/component';
 import {RightScrollComponent} from './right-scroll/component';
 import {ShareComponent} from './share/component';
 import {TrashComponent} from './trash/component';
+import {NotebookComponent} from './notebook/component';
 
 @NgModule({
   imports: [],
@@ -17,7 +18,8 @@ import {TrashComponent} from './trash/component';
     LeftScrollLightComponent,
     RightScrollComponent,
     RightScrollLightComponent,
-    ShareComponent
+    ShareComponent,
+    NotebookComponent
   ],
   exports: [
     TrashComponent,
@@ -26,7 +28,8 @@ import {TrashComponent} from './trash/component';
     LeftScrollLightComponent,
     RightScrollComponent,
     RightScrollLightComponent,
-    ShareComponent
+    ShareComponent,
+    NotebookComponent
   ],
   providers: []
 })

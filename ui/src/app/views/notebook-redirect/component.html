@@ -1,25 +1,64 @@
-<h2 *ngIf="notebookName">Loading Notebook '{{notebookName}}'</h2>
-<h2 *ngIf="!notebookName">Creating a New Notebook</h2>
-<div [ngSwitch]="progress" class="spinner-container">
-  <span class="spinner spinner-lg"></span>
-  <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
-    <span class="spinner-header">Initializing notebook server</span><br>
-    May take up to 5 minutes
-  </p>
-  <p *ngSwitchCase="Progress.Resuming" class="spinner-text">
-    <span class="spinner-header">Resuming notebook server</span><br>
-    May take up to 1 minute
-  </p>
-  <p *ngSwitchCase="Progress.Authenticating" class="spinner-text">
-    Authenticating with the notebook server
-  </p>
-  <p *ngSwitchCase="Progress.Copying" class="spinner-text">
-    Copying notebook onto the notebook server
-  </p>
-  <p *ngSwitchCase="Progress.Creating" class="spinner-text">
-    Creating the new notebook
-  </p>
-  <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
-    Redirecting to the notebook server
-  </p>
+<div style="display: flex; flex-direction: column; margin-left: 3rem; margin-top: 1rem; width: 780px">
+  <div style="display: flex; flex-direction: row; justify-content: space-between; flex-grow: 1;">
+    <h2 class="notebooks-header" *ngIf="!creating">Loading Notebook '{{notebookName}}'</h2>
+    <h2 class="notebooks-header" *ngIf="creating">Creating a New Notebook</h2>
+    <button class="btn btn-secondary">Cancel</button>
+  </div>
+  <div class="progress-container">
+    <div class="progress-card" [class.progress-card-current]="progress === Progress.Initializing">
+      <span *ngIf="progress === Progress.Initializing" class="spinner spinner-sm"></span>
+      <app-notebook-icon *ngIf="progress !== Progress.Initializing" [class.progress-icon-current]="progressComplete[Progress.Initializing]"></app-notebook-icon>
+      <span class="progress-text">Initializing notebook server, may take up to 5 minutes</span>
+    </div>
+    <!--<div *ngIf="!creating" class="progress-card" [class.progress-card-current]="progress === Progress.Resuming">-->
+      <!--<span *ngIf="progress === Progress.Resuming" class="spinner spinner-sm"></span>-->
+      <!--<app-notebook-icon *ngIf="progress !== Progress.Resuming" style="margin-bottom: 5px"></app-notebook-icon>-->
+      <!--<span class="progress-text">Resuming notebook server, may take up to 5 minutes</span>-->
+    <!--</div>-->
+    <div class="progress-card" [class.progress-card-current]="progress === Progress.Authenticating">
+      <span *ngIf="progress === Progress.Authenticating" class="spinner spinner-sm"></span>
+      <clr-icon *ngIf="progress !== Progress.Authenticating" shape="success-standard" class="progress-icon" [class.progress-icon-current]="progressComplete[Progress.Authenticating]"></clr-icon>
+      <span class="progress-text">Authenticating with the notebook server</span>
+    </div>
+    <div *ngIf="!creating" class="progress-card" [class.progress-card-current]="progress === Progress.Copying">
+      <span *ngIf="progress === Progress.Copying" class="spinner spinner-sm"></span>
+      <clr-icon *ngIf="progress !== Progress.Copying" shape="copy" class="progress-icon" [class.progress-icon-current]="progressComplete[Progress.Copying]"></clr-icon>
+      <span class="progress-text">Copying notebook onto the notebook server</span>
+    </div>
+    <div *ngIf="creating" class="progress-card" [class.progress-card-current]="progress === Progress.Creating">
+      <span *ngIf="progress === Progress.Creating" class="spinner spinner-sm"></span>
+      <clr-icon *ngIf="progress !== Progress.Creating" shape="copy" class="progress-icon" [class.progress-icon-current]="progressComplete[Progress.Creating]"></clr-icon>
+      <span class="progress-text">Creating the new notebook</span>
+    </div>
+    <div class="progress-card" [class.progress-card-current]="progress === Progress.Redirecting">
+      <span *ngIf="progress === Progress.Redirecting" class="spinner spinner-sm"></span>
+      <clr-icon *ngIf="progress !== Progress.Redirecting" shape="circle-arrow" class="progress-icon" style="transform: rotate(90deg);" [class.progress-icon-current]="progressComplete[Progress.Redirecting]"></clr-icon>
+      <span class="progress-text">Redirecting to the notebook server</span>
+    </div>
+  </div>
+
+  <div [ngSwitch]="progress" class="spinner-container">
+    <span class="spinner spinner-lg"></span>
+    <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
+      <span class="spinner-header">Initializing notebook server</span><br>
+      May take up to 5 minutes
+    </p>
+    <p *ngSwitchCase="Progress.Resuming" class="spinner-text">
+      <span class="spinner-header">Resuming notebook server</span><br>
+      May take up to 1 minute
+    </p>
+    <p *ngSwitchCase="Progress.Authenticating" class="spinner-text">
+      Authenticating with the notebook server
+    </p>
+    <p *ngSwitchCase="Progress.Copying" class="spinner-text">
+      Copying notebook onto the notebook server
+    </p>
+    <p *ngSwitchCase="Progress.Creating" class="spinner-text">
+      Creating the new notebook
+    </p>
+    <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
+      Redirecting to the notebook server
+    </p>
+  </div>
+
 </div>
