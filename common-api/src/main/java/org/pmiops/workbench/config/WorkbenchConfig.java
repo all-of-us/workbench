@@ -67,6 +67,7 @@ public class WorkbenchConfig {
 
   public static class JiraConfig {
     public String projectKey;
+    public String cdrProjectKey;
   }
 
   public static class MandrillConfig {
