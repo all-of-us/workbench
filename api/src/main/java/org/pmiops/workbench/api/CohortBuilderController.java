@@ -5,7 +5,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryResult;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
@@ -111,12 +111,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    String matchExp = ConceptService.modifyMultipleMatchKeyword(value);
+    String matchExp = modifyKeywordMatch(value);
     List<Criteria> criteriaList;
     if (subtype == null) {
-      criteriaList =  TreeType.PPI.name().equals(type) ?
-        criteriaDao.findCriteriaByTypeForName(type, matchExp, resultLimit) :
-        criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, resultLimit);
+      criteriaList =  criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, resultLimit);
     } else {
       criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, resultLimit);
     }
@@ -271,6 +269,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     ParticipantDemographics participantDemographics =
       new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
     return ResponseEntity.ok(participantDemographics);
+  }
+
+  private String modifyKeywordMatch(String value) {
+    if (value == null || value.trim().isEmpty()) {
+      throw new BadRequestException(
+        String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
+    }
+    return Arrays.stream(value.split("[,+\\s+]"))
+      .map(term -> "+" + term + "*")
+      .collect(Collectors.joining());
   }
 
 }
