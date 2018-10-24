@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
@@ -24,8 +24,7 @@ import {RenameModalComponent} from 'app/views/rename-modal/component';
     './component.css'],
   templateUrl: './component.html'
 })
-
-export class ResourceCardComponent implements OnInit, OnDestroy {
+export class ResourceCardComponent implements OnInit {
   resourceType: ResourceType;
   @Input('resourceCard')
   resourceCard: RecentResource;
@@ -41,7 +40,6 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
-  notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
   @ViewChild(RenameModalComponent)
   renameModal: RenameModalComponent;
@@ -186,34 +184,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       case ResourceType.NOTEBOOK: {
         const nbUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/notebooks/'
           + encodeURIComponent(this.resourceCard.notebook.name);
-        const notebook = window.open(nbUrl, '_blank');
-
-        // TODO(RW-474): Remove the authHandler integration. This is messy,
-        // non-standard, and currently will break in the following situation:
-        // - User opens a new notebook tab.
-        // - While that tab is loading, user immediately navigates away from this
-        //   page.
-        // This is not easily fixed without leaking listeners outside the lifespan
-        // of the workspace component.
-        const authHandler = (e: MessageEvent) => {
-          if (e.source !== notebook) {
-            return;
-          }
-          if (e.origin !== environment.leoApiUrl) {
-            return;
-          }
-          if (e.data.type !== 'bootstrap-auth.request') {
-            return;
-          }
-          notebook.postMessage({
-            'type': 'bootstrap-auth.response',
-            'body': {
-              'googleClientId': this.signInService.clientId
-            }
-          }, environment.leoApiUrl);
-        };
-        window.addEventListener('message', authHandler);
-        this.notebookAuthListeners.push(authHandler);
+        window.open(nbUrl, '_blank');
       }
     }
   }
@@ -236,10 +207,6 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
 
   get resourceTypeInvalidError(): boolean {
     return this.invalidResourceError;
-  }
-
-  ngOnDestroy(): void {
-    this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
   }
 
   get actionsDisabled(): boolean {

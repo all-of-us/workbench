@@ -37,9 +37,6 @@
     "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
   },
-  "jira": {
-    "projectKey": "RW"
-  },
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3

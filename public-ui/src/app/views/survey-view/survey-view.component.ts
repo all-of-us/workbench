@@ -29,7 +29,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   resultsComplete = false;
   private subscriptions: ISubscription[] = [];
   loading = false;
-  surveyPdfUrl = '/assets/surveys/AoU PPI_Basics_version_2018.06.04.docx';
+  surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
+  surveyName: string;
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -53,6 +54,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
+      this.surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
     }
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
@@ -63,6 +65,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
+        this.surveyName = this.survey.name;
 
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
