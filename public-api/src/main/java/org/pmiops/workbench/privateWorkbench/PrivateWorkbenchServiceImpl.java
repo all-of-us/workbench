@@ -22,17 +22,13 @@ public class PrivateWorkbenchServiceImpl implements PrivateWorkbenchService {
   }
 
   @Override
-  public Profile getMe() throws ApiException {
+  public Profile getMe(String token) throws ApiException {
     ProfileApi profileApi = profileApiProvider.get();
+    profileApi.getApiClient().setAccessToken(token);
     try {
       return profileApi.getMe();
     } catch (ApiException exception) {
       throw exception;
     }
-  }
-
-  @Override
-  public void setAccessToken(String token) {
-    this.profileApiProvider.get().getApiClient().setAccessToken(token);
   }
 }

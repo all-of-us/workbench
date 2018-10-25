@@ -21,6 +21,7 @@ public class PrivateWorkbenchConfig {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.server.apiBaseUrl);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    apiClient.setConnectTimeout(10000);
     return apiClient;
   }
 

@@ -4,10 +4,15 @@ import com.google.api.client.http.HttpMethods;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.privateWorkbench.PrivateWorkbenchService;
+import org.pmiops.workbench.privateWorkbench.model.IdVerificationStatus;
 import org.pmiops.workbench.privateWorkbench.model.Profile;
+import org.pmiops.workbench.publicapi.ConfigController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -30,10 +35,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private static final Logger log = Logger.getLogger(AuthInterceptor.class.getName());
   private static final String authName = "aou_oauth";
 
+  private final Provider<WorkbenchConfig> configProvider;
+
   private final PrivateWorkbenchService privateWorkbenchService;
 
+
   @Autowired
-  public AuthInterceptor(PrivateWorkbenchService privateWorkbenchService) {
+  public AuthInterceptor(Provider<WorkbenchConfig> configProvider,
+                         PrivateWorkbenchService privateWorkbenchService) {
+    this.configProvider = configProvider;
     this.privateWorkbenchService = privateWorkbenchService;
   }
 
@@ -78,9 +88,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
-    privateWorkbenchService.setAccessToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 
-    Profile profile = privateWorkbenchService.getMe();
+    String token = authorizationHeader.substring("Bearer".length()).trim();
+
+    if (token.equals("null")) {
+      throw new RuntimeException();
+    }
+
+    Profile profile = privateWorkbenchService.getMe(token);
+    if (configProvider.get().firecloud.enforceRegistered) {
+      if (profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
+        throw new RuntimeException();
+      }
+    }
     return true;
   }
 
