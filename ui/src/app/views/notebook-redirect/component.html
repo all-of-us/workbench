@@ -2,14 +2,14 @@
   <div style="display: flex; flex-direction: row; justify-content: space-between; flex-grow: 1;">
     <h2 class="notebooks-header" *ngIf="!creating">Loading Notebook '{{notebookName}}'</h2>
     <h2 class="notebooks-header" *ngIf="creating">Creating a New Notebook</h2>
-    <button class="btn btn-secondary">Cancel</button>
+    <button class="btn btn-secondary" (click)="closeWindow()">Cancel</button>
   </div>
   <div class="progress-container">
     <div class="progress-card" [class.progress-card-current]="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)">
       <span *ngIf="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)" class="spinner spinner-sm"></span>
-      <app-notebook-icon [completeView]="progressComplete[Progress.Initializing] || progressComplete[Progress.Resuming]" *ngIf="![Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)"></app-notebook-icon>
+      <app-notebook-icon [completeView]="true" *ngIf="![Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)"></app-notebook-icon>
       <span *ngIf="progress === Progress.Unknown" class="progress-text">Connecting to notebook server...</span>
-      <span *ngIf="progress === Progress.Initializing || progressComplete[Progress.Initializing]" class="progress-text">Initializing notebook server, may take up to 5 minutes</span>
+      <span *ngIf="(progress === Progress.Initializing || progressComplete[Progress.Initializing]) && !progressComplete[Progress.Resuming]" class="progress-text">Initializing notebook server, may take up to 5 minutes</span>
       <span *ngIf="progress === Progress.Resuming || progressComplete[Progress.Resuming]" class="progress-text">Resuming notebook server, may take up to 1 minute</span>
     </div>
     <div class="progress-card" [class.progress-card-current]="progress === Progress.Authenticating">

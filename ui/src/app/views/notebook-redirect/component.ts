@@ -121,8 +121,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.data.creating;
 
-    //this.incrementProgress(Progress.Initializing);
-
     if (this.creating) {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
       this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernel-type')];
@@ -240,6 +238,10 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         notebookNames: notebookNames
       })
       .map(resp => resp.clusterLocalDirectory);
+  }
+
+  private closeWindow() {
+    window.close();
   }
 
   private initializeProgressMap(): void {
