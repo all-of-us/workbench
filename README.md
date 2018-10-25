@@ -432,3 +432,31 @@ create and delete BigQuery datasets), run:
 ```
 
 By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
+
+## Manual Testing
+
+### Backend Swagger Portals
+
+These are easiest if you need to authenticate as one of your researcher accounts.
+
+Firecloud dev: https://firecloud-orchestration.dsde-dev.broadinstitute.org/
+Firecloud prod: https://api.firecloud.org
+
+Leo (notebook clusters) dev: https://leonardo.dsde-dev.broadinstitute.org
+Leo (notebook clusters) prod: https://notebooks.firecloud.org
+
+### Authenticated Backend Requests (CLI)
+
+This approach is required if you want to issue a request to a backend as a service account. This may be necessary in some cases as the Workbench service is an owner on all AoU billing projects.
+
+This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed:
+```
+go get github.com/google/oauth2l
+go install github.com/google/oauth2l
+```
+
+The following shows how to make an authenticated backend request against Firecloud dev (assumes you have run dev-up at least once):
+
+```
+api$ curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+```
