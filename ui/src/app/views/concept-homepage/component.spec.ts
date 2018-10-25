@@ -214,7 +214,7 @@ describe('ConceptHomepageComponent', () => {
     let buttonText = button.nativeNode.innerHTML;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
-    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row');
+    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
     const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
         .query(By.css('.checkbox')).children;
     simulateClick(fixture, checkBox[0]);
