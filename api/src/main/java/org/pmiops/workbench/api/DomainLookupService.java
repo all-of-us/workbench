@@ -42,7 +42,7 @@ public class DomainLookupService {
           List<SearchParameter> paramsWithDomains = new ArrayList<>();
           for (SearchParameter parameter : item.getSearchParameters()) {
             if (parameter.getGroup() &&
-              (parameter.getDomain() == null || parameter.getDomain().isEmpty())) {
+              (parameter.getDomainId() == null || parameter.getDomainId().isEmpty())) {
               List<String> domainLookups =
                 criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
                   parameter.getType(),
@@ -56,7 +56,7 @@ public class DomainLookupService {
 
               for (String row : domainLookups) {
                 paramsWithDomains.add(new SearchParameter()
-                  .domain(row)
+                  .domainId(row)
                   .value(parameter.getValue())
                   .type(parameter.getType())
                   .subtype(parameter.getSubtype())

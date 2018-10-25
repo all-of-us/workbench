@@ -15,6 +15,7 @@ import {
   StandardConceptFilter,
   VocabularyCount,
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 interface ConceptCacheSet {
   domain: Domain;
@@ -35,6 +36,7 @@ interface VocabularyCountSelected extends VocabularyCount {
     '../../styles/headers.css',
     '../../styles/inputs.css',
     '../../styles/errors.css',
+    '../../styles/tooltip.css',
     './component.css'],
   templateUrl: './component.html',
 })
@@ -50,8 +52,7 @@ export class ConceptHomepageComponent implements OnInit {
     domain: undefined,
     conceptCount: 0
   };
-  addTextHovering = false;
-  conceptSelected = false;
+  isConceptSelected = false;
   selectedConcept: Concept[] = [];
 
   @ViewChild(ConceptTableComponent)
@@ -60,26 +61,28 @@ export class ConceptHomepageComponent implements OnInit {
   @ViewChild(ConceptAddModalComponent)
   conceptAddModal: ConceptAddModalComponent;
 
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
+
   conceptDomainList: Array<DomainInfo> = [];
   conceptDomainCounts: Array<DomainCount> = [];
 
+  // Maps Domain Name with number of concept selected
+  selectedConceptDomainMap: Map<String, number>  = new Map<string, number>();
   concepts: Array<Concept> = [];
   conceptsCache: Array<ConceptCacheSet> = [];
-
   completedDomainSearches: Array<Domain> = [];
-
   placeholderValue = '';
-
+  addToSetText = 'Add to set';
   vocabularies: Array<VocabularyCountSelected> = [];
-
   wsNamespace: string;
   wsId: string;
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
   blockMultipleSearchFromFilter = true;
-
   maxConceptFetch = 100;
+  conceptsSavedText = '';
 
   constructor(
     private conceptsService: ConceptsService,
@@ -104,9 +107,9 @@ export class ConceptHomepageComponent implements OnInit {
           name: domain.name,
           conceptCount: 0
         });
+        this.selectedDomain = this.conceptDomainCounts[0];
       });
       this.loadingDomains = false;
-      this.selectedDomain = this.conceptDomainCounts[0];
     });
   }
 
@@ -116,6 +119,10 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   selectDomain(domainCount: DomainCount) {
+    if (!this.selectedConceptDomainMap[domainCount.domain]) {
+      this.selectedConceptDomainMap[domainCount.domain] = 0;
+    }
+    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainCount.domain]);
     this.selectedDomain = domainCount;
     this.placeholderValue = this.noConceptsConstant;
     this.setConceptsAndVocabularies();
@@ -123,9 +130,18 @@ export class ConceptHomepageComponent implements OnInit {
 
   searchButton() {
     this.currentSearchString = this.searchTerm;
+    this.reset();
     this.searchConcepts();
   }
 
+  reset() {
+    this.selectedConcept = [];
+    this.selectedConceptDomainMap = new Map<string, number>();
+    this.conceptDomainCounts = [];
+    this.addToSetText = 'Add to set';
+    this.isConceptSelected = false;
+
+  }
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
     this.selectedDomain =
@@ -134,6 +150,9 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchConcepts() {
+    if (this.conceptTable) {
+      this.conceptTable.selectedConcepts = [];
+    }
     this.searching = true;
     this.searchLoading = true;
     this.placeholderValue = this.noConceptsConstant;
@@ -182,7 +201,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   setConceptsAndVocabularies() {
     const cacheItem = this.conceptsCache.find(
-      conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
+        conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
@@ -236,14 +255,58 @@ export class ConceptHomepageComponent implements OnInit {
       });
   }
 
-  selectConcept(selectedConcepts) {
-    this.selectedConcept = selectedConcepts;
-    if (this.selectedConcept && this.selectedConcept.length > 0 ) {
-      this.conceptSelected = true;
+  selectConcept(concepts) {
+    this.selectedConcept = concepts;
+    const domainName = this.selectedDomain.domain;
+    if (concepts && concepts.length > 0 ) {
+      const filterConceptsCount = concepts
+          .filter(concept => {
+          return concept.domainId.toLowerCase() ===
+              this.selectedDomain.domain.toString().toLowerCase();
+          })
+          .length;
+      this.selectedConceptDomainMap[domainName] = filterConceptsCount;
+      this.isConceptSelected = filterConceptsCount > 0 ;
+    } else {
+      this.isConceptSelected = false;
+      this.selectedConceptDomainMap[domainName] = 0;
     }
+    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainName]);
+  }
+
+  afterConceptsSaved() {
+    this.setConceptsSaveText();
+
+    // Once concepts are saved clear the selection from concept homepage for active Domain
+
+    this.conceptTable.selectedConcepts.length = 0;
+    this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
+    this.cloneCacheConcepts();
+  }
+
+  setConceptsSaveText() {
+    const conceptsCount = this.selectedConceptDomainMap[this.selectedDomain.domain];
+    this.conceptsSavedText = conceptsCount + ' ' + this.selectedDomain.name +
+        (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added ';
+    setTimeout(() => {
+      this.conceptsSavedText = '';
+    }, 5000);
+  }
+
+  /* This is done because clr-datagrid has a bug which causes unselected entries to
+    appear as selected on refresh*/
+  cloneCacheConcepts() {
+    const cacheItem = this.conceptsCache.find(
+        conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
+    const cloneConcepts = cacheItem.items.map(x => Object.assign({}, x));
+    cacheItem.items = cloneConcepts;
   }
 
   get noConceptsConstant() {
     return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
+  }
+
+  getAddToSetText(conceptsCount): string {
+    return conceptsCount === 0 ? 'Add to set' : 'Add (' + conceptsCount + ') to set';
   }
 }

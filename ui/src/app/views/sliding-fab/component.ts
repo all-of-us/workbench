@@ -20,5 +20,6 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angula
 export class SlidingFabComponent {
   @Output('submit') submit = new EventEmitter<void>();
   @Input('expanded') expanded = '';
+  @Input('disable') disable = false;
   hovering = false;
 }

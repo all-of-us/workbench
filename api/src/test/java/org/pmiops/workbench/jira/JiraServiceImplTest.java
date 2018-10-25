@@ -26,9 +26,6 @@ import static org.mockito.Mockito.when;
 public class JiraServiceImplTest {
 
   private JiraServiceImpl service;
-
-  @Mock
-  private WorkbenchConfig workbenchConfig;
   @Mock
   private CloudStorageService cloudStorageService;
   @Mock
@@ -49,13 +46,11 @@ public class JiraServiceImplTest {
     JSONObject jiraCredentials = new JSONObject();
     jiraCredentials.putOnce("username", "username");
     jiraCredentials.putOnce("password", "password");
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+    workbenchConfig.server = new WorkbenchConfig.ServerConfig();
+    workbenchConfig.server.shortName = "Prod";
     when(cloudStorageService.getJiraCredentials()).thenReturn(jiraCredentials);
-    workbenchConfig.jira = new WorkbenchConfig.JiraConfig();
-    workbenchConfig.jira.projectKey = "RW";
-    service = new JiraServiceImpl(
-        Providers.of(workbenchConfig),
-        Providers.of(cloudStorageService)
-    );
+    service = new JiraServiceImpl(Providers.of(workbenchConfig), cloudStorageService);
     doThrow(new ApiException("Missing the required parameter 'issueKey' when calling addAttachments(Async)"))
         .when(jiraApi).addAttachments(null, mockFile, "nocheck");
 

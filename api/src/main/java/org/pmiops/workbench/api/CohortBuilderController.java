@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
@@ -110,13 +112,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    String matchExp = modifyKeywordMatch(value);
     List<Criteria> criteriaList;
     if (subtype == null) {
-      criteriaList =  TreeType.PPI.name().equals(type) ?
-        criteriaDao.findCriteriaByTypeForName(type, value, resultLimit) :
-        criteriaDao.findCriteriaByTypeForCodeOrName(type, value, resultLimit);
+      criteriaList =  criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
     } else {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, value, resultLimit);
+      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
     }
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
@@ -269,6 +270,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     ParticipantDemographics participantDemographics =
       new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
     return ResponseEntity.ok(participantDemographics);
+  }
+
+  private String modifyKeywordMatch(String value) {
+    if (value == null || value.trim().isEmpty()) {
+      throw new BadRequestException(
+        String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
+    }
+    return Arrays.stream(value.split("[,+\\s+]"))
+      .map(term -> "+" + term + "*")
+      .collect(Collectors.joining());
   }
 
 }

@@ -1,5 +1,14 @@
 <app-top-box>
-  <h3 class="cohorts-header">Cohorts</h3>
+  <h3 class="cohorts-header">
+    Cohorts
+    <app-tooltip>
+      <div class="tooltip-label">
+        A “Cohort” is a group of participants you are interested in researching.
+        The cohort builder allows you to create and review cohorts and
+        annotate participants in your study group.
+      </div>
+    </app-tooltip>
+  </h3>
   <div *ngIf="cohortsLoading" class="spinner-container">
     <span class="spinner spinner-lg"></span>
   </div>
@@ -14,10 +23,12 @@
         <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
       </div>
     </div>
-    <div *ngFor="let cohort of resourceList">
-      <app-resource-card [resourceCard]="cohort" [cssClass]="'for-list'"
-                         (onUpdate)="reloadCohorts()">
-      </app-resource-card>
+    <div style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
+      <div *ngFor="let cohort of resourceList">
+        <app-resource-card [resourceCard]="cohort" [cssClass]="'for-list'"
+                           (onUpdate)="reloadCohorts()">
+        </app-resource-card>
+      </div>
     </div>
   </div>
 </app-top-box>
