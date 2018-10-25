@@ -198,22 +198,19 @@ export class NodeComponent implements OnInit, OnDestroy {
     /* Criteria are cached, so this will result in an API call only the first
      * time this function is called.  Subsequent calls are no-ops
      */
-    /* Here need to check treeTypes for calling services otherwise
-    it is fetching data for multiple trees */
     if (_type === TreeType[TreeType.DRUG]) {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
     } else if (this.fullTree && _type === TreeType[TreeType.PM]) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else if (this.codes && this.node.get('subtype')) {
       this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
-    } else if (_type === TreeType[TreeType.VISIT]) {
-      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
-    } else if (_type === TreeType[TreeType.PPI] || _type === TreeType[TreeType.CPT]
-      || _type === TreeType[TreeType.MEAS]) {
+    } else {
       this.actions.fetchCriteria(_type, parentId);
     }
-
-
+    // Load options for Encounters modifier
+    if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
+      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
+    }
   }
 
   toggleExpanded() {
