@@ -3,8 +3,6 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {SignInService} from 'app/services/sign-in.service';
-import {environment} from 'environments/environment';
 import {Workspace} from 'generated';
 
 @Component({
@@ -19,12 +17,10 @@ export class NotebookFrameComponent implements OnInit {
   wsNamespace: string;
   wsName: string;
   nbName: string;
-  notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
 
   constructor (
     private route: ActivatedRoute,
-    private signInService: SignInService,
     private sanitizer: DomSanitizer
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
@@ -32,29 +28,22 @@ export class NotebookFrameComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.route.snapshot);
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsName = this.route.snapshot.params['wsid'];
     this.nbName = this.route.snapshot.params['nbName'];
-    this.jupyterUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsName + '/notebooks/'
-      + encodeURIComponent(this.nbName);
-    const authHandler = (e: MessageEvent) => {
-      // if (e.source !== notebook) {
-      //   return;
-      // }
-      if (e.origin !== environment.leoApiUrl) {
-        return;
-      }
-      if (e.data.type !== 'bootstrap-auth.request') {
-        return;
-      }
-      window.postMessage({
-        'type': 'bootstrap-auth.response',
-        'body': {
-          'googleClientId': this.signInService.clientId
-        }
-      }, environment.leoApiUrl);
-    };
-    window.addEventListener('message', authHandler);
-    this.notebookAuthListeners.push(authHandler);
+    if (this.route.snapshot.routeConfig.path.match('create')) {
+      this.jupyterUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
+        `notebooks/create/?notebook-name=` +
+        encodeURIComponent(this.route.snapshot.queryParams['notebook-name']) +
+        `&kernel-type=${this.route.snapshot.queryParams['kernelType']}`;
+    } else {
+      this.jupyterUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsName + '/notebooks/'
+        + this.nbName;
+    }
+  }
+
+  get iFrameSrc() {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.jupyterUrl);
   }
 }

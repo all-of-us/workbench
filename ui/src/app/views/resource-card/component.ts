@@ -191,7 +191,7 @@ export class ResourceCardComponent implements OnInit {
       }
       case ResourceType.NOTEBOOK: {
         this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'notebooks',
-        encodeURIComponent(this.resourceCard.notebook.name), 'frame'], {relativeTo: null});
+        'frame', encodeURIComponent(this.resourceCard.notebook.name)], {relativeTo: null});
       }
     }
   }
