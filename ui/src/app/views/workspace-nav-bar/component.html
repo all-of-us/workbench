@@ -35,12 +35,12 @@
           Clone
         </button>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-          <button clrDropdownItem class="btn" [disabled]="!writePermission" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/edit"
+          <button clrDropdownItem class="btn" [disabled]="!ownerPermission" routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/edit"
                       routerLinkActive="active">
             <clr-icon shape="pencil" class="icons"></clr-icon>
             Edit
           </button>
-          <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+          <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
           <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="share()">
