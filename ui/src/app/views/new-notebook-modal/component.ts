@@ -28,7 +28,7 @@ export class NewNotebookModalComponent {
 
   constructor(
     private userMetricsService: UserMetricsService,
-    private route: Router
+    public route: Router
   ) {}
 
   open(): void {
