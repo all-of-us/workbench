@@ -79,6 +79,7 @@
           id="name-control"
           class="control"
           placeholder="Cohort Name"
+          maxlength="80"
           formControlName="name"
           type="text"
           [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"

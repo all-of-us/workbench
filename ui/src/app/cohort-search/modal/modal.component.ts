@@ -51,10 +51,11 @@ export class ModalComponent implements OnInit, OnDestroy {
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
+  mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
   demoItemsType: string;
   demoParam: string;
   count = 0;
+  originalNode: any;
   constructor(
     private route: ActivatedRoute,
     private api: CohortBuilderService,
@@ -133,6 +134,7 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.subtype = subtype;
       })
     );
+    this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
     const key = selection.get('type') === TreeType[TreeType.DEMO]
@@ -166,7 +168,12 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   back() {
-    this.actions.hideAttributesPage();
+    if (this.attributesNode.size > 0) {
+      this.actions.hideAttributesPage();
+    }
+    if (this.mode === 'snomed') {
+      this.setMode('tree');
+    }
   }
 
   finish() {
@@ -182,6 +189,16 @@ export class ModalComponent implements OnInit, OnDestroy {
       subtype: this.subtype,
       fullTree: this.fullTree,
       id: 0
+    });
+  }
+
+  get snomedNode() {
+    return Map({
+      type: TreeType.SNOMED,
+      subtype: this.subtype === TreeSubType[TreeSubType.CM]
+        ? TreeSubType.CM : TreeSubType.PCS,
+      fullTree: this.fullTree,
+      id: 0,    // root parent ID is always 0
     });
   }
 
@@ -203,10 +220,40 @@ export class ModalComponent implements OnInit, OnDestroy {
       : typeToTitle(this.ctype) + ' Detail';
   }
 
+  get showModifiers() {
+    return this.itemType !== TreeType[TreeType.PM] || this.itemType !== TreeType[TreeType.DEMO];
+  }
+
   get showHeader() {
     return this.itemType === TreeType[TreeType.CONDITION]
     || this.itemType === TreeType[TreeType.PROCEDURE]
     || this.itemType === TreeType[TreeType.DEMO];
+  }
+
+  get showSnomed() {
+    return this.itemType === TreeType[TreeType.CONDITION]
+    || this.itemType === TreeType[TreeType.PROCEDURE];
+  }
+
+  setMode(mode: any) {
+    if (mode === 'snomed') {
+      this.originalNode = Map({
+        type: this.ctype,
+        subtype: this.subtype,
+        fullTree: this.fullTree,
+        id: 0,
+      });
+    }
+    const node = mode === 'tree' ? this.originalNode : this.snomedNode;
+    const criteriaType = node.get('type');
+    const criteriaSubtype = node.get('subtype');
+    const context = {criteriaType, criteriaSubtype};
+    this.actions.setWizardContext(context);
+    this.mode = mode;
+  }
+
+  get altTab() {
+    return this.attributesNode.size > 0;
   }
 
   get secondLevel() {

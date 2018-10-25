@@ -27,16 +27,15 @@
     "gSuiteDomain": "researchallofus.org"
   },
   "server": {
+    "apiBaseUrl": "https:\/\/api.workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
     "projectId": "all-of-us-rw-prod",
-    "shortName": "Prod"
+    "shortName": "Prod",
+    "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com"
   },
   "admin": {
-    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
+    "adminIdVerification": "support@researchallofus.org",
     "loginUrl": "https:\/\/workbench.researchallofus.org/login"
-  },
-  "jira": {
-    "projectKey": "RW"
   },
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",

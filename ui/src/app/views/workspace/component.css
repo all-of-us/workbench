@@ -6,8 +6,9 @@
   width: 35%;
   color: #2F2E7E;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
+  display: flex
 }
 
 .description-text {
@@ -61,8 +62,7 @@ h3 {
 }
 
 .main-body {
-  width: 77%;
-  margin-right: 0.6rem;
+  width: 100%;
   position: relative;
 }
 
@@ -83,13 +83,13 @@ h3 {
 .subheader {
   color: #2F2E7E;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 button.btn.btn-link {
   color: #2691D0;
   font-size: 0.8rem;
-  font-weight: 300;
+  font-weight: 400;
   text-transform: none;
   border-right: 1px solid #979797;
   width: 10rem;
@@ -157,7 +157,7 @@ app-workspace-nav-bar {
   align-items: flex-start;
   color: #262262;
   font-size: 12px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .column {
@@ -182,4 +182,8 @@ app-workspace-nav-bar {
 
 .action-item.disabled {
   outline: none;
+}
+
+.padding-wrapper {
+  padding-left: 1rem;
 }

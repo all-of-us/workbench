@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
@@ -22,13 +22,15 @@ import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 export class RecentWorkComponent implements OnInit {
   resourceList: RecentResource[];
+  resourcesLoading: boolean;
   fullList: RecentResource[] = [];
+  @Input('headerText')
+  headerText = 'Your Recent Work';
   @Input('workspace')
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
   startIndex = 0;
   cssClass: string;
-  resourcesLoading = false;
   constructor(
     private userMetricsService: UserMetricsService,
     private workspacesService: WorkspacesService,
@@ -36,11 +38,38 @@ export class RecentWorkComponent implements OnInit {
     private route: ActivatedRoute,
   ) {}
   index: Number;
-  size = 3;
+  @ViewChild('recentWork')
+  eRecentWork: ElementRef;
+  size: number;
 
   ngOnInit(): void {
     this.resourcesLoading = true;
+    this.size = this.calculateSize(this.eRecentWork);
     this.updateList();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    const width = this.eRecentWork.nativeElement.offsetWidth;
+    if ((this.resourcesLoading === false) && (width)) {
+      this.size = this.calculateSize(this.eRecentWork);
+      this.updateList();
+    }
+  }
+
+  calculateSize(el: ElementRef): number {
+    const width = el.nativeElement.offsetWidth;
+    let division;
+    if (this.workspace) {
+      division = Math.floor((width - 200) / 200);
+    } else {
+      division = Math.floor((width - 50) / 200);
+    }
+    if (division >= 2) {
+      return division;
+    } else {
+      return 2;
+    }
   }
 
   updateList(): void {

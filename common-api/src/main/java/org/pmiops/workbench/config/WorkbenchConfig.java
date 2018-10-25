@@ -53,9 +53,11 @@ public class WorkbenchConfig {
   }
 
   public static class ServerConfig {
+    public String apiBaseUrl;
     public String publicApiKeyForErrorReports;
     public String projectId;
     public String shortName;
+    public String oauthClientId;
   }
 
   public static class AdminConfig {
@@ -65,6 +67,7 @@ public class WorkbenchConfig {
 
   public static class JiraConfig {
     public String projectKey;
+    public String cdrProjectKey;
   }
 
   public static class MandrillConfig {

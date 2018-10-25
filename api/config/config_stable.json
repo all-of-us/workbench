@@ -27,16 +27,15 @@
     "gSuiteDomain": "stable.fake-research-aou.org"
   },
   "server": {
+    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-stable.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyA4gOEvyJRkhIbW0x0Y7PkIowOSIK_Tous",
     "projectId": "all-of-us-rw-stable",
-    "shortName": "Stable"
+    "shortName": "Stable",
+    "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
-    "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
-  },
-  "jira": {
-    "projectKey": "RW"
+    "adminIdVerification": "support@researchallofus.org"
   },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",

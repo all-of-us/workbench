@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
@@ -6,6 +6,7 @@ import {
   ConceptSet,
   ConceptSetsService,
   ConceptsService,
+  CreateConceptSetRequest,
   Domain,
   UpdateConceptSetRequest
 } from 'generated';
@@ -22,6 +23,7 @@ import {
 export class ConceptAddModalComponent {
   public modalOpen = false;
   loading = true;
+  saving = false;
   conceptSets: ConceptSet[] = [];
   wsNamespace: string;
   wsId: string;
@@ -37,6 +39,7 @@ export class ConceptAddModalComponent {
 
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
+  @Output('saveComplete') saveComplete = new EventEmitter<void>();
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -84,12 +87,13 @@ export class ConceptAddModalComponent {
   save(): void {
     this.errorSaving = false;
     this.errorNameReq = false;
+    this.saving = true;
 
+    const conceptIds = [];
+    this.selectConceptList.forEach((selected) => {
+      conceptIds.push(selected.conceptId);
+    });
     if (this.existingSetSelected) {
-      const conceptIds = [];
-      this.selectConceptList.forEach((selected) => {
-        conceptIds.push(selected.conceptId);
-      });
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: this.selectedConceptSet.etag  ,
         addedIds: conceptIds
@@ -97,7 +101,9 @@ export class ConceptAddModalComponent {
       this.conceptSetsService.updateConceptSetConcepts(
           this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
           .subscribe((response) => {
+            this.saving = false;
             this.modalOpen = false;
+            this.saveComplete.emit();
           }, (error) => {
             this.errorMsg = error.toString();
           });
@@ -114,14 +120,21 @@ export class ConceptAddModalComponent {
       return;
     }
 
-    this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, {
-          name: this.name,
-          description: this.description,
-          domain: this.selectDomain,
-          concepts: this.selectConceptList
-        })
+    const conceptSet: ConceptSet = {
+      name: this.name,
+      description: this.description,
+      domain: this.selectDomain
+    };
+    const request: CreateConceptSetRequest = {
+      conceptSet: conceptSet,
+      addedIds: conceptIds
+    };
+
+    this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
+          this.saving = false;
           this.modalOpen = false;
+          this.saveComplete.emit();
         }, (error) => {
           this.errorSaving = true;
           if (error.status === 400) {

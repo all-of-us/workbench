@@ -4,39 +4,61 @@
   <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; right: 1rem; width: 32px; margin-top: .3rem"></clr-icon></div>
 </div>
 <div class="workspace-container">
-  <div class="main-body">
-    <div style="display: flex; flex-direction: row">
-      <h2 class="greeting" style="width: 200px">Actions</h2>
-      <h2 class="greeting" style="padding-left: 10%; margin-left:2rem">Recently Modified</h2>
-    </div>
-    <div style="display: flex; flex-direction: row; align-items: center">
-      <div style="width: 200px;">
-        <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-          <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-          <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
-            <div class="create-text">
-              Create a <br/>New Cohort
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+  <app-top-box style="width: 78%">
+    <div class="padding-wrapper">
+      <div class="main-body">
+        <div style="display: flex; flex-direction: row">
+          <h2 class="greeting" style="width: 200px; padding-left: .5%">
+            Actions
+            <app-tooltip>
+                <div class="tooltip-header">Create a new Cohort</div>
+                <div class="tooltip-label">A “Cohort” is a group of participants you are interested in researching.
+                  <br>The cohort builder allows you to create and review cohorts and annotate participants in your study group.
+                </div>
+                <div class="tooltip-header">Create a new Notebook</div>
+                <div class="tooltip-label">A Notebook is a computational environment
+                  where you can analyze data with basic programming knowledge
+                  in R or Python.
+                </div>
+            </app-tooltip>
+          </h2>
+          <h2 class="greeting" style="margin-left: 2.3rem; font-size: 16px">
+            Recently Modified
+            <app-tooltip>
+              <div class="tooltip-label">This section shows the items in your workspace sorted by their last modified date.
+              </div>
+            </app-tooltip>
+          </h2>
+        </div>
+        <div style="display: flex; flex-direction: row; align-items: center; width: 100%">
+          <div style="width: 200px;">
+            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
+              <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
+                <div class="create-text">
+                  Create a <br/>New Cohort
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
+            </div>
+            <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+              <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
+              <div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
+                <div class="create-text">
+                  Create a<br/>New Notebook
+                  <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
-          <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create notebooks</span>
-          <div class="card add-card" [ngClass]="{'disabled' : !writePermission }" style="margin-top: 13px;" (click)="!writePermission || newNotebook()">
-            <div class="create-text">
-              Create a<br/>New Notebook
-              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
-            </div>
+          <div style="flex-grow: 3">
+            <app-recent-work [workspace]="workspace" [headerText]="''" style="display: flex; justify-content: flex-end"></app-recent-work>
           </div>
         </div>
-      </div>
-      <div style="padding-left: 10%">
-        <app-recent-work [workspace]="workspace"></app-recent-work>
-      </div>
-    </div>
-    <div style="padding-top: 1rem;">
-      <h4 class="subheader">Research Purpose
-        <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
+        <div style="padding-top: 1rem;">
+          <h4 class="subheader">Research Purpose
+            <span role="tooltip"
+                  aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
           <button [disabled]="!writePermission"
                   [class.disabled]="!writePermission"
                   routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
@@ -45,27 +67,40 @@
           </button>
           <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
         </span>
-      </h4>
-      <div class="description-text">
-        {{workspace.description}}
-      </div>
-      <div class="research-purpose-items">
-        <div class="column">
-          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
-            {{researchPurposeDescription}}
+            <app-tooltip [direction]="'top-right'">
+              <div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.
+              </div>
+            </app-tooltip>
+          </h4>
+          <div class="description-text">
+            {{workspace.description}}
           </div>
-        </div>
-        <div class="column">
-          <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
-            {{researchPurposeDescription}}
+          <div class="research-purpose-items">
+            <div class="column">
+              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of leftResearchPurposes">
+                {{researchPurposeDescription}}
+              </div>
+            </div>
+            <div class="column">
+              <div class="research-purpose-item" *ngFor="let researchPurposeDescription of rightResearchPurposes">
+                {{researchPurposeDescription}}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </app-top-box>
   <div class="right-sidebar">
     <div>
-      <h6 class="collaborator-text">Collaborators:</h6>
+      <h6 class="collaborator-text">
+        Collaborators:
+        <app-tooltip [direction]="'left'">
+          <div class="tooltip-label">
+            Here you can add a collaborator to your Workspace and see the list of users with whom you share your workspace.
+          </div>
+        </app-tooltip>
+      </h6>
       <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-left">
         <button class="btn btn-secondary btn-short" [disabled]="!ownerPermission" (click)="share()">Share</button>
         <span *ngIf="!ownerPermission" class="tooltip-content">
@@ -76,14 +111,32 @@
     <div *ngFor="let user of workspace.userRoles">
       <div>{{user.role}}: {{user.email}}</div>
     </div>
-    <h6>Workspace Information</h6>
+    <h6>
+      Workspace Information
+      <app-tooltip [direction]="'top-left'">
+        <div class="tooltip-header"> Dataset</div>
+        <div class="tooltip-label">
+          The version of the dataset used by this workspace is displayed here
+        </div>
+        <div class="tooltip-header" style="padding-top: 0.3rem"> Creation date</div>
+        <div class="tooltip-label">The date you created your Workspace.</div>
+        <div class="tooltip-header" style="padding-top: 0.3rem"> Access level</div>
+        <div class="tooltip-label">
+          To make sure data is accessed only by authorized users, there are three data access tiers within
+          the All of Us Research Program - “Public”, “Registered” and “Controlled”.
+        Estimated monthly cost
+          Estimated monthly cost of your cloud computing time.
+        </div>
+
+      </app-tooltip>
+    </h6>
     <div class="information-area">
       <div class="information-box">
         <div class="information-header">
-          CDR
+          Dataset
         </div>
         <div class="information-body cdr-version-text">
-          {{workspace.cdrVersionId}}
+          {{cdrVersion?.name || 'Loading...'}}
         </div>
       </div>
       <div class="information-box">
@@ -123,3 +176,4 @@
   </div>
 </clr-modal>
 <app-bug-report></app-bug-report>
+<app-new-notebook-modal [workspace]="workspace" [existingNotebooks]="notebookList"></app-new-notebook-modal>

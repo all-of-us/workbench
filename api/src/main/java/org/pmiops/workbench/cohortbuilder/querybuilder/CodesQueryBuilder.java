@@ -9,6 +9,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
 import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -96,7 +97,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomain(),
+            parameter.getDomainId(),
             QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class),
             CHILD_CODE_IN_CLAUSE_TEMPLATE);
         } else {
@@ -107,7 +108,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomain(),
+            parameter.getDomainId(),
             QueryParameterValue.string(codeParam),
             GROUP_CODE_LIKE_TEMPLATE);
         }
@@ -122,7 +123,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private void validateSearchParameter(SearchParameter param) {
     from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
     from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
-    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomain());
+    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomainId());
     from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
@@ -133,24 +134,24 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                Map<String, QueryParameterValue> queryParams,
                                String domain, QueryParameterValue codes,
                                String groupOrChildSql) {
-    String typeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(type));
-    String subtypeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(subtype));
-    String codeNamedParameter = null;
-    String conceptIdsNamedParameter = null;
     ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder()
       .put("${tableName}", DomainTableEnum.getTableName(domain))
         .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) +
             " as entry_date, " + DomainTableEnum.getSourceConceptId(domain))
-        .put("${tableId}", DomainTableEnum.getSourceConceptId(domain))
-        .put("${type}", "@" + typeNamedParameter)
-        .put("${subtype}", "@" + subtypeNamedParameter);
+        .put("${tableId}", TreeType.SNOMED.name().equalsIgnoreCase(type) ?
+          DomainTableEnum.getConceptId(domain) :
+          DomainTableEnum.getSourceConceptId(domain));
 
     if (codes.getType().equals(StandardSQLTypeName.ARRAY)) {
-      conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
+      String conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
       paramNames.put("${conceptIds}", "@" + conceptIdsNamedParameter);
     } else {
-      codeNamedParameter = addQueryParameterValue(queryParams, codes);
+      String codeNamedParameter = addQueryParameterValue(queryParams, codes);
       paramNames.put("${code}", "@" + codeNamedParameter);
+      String typeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(type));
+      paramNames.put("${type}", "@" + typeNamedParameter);
+      String subtypeNamedParameter = addQueryParameterValue(queryParams, QueryParameterValue.string(subtype));
+      paramNames.put("${subtype}", "@" + subtypeNamedParameter);
     }
 
     queryParts.add(filterSql(CODES_SQL_TEMPLATE + groupOrChildSql, paramNames.build()));
@@ -190,7 +191,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     public MultiKey(SearchParameter searchParameter) {
       this.group = searchParameter.getGroup() ? GROUP : NOT_GROUP;
       this.type = searchParameter.getType();
-      this.domain = searchParameter.getDomain();
+      this.domain = searchParameter.getDomainId();
     }
 
     public String getKey() {

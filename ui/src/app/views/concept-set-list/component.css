@@ -1,7 +1,7 @@
 .btn.btn-link.nav-link.nav-item {
     color: #2691D0;
     font-size: 20px;
-    font-weight: 300;
+    font-weight: 400;
     line-height: 24px;
     margin-top: .2rem;
 }
@@ -35,7 +35,6 @@
 
 .card-area {
     display: flex;
-    flex-wrap: wrap;
     justify-content: flex-start;
 }
 

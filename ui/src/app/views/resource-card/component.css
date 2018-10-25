@@ -22,6 +22,11 @@
   padding: 0.75rem;
 }
 
+.card.item-card.workspace-about {
+  height: 13.93rem;
+  width: 12.5rem;
+}
+
 .card.item-card .name {
   cursor: pointer;
   word-wrap: break-word;
@@ -62,7 +67,7 @@
   color: #2F2E7E;
   font-size: 20px;
   line-height: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .header-area {

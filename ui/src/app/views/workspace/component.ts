@@ -4,13 +4,16 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {environment} from 'environments/environment';
 
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {
+  CdrVersion,
   Cohort,
   CohortsService,
   FileDetail,
@@ -20,6 +23,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 /*
  * Search filters used by the cohort and notebook data tables to
@@ -72,16 +76,19 @@ enum Tabs {
   styleUrls: ['../../styles/buttons.css',
     '../../styles/headers.css',
     '../../styles/cards.css',
+    '../../styles/tooltip.css',
     './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
+  @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
   showTip: boolean;
   workspace: Workspace;
+  cdrVersion: CdrVersion;
   wsId: string;
   wsNamespace: string;
   cohortsLoading = true;
@@ -102,12 +109,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
+  @ViewChild(NewNotebookModalComponent)
+  newNotebookModal: NewNotebookModalComponent;
+
   constructor(
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
     private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
+    private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
@@ -162,6 +173,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           this.cohortsError = true;
         });
     this.loadNotebookList();
+    this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
+      this.cdrVersion = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
+    });
   }
 
   private loadNotebookList() {
@@ -182,44 +196,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.openNotebook();
-  }
-
-  openNotebook(nb?: FileDetail): void {
-    let nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/notebooks/`;
-    if (nb) {
-      nbUrl += encodeURIComponent(nb.name);
-    } else {
-      nbUrl += 'create';
-    }
-    const notebook = window.open(nbUrl, '_blank');
-
-    // TODO(RW-474): Remove the authHandler integration. This is messy,
-    // non-standard, and currently will break in the following situation:
-    // - User opens a new notebook tab.
-    // - While that tab is loading, user immediately navigates away from this
-    //   page.
-    // This is not easily fixed without leaking listeners outside the lifespan
-    // of the workspace component.
-    const authHandler = (e: MessageEvent) => {
-      if (e.source !== notebook) {
-        return;
-      }
-      if (e.origin !== environment.leoApiUrl) {
-        return;
-      }
-      if (e.data.type !== 'bootstrap-auth.request') {
-        return;
-      }
-      notebook.postMessage({
-        'type': 'bootstrap-auth.response',
-        'body': {
-          'googleClientId': this.signInService.clientId
-        }
-      }, environment.leoApiUrl);
-    };
-    window.addEventListener('message', authHandler);
-    this.notebookAuthListeners.push(authHandler);
+    this.newNotebookModal.open();
   }
 
   buildCohort(): void {
