@@ -5,16 +5,13 @@
     <button class="btn btn-secondary">Cancel</button>
   </div>
   <div class="progress-container">
-    <div class="progress-card" [class.progress-card-current]="progress === Progress.Initializing">
-      <span *ngIf="progress === Progress.Initializing" class="spinner spinner-sm"></span>
-      <app-notebook-icon *ngIf="progress !== Progress.Initializing" [class.progress-icon-current]="progressComplete[Progress.Initializing]"></app-notebook-icon>
-      <span class="progress-text">Initializing notebook server, may take up to 5 minutes</span>
+    <div class="progress-card" [class.progress-card-current]="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)">
+      <span *ngIf="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)" class="spinner spinner-sm"></span>
+      <app-notebook-icon [completeView]="progressComplete[Progress.Initializing] || progressComplete[Progress.Resuming]" *ngIf="![Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)"></app-notebook-icon>
+      <span *ngIf="progress === Progress.Unknown" class="progress-text">Connecting to notebook server...</span>
+      <span *ngIf="progress === Progress.Initializing || progressComplete[Progress.Initializing]" class="progress-text">Initializing notebook server, may take up to 5 minutes</span>
+      <span *ngIf="progress === Progress.Resuming || progressComplete[Progress.Resuming]" class="progress-text">Resuming notebook server, may take up to 1 minute</span>
     </div>
-    <!--<div *ngIf="!creating" class="progress-card" [class.progress-card-current]="progress === Progress.Resuming">-->
-      <!--<span *ngIf="progress === Progress.Resuming" class="spinner spinner-sm"></span>-->
-      <!--<app-notebook-icon *ngIf="progress !== Progress.Resuming" style="margin-bottom: 5px"></app-notebook-icon>-->
-      <!--<span class="progress-text">Resuming notebook server, may take up to 5 minutes</span>-->
-    <!--</div>-->
     <div class="progress-card" [class.progress-card-current]="progress === Progress.Authenticating">
       <span *ngIf="progress === Progress.Authenticating" class="spinner spinner-sm"></span>
       <clr-icon *ngIf="progress !== Progress.Authenticating" shape="success-standard" class="progress-icon" [class.progress-icon-current]="progressComplete[Progress.Authenticating]"></clr-icon>

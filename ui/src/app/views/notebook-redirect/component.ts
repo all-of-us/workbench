@@ -120,7 +120,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.data.creating;
-    this.incrementProgress(Progress.Initializing);
+
+    //this.incrementProgress(Progress.Initializing);
 
     if (this.creating) {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
@@ -133,13 +134,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .flatMap((resp) => {
         const c = resp.defaultCluster;
         this.incrementProgress(Progress.Initializing);
-        // if (c.status === ClusterStatus.Starting ||
-        //     c.status === ClusterStatus.Stopping ||
-        //     c.status === ClusterStatus.Stopped) {
-        //   this.incrementProgress(Progress.Resuming);
-        // } else {
-        //   this.incrementProgress(Progress.Initializing);
-        // }
+        if (c.status === ClusterStatus.Starting ||
+            c.status === ClusterStatus.Stopping ||
+            c.status === ClusterStatus.Stopped) {
+          this.incrementProgress(Progress.Resuming);
+        } else {
+          this.incrementProgress(Progress.Initializing);
+        }
 
         if (c.status === ClusterStatus.Running) {
           return Observable.from([c]);

@@ -8,6 +8,6 @@ import {Component, Input} from '@angular/core';
     templateUrl: './component.html',
 })
 export class NotebookComponent {
-    @Input() editHover: boolean;
+    @Input() completeView: boolean;
     constructor() {}
 }
