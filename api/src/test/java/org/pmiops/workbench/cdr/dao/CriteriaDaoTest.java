@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,7 @@ public class CriteriaDaoTest {
   @Before
   public void setUp() {
     icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
-    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123");
+    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123").synonyms("001");
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
@@ -82,7 +83,7 @@ public class CriteriaDaoTest {
     drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
-    labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
+    labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -188,65 +189,18 @@ public class CriteriaDaoTest {
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     //match on code
-    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", null);
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", new PageRequest(0, 10));
     assertEquals(1, labs.size());
     assertEquals(labCriteria, labs.get(0));
-
-    //match on name
-    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "Mysearch", null);
-    assertEquals(1, labs.size());
-    assertEquals(labCriteria, labs.get(0));
-
-    //match on synonym
-    labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "myword", null);
-    assertEquals(1, labs.size());
-    assertEquals(labCriteria, labs.get(0));
-
-    //limit
-    List<Criteria> cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", 1L);
-    assertEquals(1, cpts.size());
-    assertEquals(cptCriteria2, cpts.get(0));
-
-    //no limit
-    cpts = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.CPT.name(), "zzz", null);
-    assertEquals(2, cpts.size());
-    assertEquals(cptCriteria2, cpts.get(0));
-    assertEquals(cptCriteria1, cpts.get(1));
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     //match on code
     List<Criteria> conditions =
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", null);
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
     assertEquals(icd9Criteria2, conditions.get(0));
-
-    //match on name
-    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "ol b", null);
-    assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2, conditions.get(0));
-
-    //match on synonym
-    conditions = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(), "myword", null);
-    assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2, conditions.get(0));
-
-    //no limit
-    conditions =
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", null);
-    assertEquals(4, conditions.size());
-    assertEquals(icd9Criteria1, conditions.get(0));
-    assertEquals(icd9Criteria2, conditions.get(1));
-    assertEquals(parentIcd9, conditions.get(2));
-    assertEquals(childIcd9, conditions.get(3));
-
-    //limit
-    conditions =
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"00", 2L);
-    assertEquals(2, conditions.size());
-    assertEquals(icd9Criteria1, conditions.get(0));
-    assertEquals(icd9Criteria2, conditions.get(1));
   }
 
   @Test
