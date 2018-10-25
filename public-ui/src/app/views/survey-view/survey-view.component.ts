@@ -75,7 +75,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           let didNotAnswerCount  = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
             if ( a.stratum4.indexOf('PMI') !== -1 ) {
-              a.stratum4 = a.stratum4.replace('PMI','');
+              a.stratum4 = a.stratum4.replace('PMI', '');
             }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
