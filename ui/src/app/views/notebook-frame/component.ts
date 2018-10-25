@@ -28,7 +28,6 @@ export class NotebookFrameComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.route.snapshot);
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsName = this.route.snapshot.params['wsid'];
     this.nbName = this.route.snapshot.params['nbName'];
