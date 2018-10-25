@@ -25,7 +25,7 @@ import {
 } from 'generated';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
-import {ConceptsServiceStub, ConceptStubVariables, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
+import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
@@ -178,5 +178,50 @@ describe('ConceptHomepageComponent', () => {
 
     // Test that it pulls back more concepts when all concepts allowed.
     expect(fixture.debugElement.queryAll(By.css('.concept-row')).length).toBe(2);
+  }));
+
+  it( 'should display the selected concepts on header', fakeAsync(() => {
+    const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
+        .and.callThrough();
+    const searchTerm = 'test';
+    simulateClick(fixture, fixture.debugElement
+        .query(By.css('.standard-concepts-checkbox')).children[0]);
+    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    updateAndTick(fixture);
+    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row');
+    const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
+        .query(By.css('.checkbox')).children;
+    simulateClick(fixture, checkBox[0]);
+    updateAndTick(fixture);
+    const pillValue = fixture.debugElement.query(By.css('.pill')).childNodes[0]
+        .nativeNode.nodeValue.trim();
+    expect(pillValue).toBe('1');
+  }));
+
+  it( 'should display the selected concepts on sliding button', fakeAsync(() => {
+    const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
+        .and.callThrough();
+
+    const searchTerm = 'test';
+    simulateClick(fixture, fixture.debugElement
+        .query(By.css('.standard-concepts-checkbox')).children[0]);
+    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    updateAndTick(fixture);
+    const button = fixture.debugElement.query(By.css('.sliding-button'))
+       .query(By.css('.text'));
+    let buttonText = button.nativeNode.innerHTML;
+    // Default value to be Add to set
+    expect(buttonText).toBe('Add to set');
+    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row');
+    const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
+        .query(By.css('.checkbox')).children;
+    simulateClick(fixture, checkBox[0]);
+    updateAndTick(fixture);
+    buttonText = button.nativeNode.innerHTML;
+
+    //After select add the number of selected concepts
+    expect(buttonText).toBe('Add (1) to set');
   }));
 });
