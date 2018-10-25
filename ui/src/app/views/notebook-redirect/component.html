@@ -2,7 +2,7 @@
   <div style="display: flex; flex-direction: row; justify-content: space-between; flex-grow: 1;">
     <h2 class="notebooks-header" *ngIf="!creating">Loading Notebook '{{notebookName}}'</h2>
     <h2 class="notebooks-header" *ngIf="creating">Creating a New Notebook</h2>
-    <button class="btn btn-secondary" (click)="closeWindow()">Cancel</button>
+    <button class="btn btn-secondary" style="margin-right: 0;" (click)="closeWindow()">Cancel</button>
   </div>
   <div class="progress-container">
     <div class="progress-card" [class.progress-card-current]="[Progress.Initializing, Progress.Resuming, Progress.Unknown].includes(progress)">
@@ -33,29 +33,4 @@
       <span class="progress-text">Redirecting to the notebook server</span>
     </div>
   </div>
-
-  <div [ngSwitch]="progress" class="spinner-container">
-    <span class="spinner spinner-lg"></span>
-    <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
-      <span class="spinner-header">Initializing notebook server</span><br>
-      May take up to 5 minutes
-    </p>
-    <p *ngSwitchCase="Progress.Resuming" class="spinner-text">
-      <span class="spinner-header">Resuming notebook server</span><br>
-      May take up to 1 minute
-    </p>
-    <p *ngSwitchCase="Progress.Authenticating" class="spinner-text">
-      Authenticating with the notebook server
-    </p>
-    <p *ngSwitchCase="Progress.Copying" class="spinner-text">
-      Copying notebook onto the notebook server
-    </p>
-    <p *ngSwitchCase="Progress.Creating" class="spinner-text">
-      Creating the new notebook
-    </p>
-    <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
-      Redirecting to the notebook server
-    </p>
-  </div>
-
 </div>
