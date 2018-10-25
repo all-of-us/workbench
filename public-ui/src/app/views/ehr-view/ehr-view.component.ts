@@ -58,6 +58,14 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         'procedure': 'Medical concepts that capture information related to activities or ' +
         'processes that are ordered or carried out on individuals for ' +
         'diagnostic or therapeutic purposes are captured by the procedures domain.'};
+  conceptCodeHelpText = 'The concept code is an additional piece of information that\n' +
+      'can be utilized to find medical concepts in the AoU data set. ' +
+      'Concept codes are specific to the\n' +
+      'AoU Research Program data and are assigned to all medical concepts.\n' +
+      'In some instances,\n' +
+      'a medical concept may not be assigned a source or standard vocabulary code.\n' +
+      'In these instances, the concept code can be utilized to\n' +
+      'query the data for the medical concept.';
 
 
   constructor(private route: ActivatedRoute,
