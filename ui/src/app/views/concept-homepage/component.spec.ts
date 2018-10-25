@@ -189,7 +189,7 @@ describe('ConceptHomepageComponent', () => {
     simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
     simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
     updateAndTick(fixture);
-    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row');
+    const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
     const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
         .query(By.css('.checkbox')).children;
     simulateClick(fixture, checkBox[0]);
