@@ -439,11 +439,12 @@ By default, all tests will return just test pass / fail output and stack traces 
 
 These are easiest if you need to authenticate as one of your researcher accounts.
 
-Firecloud dev: https://firecloud-orchestration.dsde-dev.broadinstitute.org/
-Firecloud prod: https://api.firecloud.org
-
-Leo (notebook clusters) dev: https://leonardo.dsde-dev.broadinstitute.org
-Leo (notebook clusters) prod: https://notebooks.firecloud.org
+- Firecloud
+  - dev: https://firecloud-orchestration.dsde-dev.broadinstitute.org/
+  - prod: https://api.firecloud.org
+- Leo (notebook clusters)
+  - dev: https://leonardo.dsde-dev.broadinstitute.org
+  - prod: https://notebooks.firecloud.org
 
 ### Authenticated Backend Requests (CLI)
 
