@@ -131,12 +131,22 @@ const routes: Routes = [
               }
             },
             {
-              path: 'notebooks/:nbName/frame',
+              path: 'notebooks/frame/:nbName',
               component: NotebookFrameComponent,
               data: {
                 title: 'Notebook Frame',
                 breadcrumb: {
-                  value: 'Param: Notebook name'
+                  value: 'Param: Notebook Name'
+                }
+              }
+            },
+            {
+              path: 'notebooks/create/frame',
+              component: NotebookFrameComponent,
+              data: {
+                title: 'Notebook Frame',
+                breadcrumb: {
+                  value: 'Param: New Notebook Name'
                 }
               }
             },

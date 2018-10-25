@@ -1,10 +1,9 @@
 import {Component, Input} from '@angular/core';
+import {Router} from '@angular/router';
 
-import {SignInService} from 'app/services/sign-in.service';
 import {isBlank} from 'app/utils/index';
 import {Kernels} from 'app/utils/notebook-kernels';
 
-import {environment} from 'environments/environment';
 
 import {FileDetail, UserMetricsService, Workspace} from 'generated';
 
@@ -28,8 +27,8 @@ export class NewNotebookModalComponent {
   loading = false;
 
   constructor(
-    private signInService: SignInService,
     private userMetricsService: UserMetricsService,
+    private route: Router
   ) {}
 
   open(): void {
@@ -52,10 +51,17 @@ export class NewNotebookModalComponent {
     this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
       {notebookName: this.newName}).subscribe();
     const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
-        `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
-        `&kernel-type=${this.kernelType}`;
-
-    window.open(nbUrl, '_blank');
+      `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
+      `&kernel-type=${this.kernelType}`;
+    console.log(nbUrl);
+    this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
+        'notebooks', 'create', 'frame'], {
+      queryParams: {
+        'notebook-name': encodeURIComponent(this.newName),
+        'kernelType': this.kernelType
+      },
+      relativeTo: null
+    });
     this.close();
   }
 
