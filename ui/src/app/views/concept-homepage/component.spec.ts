@@ -221,7 +221,7 @@ describe('ConceptHomepageComponent', () => {
     updateAndTick(fixture);
     buttonText = button.nativeNode.innerHTML;
 
-    //After select add the number of selected concepts
+    // After select add the number of selected concepts
     expect(buttonText).toBe('Add (1) to set');
   }));
 });
