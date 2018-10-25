@@ -13,6 +13,7 @@ import {AppComponent, overriddenUrlKey} from './views/app/app.component';
 /* Our Modules */
 import {
   ApiModule,
+  Configuration
 } from 'publicGenerated';
 
 
@@ -46,9 +47,13 @@ function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
 }
 
-const DataBrowserServiceFactory = (http: Http) => {
-  return new DataBrowserService(http, getPublicBasePath(), null);
-};
+// "Configuration" means Swagger API Client configuration.
+export function getConfiguration(signInService: SignInService): Configuration {
+  return new Configuration({
+    basePath: getPublicBasePath(),
+    accessToken: () => signInService.currentAccessToken
+  });
+}
 
 export function getConfigService(http: Http) {
   return new ConfigService(http, getPublicBasePath(), null);
@@ -86,12 +91,12 @@ export function getConfigService(http: Http) {
       useFactory: getConfigService,
       deps: [Http]
     },
-    DbConfigService,
     {
-      provide: DataBrowserService,
-      useFactory: DataBrowserServiceFactory,
-      deps: [Http]
+      provide: Configuration,
+      deps: [SignInService],
+      useFactory: getConfiguration
     },
+    DbConfigService,
     ServerConfigService,
     SignInService,
   ],
