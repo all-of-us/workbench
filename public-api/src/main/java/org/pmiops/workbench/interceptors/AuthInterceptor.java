@@ -78,6 +78,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
+    privateWorkbenchService.setAccessToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 
     Profile profile = privateWorkbenchService.getMe();
     return true;

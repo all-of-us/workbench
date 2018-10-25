@@ -9,4 +9,6 @@ public interface PrivateWorkbenchService {
    * @return the Workbench profile for the requesting user.
    */
   Profile getMe() throws ApiException;
+
+  void setAccessToken(String token);
 }

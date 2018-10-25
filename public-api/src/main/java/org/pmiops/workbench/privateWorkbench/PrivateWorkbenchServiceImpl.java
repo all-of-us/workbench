@@ -30,4 +30,9 @@ public class PrivateWorkbenchServiceImpl implements PrivateWorkbenchService {
       throw exception;
     }
   }
+
+  @Override
+  public void setAccessToken(String token) {
+    this.profileApiProvider.get().getApiClient().setAccessToken(token);
+  }
 }
