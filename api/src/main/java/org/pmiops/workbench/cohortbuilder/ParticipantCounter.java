@@ -38,7 +38,7 @@ public class ParticipantCounter {
       "end as ageRange,\n" +
       "count(*) as count\n" +
       "from `${projectId}.${dataSetId}.person` person\n" +
-      "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id = 'Gender')\n" +
+      "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id in ('Gender', 'None'))\n" +
       "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
       "where\n";
 

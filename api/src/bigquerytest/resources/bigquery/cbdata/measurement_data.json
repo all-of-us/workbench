@@ -338,5 +338,25 @@
     "measurement_source_concept_id":903111,
     "unit_source_value":"val",
     "value_source_value":"not-wheelchair-user"
+  },
+  {
+    "measurement_id":25,
+    "person_id":99,
+    "measurement_concept_id":9,
+    "measurement_date":"2009-12-03",
+    "measurement_datetime":"2009-12-03 05:00:00 UTC",
+    "measurement_type_concept_id":9,
+    "operator_concept_id":9,
+    "value_as_number":20,
+    "value_as_concept_id":4023190,
+    "unit_concept_id":9,
+    "range_low":1.0,
+    "range_high":10.0,
+    "provider_id":9,
+    "visit_occurrence_id":9,
+    "measurement_source_value":"val",
+    "measurement_source_concept_id":903111,
+    "unit_source_value":"val",
+    "value_source_value":"wheelchair-user"
   }
 ]

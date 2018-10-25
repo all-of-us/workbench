@@ -18,6 +18,7 @@ export class GenderChartComponent {
   readonly codeMap = {
     'M': 'Male',
     'F': 'Female',
+    'No matching concept': 'Unknown'
   };
 
   /*
