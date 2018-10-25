@@ -14,10 +14,11 @@ import {Workspace} from 'generated';
 export class NotebookFrameComponent implements OnInit {
   jupyterUrl: string;
   workspace: Workspace;
+  notebookName: string;
 
 
   constructor (
-    private route: ActivatedRoute,
+    public route: ActivatedRoute,
     private sanitizer: DomSanitizer
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
@@ -25,14 +26,15 @@ export class NotebookFrameComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.route.snapshot.routeConfig.path.match('create')) {
+    this.notebookName = this.route.snapshot.params['nbName'];
+    if (this.notebookName) {
+      this.jupyterUrl = '/workspaces/' + this.workspace.namespace + '/' +
+        this.workspace.id + '/notebooks/' + this.notebookName;
+    } else {
       this.jupyterUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
         `notebooks/create/?notebook-name=` +
         encodeURIComponent(this.route.snapshot.queryParams['notebook-name']) +
         `&kernel-type=${this.route.snapshot.queryParams['kernelType']}`;
-    } else {
-      this.jupyterUrl = '/workspaces/' + this.workspace.namespace + '/' +
-        this.workspace.id + '/notebooks/' + this.route.snapshot.params['nbName'];
     }
   }
 
