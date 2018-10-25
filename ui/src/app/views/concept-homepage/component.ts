@@ -309,4 +309,8 @@ export class ConceptHomepageComponent implements OnInit {
   getAddToSetText(conceptsCount): string {
     return conceptsCount === 0 ? 'Add to set' : 'Add (' + conceptsCount + ') to set';
   }
+
+  domainLoading(domain) {
+    return this.searchLoading || !this.completedDomainSearches.includes(domain.domain);
+  }
 }
