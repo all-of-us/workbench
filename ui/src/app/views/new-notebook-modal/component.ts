@@ -50,10 +50,6 @@ export class NewNotebookModalComponent {
     }
     this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
       {notebookName: this.newName}).subscribe();
-    const nbUrl = `/workspaces/${this.workspace.namespace}/${this.workspace.id}/` +
-      `notebooks/create/?notebook-name=` + encodeURIComponent(this.newName) +
-      `&kernel-type=${this.kernelType}`;
-    console.log(nbUrl);
     this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
         'notebooks', 'create', 'frame'], {
       queryParams: {
