@@ -459,7 +459,8 @@ go install github.com/google/oauth2l
 The following shows how to make an authenticated backend request against Firecloud dev (assumes you have run dev-up at least once):
 
 ```
-api$ curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+# From the "api" directory.
+curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
