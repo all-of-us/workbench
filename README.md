@@ -456,7 +456,7 @@ go get github.com/google/oauth2l
 go install github.com/google/oauth2l
 ```
 
-The following shows how to make an authenticated backend request against Firecloud dev (assumes you have run dev-up at least once):
+The following shows how to make an authenticated backend request as the shared  workbench test service account against Firecloud dev (assumes you have run dev-up at least once):
 
 ```
 # From the "api" directory.
