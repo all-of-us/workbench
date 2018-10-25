@@ -487,8 +487,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case WIZARD_CANCEL: {
@@ -505,8 +504,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case SET_WIZARD_CONTEXT:
