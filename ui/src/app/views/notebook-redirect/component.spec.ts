@@ -103,7 +103,7 @@ describe('NotebookRedirectComponent', () => {
               'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
             },
             queryParamMap: convertToParamMap({
-              'notebook-name': 'blah blah',
+              'notebookName': 'blah blah',
               'kernelType': Kernels.R
             }),
             data: {

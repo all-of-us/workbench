@@ -53,7 +53,7 @@ export class NewNotebookModalComponent {
     this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
         'notebooks', 'create'], {
       queryParams: {
-        'notebook-name': encodeURIComponent(this.newName),
+        'notebookName': encodeURIComponent(this.newName),
         'kernelType': this.kernelType
       },
       relativeTo: null
