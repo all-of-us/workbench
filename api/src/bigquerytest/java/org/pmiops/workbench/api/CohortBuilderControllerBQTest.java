@@ -1343,7 +1343,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     lab2.attributes(Arrays.asList(labNumerical));
     lab3.attributes(Arrays.asList(labCategorical));
     SearchRequest searchRequest = createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1469,7 +1469,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1495,8 +1495,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(response.getItems().size(), 1);
-    assertEquals(response.getItems().get(0), new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L));
+    assertEquals(2, response.getItems().size());
+    assertEquals(new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L), response.getItems().get(0));
+    assertEquals(new DemoChartInfo().gender("No matching concept").race("Unknown").ageRange("> 65").count(1L), response.getItems().get(1));
   }
 
   @Test
