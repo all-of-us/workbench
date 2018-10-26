@@ -147,25 +147,6 @@
                 </clr-tooltip>
           </div>
           <div class="col-md-1 grid-header flex-xs-middle info-text"> View graphs
-              <clr-tooltip>
-                  <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                  <clr-tooltip-content clrPosition=bottom-left
-                                       clrSize="lg" *clrIfOpen>
-                      <div class="tooltip-header"><b><u>Age at occurrence chart</u></b></div>
-                      <div class="tooltip-label">The age at occurrence bar chart provides a
-                          binned age distribution for participants at the time
-                          the medical concept being queried occurred in their records.
-                          If an individual’s record contains more than one mention of a concept,
-                          the age at occurrence is included for each mention.
-                          As a result, a participant may be counted more than once in the distribution.</div>
-                      <div class="tooltip-header"><b><u>Sources chart</u></b></div>
-                      <div class="tooltip-label">Individual health records often contain medical information that means the same thing
-                          but may be recorded in many different ways.
-                          The sources represent the many different ways that the standard medical concept
-                          returned in the search results has been recorded in patient records.
-                          The sources bar chart provides the top 10 source concepts from the AoU data. </div>
-                  </clr-tooltip-content>
-              </clr-tooltip>
           </div>
         </div>
         <div class="row expandable-grid-row"
@@ -224,9 +205,19 @@
             </button>
           </div>
           <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-            <div class="col-md">
-              <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectGenderGraph(g)" class="btn btn-link">{{g}} </button>
-            </div>
+              <ng-container *ngIf="!showMeasurementGenderBins">
+                    <div class="col-md-4">
+                        <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectGenderGraph(g)" class="btn btn-link">{{g}}
+                        </button>
+                        <clr-tooltip>
+                            <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                            <clr-tooltip-content clrPosition=right
+                                             clrSize="lg" *clrIfOpen>
+                                <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
+                            </clr-tooltip-content>
+                        </clr-tooltip>
+                    </div>
+              </ng-container>
             <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender" [showGenderIdentity]="showGenderIdentity"
                                 [showSources]="showSources" [backgroundColor]="'#ECF1F4'">
             </app-concept-charts>

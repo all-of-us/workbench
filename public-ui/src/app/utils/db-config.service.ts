@@ -78,7 +78,10 @@ export class DbConfigService {
     'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
     'font-weight': '300', 'textOutline': 'none'
   };
-
+  GI_DATA_LABEL_STYLE = {
+    'color': 'black', 'font-family': 'Gotham HTF',	'font-size': '14px',
+      'font-weight': '300', 'textOutline': 'none'
+  };
 
   pmGroups: ConceptGroup[] = [];
   genderAnalysis: Analysis;

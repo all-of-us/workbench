@@ -356,6 +356,9 @@ definitions:
       ageAnalysis:
         description: age analysis
         $ref: "#/definitions/Analysis"
+      genderIdentityAnalysis:
+        description: gender identity analysis
+        $ref: "#/definitions/Analysis"
 
   QuestionConceptListResponse:
     type: object

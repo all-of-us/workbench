@@ -42,7 +42,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
   showAge = true;
-  showGender = false;
+  showGender = true;
   showGenderIdentity = false;
   showSources = true;
   showMeasurementGenderBins = false;
@@ -182,6 +182,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     } else {
       row.showSources = true;
       row.expanded = true;
+      row.viewSynonyms = true;
     }
   }
 

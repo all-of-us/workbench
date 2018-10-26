@@ -135,19 +135,6 @@
             <div class="col-xs-12">
               <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers - Click on each response option for additional gender and age at occurrence data.
                 <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
-              <clr-tooltip *ngIf="showAnswer[q.conceptId]">
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=bottom-left
-                                     clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-header"><b><u>Age at occurrence chart</u></b></div>
-                  <div class="tooltip-label">The age at occurrence bar chart provides a
-                    binned age distribution for participants at the time
-                    the medical concept being queried occurred in their records.
-                    If an individual’s record contains more than one mention of a concept,
-                    the age at occurrence is included for each mention.
-                    As a result, a participant may be counted more than once in the distribution.</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
             </div>
         </div>
 
@@ -172,9 +159,39 @@
           <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
             <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
               <div class="chart-wrapper col-xs-12 col-sm-12">
-                <app-chart [analysis]="q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                  <clr-tooltip-content clrPosition=right
+                                       clrSize="lg" *clrIfOpen>
+                    <div class="tooltip-label">Gender chart</div>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <div class="col-md">
+                  <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
+                  </button>
+                  <clr-tooltip>
+                    <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                    <clr-tooltip-content clrPosition=right
+                                         clrSize="lg" *clrIfOpen>
+                      <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
+                </div>
+                <app-chart [analysis]="genderGraph === 'GI' ? q.genderIdentityAnalysis : q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
               </div>
               <div class="chart-wrapper age col-xs-12 col-sm-12">
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                  <clr-tooltip-content clrPosition=right
+                                       clrSize="lg" *clrIfOpen>
+                    <div class="tooltip-label">The age at occurrence bar chart provides a
+                      binned age distribution for participants at the time
+                      the medical concept being queried occurred in their records.
+                      If an individual’s record contains more than one mention of a concept,
+                      the age at occurrence is included for each mention.
+                      As a result, a participant may be counted more than once in the distribution.</div>
+                  </clr-tooltip-content>
+                </clr-tooltip>
                 <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"></app-chart>
               </div>
 

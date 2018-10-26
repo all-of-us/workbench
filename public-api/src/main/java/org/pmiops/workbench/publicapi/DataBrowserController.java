@@ -147,6 +147,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis countAnalysis=null;
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
+                    org.pmiops.workbench.model.Analysis genderIdentityAnalysis=null;
                     if(concept.getCountAnalysis() != null){
                         countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
                     }
@@ -155,6 +156,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     }
                     if(concept.getAgeAnalysis() != null){
                         ageAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getAgeAnalysis());
+                    }
+                    if(concept.getGenderIdentityAnalysis() != null){
+                        genderIdentityAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderIdentityAnalysis());
                     }
 
 
@@ -167,7 +171,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .prevalence(concept.getPrevalence())
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
-                            .ageAnalysis(ageAnalysis);
+                            .ageAnalysis(ageAnalysis)
+                            .genderIdentityAnalysis(genderIdentityAnalysis);
+
                 }
             };
 

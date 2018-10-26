@@ -6,12 +6,117 @@
 
 <div *ngIf="unitNames.length > 1" class="col-md">
   <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showMeasurementGenderHistogram(u)" class="btn btn-link">{{u}} </button>
+  <clr-tooltip>
+    <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+    <clr-tooltip-content clrPosition=right
+                         clrSize="lg" *clrIfOpen>
+      <div class="tooltip-label">Toggle here to view unit specific histograms</div>
+    </clr-tooltip-content>
+  </clr-tooltip>
 </div>
 
 <div *ngIf="!loading()" class="row concept-charts chart">
   <!-- show measurements binned by gender if we want -->
   <!-- Loop through the genders we have measurement results for  for showing the graph
    This looping variable is set if showMeasurements is passed in to the component-->
+  <ng-container *ngIf="(showGender || showGenderIdentity) && showAge && (showSources && sourceConcepts.length > 0) && !showMeasurementGenderBins">
+  <div class="col-md-4 col-xs-12">
+    <div class="col-md">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition=right
+                             clrSize="lg" *clrIfOpen>
+          <div class="tooltip-label">Gender Chart</div>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </div>
+  </div>
+  <div class="col-md-4 col-xs-12">
+    <div class="col-md">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition=right
+                             clrSize="lg" *clrIfOpen>
+          <div class="tooltip-label">The age at occurrence bar chart provides a binned age
+            distribution for participants at the time the medical concept being queried occurred in their records.
+            If an individual’s record contains more than one mention of a concept,
+            the age at occurrence is included for each mention.
+            As a result, a participant may be counted more than once in the distribution.</div>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </div>
+  </div>
+  <div class="col-md-4 col-xs-12">
+    <div class="col-md">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition=left
+                             clrSize="lg" *clrIfOpen>
+          <div class="tooltip-label">Individual health records often contain medical information that means the same thing but may be recorded in many different ways.
+            The sources represent the many different ways that the standard medical concept returned in the search results has been recorded in patient records.
+            The sources bar chart provides the top 10 source concepts from the AoU data. </div>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </div>
+  </div>
+  </ng-container>
+
+  <ng-container *ngIf="(showGender || showGenderIdentity) &&
+            showAge && (!showSources || sourceConcepts.length <= 0) && !showMeasurementGenderBins">
+    <div class="col-md-4 col-xs-12">
+      <div class="col-md">
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+          <clr-tooltip-content clrPosition=right
+                               clrSize="lg" *clrIfOpen>
+            <div class="tooltip-label">Gender Chart</div>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </div>
+    </div>
+    <div class="col-md-4 col-xs-12">
+      <div class="col-md">
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+          <clr-tooltip-content clrPosition=right
+                               clrSize="lg" *clrIfOpen>
+            <div class="tooltip-label">The age at occurrence bar chart provides a binned age
+              distribution for participants at the time the medical concept being queried occurred in their records.
+              If an individual’s record contains more than one mention of a concept,
+              the age at occurrence is included for each mention.
+              As a result, a participant may be counted more than once in the distribution.</div>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </div>
+    </div>
+    <div class="col-md-4 col-xs-12">
+      <div class="col-md">
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="showAge && showMeasurementGenderBins">
+    <div class="col-md-8 col-xs-12">
+      <div class="col-md">
+
+      </div>
+    </div>
+    <div class="col-md-4 col-xs-12">
+      <div class="col-md">
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+          <clr-tooltip-content clrPosition=left
+                               clrSize="lg" *clrIfOpen>
+            <div class="tooltip-label">The age at occurrence bar chart provides a binned age
+              distribution for participants at the time the medical concept being queried occurred in their records.
+              If an individual’s record contains more than one mention of a concept,
+              the age at occurrence is included for each mention.
+              As a result, a participant may be counted more than once in the distribution.</div>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </div>
+    </div>
+  </ng-container>
 
   <div class="col-md-4 col-xs-12 chart" *ngFor="let gender of genderResults">
 
@@ -43,7 +148,7 @@
     <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
   <ng-template #genderIdentity>
-    <div class="col-md-4 col-xs-12 chart">
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showGenderIdentity">
       <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
     </div>
   </ng-template>

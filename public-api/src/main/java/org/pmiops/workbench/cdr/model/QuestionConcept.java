@@ -20,10 +20,12 @@ public class QuestionConcept {
     private AchillesAnalysis countAnalysis;
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
+    private AchillesAnalysis genderIdentityAnalysis;
 
     public static final long SURVEY_COUNT_ANALYSIS_ID = 3110;
     public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
     public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
+    public static final long SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
 
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
@@ -164,6 +166,9 @@ public class QuestionConcept {
                     if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
                         r.setAnalysisStratumName(genderStratumNameMap.get(r.getStratum5()));
                     }
+                    if (analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+                        r.setAnalysisStratumName(genderIdentityStratumNameMap.get(r.getStratum5()));
+                    }
                 }
             }
         }
@@ -278,6 +283,14 @@ public class QuestionConcept {
         return this;
     }
 
+    @Transient
+    public AchillesAnalysis getGenderIdentityAnalysis() { return this.genderIdentityAnalysis; }
+    public void setGenderIdentityAnalysis(AchillesAnalysis analysis) { this.genderIdentityAnalysis = analysis; }
+    public QuestionConcept genderIdentityAnalysis(AchillesAnalysis analysis) {
+        this.genderIdentityAnalysis = analysis;
+        return this;
+    }
+
     public void setAnalysis(AchillesAnalysis analysis) {
         if (analysis.getAnalysisId() == SURVEY_COUNT_ANALYSIS_ID) {
             this.countAnalysis = analysis;
@@ -287,6 +300,9 @@ public class QuestionConcept {
         }
         else if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
             this.ageAnalysis = analysis;
+        }
+        else if(analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            this.genderIdentityAnalysis = analysis;
         }
     }
 
@@ -299,6 +315,9 @@ public class QuestionConcept {
         }
         else if (analysisId == SURVEY_AGE_ANALYSIS_ID) {
             return this.ageAnalysis;
+        }
+        else if (analysisId == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            return this.genderIdentityAnalysis;
         }
         return null;
     }

@@ -18,7 +18,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
   @Input() showSources = true;
-  @Input() showGender = false;
+  @Input() showGender = true;
   @Input() showGenderIdentity = false;
   @Input() showAge = true;
   @Input() showMeasurementGenderBins = false;
