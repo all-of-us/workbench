@@ -196,14 +196,4 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  public selectGenderGraph(g) {
-    if (g === 'Gender Identity') {
-      this.showGenderIdentity = true;
-      this.showGender = false;
-    } else {
-      this.showGender = true;
-      this.showGenderIdentity = false;
-    }
-  }
-
 }
