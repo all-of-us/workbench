@@ -214,7 +214,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private newNotebook(): Observable<string> {
     const fileContent = commonNotebookFormat;
-    if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
+    if (this.route.snapshot.queryParamMap.get('kernelType') === Kernels.R.toString()) {
       fileContent.metadata = rNotebookMetadata;
     } else {
       fileContent.metadata = pyNotebookMetadata;
