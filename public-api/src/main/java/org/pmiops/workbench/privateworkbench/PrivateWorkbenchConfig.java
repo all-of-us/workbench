@@ -1,7 +1,7 @@
-package org.pmiops.workbench.privateWorkbench;
+package org.pmiops.workbench.privateworkbench;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.privateWorkbench.api.ProfileApi;
+import org.pmiops.workbench.privateworkbench.api.ProfileApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;

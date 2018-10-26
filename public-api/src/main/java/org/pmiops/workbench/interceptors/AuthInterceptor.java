@@ -9,17 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.privateWorkbench.PrivateWorkbenchService;
-import org.pmiops.workbench.privateWorkbench.model.IdVerificationStatus;
-import org.pmiops.workbench.privateWorkbench.model.Profile;
-import org.pmiops.workbench.publicapi.ConfigController;
+import org.pmiops.workbench.privateworkbench.PrivateWorkbenchService;
+import org.pmiops.workbench.privateworkbench.model.IdVerificationStatus;
+import org.pmiops.workbench.privateworkbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 

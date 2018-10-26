@@ -1,7 +1,7 @@
-package org.pmiops.workbench.privateWorkbench;
+package org.pmiops.workbench.privateworkbench;
 
 
-import org.pmiops.workbench.privateWorkbench.model.Profile;
+import org.pmiops.workbench.privateworkbench.model.Profile;
 
 public interface PrivateWorkbenchService {
 

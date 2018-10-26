@@ -1,8 +1,7 @@
-package org.pmiops.workbench.privateWorkbench;
+package org.pmiops.workbench.privateworkbench;
 
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.privateWorkbench.api.ProfileApi;
-import org.pmiops.workbench.privateWorkbench.model.Profile;
+import org.pmiops.workbench.privateworkbench.api.ProfileApi;
+import org.pmiops.workbench.privateworkbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

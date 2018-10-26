@@ -44,9 +44,9 @@ task generateWorkbenchClient {
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
     config.setAdditionalProperties([
-            'invokerPackage'   : 'org.pmiops.workbench.workbench',
-            'modelPackage'     : 'org.pmiops.workbench.workbench.model',
-            'apiPackage'       : 'org.pmiops.workbench.workbench.api',
+            'invokerPackage'   : 'org.pmiops.workbench.privateworkbench',
+            'modelPackage'     : 'org.pmiops.workbench.privateworkbench.model',
+            'apiPackage'       : 'org.pmiops.workbench.privateworkbench.api',
             'sourceFolder'     : swaggerTargetFolder,
             'library'          : 'okhttp-gson',
             'serializableModel': 'true',
