@@ -313,6 +313,7 @@ export class ChartComponent implements OnChanges {
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
     }
+    console.log(results);
     let data = [];
     let cats = [];
     for (const a  of results) {
