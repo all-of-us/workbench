@@ -94,7 +94,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info unit_map survey_question_map)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info unit_map survey_question_map person_gender_identity)
 
 for t in "${create_tables[@]}"
 do
@@ -403,6 +403,18 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation)
 SELECT ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`"
+
+##############
+# person_gender_identity #
+##############
+echo "Inserting gender-identity"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.person_gender_identity\`
+ (person_id,gender_concept_id,gender_identity_concept_id)
+select p.person_id,p.gender_concept_id,ob.value_source_concept_id
+from \`$BQ_PROJECT.$BQ_DATASET.person\` p join \`$BQ_PROJECT.$BQ_DATASET.observation\` ob
+on p.person_id=ob.person_id
+where ob.observation_source_concept_id=1585838"
 
 
 ####################
