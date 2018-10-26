@@ -1,6 +1,6 @@
-<h2 *ngIf="notebookName">Loading Notebook '{{notebookName}}'</h2>
-<h2 *ngIf="!notebookName">Creating a New Notebook</h2>
-<div [ngSwitch]="progress" class="spinner-container">
+<h2 *ngIf="notebookName && !notebookLoaded">Loading Notebook '{{notebookName}}'</h2>
+<h2 *ngIf="!notebookName && !notebookLoaded">Creating a New Notebook</h2>
+<div *ngIf="!notebookLoaded" [ngSwitch]="progress" class="spinner-container">
   <span class="spinner spinner-lg"></span>
   <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
     <span class="spinner-header">Initializing notebook server</span><br>
@@ -22,4 +22,7 @@
   <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
     Redirecting to the notebook server
   </p>
+</div>
+<div *ngIf="notebookLoaded">
+  <iframe style="width:100%; height: 33rem" [src]="leoUrl"></iframe>
 </div>

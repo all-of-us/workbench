@@ -44,7 +44,7 @@ import {InitialErrorComponent} from './views/initial-error/component';
 import {InvitationKeyComponent} from './views/invitation-key/component';
 import {LoginComponent} from './views/login/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
-import {NotebookIFrameComponent} from './views/notebook-frame/component';
+// import {NotebookIFrameComponent} from './views/notebook-frame/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -152,7 +152,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     InvitationKeyComponent,
     LoginComponent,
     NewNotebookModalComponent,
-    NotebookIFrameComponent,
+    // NotebookIFrameComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
