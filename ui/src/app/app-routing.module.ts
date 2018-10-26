@@ -12,7 +12,7 @@ import {ConceptSetDetailsComponent} from './views/concept-set-details/component'
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
-import {NotebookFrameComponent} from './views/notebook-frame/component';
+import {NotebookIFrameComponent} from './views/notebook-frame/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
@@ -132,7 +132,7 @@ const routes: Routes = [
             },
             {
               path: 'notebooks/frame/:nbName',
-              component: NotebookFrameComponent,
+              component: NotebookIFrameComponent,
               data: {
                 title: 'Notebook Frame',
                 breadcrumb: {
@@ -142,7 +142,7 @@ const routes: Routes = [
             },
             {
               path: 'notebooks/create/frame',
-              component: NotebookFrameComponent,
+              component: NotebookIFrameComponent,
               data: {
                 title: 'Notebook Frame',
                 breadcrumb: {

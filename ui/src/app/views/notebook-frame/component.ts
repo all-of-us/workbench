@@ -11,7 +11,7 @@ import {Workspace} from 'generated';
   templateUrl: './component.html'
 })
 
-export class NotebookFrameComponent implements OnInit {
+export class NotebookIFrameComponent implements OnInit {
   jupyterUrl: string;
   workspace: Workspace;
   notebookName: string;

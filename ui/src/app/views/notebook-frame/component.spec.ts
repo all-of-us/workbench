@@ -1,25 +1,25 @@
 import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 
-import {NotebookFrameComponent} from './component';
+import {NotebookIFrameComponent} from './component';
 
 import {Kernels} from 'app/utils/notebook-kernels';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {updateAndTick} from 'testing/test-helpers';
 
 describe('NotebookFrameComponent',  () => {
-  let fixture: ComponentFixture<NotebookFrameComponent>;
+  let fixture: ComponentFixture<NotebookIFrameComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule
       ],
       declarations: [
-        NotebookFrameComponent
+        NotebookIFrameComponent
       ],
       providers: []
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(NotebookFrameComponent);
+      fixture = TestBed.createComponent(NotebookIFrameComponent);
       fixture.componentInstance.workspace = WorkspacesServiceStub.stubWorkspace();
     });
   }));
