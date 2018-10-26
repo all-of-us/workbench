@@ -53,6 +53,7 @@
   color: #000000;
   font-size: 14px;
   line-height: 22px;
+  margin-top: 10px;
 }
 
 .progress-icon {
@@ -63,7 +64,7 @@
   fill: #B3B2C8;
 }
 
-.progress-icon-current {
+.progress-icon-done {
   fill: #8BC990;
   opacity: 1;
 }

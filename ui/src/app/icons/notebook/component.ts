@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
 
 
 
@@ -8,6 +8,5 @@ import {Component, Input} from '@angular/core';
     templateUrl: './component.html',
 })
 export class NotebookComponent {
-    @Input() completeView: boolean;
     constructor() {}
 }
