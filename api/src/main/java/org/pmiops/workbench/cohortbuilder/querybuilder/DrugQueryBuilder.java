@@ -55,7 +55,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     for (String key : paramMap.keySet()) {
       Long[] conceptIds = paramMap.get(key).stream().toArray(Long[]::new);
       String namedParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
-      if (key.equals("Children")) {
+      if ("Children".equals(key)) {
         queryParts.add(DRUG_CHILD_SQL_TEMPLATE.replace("${childConceptIds}", "@" + namedParameter));
       } else {
         queryParts.add(DRUG_PARENT_SQL_TEMPLATE.replace("${parentConceptIds}", "@" + namedParameter));
