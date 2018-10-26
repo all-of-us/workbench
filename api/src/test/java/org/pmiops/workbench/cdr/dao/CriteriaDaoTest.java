@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class CriteriaDaoTest {
 
   private Criteria icd9Criteria1;
   private Criteria icd9Criteria2;
+  private Criteria icd9Criteria3;
   private Criteria demoCriteria1;
   private Criteria demoCriteria1a;
   private Criteria demoCriteria2;
@@ -68,7 +70,8 @@ public class CriteriaDaoTest {
   @Before
   public void setUp() {
     icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
-    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123").synonyms("001");
+    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
+    icd9Criteria3 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123").synonyms("001");
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
@@ -87,6 +90,7 @@ public class CriteriaDaoTest {
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
+    criteriaDao.save(icd9Criteria3);
     criteriaDao.save(parentDemo);
     criteriaDao.save(demoCriteria1);
     criteriaDao.save(demoCriteria1a);
@@ -189,18 +193,18 @@ public class CriteriaDaoTest {
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     //match on code
-    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", new PageRequest(0, 10));
+    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", new PageRequest(0, 10));
     assertEquals(1, labs.size());
-    assertEquals(labCriteria, labs.get(0));
+    assertEquals(labCriteria.getId(), labs.get(0));
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     //match on code
-    List<Criteria> conditions =
+    List<CriteriaId> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2, conditions.get(0));
+    assertEquals(icd9Criteria3.getId(), conditions.get(0));
   }
 
   @Test
