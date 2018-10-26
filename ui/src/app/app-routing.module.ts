@@ -12,7 +12,6 @@ import {ConceptSetDetailsComponent} from './views/concept-set-details/component'
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
-// import {NotebookIFrameComponent} from './views/notebook-frame/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
@@ -129,28 +128,27 @@ const routes: Routes = [
                   intermediate: true
                 }
               }
-            },
-            // {
-            //   path: 'notebooks/frame/:nbName',
-            //   component: NotebookIFrameComponent,
-            //   data: {
-            //     title: 'Notebook Frame',
-            //     breadcrumb: {
-            //       value: 'Param: Notebook Name'
-            //     }
-            //   }
-            // },
-            // {
-            //   path: 'notebooks/create/frame',
-            //   component: NotebookIFrameComponent,
-            //   data: {
-            //     title: 'Notebook Frame',
-            //     breadcrumb: {
-            //       value: 'Param: New Notebook Name'
-            //     }
-            //   }
-            // },
-            {
+            }, {
+              path: 'notebooks/create',
+              component: NotebookRedirectComponent,
+              data: {
+                title: 'Creating a new Notebook',
+                creating: true,
+                breadcrumb: {
+                  value: 'Param: New Notebook Name'
+                }
+              }
+            }, {
+              path: 'notebooks/:nbName',
+              component: NotebookRedirectComponent,
+              data: {
+                title: 'Opening a Notebook',
+                creating: false,
+                breadcrumb: {
+                  value: 'Param: Notebook Name'
+                }
+              }
+            }, {
               path: 'cohorts',
               data: {
                 breadcrumb: {
@@ -251,23 +249,6 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      }, {
-        // The notebook redirect pages are interstitial pages, so we want to
-        // give them special chrome treatment - we therefore put them outside
-        // the normal /workspaces hierarchy.
-        path: 'workspaces/:ns/:wsid/notebooks/create',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Creating a new Notebook',
-          creating: true
-        }
-      }, {
-        path: 'workspaces/:ns/:wsid/notebooks/:nbName',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Opening a Notebook',
-          creating: false
-        }
       }
     ]
   }
