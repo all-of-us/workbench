@@ -245,9 +245,10 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private initializeProgressMap(): void {
-    for (const p in Object.keys(Progress).filter(
-        (type) => isNaN(<any>type))) {
-      this.progressComplete[p] = false;
+    for (const p in Object.keys(Progress)) {
+      if (p) {
+        this.progressComplete[p] = false;
+      }
     }
   }
 
