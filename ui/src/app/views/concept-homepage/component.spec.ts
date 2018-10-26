@@ -220,7 +220,7 @@ describe('ConceptHomepageComponent', () => {
     expect(buttonText).toBe('Add (1) to set');
   }));
 
-  fit('should clear selected count after adding', fakeAsync(() => {
+  it('should clear selected count after adding', fakeAsync(() => {
     const de = fixture.debugElement;
 
     simulateClick(fixture, de.query(By.css('.standard-concepts-checkbox')).children[0]);
