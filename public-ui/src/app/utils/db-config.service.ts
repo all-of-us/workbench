@@ -46,7 +46,7 @@ export class DbConfigService {
     '903079': '#80C4EC',
     '1585841': '#4259A5',
     '1585842': '#80C4EC',
-    '1585843': '#8DC892'
+    '1585843': '#8DC892',
   }
 
   /* Age colors -- for now we just use one color pending design */
