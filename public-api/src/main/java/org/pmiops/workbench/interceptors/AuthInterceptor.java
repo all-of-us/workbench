@@ -25,10 +25,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Intercepts all non-OPTIONS API requests to ensure they have an appropriate auth token.
- *
- * Checks handler methods for annotations like
- *     @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
- * to enforce granular permissions.
  */
 @Service
 public class AuthInterceptor extends HandlerInterceptorAdapter {
@@ -56,10 +52,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
       throws Exception {
-    // Clear the security context before we start, to make sure we're not using authentication
-    // from a previous request.
-    SecurityContextHolder.clearContext();
-
     // OPTIONS methods requests don't need authorization.
     if (request.getMethod().equals(HttpMethods.OPTIONS)) {
       return true;
@@ -92,23 +84,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
     String token = authorizationHeader.substring("Bearer".length()).trim();
 
     if (token.equals("null")) {
-      throw new RuntimeException();
+      throw new RuntimeException("No Bearer Token found. Please log in.");
     }
 
-    Profile profile = privateWorkbenchService.getMe(token);
+    Profile profile = privateWorkbenchService.getMe();
     if (configProvider.get().firecloud.enforceRegistered) {
       if (profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
-        throw new RuntimeException();
+        throw new RuntimeException("Account has not yet received identity verification.");
       }
     }
     return true;
-  }
-
-  @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-                         ModelAndView modelAndView) throws Exception {
-    // Clear the security context, just to make sure nothing subsequently uses the credentials
-    // set up in here.
-    SecurityContextHolder.clearContext();
   }
 }

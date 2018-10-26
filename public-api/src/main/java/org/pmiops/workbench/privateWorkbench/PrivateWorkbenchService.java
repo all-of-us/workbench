@@ -8,5 +8,5 @@ public interface PrivateWorkbenchService {
   /**
    * @return the Workbench profile for the requesting user.
    */
-  Profile getMe(String token) throws ApiException;
+  Profile getMe() throws ApiException;
 }

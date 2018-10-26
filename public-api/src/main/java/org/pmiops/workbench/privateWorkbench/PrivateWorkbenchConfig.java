@@ -17,11 +17,14 @@ public class PrivateWorkbenchConfig {
 
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient workbenchApiClient(WorkbenchConfig workbenchConfig) {
+  public ApiClient workbenchApiClient(HttpServletRequest request,
+                                      WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.server.apiBaseUrl);
     apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient.setConnectTimeout(10000);
+    apiClient.setAccessToken(
+        request.getHeader(HttpHeaders.AUTHORIZATION)
+            .substring("Bearer".length()).trim());
     return apiClient;
   }
 
