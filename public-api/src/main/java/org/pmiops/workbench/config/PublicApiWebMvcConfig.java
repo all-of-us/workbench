@@ -1,5 +1,6 @@
 package org.pmiops.workbench.config;
 
+import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
@@ -14,6 +15,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @Configuration
 public class PublicApiWebMvcConfig extends WebMvcConfigurerAdapter {
+
+  @Autowired
+  private AuthInterceptor authInterceptor;
 
   @Autowired
   private CorsInterceptor corsInterceptor;
@@ -32,6 +36,7 @@ public class PublicApiWebMvcConfig extends WebMvcConfigurerAdapter {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
+    registry.addInterceptor(authInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
   }

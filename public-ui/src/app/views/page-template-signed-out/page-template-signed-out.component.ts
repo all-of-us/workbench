@@ -15,7 +15,8 @@ import {
 export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
   @Input() imageSrc = '';
   @Input() smallerImageSrc = '';
-  headerImg = '/assets/images/logo-registration-non-signed-in.svg';
+  headerImg = '/assets/db-images/All_Of_Us_Logo.svg';
+  dbHeaderImg = '/assets/db-images/Data_Browser_Logo.svg';
   @ViewChild('template') template: ElementRef;
   constructor() {}
 
