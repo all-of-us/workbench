@@ -131,6 +131,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         } else {
           this.actions.setCriteriaSearchTerms([]);
           this.options = [];
+          this.noResults = false;
         }
       });
 
