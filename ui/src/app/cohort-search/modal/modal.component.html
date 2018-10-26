@@ -68,7 +68,7 @@
                     <crit-tree [node]="rootNode"></crit-tree>
                   </div>
                    <!-- SNOMED Search -->
-                  <div class="panel-left" [class.show]="mode === 'snomed'">
+                  <div *ngIf="showSnomed" class="panel-left" [class.show]="mode === 'snomed'">
                     <crit-tree [node]="snomedNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
