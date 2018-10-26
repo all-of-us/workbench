@@ -20,6 +20,7 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
+import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 
 enum Progress {
   Unknown,
@@ -105,6 +106,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private wsNamespace: string;
   private loadingSub: Subscription;
   private cluster: Cluster;
+  private notebookLoaded = false;
+  private loadedNotebookName: string;
+  private leoUrl: SafeResourceUrl;
 
   constructor(
     @Inject(WINDOW_REF) private window: Window,
@@ -113,6 +117,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     private leoClusterService: LeoClusterService,
     private leoNotebooksService: NotebooksService,
     private jupyterService: JupyterService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -124,9 +129,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
       this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernel-type')];
     } else {
-      this.notebookName = this.route.snapshot.params['nbName'];
+      this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
     }
-
+    console.log(this.notebookName);
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
@@ -176,7 +181,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       })
       .subscribe((nbName) => {
         this.progress = Progress.Redirecting;
-        this.window.location.href = this.notebookUrl(this.cluster, nbName);
+        this.notebookLoaded = true;
+        this.leoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
+        // this.window.location.href = this.notebookUrl(this.cluster, nbName);
       });
   }
 
@@ -198,6 +205,10 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
+  }
+
+  private iFrameSrc() {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, this.loadedNotebookName));
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {
