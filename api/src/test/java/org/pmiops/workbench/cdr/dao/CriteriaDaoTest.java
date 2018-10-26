@@ -195,7 +195,7 @@ public class CriteriaDaoTest {
     //match on code
     List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", new PageRequest(0, 10));
     assertEquals(1, labs.size());
-    assertEquals(labCriteria.getId(), labs.get(0));
+    assertEquals(labCriteria.getId(), labs.get(0).getId());
   }
 
   @Test
@@ -204,7 +204,7 @@ public class CriteriaDaoTest {
     List<CriteriaId> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria3.getId(), conditions.get(0));
+    assertEquals(icd9Criteria3.getId(), conditions.get(0).getId());
   }
 
   @Test
