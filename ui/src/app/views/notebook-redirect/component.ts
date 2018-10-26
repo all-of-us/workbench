@@ -7,7 +7,6 @@ import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {WINDOW_REF} from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -102,15 +101,14 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   kernelType: Kernels;
 
+  leoUrl: SafeResourceUrl;
   private wsId: string;
   private wsNamespace: string;
   private loadingSub: Subscription;
   private cluster: Cluster;
   private notebookLoaded = false;
-  private leoUrl: SafeResourceUrl;
 
   constructor(
-    @Inject(WINDOW_REF) private window: Window,
     private route: ActivatedRoute,
     private clusterService: ClusterService,
     private leoClusterService: LeoClusterService,
@@ -127,7 +125,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     if (this.creating) {
       this.notebookName =
         decodeURIComponent(this.route.snapshot.queryParamMap.get('notebook-name'));
-      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernel-type')];
+      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
     } else {
       this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
     }

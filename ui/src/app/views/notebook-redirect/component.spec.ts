@@ -8,7 +8,6 @@ import {ClarityModule} from '@clr/angular';
 import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
-import {WINDOW_REF} from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
 import {environment} from 'environments/environment';
@@ -30,7 +29,6 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
-
 
 class BlockingNotebooksStub extends NotebooksServiceStub {
   private blocker = new AsyncSubject<null>();
@@ -78,14 +76,12 @@ describe('NotebookRedirectComponent', () => {
   let fixture: ComponentFixture<NotebookRedirectComponent>;
   let blockingClusterStub: BlockingClusterStub;
   let blockingNotebooksStub: BlockingNotebooksStub;
-  let fakeWindow: any;
 
   beforeEach(fakeAsync(() => {
     blockingClusterStub = new BlockingClusterStub();
     blockingClusterStub.cluster.status = ClusterStatus.Creating;
     blockingNotebooksStub = new BlockingNotebooksStub();
 
-    fakeWindow = {location: {href: ''}};
     TestBed.configureTestingModule({
       declarations: [
         NotebookRedirectComponent
@@ -96,7 +92,6 @@ describe('NotebookRedirectComponent', () => {
         ClarityModule.forRoot()
       ],
       providers: [
-        { provide: WINDOW_REF, useFactory: () => fakeWindow },
         { provide: ClusterService, useFactory: () => blockingClusterStub },
         { provide: LeoClusterService, useValue: new LeoClusterServiceStub() },
         { provide: NotebooksService, useFactory: () => blockingNotebooksStub },
@@ -108,15 +103,19 @@ describe('NotebookRedirectComponent', () => {
               'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
             },
             queryParamMap: convertToParamMap({
-              'notebook-name': 'blah',
-              'kernel-type': Kernels.R
+              'notebook-name': 'blah blah',
+              'kernelType': Kernels.R
             }),
             data: {
               creating: true
             }
           }
         }},
-      ]}).compileComponents();
+      ]}).compileComponents().then(() => {
+      fixture = TestBed.createComponent(NotebookRedirectComponent);
+      blockingClusterStub.release();
+      blockingNotebooksStub.release();
+    });
   }));
 
   function spinnerText() {
@@ -124,29 +123,21 @@ describe('NotebookRedirectComponent', () => {
       .nativeElement.textContent;
   }
 
-  beforeEach(fakeAsync(() => {
-    fixture = TestBed.createComponent(NotebookRedirectComponent);
-    blockingClusterStub.release();
-    blockingNotebooksStub.release();
-  }));
 
   it('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture.componentRef).toBeTruthy();
-
     // Tears down the retrying subscription.
     fixture.destroy();
   }));
 
   it('should redirect', fakeAsync(() => {
     updateAndTick(fixture);
-    expect(fakeWindow.location.href).toEqual('');
+    expect(fixture.componentInstance.leoUrl).toBeFalsy();
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     tick(10000);
     updateAndTick(fixture);
-
-    expect(fakeWindow.location.href.startsWith(environment.leoApiUrl)).toBeTruthy();
-    expect(fakeWindow.location.href).toContain('/notebooks');
+    expect(fixture.componentInstance.leoUrl).toMatch(environment.leoApiUrl);
   }));
 
   it('should display "Initializing" until ready', fakeAsync(() => {
@@ -161,7 +152,7 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     tick(10000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Initializing');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
   it('should display "Resuming" until resumed', fakeAsync(() => {
@@ -177,7 +168,7 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     tick(10000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Resuming');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
   it('should display "Authenticating" while setting cookies', fakeAsync(() => {
@@ -190,7 +181,7 @@ describe('NotebookRedirectComponent', () => {
     blockingNotebooksStub.release();
     tick();
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Authenticating');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
   it('should display "Creating" while creating a new notebook', fakeAsync(() => {
@@ -203,7 +194,7 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.release();
     tick();
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Creating');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
   it('should display "Copying" while localizing', fakeAsync(() => {
@@ -220,25 +211,22 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.release();
     tick();
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Copying');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
-  it('should display "Redirecting" while redirecting', fakeAsync(() => {
+  it('should display iframe on redirect', fakeAsync(() => {
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     updateAndTick(fixture);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Redirecting');
+    expect(fixture.debugElement.query(By.css('.i-frame'))).toBeTruthy();
   }));
 
 
-  it('should escape notebooks names', fakeAsync(() => {
+  it('should properly display notebooks names', fakeAsync(() => {
     updateAndTick(fixture);
-
-    fixture.componentInstance.notebookName = '1%2B1.ipynb';
-    blockingClusterStub.cluster.status = ClusterStatus.Running;
-    tick(10000);
     fixture.detectChanges();
-
-    expect(fakeWindow.location.href).toContain('/1%252B1.ipynb');
+    expect(fixture.debugElement.query(By.css('.title')).nativeElement.textContent)
+      .toMatch('blah blah');
+    fixture.destroy();
   }));
 });
