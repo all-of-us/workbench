@@ -102,11 +102,12 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   kernelType: Kernels;
 
   leoUrl: SafeResourceUrl;
+  notebookLoaded = false;
+
   private wsId: string;
   private wsNamespace: string;
   private loadingSub: Subscription;
   private cluster: Cluster;
-  private notebookLoaded = false;
 
   constructor(
     private route: ActivatedRoute,
