@@ -59,13 +59,13 @@
           <h4 class="subheader">Research Purpose
             <span role="tooltip"
                   aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
-          <button [disabled]="!writePermission"
-                  [class.disabled]="!writePermission"
+          <button [disabled]="!ownerPermission"
+                  [class.disabled]="!ownerPermission"
                   routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
                   routerLinkActive="active" class="action-item">
             <clr-icon shape="pencil" class="icon"></clr-icon>
           </button>
-          <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+          <span *ngIf="!ownerPermission" class="tooltip-content">You must be a workspace owner to edit the Research Purpose</span>
         </span>
             <app-tooltip [direction]="'top-right'">
               <div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.

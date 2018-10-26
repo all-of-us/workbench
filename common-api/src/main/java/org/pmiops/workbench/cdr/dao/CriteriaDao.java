@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -28,27 +29,28 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   List<Criteria> findCriteriaByType(@Param("type") String type);
 
-  @Query(value = "select c from Criteria c where c.id in ( " +
-    "    select min(cr.id) as id from Criteria cr " +
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and match(synonyms, ?2) > 0 " +
-    "    group by cr.name ) " +
-    "    order by c.count desc")
-  List<Criteria> findCriteriaByTypeForCodeOrName(String type,
+    "    and cr.group = false " +
+    "    group by cr.name")
+  List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
                                                  String value,
                                                  Pageable page);
 
-  @Query(value = "select c from Criteria c where c.id in ( " +
-    "    select min(cr.id) as id from Criteria cr " +
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and cr.subtype = upper(?2) " +
     "    and match(synonyms, ?3) > 0 " +
-    "    group by cr.name ) " +
-    "    order by c.count desc")
-  List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
-                                                           String subtype,
-                                                           String value,
-                                                           Pageable page);
+    "    and cr.group = false " +
+    "    group by cr.name")
+  List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
+                                                             String subtype,
+                                                             String value,
+                                                             Pageable page);
+
+  @Query(value = "select c from Criteria c where c.id in :ids")
+  List<Criteria> findCriteriaByIds(@Param("ids") List<Long> ids);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +

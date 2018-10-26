@@ -17,6 +17,7 @@ export class ComboChartComponent {
   readonly codeMap = {
     'M': 'Male',
     'F': 'Female',
+    'No matching concept': 'Unknown'
   };
 
   readonly axis = {
