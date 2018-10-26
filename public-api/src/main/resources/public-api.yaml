@@ -16,6 +16,21 @@ schemes:
   - "https"
 produces:
   - "application/json"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
+    type: oauth2
+    flow: accessCode
+security:
+  - aou_oauth: []
 
 # Throughout, we use integer/int64 in preference to string/date-time because Swagger's
 # date formatting is inconsistent between server and client. Time values are stored as
@@ -43,7 +58,6 @@ paths:
             "$ref": "#/definitions/ConfigResponse"
   /v1/databrowser/survey-results:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -63,7 +77,6 @@ paths:
 
   /v1/databrowser/concept-analysis-results:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -85,7 +98,6 @@ paths:
 
   /v1/databrowser/participant-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -100,7 +112,6 @@ paths:
 
   /v1/databrowser/gender-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -115,7 +126,6 @@ paths:
 
   /v1/databrowser/race-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -130,7 +140,6 @@ paths:
 
   /v1/databrowser/ethnicity-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -145,7 +154,6 @@ paths:
 
   /v1/databrowser/domain-search:
     get:
-      security: []
       tags:
         - dataBrowser
       description: Gets the domain filters and survey modules with the count of matched concepts
@@ -163,7 +171,6 @@ paths:
             $ref: "#/definitions/DomainInfosAndSurveyModulesResponse"
   /v1/databrowser/domain-totals:
     get:
-      security: []
       tags:
         - dataBrowser
       description: Gets the domain filters and survey modules with the count of all concepts and questions
@@ -177,7 +184,6 @@ paths:
 
   /v1/databrowser/searchConcepts:
     post:
-      security: []
       tags:
         - dataBrowser
       description: Gets list of matched concepts
@@ -197,7 +203,6 @@ paths:
 
   /v1/databrowser/source-concepts:
     get:
-      security: []
       tags:
         - dataBrowser
 
