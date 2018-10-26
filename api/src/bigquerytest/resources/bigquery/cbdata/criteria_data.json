@@ -223,5 +223,35 @@
     "concept_id":10,
     "has_attribute":0,
     "path":"1.5.11"
+  },
+  {
+    "id":1431,
+    "parent_id":12,
+    "type":"DRUG",
+    "subtype":"ATC",
+    "code":"A16",
+    "name":"Other alimentary tract and metabolism products",
+    "is_group":1,
+    "is_selectable":1,
+    "est_count":"6098",
+    "domain_id":"",
+    "concept_id":21600932,
+    "has_attribute":0,
+    "path":"1"
+  },
+  {
+    "id":1432,
+    "parent_id":1431,
+    "type":"DRUG",
+    "subtype":"ATC",
+    "code":"1512",
+    "name":"Betaine",
+    "is_group":0,
+    "is_selectable":1,
+    "est_count":"62",
+    "domain_id":"",
+    "concept_id":1520218,
+    "has_attribute":0,
+    "path":"1.1431"
   }
 ]
