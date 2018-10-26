@@ -21,9 +21,11 @@ export class DbConfigService {
 
   COUNT_ANALYSIS_ID = 3000;
   GENDER_ANALYSIS_ID = 3101;
+  GENDER_IDENTITY_ANALYSIS_ID = 3107;
   AGE_ANALYSIS_ID = 3102;
   SURVEY_COUNT_ANALYSIS_ID = 3110;
   SURVEY_GENDER_ANALYSIS_ID = 3111;
+  SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
   SURVEY_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
@@ -36,6 +38,16 @@ export class DbConfigService {
     '8507': '#8DC892',
     '8532': '#6CAEE3'
   };
+
+  GENDER_IDENTITY_COLORS = {
+    '1585839': '#8DC892',
+    '1585840': '#6CAEE3',
+    '903070': '#252660',
+    '903079': '#80C4EC',
+    '1585841': '#4259A5',
+    '1585842': '#80C4EC',
+    '1585843': '#8DC892'
+  }
 
   /* Age colors -- for now we just use one color pending design */
   AGE_COLOR = '#252660';
