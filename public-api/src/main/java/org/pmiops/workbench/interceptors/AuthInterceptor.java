@@ -70,22 +70,19 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")
+        || "null".equals(authorizationHeader.substring("Bearer".length()).trim())) {
       log.warning("No bearer token found in request");
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return false;
     }
 
-    String token = authorizationHeader.substring("Bearer".length()).trim();
-
-    if ("null".equals(token)) {
-      throw new RuntimeException("No Bearer Token found. Please log in.");
-    }
-
     Profile profile = privateWorkbenchService.getMe();
     if (configProvider.get().firecloud.enforceRegistered &&
         profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
-      throw new RuntimeException("Account has not yet received identity verification.");
+      log.warning("Account has not been id verified");
+      response.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return false;
     }
     return true;
   }
