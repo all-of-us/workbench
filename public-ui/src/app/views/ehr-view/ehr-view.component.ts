@@ -42,7 +42,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
   showAge = true;
-  showGender = true;
+  showGender = false;
+  showGenderIdentity = false;
   showSources = true;
   showMeasurementGenderBins = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
@@ -175,14 +176,22 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   }
 
-
-
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
     } else {
       row.showSources = true;
       row.expanded = true;
+    }
+  }
+
+  public selectGenderGraph(g) {
+    if (g === 'Gender Identity') {
+      this.showGenderIdentity = true;
+      this.showGender = false;
+    } else {
+      this.showGender = true;
+      this.showGenderIdentity = false;
     }
   }
 

@@ -224,7 +224,10 @@
             </button>
           </div>
           <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-            <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender"
+            <div class="col-md">
+              <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectGenderGraph(g)" class="btn btn-link">{{g}} </button>
+            </div>
+            <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender" [showGenderIdentity]="showGenderIdentity"
                                 [showSources]="showSources" [backgroundColor]="'#ECF1F4'">
             </app-concept-charts>
           </div>

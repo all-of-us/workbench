@@ -39,9 +39,14 @@
   </div>
 
   <!-- show gender totals  if we want -->
-  <div class="col-md-4 col-xs-12 chart" *ngIf="showGender && analyses.genderAnalysis"  >
+  <div class="col-md-4 col-xs-12 chart" *ngIf="showGender && analyses.genderAnalysis; else genderIdentity"  >
     <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
   </div>
+  <ng-template #genderIdentity>
+    <div class="col-md-4 col-xs-12 chart">
+      <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor"> </app-chart>
+    </div>
+  </ng-template>
 
   <!-- show age totals  if we want -->
   <div class="col-md-4 col-xs-12 chart" *ngIf="showAge && analyses.ageAnalysis" >
