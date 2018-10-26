@@ -16,20 +16,20 @@ import {NotebookComponent} from './notebook/component';
     EditComponent,
     LeftScrollComponent,
     LeftScrollLightComponent,
+    NotebookComponent,
     RightScrollComponent,
     RightScrollLightComponent,
-    ShareComponent,
-    NotebookComponent
+    ShareComponent
   ],
   exports: [
     TrashComponent,
     EditComponent,
     LeftScrollComponent,
     LeftScrollLightComponent,
+    NotebookComponent,
     RightScrollComponent,
     RightScrollLightComponent,
-    ShareComponent,
-    NotebookComponent
+    ShareComponent
   ],
   providers: []
 })
