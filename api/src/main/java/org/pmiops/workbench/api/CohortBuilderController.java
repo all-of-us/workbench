@@ -282,7 +282,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       throw new BadRequestException(
         String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
     }
-    return Arrays.stream(value.split("[,+\\s+]"))
+    String[] keywords = value.split("[,+\\s+]");
+    if (keywords.length == 1 && keywords[0].length() <= 3) {
+      return "+\"" + keywords[0] + "\"";
+    }
+    return Arrays.stream(keywords)
       .map(term -> "+" + term + "*")
       .collect(Collectors.joining());
   }
