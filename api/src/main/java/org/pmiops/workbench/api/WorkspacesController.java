@@ -533,7 +533,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.getRequired(
         workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace,
-        workspaceId, WorkspaceAccessLevel.WRITER);
+        workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
