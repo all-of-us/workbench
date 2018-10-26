@@ -1,5 +1,17 @@
 [
   {
+    "concept_id":0,
+    "concept_name":"No matching concept",
+    "domain_id":"Metadata",
+    "vocabulary_id":"None",
+    "concept_class_id":"Undefined",
+    "standard_concept":"sc",
+    "concept_code":"No matching concept",
+    "valid_start_date":"2009-12-03",
+    "valid_end_date":"2009-12-03",
+    "invalid_reason":"ir"
+  },
+  {
     "concept_id":1,
     "concept_name":"name1",
     "domain_id":"Condition",
