@@ -125,7 +125,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
     if (this.creating) {
       this.notebookName =
-        decodeURIComponent(this.route.snapshot.queryParamMap.get('notebook-name'));
+        decodeURIComponent(this.route.snapshot.queryParamMap.get('notebookName'));
       this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
     } else {
       this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
