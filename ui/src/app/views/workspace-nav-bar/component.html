@@ -47,9 +47,7 @@
             <clr-icon shape="share" class="icons"></clr-icon>
             Share
           </button>
-          <span *ngIf="!ownerPermission" class="tooltip-content">
-            Owner access is required to share the workspace.
-          </span>
+          <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
           <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="confirmDelete()">
