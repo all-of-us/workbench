@@ -10,6 +10,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 import {environment} from 'environments/environment';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
@@ -84,7 +85,8 @@ describe('NotebookRedirectComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        NotebookRedirectComponent
+        NotebookRedirectComponent,
+        TopBoxComponent
       ],
       imports: [
         BrowserAnimationsModule,
