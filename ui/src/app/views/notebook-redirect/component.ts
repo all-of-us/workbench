@@ -1,5 +1,6 @@
 import {Location} from '@angular/common';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
@@ -11,16 +12,15 @@ import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
 import {
-  Cluster,
-  ClusterService,
-  ClusterStatus,
+Cluster,
+ClusterService,
+ClusterStatus,
 } from 'generated';
 import {
-  ClusterService as LeoClusterService,
-  JupyterService,
-  NotebooksService,
+ClusterService as LeoClusterService,
+JupyterService,
+NotebooksService,
 } from 'notebooks-generated';
-import {DomSanitizer, SafeResourceUrl} from "@angular/platform-browser";
 
 enum Progress {
   Unknown,
@@ -182,8 +182,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .subscribe((nbName) => {
         this.progress = Progress.Redirecting;
         this.notebookLoaded = true;
-        this.leoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
-        // this.window.location.href = this.notebookUrl(this.cluster, nbName);
+        this.leoUrl = this.sanitizer
+          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
       });
   }
 
@@ -205,10 +205,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
-  }
-
-  private iFrameSrc() {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, this.loadedNotebookName));
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {

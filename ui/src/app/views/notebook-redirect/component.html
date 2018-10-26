@@ -1,27 +1,29 @@
-<h2 *ngIf="notebookName && !notebookLoaded">Loading Notebook '{{notebookName}}'</h2>
-<h2 *ngIf="!notebookName && !notebookLoaded">Creating a New Notebook</h2>
-<div *ngIf="!notebookLoaded" [ngSwitch]="progress" class="spinner-container">
-  <span class="spinner spinner-lg"></span>
-  <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
-    <span class="spinner-header">Initializing notebook server</span><br>
-    May take up to 5 minutes
-  </p>
-  <p *ngSwitchCase="Progress.Resuming" class="spinner-text">
-    <span class="spinner-header">Resuming notebook server</span><br>
-    May take up to 1 minute
-  </p>
-  <p *ngSwitchCase="Progress.Authenticating" class="spinner-text">
-    Authenticating with the notebook server
-  </p>
-  <p *ngSwitchCase="Progress.Copying" class="spinner-text">
-    Copying notebook onto the notebook server
-  </p>
-  <p *ngSwitchCase="Progress.Creating" class="spinner-text">
-    Creating the new notebook
-  </p>
-  <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
-    Redirecting to the notebook server
-  </p>
+<div *ngIf="!notebookLoaded">
+  <h2 *ngIf="notebookName">Loading Notebook '{{notebookName}}'</h2>
+  <h2 *ngIf="!notebookName">Creating a New Notebook</h2>
+  <div [ngSwitch]="progress" class="spinner-container">
+    <span class="spinner spinner-lg"></span>
+    <p *ngSwitchCase="Progress.Initializing" class="spinner-text">
+      <span class="spinner-header">Initializing notebook server</span><br>
+      May take up to 5 minutes
+    </p>
+    <p *ngSwitchCase="Progress.Resuming" class="spinner-text">
+      <span class="spinner-header">Resuming notebook server</span><br>
+      May take up to 1 minute
+    </p>
+    <p *ngSwitchCase="Progress.Authenticating" class="spinner-text">
+      Authenticating with the notebook server
+    </p>
+    <p *ngSwitchCase="Progress.Copying" class="spinner-text">
+      Copying notebook onto the notebook server
+    </p>
+    <p *ngSwitchCase="Progress.Creating" class="spinner-text">
+      Creating the new notebook
+    </p>
+    <p *ngSwitchCase="Progress.Redirecting" class="spinner-text">
+      Redirecting to the notebook server
+    </p>
+  </div>
 </div>
 <div *ngIf="notebookLoaded">
   <iframe style="width:100%; height: 33rem" [src]="leoUrl"></iframe>
