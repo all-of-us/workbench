@@ -96,11 +96,6 @@ describe('ConceptHomepageComponent', () => {
       });
   }));
 
-
-  it('should render.', fakeAsync(() => {
-    expect(fixture).toBeTruthy();
-  }));
-
   it('should have one card per domain.', fakeAsync(() => {
     expect(fixture.debugElement.queryAll(By.css('.card.item-card')).length)
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
@@ -180,7 +175,7 @@ describe('ConceptHomepageComponent', () => {
     expect(fixture.debugElement.queryAll(By.css('.concept-row')).length).toBe(2);
   }));
 
-  it( 'should display the selected concepts on header', fakeAsync(() => {
+  it('should display the selected concepts on header', fakeAsync(() => {
     const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
         .and.callThrough();
     const searchTerm = 'test';
@@ -199,7 +194,7 @@ describe('ConceptHomepageComponent', () => {
     expect(pillValue).toBe('1');
   }));
 
-  it( 'should display the selected concepts on sliding button', fakeAsync(() => {
+  it('should display the selected concepts on sliding button', fakeAsync(() => {
     const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
         .and.callThrough();
 
@@ -223,5 +218,31 @@ describe('ConceptHomepageComponent', () => {
 
     // After select add the number of selected concepts
     expect(buttonText).toBe('Add (1) to set');
+  }));
+
+  fit('should clear selected count after adding', fakeAsync(() => {
+    const de = fixture.debugElement;
+
+    simulateClick(fixture, de.query(By.css('.standard-concepts-checkbox')).children[0]);
+    simulateInput(fixture, de.query(By.css('#concept-search-input')), 'test');
+    simulateClick(fixture, de.query(By.css('.btn-search')));
+    updateAndTick(fixture);
+    const dataRow = de.queryAll(By.css('.concept-row'));
+    const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
+        .query(By.css('.checkbox')).children;
+    simulateClick(fixture, checkBox[0]);
+    updateAndTick(fixture);
+
+    simulateClick(fixture, de.query(By.css('.sliding-button')));
+    updateAndTick(fixture);
+
+    simulateClick(fixture, de.query(By.css('.btn-primary')));
+    updateAndTick(fixture);
+
+    const addButton = de.query(By.css('.sliding-button'));
+    expect(addButton.classes['disable']).toBeTruthy();
+
+    // Run out the "added" notification timer.
+    tick(10000);
   }));
 });
