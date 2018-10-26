@@ -411,9 +411,6 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
-    if (this.mode === WorkspaceEditMode.Edit) {
-      return;
-    }
     if (!this.workspacePopulationDetails) {
       this.workspacePopulationDetails = [];
     }
