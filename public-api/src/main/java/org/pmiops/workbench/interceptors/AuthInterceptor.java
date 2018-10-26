@@ -41,8 +41,6 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   }
 
   /**
-   * Returns true iff the request is auth'd and should proceed. Publishes authenticated user info
-   * using Spring's SecurityContext.
    * @param handler The Swagger-generated ApiController. It contains our handler as a private
    *     delegate.
    */
@@ -80,15 +78,14 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     String token = authorizationHeader.substring("Bearer".length()).trim();
 
-    if (token.equals("null")) {
+    if ("null".equals(token)) {
       throw new RuntimeException("No Bearer Token found. Please log in.");
     }
 
     Profile profile = privateWorkbenchService.getMe();
-    if (configProvider.get().firecloud.enforceRegistered) {
-      if (profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
-        throw new RuntimeException("Account has not yet received identity verification.");
-      }
+    if (configProvider.get().firecloud.enforceRegistered &&
+        profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
+      throw new RuntimeException("Account has not yet received identity verification.");
     }
     return true;
   }

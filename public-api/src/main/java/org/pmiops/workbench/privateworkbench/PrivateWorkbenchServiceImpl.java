@@ -6,13 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Provider;
-import java.util.logging.Logger;
 
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class PrivateWorkbenchServiceImpl implements PrivateWorkbenchService {
-  private static final Logger log = Logger.getLogger(PrivateWorkbenchServiceImpl.class.getName());
-
   private final Provider<ProfileApi> profileApiProvider;
 
   @Autowired
