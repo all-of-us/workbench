@@ -12,14 +12,14 @@ import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
 import {
-Cluster,
-ClusterService,
-ClusterStatus,
+  Cluster,
+  ClusterService,
+  ClusterStatus,
 } from 'generated';
 import {
-ClusterService as LeoClusterService,
-JupyterService,
-NotebooksService,
+  ClusterService as LeoClusterService,
+  JupyterService,
+  NotebooksService,
 } from 'notebooks-generated';
 
 enum Progress {
@@ -107,7 +107,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private loadingSub: Subscription;
   private cluster: Cluster;
   private notebookLoaded = false;
-  private loadedNotebookName: string;
   private leoUrl: SafeResourceUrl;
 
   constructor(
@@ -132,7 +131,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     } else {
       this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
     }
-    console.log(this.notebookName);
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
