@@ -546,6 +546,9 @@ public class WorkspacesControllerTest {
     request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+
+    stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test(expected = ConflictException.class)
