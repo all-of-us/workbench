@@ -10,3 +10,6 @@
 .card-view {
     margin-top: .5rem;
 }
+.flex-xs-middle.code-tooltip {
+    display: inline;
+}

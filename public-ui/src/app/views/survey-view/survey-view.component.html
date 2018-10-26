@@ -5,7 +5,7 @@
     <div class="col-xs-12">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
-          <h2> {{survey.name}} Survey Module </h2>
+          <h2> {{survey.name}} Survey </h2>
           <h4 class="view-sub-title">{{survey.description}} </h4>
         </div>
       </div>
@@ -45,7 +45,7 @@
               <span *ngIf="!loading" >{{ surveyResult.items.length }} </span>
             </div>
             <div class="card-text">
-              <a href="{{surveyPdfUrl}}" download="{{surveyName}}"> Download Survey PDF <clr-icon shape="file" class="has-badge is-solid"></clr-icon></a>
+              <a href="{{surveyPdfUrl}}" download> Download Survey PDF <clr-icon shape="file" class="has-badge is-solid"></clr-icon></a>
             </div>
           </div>
         </div>
@@ -112,14 +112,42 @@
 
           <div class="col-xs-12 col-sm-12">
             <div class="box-title"> Question {{i + 1}}</div>
-            <div class="box-sub-title question" innerHtml="{{ q.conceptName | highlightSearch : searchText.value}} -- {{q.conceptId}}">   </div>
+            <div class="box-sub-title question-display">
+              <div class="box-sub-title question question" innerHtml="{{ q.conceptName | highlightSearch : searchText.value}} -- {{q.conceptId}}"></div>
+              <clr-tooltip>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-tooltip-content clrPosition=bottom-left
+                                     clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-label">The concept code is an additional piece of information that
+                    can be utilized to find medical concepts in the AoU data set. Concept codes are specific to the
+                    AoU Research Program data and are assigned to all medical concepts.
+                    In some instances,
+                    a medical concept may not be assigned a source or standard vocabulary code.
+                    In these instances, the concept code can be utilized to
+                    query the data for the medical concept.</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
           </div>
-
         </div>
 
         <div class="row">
             <div class="col-xs-12">
-              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers - Click on each response option for additional gender and age at occurrence data.
+                <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+              <clr-tooltip *ngIf="showAnswer[q.conceptId]">
+                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-tooltip-content clrPosition=bottom-left
+                                     clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-header"><b><u>Age at occurrence chart</u></b></div>
+                  <div class="tooltip-label">The age at occurrence bar chart provides a
+                    binned age distribution for participants at the time
+                    the medical concept being queried occurred in their records.
+                    If an individual’s record contains more than one mention of a concept,
+                    the age at occurrence is included for each mention.
+                    As a result, a participant may be counted more than once in the distribution.</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </div>
         </div>
 

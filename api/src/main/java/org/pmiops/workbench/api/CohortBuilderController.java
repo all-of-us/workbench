@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
+import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -21,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.inject.Provider;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -113,13 +115,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     String matchExp = modifyKeywordMatch(value);
-    List<Criteria> criteriaList;
+    List<CriteriaId> ids;
     if (subtype == null) {
-      criteriaList =  criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
     } else {
-      criteriaList = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
     }
 
+    List<Criteria> criteriaList = ids.isEmpty() ?
+      new ArrayList<>() :
+      criteriaDao.findCriteriaByIds(ids.stream().map(CriteriaId::getId).collect(Collectors.toList()));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
@@ -277,7 +282,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       throw new BadRequestException(
         String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
     }
-    return Arrays.stream(value.split("[,+\\s+]"))
+    String[] keywords = value.split("[,+\\s+]");
+    if (keywords.length == 1 && keywords[0].length() <= 3) {
+      return "+\"" + keywords[0] + "\"";
+    }
+    return Arrays.stream(keywords)
       .map(term -> "+" + term + "*")
       .collect(Collectors.joining());
   }
