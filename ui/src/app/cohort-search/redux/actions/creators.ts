@@ -67,6 +67,7 @@ import {
 
   LOAD_ENTITIES,
   RESET_STORE,
+  DELETE_STORE,
   ActionTypes,
 } from './types';
 /* tslint:enable:ordered-imports */
@@ -393,3 +394,7 @@ export const loadEntities =
 export const resetStore =
   (): ActionTypes[typeof RESET_STORE] =>
   ({type: RESET_STORE});
+
+export const deleteStore =
+  (): ActionTypes[typeof DELETE_STORE] =>
+  ({type: DELETE_STORE});

@@ -102,6 +102,7 @@ export class CohortSearchActions {
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
   @dispatch() _resetStore = ActionFuncs.resetStore;
+  @dispatch() deleteStore = ActionFuncs.deleteStore;
 
   /** Internal tooling */
   idsInUse = Set<string>();
