@@ -27,6 +27,7 @@ public class QuestionConcept {
 
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
+    public static Map<String, String> genderIdentityStratumNameMap = new HashMap<>();
     public static Map<String, String> raceStratumNameMap = new HashMap<String, String>();
     public static Map<String, String> ethnicityStratumNameMap = new HashMap<String, String>();
 
@@ -41,6 +42,7 @@ public class QuestionConcept {
         ageStratumNameMap.put("7", "70-79");
         ageStratumNameMap.put("8", "80-89");
     }
+
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */
         genderStratumNameMap.put("8507", "Male");
@@ -48,6 +50,16 @@ public class QuestionConcept {
         genderStratumNameMap.put("8521", "Other");
         genderStratumNameMap.put("8551", "Unknown");
         genderStratumNameMap.put("8570", "Ambiguous");
+    }
+
+    public static void setGenderIdentityStratumNameMap() {
+        genderIdentityStratumNameMap.put("1585840", "Woman");
+        genderIdentityStratumNameMap.put("903070", "Other");
+        genderIdentityStratumNameMap.put("903079", "Prefer Not To Answer");
+        genderIdentityStratumNameMap.put("1585841", "Non-binary");
+        genderIdentityStratumNameMap.put("1585839", "Man");
+        genderIdentityStratumNameMap.put("1585842", "Transgender");
+        genderIdentityStratumNameMap.put("1585843", "None of these describe me");
     }
 
     public static void setRaceStratumNameMap(){
@@ -116,6 +128,7 @@ public class QuestionConcept {
     static {
         setAgeStratumNameMap();
         setGenderStratumNameMap();
+        setGenderIdentityStratumNameMap();
         setRaceStratumNameMap();
         setEthnicityStratumNameMap();
     }

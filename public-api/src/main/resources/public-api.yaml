@@ -576,6 +576,10 @@ definitions:
         description: gender analysis
         type: object
         $ref: "#/definitions/Analysis"
+      genderIdentityAnalysis:
+        description: gender identity analysis
+        type: object
+        $ref: "#/definitions/Analysis"
       ageAnalysis:
         description: age analysis
         type: object
