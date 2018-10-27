@@ -81,11 +81,22 @@ export class ChartComponent implements OnChanges {
         pie: {
           borderColor: null,
           slicedOffset: 4,
+          size: this.analysis ?
+              (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID ||
+              this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ? '60%' : '100%')
+            : '100%',
           dataLabels: {
             enabled: true,
-            style: this.dbc.DATA_LABEL_STYLE,
-            distance: -30,
-            format: '{point.name} {point.percentage:.0f}%'
+            style: this.analysis ?
+                (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+                this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID
+                ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE)
+              : this.dbc.DATA_LABEL_STYLE,
+            distance: this.analysis ?
+                (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID ||
+                this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ? 1 : -30)
+              : -30,
+            format: '{point.name} {point.percentage:.0f}%',
           }
         },
         column: {
@@ -153,6 +164,11 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
+
+      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+          this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+          return this.makeGenderChartOptions();
+      }
 
     /* Todo make charts for ethniticy and race
      * maybe cleanup / generalize pie chart
@@ -285,7 +301,8 @@ export class ChartComponent implements OnChanges {
     let seriesName = '';
     if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
-      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {
+      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -296,6 +313,7 @@ export class ChartComponent implements OnChanges {
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
     }
+    console.log(results);
     let data = [];
     let cats = [];
     for (const a  of results) {
@@ -306,6 +324,9 @@ export class ChartComponent implements OnChanges {
       }
       if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
         color = this.dbc.GENDER_COLORS[a.stratum5];
+      }
+      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
+        color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum2];
       }
 
       data.push({
