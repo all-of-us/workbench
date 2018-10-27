@@ -94,7 +94,7 @@ export class ChartComponent implements OnChanges {
               : this.dbc.DATA_LABEL_STYLE,
             distance: this.analysis ?
                 (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID ||
-                this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ? 1 : -30)
+                this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ? -3 : -30)
               : -30,
             format: '{point.name} {point.percentage:.0f}%',
           }
