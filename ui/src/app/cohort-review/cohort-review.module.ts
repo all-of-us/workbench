@@ -26,9 +26,9 @@ import {DetailTabTableComponent} from './detail-tab-table/detail-tab-table.compo
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from './individual-participants-charts/individual-participants-charts';
 import {OverviewPage} from './overview-page/overview-page';
-import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
