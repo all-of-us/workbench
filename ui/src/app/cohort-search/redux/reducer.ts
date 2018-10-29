@@ -76,6 +76,7 @@ import {
 
   LOAD_ENTITIES,
   RESET_STORE,
+  CLEAR_STORE,
   RootAction,
   LOAD_CHART_RESULTS,
   BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
@@ -487,8 +488,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case WIZARD_CANCEL: {
@@ -505,8 +505,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case SET_WIZARD_CONTEXT:
@@ -517,6 +516,9 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case RESET_STORE:
         return initialState;
+
+      case CLEAR_STORE:
+        return fromJS({});
 
       /**
        * Cohort Review Charts
