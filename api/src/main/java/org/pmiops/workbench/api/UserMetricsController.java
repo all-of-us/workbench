@@ -87,7 +87,6 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           .etag(Etags.fromVersion(conceptSet.getVersion()))
           .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
           .creationTime(conceptSet.getCreationTime().getTime())
-//          .domain(conceptSet.getDomain())
           .description(conceptSet.getDescription())
           .id(conceptSet.getConceptSetId())
           .name(conceptSet.getName());
