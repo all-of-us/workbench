@@ -13,11 +13,13 @@
       </div>
       <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create concept sets.</span>
     </div>
-    <div *ngFor="let conceptSet of resourceList">
-      <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
-                         (onUpdate)="loadConceptSets()"
-                         (duplicateNameError)="duplicateNameError($event)">
-      </app-resource-card>
+    <div style="display: flex; flex-wrap: wrap;">
+      <div *ngFor="let conceptSet of resourceList">
+        <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
+                           (onUpdate)="loadConceptSets()"
+                           (duplicateNameError)="duplicateNameError($event)">
+        </app-resource-card>
+      </div>
     </div>
   </div>
 </app-top-box>
