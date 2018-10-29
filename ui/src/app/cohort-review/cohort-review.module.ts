@@ -13,7 +13,6 @@ import {NgxPopperModule} from 'ngx-popper';
 /* Pages */
 import {CohortCommonModule} from '../cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
-import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from '../cohort-search/redux';
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
@@ -88,9 +87,6 @@ import {TablePage} from './table-page/table-page';
 
   ],
   providers: [ReviewStateService,
-              CohortSearchActions,
-              CohortSearchEpics,
-              ConfigureStore,
     {
       provide: HighchartsStatic,
       useValue: highCharts
@@ -98,5 +94,5 @@ import {TablePage} from './table-page/table-page';
   ]
 })
 export class CohortReviewModule {
-    constructor(store: ConfigureStore) {}
+
 }
