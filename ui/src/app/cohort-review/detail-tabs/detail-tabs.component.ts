@@ -125,7 +125,6 @@ const labRefRange = {
 })
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
-  // loading = false;
   data;
   participantsId: any;
   procedureData = [];
@@ -334,7 +333,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
-    const cohortId = cid;
 
     this.domainList.map(domainName => {
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,

@@ -52,10 +52,8 @@ describe('DetailTabsComponent', () => {
       imports: [ChartModule, RouterTestingModule],
        schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        // {provide: NgRedux, useValue: mockReduxInst},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        // {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
       ]
     })
