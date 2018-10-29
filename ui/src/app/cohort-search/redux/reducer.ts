@@ -180,13 +180,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         action.children.forEach(child => {
           child.parameterId = `param${(child.conceptId ?
             (child.conceptId + child.code) : child.id)}`;
-          const path = child.path.split('.');
-          const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
             .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
-            .updateIn(['wizard', 'item', 'selectedParents'],
-              List(),
-              parentIdList => parentIdList.merge(fromJS(parents)))
             .updateIn(
               ['wizard', 'item', 'searchParameters'],
               List(),
@@ -353,11 +348,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['wizard', 'item', 'searchParameters'],
             List(),
             paramList => paramList.filterNot(id => id === action.parameterId)
-          )
-          .updateIn(
-            ['wizard', 'item', 'selectedParents'],
-            List(),
-            parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
           )
           .updateIn(
             ['wizard', 'item', 'selectedGroups'],

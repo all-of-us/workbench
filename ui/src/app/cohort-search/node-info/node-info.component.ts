@@ -10,7 +10,6 @@ import {
   ViewChild
 } from '@angular/core';
 import {TreeSubType, TreeType} from 'generated';
-import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {PREDEFINED_ATTRIBUTES} from '../constant';
@@ -18,7 +17,6 @@ import {
   CohortSearchActions,
   CohortSearchState,
   isParameterActive,
-  isSelectedParent,
   selectedGroups,
   subtreeSelected
 } from '../redux';
@@ -34,7 +32,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   private isSelected: boolean;
-  private isSelectedParent: boolean;
   private isSelectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
@@ -55,16 +52,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .map(val => noAttr && val)
       .subscribe(val => {
         this.isSelected = val;
-        if (val) {
-          console.log(this.node.toJS());
-        }
-      });
-
-    this.subscription = this.ngRedux
-      .select(isSelectedParent(this.node.get('id')))
-      .map(val => noAttr && val)
-      .subscribe(val => {
-        this.isSelectedParent = val;
       });
 
     this.subscription.add(this.groups$
@@ -160,7 +147,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (this.selectAllChildren) {
         this.actions.fetchAllChildren(this.node);
-        console.log(this.paramId);
       } else {
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
@@ -228,6 +214,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get isDisabled() {
-    return this.isSelected || this.isSelectedChild || this.isSelectedParent;
+    return this.isSelected || this.isSelectedChild;
   }
 }
