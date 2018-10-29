@@ -52,6 +52,7 @@ export class ConceptSetListComponent implements OnInit {
   }
 
   loadConceptSets() {
+    this.conceptSetsLoading = true;
     this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId)
       .subscribe(conceptSetListResponse => {
         this.conceptSetsList = conceptSetListResponse.items;
