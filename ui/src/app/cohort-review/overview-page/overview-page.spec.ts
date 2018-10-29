@@ -10,39 +10,59 @@ import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {ReviewStateService} from '../review-state.service';
 import {OverviewPage} from './overview-page';
-
+import {ParticipantsCharts} from '../participants-charts/participant-charts';
 
 import {
     CohortSearchActions,
     isChartLoading,
 } from '../../cohort-search/redux';
+import {CohortReviewServiceStub} from "../../../testing/stubs/cohort-review-service-stub";
+import {Observable} from "rxjs/Observable";
 
 describe('OverviewPage', () => {
   let component: OverviewPage;
   let fixture: ComponentFixture<OverviewPage>;
   const activatedRouteStub = {
+    data: Observable.of({
+      participant: {},
+      annotations: [],
+    }),
     parent: {
       snapshot: {
         data: {
           workspace: {
             cdrVersionId: 1
           },
-            cohort: {
-                name: ''
-            }
+          cohort: {
+            name: ''
+          },
+          params: {
+            ns: 'workspaceNamespace',
+            wsid: 'workspaceId',
+            cid: 1
+          }
+        },
+        params: {
+          ns: 'workspaceNamespace',
+          wsid: 'workspaceId',
+          cid: 1
         }
-      }
+      },
+
     },
+
+
   };
+
   let route;
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ ComboChartComponent, OverviewPage],
+      declarations: [ ComboChartComponent, OverviewPage, ParticipantsCharts],
       imports: [ClarityModule, NgxChartsModule, NgxPopperModule],
       providers: [
         {provide: NgRedux},
-        {provide: CohortReviewService},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions},
         {provide: isChartLoading},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
