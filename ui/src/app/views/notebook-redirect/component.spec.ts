@@ -8,8 +8,8 @@ import {ClarityModule} from '@clr/angular';
 import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
-import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookComponent} from 'app/icons/notebook/component';
+import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {environment} from 'environments/environment';
