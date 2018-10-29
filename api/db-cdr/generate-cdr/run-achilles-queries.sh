@@ -194,6 +194,7 @@ on p1.person_id = co1.person_id where co1.condition_concept_id != co1.condition_
 group by co1.condition_source_concept_id, p1.gender_concept_id"
 
 # Condition gender identity
+# Calculating the gender identity counts for condition concepts based on the answer of each person to ppi question 1585838
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
@@ -412,6 +413,7 @@ where co1.procedure_concept_id != co1.procedure_source_concept_id
 group by co1.procedure_source_concept_id,p1.gender_concept_id"
 
 #  3107 Gender identity
+# Calculates gender identity counts for procedure concepts based on the people' answer to ppi question 1585838
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
@@ -585,6 +587,7 @@ where co1.drug_concept_id != co1.drug_source_concept_id
 group by co1.drug_source_concept_id,p1.gender_concept_id"
 
 # Drug gender identity
+# Calculates gender identity counts for drug concepts based on the people' answer to ppi question 1585838
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
@@ -759,6 +762,7 @@ where co1.observation_source_concept_id > 0 and co1.observation_concept_id != co
 group by co1.observation_source_concept_id, p1.gender_concept_id"
 
 # Observation 3107 concept by gender identity
+# Calculates gender identity counts for observation concepts based on the people' answer to ppi question 1585838
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
@@ -921,6 +925,7 @@ where co1.measurement_source_concept_id > 0 and co1.measurement_concept_id!=co1.
 group by co1.measurement_source_concept_id, p1.gender_concept_id"
 
 # Measurement concept by gender identity
+# Calculates gender identity counts for measurement concepts based on the people' answer to ppi question 1585838
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
