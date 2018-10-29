@@ -20,13 +20,16 @@ public class QuestionConcept {
     private AchillesAnalysis countAnalysis;
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
+    private AchillesAnalysis genderIdentityAnalysis;
 
     public static final long SURVEY_COUNT_ANALYSIS_ID = 3110;
     public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
     public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
+    public static final long SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
 
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
+    public static Map<String, String> genderIdentityStratumNameMap = new HashMap<>();
     public static Map<String, String> raceStratumNameMap = new HashMap<String, String>();
     public static Map<String, String> ethnicityStratumNameMap = new HashMap<String, String>();
 
@@ -41,6 +44,7 @@ public class QuestionConcept {
         ageStratumNameMap.put("7", "70-79");
         ageStratumNameMap.put("8", "80-89");
     }
+
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */
         genderStratumNameMap.put("8507", "Male");
@@ -48,6 +52,16 @@ public class QuestionConcept {
         genderStratumNameMap.put("8521", "Other");
         genderStratumNameMap.put("8551", "Unknown");
         genderStratumNameMap.put("8570", "Ambiguous");
+    }
+
+    public static void setGenderIdentityStratumNameMap() {
+        genderIdentityStratumNameMap.put("1585840", "Woman");
+        genderIdentityStratumNameMap.put("903070", "Other");
+        genderIdentityStratumNameMap.put("903079", "Prefer Not To Answer");
+        genderIdentityStratumNameMap.put("1585841", "Non-binary");
+        genderIdentityStratumNameMap.put("1585839", "Man");
+        genderIdentityStratumNameMap.put("1585842", "Transgender");
+        genderIdentityStratumNameMap.put("1585843", "None of these describe me");
     }
 
     public static void setRaceStratumNameMap(){
@@ -116,6 +130,7 @@ public class QuestionConcept {
     static {
         setAgeStratumNameMap();
         setGenderStratumNameMap();
+        setGenderIdentityStratumNameMap();
         setRaceStratumNameMap();
         setEthnicityStratumNameMap();
     }
@@ -150,6 +165,9 @@ public class QuestionConcept {
                     }
                     if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
                         r.setAnalysisStratumName(genderStratumNameMap.get(r.getStratum5()));
+                    }
+                    if (analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+                        r.setAnalysisStratumName(genderIdentityStratumNameMap.get(r.getStratum5()));
                     }
                 }
             }
@@ -265,6 +283,14 @@ public class QuestionConcept {
         return this;
     }
 
+    @Transient
+    public AchillesAnalysis getGenderIdentityAnalysis() { return this.genderIdentityAnalysis; }
+    public void setGenderIdentityAnalysis(AchillesAnalysis analysis) { this.genderIdentityAnalysis = analysis; }
+    public QuestionConcept genderIdentityAnalysis(AchillesAnalysis analysis) {
+        this.genderIdentityAnalysis = analysis;
+        return this;
+    }
+
     public void setAnalysis(AchillesAnalysis analysis) {
         if (analysis.getAnalysisId() == SURVEY_COUNT_ANALYSIS_ID) {
             this.countAnalysis = analysis;
@@ -274,6 +300,9 @@ public class QuestionConcept {
         }
         else if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
             this.ageAnalysis = analysis;
+        }
+        else if(analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            this.genderIdentityAnalysis = analysis;
         }
     }
 
@@ -286,6 +315,9 @@ public class QuestionConcept {
         }
         else if (analysisId == SURVEY_AGE_ANALYSIS_ID) {
             return this.ageAnalysis;
+        }
+        else if (analysisId == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            return this.genderIdentityAnalysis;
         }
         return null;
     }
