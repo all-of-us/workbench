@@ -40,14 +40,12 @@
               </div>
               <ng-container *ngFor = "let name of typesList" >
               <div [ngClass]="{'btn-disable': buttonsDisableFlag}" >
-              <!--<div>-->
                   <button type="button"
                           (click)="getDifferentCharts(name)"
                           [ngClass]="[ name === domainTitle ?'btn-outline': 'btn-primary']"
                           class="overview-buttons btn">
                     {{name}}S
                   </button>
-
               </div>
               </ng-container>
             </div>
