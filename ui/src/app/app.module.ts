@@ -80,6 +80,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import {ToolTipComponent} from './views/tooltip/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -163,6 +164,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     SignedInComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
+    ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
     WorkspaceComponent,

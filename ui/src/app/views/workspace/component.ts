@@ -23,6 +23,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 /*
  * Search filters used by the cohort and notebook data tables to
@@ -75,12 +76,14 @@ enum Tabs {
   styleUrls: ['../../styles/buttons.css',
     '../../styles/headers.css',
     '../../styles/cards.css',
+    '../../styles/tooltip.css',
     './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
+  @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
   showTip: boolean;

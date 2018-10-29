@@ -1,11 +1,12 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Location} from '@angular/common';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
-import {WINDOW_REF} from 'app/utils';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -100,6 +101,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   kernelType: Kernels;
 
+  leoUrl: SafeResourceUrl;
+  notebookLoaded = false;
+
   private wsId: string;
   private wsNamespace: string;
   private loadingSub: Subscription;
@@ -107,12 +111,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private progressComplete = new Map<Progress, boolean>();
 
   constructor(
-    @Inject(WINDOW_REF) private window: Window,
+    private locationService: Location,
     private route: ActivatedRoute,
     private clusterService: ClusterService,
     private leoClusterService: LeoClusterService,
     private leoNotebooksService: NotebooksService,
     private jupyterService: JupyterService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -122,12 +127,12 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.creating = this.route.snapshot.data.creating;
 
     if (this.creating) {
-      this.notebookName = this.route.snapshot.queryParamMap.get('notebook-name');
-      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernel-type')];
+      this.notebookName =
+        decodeURIComponent(this.route.snapshot.queryParamMap.get('notebookName'));
+      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
     } else {
-      this.notebookName = this.route.snapshot.params['nbName'];
+      this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
     }
-
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
@@ -178,7 +183,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       })
       .subscribe((nbName) => {
         this.incrementProgress(Progress.Redirecting);
-        this.window.location.href = this.notebookUrl(this.cluster, nbName);
+        this.notebookLoaded = true;
+        this.leoUrl = this.sanitizer
+          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
       });
   }
 
@@ -210,7 +217,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private newNotebook(): Observable<string> {
     const fileContent = commonNotebookFormat;
-    if (this.route.snapshot.queryParamMap.get('kernel-type') === Kernels.R.toString()) {
+    if (this.route.snapshot.queryParamMap.get('kernelType') === Kernels.R.toString()) {
       fileContent.metadata = rNotebookMetadata;
     } else {
       fileContent.metadata = pyNotebookMetadata;
@@ -240,9 +247,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .map(resp => resp.clusterLocalDirectory);
   }
 
-  private closeWindow() {
-    window.close();
-  }
+    navigateBack(): void {
+        this.locationService.back();
+    }
 
   private initializeProgressMap(): void {
     for (const p in Object.keys(Progress)) {
