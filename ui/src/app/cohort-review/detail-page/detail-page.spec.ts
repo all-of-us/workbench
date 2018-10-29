@@ -26,6 +26,7 @@ import {ParticipantStatusComponent} from '../participant-status/participant-stat
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 
 describe('DetailPage', () => {
   let component: DetailPage;
@@ -64,13 +65,7 @@ describe('DetailPage', () => {
 
   };
   let route;
-  let mockReduxInst;
   beforeEach(async(() => {
-     // const store = initialState;
-     mockReduxInst = MockNgRedux.getInstance();
-     const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
     TestBed.configureTestingModule({
       declarations: [
         AnnotationItemComponent,
@@ -91,9 +86,8 @@ describe('DetailPage', () => {
                 ChartModule,
                 RouterTestingModule],
       providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: CohortReviewService, useValue: {}},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: Router, useValue: routerSpy},

@@ -23,8 +23,7 @@ import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-
 import {SetAnnotationModalComponent} from '../set-annotation-modal/set-annotation-modal.component';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {TablePage} from './table-page';
-
-
+import {ParticipantsCharts} from '../participants-charts/participant-charts';
 
 describe('TablePage', () => {
   let component: TablePage;
@@ -68,7 +67,8 @@ describe('TablePage', () => {
         SetAnnotationModalComponent,
         StatusFilterComponent,
         OverviewPage,
-        ComboChartComponent
+        ComboChartComponent,
+        ParticipantsCharts
       ],
       imports: [ClarityModule,
                 ReactiveFormsModule,
