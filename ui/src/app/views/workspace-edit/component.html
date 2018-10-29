@@ -109,8 +109,7 @@
               <clr-checkbox
                   name="disease-focused-research"
                   id="disease-focused-research"
-                  [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch"
-                  [clrDisabled]=!canEditResearchPurpose>
+                  [(ngModel)]="workspace.researchPurpose.diseaseFocusedResearch">
               </clr-checkbox>
               <div>
                 <label class="checkbox-label" for="clr-checkbox-disease-focused-research"><h3 class="data-use-label">
@@ -120,9 +119,7 @@
                 </div>
                 <div style="display: flex">
                   <input type="text" class="input" name="disease-specification"
-                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" [disabled]=!canEditResearchPurpose
-                      placeholder="Name of Disease"
-                      style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
+                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" placeholder="Name of Disease" style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
                 </div>
               </div>
             </div>
@@ -133,8 +130,7 @@
                 <clr-checkbox
                     name="methods-development"
                     id="methods-development"
-                    [(ngModel)]="workspace.researchPurpose.methodsDevelopment"
-                    [clrDisabled]=!canEditResearchPurpose>
+                    [(ngModel)]="workspace.researchPurpose.methodsDevelopment">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-methods-development"><h3 class="data-use-label">
@@ -150,8 +146,7 @@
                 <clr-checkbox
                         name="aggregate-analysis"
                         id="aggregate-analysis"
-                        [(ngModel)]="workspace.researchPurpose.aggregateAnalysis"
-                        [clrDisabled]=!canEditResearchPurpose>
+                        [(ngModel)]="workspace.researchPurpose.aggregateAnalysis">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-aggregate-analysis"><h3 class="data-use-label">
@@ -169,8 +164,7 @@
                 <clr-checkbox
                     name="control-set"
                     id="control-set"
-                    [(ngModel)]="workspace.researchPurpose.controlSet"
-                    [clrDisabled]=!canEditResearchPurpose>
+                    [(ngModel)]="workspace.researchPurpose.controlSet">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-control-set"><h3 class="data-use-label">
@@ -186,8 +180,7 @@
                 <clr-checkbox
                         name="ancestry"
                         id="ancestry"
-                        [(ngModel)]="workspace.researchPurpose.ancestry"
-                        [clrDisabled]=!canEditResearchPurpose>
+                        [(ngModel)]="workspace.researchPurpose.ancestry">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-ancestry"><h3 class="data-use-label">
@@ -205,8 +198,7 @@
                 <clr-checkbox
                         name="population"
                         id="population"
-                        [(ngModel)]="workspace.researchPurpose.population"
-                        [clrDisabled]=!canEditResearchPurpose>
+                        [(ngModel)]="workspace.researchPurpose.population">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-population"><h3 class="data-use-label">
@@ -222,8 +214,7 @@
                 <clr-checkbox
                         name="commercial-purpose"
                         id="commercial-purpose"
-                        [(ngModel)]="workspace.researchPurpose.commercialPurpose"
-                        [clrDisabled]=!canEditResearchPurpose>
+                        [(ngModel)]="workspace.researchPurpose.commercialPurpose">
                 </clr-checkbox>
                 <div>
                   <label class="checkbox-label" for="clr-checkbox-commercial-purpose"><h3 class="data-use-label">
@@ -272,8 +263,7 @@
                           (click)="switchUnderservedStatus(underservedCategories[categoryHeader][item])"
                           class="underserved-checkbox"
                           name="{{underservedCategories[categoryHeader][item]}}"
-                          id="{{underservedCategories[categoryHeader][item]}}"
-                          [clrDisabled]=!canEditResearchPurpose>
+                          id="{{underservedCategories[categoryHeader][item]}}">
                         {{item}}
                       </clr-checkbox>
                     </div>
@@ -285,15 +275,14 @@
         </div>
       </div>
     </div>
-    <div class="section request-review-section" *ngIf="!fillDetailsLater">
+    <div class="section request-review-section">
       <h3 class="section-header">{{researchPurposeItems.requestReview.shortDescription}}</h3>
       <div class="checkbox-group" style="padding-top: 0.3rem">
         <div style="display: flex">
           <clr-checkbox
               name="request-approval"
               id="request-approval"
-              [(ngModel)]="workspace.researchPurpose.reviewRequested"
-              [clrDisabled]=!canEditResearchPurpose>
+              [(ngModel)]="workspace.researchPurpose.reviewRequested">
           </clr-checkbox>
           <div>
             <div class="section-text">
