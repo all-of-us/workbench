@@ -131,10 +131,16 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         find(aa => aa.unitName === unit);
     }
 
-    canShowChartHelpText() {
+    hasGenderAgeSourcesShowHelpText() {
         return (this.showGender || this.showGenderIdentity)
             && this.showAge &&
             (this.showSources && this.sourceConcepts.length > 0)
             && !this.showMeasurementGenderBins;
+    }
+
+    hasGenderAgeShowHelpText() {
+    return (this.showGender || this.showGenderIdentity) &&
+        this.showAge && (!this.showSources || this.sourceConcepts.length <= 0)
+        && !this.showMeasurementGenderBins;
     }
 }

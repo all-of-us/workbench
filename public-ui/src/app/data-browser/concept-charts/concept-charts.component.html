@@ -19,7 +19,7 @@
   <!-- show measurements binned by gender if we want -->
   <!-- Loop through the genders we have measurement results for  for showing the graph
    This looping variable is set if showMeasurements is passed in to the component-->
-  <ng-container *ngIf="canShowChartHelpText()">
+  <ng-container *ngIf="hasGenderAgeSourcesShowHelpText()">
     <div class="col-md-4 col-xs-12">
       <div class="col-md">
         <clr-tooltip>
@@ -61,8 +61,7 @@
     </div>
   </ng-container>
 
-  <ng-container *ngIf="(showGender || showGenderIdentity) &&
-            showAge && (!showSources || sourceConcepts.length <= 0) && !showMeasurementGenderBins">
+  <ng-container *ngIf="hasGenderAgeShowHelpText()">
     <div class="col-md-4 col-xs-12">
       <div class="col-md">
         <clr-tooltip>
