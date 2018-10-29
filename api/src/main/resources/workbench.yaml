@@ -1919,6 +1919,12 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      currentPosition:
+        description: the user's curent position (job title)
+        type: string
+      organization:
+        description: the user's current organization
+        type: string
       authorities:
         description: authorities granted to this user
         type: "array"

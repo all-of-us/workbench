@@ -2,13 +2,44 @@
   <h2>Create your account</h2>
   <div class="form-area">
     <div class="form-section">
-      <input type="text" class="long-input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName" placeholder="Given Name">
+      <input type="text" class="long-input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName" placeholder="First Name"
+             [ngClass]="{'successfulInput': showFirstNameValidationSuccess, 'unsuccessfulInput': !showFirstNameValidationSuccess}">
+      <div *ngIf="!showFirstNameValidationSuccess" class="alert alert-danger error-message">
+        Given Name must be 80 characters or less.
+      </div>
     </div>
     <div class="form-section">
-      <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Family Name">
+      <input type="text" class="long-input" id="familyName" name="familyName" [(ngModel)]="profile.familyName" placeholder="Last Name"
+             [ngClass]="{'successfulInput': showLastNameValidationSuccess, 'unsuccessfulInput': !showLastNameValidationSuccess}">
+      <div *ngIf="!showLastNameValidationSuccess" class="alert alert-danger error-message">
+        Last Name must be 80 characters or less.
+      </div>
     </div>
     <div class="form-section">
-      <input type="text" class="long-input" id="contactEmail" name="contactemail" [(ngModel)]="profile.contactEmail" placeholder="Contact Email Address">
+      <input type="text" class="long-input" id="contactEmail" name="contactEmail" [(ngModel)]="profile.contactEmail" placeholder="Email Address">
+    </div>
+    <div class="form-section">
+      <input type="text" class="long-input" id="currentPosition" name="currentPosition" [(ngModel)]="profile.currentPosition" placeholder="Your Current Position"
+             [ngClass]="{'successfulInput': showCurrentPositionValidationSuccess, 'unsuccessfulInput': !showCurrentPositionValidationSuccess}">
+      <div *ngIf="!showCurrentPositionValidationSuccess" class="alert alert-danger error-message">
+        Current Position must be 255 characters or less.
+      </div>
+    </div>
+    <div class="form-section">
+      <input type="text" class="long-input" id="organization" name="organization" [(ngModel)]="profile.organization" placeholder="Your Organization"
+             [ngClass]="{'successfulInput': showOrganizationValidationSuccess, 'unsuccessfulInput': !showOrganizationValidationSuccess}">
+      <div *ngIf="!showOrganizationValidationSuccess" class="alert alert-danger error-message">
+        Organization must be 255 characters or less.
+      </div>
+    </div>
+    <div class="form-section flex-row">
+      <textarea id="currentResearchWork" name="areaOfResearch" [(ngModel)]="profile.areaOfResearch" placeholder="Describe Your Current Research"></textarea>
+      <clr-tooltip class="vertical-align">
+        <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
+          <div>Describe Your Current Research</div>
+        </clr-tooltip-content>
+      </clr-tooltip>
     </div>
     <div class="form-section">
       <input type="text" class="long-input" id="username" name="username"

@@ -140,3 +140,17 @@ hr {
 .error {
   justify-content: space-between;
 }
+
+.field-wrapper-aligned {
+  display: flex;
+  align-items: flex-start;
+}
+
+.error-margin {
+  margin-bottom: 16px;
+}
+
+.error-message {
+  width: 100%;
+  padding-left: 1rem;
+}

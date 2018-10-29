@@ -29,3 +29,20 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
     DataAccessLevel.Protected
   ].includes(access);
 }
+
+
+/**
+ * RANDOM STRING GENERATOR (simplified)
+ *
+ * Info:      http://stackoverflow.com/a/27872144/383904
+ * Use:       randomString(length);
+ * Default:   return a random alpha-numeric string
+ */
+export function randomString(len): string {
+  let str = '', i = 0;
+  for (; i++ < len;) {
+    let r = Math.round(Math.random() * (52) + 10);
+    str += String.fromCharCode(r += r > 9 ? r < 36 ? 55 : 61 : 48);
+  }
+  return str;
+}

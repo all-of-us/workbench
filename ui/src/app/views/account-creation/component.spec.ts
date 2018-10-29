@@ -9,6 +9,7 @@ import {ProfileService} from 'generated';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {randomString} from '../../utils';
 
 import {
   simulateEvent,
@@ -28,6 +29,10 @@ class AccountCreationPage {
   fixture: ComponentFixture<AccountCreationComponent>;
   component: AccountCreationComponent;
   usernameField: DebugElement;
+  givenNameField: DebugElement;
+  familyName: DebugElement;
+  currentPosition: DebugElement;
+  organization: DebugElement;
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(AccountCreationComponent);
@@ -38,6 +43,10 @@ class AccountCreationPage {
   readPageData() {
     updateAndTick(this.fixture);
     this.usernameField = this.fixture.debugElement.query(By.css('#username'));
+    this.givenNameField = this.fixture.debugElement.query(By.css('#givenName'));
+    this.familyName = this.fixture.debugElement.query(By.css('#familyName'));
+    this.currentPosition = this.fixture.debugElement.query(By.css('#currentPosition'));
+    this.organization = this.fixture.debugElement.query(By.css('#organization'));
   }
 }
 
@@ -125,4 +134,37 @@ describe('AccountCreationComponent', () => {
     expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
     expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));
+
+  it('handles long given name errors', fakeAsync(() => {
+    simulateInput(
+      page.fixture, page.givenNameField, randomString(81));
+    tick(300);
+    updateAndTick(page.fixture);
+    expect(page.givenNameField.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long family name errors', fakeAsync(() => {
+    simulateInput(
+      page.fixture, page.familyName, randomString(81));
+    tick(300);
+    updateAndTick(page.fixture);
+    expect(page.familyName.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long organization errors', fakeAsync(() => {
+    simulateInput(
+      page.fixture, page.organization, randomString(256));
+    tick(300);
+    updateAndTick(page.fixture);
+    expect(page.organization.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long current position errors', fakeAsync(() => {
+    simulateInput(
+      page.fixture, page.currentPosition, randomString(256));
+    tick(300);
+    updateAndTick(page.fixture);
+    expect(page.currentPosition.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
 });
