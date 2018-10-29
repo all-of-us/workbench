@@ -71,7 +71,7 @@ export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
 export const LOAD_ENTITIES = 'LOAD_ENTITIES';
 export const RESET_STORE = 'RESET_STORE';
-export const DELETE_STORE = 'DELETE_STORE';
+export const CLEAR_STORE = 'CLEAR_STORE';
 
 export interface ActiveContext {
   criteriaType?: string;
@@ -367,8 +367,8 @@ export interface ActionTypes {
   RESET_STORE: {
     type: typeof RESET_STORE;
   };
-  DELETE_STORE: {
-    type: typeof DELETE_STORE;
+  CLEAR_STORE: {
+    type: typeof CLEAR_STORE;
   };
 
   /**
@@ -505,5 +505,5 @@ export type RootAction =
 
   | ActionTypes[typeof LOAD_ENTITIES]
   | ActionTypes[typeof RESET_STORE]
-  | ActionTypes[typeof DELETE_STORE]
+  | ActionTypes[typeof CLEAR_STORE]
   ;

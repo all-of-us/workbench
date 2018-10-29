@@ -76,7 +76,7 @@ import {
 
   LOAD_ENTITIES,
   RESET_STORE,
-  DELETE_STORE,
+  CLEAR_STORE,
   RootAction,
   LOAD_CHART_RESULTS,
   BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
@@ -517,7 +517,7 @@ export const rootReducer: Reducer<CohortSearchState> =
       case RESET_STORE:
         return initialState;
 
-      case DELETE_STORE:
+      case CLEAR_STORE:
         return fromJS({});
 
       /**
