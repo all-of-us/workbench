@@ -49,13 +49,22 @@ describe('TablePage', () => {
                   },
                   cohort: {
                       name: ''
-                  }
-              }
-          }
+                  },
+              },
+            params: {
+              ns: 'workspaceNamespace',
+              wsid: 'workspaceId',
+              cid: 1
+            }
+          },
+        params: {
+          ns: 'workspaceNamespace',
+          wsid: 'workspaceId',
+          cid: 1
+        }
       },
   };
   let route;
-
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({

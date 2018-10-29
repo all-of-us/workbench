@@ -75,7 +75,6 @@ export class OverviewPage implements OnInit, OnDestroy {
     const limit = 10;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
-
     this.typesList.map(domainName => {
       this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
