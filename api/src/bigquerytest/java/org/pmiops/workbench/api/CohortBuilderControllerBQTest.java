@@ -1186,6 +1186,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDrugParent() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugParentAndChild() throws Exception {
+    Criteria drugCriteriaChild = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
+    Criteria drugCriteriaParent = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drugParent = createSearchParameter(drugCriteriaParent, null);
+    SearchParameter drugChild = createSearchParameter(drugCriteriaChild, null);
+    SearchRequest searchRequest = createSearchRequests(drugParent.getType(), Arrays.asList(drugParent,drugChild), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
     Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);

@@ -73,6 +73,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.actions.clearStore();
     this.subscription.unsubscribe();
   }
 
