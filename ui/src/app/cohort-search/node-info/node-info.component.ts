@@ -55,6 +55,9 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .map(val => noAttr && val)
       .subscribe(val => {
         this.isSelected = val;
+        if (val) {
+          console.log(this.node.toJS());
+        }
       });
 
     this.subscription = this.ngRedux
@@ -157,6 +160,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (this.selectAllChildren) {
         this.actions.fetchAllChildren(this.node);
+        console.log(this.paramId);
       } else {
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
