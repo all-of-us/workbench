@@ -1,5 +1,5 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Location} from '@angular/common';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
