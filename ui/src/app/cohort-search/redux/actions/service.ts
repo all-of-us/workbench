@@ -61,6 +61,7 @@ export class CohortSearchActions {
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
+  @dispatch() cancelAutocompleteRequest = ActionFuncs.cancelAutocompleteRequest;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
@@ -253,6 +254,10 @@ export class CohortSearchActions {
   }
 
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    if (isLoading) {
+      this.cancelAutocompleteRequest();
+    }
     this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }
 

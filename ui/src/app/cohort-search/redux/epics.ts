@@ -29,7 +29,7 @@ import {
   SHOW_ATTRIBUTES_PAGE,
 
   RootAction,
-  ActionTypes,
+  ActionTypes, CANCEL_AUTOCOMPLETE_REQUEST,
 } from './actions/types';
 
 import {
@@ -163,10 +163,16 @@ export class CohortSearchEpics {
         if (kind === DomainType[DomainType.DRUG]) {
           return this.service.getDrugBrandOrIngredientByValue(cdrVersionId, searchTerms, 100)
             .map(result => loadAutocompleteOptions(result.items))
+            .race(action$
+              .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+              .first())
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
           return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, subtype)
             .map(result => loadAutocompleteOptions(result.items))
+            .race(action$
+              .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+              .first())
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
       }
