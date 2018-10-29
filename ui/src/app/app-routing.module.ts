@@ -120,34 +120,41 @@ const routes: Routes = [
             },
             {
               path: 'notebooks',
-              component: NotebookListComponent,
               data: {
-                title: 'View Notebooks',
                 breadcrumb: {
                   value: 'Notebooks',
                   intermediate: true
                 }
-              }
-            }, {
-              path: 'notebooks/create',
-              component: NotebookRedirectComponent,
-              data: {
-                title: 'Creating a new Notebook',
-                creating: true,
-                breadcrumb: {
-                  value: 'Param: New Notebook Name'
+              },
+              children: [
+                {
+                  path: '',
+                  component: NotebookListComponent,
+                  data: {
+                    title: 'View Notebooks'
+                  }
+                }, {
+                  path: 'create',
+                  component: NotebookRedirectComponent,
+                  data: {
+                    title: 'Creating a new Notebook',
+                    creating: true,
+                    breadcrumb: {
+                        value: 'Param: New Notebook Name'
+                    }
+                  }
+                }, {
+                  path: ':nbName',
+                  component: NotebookRedirectComponent,
+                  data: {
+                    title: 'Opening a Notebook',
+                    creating: false,
+                    breadcrumb: {
+                        value: 'Param: Notebook Name'
+                    }
+                  }
                 }
-              }
-            }, {
-              path: 'notebooks/:nbName',
-              component: NotebookRedirectComponent,
-              data: {
-                title: 'Opening a Notebook',
-                creating: false,
-                breadcrumb: {
-                  value: 'Param: Notebook Name'
-                }
-              }
+              ]
             }, {
               path: 'cohorts',
               data: {
