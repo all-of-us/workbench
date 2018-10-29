@@ -11,6 +11,7 @@ import { ChartModule } from 'angular2-highcharts';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortSearchActions} from '../../cohort-search/redux';
@@ -26,7 +27,7 @@ import {ParticipantStatusComponent} from '../participant-status/participant-stat
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
-import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
+
 
 describe('DetailPage', () => {
   let component: DetailPage;
