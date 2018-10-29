@@ -100,6 +100,7 @@ export class CohortSearchActions {
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
   @dispatch() _resetStore = ActionFuncs.resetStore;
+  @dispatch() clearStore = ActionFuncs.clearStore;
 
   /** Internal tooling */
   idsInUse = Set<string>();
@@ -264,14 +265,11 @@ export class CohortSearchActions {
   fetchAllChildren(node: any): void {
     const kind = node.get('type');
     const id = node.get('id');
-    if (kind === TreeType[TreeType.DRUG]) {
-      this.requestAllChildren(this.cdrVersionId, kind, id);
-    } else {
-      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
-      const param = node.set('parameterId', paramId);
-      this.addParameter(param);
-      this.selectChildren(kind, id);
-    }
+    const paramId = `param${node.get('conceptId')
+      ? (node.get('conceptId') + node.get('code')) : id}`;
+    const param = node.set('parameterId', paramId);
+    this.addParameter(param);
+    this.selectChildren(kind, id);
   }
 
   fetchAttributes(node: any): void {
