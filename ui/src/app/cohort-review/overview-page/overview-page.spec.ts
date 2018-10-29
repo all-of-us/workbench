@@ -14,10 +14,6 @@ import {ParticipantsChartsComponent} from '../participants-charts/participant-ch
 import {ReviewStateService} from '../review-state.service';
 import {OverviewPage} from './overview-page';
 
-import {
-    CohortSearchActions,
-    isChartLoading,
-} from '../../cohort-search/redux';
 
 
 
@@ -70,8 +66,6 @@ describe('OverviewPage', () => {
       providers: [
         {provide: NgRedux},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {provide: CohortSearchActions},
-        {provide: isChartLoading},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
