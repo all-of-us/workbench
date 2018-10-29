@@ -130,4 +130,11 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
         find(aa => aa.unitName === unit);
     }
+
+    canShowChartHelpText() {
+        return (this.showGender || this.showGenderIdentity)
+            && this.showAge &&
+            (this.showSources && this.sourceConcepts.length > 0)
+            && !this.showMeasurementGenderBins;
+    }
 }

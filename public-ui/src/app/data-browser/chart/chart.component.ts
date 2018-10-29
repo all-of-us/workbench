@@ -38,6 +38,20 @@ export class ChartComponent implements OnChanges {
     }
   }
 
+  public isSurveyGenderAnalysis() {
+    return this.analysis ?
+        (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ||
+        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+        : false;
+  }
+
+  public isGenderIdentityAnalysis() {
+    return this.analysis ?
+        (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+        : false;
+  }
+
   public hcChartOptions(): any {
     const options = this.makeChartOptions();
     // Override title if they passed one
@@ -81,21 +95,12 @@ export class ChartComponent implements OnChanges {
         pie: {
           borderColor: null,
           slicedOffset: 4,
-          size: this.analysis ?
-              (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID ||
-              this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ? '60%' : '100%')
-            : '100%',
+          size: this.isSurveyGenderAnalysis() ? '60%' : '100%',
           dataLabels: {
             enabled: true,
-            style: this.analysis ?
-                (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
-                this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID
-                ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE)
-              : this.dbc.DATA_LABEL_STYLE,
-            distance: this.analysis ?
-                (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID ||
-                this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ? -3 : -30)
-              : -30,
+            style: this.isGenderIdentityAnalysis()
+                ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
+            distance: this.isGenderIdentityAnalysis() ? 3 : -30,
             format: '{point.name} {point.percentage:.0f}%',
           }
         },
@@ -313,7 +318,6 @@ export class ChartComponent implements OnChanges {
       // Series name for answers is the answer selected which is in stratum4
       seriesName = this.selectedResult.stratum4;
     }
-    console.log(results);
     let data = [];
     let cats = [];
     for (const a  of results) {
