@@ -191,18 +191,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectChildren(node: Map<string, any>) {
-    if (node.get('group')) {
-      node.get('children').forEach(child => {
-        this.selectChildren(child);
-      });
-    } else {
-      const param = node.set('parameterId', `param${(node.get('conceptId')
-        ? node.get('conceptId') : node.get('id'))}`);
-      this.actions.addParameter(param);
-    }
-  }
-
   get showCount() {
     return this.node.get('count') !== null
       && (this.node.get('selectable')
