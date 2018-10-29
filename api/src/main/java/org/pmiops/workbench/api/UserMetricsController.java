@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
@@ -44,6 +45,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
+        resource.setConceptSet(TO_CLIENT_CONCEPT_SET.apply(userRecentResource.getConceptSet()));
         FileDetail fileDetail = convertStringToFileDetail(userRecentResource.getNotebookName());
         resource.setNotebook(fileDetail);
         resource.setModifiedTime(userRecentResource.getLastAccessDate().toString());
@@ -73,6 +75,24 @@ public class UserMetricsController implements UserMetricsApiDelegate {
           return result;
         }
       };
+
+  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
+    new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
+      @Override
+      public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+        if (conceptSet == null) {
+          return null;
+        }
+        ConceptSet result = new ConceptSet()
+          .etag(Etags.fromVersion(conceptSet.getVersion()))
+          .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+          .creationTime(conceptSet.getCreationTime().getTime())
+          .description(conceptSet.getDescription())
+          .id(conceptSet.getConceptSetId())
+          .name(conceptSet.getName());
+        return result;
+      }
+    };
 
   @Autowired
   UserMetricsController(Provider<User> userProvider,
