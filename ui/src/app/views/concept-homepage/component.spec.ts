@@ -236,6 +236,11 @@ describe('ConceptHomepageComponent', () => {
     simulateClick(fixture, de.query(By.css('.sliding-button')));
     updateAndTick(fixture);
 
+    // Create a new concept set to avoid any dependency on existing stub data.
+    de.query(By.css('#select-create')).nativeElement.click();
+    updateAndTick(fixture);
+    simulateInput(fixture, de.query(By.css('#new-name')), 'foo');
+    updateAndTick(fixture);
     simulateClick(fixture, de.query(By.css('.btn-primary')));
     updateAndTick(fixture);
 
