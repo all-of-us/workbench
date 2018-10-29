@@ -16,6 +16,7 @@ import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.c
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
 import {OverviewPage} from '../overview-page/overview-page';
+import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
 import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
@@ -23,7 +24,7 @@ import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-
 import {SetAnnotationModalComponent} from '../set-annotation-modal/set-annotation-modal.component';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {TablePage} from './table-page';
-import {ParticipantsCharts} from '../participants-charts/participant-charts';
+
 
 describe('TablePage', () => {
   let component: TablePage;
@@ -68,7 +69,7 @@ describe('TablePage', () => {
         StatusFilterComponent,
         OverviewPage,
         ComboChartComponent,
-        ParticipantsCharts
+        ParticipantsChartsComponent
       ],
       imports: [ClarityModule,
                 ReactiveFormsModule,

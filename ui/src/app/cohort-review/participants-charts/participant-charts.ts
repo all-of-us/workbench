@@ -6,7 +6,7 @@ import {Component, Input, OnChanges} from '@angular/core';
   styleUrls: ['./participant-charts.css'],
 
 })
-export class ParticipantsCharts implements  OnChanges {
+export class ParticipantsChartsComponent implements  OnChanges {
 
   @Input() chartItems = [];
   @Input() totalCount: any;
@@ -14,7 +14,6 @@ export class ParticipantsCharts implements  OnChanges {
 
   ngOnChanges() {
     if (this.chartItems) {
-      console.log('here')
       this.chartItems.forEach(itemCount => {
         const percentCount = ((itemCount.count / this.totalCount) * 100);
         Object.assign(itemCount, {percentCount: percentCount});

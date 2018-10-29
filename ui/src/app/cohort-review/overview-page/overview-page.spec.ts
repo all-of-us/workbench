@@ -5,19 +5,21 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {CohortBuilderService, CohortReviewService} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
+import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
+import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {ReviewStateService} from '../review-state.service';
 import {OverviewPage} from './overview-page';
-import {ParticipantsCharts} from '../participants-charts/participant-charts';
 
 import {
     CohortSearchActions,
     isChartLoading,
 } from '../../cohort-search/redux';
-import {CohortReviewServiceStub} from "../../../testing/stubs/cohort-review-service-stub";
-import {Observable} from "rxjs/Observable";
+
+
 
 describe('OverviewPage', () => {
   let component: OverviewPage;
@@ -58,7 +60,7 @@ describe('OverviewPage', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ ComboChartComponent, OverviewPage, ParticipantsCharts],
+      declarations: [ ComboChartComponent, OverviewPage, ParticipantsChartsComponent],
       imports: [ClarityModule, NgxChartsModule, NgxPopperModule],
       providers: [
         {provide: NgRedux},

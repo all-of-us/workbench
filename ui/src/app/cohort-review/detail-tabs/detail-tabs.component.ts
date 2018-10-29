@@ -5,9 +5,10 @@ import {
   PageFilterType,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
+import {CohortReviewService} from '../../../generated';
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
-import {CohortReviewService} from "../../../generated";
+
 
 /* The most common column types */
 const itemDate = {
