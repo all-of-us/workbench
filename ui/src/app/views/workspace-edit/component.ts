@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
@@ -17,6 +17,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
@@ -194,6 +195,9 @@ export class WorkspaceEditComponent implements OnInit {
   hideDetailsLaterOption = true;
   canEditResearchPurpose = true;
   cdrVersions: CdrVersion[] = [];
+
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
 
   constructor(
       private locationService: Location,
