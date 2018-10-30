@@ -24,7 +24,6 @@ export class OverviewPage implements OnInit, OnDestroy {
     DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
-  loading: any;
   selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
@@ -32,10 +31,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   domainTitle: '';
   buttonsDisableFlag = false;
   private subscription: Subscription;
-  conditionDomainItems = [];
-  procedureDomainItems = [];
-  drugDomainItems = [];
-  labDomainItems = [];
+  domainsData = {};
   condChart: any;
   totalCount: any;
   constructor(
@@ -78,18 +74,11 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.typesList.map(domainName => {
       this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
-        .subscribe(loading => {
-          this.loading = loading;
-          this.totalCount = this.loading.count;
-          if (domainName === DomainType[DomainType.CONDITION]) {
-            this.conditionDomainItems = this.loading.items;
-          } else if (domainName === DomainType[DomainType.PROCEDURE]) {
-            this.procedureDomainItems = this.loading.items;
-          } else if (domainName === DomainType[DomainType.DRUG]) {
-            this.drugDomainItems = this.loading.items;
-          } else {
-            this.labDomainItems = this.loading.items;
-          }
+        .subscribe(data => {
+          const chartData = data;
+          this.totalCount = chartData.count;
+          this.domainsData[domainName] = chartData.items;
+          console.log( this.domainsData[domainName]);
         });
     });
   }
@@ -115,16 +104,12 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.domainTitle = names;
     this.showTitle = true;
     if (names === DomainType[DomainType.CONDITION]) {
-      this.condChart = '';
       this.setNames(names);
     } else if (names === DomainType[DomainType.PROCEDURE]) {
-       this.condChart = '';
       this.setNames(names);
     } else if (names === DomainType[DomainType.DRUG]) {
-      this.condChart = '';
       this.setNames(names);
     } else {
-      this.condChart = '';
       this.setNames(names);
     }
     this.title = typeToTitle(names);
@@ -132,6 +117,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   setNames(names) {
+     this.condChart = '';
     setTimeout(() => {
       this.condChart = names;
       this.buttonsDisableFlag = false;

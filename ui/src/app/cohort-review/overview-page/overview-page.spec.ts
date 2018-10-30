@@ -48,12 +48,6 @@ describe('OverviewPage', () => {
       },
 
     },
-    // params: {
-    //   ns: '',
-    //   wsid: '',
-    //   cid: ''
-    // }
-
 
   };
 

@@ -61,11 +61,7 @@
                       [data]="data">
               </app-combo-chart>
               <!--top 10 participant chart view start-->
-              <app-participants-charts *ngIf="condChart === 'CONDITION' && conditionDomainItems.length > 0" [chartItems]="conditionDomainItems" [totalCount]="totalCount"></app-participants-charts>
-              <app-participants-charts *ngIf="condChart ==='PROCEDURE' && procedureDomainItems.length > 0" [chartItems]="procedureDomainItems" [totalCount]="totalCount"></app-participants-charts>
-              <app-participants-charts *ngIf="condChart ==='DRUG' && drugDomainItems.length > 0" [chartItems]="drugDomainItems" [totalCount]="totalCount"></app-participants-charts>
-              <app-participants-charts *ngIf="condChart ==='LAB' && labDomainItems.length > 0" [chartItems]="labDomainItems" [totalCount]="totalCount"></app-participants-charts>
-
+                <app-participants-charts *ngIf="domainsData[condChart] && domainsData[condChart].length > 0" [chartItems]="domainsData[condChart]" [totalCount]="totalCount"></app-participants-charts>
               <!--top 10 participant chart view end-->
             </div>
           </div>
