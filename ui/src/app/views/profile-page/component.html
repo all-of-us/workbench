@@ -19,19 +19,19 @@
   <div style="display: block">
     <div class="field-wrapper field-wrapper-aligned" [class.error-margin]="(!givenNameValid || !familyNameValid)">
       <div class="field">
-        <label for="givenName" class="long-text-field">Given Name:</label>
+        <label for="givenName" class="long-text-field">First Name:</label>
         <input *ngIf="profileLoaded else loading" type="text" autofocus
           [(ngModel)]="workingProfile.givenName" id="givenName" [disabled]="!editing">
         <div *ngIf="!givenNameValid" class="alert alert-danger error-message">
-          Given Name must be 80 characters or less.
+          First Name must be 80 characters or less.
         </div>
       </div>
       <div class="field">
-        <label for="familyName" class="long-text-field">Family Name:</label>
+        <label for="familyName" class="long-text-field">Last Name:</label>
         <input *ngIf="profileLoaded else loading" type="text"
           [(ngModel)]="workingProfile.familyName" id="familyName" [disabled]="!editing">
         <div *ngIf="!familyNameValid" class="alert alert-danger error-message">
-          Family Name must be 80 characters or less.
+          Last Name must be 80 characters or less.
         </div>
       </div>
     </div>

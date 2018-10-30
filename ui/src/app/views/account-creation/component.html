@@ -5,7 +5,7 @@
       <input type="text" class="long-input" id="givenName" name="givenName" autofocus [(ngModel)]="profile.givenName" placeholder="First Name"
              [ngClass]="{'successfulInput': showFirstNameValidationSuccess, 'unsuccessfulInput': !showFirstNameValidationSuccess}">
       <div *ngIf="!showFirstNameValidationSuccess" class="alert alert-danger error-message">
-        Given Name must be 80 characters or less.
+        First Name must be 80 characters or less.
       </div>
     </div>
     <div class="form-section">
