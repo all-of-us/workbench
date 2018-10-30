@@ -3,15 +3,16 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ChartModule} from 'angular2-highcharts';
-import {CohortReviewService} from 'generated';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
+import {CohortReviewService} from 'generated';
+import * as highCharts from 'highcharts';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from '../../../testing/stubs/review-state-service-stub';
 import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ReviewStateService} from '../review-state.service';
 import {DetailTabsComponent} from './detail-tabs.component';
-import * as highCharts from "highcharts";
+
 
 
 describe('DetailTabsComponent', () => {
