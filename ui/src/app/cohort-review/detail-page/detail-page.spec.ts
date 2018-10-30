@@ -6,9 +6,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
- import {CohortReviewService} from 'generated';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
-// import * as highCharts from 'Highcharts';
+import {CohortReviewService} from 'generated';
+import * as highCharts from 'highcharts';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
@@ -28,7 +28,7 @@ import {ParticipantStatusComponent} from '../participant-status/participant-stat
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
-import * as highCharts from "highcharts";
+
 
 
 describe('DetailPage', () => {
