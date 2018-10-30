@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class ParticipantCounter {
 
   public static final String SOURCE_CONCEPT_ID = "source_concept_id";
-  public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
 
   private static final String COUNT_SQL_TEMPLATE =
@@ -104,10 +103,6 @@ public class ParticipantCounter {
                                                                   int chartLimit) {
       String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
       String table = DomainTableEnum.getDenormalizedTableName(domain);
-      String tableId = STANDARD_CONCEPT_ID;
-      if (domain.equals(DomainType.CONDITION.name()) || domain.equals(DomainType.PROCEDURE.name())) {
-        tableId = SOURCE_CONCEPT_ID;
-      }
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
         .replace("${table}", table);
@@ -116,7 +111,7 @@ public class ParticipantCounter {
         DOMAIN_CHART_INFO_SQL_GROUP_BY;
       endSqlTemplate = endSqlTemplate
         .replace("${limit}", limit)
-        .replace("${tableId}", tableId);
+        .replace("${tableId}", SOURCE_CONCEPT_ID);
       return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate);
     }
 

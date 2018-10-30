@@ -175,7 +175,7 @@ SELECT P.PERSON_ID,
 	 C1.VOCABULARY_ID AS STANDARD_VOCABULARY,
      c2.CONCEPT_NAME as SOURCE_NAME,
      c2.CONCEPT_CODE as SOURCE_CODE,
-     c2.CONCEPT_ID as SOURCE_CONCEPT_ID,
+     case when c2.CONCEPT_ID is null then 0 end as SOURCE_CONCEPT_ID,
 	 c2.VOCABULARY_ID as SOURCE_VOCABULARY,
      CASE WHEN t.VISIT_OCCURRENCE_ID is null then 0 else t.VISIT_OCCURRENCE_ID end as VISIT_ID,
      CASE WHEN v.visit_concept_id is null then 0 else v.visit_concept_id end as visit_concept_id,
@@ -358,4 +358,3 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  source_concept_id, source_vocabulary, null as source_value, age_at_event, b.concept_name as visit_type, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION
  from \`$BQ_PROJECT.$BQ_DATASET.p_procedure\` a
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
- 
