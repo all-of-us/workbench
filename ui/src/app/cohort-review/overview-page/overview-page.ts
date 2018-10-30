@@ -78,7 +78,6 @@ export class OverviewPage implements OnInit, OnDestroy {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
-          console.log( this.domainsData[domainName]);
         });
     });
   }
