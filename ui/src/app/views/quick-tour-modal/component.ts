@@ -78,7 +78,7 @@ export class QuickTourModalComponent implements OnInit {
       'target="_blank">OMOP common data model</a> format. ' +
       '<a href="https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data' +
       '-model-and-standardized-vocabularies/" target="_blank">Here</a> are some tutorials to ' +
-      'understand OMOP data model.\n\nWhen you create your workspace, you you will be prompted ' +
+      'understand OMOP data model.\n\nWhen you create your workspace, you will be prompted ' +
       'to state your research purpose.  For example, when you create a Workspace to study Type ' +
       '2 Diabetes, for research purpose you could enter: “I will use this Workspace to ' +
       'investigate the impact of Geography on use of different medications to treat Type 2 ' +
@@ -98,7 +98,7 @@ export class QuickTourModalComponent implements OnInit {
       'Concepts describe information in a patient’s medical record, such as a condition they ' +
       'have, a  prescription they are taking or their physical measurements. In the Workbench we ' +
       'refer to subject areas such as conditions, drugs, measurements etc. as “domains”. You can ' +
-      'search for and save collections of concepts from a particular domain as a “Concept set”. ' +
+      'search for and save collections of concepts from a particular domain as a “Concept Set”. ' +
       '\n\n' +
       'For example, if you want to select height, weight and blood pressure information ' +
       '(concepts) from your “diabetes cases” cohort, you can search for the 3 concepts ' +
