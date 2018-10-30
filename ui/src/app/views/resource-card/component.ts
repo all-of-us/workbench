@@ -13,6 +13,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
@@ -49,6 +50,9 @@ export class ResourceCardComponent implements OnInit {
 
   @ViewChild(EditModalComponent)
   editModal: EditModalComponent;
+
+  @ViewChild(CreateReviewModalComponent)
+  reviewModal: CreateReviewModalComponent;
 
   constructor(
       private cohortsService: CohortsService,
@@ -179,6 +183,7 @@ export class ResourceCardComponent implements OnInit {
   }
 
   openResource(resource: RecentResource): void {
+    console.log(resource);
     switch (this.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort(resource);
@@ -207,10 +212,11 @@ export class ResourceCardComponent implements OnInit {
   }
 
   reviewCohort(resource: RecentResource): void {
-    const url =
-        '/workspaces/' + this.wsNamespace
-        + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
-    this.route.navigateByUrl(url);
+    this.reviewModal.open();
+    // const url =
+    //     '/workspaces/' + this.wsNamespace
+    //     + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
+    // this.route.navigateByUrl(url);
   }
 
   get resourceTypeInvalidError(): boolean {

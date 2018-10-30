@@ -6,11 +6,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {CohortReviewService} from 'generated';
-import {CreateReviewPage} from './create-review-page';
+import {CreateReviewModal} from './create-review-modal';
 
-describe('CreateReviewPage', () => {
-  let component: CreateReviewPage;
-  let fixture: ComponentFixture<CreateReviewPage>;
+describe('CreateReviewModal', () => {
+  let component: CreateReviewModal;
+  let fixture: ComponentFixture<CreateReviewModal>;
   const activatedRouteStub = {
     snapshot: {
       data: {
@@ -24,7 +24,7 @@ describe('CreateReviewPage', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ CreateReviewPage ],
+      declarations: [ CreateReviewModal ],
       imports: [
         BrowserAnimationsModule,
         ClarityModule,
@@ -40,7 +40,7 @@ describe('CreateReviewPage', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateReviewPage);
+    fixture = TestBed.createComponent(CreateReviewModal);
     component = fixture.componentInstance;
     route = new ActivatedRoute();
     fixture.detectChanges();

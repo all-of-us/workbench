@@ -11,27 +11,17 @@ import {ReviewStateService} from '../review-state.service';
 })
 export class PageLayout implements OnInit {
 
-  create = false;
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
     this.state.annotationDefinitions.next(annotationDefinitions);
     this.state.cohort.next(cohort);
     this.state.review.next(review);
-
-    if (review.reviewStatus === ReviewStatus.NONE) {
-      this.create = true;
-    } else {
-      this.router.navigate(['participants'], {relativeTo: this.route});
-    }
-  }
-
-  reviewCreated(created: boolean) {
-    this.create = !created;
   }
 }

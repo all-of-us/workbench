@@ -49,6 +49,8 @@
 <app-edit-modal [resource]="resourceCard"
                         (updateFinished)="receiveRename()"></app-edit-modal>
 
+<app-create-review-modal [cohort]="resourceCard.cohort"></app-create-review-modal>
+
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>
       <h3 class="modal-title">Invalid Resource Type</h3>

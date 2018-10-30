@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {DetailPage} from '../detail-page/detail-page';
 import {OverviewPage} from '../overview-page/overview-page';
 import {PageLayout} from '../page-layout/page-layout';
@@ -28,16 +27,6 @@ const routes: Routes = [{
     review: ReviewResolver,
   },
   children: [{
-    path: 'create',
-    component: CreateReviewPage,
-    data: {
-      title: 'Create a New Cohort Review',
-      breadcrumb: {
-        value: 'Create a New Cohort Review',
-        intermediate: false
-      },
-    },
-  }, {
     path: 'participants',
     component: TablePage,
       resolve: {

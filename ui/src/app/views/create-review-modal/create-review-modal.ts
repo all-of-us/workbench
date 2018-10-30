@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -12,16 +12,15 @@ import {
 
 
 @Component({
-  selector: 'app-create-review-page',
-  templateUrl: './create-review-page.html',
-  styleUrls: ['./create-review-page.css']
+  selector: 'app-create-review-modal',
+  templateUrl: './create-review-modal.html',
+  styleUrls: ['./create-review-modal.css']
 })
-export class CreateReviewPage implements OnInit {
+export class CreateReviewModalComponent implements OnInit {
+  @Input() cohort: Cohort;
   create = true;
   creating = false;
-  cohort: Cohort;
   review: CohortReview;
-  @Output() created = new EventEmitter<boolean>();
 
   reviewParamForm = new FormGroup({
     numParticipants: new FormControl(),
@@ -33,18 +32,29 @@ export class CreateReviewPage implements OnInit {
     private route: ActivatedRoute,
   ) {}
 
+  open(): void {
+    this.creating = true;
+    console.log(this.cohort);
+  }
+
+  close(): void {
+    this.creating = false;
+  }
+
   get numParticipants() {
     return this.reviewParamForm.get('numParticipants');
   }
 
   get maxParticipants() {
-    return Math.min(this.review.matchedParticipantCount, 10000);
+    return 10000;
+    // return Math.min(this.review.matchedParticipantCount, 10000);
   }
 
   ngOnInit() {
-    const {review, cohort} = this.route.snapshot.data;
-    this.review = review;
-    this.cohort = cohort;
+    console.log(this);
+    // const {review, cohort} = this.route.snapshot.data;
+    // this.review = review;
+    // this.cohort = cohort;
 
     this.numParticipants.setValidators([
       Validators.required,
@@ -68,7 +78,7 @@ export class CreateReviewPage implements OnInit {
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
         this.creating = false;
-        this.created.emit(true);
+        // this.created.emit(true);
         this.router.navigate(['participants'], {relativeTo: this.route.parent});
       });
   }

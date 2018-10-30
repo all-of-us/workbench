@@ -6,7 +6,6 @@ import {ClarityModule} from '@clr/angular';
 import {CohortAnnotationDefinitionService, CohortReview} from 'generated';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {ReviewStateService} from '../review-state.service';
 import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
 import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
@@ -31,7 +30,6 @@ describe('PageLayout', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        CreateReviewPage,
         PageLayout,
         SetAnnotationCreateComponent,
         SetAnnotationItemComponent,
