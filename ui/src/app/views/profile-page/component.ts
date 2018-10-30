@@ -89,16 +89,19 @@ export class ProfilePageComponent implements OnInit {
       return this.valid(this.workingProfile.givenName, 80);
     }
   }
+
   get familyNameValid(): boolean {
     if (this.workingProfile) {
       return this.valid(this.workingProfile.familyName, 80);
     }
   }
+
   get currentPositionValid(): boolean {
     if (this.workingProfile) {
       return this.valid(this.workingProfile.currentPosition, 255);
     }
   }
+
   get organizationValid(): boolean {
     if (this.workingProfile) {
       return this.valid(this.workingProfile.organization, 255);
