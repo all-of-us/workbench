@@ -7,6 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
  import {CohortReviewService} from 'generated';
+import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 // import * as highCharts from 'Highcharts';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
@@ -27,6 +28,7 @@ import {ParticipantStatusComponent} from '../participant-status/participant-stat
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
+import * as highCharts from "highcharts";
 
 
 describe('DetailPage', () => {
@@ -87,6 +89,10 @@ describe('DetailPage', () => {
                 ChartModule,
                 RouterTestingModule],
       providers: [
+        {
+          provide: HighchartsStatic,
+          useValue: highCharts
+        },
         {provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
