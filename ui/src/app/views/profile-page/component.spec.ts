@@ -1,5 +1,5 @@
 import {APP_BASE_HREF} from '@angular/common';
-import {Component, DebugElement, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -46,31 +46,9 @@ class MockPieChartComponent {
   @Input('tooltipDisabled') tooltipDisabled: boolean;
 }
 /* tslint:enable */
-class ProfilePage {
-  fixture: ComponentFixture<ProfilePageComponent>;
-  component: ProfilePageComponent;
-  givenNameField: DebugElement;
-  familyNameField: DebugElement;
-  organizationField: DebugElement;
-  currentPositionField: DebugElement;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(ProfilePageComponent);
-    this.component = this.fixture.componentInstance;
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-    this.givenNameField = this.fixture.debugElement.query(By.css('#givenName'));
-    this.familyNameField = this.fixture.debugElement.query(By.css('#familyName'));
-    this.organizationField = this.fixture.debugElement.query(By.css('#organization'));
-    this.currentPositionField = this.fixture.debugElement.query(By.css('#currentPosition'));
-  }
-}
 
 describe('ProfilePageComponent', () => {
-  let page: ProfilePage;
+  let fixture: ComponentFixture<ProfilePageComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -98,46 +76,48 @@ describe('ProfilePageComponent', () => {
         {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {
-      page = new ProfilePage(TestBed);
+      fixture = TestBed.createComponent(ProfilePageComponent);
       tick();
+      updateAndTick(fixture);
     });
   }));
 
   it('should render', fakeAsync(() => {
-    updateAndTick(page.fixture);
-    expect(page.fixture).toBeTruthy();
+    updateAndTick(fixture);
+    expect(fixture).toBeTruthy();
   }));
 
   it('handles long given name errors', fakeAsync(() => {
+    console.log(fixture);
     simulateInput(
-      page.fixture, page.givenNameField, randomString(81));
+      fixture, fixture.debugElement.query(By.css('#givenName')), randomString(81));
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.component.givenNameValid).toBeFalsy();
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.givenNameValid).toBeFalsy();
   }));
 
   it('handles long family name errors', fakeAsync(() => {
     simulateInput(
-      page.fixture, page.familyNameField, randomString(81));
+      fixture, fixture.debugElement.query(By.css('#familyName')), randomString(81));
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.component.familyNameValid).toBeFalsy();
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.familyNameValid).toBeFalsy();
   }));
 
   it('handles long organization errors', fakeAsync(() => {
     simulateInput(
-      page.fixture, page.organizationField, randomString(256));
+      fixture, fixture.debugElement.query(By.css('#organization')), randomString(256));
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.component.organizationValid).toBeFalsy();
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.organizationValid).toBeFalsy();
   }));
 
   it('handles long current position errors', fakeAsync(() => {
     simulateInput(
-      page.fixture, page.currentPositionField, randomString(256));
+      fixture, fixture.debugElement.query(By.css('#currentPosition')), randomString(256));
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.component.currentPositionValid).toBeFalsy();
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.currentPositionValid).toBeFalsy();
   }));
 
 });
