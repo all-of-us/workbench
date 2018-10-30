@@ -71,38 +71,42 @@ describe('AccountCreationComponent', () => {
     simulateInput(fixture, usernameField, '.username');
     tick(300);
     updateAndTick(fixture);
-    expect(fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    let usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // End with a period
     simulateInput(fixture, usernameField, 'username.');
     tick(300);
     updateAndTick(fixture);
-    expect(fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // Contains special characters
     simulateInput(fixture, usernameField, 'user@name');
     tick(300);
     updateAndTick(fixture);
-    expect(fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
 
     simulateInput(fixture, usernameField, 'blah');
     tick(300);
     updateAndTick(fixture);
-    expect(fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeFalsy();
     expect(usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
 
   it('handles long username with mismatch at end', fakeAsync(() => {
     const usernameField = fixture.debugElement.query(By.css('#username'));
-    simulateInput(
-      fixture, usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
+    simulateInput(fixture, usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
     updateAndTick(fixture);
-    expect(fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
+    const usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));
 
