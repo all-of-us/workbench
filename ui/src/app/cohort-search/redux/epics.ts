@@ -10,8 +10,6 @@ import {
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_CHART_DATA_REQUEST,
-  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
   BEGIN_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
@@ -56,11 +54,6 @@ import {
 
   loadAttributes,
   attributeRequestError,
-
-  loadChartRequestResults,
-  reviewChartsRequestError,
-  participantsChartsRequestError,
-  loadIndividualParticipantsData
 } from './actions/creators';
 
 import {CohortSearchState} from './store';
@@ -72,9 +65,6 @@ type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
 type CritSubRequestAction = ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST];
 type DrugCritRequestAction = ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST];
-type ReviewChartRequestAction = ActionTypes[typeof BEGIN_CHART_DATA_REQUEST];
-type IndividualParticipantsChartRequestAction =
-      ActionTypes[typeof BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST];
 type AutocompleteRequestAction = ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST];
 type IngredientRequestAction = ActionTypes[typeof BEGIN_INGREDIENT_REQUEST];
 type ChildrenRequestAction = ActionTypes[typeof BEGIN_CHILDREN_REQUEST];
@@ -254,41 +244,6 @@ export class CohortSearchEpics {
           .filter(compare({entityType, entityId}))
           .first())
         .catch(e => Observable.of(chartsRequestError(entityType, entityId, e)))
-    )
-  )
-
-/**
- * Cohort Review Charts
- */
-
- fetchReviewChartsData: CSEpic = (action$) => (
-    action$.ofType(BEGIN_CHART_DATA_REQUEST).mergeMap(
-        ({ns, wsid, cid, cdrid, domain, limit}: ReviewChartRequestAction) => {
-            return this.reviewservice
-                .getCohortChartData(ns, wsid, cid, cdrid, domain, limit, null)
-                .map(result =>
-                    loadChartRequestResults(ns, wsid, cid, cdrid, domain, limit, result))
-             .catch(e => Observable.of(reviewChartsRequestError
-                        (ns, wsid, cid, cdrid, domain, limit, e)));
-        }
-    )
- )
-  /**
-   * Cohort Individual Participants Charts
-   */
-  fetchIndividualParticipantsData: CSEpic = (action$) => (
-    action$.ofType(BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST).mergeMap(
-      ({ns, wsid, cid, cdrid, participantsId, domain, limit}:
-         IndividualParticipantsChartRequestAction) => {
-          return this.reviewservice
-          .getParticipantChartDataWithHttpInfo(ns, wsid, cid, cdrid,
-            participantsId, domain, limit)
-            .map(results =>
-            loadIndividualParticipantsData(ns, wsid, cid, cdrid,
-              participantsId, domain, limit, results))
-          .catch(e => Observable.of(participantsChartsRequestError
-          (ns, wsid, cid, cdrid, participantsId, domain, limit, e)));
-      }
     )
   )
 }

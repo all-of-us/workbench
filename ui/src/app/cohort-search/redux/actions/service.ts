@@ -55,8 +55,6 @@ export class CohortSearchActions {
   @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
-  @dispatch() requestChartData = ActionFuncs.requestChartData;
-  @dispatch() requestIndividualParticipantsData = ActionFuncs.requestIndividualParticipantsData;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
@@ -555,23 +553,5 @@ export class CohortSearchActions {
   resetStore(): void {
     this.idsInUse = Set<string>();
     this._resetStore();
-  }
-  /**
-   * Cohort Review Charts
-   */
-
-  fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
-    domain: string, limit: number): void {
-    this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
-  }
-
-  /**
-   * Cohort Individual Participants Charts
-   */
-
-  fetchIndividualParticipantsData(ns: any, wsid: any, cid: any, cdrid: any,
-    participantsId: any, domain: string, limit: number): void {
-    this.requestIndividualParticipantsData(ns, wsid,
-    cid, cdrid, participantsId, domain, limit);
   }
 }

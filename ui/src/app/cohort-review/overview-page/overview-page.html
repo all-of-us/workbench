@@ -46,7 +46,6 @@
                           class="overview-buttons btn">
                     {{name}}S
                   </button>
-
               </div>
               </ng-container>
             </div>
@@ -61,45 +60,8 @@
                       [mode]="'stacked'"
                       [data]="data">
               </app-combo-chart>
-
               <!--top 10 participant chart view start-->
-              <div class = "container chart-width" *ngIf="showTitle">
-                <div class="data-container row" *ngFor="let items of domainItems">
-                  <ng-container *ngIf="items.name.length >=40">
-                    <div  class=" data-heading col-sm-4 col-lg-4 col-xl-4"
-                          [popper]="codesPopper"
-                          [popperTrigger]="'hover'"
-                          [popperPlacement]="'bottom'">
-                      {{items.name}}
-                    </div>
-                  </ng-container>
-                  <ng-container  *ngIf="items.name.length < 40">
-                    <div class=" col-sm-4 col-lg-4 col-xl-4 data-heading">
-                      {{items.name}}
-                    </div>
-                  </ng-container>
-                  <div class="data-bar-container col-sm-7 col-lg-7 col-xl-7">
-                    <div class="light-grey">
-                      <div class="data-blue" style="height:24px;" [style.width.%]="items.percentCount| number:'1.0-0'">
-                        <ng-container *ngIf="items.percentCount >= 90">
-                          {{items.count}}
-                        </ng-container>
-                      </div>
-                      <div class="count" style="height:24px;" [style.width.%]="100-items.percentCount">
-                        <ng-container *ngIf="items.percentCount < 90">
-                          {{items.count}}
-                        </ng-container>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="data-percent" col-sm-1 col-lg-1 col-xl-1>
-                    {{items.percentCount| number:'1.0-0'}} % of Cohort
-                  </div>
-                  <popper-content #codesPopper>
-                    <p class="tooltip-text" [style.margin]="'0'">{{items.name}}</p>
-                  </popper-content>
-                </div>
-              </div>
+                <app-participants-charts *ngIf="domainsData[condChart] && domainsData[condChart].length > 0" [chartItems]="domainsData[condChart]" [totalCount]="totalCount"></app-participants-charts>
               <!--top 10 participant chart view end-->
             </div>
           </div>
