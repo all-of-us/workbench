@@ -87,7 +87,7 @@ export class CreateReviewModalComponent {
 
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
-        this.creating = false;
+        this.create = false;
         const url = '/workspaces/' + ns + '/' + wsid + '/cohorts/' + cid + '/review/participants';
         this.router.navigateByUrl(url);
       });
