@@ -5,11 +5,10 @@ import {By} from '@angular/platform-browser';
 
 import {ClarityModule} from '@clr/angular';
 
+import {randomString} from 'app/utils/index';
 import {ProfileService} from 'generated';
-
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
-import {randomString} from '../../utils';
 
 import {
   simulateEvent,

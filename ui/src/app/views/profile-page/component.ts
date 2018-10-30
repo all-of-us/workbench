@@ -91,7 +91,7 @@ export class ProfilePageComponent implements OnInit {
   }
   get familyNameValid(): boolean {
     if (this.workingProfile) {
-    return this.valid(this.workingProfile.familyName, 80);
+      return this.valid(this.workingProfile.familyName, 80);
     }
   }
   get currentPositionValid(): boolean {
