@@ -127,7 +127,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   data;
   participantsId: any;
-  chartData = {}
+  chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
@@ -326,10 +326,9 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
 
     this.domainList.map(domainName => {
       this.chartData[domainName] = {
-        conditionTitle:'',
+        conditionTitle: '',
         loading: true
-
-      }
+      };
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
         this.participantsId , domainName, limit)
         .subscribe(data => {
