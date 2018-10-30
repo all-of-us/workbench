@@ -22,7 +22,7 @@
         <label for="givenName" class="long-text-field">First Name:</label>
         <input *ngIf="profileLoaded else loading" type="text" autofocus
           [(ngModel)]="workingProfile.givenName" id="givenName" [disabled]="!editing">
-        <div *ngIf="profileLoaded && !givenNameValid" class="alert alert-danger error-message">
+        <div *ngIf="profileLoaded && !givenNameValid" class="alert alert-danger error-message" id="givenNameInvalid">
           First Name must be 80 characters or less.
         </div>
       </div>
@@ -30,7 +30,7 @@
         <label for="familyName" class="long-text-field">Last Name:</label>
         <input *ngIf="profileLoaded else loading" type="text"
           [(ngModel)]="workingProfile.familyName" id="familyName" [disabled]="!editing">
-        <div *ngIf="profileLoaded && !familyNameValid" class="alert alert-danger error-message">
+        <div *ngIf="profileLoaded && !familyNameValid" class="alert alert-danger error-message" id="familyNameInvalid">
           Last Name must be 80 characters or less.
         </div>
       </div>
@@ -74,7 +74,7 @@
         <label for="currentPosition" class="long-text-field">Your Current Position:</label>
         <input *ngIf="profileLoaded else loading" type="text"
           [(ngModel)]="workingProfile.currentPosition" id="currentPosition" [disabled]="!editing">
-        <div *ngIf="profileLoaded && !currentPositionValid" class="alert alert-danger error-message">
+        <div *ngIf="profileLoaded && !currentPositionValid" class="alert alert-danger error-message" id="currentPositionInvalid">
           Current Position must be 255 characters or less.
         </div>
       </div>
@@ -85,7 +85,7 @@
         <input *ngIf="profileLoaded else loading" type="text"
                [(ngModel)]="workingProfile.organization" id="organization"
                [disabled]="!editing">
-        <div *ngIf="profileLoaded && !organizationValid" class="alert alert-danger error-message">
+        <div *ngIf="profileLoaded && !organizationValid" class="alert alert-danger error-message" id="organizationInvalid">
           Organization must be 255 characters or less.
         </div>
       </div>

@@ -88,12 +88,12 @@ describe('ProfilePageComponent', () => {
   }));
 
   it('handles long given name errors', fakeAsync(() => {
-    console.log(fixture);
     simulateInput(
       fixture, fixture.debugElement.query(By.css('#givenName')), randomString(81));
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.givenNameValid).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#givenNameInvalid')).length).toBeTruthy();
   }));
 
   it('handles long family name errors', fakeAsync(() => {
@@ -102,6 +102,7 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.familyNameValid).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#familyNameInvalid')).length).toBeTruthy();
   }));
 
   it('handles long organization errors', fakeAsync(() => {
@@ -110,6 +111,7 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.organizationValid).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#organizationInvalid')).length).toBeTruthy();
   }));
 
   it('handles long current position errors', fakeAsync(() => {
@@ -118,6 +120,8 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentPositionValid).toBeFalsy();
+    expect(
+      fixture.debugElement.queryAll(By.css('#currentPositionInvalid')).length).toBeTruthy();
   }));
 
 });
