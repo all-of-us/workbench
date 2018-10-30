@@ -66,7 +66,7 @@ describe('AccountCreationComponent', () => {
 
   it('handles each username invalidity', fakeAsync(() => {
     // Begin with a period
-    let usernameField = fixture.debugElement.query(By.css('#username'));
+    const usernameField = fixture.debugElement.query(By.css('#username'));
     simulateEvent(fixture, usernameField, 'focus');
     simulateInput(fixture, usernameField, '.username');
     tick(300);
@@ -97,7 +97,7 @@ describe('AccountCreationComponent', () => {
   }));
 
   it('handles long username with mismatch at end', fakeAsync(() => {
-    let usernameField = fixture.debugElement.query(By.css('#username'));
+    const usernameField = fixture.debugElement.query(By.css('#username'));
     simulateInput(
       fixture, usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
@@ -107,7 +107,7 @@ describe('AccountCreationComponent', () => {
   }));
 
   it('handles long given name errors', fakeAsync(() => {
-    let givenNameField = fixture.debugElement.query(By.css('#givenName'));
+    const givenNameField = fixture.debugElement.query(By.css('#givenName'));
     simulateInput(fixture, givenNameField, randomString(81));
     tick(300);
     updateAndTick(fixture);
@@ -115,7 +115,7 @@ describe('AccountCreationComponent', () => {
   }));
 
   it('handles long family name errors', fakeAsync(() => {
-    let familyNameField = fixture.debugElement.query(By.css('#familyName'));
+    const familyNameField = fixture.debugElement.query(By.css('#familyName'));
     simulateInput(fixture, familyNameField, randomString(81));
     tick(300);
     updateAndTick(fixture);
@@ -123,7 +123,7 @@ describe('AccountCreationComponent', () => {
   }));
 
   it('handles long organization errors', fakeAsync(() => {
-    let organizationField = fixture.debugElement.query(By.css('#organization'));
+    const organizationField = fixture.debugElement.query(By.css('#organization'));
     simulateInput(fixture, organizationField, randomString(256));
     tick(300);
     updateAndTick(fixture);
@@ -131,7 +131,7 @@ describe('AccountCreationComponent', () => {
   }));
 
   it('handles long current position errors', fakeAsync(() => {
-    let currentPositionField = fixture.debugElement.query(By.css('#currentPosition'));
+    const currentPositionField = fixture.debugElement.query(By.css('#currentPosition'));
     simulateInput(fixture, currentPositionField, randomString(256));
     tick(300);
     updateAndTick(fixture);
