@@ -71,7 +71,8 @@ describe('AccountCreationComponent', () => {
     simulateInput(fixture, usernameField, '.username');
     tick(300);
     updateAndTick(fixture);
-    let usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    let usernameInvalidError =
+      fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
     expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
@@ -105,7 +106,8 @@ describe('AccountCreationComponent', () => {
     simulateInput(fixture, usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
     updateAndTick(fixture);
-    const usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    const usernameInvalidError =
+      fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
     expect(usernameInvalidError).toBeTruthy();
     expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));

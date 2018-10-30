@@ -89,28 +89,32 @@ describe('ProfilePageComponent', () => {
 
   it('handles long given name errors', fakeAsync(() => {
     console.log(fixture);
-    simulateInput(fixture, fixture.debugElement.query(By.css('#givenName')), randomString(81));
+    simulateInput(
+      fixture, fixture.debugElement.query(By.css('#givenName')), randomString(81));
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.givenNameValid).toBeFalsy();
   }));
 
   it('handles long family name errors', fakeAsync(() => {
-    simulateInput(fixture, fixture.debugElement.query(By.css('#familyName')), randomString(81));
+    simulateInput(
+      fixture, fixture.debugElement.query(By.css('#familyName')), randomString(81));
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.familyNameValid).toBeFalsy();
   }));
 
   it('handles long organization errors', fakeAsync(() => {
-    simulateInput(fixture, fixture.debugElement.query(By.css('#organization')), randomString(256));
+    simulateInput(
+      fixture, fixture.debugElement.query(By.css('#organization')), randomString(256));
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.organizationValid).toBeFalsy();
   }));
 
   it('handles long current position errors', fakeAsync(() => {
-    simulateInput(fixture, fixture.debugElement.query(By.css('#currentPosition')), randomString(256));
+    simulateInput(
+      fixture, fixture.debugElement.query(By.css('#currentPosition')), randomString(256));
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentPositionValid).toBeFalsy();
