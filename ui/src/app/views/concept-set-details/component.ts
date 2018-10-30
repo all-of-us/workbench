@@ -80,7 +80,7 @@ export class ConceptSetDetailsComponent {
   receiveDelete() {
     this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.conceptSet.id)
       .subscribe(() => {
-        this.router.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts']);
+        this.router.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts', 'sets']);
         this.deleteModal.close();
       });
   }
@@ -113,7 +113,7 @@ export class ConceptSetDetailsComponent {
     return this.conceptTable.selectedConcepts.length;
   }
 
-  get showRemoveFab(): boolean {
-    return this.canEdit && this.selectedConceptsCount > 0;
+  get disableRemoveFab(): boolean {
+    return !this.canEdit || this.selectedConceptsCount === 0;
   }
 }
