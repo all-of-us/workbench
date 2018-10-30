@@ -127,19 +127,13 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   data;
   participantsId: any;
-  procedureData = [];
-  drugData = [];
-  conditionData = [];
+  chartData = {}
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
-  procedureTitle: string;
-  drugTitle: string;
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
-  trackClickedParticipants = false;
-  loading: any;
   readonly stubs = [
     'survey',
   ];
@@ -326,32 +320,23 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
 
 
   getDomainsParticipantsData() {
-    this.chartLoadedSpinner = true;
-    this.procedureData = [];
-    this.drugData = [];
-    this.conditionData = [];
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
 
     this.domainList.map(domainName => {
+      this.chartData[domainName] = {
+        conditionTitle:'',
+        loading: true
+
+      }
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
         this.participantsId , domainName, limit)
-        .subscribe(loading => {
-          this.loading = loading;
-          if (domainName === DomainType[DomainType.CONDITION]) {
-            this.conditionTitle = typeToTitle(domainName);
-            this.conditionData = this.loading.items;
-            this.chartLoadedSpinner = false;
-          } else if (domainName === DomainType[DomainType.PROCEDURE]) {
-            this.procedureTitle = typeToTitle(domainName);
-            this.procedureData = this.loading.items;
-            this.chartLoadedSpinner = false;
-          } else {
-            this.drugTitle = typeToTitle(domainName);
-            this.drugData = this.loading.items;
-            this.chartLoadedSpinner = false;
-          }
+        .subscribe(data => {
+          const participantsData = data;
+          this.chartData[domainName] = participantsData.items;
+          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
+          this.chartData[domainName].loading = false;
         });
       this.subscription = getParticipantsDomainData;
     });
