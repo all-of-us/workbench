@@ -4,15 +4,6 @@ export const BEGIN_CRITERIA_REQUEST = 'BEGIN_CRITERIA_REQUEST';
 export const BEGIN_SUBTYPE_CRITERIA_REQUEST = 'BEGIN_SUBTYPE_CRITERIA_REQUEST';
 export const BEGIN_ALL_CRITERIA_REQUEST = 'BEGIN_ALL_CRITERIA_REQUEST';
 export const BEGIN_DRUG_CRITERIA_REQUEST = 'BEGIN_DRUG_CRITERIA_REQUEST';
-
-export const BEGIN_CHART_DATA_REQUEST = 'BEGIN_CHART_DATA_REQUEST';
-export const LOAD_CHART_RESULTS = 'LOAD_CHART_RESULTS';
-export const REVIEW_CHART_REQUEST_ERROR = 'REVIEW_CHART_REQUEST_ERROR';
-export const PARTICIPANTS_CHART_REQUEST_ERROR = 'PARTICIPANTS_CHART_REQUEST_ERROR';
-export const BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST
-            = 'BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST';
-export const LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS
-            = 'LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS';
 export const LOAD_CRITERIA_RESULTS = 'LOAD_CRITERIA_RESULTS';
 export const LOAD_CRITERIA_SUBTYPE_RESULTS = 'LOAD_CRITERIA_SUBTYPE_RESULTS';
 export const LOAD_DEMO_CRITERIA_RESULTS = 'LOAD_DEMO_CRITERIA_RESULTS';
@@ -20,6 +11,7 @@ export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
+export const CANCEL_AUTOCOMPLETE_REQUEST = 'CANCEL_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const BEGIN_CHILDREN_REQUEST = 'BEGIN_CHILDREN_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
@@ -150,6 +142,9 @@ export interface ActionTypes {
     kind: string;
     subtype: string;
     searchTerms: string;
+  };
+  CANCEL_AUTOCOMPLETE_REQUEST: {
+    type: typeof CANCEL_AUTOCOMPLETE_REQUEST;
   };
   BEGIN_INGREDIENT_REQUEST: {
     type: typeof BEGIN_INGREDIENT_REQUEST;
@@ -371,80 +366,10 @@ export interface ActionTypes {
     type: typeof CLEAR_STORE;
   };
 
-  /**
-   * Cohort Review Charts
-   */
-  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST: {
-    type: typeof BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST;
-    ns: any;
-    wsid: any;
-    cid: any;
-    cdrid: any;
-    participantsId: any;
-    domain: string;
-    limit: number;
-  };
-  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS: {
-    type: typeof LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS;
-    ns: any;
-    wsid: any;
-    cid: any;
-    cdrid: any;
-    participantsId: any;
-    domain: string;
-    limit: number;
-    results: any;
-  };
-  PARTICIPANTS_CHART_REQUEST_ERROR: {
-    type: typeof PARTICIPANTS_CHART_REQUEST_ERROR;
-    ns: any;
-    wsid: any;
-    cid: any;
-    cdrid: any;
-    participantsId: any;
-    domain: string;
-    limit: number;
-    error?: any;
-  };
-  BEGIN_CHART_DATA_REQUEST: {
-      type: typeof BEGIN_CHART_DATA_REQUEST;
-      ns: any;
-      wsid: any;
-      cid: any;
-      cdrid: any;
-      domain: string;
-      limit: number;
-  };
-  LOAD_CHART_RESULTS: {
-      type: typeof LOAD_CHART_RESULTS;
-      ns: any;
-      wsid: any;
-      cid: any;
-      cdrid: any;
-      domain: string;
-      limit: number;
-      results: any;
-  };
-  REVIEW_CHART_REQUEST_ERROR: {
-      type: typeof REVIEW_CHART_REQUEST_ERROR;
-      ns: any;
-      wsid: any;
-      cid: any;
-      cdrid: any;
-      domain: string;
-      limit: number;
-      error?: any;
-    };
 }
 
 export type RootAction =
     ActionTypes[typeof BEGIN_CRITERIA_REQUEST]
-  | ActionTypes[typeof BEGIN_CHART_DATA_REQUEST]
-  | ActionTypes[typeof LOAD_CHART_RESULTS]
-  | ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR]
-  | ActionTypes[typeof PARTICIPANTS_CHART_REQUEST_ERROR]
-  | ActionTypes[typeof BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST]
-  | ActionTypes[typeof LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS]
   | ActionTypes[typeof BEGIN_SUBTYPE_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_ALL_CRITERIA_REQUEST]
   | ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST]
@@ -455,6 +380,7 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof CANCEL_AUTOCOMPLETE_REQUEST]
   | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
   | ActionTypes[typeof BEGIN_CHILDREN_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]

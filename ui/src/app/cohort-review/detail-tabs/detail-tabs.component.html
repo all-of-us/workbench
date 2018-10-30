@@ -4,23 +4,11 @@
     <clr-tab-content id="detail-summary-content" *clrIfActive>
       <div class="container summary-container">
         <div class="row">
-          <div class="col-sm-4">
-            <div *ngIf="chartLoadedSpinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
+          <div class="col-sm-4" *ngFor = "let charts of domainList">
+            <div *ngIf="chartData[charts].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
               Loading...
             </div>
-            <app-individual-participants-charts *ngIf="conditionData.length > 0 && !chartLoadedSpinner" [chartData] ="conditionData" [chartHeader]="conditionTitle" ></app-individual-participants-charts>
-          </div>
-          <div class="col-sm-4">
-            <div *ngIf="chartLoadedSpinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
-              Loading...
-            </div>
-            <app-individual-participants-charts *ngIf="procedureData.length > 0 && !chartLoadedSpinner" [chartData] ="procedureData" [chartHeader]="procedureTitle" ></app-individual-participants-charts>
-          </div>
-          <div class="col-sm-4">
-            <div *ngIf="chartLoadedSpinner" class="loading-spinner spinner spinner-lg spin-in-overlay">
-              Loading...
-            </div>
-            <app-individual-participants-charts *ngIf="drugData.length > 0 && !chartLoadedSpinner" [chartData] ="drugData" [chartHeader]="drugTitle"></app-individual-participants-charts>
+            <app-individual-participants-charts *ngIf="!chartData[charts].loading && chartData[charts] " [chartData] ="chartData[charts]" [chartHeader] = "chartData[charts].conditionTitle" ></app-individual-participants-charts>
           </div>
         </div>
       </div>

@@ -19,7 +19,6 @@ import {
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_CHART_DATA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_CRITERIA_SUBTYPE_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
@@ -27,6 +26,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -78,9 +78,6 @@ import {
   RESET_STORE,
   CLEAR_STORE,
   RootAction,
-  LOAD_CHART_RESULTS,
-  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
-  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
 } from './actions/types';
 /* tslint:enable:ordered-imports */
 
@@ -156,6 +153,9 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
+
+      case CANCEL_AUTOCOMPLETE_REQUEST:
+        return state.deleteIn(['criteria', 'search', 'autocomplete']);
 
       case BEGIN_INGREDIENT_REQUEST:
         return state
@@ -509,47 +509,6 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case CLEAR_STORE:
         return fromJS({});
-
-      /**
-       * Cohort Review Charts
-       */
-      case BEGIN_CHART_DATA_REQUEST:
-        return state
-          .deleteIn(
-            ['reviewChartData', 'request', action.cid, action.domain])
-          .setIn(
-            ['reviewChartData', 'request', action.cid, action.domain],
-            true);
-
-      case LOAD_CHART_RESULTS:
-        return state
-          .setIn(
-            ['reviewChartData', 'domainCharts', action.cid, action.domain]
-            , fromJS(action.results))
-          .deleteIn(
-            ['reviewChartData', 'request', action.cid, action.domain]);
-      /**
-       * Cohort Individual Participants Charts
-       */
-
-      case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
-        return state
-          .deleteIn(
-            ['individualChartData', 'request', action.cid , action.participantsId, action.domain])
-          .setIn(
-            ['individualChartData', 'request',
-              action.cid, action.participantsId, action.domain],
-            true);
-
-
-      case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
-        return state
-          .setIn(
-            ['individualChartData', 'chartsData', action.cid , action.participantsId, action.domain]
-            , fromJS(action.results._body))
-          .deleteIn(
-            ['individualChartData', 'request', action.ns,
-              action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
       default: return state;
     }
 
