@@ -1,33 +1,41 @@
 {
-  "includes": [
-    {
-      "id": "includes_6wlxu3h4z",
-      "temporal": false,
-      "mention": "",
-      "time": "",
-      "timeValue": 0,
-      "timeFrame": "",
-      "items": [
+  "type": "cohort",
+  "cohort": {
+    "name": "diabetes-cases",
+    "description": "demo",
+    "type": "demo",
+    "criteria": {
+      "includes": [
         {
-          "id": "items_ypz4y1gkq",
-          "type": "CONDITION",
-          "temporalGroup": 0,
-          "searchParameters": [
+          "id": "includes_6wlxu3h4z",
+          "temporal": false,
+          "mention": "",
+          "time": "",
+          "timeValue": 0,
+          "timeFrame": "",
+          "items": [
             {
-              "parameterId": "param235",
-              "name": "Diabetes mellitus",
-              "value": "250",
-              "type": "ICD9",
-              "subtype": "CM",
-              "group": true,
-              "conceptId": null,
-              "domainId": ""
+              "id": "items_ypz4y1gkq",
+              "type": "CONDITION",
+              "temporalGroup": 0,
+              "searchParameters": [
+                {
+                  "parameterId": "param235",
+                  "name": "Diabetes mellitus",
+                  "value": "250",
+                  "type": "ICD9",
+                  "subtype": "CM",
+                  "group": true,
+                  "conceptId": null,
+                  "domainId": ""
+                }
+              ],
+              "modifiers": []
             }
-          ],
-          "modifiers": []
+          ]
         }
-      ]
+      ],
+      "excludes": []
     }
-  ],
-  "excludes": []
+  }
 }
