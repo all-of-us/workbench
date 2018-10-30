@@ -154,3 +154,19 @@ hr {
   width: 100%;
   padding-left: 1rem;
 }
+
+.is-solid.info-icon {
+  color: #302C71;
+  height: 18px;
+  width: 18px;
+  vertical-align: top;
+}
+
+.padding-right {
+  padding-right: 1rem;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
