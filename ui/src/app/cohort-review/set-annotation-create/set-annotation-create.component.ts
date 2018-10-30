@@ -71,6 +71,9 @@ export class SetAnnotationCreateComponent {
       if (val && val !== '' && !hasVal) {
         request.enumValues = [...this.enumValues, val];
         this.addValue.reset();
+      } else {
+        request.enumValues = [...this.enumValues];
+        this.addValue.reset();
       }
     }
 
@@ -121,9 +124,14 @@ export class SetAnnotationCreateComponent {
     return this.kind.value === AnnotationType.ENUM;
   }
 
+  // get formIsInvalid() {
+  //   const val = this.addValue.value;
+  //   const isEmptyEnum = this.isEnum && !val && !(this.enumValues.length > 0);
+  //   return (this.form.invalid || isEmptyEnum);
+  // }
+
   get formIsInvalid() {
-    const val = this.addValue.value;
-    const isEmptyEnum = this.isEnum && !val && !(this.enumValues.length > 0);
+    const isEmptyEnum = this.isEnum && !(this.enumValues.length > 0);
     return (this.form.invalid || isEmptyEnum);
   }
 
