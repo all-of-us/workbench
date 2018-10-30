@@ -1,5 +1,5 @@
 <clr-modal [(clrModalOpen)]="modalOpen" [clrModalSize]="'md'" *ngIf="!loading">
-  <h3 class="modal-title">Add {{selectConceptList?.length}} to {{selectDomain|titlecase}} Concept Set</h3>
+  <h3 class="modal-title">Add {{selectConceptList?.length}} Concepts to {{selectDomain|titlecase}} Concept Set</h3>
   <div class="modal-body">
     <label *ngIf="errorSaving" class="error">{{errorMsg}}</label>
     <div *ngIf="conceptSets?.length > 0" class="form-section">

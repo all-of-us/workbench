@@ -1,12 +1,6 @@
 /* tslint:disable:ordered-imports */
 import {
   BEGIN_CRITERIA_REQUEST,
-  BEGIN_CHART_DATA_REQUEST,
-  REVIEW_CHART_REQUEST_ERROR,
-  LOAD_CHART_RESULTS,
-  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
-  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
-  PARTICIPANTS_CHART_REQUEST_ERROR,
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
@@ -17,6 +11,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
@@ -97,44 +92,6 @@ export const requestDrugCriteria =
   ): ActionTypes[typeof BEGIN_DRUG_CRITERIA_REQUEST] =>
   ({type: BEGIN_DRUG_CRITERIA_REQUEST, cdrVersionId, kind, parentId, subtype});
 
-
-/**
- * Cohort Review Charts
- */
-export const requestChartData =
-    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
-    ): ActionTypes[typeof BEGIN_CHART_DATA_REQUEST] =>
-        ({type: BEGIN_CHART_DATA_REQUEST, ns, wsid, cid, cdrid, domain, limit});
-
-export const loadChartRequestResults =
-    (ns: string, wsid: string, cid: number, cdrid: number, domain: string, limit: number,
-     results: any): ActionTypes[typeof LOAD_CHART_RESULTS] =>
-    ({type: LOAD_CHART_RESULTS, ns, wsid, cid, cdrid, domain, limit, results});
-
-/**
- * Cohort Individual Participants Charts
- */
-export const requestIndividualParticipantsData =
-    (ns: string, wsid: string, cid: number, cdrid: number,
-    participantsId: any, domain: string, limit: number):
-    ActionTypes[typeof BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST] =>
-    ({type: BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
-    ns, wsid, cid, cdrid, participantsId, domain, limit});
-
-export const loadIndividualParticipantsData =
-    (ns: string, wsid: string, cid: number, cdrid: number,
-    participantsId: any, domain: string, limit: number, results: any):
-    ActionTypes[typeof LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS] =>
-    ({type: LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
-    ns, wsid, cid, cdrid, participantsId, domain, limit, results});
-
-export const participantsChartsRequestError =
-  (ns: any, wsid: any, cid: any, cdrid: any,
-   participantsId: any, domain: any, limit: any, error: any):
-  ActionTypes[typeof PARTICIPANTS_CHART_REQUEST_ERROR] =>
-  ({type: PARTICIPANTS_CHART_REQUEST_ERROR, ns, wsid, cid,
-  cdrid, participantsId, domain, limit, error});
-
 export const loadCriteriaRequestResults =
   (kind: string, parentId: number, results: Criteria[]
   ): ActionTypes[typeof LOAD_CRITERIA_RESULTS] =>
@@ -169,6 +126,10 @@ export const requestAutocompleteOptions =
   (cdrVersionId: number, kind: string, subtype: string, searchTerms: string
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
   ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, subtype, searchTerms});
+
+export const cancelAutocompleteRequest =
+  (): ActionTypes[typeof CANCEL_AUTOCOMPLETE_REQUEST] =>
+  ({type: CANCEL_AUTOCOMPLETE_REQUEST});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
@@ -283,10 +244,6 @@ export const loadPreviewRequestResults =
 export const previewRequestError =
   (error?: any): ActionTypes[typeof PREVIEW_REQUEST_ERROR] =>
   ({type: PREVIEW_REQUEST_ERROR, error});
-export const reviewChartsRequestError =
-    (ns: any, wsid: any, cid: any, cdrid: any, domain: any, limit: any, error: any):
-    ActionTypes[typeof REVIEW_CHART_REQUEST_ERROR] =>
-    ({type: REVIEW_CHART_REQUEST_ERROR, ns, wsid, cid, cdrid, domain, limit, error});
 
 export const requestCharts =
   (cdrVersionId: number, entityType: string, entityId: string, request: SearchRequest

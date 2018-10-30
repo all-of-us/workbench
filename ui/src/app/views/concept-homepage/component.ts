@@ -52,7 +52,6 @@ export class ConceptHomepageComponent implements OnInit {
     domain: undefined,
     conceptCount: 0
   };
-  isConceptSelected = false;
   selectedConcept: Concept[] = [];
 
   @ViewChild(ConceptTableComponent)
@@ -73,7 +72,6 @@ export class ConceptHomepageComponent implements OnInit {
   conceptsCache: Array<ConceptCacheSet> = [];
   completedDomainSearches: Array<Domain> = [];
   placeholderValue = '';
-  addToSetText = 'Add to set';
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
@@ -122,7 +120,6 @@ export class ConceptHomepageComponent implements OnInit {
     if (!this.selectedConceptDomainMap[domainCount.domain]) {
       this.selectedConceptDomainMap[domainCount.domain] = 0;
     }
-    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainCount.domain]);
     this.selectedDomain = domainCount;
     this.placeholderValue = this.noConceptsConstant;
     this.setConceptsAndVocabularies();
@@ -138,8 +135,6 @@ export class ConceptHomepageComponent implements OnInit {
     this.selectedConcept = [];
     this.selectedConceptDomainMap = new Map<string, number>();
     this.conceptDomainCounts = [];
-    this.addToSetText = 'Add to set';
-    this.isConceptSelected = false;
 
   }
   browseDomain(domain: DomainInfo) {
@@ -266,19 +261,15 @@ export class ConceptHomepageComponent implements OnInit {
           })
           .length;
       this.selectedConceptDomainMap[domainName] = filterConceptsCount;
-      this.isConceptSelected = filterConceptsCount > 0 ;
     } else {
-      this.isConceptSelected = false;
       this.selectedConceptDomainMap[domainName] = 0;
     }
-    this.addToSetText = this.getAddToSetText(this.selectedConceptDomainMap[domainName]);
   }
 
   afterConceptsSaved() {
     this.setConceptsSaveText();
 
     // Once concepts are saved clear the selection from concept homepage for active Domain
-
     this.conceptTable.selectedConcepts.length = 0;
     this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
     this.cloneCacheConcepts();
@@ -302,11 +293,19 @@ export class ConceptHomepageComponent implements OnInit {
     cacheItem.items = cloneConcepts;
   }
 
+  get activeSelectedConceptCount(): number {
+    if (!this.selectedDomain || !this.selectedDomain.domain) {
+      return 0;
+    }
+    return this.selectedConceptDomainMap[this.selectedDomain.domain];
+  }
+
   get noConceptsConstant() {
     return 'No concepts found for domain \'' + this.selectedDomain.name + '\' this search.';
   }
 
-  getAddToSetText(conceptsCount): string {
-    return conceptsCount === 0 ? 'Add to set' : 'Add (' + conceptsCount + ') to set';
+  get addToSetText(): string {
+    const count = this.activeSelectedConceptCount;
+    return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
   }
 }

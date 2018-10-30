@@ -1,0 +1,17 @@
+[
+  {
+    "mode":"REQUIRED",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "gender_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "gender_identity_concept_id",
+    "type": "INTEGER"
+  }
+]

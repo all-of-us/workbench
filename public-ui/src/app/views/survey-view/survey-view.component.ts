@@ -32,6 +32,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
   surveyName: string;
   conceptCodeTooltip: any;
+  genderGraph: string;
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -208,6 +209,14 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
+  }
+
+  public selectSurveyGenderGraph(g) {
+      if (g === 'Gender Identity') {
+        this.genderGraph = 'GI';
+      } else {
+        this.genderGraph = 'BS';
+      }
   }
 
 }

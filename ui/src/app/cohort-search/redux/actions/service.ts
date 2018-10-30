@@ -55,12 +55,11 @@ export class CohortSearchActions {
   @dispatch() requestCriteriaBySubtype = ActionFuncs.requestCriteriaBySubtype;
   @dispatch() requestAllCriteria = ActionFuncs.requestAllCriteria;
   @dispatch() requestDrugCriteria = ActionFuncs.requestDrugCriteria;
-  @dispatch() requestChartData = ActionFuncs.requestChartData;
-  @dispatch() requestIndividualParticipantsData = ActionFuncs.requestIndividualParticipantsData;
   @dispatch() loadDemoCriteriaRequestResults = ActionFuncs.loadDemoCriteriaRequestResults;
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
+  @dispatch() cancelAutocompleteRequest = ActionFuncs.cancelAutocompleteRequest;
   @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
@@ -253,6 +252,10 @@ export class CohortSearchActions {
   }
 
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    if (isLoading) {
+      this.cancelAutocompleteRequest();
+    }
     this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }
 
@@ -550,23 +553,5 @@ export class CohortSearchActions {
   resetStore(): void {
     this.idsInUse = Set<string>();
     this._resetStore();
-  }
-  /**
-   * Cohort Review Charts
-   */
-
-  fetchReviewChartsData(ns: any, wsid: any, cid: any, cdrid: any,
-    domain: string, limit: number): void {
-    this.requestChartData(ns, wsid, cid, cdrid, domain, limit);
-  }
-
-  /**
-   * Cohort Individual Participants Charts
-   */
-
-  fetchIndividualParticipantsData(ns: any, wsid: any, cid: any, cdrid: any,
-    participantsId: any, domain: string, limit: number): void {
-    this.requestIndividualParticipantsData(ns, wsid,
-    cid, cdrid, participantsId, domain, limit);
   }
 }
