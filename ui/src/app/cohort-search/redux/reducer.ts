@@ -27,6 +27,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -156,6 +157,9 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
+
+      case CANCEL_AUTOCOMPLETE_REQUEST:
+        return state.deleteIn(['criteria', 'search', 'autocomplete']);
 
       case BEGIN_INGREDIENT_REQUEST:
         return state

@@ -17,6 +17,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
@@ -169,6 +170,10 @@ export const requestAutocompleteOptions =
   (cdrVersionId: number, kind: string, subtype: string, searchTerms: string
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
   ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, subtype, searchTerms});
+
+export const cancelAutocompleteRequest =
+  (): ActionTypes[typeof CANCEL_AUTOCOMPLETE_REQUEST] =>
+  ({type: CANCEL_AUTOCOMPLETE_REQUEST});
 
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
