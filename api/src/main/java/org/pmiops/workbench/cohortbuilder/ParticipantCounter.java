@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParticipantCounter {
 
-    private CohortQueryBuilder cohortQueryBuilder;
+  public static final String SOURCE_CONCEPT_ID = "source_concept_id";
+  public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
+  private CohortQueryBuilder cohortQueryBuilder;
 
   private static final String COUNT_SQL_TEMPLATE =
     "select count(*) as count\n" +
@@ -43,9 +45,7 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
-    "select concept_name as name, concept_id as conceptId, s.count\n" +
-      "from `${projectId}.${dataSetId}.concept`\n" +
-      "join (select ${tableId}, count(distinct person_id) as count\n" +
+    "select source_name as name, source_concept_id as conceptId, count(distinct person_id) as count\n" +
       "from `${projectId}.${dataSetId}.${table}` person\n" +
       "where\n";
 
@@ -64,10 +64,9 @@ public class ParticipantCounter {
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
     "and ${tableId} != 0\n" +
-      "group by ${tableId}\n" +
-      "order by count desc\n" +
-      "limit ${limit}) as s on concept_id = s.${tableId}\n" +
-      "order by count desc, name asc\n";
+      "group by name, conceptId\n" +
+      "order by count desc, name asc\n" +
+      "limit ${limit}\n";
 
     private static final String ID_SQL_ORDER_BY = "order by person_id\nlimit";
 
@@ -104,15 +103,14 @@ public class ParticipantCounter {
                                                                   DomainType domainType,
                                                                   int chartLimit) {
       String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
-      String table = DomainTableEnum.getTableName(domain);
-      String tableId = DomainTableEnum.getConceptId(domain);
+      String table = DomainTableEnum.getDenormalizedTableName(domain);
+      String tableId = STANDARD_CONCEPT_ID;
       if (domain.equals(DomainType.CONDITION.name()) || domain.equals(DomainType.PROCEDURE.name())) {
-        tableId = DomainTableEnum.getSourceConceptId(domain);
+        tableId = SOURCE_CONCEPT_ID;
       }
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
-        .replace("${table}", table)
-        .replace("${tableId}", tableId);
+        .replace("${table}", table);
       String endSqlTemplate = DomainType.LAB.equals(domainType) ?
         LAB_SQL_TEMPLATE + DOMAIN_CHART_INFO_SQL_GROUP_BY :
         DOMAIN_CHART_INFO_SQL_GROUP_BY;
