@@ -13,7 +13,6 @@ import {NgxPopperModule} from 'ngx-popper';
 /* Pages */
 import {CohortCommonModule} from '../cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
-import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from '../cohort-search/redux';
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
@@ -27,6 +26,7 @@ import {IndividualParticipantsChartsComponent} from './individual-participants-c
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
+import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -81,12 +81,10 @@ import {TablePage} from './table-page/table-page';
     DetailTabsComponent,
     DetailTabTableComponent,
     DetailAllEventsComponent,
+    ParticipantsChartsComponent
 
   ],
   providers: [ReviewStateService,
-              CohortSearchActions,
-              CohortSearchEpics,
-              ConfigureStore,
     {
       provide: HighchartsStatic,
       useValue: highCharts
@@ -94,5 +92,5 @@ import {TablePage} from './table-page/table-page';
   ]
 })
 export class CohortReviewModule {
-    constructor(store: ConfigureStore) {}
+
 }

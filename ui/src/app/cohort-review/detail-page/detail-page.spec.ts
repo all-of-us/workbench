@@ -6,11 +6,13 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
- import {CohortReviewService} from 'generated';
-// import * as highCharts from 'Highcharts';
+import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
+import {CohortReviewService} from 'generated';
+import * as highCharts from 'highcharts';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortSearchActions} from '../../cohort-search/redux';
@@ -25,6 +27,8 @@ import {ParticipantStatusComponent} from '../participant-status/participant-stat
 import {ReviewStateService} from '../review-state.service';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
+
+
 
 describe('DetailPage', () => {
   let component: DetailPage;
@@ -63,13 +67,7 @@ describe('DetailPage', () => {
 
   };
   let route;
-  let mockReduxInst;
   beforeEach(async(() => {
-     // const store = initialState;
-     mockReduxInst = MockNgRedux.getInstance();
-     const _old = mockReduxInst.getState;
-    const _wrapped = () => fromJS(_old());
-    mockReduxInst.getState = _wrapped;
     TestBed.configureTestingModule({
       declarations: [
         AnnotationItemComponent,
@@ -89,9 +87,12 @@ describe('DetailPage', () => {
                 ChartModule,
                 RouterTestingModule],
       providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
+        {
+          provide: HighchartsStatic,
+          useValue: highCharts
+        },
         {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: CohortReviewService, useValue: {}},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: Router, useValue: routerSpy},

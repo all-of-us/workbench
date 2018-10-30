@@ -1,20 +1,13 @@
-import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
-    DomainType,
-    PageFilterType,
+  DomainType,
+  PageFilterType,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  getParticipantData,
-  isParticipantIdExists
-} from '../../cohort-search/redux';
+import {CohortReviewService} from '../../../generated';
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
-
 
 
 /* The most common column types */
@@ -24,9 +17,9 @@ const itemDate = {
   displayName: 'Start Date',
 };
 const endDate = {
-    name: 'endDate',
-    classNames: ['date-col'],
-    displayName: 'End Date',
+  name: 'endDate',
+  classNames: ['date-col'],
+  displayName: 'End Date',
 };
 const domain = {
   name: 'domain',
@@ -55,8 +48,8 @@ const sourceName = {
   displayName: 'Source Name',
 };
 const signature = {
-    name: 'signature',
-    displayName: 'Signature',
+  name: 'signature',
+  displayName: 'Signature',
 };
 const valueConcept = {
   name: 'valueConcept',
@@ -132,21 +125,15 @@ const labRefRange = {
 })
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
-  loading = false;
   data;
   participantsId: any;
-  procedureData = [];
-  drugData = [];
-  conditionData = [];
+  chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
-  procedureTitle: string;
-  drugTitle: string;
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
-  trackClickedParticipants = false;
   readonly stubs = [
     'survey',
   ];
@@ -306,12 +293,12 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       age: ageAtEvent,
     }
   }];
+
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
     private router: Router,
-    private actions: CohortSearchActions,
-    private ngRedux: NgRedux<CohortSearchState>,
+    private reviewAPI: CohortReviewService,
   ) {}
 
 
@@ -319,7 +306,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     if (this.clickedParticipantId) {
       this.chartLoadedSpinner = true;
       this.participantsId = this.clickedParticipantId;
-        this.getDomainsParticipantsData();
+      this.getDomainsParticipantsData();
     }
   }
 
@@ -328,49 +315,34 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       .subscribe(participants => {
         this.participantsId = participants.participantId;
       });
-     this.getDomainsParticipantsData();
+    this.getDomainsParticipantsData();
   }
 
+
   getDomainsParticipantsData() {
-    this.chartLoadedSpinner = true;
-    this.procedureData = [];
-    this.drugData = [];
-    this.conditionData = [];
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
-    const cohortId = cid;
-     this.trackClickedParticipants =
-       isParticipantIdExists(cohortId, this.participantsId)(this.ngRedux.getState());
-      this.domainList.map(domainName => {
-        if (!this.trackClickedParticipants) {
-          this.actions.fetchIndividualParticipantsData(ns, wsid, cid,
-            cdrid, this.participantsId, domainName, limit);
-        }
-        const getParticipantsDomainData = this.ngRedux
-          .select(getParticipantData(cohortId, this.participantsId, domainName))
-          .filter(loading => !!loading)
-          .subscribe(loading => {
-            const data = JSON.parse(loading);
-            if (domainName === DomainType[DomainType.CONDITION]) {
-              this.conditionTitle = typeToTitle(domainName);
-              this.conditionData = data.items;
-              this.chartLoadedSpinner = false;
-            } else if (domainName === DomainType[DomainType.PROCEDURE]) {
-              this.procedureTitle = typeToTitle(domainName);
-              this.procedureData = data.items;
-              this.chartLoadedSpinner = false;
-            } else {
-              this.drugTitle = typeToTitle(domainName);
-              this.drugData = data.items;
-              this.chartLoadedSpinner = false;
-            }
-          });
-        this.subscription = getParticipantsDomainData;
-      });
+
+    this.domainList.map(domainName => {
+      this.chartData[domainName] = {
+        conditionTitle: '',
+        loading: true
+      };
+      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
+        this.participantsId , domainName, limit)
+        .subscribe(data => {
+          const participantsData = data;
+          this.chartData[domainName] = participantsData.items;
+          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
+          this.chartData[domainName].loading = false;
+        });
+      this.subscription = getParticipantsDomainData;
+    });
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 }
+
