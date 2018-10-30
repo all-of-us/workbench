@@ -12,6 +12,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
@@ -25,6 +26,7 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
   BugReportService,
+  CohortReviewService,
   CohortsService,
   ConceptSetsService,
   ProfileService,
@@ -34,6 +36,7 @@ import {
 } from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
@@ -104,6 +107,7 @@ describe('NotebookListComponent', () => {
         BugReportComponent,
         EditModalComponent,
         ConfirmDeleteModalComponent,
+        CreateReviewModalComponent,
         NewNotebookModalComponent,
         NotebookListComponent,
         ResourceCardComponent,
@@ -116,6 +120,7 @@ describe('NotebookListComponent', () => {
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: CohortsService },
+        { provide: CohortReviewService, useValue: new CohortReviewServiceStub() },
         { provide: ConceptSetsService },
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },

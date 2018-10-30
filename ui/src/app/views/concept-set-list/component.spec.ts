@@ -10,6 +10,7 @@ import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetListComponent} from 'app/views/concept-set-list/component';
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -18,6 +19,7 @@ import {TopBoxComponent} from 'app/views/top-box/component';
 
 
 import {
+  CohortReviewService,
   CohortsService,
   ConceptSetsService,
   ConceptsService,
@@ -25,6 +27,7 @@ import {
   WorkspacesService,
 } from 'generated';
 
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -71,6 +74,7 @@ describe('ConceptSetListComponent', () => {
         ConceptSetListComponent,
         ConfirmDeleteModalComponent,
         CreateConceptSetModalComponent,
+        CreateReviewModalComponent,
         EditModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
@@ -81,6 +85,7 @@ describe('ConceptSetListComponent', () => {
         {provide: CohortsService},
         {provide: WorkspacesService},
         {provide: SignInService},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ConceptsService, useValue: new ConceptsServiceStub()},
         {provide: ConceptSetsService, useValue: new ConceptSetsServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub}

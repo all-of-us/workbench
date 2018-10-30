@@ -1,7 +1,6 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {
   Cohort,
@@ -20,7 +19,7 @@ import {
   templateUrl: './create-review-modal.html',
   styleUrls: ['./create-review-modal.css']
 })
-export class CreateReviewModalComponent implements OnInit {
+export class CreateReviewModalComponent {
   @Input() cohort: Cohort;
   loading = false;
   create = false;
@@ -40,7 +39,7 @@ export class CreateReviewModalComponent implements OnInit {
   open(): void {
     this.create = true;
     this.loading = true;
-    const {ns, wsid} = this.route.parent.snapshot.params;
+    const {ns, wsid} = this.route.snapshot.params;
     const cid = this.cohort.id;
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     const request = <PageFilterRequest>{
@@ -67,6 +66,7 @@ export class CreateReviewModalComponent implements OnInit {
   }
 
   close(): void {
+    this.reviewParamForm.reset();
     this.create = false;
   }
 
@@ -78,13 +78,9 @@ export class CreateReviewModalComponent implements OnInit {
     return Math.min(this.review.matchedParticipantCount, 10000);
   }
 
-  ngOnInit() {
-
-  }
-
   createReview() {
     this.creating = true;
-    const {ns, wsid} = this.route.parent.snapshot.params;
+    const {ns, wsid} = this.route.snapshot.params;
     const cid = this.cohort.id;
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     const request = <CreateReviewRequest>{size: this.numParticipants.value};

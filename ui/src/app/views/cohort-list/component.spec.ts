@@ -8,6 +8,7 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -20,6 +21,7 @@ import {
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -28,6 +30,7 @@ import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
   Cohort,
+  CohortReviewService,
   CohortsService,
   ConceptSetsService,
   RecentResource,
@@ -88,6 +91,7 @@ describe('CohortListComponent', () => {
         EditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent,
+        CreateReviewModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
         ToolTipComponent,
@@ -95,6 +99,7 @@ describe('CohortListComponent', () => {
       ],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub},
+        { provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         { provide: CohortsService, useValue: new CohortsServiceStub()},
         { provide: ConceptSetsService },
         { provide: SignInService, useValue: new SignInServiceStub()},

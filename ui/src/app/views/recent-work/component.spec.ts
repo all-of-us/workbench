@@ -9,11 +9,13 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {SignInService} from 'app/services/sign-in.service';
+import {CohortReviewService} from 'generated/api/cohortReview.service';
 import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
@@ -21,6 +23,7 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
@@ -52,10 +55,12 @@ describe('RecentWorkComponent', () => {
         RightScrollLightComponent,
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
+        CreateReviewModalComponent,
         RenameModalComponent,
         EditModalComponent,
       ],
       providers: [
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortsService, useValue: new CohortsServiceStub()},
         {provide: ConceptSetsService },
         {provide: SignInService, useValue: new SignInServiceStub()},

@@ -1,22 +1,23 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {CohortReviewService} from 'generated';
-import {CreateReviewModal} from './create-review-modal';
+import {CreateReviewModalComponent} from './create-review-modal';
 
-describe('CreateReviewModal', () => {
-  let component: CreateReviewModal;
-  let fixture: ComponentFixture<CreateReviewModal>;
+describe('CreateReviewModalComponent', () => {
+  let component: CreateReviewModalComponent;
+  let fixture: ComponentFixture<CreateReviewModalComponent>;
   const activatedRouteStub = {
     snapshot: {
       data: {
         review: {},
         cohort: {}
-      }
+      },
+      params: {}
     }
   };
   let route;
@@ -24,7 +25,7 @@ describe('CreateReviewModal', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ CreateReviewModal ],
+      declarations: [ CreateReviewModalComponent ],
       imports: [
         BrowserAnimationsModule,
         ClarityModule,
@@ -40,7 +41,7 @@ describe('CreateReviewModal', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateReviewModal);
+    fixture = TestBed.createComponent(CreateReviewModalComponent);
     component = fixture.componentInstance;
     route = new ActivatedRoute();
     fixture.detectChanges();

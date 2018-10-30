@@ -15,6 +15,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
@@ -28,6 +29,7 @@ import {WorkspaceComponent} from 'app/views/workspace/component';
 import {
   BugReportService,
   ClusterService,
+  CohortReviewService,
   CohortsService,
   ConceptSetsService,
   DataAccessLevel,
@@ -45,6 +47,7 @@ import {
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {HttpStub} from 'testing/stubs/http-stub';
@@ -95,6 +98,7 @@ describe('WorkspaceComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
+        CreateReviewModalComponent,
         EditModalComponent,
         NewNotebookModalComponent,
         RecentWorkComponent,
@@ -109,6 +113,7 @@ describe('WorkspaceComponent', () => {
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ClusterService, useValue: new ClusterServiceStub() },
+        { provide: CohortReviewService, useValue: new CohortReviewServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
         { provide: JupyterService, useValue: new JupyterServiceStub() },

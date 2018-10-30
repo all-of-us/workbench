@@ -8,6 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileService} from 'generated';
 
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -17,11 +18,13 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {CohortReviewService} from 'generated/api/cohortReview.service';
 import {CohortsService} from 'generated/api/cohorts.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {CreateReviewModalComponent} from 'app/views/create-review-modal/create-review-modal';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
@@ -54,11 +57,13 @@ describe('HomepageComponent', () => {
         RightScrollLightComponent,
         ResourceCardComponent,
         ConfirmDeleteModalComponent,
+        CreateReviewModalComponent,
         RenameModalComponent,
         EditModalComponent,
       ],
       providers: [
         {provide: CohortsService},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ProfileService, useValue: new ProfileServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: WorkspacesService },

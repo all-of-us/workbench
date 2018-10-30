@@ -183,7 +183,6 @@ export class ResourceCardComponent implements OnInit {
   }
 
   openResource(resource: RecentResource): void {
-    console.log(resource);
     switch (this.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort(resource);
