@@ -32,7 +32,7 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
 
 
 /**
- * RANDOM STRING GENERATOR (simplified)
+ * RANDOM STRING GENERATOR (simplified version)
  *
  * Info:      http://stackoverflow.com/a/27872144/383904
  * Use:       randomString(length);
@@ -41,8 +41,9 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
 export function randomString(len): string {
   let str = '', i = 0;
   for (; i++ < len;) {
-    let r = Math.round(Math.random() * (52) + 10);
-    str += String.fromCharCode(r += r > 9 ? r < 36 ? 55 : 61 : 48);
+    let rand = Math.floor( Math.random() * 62 );
+    const charCode = rand += rand > 9 ? (rand < 36 ? 55 : 61) : 48;
+    str += String.fromCharCode(charCode);
   }
   return str;
 }
