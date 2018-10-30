@@ -38,3 +38,8 @@
   border: 1px solid #9B9B9B;
   opacity: 1;
 }
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}

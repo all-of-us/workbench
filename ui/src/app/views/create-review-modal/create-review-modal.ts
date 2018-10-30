@@ -8,6 +8,10 @@ import {
   CohortReview,
   CohortReviewService,
   CreateReviewRequest,
+  PageFilterRequest,
+  PageFilterType,
+  ReviewStatus,
+  SortOrder,
 } from 'generated';
 
 
@@ -18,7 +22,8 @@ import {
 })
 export class CreateReviewModalComponent implements OnInit {
   @Input() cohort: Cohort;
-  create = true;
+  loading = false;
+  create = false;
   creating = false;
   review: CohortReview;
 
@@ -33,12 +38,36 @@ export class CreateReviewModalComponent implements OnInit {
   ) {}
 
   open(): void {
-    this.creating = true;
-    console.log(this.cohort);
+    this.create = true;
+    this.loading = true;
+    const {ns, wsid} = this.route.parent.snapshot.params;
+    const cid = this.cohort.id;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const request = <PageFilterRequest>{
+      page: 0,
+      pageSize: 0,
+      sortOrder: SortOrder.Asc,
+      pageFilterType: PageFilterType.ParticipantCohortStatuses
+    };
+    this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request)
+      .subscribe(review => {
+        this.loading = false;
+        if (review.reviewStatus === ReviewStatus.CREATED) {
+          const url = '/workspaces/' + ns + '/' + wsid + '/cohorts/' + cid + '/review/participants';
+          this.router.navigateByUrl(url);
+        } else {
+          this.review = review;
+          this.numParticipants.setValidators([
+            Validators.required,
+            Validators.min(1),
+            Validators.max(this.maxParticipants),
+          ]);
+        }
+      });
   }
 
   close(): void {
-    this.creating = false;
+    this.create = false;
   }
 
   get numParticipants() {
@@ -46,40 +75,25 @@ export class CreateReviewModalComponent implements OnInit {
   }
 
   get maxParticipants() {
-    return 10000;
-    // return Math.min(this.review.matchedParticipantCount, 10000);
+    return Math.min(this.review.matchedParticipantCount, 10000);
   }
 
   ngOnInit() {
-    console.log(this);
-    // const {review, cohort} = this.route.snapshot.data;
-    // this.review = review;
-    // this.cohort = cohort;
 
-    this.numParticipants.setValidators([
-      Validators.required,
-      Validators.min(1),
-      Validators.max(this.maxParticipants),
-    ]);
-  }
-
-  cancelReview() {
-    const {ns, wsid} = this.route.parent.snapshot.params;
-    console.dir(this.route);
-    this.router.navigate(['workspaces', ns, wsid, 'cohorts']);
   }
 
   createReview() {
     this.creating = true;
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid} = this.route.parent.snapshot.params;
+    const cid = this.cohort.id;
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     const request = <CreateReviewRequest>{size: this.numParticipants.value};
 
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
         this.creating = false;
-        // this.created.emit(true);
-        this.router.navigate(['participants'], {relativeTo: this.route.parent});
+        const url = '/workspaces/' + ns + '/' + wsid + '/cohorts/' + cid + '/review/participants';
+        this.router.navigateByUrl(url);
       });
   }
 }
