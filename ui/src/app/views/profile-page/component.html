@@ -17,7 +17,7 @@
 <div style="display: flex; justify-content: flex-start;">
   <img *ngIf="profileImage !== null" [src]="profileImage" style="border-radius: 100px; width: 140px; height: 140px; margin-right: 1rem;">
   <div style="display: block">
-    <div class="field-wrapper field-wrapper-aligned" [class.error-margin]="(!givenNameValid || !familyNameValid)">
+    <div class="field-wrapper field-wrapper-aligned" [class.field-wrapper-error]="(!givenNameValid || !familyNameValid)">
       <div class="field">
         <label for="givenName" class="long-text-field">First Name:</label>
         <input *ngIf="profileLoaded else loading" type="text" autofocus
