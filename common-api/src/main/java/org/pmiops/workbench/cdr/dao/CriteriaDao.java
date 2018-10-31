@@ -32,7 +32,6 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and match(synonyms, ?2) > 0 " +
-    "    and cr.group = false " +
     "    group by cr.name")
   List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
                                                  String value,
@@ -42,7 +41,6 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    where cr.type = upper(?1) " +
     "    and cr.subtype = upper(?2) " +
     "    and match(synonyms, ?3) > 0 " +
-    "    and cr.group = false " +
     "    group by cr.name")
   List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                              String subtype,
