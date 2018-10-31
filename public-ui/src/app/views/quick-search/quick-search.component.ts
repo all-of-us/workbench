@@ -20,9 +20,12 @@ import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/mode
 })
 export class QuickSearchComponent implements OnInit, OnDestroy {
     pageImage = '/assets/db-images/man-standing.png';
-    title = 'Quick Guided Search';
-    subTitle = 'Enter a keyword or data standards code (eg ICD, SNOMED) in the search bar ' +
-        'to search across Electronic Health Record (EHR) data and program surveys.';
+    title = 'Search Across Data Types';
+    subTitle = 'Conduct a search across all AoU Research Program data types, including surveys, ' +
+        'physical measurements taken at the time of participant enrollment ' +
+        ' (“program physical measurements”), ' +
+        'and electronic health record (EHR) data. Search using common keywords and/or ' +
+        'billing or data standards codes (ie SNOMED, CPT, ICD). ';
     searchResults = [];
     domainResults = [];
     surveyResults = [];
@@ -34,6 +37,19 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     dataType = null;
     EHR_DATATYPE = 'ehr';
     SURVEY_DATATYPE = 'surveys';
+    domainHelpText = {'condition': 'Medical concepts that describe the ' +
+        'health status of an individual, ' +
+        'such as medical diagnoses, are found in the conditions domain.',
+        'drug': 'Medical concepts that capture information about the utilization of a ' +
+        'drug when ingested or otherwise introduced into ' +
+        'the body are captured by the drug exposures domain.',
+        'measurement': 'Medical concepts that capture values resulting from ' +
+        'examinations or tests are captured by the measurements domain. ' +
+        'The measurements domain may include vital signs, lab values, ' +
+        'quantitative findings from pathology reports, etc.',
+        'procedure': 'Medical concepts that capture information related to activities or ' +
+        'processes that are ordered or carried out on individuals for ' +
+        'diagnostic or therapeutic purposes are captured by the procedures domain.'};
 
     private subscriptions: ISubscription[] = [];
 
@@ -54,9 +70,14 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
                 'to search across Electronic Health Record (EHR) data.';
         }
         if (this.dataType === this.SURVEY_DATATYPE) {
-            this.title = 'Participant Survey Data';
-            this.subTitle = 'Enter a keyword to search survey data. ' +
-                'Or click on a survey below to view full content.';
+            this.title = 'Browse Participant Surveys';
+            this.subTitle = 'Participants are asked to complete ' +
+                'The Basics survey at the time of enrollment,' +
+                ' and may choose to complete additional surveys as they become available. ' +
+                'Use this tool to browse all survey questions as well as all ' +
+                'response options for each question. ' +
+                'The Data Browser provides a total count, ' +
+                'grouped by age at occurrence and gender, for each response option.';
         }
         // Get search result from localStorage
         this.prevSearchText = localStorage.getItem('searchText');

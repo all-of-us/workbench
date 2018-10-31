@@ -54,5 +54,23 @@
     "gender_source_concept_id":2,
     "race_source_concept_id":2,
     "ethnicity_source_concept_id":2
+  },
+  {
+    "person_id":99,
+    "gender_source_value":"0",
+    "race_source_value":"0",
+    "gender_concept_id":0,
+    "year_of_birth":2,
+    "month_of_birth":2,
+    "day_of_birth":2,
+    "race_concept_id":2,
+    "ethnicity_concept_id":2,
+    "location_id":2,
+    "provider_id":2,
+    "care_site_id":2,
+    "person_source_value":"psv",
+    "gender_source_concept_id":0,
+    "race_source_concept_id":2,
+    "ethnicity_source_concept_id":2
   }
 ]

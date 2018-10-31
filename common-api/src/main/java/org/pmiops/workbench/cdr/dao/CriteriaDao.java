@@ -1,6 +1,8 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.cdr.model.CriteriaId;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -27,86 +29,28 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   List<Criteria> findCriteriaByType(@Param("type") String type);
 
-  @Query(value = "select * from criteria where id in ( " +
-    "select id from " +
-    "(select case " +
-    "when @curType = name " +
-    "then @curRow \\:= @curRow + 1 " +
-    "else @curRow \\:= 1 end as rank, " +
-    "id, " +
-    "code, " +
-    "@curType \\:= name as name, " +
-    "concept_id " +
-    "from (select * from criteria " +
-    "where type = upper(:type) " +
-    "and (upper(code) like upper(concat('%',:value,'%')) " +
-    "     or upper(name) like upper(concat('%',:value,'%')) " +
-    "     or concept_id in " +
-    "      (select concept_id " +
-    "         from concept_synonym " +
-    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
-    "    ) ) a, " +
-    "(select @curRow \\:= 0, @curType \\:= '') r " +
-    "order by name, id) as x " +
-    "where rank = 1) " +
-    "limit :limit", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeForCodeOrName(@Param("type") String type,
-                                                 @Param("value") String value,
-                                                 @Param("limit") Long limit);
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
+    "    where cr.type = upper(?1) " +
+    "    and match(synonyms, ?2) > 0 " +
+    "    and cr.group = false " +
+    "    group by cr.name")
+  List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
+                                                 String value,
+                                                 Pageable page);
 
-  @Query(value = "select * from criteria where id in ( " +
-    "select id from " +
-    "(select case " +
-    "when @curType = name " +
-    "then @curRow \\:= @curRow + 1 " +
-    "else @curRow \\:= 1 end as rank, " +
-    "id, " +
-    "code, " +
-    "@curType \\:= name as name, " +
-    "concept_id " +
-    "from (select * from criteria " +
-    "where type = upper(:type) " +
-    "and (upper(name) like upper(concat('%',:value,'%')) " +
-    "     or concept_id in " +
-    "      (select concept_id " +
-    "         from concept_synonym " +
-    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
-    "    ) ) a, " +
-    "(select @curRow \\:= 0, @curType \\:= '') r " +
-    "order by name, id) as x " +
-    "where rank = 1) " +
-    "limit :limit", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeForName(@Param("type") String type,
-                                                 @Param("value") String value,
-                                                 @Param("limit") Long limit);
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
+    "    where cr.type = upper(?1) " +
+    "    and cr.subtype = upper(?2) " +
+    "    and match(synonyms, ?3) > 0 " +
+    "    and cr.group = false " +
+    "    group by cr.name")
+  List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
+                                                             String subtype,
+                                                             String value,
+                                                             Pageable page);
 
-  @Query(value = "select * from criteria where id in ( " +
-    "select id from " +
-    "(select case " +
-    "when @curType = name " +
-    "then @curRow \\:= @curRow + 1 " +
-    "else @curRow \\:= 1 end as rank, " +
-    "id, " +
-    "code, " +
-    "@curType \\:= name as name, " +
-    "concept_id " +
-    "from (select * from criteria where type = upper(:type) " +
-    "and subtype = upper(:subtype) " +
-    "and (upper(code) like upper(concat('%',:value,'%')) " +
-    "     or upper(name) like upper(concat('%',:value,'%')) " +
-    "     or concept_id in " +
-    "      (select concept_id " +
-    "         from concept_synonym " +
-    "        where upper(concept_synonym_name) like upper(concat('%',:value,'%'))) " +
-    "    ) ) a, " +
-    "(select @curRow \\:= 0, @curType \\:= '') r " +
-    "order by name, id) as x " +
-    "where rank = 1) " +
-    "limit :limit", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndSubtypeForCodeOrName(@Param("type") String type,
-                                                           @Param("subtype") String subtype,
-                                                           @Param("value") String value,
-                                                           @Param("limit") Long limit);
+  @Query(value = "select c from Criteria c where c.id in :ids")
+  List<Criteria> findCriteriaByIds(@Param("ids") List<Long> ids);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +

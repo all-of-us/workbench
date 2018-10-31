@@ -12,4 +12,10 @@ export class CohortReviewServiceStub {
   getParticipantData(): Observable<ParticipantDataListResponse> {
     return Observable.of(<ParticipantDataListResponse> {items: []});
   }
+  getParticipantChartData(): Observable<ParticipantDataListResponse> {
+    return Observable.of(<ParticipantDataListResponse> {items: []});
+  }
+  getCohortChartData(): Observable<ParticipantDataListResponse> {
+    return Observable.of(<ParticipantDataListResponse> {items: []});
+  }
 }

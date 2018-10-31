@@ -31,6 +31,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   loading = false;
   surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
   surveyName: string;
+  conceptCodeTooltip: any;
+  genderGraph: string;
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -73,6 +75,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
+            if ( a.stratum4.indexOf('PMI') !== -1 ) {
+              a.stratum4 = a.stratum4.replace('PMI', '');
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -204,6 +209,14 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
+  }
+
+  public selectSurveyGenderGraph(g) {
+      if (g === 'Gender Identity') {
+        this.genderGraph = 'GI';
+      } else {
+        this.genderGraph = 'BS';
+      }
   }
 
 }

@@ -37,12 +37,4 @@ export const initialState = fromJS({
 
   initShowChart: false,
 
-  reviewChartData: {
-    domainCharts: {},
-  },
-
-  individualChartData: {
-    chartsData: {},
-  },
-
 });

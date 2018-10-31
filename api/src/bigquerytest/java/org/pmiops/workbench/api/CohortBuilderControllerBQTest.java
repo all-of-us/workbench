@@ -1186,6 +1186,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsDrugParent() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugParentAndChild() throws Exception {
+    Criteria drugCriteriaChild = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
+    Criteria drugCriteriaParent = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drugParent = createSearchParameter(drugCriteriaParent, null);
+    SearchParameter drugChild = createSearchParameter(drugCriteriaChild, null);
+    SearchRequest searchRequest = createSearchRequests(drugParent.getType(), Arrays.asList(drugParent,drugChild), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
     Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
@@ -1343,7 +1361,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     lab2.attributes(Arrays.asList(labNumerical));
     lab3.attributes(Arrays.asList(labCategorical));
     SearchRequest searchRequest = createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1469,7 +1487,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1495,8 +1513,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(response.getItems().size(), 1);
-    assertEquals(response.getItems().get(0), new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L));
+    assertEquals(2, response.getItems().size());
+    assertEquals(new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L), response.getItems().get(0));
+    assertEquals(new DemoChartInfo().gender("No matching concept").race("Unknown").ageRange("> 65").count(1L), response.getItems().get(1));
   }
 
   @Test

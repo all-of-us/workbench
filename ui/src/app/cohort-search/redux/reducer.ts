@@ -19,7 +19,6 @@ import {
   BEGIN_SUBTYPE_CRITERIA_REQUEST,
   BEGIN_ALL_CRITERIA_REQUEST,
   BEGIN_DRUG_CRITERIA_REQUEST,
-  BEGIN_CHART_DATA_REQUEST,
   LOAD_CRITERIA_RESULTS,
   LOAD_CRITERIA_SUBTYPE_RESULTS,
   LOAD_DEMO_CRITERIA_RESULTS,
@@ -27,6 +26,7 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
   CLEAR_AUTOCOMPLETE_OPTIONS,
@@ -76,10 +76,8 @@ import {
 
   LOAD_ENTITIES,
   RESET_STORE,
+  CLEAR_STORE,
   RootAction,
-  LOAD_CHART_RESULTS,
-  BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST,
-  LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS,
 } from './actions/types';
 /* tslint:enable:ordered-imports */
 
@@ -156,6 +154,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['criteria', 'search', 'errors'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
 
+      case CANCEL_AUTOCOMPLETE_REQUEST:
+        return state.deleteIn(['criteria', 'search', 'autocomplete']);
+
       case BEGIN_INGREDIENT_REQUEST:
         return state
           .deleteIn(['criteria', 'search', 'errors'])
@@ -179,13 +180,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         action.children.forEach(child => {
           child.parameterId = `param${(child.conceptId ?
             (child.conceptId + child.code) : child.id)}`;
-          const path = child.path.split('.');
-          const parents = path.slice(path.indexOf(action.parentId.toString()));
           state = state
             .setIn(['wizard', 'selections', child.parameterId], fromJS(child))
-            .updateIn(['wizard', 'item', 'selectedParents'],
-              List(),
-              parentIdList => parentIdList.merge(fromJS(parents)))
             .updateIn(
               ['wizard', 'item', 'searchParameters'],
               List(),
@@ -354,11 +350,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             paramList => paramList.filterNot(id => id === action.parameterId)
           )
           .updateIn(
-            ['wizard', 'item', 'selectedParents'],
-            List(),
-            parentIdList => parentIdList.filterNot(id => action.path.split('.').includes(id))
-          )
-          .updateIn(
             ['wizard', 'item', 'selectedGroups'],
             List(),
             groupIdList => groupIdList.filter(id => id !== action.id.toString())
@@ -487,8 +478,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['entities', 'items', itemId], item)
           .updateIn(['entities', 'parameters'], Map(), mergeParams)
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case WIZARD_CANCEL: {
@@ -505,8 +495,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
         return state
           .set('wizard', Map({open: false}))
-          .deleteIn(['criteria', 'subtree'])
-          .deleteIn(['criteria', 'search']);
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case SET_WIZARD_CONTEXT:
@@ -518,46 +507,8 @@ export const rootReducer: Reducer<CohortSearchState> =
       case RESET_STORE:
         return initialState;
 
-      /**
-       * Cohort Review Charts
-       */
-      case BEGIN_CHART_DATA_REQUEST:
-        return state
-          .deleteIn(
-            ['reviewChartData', 'request', action.cid, action.domain])
-          .setIn(
-            ['reviewChartData', 'request', action.cid, action.domain],
-            true);
-
-      case LOAD_CHART_RESULTS:
-        return state
-          .setIn(
-            ['reviewChartData', 'domainCharts', action.cid, action.domain]
-            , fromJS(action.results))
-          .deleteIn(
-            ['reviewChartData', 'request', action.cid, action.domain]);
-      /**
-       * Cohort Individual Participants Charts
-       */
-
-      case BEGIN_INDIVIDUAL_PARTICIPANTS_CHART_REQUEST:
-        return state
-          .deleteIn(
-            ['individualChartData', 'request', action.cid , action.participantsId, action.domain])
-          .setIn(
-            ['individualChartData', 'request',
-              action.cid, action.participantsId, action.domain],
-            true);
-
-
-      case LOAD_INDIVIDUAL_PARTICIPANTS_CHART_RESULTS:
-        return state
-          .setIn(
-            ['individualChartData', 'chartsData', action.cid , action.participantsId, action.domain]
-            , fromJS(action.results._body))
-          .deleteIn(
-            ['individualChartData', 'request', action.ns,
-              action.wsid, action.cid, action.cdrid, action.domain, action.limit]);
+      case CLEAR_STORE:
+        return fromJS({});
       default: return state;
     }
 

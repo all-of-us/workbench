@@ -1,8 +1,3 @@
-<div class="help-tip" *ngIf="showTip">
-  <div class="help-tip-title">Welcome to your workspace!</div>
-  <div class="help-tip-text">Define a subset of the participant data by creating a cohort. Create a notebook to access and analyze your cohorts in Python.</div>
-  <div (click)="dismissTip()" style="cursor: pointer"><clr-icon shape="times-circle" size="32px" style="position: absolute; right: 1rem; width: 32px; margin-top: .3rem"></clr-icon></div>
-</div>
 <div class="workspace-container">
   <app-top-box style="width: 78%">
     <div class="padding-wrapper">
@@ -59,13 +54,13 @@
           <h4 class="subheader">Research Purpose
             <span role="tooltip"
                   aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
-          <button [disabled]="!writePermission"
-                  [class.disabled]="!writePermission"
+          <button [disabled]="!ownerPermission"
+                  [class.disabled]="!ownerPermission"
                   routerLink="/workspaces/{{workspace.namespace}}/{{workspace.id}}/edit"
                   routerLinkActive="active" class="action-item">
             <clr-icon shape="pencil" class="icon"></clr-icon>
           </button>
-          <span *ngIf="!writePermission" class="tooltip-content">Requires Write Permission</span>
+          <span *ngIf="!ownerPermission" class="tooltip-content">You must be a workspace owner to edit the Research Purpose</span>
         </span>
             <app-tooltip [direction]="'top-right'">
               <div class="tooltip-label">When you created your Workspace, you were required to describe your research purpose. This will be posted on the publicly available All of Us website. Here you can edit your research purpose and keep it up to date.

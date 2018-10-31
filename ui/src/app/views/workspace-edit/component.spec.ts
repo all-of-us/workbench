@@ -29,6 +29,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -74,6 +75,7 @@ describe('WorkspaceEditComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
+        ToolTipComponent,
         WorkspaceEditComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
