@@ -138,7 +138,6 @@ const routes: Routes = [
                   component: NotebookRedirectComponent,
                   data: {
                     title: 'Notebook',
-                    creating: false,
                     breadcrumb: {
                         value: 'Param: Notebook Name'
                     }
