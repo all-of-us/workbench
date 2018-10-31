@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-shrink-icon',
-  styleUrls: ['./component.css'],
+  styleUrls: [],
   templateUrl: './component.html',
 })
 

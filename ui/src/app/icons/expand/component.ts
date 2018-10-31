@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-expand-icon',
-  styleUrls: ['./component.css'],
+  styleUrls: [],
   templateUrl: './component.html',
 })
 
