@@ -35,10 +35,5 @@
 
 .card-area {
     display: flex;
-    flex-wrap: wrap;
     justify-content: flex-start;
-}
-
-.add-card {
-    margin-left: 2%;
 }

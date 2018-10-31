@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
@@ -23,6 +23,7 @@ import {
 export class ConceptAddModalComponent {
   public modalOpen = false;
   loading = true;
+  saving = false;
   conceptSets: ConceptSet[] = [];
   wsNamespace: string;
   wsId: string;
@@ -38,6 +39,7 @@ export class ConceptAddModalComponent {
 
   @Input() selectedDomain: Domain;
   @Input() selectedConcepts: Concept[];
+  @Output('saveComplete') saveComplete = new EventEmitter<void>();
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -85,6 +87,7 @@ export class ConceptAddModalComponent {
   save(): void {
     this.errorSaving = false;
     this.errorNameReq = false;
+    this.saving = true;
 
     const conceptIds = [];
     this.selectConceptList.forEach((selected) => {
@@ -98,7 +101,9 @@ export class ConceptAddModalComponent {
       this.conceptSetsService.updateConceptSetConcepts(
           this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
           .subscribe((response) => {
+            this.saving = false;
             this.modalOpen = false;
+            this.saveComplete.emit();
           }, (error) => {
             this.errorMsg = error.toString();
           });
@@ -127,7 +132,9 @@ export class ConceptAddModalComponent {
 
     this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe((response) => {
+          this.saving = false;
           this.modalOpen = false;
+          this.saveComplete.emit();
         }, (error) => {
           this.errorSaving = true;
           if (error.status === 400) {

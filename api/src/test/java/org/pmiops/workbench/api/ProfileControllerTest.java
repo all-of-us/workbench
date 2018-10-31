@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -647,6 +649,42 @@ public class ProfileControllerTest {
     ResponseEntity response = profileController.updateContactEmail(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateGivenName_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
+      "lifegoesonrahlalalalifegoeson";
+    profile.setGivenName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateFamilyName_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    String newName = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
+      "lifegoesonrahlalalalifegoeson";
+    profile.setFamilyName(newName);
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateCurrentPosition_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setCurrentPosition(RandomStringUtils.random(256));
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateOrganization_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setOrganization(RandomStringUtils.random(256));
+    profileController.updateProfile(profile);
   }
 
   @Test

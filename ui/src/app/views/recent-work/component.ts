@@ -63,7 +63,7 @@ export class RecentWorkComponent implements OnInit {
     if (this.workspace) {
       division = Math.floor((width - 200) / 200);
     } else {
-      division = Math.floor((width - 50) / 200);
+      division = Math.floor((width - 180) / 200);
     }
     if (division >= 2) {
       return division;

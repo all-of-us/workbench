@@ -1,9 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 
-import {BugReportService} from 'generated';
-import {BugReport} from 'generated';
+import {
+  BugReport,
+  BugReportService,
+  BugReportType
+} from 'generated';
 
 @Component({
   selector: 'app-bug-report',
@@ -13,10 +16,13 @@ import {BugReport} from 'generated';
               '../../styles/errors.css',
               '../../styles/inputs.css']
 })
-export class BugReportComponent implements OnInit {
+export class BugReportComponent {
+  BugReportType = BugReportType;
+
   reporting = false;
+  submitting = false;
   bugReport: BugReport = this.emptyReport();
-  sendBugReportError: boolean;
+  sendBugReportError = false;
 
   constructor(
     private bugReportService: BugReportService,
@@ -25,6 +31,7 @@ export class BugReportComponent implements OnInit {
 
   private emptyReport(): BugReport {
     return {
+      bugType: BugReportType.APPLICATION,
       shortDescription: '',
       reproSteps: '',
       includeNotebookLogs: true,
@@ -32,12 +39,9 @@ export class BugReportComponent implements OnInit {
     };
   }
 
-  ngOnInit() {
-    this.sendBugReportError = false;
-  }
-
   reportBug() {
     this.reporting = true;
+    this.sendBugReportError = false;
     this.bugReport = this.emptyReport();
     this.profileStorageService.profile$.subscribe((profile) => {
       this.bugReport.contactEmail = profile.contactEmail;
@@ -45,9 +49,14 @@ export class BugReportComponent implements OnInit {
   }
 
   send() {
-    this.reporting = false;
-    this.bugReportService.sendBugReport(this.bugReport).subscribe(() => {}, () => {
+    this.submitting = true;
+    this.sendBugReportError = false;
+    this.bugReportService.sendBugReport(this.bugReport).subscribe(() => {
+      this.reporting = false;
+      this.submitting = false;
+    }, () => {
       this.sendBugReportError = true;
+      this.submitting = false;
     });
   }
 }

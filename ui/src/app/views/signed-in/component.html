@@ -24,7 +24,7 @@
         <a routerLink="/profile" clrDropdownItem>Profile</a>
         <a routerLink="/settings" clrDropdownItem>Settings</a>
         <div class="dropdown-divider"></div>
-        <button id="report-bug" class="btn" (click)="bugReportComponent.reportBug();">Report A Bug</button>
+        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportComponent.reportBug();">Report A Bug</button>
         <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -39,9 +39,8 @@
           [class.active]="homeActive"
           routerLink="/"
           (click)="sidenavToggle = false">Home</button>
-      <!--Data browser won't show the sidenav, so active is irrelevant-->
-      <a class="btn btn-primary nav-link"
-          [attr.href]="publicUiUrl">Browse Data</a>
+      <button class="btn btn-primary nav-link"
+          (click)="openDataBrowser()">Browse Data</button>
       <button class="btn btn-primary nav-link"
           [class.active]="createWorkspaceActive"
           routerLink="/workspaces/build"

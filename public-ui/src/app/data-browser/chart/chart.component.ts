@@ -35,18 +35,25 @@ export class ChartComponent implements OnChanges {
       (this.concepts && this.concepts.length)) {
       // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
-    } else {
-      this.chartOptions = this.hcChartOptions();
     }
   }
 
+  public isSurveyGenderAnalysis() {
+    return this.analysis ?
+        (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ||
+        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+        : false;
+  }
+
+  public isGenderIdentityAnalysis() {
+    return this.analysis ?
+        (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+        : false;
+  }
+
   public hcChartOptions(): any {
-    let options;
-    if (!this.analysis) {
-      options = this.makeEmptyChartOptions();
-    } else {
-      options = this.makeChartOptions();
-    }
+    const options = this.makeChartOptions();
     // Override title if they passed one
     if (this.chartTitle) {
       options.title.text = this.chartTitle;
@@ -88,11 +95,13 @@ export class ChartComponent implements OnChanges {
         pie: {
           borderColor: null,
           slicedOffset: 4,
+          size: this.isSurveyGenderAnalysis() ? '60%' : '100%',
           dataLabels: {
             enabled: true,
-            style: this.dbc.DATA_LABEL_STYLE,
-            distance: -30,
-            format: '{point.name} {point.percentage:.0f}%'
+            style: this.isGenderIdentityAnalysis()
+                ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
+            distance: this.isGenderIdentityAnalysis() ? 3 : -30,
+            format: '{point.name} {point.percentage:.0f}%',
           }
         },
         column: {
@@ -160,6 +169,11 @@ export class ChartComponent implements OnChanges {
       this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
+
+      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+          this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+          return this.makeGenderChartOptions();
+      }
 
     /* Todo make charts for ethniticy and race
      * maybe cleanup / generalize pie chart
@@ -292,7 +306,8 @@ export class ChartComponent implements OnChanges {
     let seriesName = '';
     if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
-      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {
+      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -313,6 +328,9 @@ export class ChartComponent implements OnChanges {
       }
       if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
         color = this.dbc.GENDER_COLORS[a.stratum5];
+      }
+      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
+        color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum2];
       }
 
       data.push({
@@ -489,19 +507,5 @@ export class ChartComponent implements OnChanges {
     };
 
   }
-
-    public makeEmptyChartOptions() {
-        const data = [];
-        const cats = [];
-
-        return {
-            chart: {type: 'column', backgroundColor: this.backgroundColor},
-            title: { text: 'No data to chart' },
-            series: data,
-            categories: cats,
-            xAxisTitle: 'No data to chart'
-        };
-
-    }
 
 }

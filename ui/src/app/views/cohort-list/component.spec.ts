@@ -23,12 +23,14 @@ import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/compon
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
   Cohort,
   CohortsService,
   ConceptSetsService,
+  RecentResource,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -88,6 +90,7 @@ describe('CohortListComponent', () => {
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ToolTipComponent,
         TopBoxComponent
       ],
       providers: [
@@ -102,22 +105,15 @@ describe('CohortListComponent', () => {
     tick();
   }));
 
-  it('should create the app', fakeAsync(() => {
-    const fixture = TestBed.createComponent(CohortListComponent);
-    const app = fixture.debugElement.componentInstance;
-    updateAndTick(fixture);
-    expect(app).toBeTruthy();
-    expect(app.cohortList.length).toBe(2);
-  }));
-
   it('should delete the correct cohort', fakeAsync(() => {
     const fixture = TestBed.createComponent(CohortListComponent);
     const app = fixture.debugElement.componentInstance;
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
-    const deletedCohort: Cohort = app.cohortList.find(
-      (cohort: Cohort) => cohort.name === firstCohortName);
+    const deletedResource: RecentResource = app.resourceList.find(
+      (r: RecentResource) => r.cohort.name === firstCohortName);
+    expect(deletedResource).toBeTruthy();
     simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
     updateAndTick(fixture);
     updateAndTick(fixture);
@@ -126,8 +122,8 @@ describe('CohortListComponent', () => {
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-delete-btn')));
     updateAndTick(fixture);
     expect(app).toBeTruthy();
-    expect(app.cohortList.length).toBe(1);
-    expect(app.cohortList).not.toContain(deletedCohort);
+    expect(app.resourceList.length).toBe(1);
+    expect(app.resourceList).not.toContain(deletedResource);
   }));
 
   it('updates the page on edit', fakeAsync(() => {
@@ -149,7 +145,7 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     updateAndTick(fixture);
     expect(app).toBeTruthy();
-    expect(app.cohortList.length).toBe(2);
+    expect(app.resourceList.length).toBe(2);
     const listOfNames = fixture.debugElement
       .queryAll(By.css('.name')).map(el => el.nativeNode.innerText);
     expect(listOfNames).toContain(editValue);

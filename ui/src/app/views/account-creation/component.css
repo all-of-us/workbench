@@ -7,7 +7,7 @@
 
 .form-section {
   margin-top: 1rem;
-  min-width: 25rem;
+  min-width: 29rem;
 }
 
 .form-section:first {
@@ -50,6 +50,7 @@
 }
 
 input[type=text]:not([readonly]).successfulInput,
+textarea:not([readonly]).successfulInput,
 input[type=password]:not([readonly]).successfulInput {
   border-color: #7AC79B;
 }
@@ -61,6 +62,7 @@ input[type=password]:not([readonly]).successfulInput {
 }
 
 input[type=text]:not([readonly]).unsuccessfulInput,
+textarea:not([readonly]).unsuccessfulInput,
 input[type=password]:not([readonly]).unsuccessfulInput {
   background-color: #FCEFEC;
   border-color: #F68D76;
@@ -70,4 +72,28 @@ input[type=password]:not([readonly]).unsuccessfulInput {
   fill: #F68D76;
   width: 20px;
   height: 20px;
+}
+
+.form-section > textarea {
+  max-width: 16rem;
+  border-color: #9a9a9a;
+  border-radius: 5px;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.vertical-align {
+  vertical-align: middle;
+  padding-left: .25rem;
+  padding-top: 2.5rem;
+}
+
+.error-message {
+  width: 12.5rem;
+  padding: .25rem;
+  float: right;
+  margin-top: 0;
 }

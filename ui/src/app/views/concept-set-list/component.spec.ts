@@ -31,6 +31,7 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
+import {ToolTipComponent} from '../tooltip/component';
 
 
 const activatedRouteStub  = {
@@ -73,6 +74,7 @@ describe('ConceptSetListComponent', () => {
         EditModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ToolTipComponent,
         TopBoxComponent,
       ],
       providers: [

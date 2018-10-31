@@ -156,6 +156,18 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private User saveUserWithConflictHandling(User user) {
+    if (user.getGivenName().length() > 80) {
+      throw new BadRequestException("Given Name length exceeds character limit. (80)");
+    }
+    if (user.getFamilyName().length() > 80) {
+      throw new BadRequestException("Family Name length exceeds character limit. (80)");
+    }
+    if (user.getCurrentPosition() != null && user.getCurrentPosition().length() > 255) {
+      throw new BadRequestException("Current Position length exceeds character limit. (255)");
+    }
+    if (user.getOrganization() != null && user.getOrganization().length() > 255) {
+      throw new BadRequestException("Organization length exceeds character limit. (255)");
+    }
     try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -384,9 +396,15 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    userService.createUser(request.getProfile().getGivenName(),
+    userService.createUser(
+        request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
+        googleUser.getPrimaryEmail(),
+        request.getProfile().getContactEmail(),
+        request.getProfile().getCurrentPosition(),
+        request.getProfile().getOrganization(),
+        request.getProfile().getAreaOfResearch()
+    );
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
@@ -523,6 +541,8 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setOrganization(updatedProfile.getOrganization());
+    user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
 

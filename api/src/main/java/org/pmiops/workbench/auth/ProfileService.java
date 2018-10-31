@@ -62,6 +62,8 @@ public class ProfileService {
     profile.setUsername(user.getEmail());
     profile.setFamilyName(user.getFamilyName());
     profile.setGivenName(user.getGivenName());
+    profile.setOrganization(user.getOrganization());
+    profile.setCurrentPosition(user.getCurrentPosition());
     profile.setContactEmail(user.getContactEmail());
     profile.setPhoneNumber(user.getPhoneNumber());
     profile.setFreeTierBillingProjectName(user.getFreeTierBillingProjectName());

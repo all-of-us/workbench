@@ -17,6 +17,7 @@ import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component'
 import {NotebookListComponent} from 'app/views/notebook-list/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -107,6 +108,7 @@ describe('NotebookListComponent', () => {
         NotebookListComponent,
         ResourceCardComponent,
         RenameModalComponent,
+        ToolTipComponent,
         TopBoxComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent

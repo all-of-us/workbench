@@ -25,7 +25,10 @@ export class AccountCreationComponent implements AfterViewInit {
     dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
     familyName: '',
-    contactEmail: ''
+    contactEmail: '',
+    currentPosition: '',
+    organization: '',
+    areaOfResearch: ''
   };
   showAllFieldsRequiredError: boolean;
   creatingAccount: boolean;
@@ -151,4 +154,21 @@ export class AccountCreationComponent implements AfterViewInit {
     }
     return !this.isUsernameValidationError;
   }
+
+  get showFirstNameValidationSuccess(): boolean {
+    return this.profile.givenName.length <= 80;
+  }
+
+  get showLastNameValidationSuccess(): boolean {
+    return this.profile.familyName.length <= 80;
+  }
+
+  get showCurrentPositionValidationSuccess(): boolean {
+    return this.profile.currentPosition.length <= 255;
+  }
+
+  get showOrganizationValidationSuccess(): boolean {
+    return this.profile.organization.length <= 255;
+  }
+
 }

@@ -21,9 +21,11 @@ export class DbConfigService {
 
   COUNT_ANALYSIS_ID = 3000;
   GENDER_ANALYSIS_ID = 3101;
+  GENDER_IDENTITY_ANALYSIS_ID = 3107;
   AGE_ANALYSIS_ID = 3102;
   SURVEY_COUNT_ANALYSIS_ID = 3110;
   SURVEY_GENDER_ANALYSIS_ID = 3111;
+  SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
   SURVEY_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
@@ -35,6 +37,16 @@ export class DbConfigService {
   GENDER_COLORS = {
     '8507': '#8DC892',
     '8532': '#6CAEE3'
+  };
+
+  GENDER_IDENTITY_COLORS = {
+    '1585839': '#8DC892',
+    '1585840': '#6CAEE3',
+    '903070': '#252660',
+    '903079': '#80C4EC',
+    '1585841': '#4259A5',
+    '1585842': '#80C4EC',
+    '1585843': '#8DC892'
   };
 
   /* Age colors -- for now we just use one color pending design */
@@ -66,7 +78,10 @@ export class DbConfigService {
     'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
     'font-weight': '300', 'textOutline': 'none'
   };
-
+  GI_DATA_LABEL_STYLE = {
+    'color': 'black', 'font-family': 'Gotham HTF',	'font-size': '14px',
+      'font-weight': '300', 'textOutline': 'none'
+  };
 
   pmGroups: ConceptGroup[] = [];
   genderAnalysis: Analysis;

@@ -70,7 +70,7 @@
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
     <app-concept-table [concepts]="conceptSet.concepts" [placeholderValue]="'No Concepts Found'"></app-concept-table>
   </div>
-  <app-sliding-fab *ngIf="showRemoveFab" [expanded]="'Remove from set'" (submit)="removing=true">
+  <app-sliding-fab [disable]="disableRemoveFab" [expanded]="'Remove from set'" (submit)="removing=true">
     <clr-icon shape="trash" class="remove-icon"></clr-icon>
   </app-sliding-fab>
 </app-top-box>
@@ -86,6 +86,7 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="removing=false">Cancel</button>
-    <button type="button" class="btn btn-primary confirm-remove-btn" (click)="removeConcepts()" [clrLoading]="removeSubmitting" [disabled]="removeSubmitting">Remove Concepts</button>
+    <button type="button" class="btn btn-primary confirm-remove-btn" (click)="removeConcepts()"
+            [clrLoading]="removeSubmitting" [disabled]="removeSubmitting">Remove Concepts</button>
   </div>
 </clr-modal>

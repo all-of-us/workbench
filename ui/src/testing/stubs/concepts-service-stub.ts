@@ -15,7 +15,7 @@ export class ConceptStubVariables {
     {
       conceptId: 1,
       conceptName: 'Stub Concept 1',
-      domainId: 'Conditions',
+      domainId: 'Condition',
       vocabularyId: 'SNOMED',
       conceptCode: 'G8107',
       conceptClassId: 'Ingredient',
@@ -29,7 +29,7 @@ export class ConceptStubVariables {
     {
       conceptId: 2,
       conceptName: 'Stub Concept 2',
-      domainId: 'Conditions',
+      domainId: 'Condition',
       vocabularyId: 'SNOMED',
       conceptCode: 'G8107',
       conceptClassId: 'Ingredient',
@@ -43,7 +43,7 @@ export class ConceptStubVariables {
     {
       conceptId: 3,
       conceptName: 'Stub Concept 3',
-      domainId: 'Measurements',
+      domainId: 'Measurement',
       vocabularyId: 'SNOMED',
       conceptCode: 'G8107',
       conceptClassId: 'Ingredient',
@@ -57,7 +57,7 @@ export class ConceptStubVariables {
     {
       conceptId: 4,
       conceptName: 'Stub Concept 4',
-      domainId: 'Measurements',
+      domainId: 'Measurement',
       vocabularyId: 'SNOMED',
       conceptCode: 'G8107',
       conceptClassId: 'Ingredient',
@@ -75,7 +75,7 @@ export class DomainStubVariables {
   static STUB_DOMAINS: DomainInfo[] = [
     {
       domain: Domain.CONDITION,
-      name: 'Conditions',
+      name: 'Condition',
       description: 'The Conditions Stub',
       standardConceptCount: 1,
       allConceptCount: 2,
@@ -83,7 +83,7 @@ export class DomainStubVariables {
     },
     {
       domain: Domain.MEASUREMENT,
-      name: 'Measurements',
+      name: 'Measurement',
       description: 'The Measurements Stub',
       standardConceptCount: 50,
       allConceptCount: 65,

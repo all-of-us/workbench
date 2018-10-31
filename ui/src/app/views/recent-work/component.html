@@ -17,7 +17,7 @@
         </ng-template>
       </div>
       <div *ngFor="let resource of resourceList">
-        <app-resource-card [resourceCard]="resource" [cssClass]="cssClass" (onUpdate)="updateList($event)"></app-resource-card>
+        <app-resource-card [resourceCard]="resource" [cssClass]="'for-list'" (onUpdate)="updateList($event)"></app-resource-card>
       </div>
       <div *ngIf="rightScrollVisible()" class="scroll-indicator" id="right-scroll"
            style="position: absolute; right: -1.5rem;" (click)="scrollRight()">

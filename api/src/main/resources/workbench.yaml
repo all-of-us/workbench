@@ -1854,6 +1854,8 @@ definitions:
       - shortDescription
       - contactEmail
     properties:
+      bugType:
+        $ref: "#/definitions/BugReportType"
       shortDescription:
         description: A short description of the bug
         type: string
@@ -1868,6 +1870,11 @@ definitions:
       contactEmail:
         description: The email with which to contact the bug reporter.
         type: string
+
+  BugReportType:
+    type: string
+    description: Possible value for bug reports
+    enum: [APPLICATION, DATA]
 
   Profile:
     type: object
@@ -1911,6 +1918,12 @@ definitions:
         type: string
       phoneNumber:
         description: the user's phone number
+        type: string
+      currentPosition:
+        description: the user's curent position (job title)
+        type: string
+      organization:
+        description: the user's current organization
         type: string
       authorities:
         description: authorities granted to this user

@@ -15,10 +15,6 @@
   cursor: not-allowed;
 }
 
-.cdr-version-item {
-  width: 300px;
-}
-
 .text-label {
   display: block;
   padding: 0 0 0.4rem 0;
@@ -179,6 +175,7 @@ h3 {
 .tooltip {
   position: relative;
   display: inline-block;
+  width: 12rem;
 }
 
 .tooltip-content-wrapper {
@@ -211,4 +208,8 @@ h3 {
   border-width: 5px;
   border-style: solid;
   border-color: transparent black transparent transparent;
+}
+
+:host ::ng-deep .dropdown-menu {
+  width: 12rem;
 }
