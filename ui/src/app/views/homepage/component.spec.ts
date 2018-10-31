@@ -8,7 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileService} from 'generated';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
@@ -36,7 +36,9 @@ import {RightScrollComponent} from 'app/icons/right-scroll/component';
 
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;
+  let profileStub: ProfileServiceStub;
   beforeEach(fakeAsync(() => {
+    profileStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -59,7 +61,7 @@ describe('HomepageComponent', () => {
       ],
       providers: [
         {provide: CohortsService},
-        {provide: ProfileService, useValue: new ProfileServiceStub()},
+        {provide: ProfileService, useValue: profileStub},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: WorkspacesService },
         {provide: UserMetricsService, useValue: new UserMetricsServiceStub()},
@@ -72,23 +74,47 @@ describe('HomepageComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(HomepageComponent);
-      tick();
     });
   }));
 
+  const loadProfileWithPageVisits = (p: any) => {
+    profileStub.profile = {
+      ...ProfileStubVariables.PROFILE_STUB,
+      pageVisits: p.pageVisits
+    };
+  };
+
   it('should render', fakeAsync(() => {
+    loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
   }));
 
   it('should display quick tour when clicked', fakeAsync(() =>  {
-    simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
+    loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
+    tick(1000);
     expect(fixture.debugElement.query(By.css('#quick-tour'))).toBeTruthy();
   }));
 
+  it('should display quick tour on first visit', fakeAsync(() => {
+    updateAndTick(fixture);
+    tick(1000);
+    updateAndTick(fixture);
+    expect(fixture.debugElement.queryAll(By.css('#quick-tour')).length).toBe(1);
+  }));
+
+  it('should not auto display quick tour if not first visit', fakeAsync(() => {
+    loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
+    updateAndTick(fixture);
+    tick(1000);
+    expect(fixture.debugElement.queryAll(By.css('#quick-tour')).length).toBe(0);
+  }));
+
   it('should close quick tour when closed', fakeAsync(() => {
-    simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
+    updateAndTick(fixture);
+    tick(1000);
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('#close')));
     updateAndTick(fixture);
