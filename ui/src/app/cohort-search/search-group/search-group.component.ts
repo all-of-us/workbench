@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {List} from 'immutable';
-
+import {environment} from 'environments/environment.local';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {CohortSearchActions} from '../redux';
 
@@ -18,19 +18,17 @@ export class SearchGroupComponent {
   @Input() group;
   @Input() role: keyof SearchRequest;
 
-  // *******Temporal Changes are commented bellow Please
-  // uncomment below codes when using Temporal HTML ****** //
-
-  // temporalDropdown = false;
-  // whichMention = ['Any mention', 'First mention', 'Last mention'];
-  // timeDropDown = ['During same encounter as',
-  //                 'X Days before', 'X Days after', 'Within X days of',
-  //   'On or X days before', 'On or X days after'];
-  // dropdownOption: any;
-  // timeDropdownOption: any;
+  temporalDropdown = false;
+  whichMention = ['Any mention', 'First mention', 'Last mention'];
+  timeDropDown = ['During same encounter as',
+                  'X Days before', 'X Days after', 'Within X days of',
+    'On or X days before', 'On or X days after'];
+  dropdownOption: any;
+  timeDropdownOption: any;
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
+  readonly envFlag = environment.enableTemporal;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -60,22 +58,20 @@ export class SearchGroupComponent {
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
   }
-  // *******Temporal Changes are commented bellow Please
-  // uncomment below codes when using Temporal HTML ****** //
 
-  // getTemporal(e) {
-  //   if (e.target.checked === true) {
-  //     this.temporalDropdown = true;
-  //   } else {
-  //     this.temporalDropdown = false;
-  //   }
-  //
-  // }
-  //
-  // getMentionTitle(mention) {
-  //   this.dropdownOption = mention;
-  // }
-  // getTimeTitle(time) {
-  //   this.timeDropdownOption = time;
-  // }
+  getTemporal(e) {
+    if (e.target.checked === true) {
+      this.temporalDropdown = true;
+    } else {
+      this.temporalDropdown = false;
+    }
+
+  }
+
+  getMentionTitle(mention) {
+    this.dropdownOption = mention;
+  }
+  getTimeTitle(time) {
+    this.timeDropdownOption = time;
+  }
 }
