@@ -17,8 +17,14 @@ IFS=$'\n\t'
 
 
 USAGE="./generate-cdr/generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT>"
-USAGE="$USAGE --bucket all-of-us-workbench-cloudsql-create --cdr-version=YYYYMMDD"
+USAGE="$USAGE --bucket <BUCKET> --cdr-version=YYYYMMDD"
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
+
+BQ_PROJECT=""
+BQ_DATASET=""
+WORKBENCH_PROJECT=""
+CDR_VERSION=""
+BUCKET=""
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -26,45 +32,53 @@ while [ $# -gt 0 ]; do
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
-    --bucket) BUCKET=$2; shift;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
-    -- ) shift; break ;;
+    --bucket) BUCKET=$2; shift 2;;
+    -- ) shift; echo -e "Usage: $USAGE"; break ;;
     * ) break ;;
   esac
 done
-# Todo this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
 
 if [ -z "${BQ_PROJECT}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bq project name"
   exit 1
 fi
 
 if [ -z "${BQ_DATASET}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bq_dataset name"
   exit 1
 fi
 
 if [ -z "${WORKBENCH_PROJECT}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing workbench_project name"
   exit 1
 fi
 
 if [ -z "${BUCKET}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bucket name"
   exit 1
 fi
 
-#Check cdr_version is of form YYYYMMDD
-if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
-    echo "New CDR VERSION will be $CDR_VERSION"
-  else
-    echo "CDR Version doesn't match required format YYYYMMDD"
-    echo "Usage: $USAGE"
-    exit 1
+#Check cdr_version is not empty and of form YYYYMMDD
+if [ -z "${CDR_VERSION}" ]
+then
+  echo -e "Usage: $USAGE"
+  echo -e "Missing cdr version"
+  exit 1
+elif [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+  echo -e "New CDR VERSION will be $CDR_VERSION"
+else
+  echo -e "CDR Version doesn't match required format YYYYMMDD"
+  echo -e "Usage: $USAGE"
+  exit 1
 fi
 
 WORKBENCH_DATASET=cdr$CDR_VERSION

@@ -20,57 +20,72 @@ USAGE="./generate-cdr/generate-public-cdr-counts --bq-project <PROJECT> --bq-dat
 USAGE="$USAGE --bucket all-of-us-workbench-cloudsql-create --cdr-version=YYYYMMDD --bin-size <BINSIZE>"
 USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.public<cdr-version>."
 
+BQ_PROJECT="";
+BQ_DATASET="";
+PUBLIC_PROJECT="";
+BUCKET="";
+CDR_VERSION="";
+BIN_SIZE="";
+
 while [ $# -gt 0 ]; do
   echo "1 is $1"
   case "$1" in
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
     --public-project) PUBLIC_PROJECT=$2; shift 2;;
-    --bucket) BUCKET=$2; shift;;
+    --bucket) BUCKET=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
     --bin-size) BIN_SIZE=$2; shift 2;;
-    -- ) shift; break ;;
+    -- ) shift; echo -e "Usage: $USAGE"; break ;;
     * ) break ;;
   esac
 done
-# Todo this requires args in right order and doesn't print usage. Prints "Unbound variable ...."
 
 if [ -z "${BQ_PROJECT}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bq-project name"
   exit 1
 fi
 
 if [ -z "${BQ_DATASET}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bq-dataset name"
   exit 1
 fi
 
 if [ -z "${PUBLIC_PROJECT}" ]
 then
-  echo "Usage: $USAGE"
+  echo -e "Usage: $USAGE"
+  echo -e "Missing public project name"
   exit 1
 fi
 
 if [ -z "${BUCKET}" ]
 then
+  echo -e "Usage: $USAGE"
+  echo -e "Missing bucket name"
+  exit 1
+fi
+
+#Check cdr_version is not empty and of form YYYYMMDD
+if [ -z "${CDR_VERSION}" ]
+then
+  echo -e "Usage: $USAGE"
+  echo -e "Missing cdr version name"
+  exit 1
+elif [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
+  echo "New CDR VERSION will be $CDR_VERSION"
+else
+  echo "CDR Version doesn't match required format YYYYMMDD"
   echo "Usage: $USAGE"
   exit 1
 fi
 
-#Check cdr_version is of form YYYYMMDD
-if [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
-    echo "New CDR VERSION will be $CDR_VERSION"
-  else
-    echo "CDR Version doesn't match required format YYYYMMDD"
-    echo "Usage: $USAGE"
-    exit 1
-fi
-
 if [ -z "${BIN_SIZE}" ]
 then
-  $BIN_SIZE=20
+  BIN_SIZE=20
 fi
 
 PUBLIC_DATASET=public$CDR_VERSION
