@@ -6,5 +6,6 @@ export const environment = {
   publicApiUrl: 'https://public-api-dot-all-of-us-rw-staging.appspot.com',
   publicUiUrl: 'https://public-ui-dot-all-of-us-rw-staging.appspot.com',
   debug: false,
-  gaId: 'UA-112406425-2'
+  gaId: 'UA-112406425-2',
+  enableTemporal: false
 };
