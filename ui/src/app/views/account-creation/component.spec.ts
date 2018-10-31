@@ -1,12 +1,11 @@
-import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 
 import {ClarityModule} from '@clr/angular';
 
+import {randomString} from 'app/utils/index';
 import {ProfileService} from 'generated';
-
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
@@ -24,26 +23,8 @@ import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
 
-class AccountCreationPage {
-  fixture: ComponentFixture<AccountCreationComponent>;
-  component: AccountCreationComponent;
-  usernameField: DebugElement;
-
-  constructor(testBed: typeof TestBed) {
-    this.fixture = testBed.createComponent(AccountCreationComponent);
-    this.component = this.fixture.componentInstance;
-    this.readPageData();
-  }
-
-  readPageData() {
-    updateAndTick(this.fixture);
-    this.usernameField = this.fixture.debugElement.query(By.css('#username'));
-  }
-}
-
-
 describe('AccountCreationComponent', () => {
-  let page: AccountCreationPage;
+  let fixture: ComponentFixture<AccountCreationComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -69,60 +50,98 @@ describe('AccountCreationComponent', () => {
           })
         }]
     }).compileComponents().then(() => {
-      page = new AccountCreationPage(TestBed);
+      fixture = TestBed.createComponent(AccountCreationComponent);
       tick();
+      updateAndTick(fixture);
     });
   }));
 
   it('handles selecting username', fakeAsync(() => {
-    page.readPageData();
-    expect(page.component.usernameFocused).toBeFalsy();
-    simulateEvent(page.fixture, page.usernameField, 'focus');
-    expect(page.component.usernameFocused).toBeTruthy();
-    simulateEvent(page.fixture, page.usernameField, 'blur');
-    expect(page.component.usernameFocused).toBeFalsy();
+    expect(fixture.componentInstance.usernameFocused).toBeFalsy();
+    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'focus');
+    expect(fixture.componentInstance.usernameFocused).toBeTruthy();
+    simulateEvent(fixture, fixture.debugElement.query(By.css('#username')), 'blur');
+    expect(fixture.componentInstance.usernameFocused).toBeFalsy();
   }));
 
   it('handles each username invalidity', fakeAsync(() => {
-    page.readPageData();
     // Begin with a period
-    simulateEvent(page.fixture, page.usernameField, 'focus');
-    simulateInput(page.fixture, page.usernameField, '.username');
+    const usernameField = fixture.debugElement.query(By.css('#username'));
+    simulateEvent(fixture, usernameField, 'focus');
+    simulateInput(fixture, usernameField, '.username');
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
-    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
+    updateAndTick(fixture);
+    let usernameInvalidError =
+      fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
+    expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // End with a period
-    simulateInput(page.fixture, page.usernameField, 'username.');
+    simulateInput(fixture, usernameField, 'username.');
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
-    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
+    updateAndTick(fixture);
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
+    expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
     // Contains special characters
-    simulateInput(page.fixture, page.usernameField, 'user@name');
+    simulateInput(fixture, usernameField, 'user@name');
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
-    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
+    updateAndTick(fixture);
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
+    expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
 
 
-    simulateInput(page.fixture, page.usernameField, 'blah');
+    simulateInput(fixture, usernameField, 'blah');
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeFalsy();
-    expect(page.usernameField.classes.unsuccessfulInput).toBeFalsy();
+    updateAndTick(fixture);
+    usernameInvalidError = fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeFalsy();
+    expect(usernameField.classes.unsuccessfulInput).toBeFalsy();
   }));
 
   it('handles long username with mismatch at end', fakeAsync(() => {
-    page.readPageData();
-
-    simulateInput(
-      page.fixture, page.usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
+    const usernameField = fixture.debugElement.query(By.css('#username'));
+    simulateInput(fixture, usernameField, 'thisisaverylongusernamewithnowspaceswillitwork t');
     tick(300);
-    updateAndTick(page.fixture);
-    expect(page.fixture.debugElement.query(By.css('#username-invalid-error'))).toBeTruthy();
-    expect(page.usernameField.classes.unsuccessfulInput).toBeTruthy();
+    updateAndTick(fixture);
+    const usernameInvalidError =
+      fixture.debugElement.queryAll(By.css('#username-invalid-error')).length;
+    expect(usernameInvalidError).toBeTruthy();
+    expect(usernameField.classes.unsuccessfulInput).toBeTruthy();
   }));
+
+  it('handles long given name errors', fakeAsync(() => {
+    const givenNameField = fixture.debugElement.query(By.css('#givenName'));
+    simulateInput(fixture, givenNameField, randomString(81));
+    tick(300);
+    updateAndTick(fixture);
+    expect(givenNameField.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long family name errors', fakeAsync(() => {
+    const familyNameField = fixture.debugElement.query(By.css('#familyName'));
+    simulateInput(fixture, familyNameField, randomString(81));
+    tick(300);
+    updateAndTick(fixture);
+    expect(familyNameField.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long organization errors', fakeAsync(() => {
+    const organizationField = fixture.debugElement.query(By.css('#organization'));
+    simulateInput(fixture, organizationField, randomString(256));
+    tick(300);
+    updateAndTick(fixture);
+    expect(organizationField.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
+  it('handles long current position errors', fakeAsync(() => {
+    const currentPositionField = fixture.debugElement.query(By.css('#currentPosition'));
+    simulateInput(fixture, currentPositionField, randomString(256));
+    tick(300);
+    updateAndTick(fixture);
+    expect(currentPositionField.classes.unsuccessfulInput).toBeTruthy();
+  }));
+
 });

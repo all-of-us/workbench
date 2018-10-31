@@ -39,6 +39,8 @@ public class User {
   private String givenName;
   private String familyName;
   private String phoneNumber;
+  private String currentPosition;
+  private String organization;
   private String freeTierBillingProjectName;
   private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
@@ -141,6 +143,24 @@ public class User {
 
   public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
+  }
+
+  @Column(name = "current_position")
+  public String getCurrentPosition() {
+    return currentPosition;
+  }
+
+  public void setCurrentPosition(String currentPosition) {
+    this.currentPosition = currentPosition;
+  }
+
+  @Column(name = "organization")
+  public String getOrganization() {
+    return organization;
+  }
+
+  public void setOrganization(String organization) {
+    this.organization = organization;
   }
 
   @Column(name = "free_tier_billing_project_name")
