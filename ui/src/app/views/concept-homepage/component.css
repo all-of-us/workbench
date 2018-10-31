@@ -130,10 +130,14 @@
   line-height: 18px;
   text-align: start;
   box-shadow: none;
-  width: 7rem;
+  width: auto;
   height: 2.2rem;
-  padding-left: 0.5rem;
-  margin: 0;
+  padding-left: 0.8rem;
+  padding-right: 1rem;
+}
+
+.spinnerloading {
+  padding-right: 2.05rem;
 }
 
 .chart-selector-tabs {
