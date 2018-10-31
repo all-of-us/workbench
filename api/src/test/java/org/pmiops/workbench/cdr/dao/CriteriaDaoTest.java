@@ -204,7 +204,7 @@ public class CriteriaDaoTest {
     List<CriteriaId> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria3.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria2.getId(), conditions.get(0).getId());
   }
 
   @Test
