@@ -18,8 +18,8 @@ export class SearchGroupComponent {
   @Input() group;
   @Input() role: keyof SearchRequest;
 
-  // ******* Temporal Changes are commented bellow Please
-  // uncomment below codes when using Temporal HTML ********** //
+  // *******Temporal Changes are commented bellow Please
+  // uncomment below codes when using Temporal HTML ****** //
 
   // temporalDropdown = false;
   // whichMention = ['Any mention', 'First mention', 'Last mention'];
