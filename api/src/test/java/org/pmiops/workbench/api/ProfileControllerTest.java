@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -670,14 +672,18 @@ public class ProfileControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void updateAreaOfResearch_badRequest() throws Exception {
+  public void updateCurrentPosition_badRequest() throws Exception {
     createUser();
     Profile profile = profileController.getMe().getBody();
-    String areaOfResearch = "obladidobladalifegoesonyalalalalalifegoesonobladioblada" +
-      "lifegoesonrahlalalalifegoesonobladidobladalifegoesonyalalalalalifegoeson" +
-      "obladiobladaobladidobladalifegoesonyalalalalalifegoesonobladiobladalife" +
-      "goesonrahlalalalifegoesonobladidobladalifegoesonyalalalalalifegoeson";
-    profile.setAreaOfResearch(areaOfResearch);
+    profile.setCurrentPosition(RandomStringUtils.random(256));
+    profileController.updateProfile(profile);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateOrganization_badRequest() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setOrganization(RandomStringUtils.random(256));
     profileController.updateProfile(profile);
   }
 
