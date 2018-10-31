@@ -16,6 +16,7 @@ export class QuickTourModalComponent implements OnInit {
   completed: String[];
   selectedIndex: number;
   learning = false;
+  fullImage = false;
 
   constructor() {}
 
@@ -57,6 +58,10 @@ export class QuickTourModalComponent implements OnInit {
     } else {
       return title;
     }
+  }
+
+  toggleImage(): void {
+    this.fullImage = !this.fullImage;
   }
 
   setPanels(): void {
