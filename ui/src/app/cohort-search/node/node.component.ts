@@ -161,7 +161,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       this.expanded = this.node.get('expanded', false);
     }
     if (this.secondLevel) {
-      // setTimeout(() => this.loadChildren(true));
+      setTimeout(() => this.loadChildren(true));
     }
   }
 
@@ -293,8 +293,8 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   get secondLevel() {
     return this.node.get('parentId') === 0
-      && this.node.get('type') === TreeType[TreeType.ICD10]
+      && (this.node.get('type') === TreeType[TreeType.ICD10]
       || (this.node.get('type') === TreeType[TreeType.ICD9]
-      && this.node.get('subtype') === TreeSubType[TreeSubType.PROC]);
+      && this.node.get('subtype') === TreeSubType[TreeSubType.PROC]));
   }
 }
