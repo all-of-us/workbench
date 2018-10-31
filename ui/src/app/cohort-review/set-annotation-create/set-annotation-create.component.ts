@@ -70,7 +70,8 @@ export class SetAnnotationCreateComponent {
       const hasVal = this.enumValues.includes(val);
       if (val && val !== '' && !hasVal) {
         request.enumValues = [...this.enumValues, val];
-        this.addValue.reset();
+      } else {
+        request.enumValues = [...this.enumValues];
       }
     }
 
@@ -90,6 +91,7 @@ export class SetAnnotationCreateComponent {
           this.enumValues.length = 0;
          this.name.patchValue('');
         this.onFinish.emit(true);
+        this.addValue.reset();
       });
   }
    get open() {
