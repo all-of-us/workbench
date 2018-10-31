@@ -112,10 +112,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
         label = child.snapshot.data['conceptSet'].name;
       }
       if (label === 'Param: Notebook Name') {
-        label = decodeURI(child.snapshot.params['nbName']);
-      }
-      if (label === 'Param: New Notebook Name') {
-        label = decodeURI(child.snapshot.queryParams['notebookName']);
+        label = decodeURI(child.snapshot.params['nbName'])
+          .replace(/\.ipynb$/, '');
       }
       // Prevent processing children with duplicate urls
       if (!breadcrumbs.some(b => b.url === url)) {

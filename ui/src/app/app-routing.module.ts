@@ -134,20 +134,10 @@ const routes: Routes = [
                     title: 'View Notebooks'
                   }
                 }, {
-                  path: 'create',
-                  component: NotebookRedirectComponent,
-                  data: {
-                    title: 'Creating a new Notebook',
-                    creating: true,
-                    breadcrumb: {
-                        value: 'Param: New Notebook Name'
-                    }
-                  }
-                }, {
                   path: ':nbName',
                   component: NotebookRedirectComponent,
                   data: {
-                    title: 'Opening a Notebook',
+                    title: 'Notebook',
                     creating: false,
                     breadcrumb: {
                         value: 'Param: Notebook Name'

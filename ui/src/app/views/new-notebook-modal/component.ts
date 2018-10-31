@@ -51,12 +51,11 @@ export class NewNotebookModalComponent {
     this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
       {notebookName: this.newName}).subscribe();
     this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
-        'notebooks', 'create'], {
+        'notebooks', encodeURIComponent(this.newName)], {
       queryParams: {
-        'notebookName': encodeURIComponent(this.newName),
-        'kernelType': this.kernelType
-      },
-      relativeTo: null
+        'kernelType': this.kernelType,
+        'creating': true
+      }
     });
     this.close();
   }

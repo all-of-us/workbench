@@ -28,7 +28,8 @@ enum Progress {
   Authenticating,
   Copying,
   Creating,
-  Redirecting
+  Redirecting,
+  Loaded
 }
 
 const commonNotebookFormat = {
@@ -96,13 +97,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   progress = Progress.Unknown;
   notebookName: string;
+  fullNotebookName: string;
 
   creating: boolean;
 
   kernelType: Kernels;
 
   leoUrl: SafeResourceUrl;
-  notebookLoaded = false;
 
   private wsId: string;
   private wsNamespace: string;
@@ -124,14 +125,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.initializeProgressMap();
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
-    this.creating = this.route.snapshot.data.creating;
+    this.creating = this.route.snapshot.queryParams['creating'] || false;
+    this.setNotebookNames();
 
     if (this.creating) {
-      this.notebookName =
-        decodeURIComponent(this.route.snapshot.queryParamMap.get('notebookName'));
       this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
-    } else {
-      this.notebookName = decodeURIComponent(this.route.snapshot.params['nbName']);
     }
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
@@ -144,7 +142,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         } else {
           this.incrementProgress(Progress.Initializing);
         }
-
         if (c.status === ClusterStatus.Running) {
           return Observable.from([c]);
         }
@@ -183,15 +180,39 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       })
       .subscribe((nbName) => {
         this.incrementProgress(Progress.Redirecting);
-        this.notebookLoaded = true;
+        if (this.creating) {
+          window.history.replaceState({}, '', 'workspaces/' + this.wsNamespace +
+          '/' + this.wsId + '/notebooks/' + this.fullNotebookName);
+        }
         this.leoUrl = this.sanitizer
           .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
+        // Angular 2 only provides a load hook for iFrames
+        // the load hook triggers on url definition, not on completion of url load
+        // so instead just giving it a sec to "redirect"
+        setTimeout(() => {
+          this.incrementProgress(Progress.Loaded);
+          }, 1000);
       });
   }
 
   ngOnDestroy(): void {
     if (this.loadingSub) {
       this.loadingSub.unsubscribe();
+    }
+  }
+
+  // this maybe overkill, but should handle all situations
+  setNotebookNames(): void {
+    this.notebookName =
+      decodeURIComponent(this.route.snapshot.params['nbName']);
+    if (this.route.snapshot.params['nbName'].endsWith('.ipynb')) {
+      this.fullNotebookName =
+        decodeURIComponent(this.route.snapshot.params['nbName']);
+      this.notebookName = this.fullNotebookName.replace('.ipynb$', '');
+    } else {
+      this.notebookName =
+        decodeURIComponent(this.route.snapshot.params['nbName']);
+      this.fullNotebookName = this.notebookName + '.ipynb';
     }
   }
 
