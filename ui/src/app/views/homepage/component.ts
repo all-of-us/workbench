@@ -10,10 +10,10 @@ import {
   BillingProjectStatus,
   DataAccessLevel,
   IdVerificationStatus,
+  PageVisit,
   Profile,
   ProfileService
 } from 'generated';
-import {PageVisit} from "../../../generated/model/pageVisit";
 
 @Component({
   styleUrls: ['./component.css'],
@@ -21,6 +21,7 @@ import {PageVisit} from "../../../generated/model/pageVisit";
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
+  private static pageId = 'homepage';
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -40,7 +41,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
   firstVisit = true;
-  private static pageId = 'homepage';
   newPageVisit: PageVisit = { page: HomepageComponent.pageId};
   footerLinks = [
     {
@@ -77,7 +77,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.profileService.getMe().subscribe(profile =>{
+    this.profileService.getMe().subscribe(profile => {
       if (profile.pageVisits) {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
