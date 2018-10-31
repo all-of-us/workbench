@@ -4,7 +4,7 @@
 # and dumps csvs of that dataset to import to cloudsql
 
 # End product is:
-# 0) Big query dataset for cdr version cdrYYYYMMDD and publicYYYYMMDD
+# 0) Big query dataset for cdr version cdrYYYYMMDD
 # 1) .csv of all the tables in a bucket
 
 # Example usage, you need to provide a bunch of args
