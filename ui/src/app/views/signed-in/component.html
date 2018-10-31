@@ -39,9 +39,8 @@
           [class.active]="homeActive"
           routerLink="/"
           (click)="sidenavToggle = false">Home</button>
-      <!--Data browser won't show the sidenav, so active is irrelevant-->
-      <a class="btn btn-primary nav-link"
-          [attr.href]="publicUiUrl">Browse Data</a>
+      <button class="btn btn-primary nav-link"
+          (click)="openDataBrowser()">Browse Data</button>
       <button class="btn btn-primary nav-link"
           [class.active]="createWorkspaceActive"
           routerLink="/workspaces/build"

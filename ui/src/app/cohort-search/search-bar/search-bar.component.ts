@@ -6,6 +6,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaSubtype,
+  activeCriteriaType,
   autocompleteError,
   autocompleteOptions,
   CohortSearchActions,
@@ -24,6 +25,7 @@ const trigger = 2;
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
   @select(activeCriteriaSubtype) subtype$: Observable<string>;
+  @select(activeCriteriaType) type$: Observable<string>;
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() _type;
   searchTerm: FormControl = new FormControl('');
@@ -116,9 +118,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .filter(selectedIds => !!selectedIds)
       .subscribe(selectedIds => this.numMatches = selectedIds.length);
 
-    const subtypeSub = this.subtype$
+    const typeSub = this.type$
       .subscribe(subtype => {
         this.searchTerm.setValue('');
+      });
+
+    const subtypeSub = this.subtype$
+      .subscribe(subtype => {
         this.subtype = subtype;
       });
 
@@ -140,6 +146,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.subscription.add(optionsSub);
     this.subscription.add(ingredientSub);
     this.subscription.add(subtreeSelectSub);
+    this.subscription.add(typeSub);
     this.subscription.add(subtypeSub);
     this.subscription.add(inputSub);
   }
