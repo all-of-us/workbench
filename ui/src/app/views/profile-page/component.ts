@@ -77,6 +77,44 @@ export class ProfilePageComponent implements OnInit {
     this.profileStorageService.reload();
   }
 
+  get isGivenNameValidationError(): boolean {
+    if (this.workingProfile && this.workingProfile.givenName) {
+      return this.workingProfile.givenName.length > 80;
+    }
+    return false;
+  }
+
+  get givenNameValid(): boolean {
+    if (this.workingProfile) {
+      return this.valid(this.workingProfile.givenName, 80);
+    }
+  }
+
+  get familyNameValid(): boolean {
+    if (this.workingProfile) {
+      return this.valid(this.workingProfile.familyName, 80);
+    }
+  }
+
+  get currentPositionValid(): boolean {
+    if (this.workingProfile) {
+      return this.valid(this.workingProfile.currentPosition, 255);
+    }
+  }
+
+  get organizationValid(): boolean {
+    if (this.workingProfile) {
+      return this.valid(this.workingProfile.organization, 255);
+    }
+  }
+
+  valid(val: string, len: number): boolean {
+    if (val) {
+      return val.length <= len;
+    }
+    return true;
+  }
+
   submitChanges(): void {
 
     this.profileService.updateProfile(this.workingProfile).subscribe(
