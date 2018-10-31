@@ -787,7 +787,7 @@ end
 Common.register_command({
   :invocation => "generate-local-count-dbs",
   :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
+Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-private/public-cdr-counts.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 

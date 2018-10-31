@@ -8,7 +8,7 @@
 # 1) .csv of all the tables in a bucket
 
 # Example usage, you need to provide a bunch of args
-# ./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 \
+# ./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 \
 # --workbench-project all-of-us-workbench-test --cdr-version 20180130 \
 # --bucket all-of-us-workbench-cloudsql-create
 
@@ -70,7 +70,7 @@ fi
 WORKBENCH_DATASET=cdr$CDR_VERSION
 
 startDate=$(date)
-echo $(date) " Starting generate-cdr-counts $startDate"
+echo $(date) " Starting generate-private-cdr-counts $startDate"
 
 ## Make workbench cdr count data
 echo "Making BigQuery cdr dataset"

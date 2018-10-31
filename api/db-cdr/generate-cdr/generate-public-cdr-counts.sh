@@ -8,7 +8,7 @@
 # 1) .csv of all the tables in a bucket
 
 # Example usage, you need to provide a bunch of args
-# ./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 \
+# ./project.rb generate-public-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 \
 # --public-project all-of-us-workbench-test --cdr-version 20180130 \
 # --bucket all-of-us-workbench-cloudsql-create
 
@@ -17,8 +17,8 @@ IFS=$'\n\t'
 
 
 USAGE="./generate-cdr/generate-public-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --public-project <PROJECT>"
-USAGE="$USAGE --bucket all-of-us-workbench-cloudsql-create --cdr-version=YYYYMMDD"
-USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.cdr<cdr-version>."
+USAGE="$USAGE --bucket all-of-us-workbench-cloudsql-create --cdr-version=YYYYMMDD --bin-size <BINSIZE>"
+USAGE="$USAGE \n Data is generated from bq-project.bq-dataset and dumped to workbench-project.public<cdr-version>."
 
 while [ $# -gt 0 ]; do
   echo "1 is $1"
@@ -76,16 +76,16 @@ fi
 PUBLIC_DATASET=public$CDR_VERSION
 
 startDate=$(date)
-echo $(date) " Starting generate-cdr-counts $startDate"
+echo $(date) " Starting generate-public-cdr-counts $startDate"
 
 ## Make public cdr count data
 echo "Making BigQuery cdr dataset"
 if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --public-project $PUBLIC_PROJECT \
  --public-dataset $PUBLIC_DATASET --cdr-version "$CDR_VERSION"
 then
-    echo "BigQuery cdr data generated"
+    echo "BigQuery public data generated"
 else
-    echo "FAILED To generate BigQuery data for cdr $CDR_VERSION"
+    echo "FAILED To generate BigQuery data for public $CDR_VERSION"
     exit 1
 fi
 
@@ -94,9 +94,9 @@ echo "Making BigQuery public dataset"
 if ./generate-cdr/make-bq-public-data.sh \
   --public-project $PUBLIC_PROJECT --public-dataset $PUBLIC_DATASET --bin-size $BIN_SIZE
 then
-    echo "BigQuery public cdr data generated"
+    echo "BigQuery public data generated"
 else
-    echo "FAILED To generate public BigQuery data for $CDR_VERSION"
+    echo "FAILED To generate public BigQuery data for public $CDR_VERSION"
     exit 1
 fi
 
