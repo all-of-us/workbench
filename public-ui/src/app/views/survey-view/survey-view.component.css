@@ -7,6 +7,10 @@
 }
 .box-sub-title.question {
     font-size: larger;
+    display: inline;
+}
+.box-sub-title.question.question-display{
+    font-size: larger;
 }
 .survey-results {
     padding: .5rem;

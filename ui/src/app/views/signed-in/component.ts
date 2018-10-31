@@ -117,4 +117,8 @@ export class SignedInComponent implements OnInit {
     return this.locationService.path() === '/workspaces/build';
   }
 
+  openDataBrowser(): void {
+    window.open(this.publicUiUrl, '_blank');
+  }
+
 }

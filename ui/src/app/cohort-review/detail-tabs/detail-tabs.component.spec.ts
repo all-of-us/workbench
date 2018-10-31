@@ -1,21 +1,18 @@
-import {NgRedux} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ChartModule} from 'angular2-highcharts';
+import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {CohortReviewService} from 'generated';
-// import * as highCharts from 'Highcharts';
-import {fromJS} from 'immutable';
+import * as highCharts from 'highcharts';
 import {Observable} from 'rxjs/Observable';
-import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
+import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from '../../../testing/stubs/review-state-service-stub';
-import {CohortSearchActions} from '../../cohort-search/redux';
-import {initialState} from '../../cohort-search/redux/store';
 import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ReviewStateService} from '../review-state.service';
 import {DetailTabsComponent} from './detail-tabs.component';
+
 
 
 describe('DetailTabsComponent', () => {
@@ -51,24 +48,19 @@ describe('DetailTabsComponent', () => {
 
   };
   let route;
-  let mockReduxInst;
 
   beforeEach(async(() => {
-     const store = initialState;
-    mockReduxInst = MockNgRedux.getInstance();
-     const _old = mockReduxInst.getState;
-     const _wrapped = () => fromJS(_old());
-     mockReduxInst.getState = _wrapped;
-   store.has(activatedRouteStub.parent.snapshot.params.cid);
     TestBed.configureTestingModule({
       declarations: [DetailTabsComponent, IndividualParticipantsChartsComponent],
       imports: [ChartModule, RouterTestingModule],
        schemas: [NO_ERRORS_SCHEMA],
       providers: [
-        {provide: NgRedux, useValue: mockReduxInst},
+        {
+          provide: HighchartsStatic,
+          useValue: highCharts
+        },
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: CohortReviewService, useValue: {}},
-        {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
+        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
       ]
     })

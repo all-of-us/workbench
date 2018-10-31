@@ -1,0 +1,82 @@
+# This is a short term swagger file intended to support auth for the data browser.
+# It is intentionally not perfect or complete because it is expected to go away
+# as soon as we have authority to release publicly.
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Workbench API"
+  description: "The API for the AllOfUs workbench."
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "BSD"
+host: "api.pmi-ops.org"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
+    type: oauth2
+    flow: accessCode
+schemes:
+  - "https"
+produces:
+  - "application/json"
+# Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
+
+##########################################################################################
+## PATHS
+##########################################################################################
+paths:
+  /v1/me:
+    get:
+      tags:
+        - profile
+      description: Returns the user's profile information
+      operationId: getMe
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+
+definitions:
+  Profile:
+    type: object
+    required:
+      - username
+      - dataAccessLevel
+    properties:
+      username:
+        description: researchallofus username
+        type: string
+      dataAccessLevel:
+        description: what level of data access the user has
+        $ref: "#/definitions/DataAccessLevel"
+      idVerificationStatus:
+        $ref: "#/definitions/IdVerificationStatus"
+        description: Status of ID verification
+
+  IdVerificationStatus:
+    type: string
+    description: possible values indicating whether the user's ID has been verified
+    enum: [UNVERIFIED, VERIFIED, REJECTED]
+
+  DataAccessLevel:
+      type: string
+      description: levels of access to data in the curated data repository
+      enum:
+      - unregistered
+      - registered
+      - protected
+      - revoked

@@ -27,12 +27,35 @@
     </div>
 
 
-    <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains: </h5>
+    <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains:
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition=right
+                             clrSize="lg" *clrIfOpen>
+          <div class="tooltip-header">EHR Domains</div>
+          <div class="tooltip-label">Electronic health records contain information about an individual’s health.
+            Medical concepts are similar to medical terms;
+            they capture medical information in individual records and may sometimes have values associated with them.
+            For example, “height” is a medical concept that has a measurement value (in centimeters).
+            These concepts are categorized into different domains. Domains are types of medical information.
+            There are numerous domains of data in EHR records,
+            but some of the most common domains include conditions, drug exposures, measurements and procedures.
+          </div>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      </h5>
     <div class="row card-boxes" *ngIf="showDataType(EHR_DATATYPE)" >
       <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
             <h5 class="box-title">
               {{r.name}}
+              <clr-tooltip>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-tooltip-content clrPosition=right
+                                     clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </h5>
             <div class="card-stat">
               {{r.standardConceptCount | number}}
@@ -47,7 +70,10 @@
             </p>
 
             <div class="card-text bottom">
-              <button class="btn btn-primary" (click)="viewEhrDomain(r)"> View Full List </button>
+              <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-primary" (click)="viewEhrDomain(r)"> View Top 100 </button>
+              <ng-template #searchTextButton>
+                <button class="btn btn-primary" (click)="viewEhrDomain(r)"> View Results </button>
+              </ng-template>
             </div>
           </div>
       </div>
@@ -75,7 +101,10 @@
           </p>
 
           <div class="card-text bottom">
-            <button class="btn btn-primary" (click)="viewSurvey(r)"> View Full List </button>
+            <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-primary" (click)="viewSurvey(r)"> View Complete Survey </button>
+            <ng-template #searchTextButton>
+              <button class="btn btn-primary" (click)="viewSurvey(r)"> View Results </button>
+            </ng-template>
           </div>
         </div>
       </div>

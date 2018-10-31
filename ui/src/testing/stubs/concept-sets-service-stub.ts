@@ -96,6 +96,9 @@ export class ConceptSetsServiceStub {
         if (!target) {
           throw Error(`concept set ${conceptSetId} not found`);
         }
+        if (!target.concepts) {
+          target.concepts = [];
+        }
         for (const id of req.removedIds || []) {
           const index = target.concepts.findIndex(c => c.conceptId === id);
           if (index >= 0) {
