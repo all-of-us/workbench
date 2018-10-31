@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParticipantCounter {
 
-  public static final String SOURCE_CONCEPT_ID = "source_concept_id";
+  public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
 
   private static final String COUNT_SQL_TEMPLATE =
@@ -44,7 +44,7 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
-    "select source_name as name, source_concept_id as conceptId, count(distinct person_id) as count\n" +
+    "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n" +
       "from `${projectId}.${dataSetId}.${table}` person\n" +
       "where\n";
 
@@ -62,8 +62,7 @@ public class ParticipantCounter {
       ")\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-    "and ${tableId} != 0\n" +
-      "group by name, conceptId\n" +
+    "group by name, conceptId\n" +
       "order by count desc, name asc\n" +
       "limit ${limit}\n";
 
@@ -111,7 +110,7 @@ public class ParticipantCounter {
         DOMAIN_CHART_INFO_SQL_GROUP_BY;
       endSqlTemplate = endSqlTemplate
         .replace("${limit}", limit)
-        .replace("${tableId}", SOURCE_CONCEPT_ID);
+        .replace("${tableId}", STANDARD_CONCEPT_ID);
       return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate);
     }
 
