@@ -13,6 +13,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {PageVisit} from "../../../generated/model/pageVisit";
 
 @Component({
   styleUrls: ['./component.css'],
@@ -38,6 +39,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
+  firstVisit = true;
+  private static pageId = 'homepage';
+  newPageVisit: PageVisit = { page: HomepageComponent.pageId};
   footerLinks = [
     {
       title: 'Working Within Researcher Workbench',
@@ -73,10 +77,20 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.profileStorageService.profile$.subscribe((profile) => {
-      if (profile.firstSignInTime === undefined) {
+    this.profileService.getMe().subscribe(profile =>{
+      if (profile.pageVisits) {
+        this.firstVisit = !profile.pageVisits.some(v =>
+        v.page === HomepageComponent.pageId);
+      }
+    },
+      e => {},
+      () => {
+      if (this.firstVisit) {
         this.openQuickTour();
       }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
+    this.profileStorageService.profile$.subscribe((profile) => {
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
