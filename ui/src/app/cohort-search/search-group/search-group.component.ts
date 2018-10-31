@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {List} from 'immutable';
 import {environment} from 'environments/environment.local';
+import {List} from 'immutable';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {CohortSearchActions} from '../redux';
 
