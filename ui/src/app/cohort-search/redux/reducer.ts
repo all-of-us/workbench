@@ -499,7 +499,9 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case SET_WIZARD_CONTEXT:
-        return state.mergeDeepIn(['wizard'], action.context);
+        return state
+          .mergeDeepIn(['wizard'], action.context)
+          .deleteIn(['criteria', 'subtree']);
 
       case LOAD_ENTITIES:
         return state.set('entities', action.entities);
