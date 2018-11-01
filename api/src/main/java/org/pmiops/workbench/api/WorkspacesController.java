@@ -18,16 +18,19 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -76,6 +79,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
+  private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -89,6 +93,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
+      ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -99,6 +104,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
+    this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -414,6 +420,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         throw new BadRequestException(String.format(
             "Cohort \"/%s/%s/%d\" already exists.",
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+      }
+    }
+
+    List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
+    for (JSONObject conceptSet: demoConceptSets) {
+      ConceptSet dbConceptSet = new ConceptSet();
+      JSONArray conceptIdsJSON = conceptSet.getJSONArray("concept_ids");
+      Set<Long> conceptIds = new HashSet<>();
+      for (int i = 0; i < conceptIdsJSON.length(); i++) {
+        conceptIds.add(conceptIdsJSON.getLong(i));
+      }
+
+      dbConceptSet.setName(conceptSet.getString("name"));
+      dbConceptSet.setDescription(conceptSet.getString("description"));
+      dbConceptSet.setCreator(userProvider.get());
+      dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+      dbConceptSet.setCreationTime(now);
+      dbConceptSet.setLastModifiedTime(now);
+      dbConceptSet.setVersion(1);
+      dbConceptSet.setParticipantCount(0);
+      dbConceptSet.setConceptIds(conceptIds);
+      try {
+        dbConceptSet = conceptSetDao.save(dbConceptSet);
+      } catch (DataIntegrityViolationException e) {
+        throw new BadRequestException(String.format(
+                "Concept Set \"/%s/%s/%d\" already exists.",
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbConceptSet.getConceptSetId()));
       }
     }
     return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));

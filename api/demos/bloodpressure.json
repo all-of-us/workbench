@@ -1,0 +1,12 @@
+{
+  "type": "concept_set",
+  "concept_set": {
+    "name": "bloodpressure",
+    "description": "demo",
+    "type": "demo",
+    "concept_ids": [
+      4154790,
+      4152194
+    ]
+  }
+}
