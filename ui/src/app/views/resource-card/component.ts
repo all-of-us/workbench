@@ -167,6 +167,7 @@ export class ResourceCardComponent implements OnInit {
           .subscribe(() => this.onUpdate.emit());
       }
     }
+    this.deleteModal.close();
   }
 
   openResource(resource: RecentResource): void {
