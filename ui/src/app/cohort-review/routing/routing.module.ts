@@ -1,9 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {DetailPage} from '../detail-page/detail-page';
-import {OverviewPage} from '../overview-page/overview-page';
 import {PageLayout} from '../page-layout/page-layout';
 import {TablePage} from '../table-page/table-page';
 
@@ -12,7 +10,6 @@ import {ParticipantAnnotationsResolver} from './participant-annotations.resolver
 import {ParticipantResolver} from './participant.resolver';
 
 import {AnnotationDefinitionsResolver} from '../../resolvers/annotation-definitions';
-import {CohortResolver} from '../../resolvers/cohort';
 import {ReviewResolver} from '../../resolvers/review';
 
 
@@ -23,15 +20,14 @@ const routes: Routes = [{
     title: 'Review Cohort Participants'
   },
   resolve: {
-    annotationDefinitions: AnnotationDefinitionsResolver,
-    cohort: CohortResolver,
     review: ReviewResolver,
   },
   children: [{
     path: 'participants',
     component: TablePage,
       resolve: {
-          concepts: DemographicConceptMapsResolver,
+        annotationDefinitions: AnnotationDefinitionsResolver,
+        concepts: DemographicConceptMapsResolver,
       },
       data: {
           breadcrumb: {

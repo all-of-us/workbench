@@ -59,7 +59,6 @@ export class TablePage implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    // private router: Router,
   ) {}
 
   ngOnInit() {
@@ -69,7 +68,8 @@ export class TablePage implements OnInit, OnDestroy {
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
     });
 
-    const {concepts} = this.route.snapshot.data;
+    const {annotationDefinitions, concepts} = this.route.snapshot.data;
+    this.state.annotationDefinitions.next(annotationDefinitions);
     this.concepts = concepts;
     this.races = this.extractDemographics(concepts.raceList);
     this.genders = this.extractDemographics(concepts.genderList);
