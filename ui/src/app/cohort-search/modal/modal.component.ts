@@ -147,7 +147,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       .subscribe(i => {
         node = document.getElementById('node' + nodeId.toString());
         if (node && i < 100) {
-          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+          setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'start'}), 200);
         }
       });
   }
