@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStatus} from 'generated';
 import {ReviewStateService} from '../review-state.service';
@@ -19,8 +18,7 @@ export class PageLayout implements OnInit {
   ) {}
 
   ngOnInit() {
-    const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
-    this.state.annotationDefinitions.next(annotationDefinitions);
+    const {cohort, review} = this.route.snapshot.data;
     this.state.cohort.next(cohort);
     this.state.review.next(review);
 
