@@ -3,7 +3,7 @@
   "concept_set": {
     "name": "bloodpressure",
     "description": "demo",
-    "type": "demo",
+    "domain": "MEASUREMENT",
     "concept_ids": [
       4154790,
       4152194

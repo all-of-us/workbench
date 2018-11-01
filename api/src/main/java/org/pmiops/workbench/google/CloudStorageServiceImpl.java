@@ -26,7 +26,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   final Provider<WorkbenchConfig> configProvider;
 
-  private List<JSONObject> readJSONObject(String filterType, String filterField) {
+  private List<JSONObject> readJSONObjects(String filterType, String filterField) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
 
@@ -69,11 +69,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   public List<JSONObject> readAllDemoCohorts() {
-    return readJSONObject("cohort", "cohort");
+    return readJSONObjects("cohort", "cohort");
   }
 
   public List<JSONObject> readAllDemoConceptSets() {
-    return readJSONObject("concept_set", "concept_set");
+    return readJSONObjects("concept_set", "concept_set");
   }
 
   @Override

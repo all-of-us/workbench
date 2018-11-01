@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -20,9 +21,12 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mortbay.jetty.Server;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -44,6 +48,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookRename;
@@ -79,6 +84,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
+  private final ConceptBigQueryService conceptBigQueryService;
   private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
@@ -93,6 +99,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
+      ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -104,6 +111,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
+    this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -417,7 +425,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         dbCohort = cohortDao.save(dbCohort);
       } catch (DataIntegrityViolationException e) {
-        throw new BadRequestException(String.format(
+        throw new ServerErrorException(String.format(
             "Cohort \"/%s/%s/%d\" already exists.",
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
       }
@@ -427,6 +435,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     for (JSONObject conceptSet: demoConceptSets) {
       ConceptSet dbConceptSet = new ConceptSet();
       JSONArray conceptIdsJSON = conceptSet.getJSONArray("concept_ids");
+      //Set<Long> conceptIds = conceptIdsJSON.toStream().map(id -> Long.valueOf(id)).collect(Collectors.toSet());
+
       Set<Long> conceptIds = new HashSet<>();
       for (int i = 0; i < conceptIdsJSON.length(); i++) {
         conceptIds.add(conceptIdsJSON.getLong(i));
@@ -440,11 +450,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbConceptSet.setLastModifiedTime(now);
       dbConceptSet.setVersion(1);
       dbConceptSet.setParticipantCount(0);
-      dbConceptSet.setConceptIds(conceptIds);
+      dbConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
+      dbConceptSet.getConceptIds().addAll(conceptIds);
+      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
+      dbConceptSet.setParticipantCount(conceptBigQueryService.getParticipantCountForConcepts(omopTable,
+              dbConceptSet.getConceptIds()));
       try {
         dbConceptSet = conceptSetDao.save(dbConceptSet);
       } catch (DataIntegrityViolationException e) {
-        throw new BadRequestException(String.format(
+        throw new ServerErrorException(String.format(
                 "Concept Set \"/%s/%s/%d\" already exists.",
                 dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbConceptSet.getConceptSetId()));
       }
