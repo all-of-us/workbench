@@ -28,16 +28,6 @@ const routes: Routes = [{
     review: ReviewResolver,
   },
   children: [{
-    path: 'create',
-    component: CreateReviewPage,
-    data: {
-      title: 'Create a New Cohort Review',
-      breadcrumb: {
-        value: 'Create a New Cohort Review',
-        intermediate: false
-      },
-    },
-  }, {
     path: 'participants',
     component: TablePage,
       resolve: {
