@@ -138,7 +138,7 @@ describe('SearchGroupComponent', () => {
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     const text = footer.nativeElement.textContent.replace(/\s+/g, ' ').trim();
 
-    expect(text).toEqual('Temporal Group Count: 0');
+    expect(text).toEqual('Group Count: 0');
     expect(spinner).toBeNull();
   });
 
@@ -150,7 +150,7 @@ describe('SearchGroupComponent', () => {
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     const text = footer.nativeElement.textContent.replace(/\s+/g, ' ').trim();
 
-    expect(text).toEqual('Temporal Group Count: 25');
+    expect(text).toEqual('Group Count: 25');
     expect(spinner).toBeNull();
   });
 
