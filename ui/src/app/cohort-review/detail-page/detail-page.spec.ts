@@ -1,5 +1,3 @@
-import { NgRedux} from '@angular-redux/store';
-import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -7,9 +5,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
-import {CohortReviewService} from 'generated';
+import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated';
 import * as highCharts from 'highcharts';
-import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
@@ -26,6 +23,10 @@ import {DetailTabsComponent} from '../detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
 import {ParticipantStatusComponent} from '../participant-status/participant-status.component';
 import {ReviewStateService} from '../review-state.service';
+import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
+import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
+import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-list.component';
+import {SetAnnotationModalComponent} from '../set-annotation-modal/set-annotation-modal.component';
 import {SidebarContentComponent} from '../sidebar-content/sidebar-content.component';
 import {DetailPage} from './detail-page';
 
@@ -41,6 +42,9 @@ describe('DetailPage', () => {
       participant: {},
       annotations: [],
     }),
+    snapshot: {
+      data: {},
+    },
     parent: {
       snapshot: {
         data: {
@@ -81,6 +85,10 @@ describe('DetailPage', () => {
         IndividualParticipantsChartsComponent,
         DetailTabTableComponent,
         ParticipantStatusComponent,
+        SetAnnotationCreateComponent,
+        SetAnnotationItemComponent,
+        SetAnnotationListComponent,
+        SetAnnotationModalComponent,
         SidebarContentComponent,
       ],
       imports: [ClarityModule,
@@ -94,6 +102,7 @@ describe('DetailPage', () => {
           useValue: highCharts
         },
         {provide: ActivatedRoute, useValue: activatedRouteStub},
+        {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
