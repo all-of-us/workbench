@@ -386,7 +386,7 @@ describe('NotebookRedirectComponent', () => {
     updateAndTick(fixture);
     fixture.detectChanges();
     tick(10000);
-    expect(fixture.debugElement.queryAll(By.css('#leo-iframe'))[0]
+    expect(fixture.debugElement.query(By.css('#leo-iframe'))
       .properties['src']).toMatch(/1\+1.ipynb/);
   }));
 
