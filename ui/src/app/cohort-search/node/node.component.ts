@@ -160,6 +160,9 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
     }
+    if (this.secondLevel) {
+      setTimeout(() => this.loadChildren(true));
+    }
   }
 
   ngOnDestroy() {
@@ -200,7 +203,7 @@ export class NodeComponent implements OnInit, OnDestroy {
      */
     if (_type === TreeType[TreeType.DRUG]) {
       this.actions.fetchDrugCriteria(_type, parentId, TreeSubType[TreeSubType.ATC]);
-    } else if (this.fullTree && _type === TreeType[TreeType.PM]) {
+    } else if (this.fullTree) {
       this.actions.fetchAllCriteria(_type, parentId);
     } else if (this.codes && this.node.get('subtype')) {
       this.actions.fetchCriteriaBySubtype(_type, this.node.get('subtype'), parentId);
@@ -286,5 +289,12 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   get multipleMatches() {
     return this.ingredients.length > 0 || this.subMatches > 1;
+  }
+
+  get secondLevel() {
+    return this.node.get('parentId') === 0
+      && (this.node.get('type') === TreeType[TreeType.ICD10]
+      || (this.node.get('type') === TreeType[TreeType.ICD9]
+      && this.node.get('subtype') === TreeSubType[TreeSubType.PROC]));
   }
 }
