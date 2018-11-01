@@ -120,16 +120,31 @@ const routes: Routes = [
             },
             {
               path: 'notebooks',
-              component: NotebookListComponent,
               data: {
-                title: 'View Notebooks',
                 breadcrumb: {
                   value: 'Notebooks',
                   intermediate: true
                 }
-              }
-            },
-            {
+              },
+              children: [
+                {
+                  path: '',
+                  component: NotebookListComponent,
+                  data: {
+                    title: 'View Notebooks'
+                  }
+                }, {
+                  path: ':nbName',
+                  component: NotebookRedirectComponent,
+                  data: {
+                    title: 'Notebook',
+                    breadcrumb: {
+                        value: 'Param: Notebook Name'
+                    }
+                  }
+                }
+              ]
+            }, {
               path: 'cohorts',
               data: {
                 breadcrumb: {
@@ -230,23 +245,6 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      }, {
-        // The notebook redirect pages are interstitial pages, so we want to
-        // give them special chrome treatment - we therefore put them outside
-        // the normal /workspaces hierarchy.
-        path: 'workspaces/:ns/:wsid/notebooks/create',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Creating a new Notebook',
-          creating: true
-        }
-      }, {
-        path: 'workspaces/:ns/:wsid/notebooks/:nbName',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Opening a Notebook',
-          creating: false
-        }
       }
     ]
   }

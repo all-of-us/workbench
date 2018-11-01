@@ -8,9 +8,10 @@ import {ClarityModule} from '@clr/angular';
 import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
-import {WINDOW_REF} from 'app/utils';
+import {NotebookComponent} from 'app/icons/notebook/component';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 import {environment} from 'environments/environment';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
@@ -30,7 +31,6 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
-
 
 class BlockingNotebooksStub extends NotebooksServiceStub {
   private blocker = new AsyncSubject<null>();
@@ -74,21 +74,22 @@ class BlockingClusterStub extends ClusterServiceStub {
   }
 }
 
+
 describe('NotebookRedirectComponent', () => {
   let fixture: ComponentFixture<NotebookRedirectComponent>;
   let blockingClusterStub: BlockingClusterStub;
   let blockingNotebooksStub: BlockingNotebooksStub;
-  let fakeWindow: any;
 
   beforeEach(fakeAsync(() => {
     blockingClusterStub = new BlockingClusterStub();
     blockingClusterStub.cluster.status = ClusterStatus.Creating;
     blockingNotebooksStub = new BlockingNotebooksStub();
 
-    fakeWindow = {location: {href: ''}};
     TestBed.configureTestingModule({
       declarations: [
-        NotebookRedirectComponent
+        NotebookComponent,
+        NotebookRedirectComponent,
+        TopBoxComponent
       ],
       imports: [
         BrowserAnimationsModule,
@@ -96,7 +97,6 @@ describe('NotebookRedirectComponent', () => {
         ClarityModule.forRoot()
       ],
       providers: [
-        { provide: WINDOW_REF, useFactory: () => fakeWindow },
         { provide: ClusterService, useFactory: () => blockingClusterStub },
         { provide: LeoClusterService, useValue: new LeoClusterServiceStub() },
         { provide: NotebooksService, useFactory: () => blockingNotebooksStub },
@@ -105,140 +105,289 @@ describe('NotebookRedirectComponent', () => {
           snapshot: {
             params: {
               'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+              'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+              'nbName': 'blah blah'
+            },
+            queryParams: {
+              'kernelType': Kernels.R,
+              'creating': true
             },
             queryParamMap: convertToParamMap({
-              'notebook-name': 'blah',
-              'kernel-type': Kernels.R
-            }),
-            data: {
-              creating: true
-            }
+              'kernelType': Kernels.R,
+              'creating': true
+            })
           }
         }},
-      ]}).compileComponents();
+      ]}).compileComponents().then(() => {
+      fixture = TestBed.createComponent(NotebookRedirectComponent);
+      spyOn(window.history, 'replaceState').and.stub();
+      blockingClusterStub.release();
+      blockingNotebooksStub.release();
+    });
   }));
 
-  function spinnerText() {
-    return fixture.debugElement.query(By.css('.spinner-text'))
-      .nativeElement.textContent;
+  function spinner() {
+    return fixture.debugElement.query(By.css('.spinner-sm'))
+      .nativeElement;
   }
-
-  beforeEach(fakeAsync(() => {
-    fixture = TestBed.createComponent(NotebookRedirectComponent);
-    blockingClusterStub.release();
-    blockingNotebooksStub.release();
-  }));
 
   it('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture.componentRef).toBeTruthy();
-
     // Tears down the retrying subscription.
     fixture.destroy();
   }));
 
   it('should redirect', fakeAsync(() => {
     updateAndTick(fixture);
-    expect(fakeWindow.location.href).toEqual('');
+    expect(fixture.componentInstance.leoUrl).toBeFalsy();
     blockingClusterStub.cluster.status = ClusterStatus.Running;
-    tick(10000);
+    tick(100000);
     updateAndTick(fixture);
-
-    expect(fakeWindow.location.href.startsWith(environment.leoApiUrl)).toBeTruthy();
-    expect(fakeWindow.location.href).toContain('/notebooks');
+    expect(fixture.componentInstance.leoUrl).toMatch(environment.leoApiUrl);
   }));
 
-  it('should display "Initializing" until ready', fakeAsync(() => {
+  it('should set spinner "Initializing" until ready', fakeAsync(() => {
     updateAndTick(fixture);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Initializing');
+    const initBox = fixture.debugElement.queryAll(By.css('#initializing'))[0];
+    expect(initBox.children[0].nativeElement === spinner());
 
     tick(10000);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Initializing');
+    expect(initBox.children[0].nativeElement).toBe(spinner());
 
     blockingClusterStub.cluster.status = ClusterStatus.Running;
-    tick(10000);
+    tick(100000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Initializing');
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
-  it('should display "Resuming" until resumed', fakeAsync(() => {
+  it('should display resuming message until resumed', fakeAsync(() => {
     blockingClusterStub.cluster.status = ClusterStatus.Stopped;
     updateAndTick(fixture);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Resuming');
+    const initBox = fixture.debugElement.queryAll(By.css('#initializing'))[0];
+    expect(initBox.children[1].nativeElement.innerText)
+      .toMatch('Resuming notebook server, may take up to 1 minute');
 
     tick(10000);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Resuming');
+    expect(initBox.children[1].nativeElement.innerText)
+      .toMatch('Resuming notebook server, may take up to 1 minute');
 
     blockingClusterStub.cluster.status = ClusterStatus.Running;
-    tick(10000);
+    tick(100000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Resuming');
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
-  it('should display "Authenticating" while setting cookies', fakeAsync(() => {
+  it('should set spinner to "Authenticating" while setting cookies', fakeAsync(() => {
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     blockingNotebooksStub.block();
     updateAndTick(fixture);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Authenticating');
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
+      .children[0].nativeElement).toBe(spinner());
 
     blockingNotebooksStub.release();
-    tick();
+    tick(100000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Authenticating');
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
-  it('should display "Creating" while creating a new notebook', fakeAsync(() => {
+  it('should set spinner to "Creating" while creating a new notebook', fakeAsync(() => {
+
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     blockingClusterStub.block();
     updateAndTick(fixture);
+    tick(1000);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Creating');
+    updateAndTick(fixture);
+    tick(10000);
+    expect(fixture.debugElement.queryAll(By.css('#creating'))[0]
+      .children[0].nativeElement).toBe(spinner());
 
     blockingClusterStub.release();
-    tick();
+    tick(1000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Creating');
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
-  it('should display "Copying" while localizing', fakeAsync(() => {
+  it('should set spinner to "Copying" while localizing', fakeAsync(() => {
     updateAndTick(fixture);
-
     fixture.componentInstance.notebookName = 'foo.ipynb';
     fixture.componentInstance.creating = false;
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     blockingClusterStub.block();
     tick(10000);
     fixture.detectChanges();
-    expect(spinnerText()).toContain('Copying');
+    expect(fixture.debugElement.queryAll(By.css('#copying'))[0]
+      .children[0].nativeElement).toBe(spinner());
 
     blockingClusterStub.release();
-    tick();
+    tick(1000);
     fixture.detectChanges();
-    expect(spinnerText()).not.toContain('Copying');
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
   }));
 
-  it('should display "Redirecting" while redirecting', fakeAsync(() => {
-    blockingClusterStub.cluster.status = ClusterStatus.Running;
+  it('should display spinners to match progress status when creating a notebook', fakeAsync(() => {
+    spyOn(window, 'setTimeout').and.stub();
     updateAndTick(fixture);
-    fixture.detectChanges();
-    expect(spinnerText()).toContain('Redirecting');
-  }));
-
-
-  it('should escape notebooks names', fakeAsync(() => {
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Initializing;
     updateAndTick(fixture);
+    tick(1000);
+    expect(fixture.debugElement.queryAll(By.css('#initializing'))[0]
+      .children[0].nativeElement).toBe(spinner());
 
-    fixture.componentInstance.notebookName = '1%2B1.ipynb';
-    blockingClusterStub.cluster.status = ClusterStatus.Running;
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Authenticating;
+    updateAndTick(fixture);
+    tick(1000);
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Creating;
+    updateAndTick(fixture);
+    tick(1000);
+    expect(fixture.debugElement.queryAll(By.css('#creating'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Redirecting;
+    updateAndTick(fixture);
     tick(10000);
-    fixture.detectChanges();
+    expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
+      .children[0].nativeElement).toBe(spinner());
 
-    expect(fakeWindow.location.href).toContain('/1%252B1.ipynb');
   }));
+
+  it('should display spinners to match progress status when loading a notebook', fakeAsync(() => {
+    spyOn(window, 'setTimeout').and.stub();
+    updateAndTick(fixture);
+    fixture.componentInstance.notebookName = 'foo.ipynb';
+    fixture.componentInstance.creating = false;
+    fixture.detectChanges();
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Resuming;
+    updateAndTick(fixture);
+    expect(fixture.debugElement.queryAll(By.css('#initializing'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Authenticating;
+    updateAndTick(fixture);
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Copying;
+    updateAndTick(fixture);
+    expect(fixture.debugElement.queryAll(By.css('#copying'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+    fixture.componentInstance.progress = fixture.componentInstance.Progress.Redirecting;
+    updateAndTick(fixture);
+    expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
+      .children[0].nativeElement).toBe(spinner());
+
+  }));
+
+  it('should properly display notebooks names', fakeAsync(() => {
+    fixture.componentInstance.creating = false;
+    blockingClusterStub.cluster.status = ClusterStatus.Running;
+    updateAndTick(fixture);
+    fixture.detectChanges();
+    tick(10000);
+    expect(fixture.debugElement.queryAll(By.css('.notebooks-header'))[0].nativeElement.textContent)
+      .toMatch('blah blah');
+  }));
+
+  it('should display iframe on redirect', fakeAsync(() => {
+    blockingClusterStub.cluster.status = ClusterStatus.Running;
+    updateAndTick(fixture);
+    fixture.detectChanges();
+    tick(10000);
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(1);
+  }));
+
+
+  it('should display notebook name if loading a notebook', fakeAsync(() => {
+    spyOn(window, 'setTimeout').and.stub();
+    updateAndTick(fixture);
+    fixture.componentInstance.notebookName = 'foo.ipynb';
+    fixture.componentInstance.creating = false;
+    fixture.detectChanges();
+    expect(fixture.debugElement.queryAll(By.css('.notebooks-header'))[0].nativeElement.textContent)
+      .toMatch('Loading Notebook \'foo.ipynb\'');
+  }));
+
+  it('should return to the notebooks list page if we cancel notebook creation', fakeAsync(() => {
+    spyOn(window, 'setTimeout').and.stub();
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.queryAll(By.css('#cancelButton'))[0]);
+    tick(10000);
+
+    // expect notebook not to have loaded
+    fixture.detectChanges();
+    expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(0);
+  }));
+});
+
+describe('NotebookRedirectComponent', () => {
+  let fixture: ComponentFixture<NotebookRedirectComponent>;
+  let blockingClusterStub: BlockingClusterStub;
+  let blockingNotebooksStub: BlockingNotebooksStub;
+
+  beforeEach(fakeAsync(() => {
+    blockingClusterStub = new BlockingClusterStub();
+    blockingClusterStub.cluster.status = ClusterStatus.Creating;
+    blockingNotebooksStub = new BlockingNotebooksStub();
+
+    TestBed.configureTestingModule({
+      declarations: [
+        NotebookComponent,
+        NotebookRedirectComponent,
+        TopBoxComponent
+      ],
+      imports: [
+        BrowserAnimationsModule,
+        RouterTestingModule,
+        ClarityModule.forRoot()
+      ],
+      providers: [
+        { provide: ClusterService, useFactory: () => blockingClusterStub },
+        { provide: LeoClusterService, useValue: new LeoClusterServiceStub() },
+        { provide: NotebooksService, useFactory: () => blockingNotebooksStub },
+        { provide: JupyterService, useValue: new JupyterServiceStub() },
+        { provide: ActivatedRoute, useValue: {
+          snapshot: {
+            params: {
+              'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+              'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+              'nbName': '1%2B1'
+            },
+            queryParams: {
+              'kernelType': Kernels.R,
+              'creating': true
+            },
+            queryParamMap: convertToParamMap({
+              'kernelType': Kernels.R,
+              'creating': true
+            })
+          }
+        }},
+      ]}).compileComponents().then(() => {
+      fixture = TestBed.createComponent(NotebookRedirectComponent);
+      spyOn(window.history, 'replaceState').and.stub();
+      blockingClusterStub.release();
+      blockingNotebooksStub.release();
+    });
+  }));
+
+
+  it('should escape notebook names', fakeAsync(() => {
+    blockingClusterStub.cluster.status = ClusterStatus.Running;
+    updateAndTick(fixture);
+    fixture.detectChanges();
+    tick(10000);
+    expect(fixture.debugElement.query(By.css('#leo-iframe'))
+      .properties['src']).toMatch(/1\+1.ipynb/);
+  }));
+
 });

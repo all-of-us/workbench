@@ -190,9 +190,8 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        const nbUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/notebooks/'
-          + encodeURIComponent(this.resourceCard.notebook.name);
-        window.open(nbUrl, '_blank');
+        this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'notebooks',
+          encodeURIComponent(this.resourceCard.notebook.name)], {relativeTo: null});
       }
     }
   }
@@ -224,6 +223,12 @@ export class ResourceCardComponent implements OnInit {
   get writePermission(): boolean {
     return this.resourceCard.permission === 'OWNER'
       || this.resourceCard.permission === 'WRITER';
+  }
+
+  get notebookDisplayName(): string {
+    if (this.resourceType === ResourceType.NOTEBOOK) {
+      return this.resourceCard.notebook.name.replace(/\.ipynb$/, '');
+    }
   }
 
 }
