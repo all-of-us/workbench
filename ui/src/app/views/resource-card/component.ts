@@ -154,17 +154,26 @@ export class ResourceCardComponent implements OnInit {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-          .subscribe(() => this.onUpdate.emit());
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => this.onUpdate.emit());
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
         break;
       }
       case ResourceType.CONCEPT_SET: {
         this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => this.onUpdate.emit());
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
       }
     }
   }
