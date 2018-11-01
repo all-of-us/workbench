@@ -2,7 +2,7 @@
   <div class="header-container">
     <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
       <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"
-          style="width: 1.5rem; height: 1.5rem; fill: #216FB4"></clr-icon>
+                style="width: 1.5rem; height: 1.5rem; fill: #216FB4"></clr-icon>
     </div>
     <img [src]="headerImg" class="header-image" routerLink="/">
     <app-breadcrumb></app-breadcrumb>
@@ -24,7 +24,7 @@
         <a routerLink="/profile" clrDropdownItem>Profile</a>
         <a routerLink="/settings" clrDropdownItem>Settings</a>
         <div class="dropdown-divider"></div>
-        <button id="report-bug" class="btn" (click)="bugReportComponent.reportBug();">Report A Bug</button>
+        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportComponent.reportBug();">Report A Bug</button>
         <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -36,34 +36,33 @@
   <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
     <section class="sidenav-content">
       <button class="btn btn-primary nav-link"
-          [class.active]="homeActive"
-          routerLink="/"
-          (click)="sidenavToggle = false">Home</button>
-      <!--Data browser won't show the sidenav, so active is irrelevant-->
-      <a class="btn btn-primary nav-link"
-          [attr.href]="publicUiUrl">Browse Data</a>
+              [class.active]="homeActive"
+              routerLink="/"
+              (click)="sidenavToggle = false">Home</button>
       <button class="btn btn-primary nav-link"
-          [class.active]="createWorkspaceActive"
-          routerLink="/workspaces/build"
-          [attr.disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">Create Workspace</button>
+              (click)="openDataBrowser()">Browse Data</button>
       <button class="btn btn-primary nav-link"
-          [class.active]="workspacesActive"
-          routerLink="/workspaces"
-          [attr.disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">My Workspaces</button>
+              [class.active]="createWorkspaceActive"
+              routerLink="/workspaces/build"
+              [attr.disabled]="hasDataAccess ? null : true"
+              (click)="sidenavToggle = false">Create Workspace</button>
       <button class="btn btn-primary nav-link"
-          [class.active]="reviewWorkspaceActive"
-          *ngIf="hasReviewResearchPurpose"
-          routerLink="/admin/review-workspace"
-          (click)="sidenavToggle = false">Review Workspaces</button>
+              [class.active]="workspacesActive"
+              routerLink="/workspaces"
+              [attr.disabled]="hasDataAccess ? null : true"
+              (click)="sidenavToggle = false">My Workspaces</button>
       <button class="btn btn-primary nav-link"
-          [class.active]="reviewIdActive"
-          *ngIf="hasReviewIdVerification"
-          routerLink="/admin/review-id-verification"
-          (click)="sidenavToggle = false">Review ID Verifications</button>
+              [class.active]="reviewWorkspaceActive"
+              *ngIf="hasReviewResearchPurpose"
+              routerLink="/admin/review-workspace"
+              (click)="sidenavToggle = false">Review Workspaces</button>
+      <button class="btn btn-primary nav-link"
+              [class.active]="reviewIdActive"
+              *ngIf="hasReviewIdVerification"
+              routerLink="/admin/review-id-verification"
+              (click)="sidenavToggle = false">Review ID Verifications</button>
       <button class="btn btn-secondary btn-bug-report"
-          (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
+              (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
   <div class="app-container">
