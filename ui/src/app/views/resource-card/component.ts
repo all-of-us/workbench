@@ -190,8 +190,9 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'notebooks',
-            encodeURIComponent(this.resourceCard.notebook.name)], {relativeTo: null});
+        const nbUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/notebooks/'
+          + encodeURIComponent(this.resourceCard.notebook.name);
+        window.open(nbUrl, '_blank');
       }
     }
   }
