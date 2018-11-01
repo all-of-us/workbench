@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {environment} from 'environments/environment.local';
+import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {CohortSearchActions} from '../redux';
