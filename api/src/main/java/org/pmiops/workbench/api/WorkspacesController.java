@@ -21,7 +21,6 @@ import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
