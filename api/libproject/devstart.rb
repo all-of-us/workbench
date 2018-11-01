@@ -1194,7 +1194,7 @@ def deploy_gcs_artifacts(cmd_name, args)
   run_inline_or_log(op.opts.dry_run, %W{
     gsutil cp
     cluster-resources/setup_notebook_cluster.sh
-    cluster-resources/playground-extension.sh
+    cluster-resources/playground-extension.js
     gs://#{gcc.project}-cluster-resources/
   })
   # This file must be readable by all AoU researchers and the Leonardo service
@@ -1203,7 +1203,7 @@ def deploy_gcs_artifacts(cmd_name, args)
   run_inline_or_log(op.opts.dry_run, %W{
     gsutil acl ch -u AllUsers:R
     gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
-    gs://#{gcc.project}-cluster-resources/playground-extension.sh
+    gs://#{gcc.project}-cluster-resources/playground-extension.js
   })
 end
 
