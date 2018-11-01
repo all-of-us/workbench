@@ -52,7 +52,8 @@ public class NotebooksServiceImpl implements NotebooksService {
         .defaultClientId(config.server.oauthClientId)
         .jupyterUserScriptUri(config.firecloud.jupyterUserScriptUri)
         .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
-            .nbExtensions(ImmutableMap.<String, String>of())
+            .nbExtensions(ImmutableMap.of(
+                "playground-extension", config.firecloud.jupyterPlaygroundExtensionUri))
             .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
             .combinedExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()

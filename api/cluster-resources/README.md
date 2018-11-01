@@ -11,8 +11,8 @@ To manually test updates to this script locally:
 - Push the script to GCS (username-suffixed) and make it publicly readable:
 
   ```
-  api$ gsutil cp scripts/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-scripts/setup_notebook_cluster-${USER}.sh" &&
-    gsutil acl ch -u AllUsers:R "gs://all-of-us-workbench-test-scripts/setup_notebook_cluster-${USER}.sh"
+  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh" &&
+    gsutil acl ch -u AllUsers:R "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh"
   ```
 
 - (**Disclaimer**: local code change, do not submit) Temporarily update your
@@ -34,10 +34,19 @@ To manually test updates to this script locally:
     this may take a minute.
   - Cluster creation will fail with 500s if the user script is not accessible,
     ensure your script is publicly readable via [cloud console UI](
-    https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-scripts?project=all-of-us-workbench-test)
+    https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-cluster-resources?project=all-of-us-workbench-test)
 - Revert changes to `config/config_local.json`
 
-## Releasing
+# playground-extension.js
 
-This script will be pushed to the appropriate GCS environment along with our
+Jupyter UI extension for playground mode. Passed via GCS at cluster creation time.
+
+## Local testing
+
+Tweak the above instructions for testing the user script to push a modified
+extension and modify the cluster controller to use it.
+
+# Releasing
+
+Resources will be pushed to the appropriate GCS environment along with our
 normal release process.
