@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Stream;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -22,6 +21,7 @@ import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mortbay.jetty.Server;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -45,24 +45,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.ShareWorkspaceResponse;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -100,6 +83,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       ConceptBigQueryService conceptBigQueryService,
+      ConceptSetsController conceptSetsController,
       ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -435,8 +419,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     for (JSONObject conceptSet: demoConceptSets) {
       ConceptSet dbConceptSet = new ConceptSet();
       JSONArray conceptIdsJSON = conceptSet.getJSONArray("concept_ids");
-      //Set<Long> conceptIds = conceptIdsJSON.toStream().map(id -> Long.valueOf(id)).collect(Collectors.toSet());
-
       Set<Long> conceptIds = new HashSet<>();
       for (int i = 0; i < conceptIdsJSON.length(); i++) {
         conceptIds.add(conceptIdsJSON.getLong(i));
@@ -449,12 +431,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbConceptSet.setCreationTime(now);
       dbConceptSet.setLastModifiedTime(now);
       dbConceptSet.setVersion(1);
-      dbConceptSet.setParticipantCount(0);
+      dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
       dbConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
       dbConceptSet.getConceptIds().addAll(conceptIds);
-      String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
-      dbConceptSet.setParticipantCount(conceptBigQueryService.getParticipantCountForConcepts(omopTable,
-              dbConceptSet.getConceptIds()));
+
       try {
         dbConceptSet = conceptSetDao.save(dbConceptSet);
       } catch (DataIntegrityViolationException e) {
