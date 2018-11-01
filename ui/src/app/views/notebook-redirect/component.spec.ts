@@ -149,7 +149,7 @@ describe('NotebookRedirectComponent', () => {
   it('should set spinner "Initializing" until ready', fakeAsync(() => {
     updateAndTick(fixture);
     fixture.detectChanges();
-    const initBox = fixture.debugElement.queryAll(By.css('#Initializing'))[0];
+    const initBox = fixture.debugElement.queryAll(By.css('#initializing'))[0];
     expect(initBox.children[0].nativeElement === spinner());
 
     tick(10000);
@@ -166,7 +166,7 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.cluster.status = ClusterStatus.Stopped;
     updateAndTick(fixture);
     fixture.detectChanges();
-    const initBox = fixture.debugElement.queryAll(By.css('#Initializing'))[0];
+    const initBox = fixture.debugElement.queryAll(By.css('#initializing'))[0];
     expect(initBox.children[1].nativeElement.innerText)
         .toMatch('Resuming notebook server, may take up to 1 minute');
 
@@ -186,7 +186,7 @@ describe('NotebookRedirectComponent', () => {
     blockingNotebooksStub.block();
     updateAndTick(fixture);
     fixture.detectChanges();
-    expect(fixture.debugElement.queryAll(By.css('#Authenticating'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     blockingNotebooksStub.release();
@@ -204,7 +204,7 @@ describe('NotebookRedirectComponent', () => {
     fixture.detectChanges();
     updateAndTick(fixture);
     tick(10000);
-    expect(fixture.debugElement.queryAll(By.css('#Creating'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#creating'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     blockingClusterStub.release();
@@ -221,7 +221,7 @@ describe('NotebookRedirectComponent', () => {
     blockingClusterStub.block();
     tick(10000);
     fixture.detectChanges();
-    expect(fixture.debugElement.queryAll(By.css('#Copying'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#copying'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     blockingClusterStub.release();
@@ -236,25 +236,25 @@ describe('NotebookRedirectComponent', () => {
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Initializing;
     updateAndTick(fixture);
     tick(1000);
-    expect(fixture.debugElement.queryAll(By.css('#Initializing'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#initializing'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Authenticating;
     updateAndTick(fixture);
     tick(1000);
-    expect(fixture.debugElement.queryAll(By.css('#Authenticating'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Creating;
     updateAndTick(fixture);
     tick(1000);
-    expect(fixture.debugElement.queryAll(By.css('#Creating'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#creating'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Redirecting;
     updateAndTick(fixture);
     tick(10000);
-    expect(fixture.debugElement.queryAll(By.css('#Redirecting'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
         .children[0].nativeElement).toBe(spinner());
 
   }));
@@ -267,32 +267,34 @@ describe('NotebookRedirectComponent', () => {
     fixture.detectChanges();
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Resuming;
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('#Initializing'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#initializing'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Authenticating;
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('#Authenticating'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#authenticating'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Copying;
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('#Copying'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#copying'))[0]
         .children[0].nativeElement).toBe(spinner());
 
     fixture.componentInstance.progress = fixture.componentInstance.Progress.Redirecting;
     updateAndTick(fixture);
-    expect(fixture.debugElement.queryAll(By.css('#Redirecting'))[0]
+    expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
         .children[0].nativeElement).toBe(spinner());
 
   }));
 
   it('should escape notebook names', fakeAsync(() => {
+    fixture.componentInstance.route.snapshot.params['nbName'] = '1%2B1.ipynb';
     blockingClusterStub.cluster.status = ClusterStatus.Running;
     updateAndTick(fixture);
     fixture.detectChanges();
     tick(10000);
-    expect(fixture.componentInstance.leoUrl).toMatch('blah%20blah');
+    expect(fixture.debugElement.queryAll(By.css('#leo-iframe'))[0]
+      .properties['src']).toMatch(/1\+1.ipynb/);
   }));
 
   it('should properly display notebooks names', fakeAsync(() => {

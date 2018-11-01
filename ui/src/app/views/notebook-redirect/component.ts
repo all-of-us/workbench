@@ -181,8 +181,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .subscribe((nbName) => {
         this.incrementProgress(Progress.Redirecting);
         if (this.creating) {
-          window.history.replaceState({}, '', 'workspaces/' + this.wsNamespace +
-          '/' + this.wsId + '/notebooks/' + this.fullNotebookName);
+          window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
+          '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
         this.leoUrl = this.sanitizer
           .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
@@ -269,7 +269,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
     navigateBack(): void {
-        this.locationService.back();
+      this.locationService.back();
     }
 
   private initializeProgressMap(): void {
