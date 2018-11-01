@@ -26,8 +26,7 @@ const routes: Routes = [{
     path: 'participants',
     component: TablePage,
       resolve: {
-        annotationDefinitions: AnnotationDefinitionsResolver,
-        concepts: DemographicConceptMapsResolver,
+          concepts: DemographicConceptMapsResolver,
       },
       data: {
           breadcrumb: {
@@ -39,6 +38,7 @@ const routes: Routes = [{
     path: 'participants/:pid',
     component: DetailPage,
     resolve: {
+      annotationDefinitions: AnnotationDefinitionsResolver,
       participant: ParticipantResolver,
       annotations: ParticipantAnnotationsResolver,
     },
