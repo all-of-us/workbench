@@ -89,7 +89,7 @@ describe('RecentWorkComponent', () => {
     expect(cardsOnPage.length).toEqual(3);
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
-    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile']);
+    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile.ipynb']);
   }));
 
   // test that it displays 4 most recent resources from UserMetrics cache
@@ -102,7 +102,7 @@ describe('RecentWorkComponent', () => {
     expect(cardsOnPage.length).toEqual(4);
     // should match LAST 4, and NOT include the "oldest"
     expect(cardNames).toEqual(
-        ['mockFile5', 'mockFile4', 'mockFile3', 'mockFile2']);
+        ['mockFile5.ipynb', 'mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
   }));
 
   // it should not render the component at all if user has no cache
@@ -149,7 +149,7 @@ describe('RecentWorkComponent', () => {
     updateAndTick(fixture);
     // should have scrolled right so should be FIRST 4 and NOT last
     expect(nameQuery())
-      .toEqual(['mockFile4', 'mockFile3', 'mockFile2', 'mockFile1']);
+      .toEqual(['mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb', 'mockFile1.ipynb']);
     // right scroll should not be present and left present
     expect(rightScroll()).toBe(null);
     expect(leftScroll()).not.toBe(null);
@@ -157,7 +157,7 @@ describe('RecentWorkComponent', () => {
     updateAndTick(fixture);
     // all should be returned to orig state
     expect(nameQuery())
-      .toEqual(['mockFile5', 'mockFile4', 'mockFile3', 'mockFile2']);
+      .toEqual(['mockFile5.ipynb', 'mockFile4.ipynb', 'mockFile3.ipynb', 'mockFile2.ipynb']);
     expect(rightScroll()).not.toBe(null);
     expect(leftScroll()).toBe(null);
   }));

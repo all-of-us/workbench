@@ -154,7 +154,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('button#rename')));
     updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile.ipynb');
     expect(fixture.componentInstance.resourceList[0].notebook.name)
         .toEqual('testMockFile.ipynb');
   }));
@@ -172,7 +172,7 @@ describe('NotebookListComponent', () => {
     expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
     simulateClick(fixture, de.query(By.css('.close')));
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile.ipynb');
   }));
 
   it('displays correct information when notebook cloned', fakeAsync(() => {
@@ -185,7 +185,7 @@ describe('NotebookListComponent', () => {
     tick();
     updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone.ipynb');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
         .toContain('mockFile Clone.ipynb');
   }));
