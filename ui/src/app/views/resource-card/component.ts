@@ -190,8 +190,16 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'notebooks',
-          encodeURIComponent(this.resourceCard.notebook.name)], {relativeTo: null});
+        let queryParams = null;
+        if (this.notebookReadOnly) {
+          queryParams = { playgroundMode: true };
+        }
+        this.route.navigate(
+          ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
+           encodeURIComponent(this.resourceCard.notebook.name)], {
+             queryParams,
+             relativeTo: null,
+           });
       }
     }
   }
@@ -223,6 +231,11 @@ export class ResourceCardComponent implements OnInit {
   get writePermission(): boolean {
     return this.resourceCard.permission === 'OWNER'
       || this.resourceCard.permission === 'WRITER';
+  }
+
+  get notebookReadOnly(): boolean {
+    return this.resourceType === ResourceType.NOTEBOOK
+      && this.resourceCard.permission === 'READER';
   }
 
   get notebookDisplayName(): string {

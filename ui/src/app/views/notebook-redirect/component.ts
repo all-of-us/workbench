@@ -14,12 +14,15 @@ import {
   Cluster,
   ClusterService,
   ClusterStatus,
+  WorkspaceAccessLevel
 } from 'generated';
 import {
   ClusterService as LeoClusterService,
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
+
+import {WorkspaceData} from 'app/resolvers/workspace';
 
 enum Progress {
   Unknown,
@@ -110,6 +113,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
+  private playground = false;
 
   constructor(
     private locationService: Location,
@@ -122,10 +126,10 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.initializeProgressMap();
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.queryParams['creating'] || false;
+    this.playground = (this.route.snapshot.queryParams['playgroundMode'] === 'true');
     this.setNotebookNames();
 
     if (this.creating) {
@@ -166,7 +170,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         // This will contain the Jupyter-local path to the localized notebook.
         if (!this.creating) {
           this.incrementProgress(Progress.Copying);
-          localizeObs = this.localizeNotebooks([this.notebookName])
+          localizeObs = this.localizeNotebooks([this.notebookName],
+            this.playground)
             .map(localDir => `${localDir}/${this.notebookName}`);
         } else {
           this.incrementProgress(Progress.Creating);
@@ -243,7 +248,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     } else {
       fileContent.metadata = pyNotebookMetadata;
     }
-    return this.localizeNotebooks([]).flatMap((localDir) => {
+    return this.localizeNotebooks([], false).flatMap((localDir) => {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking 'new notebook' in the Jupyter UI.
@@ -258,12 +263,14 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     });
   }
 
-  private localizeNotebooks(notebookNames: Array<string>): Observable<string> {
+  private localizeNotebooks(notebookNames: Array<string>,
+                            playgroundMode: boolean): Observable<string> {
     return this.clusterService
       .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
         workspaceNamespace: this.wsNamespace,
         workspaceId: this.wsId,
-        notebookNames: notebookNames
+        notebookNames: notebookNames,
+        playgroundMode: playgroundMode
       })
       .map(resp => resp.clusterLocalDirectory);
   }

@@ -203,19 +203,23 @@ public class ClusterController implements ClusterApiDelegate {
       workspacePath = body.getWorkspaceNamespace() + ":" + body.getWorkspaceId();
     }
     String apiDir = "workspaces/" + workspacePath;
+    if (body.getPlaygroundMode()) {
+      apiDir = "workspaces:playground/" + workspacePath;
+    }
     String localDir = "~/" + apiDir;
 
     // Always localize config files; usually a no-op after the first call.
     Map<String, String> localizeMap = new HashMap<>();
-    localizeMap.put(
+    if (!body.getPlaygroundMode()) {
+      localizeMap.put(
         localDir + "/" + DELOCALIZE_CONFIG_FILENAME,
         jsonToDataUri(new JSONObject()
-            .put("destination", gcsNotebooksDir)
-            .put("pattern", "\\.ipynb$")));
+          .put("destination", gcsNotebooksDir)
+          .put("pattern", "\\.ipynb$")));
+    }
     localizeMap.put(
         localDir + "/" + AOU_CONFIG_FILENAME,
         aouConfigDataUri(fcWorkspace, cdrVersion, projectName));
-
     // Localize the requested notebooks, if any.
     if (body.getNotebookNames() != null) {
       localizeMap.putAll(

@@ -2073,6 +2073,7 @@ definitions:
       - workspaceNamespace
       - workspaceId
       - notebookNames
+      - playgroundMode
     properties:
       workspaceNamespace:
         type: string
@@ -2088,6 +2089,9 @@ definitions:
           within the provided workspace's Google Cloud Storage bucket.
         items:
           type: string
+      playgroundMode:
+        type: boolean
+        description: Set to true if playgroundMode needed
 
   ClusterLocalizeResponse:
     type: object
