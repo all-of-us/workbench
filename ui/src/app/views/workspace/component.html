@@ -159,7 +159,10 @@
         </div>
       </div>
     </div>
-    <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}">Google Bucket</a>
+    <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}?authuser={{username}}"
+        target="_blank">
+      Google Bucket
+    </a>
   </div>
 </div>
 <app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
