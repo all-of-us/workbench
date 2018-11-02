@@ -242,6 +242,7 @@ public class ClusterControllerTest {
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
     req.setNotebookNames(ImmutableList.of("foo.ipynb"));
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
@@ -266,6 +267,7 @@ public class ClusterControllerTest {
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
     req.setNotebookNames(ImmutableList.of("foo.ipynb"));
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize("other-proj", "cluster", req).getBody();
@@ -284,6 +286,7 @@ public class ClusterControllerTest {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
