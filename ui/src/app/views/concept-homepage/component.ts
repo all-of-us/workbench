@@ -76,6 +76,7 @@ export class ConceptHomepageComponent implements OnInit {
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
+  originalConceptList: Array<Concept> = [];
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -235,6 +236,7 @@ export class ConceptHomepageComponent implements OnInit {
     const cacheItem = this.conceptsCache.find(
       conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items;
+    this.originalConceptList = this.concepts;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
       return {
@@ -259,6 +261,9 @@ export class ConceptHomepageComponent implements OnInit {
     }
     if (this.vocabularies.filter(vocabulary => vocabulary.selected).length === 0) {
       this.concepts = [];
+      this.conceptTable.selectedConcepts.length = 0;
+      this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
+      this.cloneCacheConcepts();
       this.placeholderValue = 'No vocabularies selected. Please select at least one vocabulary.';
       return;
     }
@@ -284,7 +289,17 @@ export class ConceptHomepageComponent implements OnInit {
       .subscribe((response) => {
         this.searchLoading = false;
         this.concepts = response.items;
+        this.conceptTable.selectedConcepts = this.conceptTable.selectedConcepts.filter((concept) =>
+            this.concepts.findIndex(concep => concep.conceptId === concept.conceptId) >= 0
+        );
       });
+
+    this.conceptsCache.find(
+        conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
+    this.conceptsCache.filter(concept => concept.vocabularyList
+        .filter(v => this.vocabularies.findIndex(v) === -1)
+    );
+    this.searchLoading = false;
   }
 
   selectConcept(concepts) {
