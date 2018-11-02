@@ -5,7 +5,6 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 
-import java.rmi.ServerError;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
