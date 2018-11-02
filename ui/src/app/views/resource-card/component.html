@@ -17,7 +17,8 @@
         </div>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <div class="name" [class.disabled]="actionsDisabled" (click)="actionsDisabled || openResource(this.resourceCard)">
+    <div class="name" [class.disabled]="actionsDisabled && !notebookReadPermission"
+         (click)="(actionsDisabled && !notebookReadPermission) || openResource(this.resourceCard)">
       {{notebookDisplayName}}
       {{resourceCard.cohort?.name}}
       {{resourceCard.conceptSet?.name}}

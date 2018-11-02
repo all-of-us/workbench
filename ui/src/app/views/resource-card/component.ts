@@ -225,6 +225,11 @@ export class ResourceCardComponent implements OnInit {
       || this.resourceCard.permission === 'WRITER';
   }
 
+  get notebookReadPermission(): boolean {
+    return this.resourceType === ResourceType.NOTEBOOK
+      && this.resourceCard.permission === 'READER';
+  }
+
   get notebookDisplayName(): string {
     if (this.resourceType === ResourceType.NOTEBOOK) {
       return this.resourceCard.notebook.name.replace(/\.ipynb$/, '');

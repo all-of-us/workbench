@@ -14,12 +14,15 @@ import {
   Cluster,
   ClusterService,
   ClusterStatus,
+  WorkspaceAccessLevel
 } from 'generated';
 import {
   ClusterService as LeoClusterService,
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
+
+import {WorkspaceData} from 'app/resolvers/workspace';
 
 enum Progress {
   Unknown,
@@ -110,6 +113,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
+  private accessLevel: WorkspaceAccessLevel;
+  private playground = false;
 
   constructor(
     private locationService: Location,
@@ -119,10 +124,17 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     private leoNotebooksService: NotebooksService,
     private jupyterService: JupyterService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) {
+    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.accessLevel = wsData.accessLevel;
+  }
+
+
 
   ngOnInit(): void {
-    this.initializeProgressMap();
+    if (this.accessLevel == WorkspaceAccessLevel.READER) {
+      this.playground = true;
+    }
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.queryParams['creating'] || false;
@@ -165,8 +177,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         let localizeObs: Observable<string>;
         // This will contain the Jupyter-local path to the localized notebook.
         if (!this.creating) {
-          this.incrementProgress(Progress.Copying);
-          localizeObs = this.localizeNotebooks([this.notebookName])
+          this.progress = Progress.Copying;
+          localizeObs = this.localizeNotebooks([this.notebookName],
+            this.playground)
             .map(localDir => `${localDir}/${this.notebookName}`);
         } else {
           this.incrementProgress(Progress.Creating);
@@ -243,7 +256,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     } else {
       fileContent.metadata = pyNotebookMetadata;
     }
-    return this.localizeNotebooks([]).flatMap((localDir) => {
+    return this.localizeNotebooks([], false).flatMap((localDir) => {
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking 'new notebook' in the Jupyter UI.
@@ -258,12 +271,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     });
   }
 
-  private localizeNotebooks(notebookNames: Array<string>): Observable<string> {
+  private localizeNotebooks(notebookNames: Array<string>, playgroundMode: boolean): Observable<string> {
     return this.clusterService
       .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
         workspaceNamespace: this.wsNamespace,
         workspaceId: this.wsId,
-        notebookNames: notebookNames
+        notebookNames: notebookNames,
+        playgroundMode: playgroundMode
       })
       .map(resp => resp.clusterLocalDirectory);
   }
