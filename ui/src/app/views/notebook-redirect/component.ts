@@ -113,7 +113,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
-  private accessLevel: WorkspaceAccessLevel;
   private playground = false;
 
   constructor(
@@ -130,7 +129,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.queryParams['creating'] || false;
-    this.playground = this.route.snapshot.queryParams['playgroundMode'] || false;
+    this.playground = (this.route.snapshot.queryParams['playgroundMode'] === 'true');
     this.setNotebookNames();
 
     if (this.creating) {
@@ -170,7 +169,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         let localizeObs: Observable<string>;
         // This will contain the Jupyter-local path to the localized notebook.
         if (!this.creating) {
-          this.progress = Progress.Copying;
+          this.incrementProgress(Progress.Copying);
           localizeObs = this.localizeNotebooks([this.notebookName],
             this.playground)
             .map(localDir => `${localDir}/${this.notebookName}`);
