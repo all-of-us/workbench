@@ -206,7 +206,6 @@ public class ClusterController implements ClusterApiDelegate {
     if (body.getPlaygroundMode()) {
       apiDir = "workspaces:playground/" + workspacePath;
     }
-    log.info(String.format("apiDir: %s", apiDir));
     String localDir = "~/" + apiDir;
 
     // Always localize config files; usually a no-op after the first call.
