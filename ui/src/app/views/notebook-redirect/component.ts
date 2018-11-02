@@ -124,20 +124,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     private leoNotebooksService: NotebooksService,
     private jupyterService: JupyterService,
     private sanitizer: DomSanitizer
-  ) {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.accessLevel = wsData.accessLevel;
-  }
-
-
+  ) {}
 
   ngOnInit(): void {
-    if (this.accessLevel == WorkspaceAccessLevel.READER) {
-      this.playground = true;
-    }
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.queryParams['creating'] || false;
+    this.playground = this.route.snapshot.queryParams['playgroundMode'] || false;
     this.setNotebookNames();
 
     if (this.creating) {
@@ -271,7 +264,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     });
   }
 
-  private localizeNotebooks(notebookNames: Array<string>, playgroundMode: boolean): Observable<string> {
+  private localizeNotebooks(notebookNames: Array<string>,
+                            playgroundMode: boolean): Observable<string> {
     return this.clusterService
       .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
         workspaceNamespace: this.wsNamespace,
