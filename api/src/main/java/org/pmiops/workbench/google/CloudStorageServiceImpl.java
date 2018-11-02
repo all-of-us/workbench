@@ -26,6 +26,19 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   final Provider<WorkbenchConfig> configProvider;
 
+  private List<JSONObject> readJSONObjects(String filterType, String filterField) {
+    Storage storage = StorageOptions.getDefaultInstance().getService();
+    Bucket demoBucket = storage.get(getDemosBucketName());
+
+    return StreamSupport
+            .stream(demoBucket.list().getValues().spliterator(), false)
+            .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
+            .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
+            .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase(filterType))
+            .map(jsonObject -> jsonObject.getJSONObject(filterField))
+            .collect(Collectors.toList());
+  }
+
   @Autowired
   public CloudStorageServiceImpl(Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
@@ -56,16 +69,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   public List<JSONObject> readAllDemoCohorts() {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Bucket demoBucket = storage.get(getDemosBucketName());
+    return readJSONObjects("cohort", "cohort");
+  }
 
-    return StreamSupport
-        .stream(demoBucket.list().getValues().spliterator(), false)
-        .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
-        .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
-        .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase("cohort"))
-        .map(jsonObject -> jsonObject.getJSONObject("cohort"))
-        .collect(Collectors.toList());
+  public List<JSONObject> readAllDemoConceptSets() {
+    return readJSONObjects("concept_set", "concept_set");
   }
 
   @Override

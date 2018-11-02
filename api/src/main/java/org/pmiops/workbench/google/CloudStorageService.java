@@ -16,6 +16,7 @@ public interface CloudStorageService {
   public String getImageUrl(String image_name);
   public void copyAllDemoNotebooks(String workspaceBucket);
   public List<JSONObject> readAllDemoCohorts();
+  public List<JSONObject> readAllDemoConceptSets();
   public List<Blob> getBlobList(String bucketName, String directory);
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
