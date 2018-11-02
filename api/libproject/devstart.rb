@@ -1192,14 +1192,18 @@ def deploy_gcs_artifacts(cmd_name, args)
   op.parse.validate
   gcc.validate
   run_inline_or_log(op.opts.dry_run, %W{
-    gsutil cp scripts/setup_notebook_cluster.sh
-    gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+    gsutil cp
+    cluster-resources/setup_notebook_cluster.sh
+    cluster-resources/playground-extension.js
+    gs://#{gcc.project}-cluster-resources/
   })
   # This file must be readable by all AoU researchers and the Leonardo service
-  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
-  # public since the script's source is public anyways.
+  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
+  # these public since these assets are public in GitHub anyways.
   run_inline_or_log(op.opts.dry_run, %W{
-    gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+    gsutil acl ch -u AllUsers:R
+    gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
+    gs://#{gcc.project}-cluster-resources/playground-extension.js
   })
 end
 
@@ -1566,7 +1570,7 @@ def create_project_resources(gcc)
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating GCS bucket to store scripts..."
-  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-cluster-resources/}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
                        --activation-policy=ALWAYS --backup-start-time 00:00
