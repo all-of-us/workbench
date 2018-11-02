@@ -4,6 +4,8 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+
+import java.rmi.ServerError;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -411,11 +414,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
     for (JSONObject conceptSet: demoConceptSets) {
       ConceptSet dbConceptSet = new ConceptSet();
-      JSONArray conceptIdsJSON = conceptSet.getJSONArray("concept_ids");
-      Set<Long> conceptIds = new HashSet<>();
-      for (int i = 0; i < conceptIdsJSON.length(); i++) {
-        conceptIds.add(conceptIdsJSON.getLong(i));
-      }
 
       dbConceptSet.setName(conceptSet.getString("name"));
       dbConceptSet.setDescription(conceptSet.getString("description"));
@@ -426,7 +424,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbConceptSet.setVersion(1);
       dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
       dbConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
-      dbConceptSet.getConceptIds().addAll(conceptIds);
+      try {
+        List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
+        Set<Long> conceptIds = conceptIdsJSON
+                .stream()
+                .map(Object::toString)
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
+        dbConceptSet.getConceptIds().addAll(conceptIds);
+      } catch (JSONException e) {
+        throw new ServerErrorException(String.format(
+           "concept_ids cannot be read from %s", conceptSet.getString("name")
+        ));
+      }
 
       try {
         dbConceptSet = conceptSetDao.save(dbConceptSet);
