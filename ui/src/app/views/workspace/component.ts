@@ -105,6 +105,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   rightResearchPurposes: String[];
   newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
   firstVisit = true;
+  username = '';
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -148,6 +149,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     // TODO: RW-1057
     this.profileService.getMe().subscribe(
       profile => {
+        this.username = profile.username;
         if (profile.pageVisits) {
           this.firstVisit = !profile.pageVisits.some(v =>
             v.page === WorkspaceComponent.PAGE_ID);
