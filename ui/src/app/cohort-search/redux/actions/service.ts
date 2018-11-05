@@ -203,13 +203,13 @@ export class CohortSearchActions {
     this.removeId(itemId);
 
     if (hasItems && (countIsNonZero || isOnlyChild)) {
-      this.requestTotalCount();
-
       /* If this was the only item in the group, the group no longer has a
        * count, not really. */
       if (isOnlyChild) {
+        this.requestTotalCount(groupId);
         this.removeGroup(role, groupId);
       } else {
+        this.requestTotalCount();
         this.requestGroupCount(role, groupId);
       }
     }
