@@ -322,3 +322,7 @@ h5.selection-title {
   from {opacity: 0;}
   to {opacity: 1;}
 }
+
+.disable-tree {
+  pointer-events: none;
+}
