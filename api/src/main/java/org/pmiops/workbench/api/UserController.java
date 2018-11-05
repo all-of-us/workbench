@@ -60,7 +60,10 @@ public class UserController implements UserApiDelegate {
         .ofNullable(Sort.Direction.fromStringOrNull(sortOrder))
         .orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
-    List<User> users = userService.findUsersBySearchString(term, sort);
+    List<User> users = userService.findUsersBySearchString(term, sort)
+        .stream()
+        .filter(user -> user.getFirstSignInTime() != null)
+        .collect(Collectors.toList());
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
 
