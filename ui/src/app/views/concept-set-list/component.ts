@@ -19,6 +19,7 @@ import {ToolTipComponent} from '../tooltip/component';
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
+    '../../styles/tooltip.css',
     './component.css'],
   templateUrl: './component.html',
 })
