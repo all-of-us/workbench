@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
-import {ServerConfigService} from '../../services/server-config.service';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 
@@ -21,6 +20,8 @@ function isBlank(s: string) {
 })
 export class AccountCreationComponent implements AfterViewInit {
   profile: Profile = {
+    // Note: We abuse the "username" field here by omitting "@domain.org". After
+    // profile creation, this field is populated with the full email address.
     username: '',
     dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
@@ -34,7 +35,6 @@ export class AccountCreationComponent implements AfterViewInit {
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
-  gsuiteDomain: string;
   usernameFocused = false;
   usernameCheckTimeout: NodeJS.Timer;
   usernameCheckInProgress = false;
@@ -47,12 +47,8 @@ export class AccountCreationComponent implements AfterViewInit {
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
-    private loginComponent: LoginComponent,
-    serverConfigService: ServerConfigService
+    private loginComponent: LoginComponent
   ) {
-    serverConfigService.getConfig().subscribe((config) => {
-      this.gsuiteDomain = config.gsuiteDomain;
-    });
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
       this.loginComponent.smallerBackgroundImgSrc =
@@ -87,7 +83,8 @@ export class AccountCreationComponent implements AfterViewInit {
       invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
-    this.profileService.createAccount(request).subscribe(() => {
+    this.profileService.createAccount(request).subscribe((profile) => {
+      this.profile = profile;
       this.creatingAccount = false;
       this.accountCreated = true;
     }, () => {

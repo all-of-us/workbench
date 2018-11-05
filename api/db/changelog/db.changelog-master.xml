@@ -59,4 +59,5 @@
   <include file="changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml"/>
   <include file="changelog/db.changelog-50.xml"/>
   <include file="changelog/db.changelog-51-user-profile-updates.xml"/>
+  <include file="changelog/db.changelog-52-user-nonce.xml"/>
 </databaseChangeLog>

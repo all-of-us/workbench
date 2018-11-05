@@ -31,6 +31,9 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 public class User {
   private long userId;
   private int version;
+  // A nonce which can be used during the account creation flow to verify
+  // unauthenticated API calls after account creation, but before initial login.
+  private Long creationNonce;
   // The Google email address that the user signs in with.
   private String email;
   // The email address that can be used to contact the user.
@@ -80,6 +83,11 @@ public class User {
   public int getVersion() { return version; }
 
   public void setVersion(int version) { this.version = version; }
+
+  @Column(name = "creation_nonce")
+  public Long getCreationNonce() { return creationNonce; }
+
+  public void setCreationNonce(Long creationNonce) { this.creationNonce = creationNonce; }
 
   @Column(name = "email")
   public String getEmail() {

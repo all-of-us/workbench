@@ -1,12 +1,16 @@
 package org.pmiops.workbench.db.dao;
 
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.inject.Provider;
+
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -36,6 +40,7 @@ public class UserService {
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
+  private Random random = new SecureRandom();
 
   @Autowired
   public UserService(Provider<User> userProvider,
@@ -124,6 +129,7 @@ public class UserService {
       String organization,
       String areaOfResearch) {
     User user = new User();
+    user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
     user.setContactEmail(contactEmail);
