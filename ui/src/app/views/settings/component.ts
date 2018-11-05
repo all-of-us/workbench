@@ -16,6 +16,11 @@ import {
   templateUrl: './component.html',
 })
 export class SettingsComponent implements OnInit, OnDestroy {
+  private static readonly TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
+    ClusterStatus.Deleting, ClusterStatus.Creating,
+    ClusterStatus.Starting, ClusterStatus.Stopping
+  ]);
+
   private pollClusterTimer: NodeJS.Timer;
   cluster: Cluster;
   clusterDeletionFailure = true;
@@ -41,12 +46,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.clusterService.listClusters()
       .subscribe((resp) => {
         const cluster = resp.defaultCluster;
-        if (cluster.status === ClusterStatus.Running ||
-            cluster.status === ClusterStatus.Error) {
-          this.cluster = cluster;
+        if (SettingsComponent.TRANSITIONAL_STATUSES.has(cluster.status)) {
+          repoll();
           return;
         }
-        repoll();
+        this.cluster = cluster;
       }, () => {
         // Also retry on errors.
         repoll();
