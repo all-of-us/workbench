@@ -100,11 +100,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
-      .filter(nodeId => !!nodeId)
-      .subscribe(nodeId => {
-        if (nodeId) {
-          this.setScroll(nodeId);
-        }
+      .filter(nodeIds => !!nodeIds)
+      .subscribe(nodeIds => {
+        this.setScroll(nodeIds[0]);
       })
     );
 
@@ -145,22 +143,16 @@ export class ModalComponent implements OnInit, OnDestroy {
     let node: any;
     this.disableCursor = true;
     Observable.interval(100)
-      .takeWhile(() => !node)
+      .takeWhile((val, index) => !node && index < 30)
       .subscribe(i => {
-
         node = document.getElementById('node' + nodeId.toString());
-        if (node && i < 100) {
-          console.log('inside node');
-          console.log(node);
+        if (node) {
           setTimeout(() => {
             node.scrollIntoView({behavior: 'smooth'});
             this.disableCursor = false;
-          }, 2000);
-
-        } else if (i < 100) {
-          setTimeout(() => {
-            this.disableCursor = false;
-          }, 2000);
+          }, 200);
+        } else if (i === 29) {
+          this.disableCursor = false;
         }
       });
   }
