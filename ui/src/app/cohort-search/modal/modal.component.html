@@ -62,6 +62,7 @@
                 <div
                   id="tree"
                   class="panel"
+                  [ngClass]="{'disable-tree':disableCursor}"
                   [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes' || mode === 'snomed'">
                    <!-- SNOMED Search -->
                   <div *ngIf="showSnomed" class="panel-left" [class.show]="mode === 'snomed'">

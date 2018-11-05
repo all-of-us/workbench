@@ -55,6 +55,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   demoParam: string;
   count = 0;
   originalNode: any;
+  disableCursor = false;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -142,12 +143,24 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
   setScroll(nodeId: string) {
     let node: any;
+    this.disableCursor = true;
     Observable.interval(100)
       .takeWhile(() => !node)
       .subscribe(i => {
+
         node = document.getElementById('node' + nodeId.toString());
         if (node && i < 100) {
-          setTimeout(() => node.scrollIntoView({behavior: 'smooth'}), 200);
+          console.log('inside node');
+          console.log(node);
+          setTimeout(() => {
+            node.scrollIntoView({behavior: 'smooth'});
+            this.disableCursor = false;
+          }, 200);
+
+        } else if(i < 100) {
+          setTimeout(() => {
+            this.disableCursor = false;
+          }, 200);
         }
       });
   }
