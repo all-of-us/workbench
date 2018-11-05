@@ -42,7 +42,6 @@
       margin-left: 6px;
     }
     .card {
-      cursor: pointer;
       line-height: 38px;
       margin-bottom: 27px;
       text-decoration: none;
@@ -98,6 +97,10 @@
     th.long {
       width: 60%
     }
+    a.unstyled {
+      text-decoration: inherit;
+      color: inherit;
+    }
   </style>
 </head>
 <body>
@@ -140,20 +143,20 @@
         <div class="text">Quick guide on how to get started:</div>
       </td>
     </tr>
-    <tr class="card" href="https://myaccount.google.com/signinoptions/two-step-verification">
+    <tr class="card">
       <td>
-        <img class="bullet" src="${BULLET_1}">
+        <a class="unstyled" href="https://myaccount.google.com/signinoptions/two-step-verification"><img class="bullet" src="${BULLET_1}"></a>
       </td>
       <td colspan="2">
-        <span class=" card-text link">Sign into Google</span><span> with your new account, change your password, and set up 2-Step Verification</span>
+        <a class="unstyled" href="https://myaccount.google.com/signinoptions/two-step-verification"><span class=" card-text link">Sign into Google</span><span> with your new account, change your password, and set up 2-Step Verification</span></a>
       </td>
     </tr>
-    <tr class="card" href="https://myaccount.google.com/intro/recovery/email?hl=en-US">
+    <tr class="card">
       <td>
-        <img class="bullet" src="${BULLET_2}">
+        <a class="unstyled" href="https://myaccount.google.com/intro/recovery/email?hl=en-US"><img class="bullet" src="${BULLET_2}"></a>
       </td>
       <td colspan="2">
-        <span class="card-text link">Add</span><span> your recover email address</span>
+        <a class="unstyled" href="https://myaccount.google.com/intro/recovery/email?hl=en-US"><span class="card-text link">Add</span><span> your recover email address</span></a>
       </td>
     </tr>
     <tr>
