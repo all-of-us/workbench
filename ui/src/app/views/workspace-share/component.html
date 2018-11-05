@@ -5,10 +5,13 @@
       <clr-tooltip>
         <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
-          <div>
-            Workspaces can only be shared with existing All of Us users. If you want to share your
-            workspace with someone who is not yet a part of the All of Us community, have them
-            create an account first and then you can share the workspace with them.
+          <div class="tooltip-label">
+            Search for a collaborator that has an All of Us research account. Collaborators can be assigned different permissions within your Workspace.
+            <ul>
+              <li style="list-style-position: outside; margin-left: 0.6rem;">A <span style="text-decoration: underline">Reader</span> can view your notebooks, but not make edits, deletes or share contents of the Workspace.</li>
+              <li style="list-style-position: outside; margin-left: 0.6rem;">A <span style="text-decoration: underline">Writer</span> can view, edit and delete content in the Workspace but not share the Workspace with others.</li>
+              <li style="list-style-position: outside; margin-left: 0.6rem;">An <span style="text-decoration: underline">Owner</span> can view, edit, delete and share contents in the Workspace.</li>
+            </ul>
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
