@@ -155,12 +155,12 @@ export class ModalComponent implements OnInit, OnDestroy {
           setTimeout(() => {
             node.scrollIntoView({behavior: 'smooth'});
             this.disableCursor = false;
-          }, 200);
+          }, 2000);
 
-        } else if(i < 100) {
+        } else if (i < 100) {
           setTimeout(() => {
             this.disableCursor = false;
-          }, 200);
+          }, 2000);
         }
       });
   }

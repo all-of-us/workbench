@@ -59,6 +59,9 @@
               </crit-demographics>
 
               <ng-container *ngSwitchDefault>
+                <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
+                  Loading...
+                </div>
                 <div
                   id="tree"
                   class="panel"

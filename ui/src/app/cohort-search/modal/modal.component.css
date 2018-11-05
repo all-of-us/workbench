@@ -326,3 +326,9 @@ h5.selection-title {
 .disable-tree {
   pointer-events: none;
 }
+
+.spin-in-overlay {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+}
