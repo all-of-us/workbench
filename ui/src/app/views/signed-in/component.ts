@@ -15,6 +15,7 @@ import {environment} from 'environments/environment';
 
 import {Authority,
     BillingProjectStatus} from 'generated';
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-signed-in',
@@ -35,6 +36,8 @@ export class SignedInComponent implements OnInit {
   publicUiUrl = environment.publicUiUrl;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
+  private profileLoadingSub: Subscription;
+  private profileBlockingSub: Subscription;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -64,7 +67,7 @@ export class SignedInComponent implements OnInit {
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
-      this.profileStorageService.profile$.subscribe((profile) => {
+      this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.hasDataAccess =
           !config.enforceRegistered || hasRegisteredAccess(profile.dataAccessLevel);
 
@@ -87,7 +90,7 @@ export class SignedInComponent implements OnInit {
       }
     });
 
-    this.profileStorageService.profile$.subscribe((profile) => {
+    this.profileBlockingSub = this.profileStorageService.profile$.subscribe((profile) => {
       // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
@@ -98,6 +101,15 @@ export class SignedInComponent implements OnInit {
       }
     });
 
+  }
+
+  ngOnDestroy() {
+    if (this.profileLoadingSub) {
+      this.profileLoadingSub.unsubscribe();
+    }
+    if (this.profileBlockingSub) {
+      this.profileBlockingSub.unsubscribe();
+    }
   }
 
   signOut(): void {
