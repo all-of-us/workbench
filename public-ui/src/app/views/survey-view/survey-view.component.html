@@ -166,7 +166,7 @@
                 </clr-tooltip-content>
               </clr-tooltip>
               <div class="chart-wrapper col-xs-12 col-sm-12">
-                <div class="col-md">
+                <div class="col-md gender-chart-button">
                   <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
                   </button>
                   <clr-tooltip>
