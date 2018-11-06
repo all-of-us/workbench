@@ -7,14 +7,12 @@ import {ClarityModule} from '@clr/angular';
 import {randomString} from 'app/utils/index';
 import {ProfileService} from 'generated';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
 import {
   simulateEvent,
   simulateInput,
   updateAndTick
 } from '../../../testing/test-helpers';
-import {ServerConfigService} from '../../services/server-config.service';
 
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
@@ -43,12 +41,7 @@ describe('AccountCreationComponent', () => {
         { provide: LoginComponent, useValue: {}},
         { provide: InvitationKeyComponent, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub() },
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        }]
+      ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(AccountCreationComponent);
       tick();

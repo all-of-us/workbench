@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -11,13 +12,16 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
+
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +49,7 @@ import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -147,7 +152,9 @@ public class ClusterControllerTest {
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, CLOCK, fireCloudService, configProvider);
+    UserService userService = new UserService(
+        userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
+        fireCloudService, configProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
