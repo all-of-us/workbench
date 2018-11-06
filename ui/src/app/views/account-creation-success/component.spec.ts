@@ -9,13 +9,11 @@ import {
 } from 'generated';
 
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
-import {ServerConfigService} from '../../services/server-config.service';
 import {SignInService} from '../../services/sign-in.service';
 
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
@@ -43,12 +41,6 @@ describe('AccountCreationSuccessComponent', () => {
         },
         { provide: LoginComponent, useValue: {}},
         { provide: ProfileService, useValue: new ProfileServiceStub },
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
         { provide: SignInService, useValue: new SignInServiceStub()}
       ]
     }).compileComponents().then(() => {

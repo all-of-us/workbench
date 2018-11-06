@@ -3,11 +3,15 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Lists;
+
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +67,7 @@ public class UserControllerTest {
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
     configProvider = Providers.of(config);
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
     this.userController = new UserController(userService);
     saveFamily();
   }
@@ -76,7 +80,7 @@ public class UserControllerTest {
   @Test
   public void testEnforceRegistered() {
     configProvider.get().firecloud.enforceRegistered = true;
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, fireCloudService, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
     this.userController = new UserController(userService);
     User john = userDao.findUserByEmail("john@lis.org");
 

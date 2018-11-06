@@ -3,10 +3,13 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.inject.Provider;
+
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -34,6 +37,7 @@ public class UserService {
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final Clock clock;
+  private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
 
@@ -42,12 +46,14 @@ public class UserService {
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
       Clock clock,
+      Random random,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.clock = clock;
+    this.random = random;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
   }
@@ -124,6 +130,7 @@ public class UserService {
       String organization,
       String areaOfResearch) {
     User user = new User();
+    user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
     user.setContactEmail(contactEmail);
