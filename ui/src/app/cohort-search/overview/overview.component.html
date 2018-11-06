@@ -9,12 +9,12 @@
         {{ total$ | async | number }}
       </span>
     </h2>
-    <div *ngIf="chartData$ | async as chartData">
+    <div>
       <button
         type="button"
         class="btn btn-primary"
         [style.margin-left]="'0'"
-        [disabled]="!chartData.size || (total$ | async) === 0"
+        [disabled]="(isRequesting$ | async) || (total$ | async) === 0"
         (click)="saveModal.open()">
         Save Cohort
       </button>
@@ -25,10 +25,6 @@
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender
-        <!--<clr-icon shape="angle"-->
-          <!--[dir]="showGenderChart ? 'up' : 'down'"-->
-          <!--(click)="toggleShowGender()">-->
-        <!--</clr-icon>-->
       </div>
       <div *ngIf="showGenderChart" class="card-block">
         <app-gender-chart *ngIf="chartData.size"
