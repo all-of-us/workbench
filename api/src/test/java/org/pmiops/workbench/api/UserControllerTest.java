@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.junit.After;
 import org.junit.Before;
@@ -99,7 +100,14 @@ public class UserControllerTest {
     List<User> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response = userController.user("obin", null, null, null).getBody();
-    assertThat(response.getUsers()).hasSize(allUsers.size());
+
+    // We only want to include users that have active billing projects to avoid users not initialized in FC.
+    assertThat(response.getUsers()).hasSize(
+        allUsers
+            .stream()
+            .filter(user -> user.getFreeTierBillingProjectName() != null)
+            .collect(Collectors.toList())
+            .size());
   }
 
   @Test
@@ -201,10 +209,27 @@ public class UserControllerTest {
     saveUser("maureen@lis.org", "Mauren", "Robinson", false);
     saveUser("penny@lis.org", "Penny", "Robinson", false);
     saveUser("will@lis.org", "Will", "Robinson", false);
+    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", false);
   }
 
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName, boolean registered) {
+    User user = new User();
+    user.setEmail(email);
+    user.setUserId(incrementedUserId);
+    user.setGivenName(givenName);
+    user.setFamilyName(familyName);
+    user.setFreeTierBillingProjectName(givenName + familyName);
+    if (registered) {
+      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
+    } else {
+      user.setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
+    }
+    incrementedUserId++;
+    userDao.save(user);
+  }
+
+  private void saveUserNotInFirecloud(String email, String givenName, String familyName, boolean registered) {
     User user = new User();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
