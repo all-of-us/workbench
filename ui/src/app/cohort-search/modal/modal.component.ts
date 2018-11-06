@@ -164,7 +164,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   cancel() {
     this.selections = {};
     this.open = false;
-    this.actions.cancelWizard();
+    this.actions.cancelWizard(this.ctype, 0);
   }
 
   back() {
