@@ -60,7 +60,6 @@ export class CohortSearchActions {
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() cancelAutocompleteRequest = ActionFuncs.cancelAutocompleteRequest;
-  @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
   @dispatch() selectChildren = ActionFuncs.selectChildren;
