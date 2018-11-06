@@ -174,6 +174,9 @@ export class CohortSearchEpics {
       ({cdrVersionId, conceptId}: IngredientRequestAction) => {
         return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
           .map(result => loadIngredients(result.items))
+          .race(action$
+            .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+            .first())
           .catch(e => Observable.of(autocompleteRequestError(e)));
       }
     )
