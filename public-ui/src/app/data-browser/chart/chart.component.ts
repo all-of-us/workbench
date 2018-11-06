@@ -177,6 +177,8 @@ export class ChartComponent implements OnChanges {
 
     /* Todo make charts for ethniticy and race
      * maybe cleanup / generalize pie chart
+     *
+     *
     if (
       this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {

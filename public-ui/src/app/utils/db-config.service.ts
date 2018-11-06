@@ -36,7 +36,8 @@ export class DbConfigService {
 
   GENDER_COLORS = {
     '8507': '#8DC892',
-    '8532': '#6CAEE3'
+    '8532': '#6CAEE3',
+      '8521': '#4259A5'
   };
 
   GENDER_IDENTITY_COLORS = {
