@@ -15,7 +15,7 @@ export class DbConfigService {
   /* CONSTANTS */
   MALE_GENDER_ID = '8507';
   FEMALE_GENDER_ID = '8532';
-  OTHER_GENDER_ID = '8521';
+  OTHER_GENDER_ID = '0';
   PREGNANCY_CONCEPT_ID = '903120';
   WHEEL_CHAIR_CONCEPT_ID = '903111';
 
@@ -36,8 +36,7 @@ export class DbConfigService {
 
   GENDER_COLORS = {
     '8507': '#8DC892',
-    '8532': '#6CAEE3',
-      '8521': '#4259A5'
+    '8532': '#6CAEE3'
   };
 
   GENDER_IDENTITY_COLORS = {
