@@ -60,9 +60,8 @@ export class AdminReviewIdVerificationComponent implements OnInit {
       if (verificationSortMap[a.idVerificationStatus]
         < verificationSortMap[b.idVerificationStatus]) {
         return -1;
-      } else {
-        return 1;
       }
+      return 1;
     });
   }
 
@@ -73,9 +72,8 @@ export class AdminReviewIdVerificationComponent implements OnInit {
       return 1;
     } else if (b.idVerificationRequestTime === null) {
       return -1;
-    } else {
-      return b.idVerificationRequestTime - a.idVerificationRequestTime;
     }
+    return b.idVerificationRequestTime - a.idVerificationRequestTime;
   }
 
   private nameCompare(a: Profile, b: Profile): number {
