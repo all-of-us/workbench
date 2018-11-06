@@ -91,6 +91,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
     this.profileStorageService.profile$.subscribe((profile) => {
+      // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {

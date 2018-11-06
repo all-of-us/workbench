@@ -10,11 +10,13 @@
         </div>
       </div>
       <div class="row" style="flex-direction: row; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap;">
-        <div class="card add-card" (click)="addWorkspace()">
-          <div class="card-text">
+        <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-bottom-left"
+             (click)="!billingProjectInitialized || addWorkspace()">
+          <div class="card-text" [class.disabled]="!billingProjectInitialized">
             Create a <br/> New Workspace <br/>
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
           </div>
+        <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
         </div>
         <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
       </div>

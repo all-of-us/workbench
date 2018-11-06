@@ -252,10 +252,14 @@
   width: 284px;
   color: #2691D0;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 28px;
   margin-top: 20%;
   margin-left: 6%;
+}
+
+.card-text.disabled {
+  opacity: 0.5;
 }
 
 .plus-circle {
