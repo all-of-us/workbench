@@ -66,28 +66,28 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     });
   }
 
-  private timeCompare(profileOne: Profile, profileTwo: Profile): number {
-    if (profileOne.idVerificationRequestTime === profileTwo.idVerificationRequestTime) {
-      return this.nameCompare(profileOne, profileTwo);
-    } else if (profileOne.idVerificationRequestTime === null) {
+  private timeCompare(a: Profile, b: Profile): number {
+    if (a.idVerificationRequestTime === b.idVerificationRequestTime) {
+      return this.nameCompare(a, b);
+    } else if (a.idVerificationRequestTime === null) {
       return 1;
-    } else if (profileTwo.idVerificationRequestTime === null) {
+    } else if (b.idVerificationRequestTime === null) {
       return -1;
     } else {
-      return profileTwo.idVerificationRequestTime - profileOne.idVerificationRequestTime;
+      return b.idVerificationRequestTime - a.idVerificationRequestTime;
     }
   }
 
-  private nameCompare(profileOne: Profile, profileTwo: Profile): number {
-    if (profileOne.familyName === null) {
+  private nameCompare(a: Profile, b: Profile): number {
+    if (a.familyName === null) {
       return 1;
     }
-    if (profileOne.familyName.localeCompare(profileTwo.familyName) === 0) {
-      if (profileOne.givenName === null) {
+    if (a.familyName.localeCompare(b.familyName) === 0) {
+      if (a.givenName === null) {
         return 1;
       }
-      return profileOne.givenName.localeCompare(profileTwo.givenName);
+      return a.givenName.localeCompare(b.givenName);
     }
-    return profileOne.familyName.localeCompare(profileTwo.familyName);
+    return a.familyName.localeCompare(b.familyName);
   }
 }
