@@ -1,8 +1,7 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {
-  Router,
-} from '@angular/router';
+import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -10,12 +9,8 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
-
 import {environment} from 'environments/environment';
-
-import {Authority,
-    BillingProjectStatus} from 'generated';
-import {Subscription} from "rxjs";
+import {Authority, BillingProjectStatus} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -24,7 +19,7 @@ import {Subscription} from "rxjs";
               '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit {
+export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
