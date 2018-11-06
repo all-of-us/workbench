@@ -14,7 +14,7 @@
         type="button"
         class="btn btn-primary"
         [style.margin-left]="'0'"
-        [disabled]="(isRequesting$ | async) || (total$ | async) === 0"
+        [disabled]="(isRequesting$ | async) || !(total$ | async)"
         (click)="saveModal.open()">
         Save Cohort
       </button>
