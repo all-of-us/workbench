@@ -221,7 +221,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get showModifiers() {
-    return this.itemType === TreeType[TreeType.PM] || this.itemType === TreeType[TreeType.DEMO] ? false : true;
+    return this.itemType === TreeType[TreeType.PM] ||
+          this.itemType === TreeType[TreeType.DEMO] ||
+          this.itemType === TreeType[TreeType.PPI] ? false : true;
   }
 
   get showHeader() {
