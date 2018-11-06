@@ -96,7 +96,7 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
-  @dispatch() cancelWizard = ActionFuncs.cancelWizard;
+  @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
@@ -151,6 +151,14 @@ export class CohortSearchActions {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     }
+  }
+
+  cancelWizard(): void {
+    const autocompleteLoading = isAutocompleteLoading()(this.state);
+    if (autocompleteLoading) {
+      this.cancelAutocompleteRequest();
+    }
+    this._cancelWizard();
   }
 
   cancelIfRequesting(kind, id): void {
