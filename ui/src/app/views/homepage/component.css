@@ -258,6 +258,10 @@
   margin-left: 6%;
 }
 
+.card.add-card.disabled {
+  cursor: not-allowed;
+}
+
 .card-text.disabled {
   opacity: 0.5;
 }
