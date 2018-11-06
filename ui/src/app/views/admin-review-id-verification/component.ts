@@ -33,7 +33,7 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     this.profileService.getIdVerificationsForReview()
       .subscribe(
           profilesResp => {
-            this.profiles = this.sortProfileResponseList(profilesResp.profileList);
+            this.profiles = this.sortProfileList(profilesResp.profileList);
             this.contentLoaded = true;
           });
   }
@@ -44,30 +44,29 @@ export class AdminReviewIdVerificationComponent implements OnInit {
       const request = <IdVerificationReviewRequest> {newStatus};
       this.profileService.reviewIdVerification(profile.userId, request).subscribe(
         profilesResp => {
-          this.profiles = this.sortProfileResponseList(profilesResp.profileList);
+          this.profiles = this.sortProfileList(profilesResp.profileList);
           this.contentLoaded = true;
         });
     }
   }
 
-  // On talking to Kayla, we want to sort first by verification status, then by
+  // We want to sort first by verification status, then by
   // submission time (newest at the top), then alphanumerically.
-  sortProfileResponseList(profileList: Array<Profile>): Array<Profile> {
-    return profileList.sort((profileOne, profileTwo) => {
-      if (profileOne.idVerificationStatus === profileTwo.idVerificationStatus) {
-        return this.timeCompare(profileOne, profileTwo);
+  private sortProfileList(profileList: Array<Profile>): Array<Profile> {
+    return profileList.sort((a, b) => {
+      if (a.idVerificationStatus === b.idVerificationStatus) {
+        return this.timeCompare(a, b);
+      }
+      if (verificationSortMap[a.idVerificationStatus]
+        < verificationSortMap[b.idVerificationStatus]) {
+        return -1;
       } else {
-        if (verificationSortMap[profileOne.idVerificationStatus]
-          < verificationSortMap[profileTwo.idVerificationStatus]) {
-          return -1;
-        } else {
-          return 1;
-        }
+        return 1;
       }
     });
   }
 
-  timeCompare(profileOne: Profile, profileTwo: Profile) {
+  private timeCompare(profileOne: Profile, profileTwo: Profile): number {
     if (profileOne.idVerificationRequestTime === profileTwo.idVerificationRequestTime) {
       return this.nameCompare(profileOne, profileTwo);
     } else if (profileOne.idVerificationRequestTime === null) {
@@ -79,19 +78,16 @@ export class AdminReviewIdVerificationComponent implements OnInit {
     }
   }
 
-  nameCompare(profileOne: Profile, profileTwo: Profile) {
-    if (profileOne.familyName === profileTwo.familyName) {
-      if (profileOne.givenName === profileTwo.givenName) {
-        return 0;
-      } else if (profileOne.givenName < profileTwo.givenName) {
-        return -1;
-      } else {
-        return 1;
-      }
-    } else if (profileOne.familyName < profileTwo.familyName) {
-      return -1;
-    } else {
+  private nameCompare(profileOne: Profile, profileTwo: Profile): number {
+    if (profileOne.familyName === null) {
       return 1;
     }
+    if (profileOne.familyName.localeCompare(profileTwo.familyName) === 0) {
+      if (profileOne.givenName === null) {
+        return 1;
+      }
+      return profileOne.givenName.localeCompare(profileTwo.givenName);
+    }
+    return profileOne.familyName.localeCompare(profileTwo.familyName);
   }
 }
