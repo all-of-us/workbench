@@ -1,8 +1,7 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
-import {
-  Router,
-} from '@angular/router';
+import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -10,11 +9,8 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
-
 import {environment} from 'environments/environment';
-
-import {Authority,
-    BillingProjectStatus} from 'generated';
+import {Authority, BillingProjectStatus} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -23,7 +19,7 @@ import {Authority,
               '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit {
+export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
@@ -35,6 +31,8 @@ export class SignedInComponent implements OnInit {
   publicUiUrl = environment.publicUiUrl;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
+  private profileLoadingSub: Subscription;
+  private profileBlockingSub: Subscription;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -64,7 +62,7 @@ export class SignedInComponent implements OnInit {
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
-      this.profileStorageService.profile$.subscribe((profile) => {
+      this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.hasDataAccess =
           !config.enforceRegistered || hasRegisteredAccess(profile.dataAccessLevel);
 
@@ -87,7 +85,7 @@ export class SignedInComponent implements OnInit {
       }
     });
 
-    this.profileStorageService.profile$.subscribe((profile) => {
+    this.profileBlockingSub = this.profileStorageService.profile$.subscribe((profile) => {
       // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
@@ -98,6 +96,15 @@ export class SignedInComponent implements OnInit {
       }
     });
 
+  }
+
+  ngOnDestroy() {
+    if (this.profileLoadingSub) {
+      this.profileLoadingSub.unsubscribe();
+    }
+    if (this.profileBlockingSub) {
+      this.profileBlockingSub.unsubscribe();
+    }
   }
 
   signOut(): void {
