@@ -153,7 +153,11 @@ export class CohortSearchActions {
     }
   }
 
-  cancelWizard(): void {
+  cancelWizard(kind: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    if (isLoading) {
+      this.cancelCriteriaRequest(kind, parentId);
+    }
     const autocompleteLoading = isAutocompleteLoading()(this.state);
     if (autocompleteLoading) {
       this.cancelAutocompleteRequest();
