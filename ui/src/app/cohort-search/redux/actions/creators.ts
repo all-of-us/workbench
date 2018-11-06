@@ -15,7 +15,6 @@ import {
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
-  CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
   SELECT_CHILDREN_LIST,
@@ -145,10 +144,6 @@ export const loadAutocompleteOptions =
   (options: any
   ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
   ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
-
-export const clearAutocompleteOptions =
-  (): ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS] =>
-  ({type: CLEAR_AUTOCOMPLETE_OPTIONS});
 
 export const autocompleteRequestError =
   (error?: any
