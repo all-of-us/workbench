@@ -320,6 +320,7 @@ export class ChartComponent implements OnChanges {
     }
     let data = [];
     let cats = [];
+    console.log(results);
     for (const a  of results) {
       // For normal Gender Analysis , the stratum2 is the gender . For ppi it is stratum5;
       let color = null;

@@ -30,15 +30,17 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   results;
   maleGenderResult: AchillesResult;
   femaleGenderResult: AchillesResult;
-  otherGenderResult: AchillesResult;
+  intersexGenderResult: AchillesResult;
+  noneGenderResult: AchillesResult;
   maleGenderChartTitle =  '';
   femaleGenderChartTitle = '';
-  otherGenderChartTitle = '';
+  intersexGenderChartTitle = '';
+  noneGenderChartTitle = '';
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
-  genderResults: AchillesResult[] = [];
   unitNames: string[] = [];
   selectedUnit: string;
+  genderResults: AchillesResult[] = [];
   toDisplayMeasurementGenderAnalysis: Analysis;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
@@ -86,43 +88,44 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
 
   // Organize genders and set the chart title for the gender charts for simple display
   organizeGenders(analysis: Analysis) {
-    let otherCountValue = 0;
-    const others = [];
-
-    // No need to do anything if only one gender
-    if (analysis && analysis.results.length <= 1) {
-      return;
-    }
-    const results = [];
-    for (const g of analysis.results) {
-      if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
-        this.maleGenderResult = g;
-        this.maleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
-      } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
-        this.femaleGenderResult = g;
-        this.femaleGenderChartTitle = g.analysisStratumName + ' - ' + g.countValue.toLocaleString();
-      } else {
-        otherCountValue += g.countValue;
+      // No need to do anything if only one gender
+      if (analysis && analysis.results.length <= 1) {
+          return;
       }
-    }
+      const results = [];
+      for (const g of analysis.results) {
+          if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
+              this.maleGenderResult = g;
+              this.maleGenderChartTitle = g.analysisStratumName
+                  + ' - ' + g.countValue.toLocaleString();
+          } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
+              this.femaleGenderResult = g;
+              this.femaleGenderChartTitle = g.analysisStratumName
+                  + ' - ' + g.countValue.toLocaleString();
+          } else if (g.stratum2 === this.dbc.INTERSEX_GENDER_ID) {
+              this.intersexGenderResult = g;
+              this.intersexGenderChartTitle = g.analysisStratumName
+                  + ' - ' + g.countValue.toLocaleString();
+          } else if (g.stratum2 === this.dbc.NONE_GENDER_ID) {
+              this.noneGenderResult = g;
+              this.noneGenderChartTitle = g.analysisStratumName
+                  + ' - ' + g.countValue.toLocaleString();
+          }
+      }
 
-    // Put our gender results in order we want
-    analysis.results = [this.maleGenderResult, this.femaleGenderResult];
-
-    // Make Other results in one concept if we have them.
-    // Todo -- when we get more data will will have more genders
-    if (otherCountValue > 0) {
-      this.otherGenderResult = {
-        analysisId: analysis.results[0].analysisId,
-        stratum1: analysis.results[0].stratum1,
-        stratum2: this.dbc.OTHER_GENDER_ID,
-        analysisStratumName: 'Other',
-        countValue: otherCountValue
-      };
-      this.otherGenderChartTitle = this.otherGenderResult.analysisStratumName + ' - ' +
-        this.otherGenderResult.countValue.toLocaleString();
-      analysis.results.push(this.otherGenderResult);
-    }
+      analysis.results = []
+      if (this.maleGenderResult) {
+          analysis.results.push(this.maleGenderResult);
+      }
+      if (this.femaleGenderResult) {
+          analysis.results.push(this.femaleGenderResult);
+      }
+      if (this.intersexGenderResult) {
+          analysis.results.push(this.intersexGenderResult);
+      }
+      if (this.noneGenderResult) {
+          analysis.results.push(this.noneGenderResult);
+      }
   }
 
     showMeasurementGenderHistogram(unit: string) {

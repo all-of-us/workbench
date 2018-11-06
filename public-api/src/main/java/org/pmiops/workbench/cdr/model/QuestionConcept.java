@@ -52,6 +52,8 @@ public class QuestionConcept {
         genderStratumNameMap.put("8521", "Other");
         genderStratumNameMap.put("8551", "Unknown");
         genderStratumNameMap.put("8570", "Ambiguous");
+        genderStratumNameMap.put("1585849", "None of these describe me");
+        genderStratumNameMap.put("1585848", "Intersex");
     }
 
     public static void setGenderIdentityStratumNameMap() {
