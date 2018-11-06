@@ -13,7 +13,8 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {environment} from 'environments/environment';
 
-import {Authority} from 'generated';
+import {Authority,
+    BillingProjectStatus} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -32,6 +33,8 @@ export class SignedInComponent implements OnInit {
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
+  billingProjectInitialized = false;
+  billingProjectQuery: NodeJS.Timer;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -83,6 +86,18 @@ export class SignedInComponent implements OnInit {
         this.navigateSignOut();
       }
     });
+
+    this.profileStorageService.profile$.subscribe((profile) => {
+      // This will block workspace creation until the billing project is initialized
+      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+        this.billingProjectInitialized = true;
+      } else {
+        this.billingProjectQuery = setTimeout(() => {
+            this.profileStorageService.reload();
+        }, 10000);
+      }
+    });
+
   }
 
   signOut(): void {
