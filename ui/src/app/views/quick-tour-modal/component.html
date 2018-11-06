@@ -32,8 +32,8 @@
     </div>
     <div class="panel-right">
       <img [src]="panelImages.get(selected)" class="panel-image">
-      <div *ngIf="selectedIndex !== 0" class="resize-icon" style="position: absolute; right: 5%; bottom: 5%; height: 1rem; width: 1rem" (click)="toggleImage()">
-        <app-expand-icon style="position: absolute; z-index: 2;" ></app-expand-icon>
+      <div *ngIf="selectedIndex !== 0" style="position: absolute; right: 5%; bottom: 5%; height: 1rem; width: 1rem">
+        <app-expand-icon class="resize-icon" style="position: absolute; z-index: 2;"  (click)="toggleImage()"></app-expand-icon>
       </div>
     </div>
   </div>
@@ -50,6 +50,6 @@
 <div class="main" *ngIf="learning && fullImage">
   <div class="full-image-wrapper">
     <img [src]="panelImages.get(selected)" style="height: 100%; width: 100%">
-    <app-shrink-icon (click)="toggleImage()" style="position: absolute; right: 5%; bottom: 5%"></app-shrink-icon>
+    <app-shrink-icon class="resize-icon" (click)="toggleImage()" style="position: absolute; right: 5%; bottom: 5%"></app-shrink-icon>
   </div>
 </div>
