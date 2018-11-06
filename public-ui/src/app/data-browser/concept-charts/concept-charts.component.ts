@@ -113,7 +113,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
           }
       }
 
-      analysis.results = []
+      analysis.results = [];
       if (this.maleGenderResult) {
           analysis.results.push(this.maleGenderResult);
       }
