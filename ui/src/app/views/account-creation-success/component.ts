@@ -16,7 +16,7 @@ import {LoginComponent} from '../login/component';
 export class AccountCreationSuccessComponent {
   username: string;
   @Input('contactEmail') contactEmail: string;
-  creationNonce: string
+  creationNonce: string;
 
   @ViewChild(AccountCreationModalsComponent)
   accountCreationModalsComponent: AccountCreationModalsComponent;

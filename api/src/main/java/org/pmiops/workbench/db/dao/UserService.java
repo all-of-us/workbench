@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -38,21 +37,23 @@ public class UserService {
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final Clock clock;
+  private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
-  private Random random = new SecureRandom();
 
   @Autowired
   public UserService(Provider<User> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
       Clock clock,
+      Random random,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
     this.clock = clock;
+    this.random = random;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
   }
