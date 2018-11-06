@@ -322,3 +322,14 @@ h5.selection-title {
   from {opacity: 0;}
   to {opacity: 1;}
 }
+
+.disable-tree {
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.spin-in-overlay {
+  position: absolute;
+  top: 50%;
+  right: 50%;
+}
