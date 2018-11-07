@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -186,6 +187,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     Set<BlobId> foundNotebooks = workspaceFilteredResources.stream()
           .map(r -> parseBlobId(r.getNotebookName()))
           .limit(MAX_RECENT_NOTEBOOKS)
+          .filter(Objects::nonNull)
           .filter(id -> {
             try {
               return cloudStorageService.blobExists(id);
