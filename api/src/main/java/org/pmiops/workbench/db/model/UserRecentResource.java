@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user_recent_resource")
@@ -41,6 +41,11 @@ public class UserRecentResource {
 
   public void setWorkspaceId(long workspaceId ) {this.workspaceId = workspaceId;}
 
+  /**
+   * TODO: Rename this column to reflect reality.
+   *
+   * @return the full GCS URI for the notebook, not just the notebook name as implied
+   */
   @Column(name = "notebook_name")
   public String getNotebookName() {
     return this.notebookName;

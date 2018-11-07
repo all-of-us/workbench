@@ -2,40 +2,43 @@ package org.pmiops.workbench.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.google.cloud.storage.BlobId;
+import com.google.common.collect.ImmutableList;
+
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+
+import javax.inject.Provider;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -51,6 +54,8 @@ public class UserMetricsControllerTest {
   private FireCloudService fireCloudService;
   @Mock
   private WorkspaceService workspaceService;
+  @Mock
+  private CloudStorageService cloudStorageService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
@@ -58,6 +63,7 @@ public class UserMetricsControllerTest {
 
   private User user;
   private UserRecentResource resource1;
+  private UserRecentResource resource2;
   private Workspace workspace2;
 
   @Before
@@ -89,7 +95,7 @@ public class UserMetricsControllerTest {
     resource1.setUserId(user.getUserId());
     resource1.setWorkspaceId(workspace1.getWorkspaceId());
 
-    UserRecentResource resource2 = new UserRecentResource();
+    resource2 = new UserRecentResource();
     resource2.setNotebookName(null);
     resource2.setCohort(cohort);
     resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
@@ -137,11 +143,14 @@ public class UserMetricsControllerTest {
     when(fireCloudService.getWorkspace(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspaceResponse2);
 
+    when(cloudStorageService.blobExists(any())).thenReturn(true);
+
     userMetricsController = new UserMetricsController(
         userProvider,
         userRecentResourceService,
         workspaceService,
         fireCloudService,
+        cloudStorageService,
         clock);
     userMetricsController.setDistinctWorkspaceLimit(5);
 
@@ -195,7 +204,7 @@ public class UserMetricsControllerTest {
     RecentResourceResponse recentResources = userMetricsController
         .getUserRecentResources().getBody();
     assertNotNull(recentResources);
-    assertNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.size(), 0);
   }
 
   @Test
@@ -210,6 +219,24 @@ public class UserMetricsControllerTest {
     assertNotNull(recentResources.get(0).getNotebook());
     assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/notebook.ipynb/");
     assertEquals(recentResources.get(0).getNotebook().getName(), "");
+  }
+
+  @Test
+  public void testGetUserRecentResourceNonexistentNotebook() {
+    resource1.setNotebookName("gs://bkt/notebooks/notebook.ipynb");
+    resource2.setCohort(null);
+    resource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(ImmutableList.of(resource1, resource2));
+    when(cloudStorageService.blobExists(
+        BlobId.of("bkt", "notebooks/not-found.ipynb"))).thenReturn(false);
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.size(), 1);
+    assertNotNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
   }
 
   @Test
