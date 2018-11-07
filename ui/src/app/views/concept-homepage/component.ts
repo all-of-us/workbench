@@ -308,13 +308,7 @@ export class ConceptHomepageComponent implements OnInit {
           };
         });
         this.selectedConcept.every((concept) => concept.selected = false);
-        this.concepts.forEach((concept) => {
-          const index = this.selectedConcept.find
-            (select => select.conceptId === concept.conceptId);
-          if (index) {
-            concept.selected = true;
-          }
-        });
+        this.filterConceptSelection(this.concepts);
         this.conceptTable.selectedConcepts = [];
       });
   }
@@ -332,15 +326,11 @@ export class ConceptHomepageComponent implements OnInit {
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
       const filterConceptsCount = concepts
-        .filter(concept => {
+          .filter(concept => {
           return concept.domainId.toLowerCase() ===
             this.selectedDomain.domain.toString().toLowerCase();
-<<<<<<< HEAD
-        })
-=======
           })
->>>>>>> PR COmments I
-        .length;
+          .length;
       this.selectedConceptDomainMap[domainName] = filterConceptsCount;
     } else {
       this.selectedConceptDomainMap[domainName] = 0;
