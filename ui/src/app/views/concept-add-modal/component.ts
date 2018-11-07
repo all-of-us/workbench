@@ -67,7 +67,7 @@ export class ConceptAddModalComponent {
     this.modalOpen = true;
     this.selectDomain = this.selectedDomain;
     this.selectConceptList = this.selectedConcepts
-        .filter((concepts) => concepts.selected && concepts.domainId.toUpperCase() ===
+        .filter((concepts) => concepts.domainId.toUpperCase() ===
             this.selectDomain.toString().toUpperCase());
     this.name = '';
     this.description = '';
