@@ -388,8 +388,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   filterConceptSelection(concepts) {
     concepts.forEach((concept) => {
-      const exist = this.selectedConcept
-          .find(select => select.conceptId === concept.conceptId);
+      const exist = this.selectConceptMap.get(concept.conceptId);
       if (exist) {
         concept.selected = true;
       }
