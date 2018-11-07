@@ -60,7 +60,6 @@ export class CohortSearchActions {
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
   @dispatch() cancelAutocompleteRequest = ActionFuncs.cancelAutocompleteRequest;
-  @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
   @dispatch() selectChildren = ActionFuncs.selectChildren;
@@ -96,7 +95,7 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
-  @dispatch() cancelWizard = ActionFuncs.cancelWizard;
+  @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
@@ -151,6 +150,18 @@ export class CohortSearchActions {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     }
+  }
+
+  cancelWizard(kind: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    if (isLoading) {
+      this.cancelCriteriaRequest(kind, parentId);
+    }
+    const autocompleteLoading = isAutocompleteLoading()(this.state);
+    if (autocompleteLoading) {
+      this.cancelAutocompleteRequest();
+    }
+    this._cancelWizard();
   }
 
   cancelIfRequesting(kind, id): void {
