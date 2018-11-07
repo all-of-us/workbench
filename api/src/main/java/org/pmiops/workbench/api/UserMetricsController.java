@@ -186,8 +186,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // TODO: If we find a non-existent notebook, expunge from the cache.
     Set<BlobId> foundNotebooks = workspaceFilteredResources.stream()
           .map(r -> parseBlobId(r.getNotebookName()))
-          .limit(MAX_RECENT_NOTEBOOKS)
           .filter(Objects::nonNull)
+          .limit(MAX_RECENT_NOTEBOOKS)
           .filter(id -> {
             try {
               return cloudStorageService.blobExists(id);
