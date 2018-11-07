@@ -326,7 +326,7 @@ export class ConceptHomepageComponent implements OnInit {
     concepts.forEach((concept) => {
       this.selectConceptMap.set(concept.conceptId, concept);
     });
-    this.selectedConcept =  Array.from(this.selectConceptMap.values());;
+    this.selectedConcept =  Array.from(this.selectConceptMap.values());
     concepts = this.selectedConcept;
 
     const domainName = this.selectedDomain.domain;
