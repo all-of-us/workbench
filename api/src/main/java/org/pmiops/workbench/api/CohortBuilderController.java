@@ -117,9 +117,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     String matchExp = modifyKeywordMatch(value);
     List<CriteriaId> ids;
     if (subtype == null) {
-      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     } else {
-      ids = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = type.equals(TreeType.SNOMED.name()) ?
+        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
+        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     }
 
     List<Criteria> criteriaList = ids.isEmpty() ?
@@ -284,7 +286,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     String[] keywords = value.split("[,+\\s+]");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0] + "\"";
+      return "+" + keywords[0];
     }
     return Arrays.stream(keywords)
       .map(term -> "+" + term + "*")
