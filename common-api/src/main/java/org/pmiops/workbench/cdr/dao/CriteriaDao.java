@@ -56,7 +56,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    group by cr.name")
   List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                              String subtype,
-                                                             String modifiedValue,
+                                                             String value,
                                                              Pageable page);
 
   @Query(value = "select c from Criteria c where c.id in :ids")
