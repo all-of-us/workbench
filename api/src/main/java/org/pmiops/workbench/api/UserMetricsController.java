@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -185,6 +186,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // TODO: If we find a non-existent notebook, expunge from the cache.
     Set<BlobId> foundNotebooks = workspaceFilteredResources.stream()
           .map(r -> parseBlobId(r.getNotebookName()))
+          .filter(Objects::nonNull)
           .limit(MAX_RECENT_NOTEBOOKS)
           .filter(id -> {
             try {
