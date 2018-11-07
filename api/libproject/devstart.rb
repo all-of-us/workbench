@@ -673,7 +673,7 @@ Common.register_command({
   :invocation => "generate-private-cdr-counts",
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench.",
+Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts(*args) }
 })
 
@@ -681,7 +681,7 @@ Common.register_command({
   :invocation => "generate-public-cdr-counts",
   :description => "generate-public-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --public-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by databrowser.",
+Generates databases in bigquery with non de-identified data from a cdr that will be imported to mysql/cloudsql to be used by databrowser.",
   :fn => ->(*args) { generate_public_cdr_counts(*args) }
 })
 

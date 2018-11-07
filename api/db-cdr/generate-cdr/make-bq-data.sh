@@ -9,7 +9,7 @@ IFS=$'\n\t'
 # --project=all-of-us-workbench-test *required
 
 # --cdr=cdr_version ... *optional
-USAGE="./generate-clousql-cdr/make-bq-data.sh --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> --public-project <PROJECT>"
+USAGE="./generate-clousql-cdr/make-bq-data.sh --bq-project <PROJECT> --bq-dataset <DATASET> --output-project <PROJECT> --output-dataset <DATASET>"
 USAGE="$USAGE --cdr-version=YYYYMMDD"
 
 while [ $# -gt 0 ]; do
@@ -18,10 +18,8 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --bq-project) BQ_PROJECT=$2; shift 2;;
     --bq-dataset) BQ_DATASET=$2; shift 2;;
-    --workbench-project) WORKBENCH_PROJECT=$2; shift 2;;
-    --workbench-dataset) WORKBENCH_DATASET=$2; shift 2;;
-    --public-project) PUBLIC_PROJECT=$2; WORKBENCH_PROJECT=""; shift 2;;
-    --public-dataset) PUBLIC_DATASET=$2; WORKBENCH_DATASET=""; shift 2;;
+    --output-project) OUTPUT_PROJECT=$2; shift 2;;
+    --output-dataset) OUTPUT_DATASET=$2; shift 2;;
     --cdr-version) CDR_VERSION=$2; shift 2;;
     -- ) shift; break ;;
     * ) break ;;
@@ -41,27 +39,10 @@ then
   exit 1
 fi
 
-if [ -z "${WORKBENCH_PROJECT}" ] && [ -z "${WORKBENCH_DATASET}" ] &&  [ -z "${PUBLIC_PROJECT}" ] && [ -z "${PUBLIC_DATASET}" ]
+if [ -z "${OUTPUT_PROJECT}" ] && [ -z "${OUTPUT_DATASET}" ]
 then
   echo "Usage: $USAGE"
   exit 1
-fi
-
-DATASET=""
-PROJECT=""
-
-if [ ! -z "${WORKBENCH_PROJECT}" ] && [ ! -z "${WORKBENCH_DATASET}" ]
-then
-    DATASET=cdr$CDR_VERSION
-    PROJECT=$WORKBENCH_PROJECT
-    echo "$DATASET"
-    echo "$PROJECT"
-elif [ ! -z "${PUBLIC_PROJECT}" ] && [ ! -z "${PUBLIC_DATASET}" ]
-then
-    DATASET=public$CDR_VERSION
-    PROJECT=$PUBLIC_PROJECT
-    echo "$DATASET"
-    echo "$PROJECT"
 fi
 
 # Check that bq_dataset exists and exit if not
@@ -94,16 +75,15 @@ else
 fi
 
 # Make dataset for cdr cloudsql tables
-datasets=$(bq --project=$PROJECT ls)
-re=\\b$DATASET\\b
+datasets=$(bq --project=$OUTPUT_PROJECT ls)
+re=\\b$OUTPUT_DATASET\\b
 if [[ $datasets =~ $re ]]; then
-  echo "$DATASET exists"
+  echo "$OUTPUT_DATASET exists"
 else
-  echo "Creating $DATASET"
-  bq --project=$PROJECT mk $DATASET
+  echo "Creating $OUTPUT_DATASET"
+  bq --project=$OUTPUT_PROJECT mk $OUTPUT_DATASET
 fi
 
-tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -111,8 +91,8 @@ create_tables=(achilles_analysis achilles_results achilles_results_concept achil
 
 for t in "${create_tables[@]}"
 do
-    bq --project=$PROJECT rm -f $DATASET.$t
-    bq --quiet --project=$PROJECT mk --schema=$schema_path/$t.json $DATASET.$t
+    bq --project=$OUTPUT_PROJECT rm -f $OUTPUT_DATASET.$t
+    bq --quiet --project=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
@@ -120,7 +100,7 @@ load_tables=(domain_info survey_module achilles_analysis unit_map survey_questio
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do
-    bq --project=$PROJECT load --quote='"' --source_format=CSV --skip_leading_rows=1 --max_bad_records=10 $DATASET.$t $csv_path/$t.csv
+    bq --project=$OUTPUT_PROJECT load --quote='"' --source_format=CSV --skip_leading_rows=1 --max_bad_records=10 $OUTPUT_DATASET.$t $csv_path/$t.csv
 done
 
 # Populate some tables from cdr data
@@ -130,7 +110,7 @@ done
 ############
 echo "Inserting criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.criteria\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\`
  (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
 SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
 FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
@@ -138,7 +118,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
 
 echo "Updating SNOMED PCS criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -159,7 +139,7 @@ where crit.id = ct.id"
 
 echo "Updating SNOMED CM criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -180,7 +160,7 @@ where crit.id = ct.id"
 
 echo "Updating ICD9 CM criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -201,7 +181,7 @@ where crit.id = ct.id"
 
 echo "Updating ICD9 PROC criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -222,7 +202,7 @@ where crit.id = ct.id"
 
 echo "Updating ICD10 CM criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -243,7 +223,7 @@ where crit.id = ct.id"
 
 echo "Updating ICD10 PCS criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -264,7 +244,7 @@ where crit.id = ct.id"
 
 echo "Updating CPT criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -285,7 +265,7 @@ where crit.id = ct.id"
 
 echo "Updating MEAS CLIN criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -306,7 +286,7 @@ where crit.id = ct.id"
 
 echo "Updating MEAS LAB criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -327,7 +307,7 @@ where crit.id = ct.id"
 
 echo "Updating PPI criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -344,7 +324,7 @@ where crit.id = ct.id"
 
 echo "Updating criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -357,14 +337,14 @@ then c.name
 else concat(c.name,'|',c.code)
 end as synonyms
 from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$PROJECT.$DATASET.criteria\` cs on c.id = cs.id
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
 where c.type in ('MEAS','CPT','ICD10','ICD9','SNOMED')
 and cs.synonyms is null) as crit
 where crit.id = ct.id"
 
 echo "Updating criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$PROJECT.$DATASET.criteria\` ct
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
 set ct.synonyms = crit.synonyms
 from (
 select c.id,
@@ -373,7 +353,7 @@ then ''
 else c.name
 end as synonyms
 from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$PROJECT.$DATASET.criteria\` cs on c.id = cs.id
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
 where c.type = 'PPI'
 and cs.synonyms is null) as crit
 where crit.id = ct.id"
@@ -383,7 +363,7 @@ where crit.id = ct.id"
 ######################
 echo "Inserting criteria_attribute"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.criteria_attribute\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria_attribute\`
  (id, concept_id, value_as_concept_id, concept_name, type, est_count)
 SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
@@ -393,7 +373,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
 ##########
 echo "Inserting domain"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.domain\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\`
  (domain_id, domain_name, domain_concept_id)
 SELECT domain_id, domain_name, domain_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.domain\` d"
@@ -403,7 +383,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.domain\` d"
 ##############
 echo "Inserting vocabulary"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.vocabulary\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.vocabulary\`
  (vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id)
 SELECT vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.vocabulary\`"
@@ -413,7 +393,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.vocabulary\`"
 ##############
 echo "Inserting concept-ancestor"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.concept_ancestor\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_ancestor\`
  (ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation)
 SELECT ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`"
@@ -423,7 +403,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`"
 ##############
 echo "Inserting gender-identity"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.person_gender_identity\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.person_gender_identity\`
  (person_id,gender_concept_id,gender_identity_concept_id)
 select p.person_id,p.gender_concept_id,ob.value_source_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.person\` p join \`$BQ_PROJECT.$BQ_DATASET.observation\` ob
@@ -435,7 +415,7 @@ where ob.observation_source_concept_id=1585838"
 # achilles queries #
 ####################
 # Run achilles count queries to fill achilles_results
-if ./generate-cdr/run-achilles-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $PROJECT --workbench-dataset $DATASET
+if ./generate-cdr/run-achilles-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $OUTPUT_PROJECT --workbench-dataset $OUTPUT_DATASET
 then
     echo "Achilles queries ran"
 else
@@ -447,7 +427,7 @@ fi
 # measurement queries #
 ####################
 # Run measurement achilles count queries to fill achilles_results
-if ./generate-cdr/run-measurement-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $PROJECT --workbench-dataset $DATASET
+if ./generate-cdr/run-measurement-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $OUTPUT_PROJECT --workbench-dataset $OUTPUT_DATASET
 then
     echo "Measurement achilles queries ran"
 else
@@ -463,7 +443,7 @@ fi
 # Insert the base data into it formatting dates.
 echo "Inserting concept table data ... "
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.concept\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
 concept_code, count_value, prevalence, source_count_value, synonyms)
 select c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id, c.concept_class_id, c.standard_concept, c.concept_code,
@@ -477,16 +457,16 @@ person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" | 
 
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"Update \`$PROJECT.$DATASET.concept\` c
+"Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = r.source_count_value,c.count_value=r.count_value
 from  (select cast(r.stratum_1 as int64) as concept_id , sum(r.count_value) as count_value , sum(r.source_count_value) as source_count_value
-from \`$PROJECT.$DATASET.achilles_results\` r
+from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` r
 where r.analysis_id in (3000,2,4,5) and CAST(r.stratum_1 as int64) > "0" group by r.stratum_1) as r
 where r.concept_id = c.concept_id"
 
 #Concept prevalence (based on count value and not on source count value)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"Update  \`$PROJECT.$DATASET.concept\`
+"Update  \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\`
 set prevalence =
 case when count_value > 0 then round(count_value/$person_count, 2)
      when source_count_value > 0 then round(source_count_value/$person_count, 2)
@@ -576,7 +556,7 @@ where CAST(sm.concept_id AS STRING) = survey_concept_id
 ########################
 echo "Inserting concept_relationship"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.concept_relationship\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_relationship\`
  (concept_id_1, concept_id_2, relationship_id)
 SELECT c.concept_id_1, c.concept_id_2, c.relationship_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
@@ -586,7 +566,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` c"
 ########################
 echo "Inserting concept_synonym"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$PROJECT.$DATASET.concept_synonym\`
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_synonym\`
  (id, concept_id, concept_synonym_name)
 SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
@@ -596,12 +576,12 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
 ###########################
 echo "Updating all concept count in domain_vocabulary_info"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$PROJECT.$DATASET.domain_vocabulary_info\`
+"insert into \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_vocabulary_info\`
 (domain_id,vocabulary_id,all_concept_count,standard_concept_count)
 select d2.domain_id as domain_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
 SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
-\`$PROJECT.$DATASET.concept\` c
-join \`$PROJECT.$DATASET.domain\` d2
+\`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"

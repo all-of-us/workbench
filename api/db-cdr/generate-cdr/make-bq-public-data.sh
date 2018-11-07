@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# # This generates big query count databases public that get put in cloudsql for data browser
+# This requires the raw count data in the public bq dataset which would be binned in place
 # to sanitize the data for public consumption
 
 set -xeuo pipefail
@@ -52,6 +52,15 @@ else
   echo "$PUBLIC_PROJECT.$PUBLIC_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
+
+tables=$(bq --project=$PUBLIC_PROJECT --dataset=$PUBLIC_DATASET ls)
+if [[ $tables =~ \\bconcept\\b ]] && [[ $tables =~ \\bachilles_results\\b ]] && [[ $tables =~ \\bconcept_relationship\\b ]] [[ $tables =~ \\bcriteria\\b ]] && [[ $tables =~ \\bsurvey_module\\b ]] && [[ $tables =~ \\bdomain_info\\b ]]; then
+    echo "Raw count tables exist. Carrying on."
+else
+    echo "Raw count tables does not exist. Please try generating counts on this dataset before proceeding."
+    exit 1
+fi
+
 
 # Round counts for public dataset (The counts are rounded up using ceil. For example 4 to 20, 21 to 40, 43 to 60)
 # 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
@@ -152,6 +161,20 @@ set participant_count =
         cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
+
+#Drop person_gender_identity table
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"drop \`$PUBLIC_PROJECT.$PUBLIC_DATASET.person_gender_identity\` "
+
+#Drop unit_map table
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"drop \`$PUBLIC_PROJECT.$PUBLIC_DATASET.unit_map\` "
+
+#Drop survey_question_map table
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"drop \`$PUBLIC_PROJECT.$PUBLIC_DATASET.survey_question_map\` "
+
+
 
 
 

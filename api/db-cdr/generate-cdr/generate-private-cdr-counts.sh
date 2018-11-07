@@ -88,8 +88,8 @@ echo $(date) " Starting generate-private-cdr-counts $startDate"
 
 ## Make workbench cdr count data
 echo "Making BigQuery cdr dataset"
-if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $WORKBENCH_PROJECT \
- --workbench-dataset $WORKBENCH_DATASET --cdr-version "$CDR_VERSION"
+if ./generate-cdr/make-bq-data.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --output-project $WORKBENCH_PROJECT \
+ --output-dataset $WORKBENCH_DATASET --cdr-version "$CDR_VERSION"
 then
     echo "BigQuery cdr data generated"
 else
