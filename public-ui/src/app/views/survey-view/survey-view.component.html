@@ -157,7 +157,7 @@
           </div>
 
           <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
-            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
+            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer && q.selectedAnswer.stratum4.toLowerCase() != 'did not answer' " >
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=right
