@@ -79,6 +79,7 @@ export class ConceptHomepageComponent implements OnInit {
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
+  selectConceptMap = new Map<number, ConceptInfo>();
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -121,7 +122,6 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   openAddModal(): void {
-    this.selectedConcept = this.conceptTable.selectedConcepts;
     this.conceptAddModal.open();
   }
 
@@ -163,8 +163,8 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   reset() {
-    this.selectedConcept = [];
     this.rebuildSelectedConceptDomainMap();
+    this.selectConceptMap.clear();
     this.conceptDomainCounts = [];
   }
 
@@ -223,17 +223,12 @@ export class ConceptHomepageComponent implements OnInit {
           numCallsSubject.next(conceptDomain.domain);
           conceptDomain.items = response.items.map((concept) => {
             return {
-                ...concept,
+              ...concept,
               selected: false
             };
           });
-          conceptDomain.items.forEach((concept) => {
-            const exist = this.selectedConcept.find
-            (select => select.conceptId === concept.conceptId);
-            if (exist) {
-              concept.selected = true;
-            }
-          });
+          this.filterConceptSelection(conceptDomain.items);
+
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
             this.searchLoading = false;
@@ -251,17 +246,13 @@ export class ConceptHomepageComponent implements OnInit {
       conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items.map((concept) => {
       return {
-          ...concept,
+        ...concept,
         selected: false
       };
     });
-    this.concepts.forEach((concept) => {
-      const exist = this.selectedConcept.find
-      (select => select.conceptId === concept.conceptId);
-      if (exist) {
-        concept.selected = true;
-      }
-    });
+
+    this.filterConceptSelection(this.concepts);
+
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
       return {
@@ -304,7 +295,7 @@ export class ConceptHomepageComponent implements OnInit {
       standardConceptFilter: standardConceptFilter,
       domain: this.selectedDomain.domain,
       vocabularyIds: this.vocabularies
-         .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
+        .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
       maxResults: this.maxConceptFetch
     };
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
@@ -329,19 +320,26 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   selectConcept(concepts) {
-    if (concepts && concepts.length > 1 ) {
-      concepts = concepts.filter((value) => !(value === undefined || value === null));
-      this.selectedConcept = concepts.filter(
-          (e, i) => concepts.findIndex(a => a.conceptId === e.conceptId) === i);
-      concepts = this.selectedConcept;
-    }
+    // TODO Check why clr-datagrid is sending empty and duplicate values
+    concepts = concepts.filter((value) => !(value === undefined || value === null));
+    this.selectConceptMap.clear();
+    concepts.forEach((concept) => {
+      this.selectConceptMap.set(concept.conceptId, concept);
+    });
+    this.selectedConcept =  Array.from(this.selectConceptMap.values());;
+    concepts = this.selectedConcept;
+
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
       const filterConceptsCount = concepts
         .filter(concept => {
           return concept.domainId.toLowerCase() ===
             this.selectedDomain.domain.toString().toLowerCase();
+<<<<<<< HEAD
         })
+=======
+          })
+>>>>>>> PR COmments I
         .length;
       this.selectedConceptDomainMap[domainName] = filterConceptsCount;
     } else {
@@ -397,4 +395,15 @@ export class ConceptHomepageComponent implements OnInit {
   domainLoading(domain) {
     return this.searchLoading || !this.completedDomainSearches.includes(domain.domain);
   }
+
+  filterConceptSelection(concepts) {
+    concepts.forEach((concept) => {
+      const exist = this.selectedConcept
+          .find(select => select.conceptId === concept.conceptId);
+      if (exist) {
+        concept.selected = true;
+      }
+    });
+  }
+
 }
