@@ -79,7 +79,6 @@ export class ConceptHomepageComponent implements OnInit {
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
-  originalConceptList: Array<ConceptInfo> = [];
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -229,9 +228,9 @@ export class ConceptHomepageComponent implements OnInit {
             };
           });
           conceptDomain.items.forEach((concept) => {
-            const index = this.selectedConcept.find
+            const exist = this.selectedConcept.find
             (select => select.conceptId === concept.conceptId);
-            if (index ) {
+            if (exist) {
               concept.selected = true;
             }
           });
@@ -257,13 +256,12 @@ export class ConceptHomepageComponent implements OnInit {
       };
     });
     this.concepts.forEach((concept) => {
-      const index = this.selectedConcept.find
+      const exist = this.selectedConcept.find
       (select => select.conceptId === concept.conceptId);
-      if (index ) {
+      if (exist) {
         concept.selected = true;
       }
     });
-    this.originalConceptList = this.concepts;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
       return {
@@ -306,34 +304,28 @@ export class ConceptHomepageComponent implements OnInit {
       standardConceptFilter: standardConceptFilter,
       domain: this.selectedDomain.domain,
       vocabularyIds: this.vocabularies
-          .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
+         .filter(vocabulary => vocabulary.selected).map(vocabulary => vocabulary.vocabularyId),
       maxResults: this.maxConceptFetch
     };
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
-        .subscribe((response) => {
-          this.searchLoading = false;
-          this.concepts = response.items.map((vocabulary) => {
-            return {
-              ...vocabulary,
-              selected: false
-            };
-          });
-          this.selectedConcept.every((concept) => concept.selected = false);
-          this.concepts.forEach((concept) => {
-            const index = this.selectedConcept.find
-            (select => select.conceptId === concept.conceptId);
-            if (index ) {
-              concept.selected = true;
-            }
-          });
-         /* this.conceptTable.selectedConcepts =
-              this.selectedConcept.filter(value => (
-                  !(!this.concepts.find(
-                      concept => concept.conceptId === value.conceptId)
-                  )));*/
-         this.conceptTable.selectedConcepts = [];
-
+      .subscribe((response) => {
+        this.searchLoading = false;
+        this.concepts = response.items.map((vocabulary) => {
+          return {
+            ...vocabulary,
+            selected: false
+          };
         });
+        this.selectedConcept.every((concept) => concept.selected = false);
+        this.concepts.forEach((concept) => {
+          const index = this.selectedConcept.find
+            (select => select.conceptId === concept.conceptId);
+          if (index) {
+            concept.selected = true;
+          }
+        });
+        this.conceptTable.selectedConcepts = [];
+      });
   }
 
   selectConcept(concepts) {
