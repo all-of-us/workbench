@@ -1,20 +1,19 @@
 package org.pmiops.workbench.google;
 
 import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.StorageOptions;
-import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.CopyWriter;
+import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
+import com.google.cloud.storage.StorageException;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -44,19 +43,23 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     this.configProvider = configProvider;
   }
 
+  @Override
   public String readInvitationKey() {
     return readToString(getCredentialsBucketName(), "invitation-key.txt");
   }
 
+  @Override
   public String readMandrillApiKey() {
     JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
     return mandrillKeys.getString("api-key");
   }
 
+  @Override
   public String getImageUrl(String image_name) {
     return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + image_name;
   }
 
+  @Override
   public void copyAllDemoNotebooks(String workspaceBucket)  {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
@@ -68,10 +71,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
         .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
   }
 
+  @Override
   public List<JSONObject> readAllDemoCohorts() {
     return readJSONObjects("cohort", "cohort");
   }
 
+  @Override
   public List<JSONObject> readAllDemoConceptSets() {
     return readJSONObjects("concept_set", "concept_set");
   }
@@ -130,5 +135,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   public void deleteBlob(BlobId blobId) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     storage.delete(blobId);
+  }
+
+  @Override
+  public boolean blobExists(BlobId id) throws StorageException {
+    return StorageOptions.getDefaultInstance().getService().get(id) != null;
   }
 }
