@@ -338,6 +338,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   selectConcept(concepts) {
     if (concepts && concepts.length > 1 ) {
+      concepts = concepts.filter((value) => !(value === undefined || value === null));
       this.selectedConcept = concepts.filter(
           (e, i) => concepts.findIndex(a => a.conceptId === e.conceptId) === i);
       concepts = this.selectedConcept;
