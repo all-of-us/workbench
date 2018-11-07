@@ -146,13 +146,14 @@ select 0 as id,3000 as analysis_id,CAST(vo1.visit_concept_id AS STRING) as strat
 COUNT(distinct vo1.PERSON_ID) as count_value,(select COUNT(distinct vo2.person_id) from
 \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo2 where vo2.visit_source_concept_id=vo1.visit_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
-where vo1.visit_concept_id > 0
+where vo1.visit_concept_id > 0 and vo1.visit_concept_id != 8
 group by vo1.visit_concept_id
 union all
 select 0 as id,3000 as analysis_id,CAST(vo1.visit_source_concept_id AS STRING) as stratum_1,'Visit' as stratum_3,
 COUNT(distinct vo1.PERSON_ID) as count_value,COUNT(distinct vo1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.visit_occurrence\` vo1
 where vo1.visit_concept_id != vo1.visit_source_concept_id
+and vo1.visit_source_concept_id != 8
 group by vo1.visit_source_concept_id"
 
 
@@ -166,13 +167,14 @@ CAST(co1.condition_CONCEPT_ID AS STRING) as stratum_1,'Condition' as stratum_3,
 COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
 where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
-where co1.condition_concept_id > 0
+where co1.condition_concept_id > 0 and co1.condition_concept_id != 19
 group by co1.condition_CONCEPT_ID
 union all
 select 0 as id,3000 as analysis_id,CAST(co1.condition_source_concept_id AS STRING) as stratum_1,'Condition' as stratum_3,
 COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 where co1.condition_concept_id != co1.condition_source_concept_id
+and co1.condition_source_concept_id != 19
 group by co1.condition_source_concept_id"
 
 # Condition gender
@@ -398,12 +400,13 @@ CAST(po1.procedure_CONCEPT_ID AS STRING) as stratum_1,'Procedure' as stratum_3,
 COUNT(distinct po1.PERSON_ID) as count_value,
 (select COUNT(distinct po2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po2 where po2.procedure_source_CONCEPT_ID=po1.procedure_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1
-where po1.procedure_concept_id > 0
+where po1.procedure_concept_id > 0 and po1.procedure_concept_id != 10
 group by po1.procedure_CONCEPT_ID
 union all
 select 0, 3000 as analysis_id,CAST(po1.procedure_source_CONCEPT_ID AS STRING) as stratum_1,'Procedure' as stratum_3,
 COUNT(distinct po1.PERSON_ID) as count_value,
 COUNT(distinct po1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` po1 where po1.procedure_CONCEPT_ID!=po1.procedure_source_CONCEPT_ID
+and po1.procedure_source_concept_id != 10
 group by po1.procedure_source_CONCEPT_ID"
 
 #  600 Gender
@@ -577,12 +580,13 @@ select 0, 3000 as analysis_id,
 CAST(de1.drug_CONCEPT_ID AS STRING) as stratum_1,'Drug' as stratum_3,
 COUNT(distinct de1.PERSON_ID) as count_value,(select COUNT(distinct de2.PERSON_ID) from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de2 where de2.drug_source_concept_id=de1.drug_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1
-where de1.drug_concept_id > 0
+where de1.drug_concept_id > 0 and de1.drug_concept_id != 13
 group by de1.drug_CONCEPT_ID
 union all
 select 0, 3000 as analysis_id,CAST(de1.drug_source_CONCEPT_ID AS STRING) as stratum_1,'Drug' as stratum_3,
 COUNT(distinct de1.PERSON_ID) as count_value,
 COUNT(distinct de1.PERSON_ID) as source_count_value from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` de1 where de1.drug_concept_id != de1.drug_source_concept_id
+and de1.drug_source_concept_id != 13
 group by de1.drug_source_CONCEPT_ID"
 
 # Drug gender

@@ -103,6 +103,8 @@ else
   bq --project=$PROJECT mk $DATASET
 fi
 
+tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
+
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info unit_map survey_question_map person_gender_identity)
@@ -131,7 +133,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$PROJECT.$DATASET.criteria\`
  (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
 SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`"
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+"
 
 echo "Updating SNOMED PCS criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -602,8 +605,3 @@ join \`$PROJECT.$DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"
-
-
-
-
-

@@ -152,3 +152,6 @@ set participant_count =
         cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
+
+
+
