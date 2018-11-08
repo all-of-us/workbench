@@ -10,11 +10,12 @@ import {
   CohortSearchActions,
   CohortSearchState,
   demoCriteriaChildren,
-  previewStatus, participantsCount
+  participantsCount,
+  previewStatus,
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 
 const minAge = 18;
 const maxAge = 120;
@@ -148,7 +149,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
       this.subscription = this.count$
         .subscribe(item => {
-            if(item) {
+            if (item) {
               this.count = item;
             }
         });
