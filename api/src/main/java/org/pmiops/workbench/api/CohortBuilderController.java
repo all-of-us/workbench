@@ -18,6 +18,7 @@ import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 @RestController
@@ -288,8 +291,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+" + keywords[0];
     }
-    return Arrays.stream(keywords)
-      .map(term -> "+" + term + "*")
+
+    return IntStream
+      .range(0, keywords.length)
+      .mapToObj(i -> {
+        if (i == 0) {
+          return keywords[i] + "";
+        }
+        return keywords[i] + "";
+      })
       .collect(Collectors.joining());
   }
 
