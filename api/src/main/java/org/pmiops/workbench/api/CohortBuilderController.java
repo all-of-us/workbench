@@ -2,7 +2,16 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -14,23 +23,21 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.CriteriaAttributeListResponse;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TreeSubType;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
@@ -169,7 +176,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
       new ParticipantCriteria(request)));
-    QueryResult result = bigQueryService.executeQuery(qjc);
+    TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<FieldValue> row = result.iterateAll().iterator().next();
@@ -183,7 +190,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
-    QueryResult result = bigQueryService.executeQuery(qjc);
+    TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     for (List<FieldValue> row : result.iterateAll()) {

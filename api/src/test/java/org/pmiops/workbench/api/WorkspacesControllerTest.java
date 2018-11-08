@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
@@ -336,7 +336,7 @@ public class WorkspacesControllerTest {
   }
 
   private void stubBigQueryCohortCalls() {
-    QueryResult queryResult = mock(QueryResult.class);
+    TableResult queryResult = mock(TableResult.class);
     Iterable testIterable = new Iterable() {
         @Override
         public Iterator iterator() {
