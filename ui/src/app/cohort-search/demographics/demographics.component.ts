@@ -147,9 +147,9 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
 
       this.subscription = this.count$
-        .subscribe(item => {
-            if (item) {
-              this.count = item;
+        .subscribe(totalCount => {
+            if (totalCount) {
+              this.count = totalCount;
             }
         });
 
