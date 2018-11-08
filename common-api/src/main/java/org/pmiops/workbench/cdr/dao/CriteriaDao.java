@@ -62,7 +62,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
                                                              String value,
                                                              Pageable page);
 
-  @Query(value = "select c from Criteria c where c.id in :ids")
+  @Query(value = "select * from criteria c " +
+    "where c.id in (:ids) " +
+    "order by CAST(est_count AS UNSIGNED) desc", nativeQuery = true)
   List<Criteria> findCriteriaByIds(@Param("ids") List<Long> ids);
 
   @Query(value = "select * from criteria c " +
