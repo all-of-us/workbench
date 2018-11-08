@@ -98,10 +98,10 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
         + ' - ' + g.countValue.toLocaleString();
       if (g.stratum2 === this.dbc.MALE_GENDER_ID) {
         this.maleGenderResult = g;
-        this.maleGenderChartTitle = chartTitle
+        this.maleGenderChartTitle = chartTitle;
       } else if (g.stratum2 === this.dbc.FEMALE_GENDER_ID) {
         this.femaleGenderResult = g;
-        this.femaleGenderChartTitle = chartTitle
+        this.femaleGenderChartTitle = chartTitle;
       } else if (g.stratum2 === this.dbc.INTERSEX_GENDER_ID) {
         this.intersexGenderResult = g;
         this.intersexGenderChartTitle = chartTitle;
