@@ -59,7 +59,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
                                                              String value,
                                                              Pageable page);
 
-  @Query(value = "select c from Criteria c where c.id in :ids")
+  @Query(value = "select * from criteria c " +
+    "where c.id in (:ids) " +
+    "order by CAST(est_count AS UNSIGNED) desc", nativeQuery = true)
   List<Criteria> findCriteriaByIds(@Param("ids") List<Long> ids);
 
   @Query(value = "select * from criteria c " +
@@ -78,7 +80,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "order by c.name asc " +
     "limit :limit", nativeQuery = true)
   List<Criteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
-                                                 @Param("limit") Long limit);
+                                                  @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +
@@ -108,13 +110,16 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and code = :code " +
     "and is_group = 1 " +
     "and is_selectable = 1))", nativeQuery = true)
-  List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
+  List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type,
+                                                   @Param("subtype") String subtype,
+                                                   @Param("code") String code);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +
     "and (match(c.name) against(:value in boolean mode) or match(c.code) against(:value in boolean mode)) " +
     "and c.is_selectable = 1 " +
     "order by c.code asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("value") String value);
+  List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type,
+                                                 @Param("value") String value);
 
 }
