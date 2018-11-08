@@ -14,6 +14,7 @@ import {
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   CANCEL_CRITERIA_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
 
   BEGIN_COUNT_REQUEST,
   CANCEL_COUNT_REQUEST,
@@ -27,7 +28,7 @@ import {
   SHOW_ATTRIBUTES_PAGE,
 
   RootAction,
-  ActionTypes, CANCEL_AUTOCOMPLETE_REQUEST,
+  ActionTypes,
 } from './actions/types';
 
 import {
@@ -174,6 +175,9 @@ export class CohortSearchEpics {
       ({cdrVersionId, conceptId}: IngredientRequestAction) => {
         return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
           .map(result => loadIngredients(result.items))
+          .race(action$
+            .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+            .first())
           .catch(e => Observable.of(autocompleteRequestError(e)));
       }
     )

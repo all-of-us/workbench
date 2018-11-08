@@ -195,7 +195,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       }
       this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
     }
-    this.actions.clearAutocompleteOptions();
   }
 
   hideDropdown() {

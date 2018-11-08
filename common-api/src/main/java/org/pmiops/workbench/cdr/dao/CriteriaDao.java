@@ -31,11 +31,23 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
-    "    and match(synonyms, ?2) > 0 " +
+    "    and (match(synonyms, ?2) > 0 or cr.code like upper(concat(?3,'%')))" +
     "    group by cr.name")
   List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
-                                                 String value,
-                                                 Pageable page);
+                                                   String modifiedValue,
+                                                   String value,
+                                                   Pageable page);
+
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
+    "    where cr.type = upper(?1) " +
+    "    and cr.subtype = upper(?2) " +
+    "    and (match(synonyms, ?3) > 0 or cr.code like upper(concat(?4,'%')))" +
+    "    group by cr.name")
+  List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
+                                                             String subtype,
+                                                             String modifiedValue,
+                                                             String value,
+                                                             Pageable page);
 
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
