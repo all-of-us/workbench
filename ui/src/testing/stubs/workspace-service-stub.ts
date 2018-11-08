@@ -116,7 +116,7 @@ export class WorkspacesServiceStub {
   static stubWorkspaceData(): WorkspaceData {
     return {
       name: WorkspacesServiceStub.stubWorkspace().name,
-      accessLevel: WorkspaceAccessLevel.OWNER,
+      accessLevel: WorkspaceAccessLevel.OWNER
     };
   }
 
