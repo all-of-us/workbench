@@ -32,7 +32,8 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and (match(synonyms, ?2) > 0 or cr.code like upper(concat(?3,'%')))" +
-    "    group by cr.name")
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
   List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
                                                    String modifiedValue,
                                                    String value,
@@ -42,7 +43,8 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    where cr.type = upper(?1) " +
     "    and cr.subtype = upper(?2) " +
     "    and (match(synonyms, ?3) > 0 or cr.code like upper(concat(?4,'%')))" +
-    "    group by cr.name")
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
   List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                              String subtype,
                                                              String modifiedValue,
@@ -53,15 +55,14 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    where cr.type = upper(?1) " +
     "    and cr.subtype = upper(?2) " +
     "    and match(synonyms, ?3) > 0 " +
-    "    group by cr.name")
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
   List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                              String subtype,
                                                              String value,
                                                              Pageable page);
 
-  @Query(value = "select * from criteria c " +
-    "where c.id in (:ids) " +
-    "order by CAST(est_count AS UNSIGNED) desc", nativeQuery = true)
+  @Query(value = "select c from Criteria c where c.id in :ids")
   List<Criteria> findCriteriaByIds(@Param("ids") List<Long> ids);
 
   @Query(value = "select * from criteria c " +
