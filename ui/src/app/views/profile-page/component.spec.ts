@@ -124,4 +124,49 @@ describe('ProfilePageComponent', () => {
       fixture.debugElement.queryAll(By.css('#currentPositionInvalid')).length).toBeTruthy();
   }));
 
+  it('handles empty givenName field', fakeAsync( () => {
+      simulateInput(
+          fixture, fixture.debugElement.query(By.css('#givenName')), randomString(0));
+      tick(300);
+      updateAndTick(fixture);
+      expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
+      expect(fixture.debugElement.queryAll(By.css('#givenNameEmpty')).length).toBeTruthy();
+  }));
+
+  it('handles empty familyName field', fakeAsync( () => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#familyName')), randomString(0));
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.familyNameNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#familyNameEmpty')).length).toBeTruthy();
+  }));
+
+  it('handles empty current position field', fakeAsync( () => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#currentPosition')), randomString(0));
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.currentPositionNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#currentPositionEmpty')).length).toBeTruthy();
+  }));
+
+  it('handles empty organization field', fakeAsync( () => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#organization')), randomString(0));
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.organizationNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#organizationEmpty')).length).toBeTruthy();
+  }));
+
+  it('handles empty organization field', fakeAsync( () => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#areaOfResearch')), randomString(0));
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.currentResearchNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.queryAll(By.css('#currentResearchEmpty')).length).toBeTruthy();
+  }));
+
 });
