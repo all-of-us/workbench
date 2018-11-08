@@ -9,14 +9,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-
 import javax.inject.Provider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -144,6 +141,7 @@ public class UserMetricsControllerTest {
         .thenReturn(workspaceResponse2);
 
     when(cloudStorageService.blobExists(any())).thenReturn(true);
+    when(cloudStorageService.blobExists(null)).thenThrow(new NullPointerException());
 
     userMetricsController = new UserMetricsController(
         userProvider,

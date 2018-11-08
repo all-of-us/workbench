@@ -139,7 +139,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public boolean blobExists(BlobId id) throws StorageException {
-    if (null == id) { return false; }
     return StorageOptions.getDefaultInstance().getService().get(id) != null;
   }
 }

@@ -185,18 +185,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // TODO: Dispatch these requests in batch or in parallel.
     // TODO: If we find a non-existent notebook, expunge from the cache.
     Set<BlobId> foundNotebooks = workspaceFilteredResources.stream()
-          .map(r -> parseBlobId(r.getNotebookName()))
-          .filter(Objects::nonNull)
-          .limit(MAX_RECENT_NOTEBOOKS)
-          .filter(id -> {
-            try {
-              return cloudStorageService.blobExists(id);
-            } catch (StorageException e) {
-              log.log(Level.WARNING, "failed to check blob existence, assuming it exists", e);
-              return true;
-            }
-          })
-          .collect(Collectors.toSet());
+        .map(r -> parseBlobId(r.getNotebookName()))
+        .filter(Objects::nonNull)
+        .limit(MAX_RECENT_NOTEBOOKS)
+        .filter(id -> {
+          try {
+            return cloudStorageService.blobExists(id);
+          } catch (StorageException e) {
+            log.log(Level.WARNING, "failed to check blob existence, assuming it exists", e);
+            return true;
+          }
+        })
+        .collect(Collectors.toSet());
 
     RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(
