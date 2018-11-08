@@ -106,8 +106,8 @@ export const isAttributeLoading =
   () => (state): boolean =>
     state.getIn(['wizard', 'item', 'attributes', 'loading'], false);
 
-export const participantsCount = (state) =>
-  state.getIn(['wizard', 'item', 'count'], Map());
+export const participantsCount = (state): any =>
+  state.getIn(['wizard', 'item', 'count'], false);
 
 
 /**

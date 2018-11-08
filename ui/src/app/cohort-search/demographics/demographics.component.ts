@@ -14,7 +14,6 @@ import {
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
-import {getCodeOptions} from "../utils";
 import {Observable} from "rxjs/Observable";
 
 const minAge = 18;
