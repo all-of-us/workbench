@@ -1,7 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {
-  ActivatedRoute, NavigationEnd, Router
-} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
