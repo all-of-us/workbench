@@ -1,4 +1,5 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
+import {TreeType} from 'generated';
 import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
@@ -18,8 +19,9 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   constructor() { }
 
   ngOnInit() {
+    const displayName = (this.showCode ? this.option.code + ' ' : '') + this.option.name;
     this.option.displayName =
-      highlightMatches([this.searchTerm], this.option.name, this.option.id.toString());
+      highlightMatches([this.searchTerm], displayName, this.option.id.toString());
   }
 
   ngAfterViewInit() {
@@ -55,5 +57,10 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
       highlight.style.background =
         'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)';
     }
+  }
+
+  get showCode() {
+    return [TreeType.ICD9, TreeType.ICD10, TreeType.CPT, TreeType.MEAS].includes(this.option.type)
+      || (TreeType.DRUG === this.option.type && !this.option.group);
   }
 }
