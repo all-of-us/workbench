@@ -85,6 +85,7 @@ describe('WorkspaceNavBarComponent', () => {
             workspace: {
               ...WorkspacesServiceStub.stubWorkspace(),
               accessLevel: WorkspaceAccessLevel.OWNER,
+              showNavBar: true
             }
           },
           children: [
