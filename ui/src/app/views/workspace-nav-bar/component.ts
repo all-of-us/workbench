@@ -53,7 +53,6 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
       const workspace = <WorkspaceData> data.workspace;
       this.workspace = workspace;
       this.accessLevel = workspace.accessLevel;
-      this.display = workspace.showNavBar;
     };
     handleData(this.route.snapshot.data);
     this.subscriptions.push(this.route.data.subscribe(handleData));
@@ -66,11 +65,12 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.route.params.subscribe(handleParams));
 
     this.tabPath = this.getTabPath();
+    this.display = this.shouldDisplay();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
-          this.setNavBar();
+          this.display = this.shouldDisplay();
         }));
   }
 
@@ -80,10 +80,12 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  setNavBar(): void {
-    if (this.route.firstChild && this.route.firstChild.firstChild) {
-      this.display = this.route.firstChild.firstChild.snapshot.data.showNavBar;
+  private shouldDisplay(): boolean {
+    let leaf = this.route.snapshot;
+    while (leaf.firstChild != null) {
+      leaf = leaf.firstChild;
     }
+    return !leaf.data.hideNavBar;
   }
 
   private getTabPath(): string {
