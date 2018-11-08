@@ -152,6 +152,9 @@ public class QuestionConcept {
             // Add stratum5Name to the results for the ui -- ie Male, Female , Age Decile name
             for (AchillesResult r : analysis.getResults()) {
                 // Add analysis to question if need to
+                if(r.getStratum4().contains("PMI")) {
+                    r.setStratum4(r.getStratum4().replace("PMI",""));
+                }
                 Long qid = Long.valueOf(r.getStratum2());
                 QuestionConcept q = questionMap.get(qid);
 
