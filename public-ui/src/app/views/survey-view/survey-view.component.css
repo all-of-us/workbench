@@ -109,6 +109,10 @@
     padding-right: 1rem;
 }
 
-.gender-chart-button{
+.gender-chart-button {
     text-align: center;
+}
+
+.answer-text {
+    cursor: pointer;
 }
