@@ -77,5 +77,14 @@
 }
 
 .i-frame {
-  height: 0;
+  width: 104%;
+  margin-left: -.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+#seperator {
+  border-bottom: 5px solid #2691D0;
 }
