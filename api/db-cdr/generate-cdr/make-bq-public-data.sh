@@ -54,7 +54,7 @@ else
 fi
 
 tables=$(bq --project=$PUBLIC_PROJECT --dataset=$PUBLIC_DATASET ls)
-if [[ $tables =~ \\bconcept\\b ]] && [[ $tables =~ \\bachilles_results\\b ]] && [[ $tables =~ \\bconcept_relationship\\b ]] [[ $tables =~ \\bcriteria\\b ]] && [[ $tables =~ \\bsurvey_module\\b ]] && [[ $tables =~ \\bdomain_info\\b ]]; then
+if [ "$tables" =~ \\bconcept\\b ] && [ "$tables" =~ \\bachilles_results\\b ] && [ "$tables" =~ \\bconcept_relationship\\b ] [ "$tables" =~ \\bcriteria\\b ] && [ "$tables" =~ \\bsurvey_module\\b ] && [ "$tables" =~ \\bdomain_info\\b ]; then
     echo "Raw count tables exist. Carrying on."
 else
     echo "Raw count tables does not exist. Please try generating counts on this dataset before proceeding."
@@ -173,8 +173,3 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 #Drop survey_question_map table
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "drop \`$PUBLIC_PROJECT.$PUBLIC_DATASET.survey_question_map\` "
-
-
-
-
-

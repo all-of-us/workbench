@@ -294,10 +294,10 @@ Description of arguments these scripts take are as follows.
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 3. Note cdr-version can be '' to make dataset named cdr
 #### Generate public count data for use by databrowser in BigQuery from a non de-identified cdr release
-`./project.rb generate-public-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --public-project all-of-us-workbench-test --cdr-version 20181107 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb generate-public-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --public-project all-of-us-workbench-test --cdr-version 20181107 --bin-size 20 --bucket all-of-us-workbench-public-cloudsql`
 ##### Result is
 1. Public BigQuery dataset:  all-of-us-workbench-test:public20181107
-2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: public20181107/*.csv.gz 
+2. CSV dumps of tables in bucket all-of-us-workbench-public-cloudsql: public20181107/*.csv.gz 
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
 3. Note cdr-version can be '' to make dataset named public
 #### Generate cloudsql databases from a bucket without downloading the data

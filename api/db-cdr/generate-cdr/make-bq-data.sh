@@ -39,7 +39,7 @@ then
   exit 1
 fi
 
-if [ -z "${OUTPUT_PROJECT}" ] && [ -z "${OUTPUT_DATASET}" ]
+if [ -z "${OUTPUT_PROJECT}" ] || [ -z "${OUTPUT_DATASET}" ]
 then
   echo "Usage: $USAGE"
   exit 1
@@ -452,7 +452,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c join \`${BQ_PROJECT}.${BQ_DATASET
 on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class_id, c.standard_concept, c.concept_code"
 
 # Update counts and prevalence in concept
-q="select count_value from \`${PROJECT}.${DATASET}.achilles_results\` a where a.analysis_id = 1"
+q="select count_value from \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
 
 
@@ -479,12 +479,12 @@ where count_value > 0 or source_count_value > 0"
 
 # Set all_concept_count and standard_concept_count on domain_info
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.domain_info\` d
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
 set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
 (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
 SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
-\`${PROJECT}.${DATASET}.concept\` c
-join \`${PROJECT}.${DATASET}.domain_info\` d2
+\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
+join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by c.domain_id) c
@@ -493,9 +493,9 @@ where d.domain_id = c.domain_id
 
 # Set participant counts for each domain
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.domain_info\` d
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
 set d.participant_count = r.count_value from
-\`${PROJECT}.${DATASET}.achilles_results\` r
+\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
 where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
 and r.stratum_3 = d.domain_id
 and r.stratum_2 is null
@@ -507,29 +507,29 @@ and r.stratum_2 is null
 
 # Set the survey participant count on the concept
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.concept\` c1
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
 join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${PROJECT}.${DATASET}.survey_module\` sm
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
 on cr.concept_id_2=sm.concept_id
 group by cr.concept_id_2)
 where c1.concept_id=survey_concept_id"
 
 # Set the participant count on the survey_module row
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.survey_module\` sm
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
 set sm.participant_count=c.count_value from
-\`${PROJECT}.${DATASET}.concept\` c
+\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
 where c.concept_id=sm.concept_id"
 
 # Set the question participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.concept\` c1
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
 from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob join \`${BQ_PROJECT}.${BQ_DATASET}.concept_relationship\` cr
-on ob.observation_source_concept_id=cr.concept_id_1 join \`${PROJECT}.${DATASET}.survey_module\` sm
+on ob.observation_source_concept_id=cr.concept_id_1 join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
 on cr.concept_id_2 = sm.concept_id
 where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
@@ -538,13 +538,13 @@ where c1.concept_id=question_id
 
 # Set the question count on the survey_module row
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${PROJECT}.${DATASET}.survey_module\` sm
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
 set sm.question_count=num_questions from
 (select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
-\`${PROJECT}.${DATASET}.achilles_results\` r
-  join \`${PROJECT}.${DATASET}.survey_module\` sm2
+\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
+  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm2
     on r.stratum_1 = CAST(sm2.concept_id AS STRING)
-  join \`${PROJECT}.${DATASET}.concept\` qc
+  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` qc
     on r.stratum_2 = CAST(qc.concept_id AS STRING)
 where r.analysis_id = 3110 and qc.count_value > 0
   group by survey_concept_id)
