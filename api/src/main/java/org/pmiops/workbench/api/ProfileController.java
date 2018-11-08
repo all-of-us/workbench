@@ -160,13 +160,23 @@ public class ProfileController implements ProfileApiDelegate {
     return createFirecloudBillingProject(user);
   }
 
+  private void validateStringLength(String field, String fieldName, Integer max, Integer min) {
+    if (field.length() > max) {
+      throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
+    }
+    if (field.length() < min) {
+      if (min.equals(0)) {
+        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
+      } else {
+        throw new BadRequestException(String.format("%s is under character minimum. (%d)", fieldName, min));
+      }
+    }
+  }
+
   private User saveUserWithConflictHandling(User user) {
-    if (user.getGivenName().length() > 80) {
-      throw new BadRequestException("Given Name length exceeds character limit. (80)");
-    }
-    if (user.getFamilyName().length() > 80) {
-      throw new BadRequestException("Family Name length exceeds character limit. (80)");
-    }
+    validateStringLength(user.getGivenName(), "Given Name", 80, 1);
+    validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
+
     if (user.getCurrentPosition() != null && user.getCurrentPosition().length() > 255) {
       throw new BadRequestException("Current Position length exceeds character limit. (255)");
     }

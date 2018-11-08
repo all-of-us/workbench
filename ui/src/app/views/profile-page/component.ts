@@ -77,6 +77,20 @@ export class ProfilePageComponent implements OnInit {
     this.profileStorageService.reload();
   }
 
+  static valid(val: string, len: number): boolean {
+    if (val) {
+      return val.length <= len;
+    }
+    return true;
+  }
+
+  static notEmpty(val: string): boolean {
+    if (val) {
+      return val.length > 0;
+    }
+    return false;
+  }
+
   get isGivenNameValidationError(): boolean {
     if (this.workingProfile && this.workingProfile.givenName) {
       return this.workingProfile.givenName.length > 80;
@@ -86,33 +100,62 @@ export class ProfilePageComponent implements OnInit {
 
   get givenNameValid(): boolean {
     if (this.workingProfile) {
-      return this.valid(this.workingProfile.givenName, 80);
+      return (ProfilePageComponent.valid(this.workingProfile.givenName, 80));
+    }
+  }
+
+  get givenNameNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return (ProfilePageComponent.notEmpty(this.workingProfile.givenName));
     }
   }
 
   get familyNameValid(): boolean {
     if (this.workingProfile) {
-      return this.valid(this.workingProfile.familyName, 80);
+      return (ProfilePageComponent.valid(this.workingProfile.familyName, 80));
+    }
+  }
+
+  get familyNameNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return (ProfilePageComponent.notEmpty(this.workingProfile.familyName));
     }
   }
 
   get currentPositionValid(): boolean {
     if (this.workingProfile) {
-      return this.valid(this.workingProfile.currentPosition, 255);
+      return ProfilePageComponent.valid(this.workingProfile.currentPosition, 255);
+    }
+  }
+
+  get currentPositionNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return (ProfilePageComponent.notEmpty(this.workingProfile.currentPosition));
     }
   }
 
   get organizationValid(): boolean {
     if (this.workingProfile) {
-      return this.valid(this.workingProfile.organization, 255);
+      return ProfilePageComponent.valid(this.workingProfile.organization, 255);
     }
   }
 
-  valid(val: string, len: number): boolean {
-    if (val) {
-      return val.length <= len;
+  get organizationNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.organization);
     }
-    return true;
+  }
+
+  get currentResearchNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.areaOfResearch)
+    }
+  }
+
+  get allFieldsValid(): boolean {
+    return (this.givenNameValid && this.givenNameNotEmpty && this.familyNameValid && this.familyNameNotEmpty
+        && this.currentPositionValid && this.currentPositionNotEmpty && this.organizationValid
+        && this.organizationNotEmpty && this.currentResearchNotEmpty)
   }
 
   submitChanges(): void {
