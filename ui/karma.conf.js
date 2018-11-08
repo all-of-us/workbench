@@ -26,7 +26,11 @@ module.exports = function (config) {
 
     ],
     client:{
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      clearContext: false,// leave Jasmine Spec Runner output visible in browser
+      jasmine: {
+        maxPrettyPrintArrayLength: 10,
+        maxPrettyPrintDepth: 10
+      }
     },
     coverageIstanbulReporter: {
       reports: [ 'html', 'lcovonly' ],
