@@ -3,12 +3,12 @@ import 'rxjs/Rx';
 import {Injectable} from '@angular/core';
 
 import {Workspace} from 'generated';
-import {WorkspaceResponse} from 'generated';
-import {WorkspacesService} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
+import {WorkspacesService} from 'generated';
 
 export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
+  showNavBar: boolean;
 }
 
 @Injectable()
@@ -17,20 +17,23 @@ export class WorkspaceStorageService {
   // form "ns/id".
   private cache = new Map<string, Promise<WorkspaceData>>();
 
-  constructor(private workspacesService: WorkspacesService) {}
+  constructor(
+    private workspacesService: WorkspacesService,
+  ) {}
 
   private wsKey(wsNs, wsId: string): string {
     return `${wsNs}/${wsId}`;
   }
 
-  reloadWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
+  reloadWorkspace(wsNs: string, wsId: string, navBar: boolean): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     const load = this.workspacesService.getWorkspace(wsNs, wsId)
       .toPromise()
       .then((resp) => {
         return {
           ...resp.workspace,
-          accessLevel: resp.accessLevel
+          accessLevel: resp.accessLevel,
+          showNavBar: navBar
         };
       })
       .catch((e) => {
@@ -45,10 +48,10 @@ export class WorkspaceStorageService {
     return load;
   }
 
-  getWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
+  getWorkspace(wsNs: string, wsId: string, navBar: boolean): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     if (!this.cache.has(key)) {
-      return this.reloadWorkspace(wsNs, wsId);
+      return this.reloadWorkspace(wsNs, wsId, navBar);
     }
     return this.cache.get(key);
   }

@@ -1,5 +1,7 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {
+  ActivatedRoute, NavigationEnd, Router
+} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
@@ -35,6 +37,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   deleting = false;
   workspaceDeletionError = false;
   tabPath: string;
+  display = true;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -52,6 +55,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
       const workspace = <WorkspaceData> data.workspace;
       this.workspace = workspace;
       this.accessLevel = workspace.accessLevel;
+      this.display = workspace.showNavBar;
     };
     handleData(this.route.snapshot.data);
     this.subscriptions.push(this.route.data.subscribe(handleData));
@@ -68,12 +72,19 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
+          this.setNavBar();
         }));
   }
 
   ngOnDestroy() {
     for (const s of this.subscriptions) {
       s.unsubscribe();
+    }
+  }
+
+  setNavBar(): void {
+    if (this.route.firstChild && this.route.firstChild.firstChild) {
+      this.display = this.route.firstChild.firstChild.snapshot.data.showNavBar;
     }
   }
 

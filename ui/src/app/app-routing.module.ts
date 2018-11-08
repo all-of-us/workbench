@@ -96,6 +96,7 @@ const routes: Routes = [
               component: WorkspaceComponent,
               data: {
                 title: 'View Workspace Details',
+                showNavBar: true
               }
             }, {
               path: 'edit',
@@ -103,6 +104,7 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
+                showNavBar: true,
                 breadcrumb: {
                   value: 'Edit Workspace',
                 }
@@ -113,6 +115,7 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
+                showNavBar: true,
                 breadcrumb: {
                   value: 'Clone Workspace',
                 }
@@ -121,6 +124,7 @@ const routes: Routes = [
             {
               path: 'notebooks',
               data: {
+                showNavBar: true,
                 breadcrumb: {
                   value: 'Notebooks',
                   intermediate: true
@@ -131,7 +135,8 @@ const routes: Routes = [
                   path: '',
                   component: NotebookListComponent,
                   data: {
-                    title: 'View Notebooks'
+                    title: 'View Notebooks',
+                    showNavBar: true
                   }
                 }, {
                   path: ':nbName',
@@ -140,7 +145,8 @@ const routes: Routes = [
                     title: 'Notebook',
                     breadcrumb: {
                         value: 'Param: Notebook Name'
-                    }
+                    },
+                    showNavBar: false
                   }
                 }
               ]
@@ -158,12 +164,14 @@ const routes: Routes = [
                   component: CohortListComponent,
                   data: {
                     title: 'View Cohorts',
+                    showNavBar: true
                   },
                 },
                 {
                   path: 'build',
                   loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                   data: {
+                    showNavBar: true,
                     breadcrumb: {
                       value: 'Add a Cohort',
                     }
@@ -174,6 +182,7 @@ const routes: Routes = [
                   loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
                   data: {
                     title: 'Cohort',
+                    showNavBar: true,
                     breadcrumb: {
                       value: 'Param: Cohort Name',
                     }
@@ -207,6 +216,7 @@ const routes: Routes = [
                 path: '',
                 component: ConceptSetListComponent,
                 data: {
+                  showNavBar: true,
                   title: 'View Concept Sets',
                 }
               }, {
@@ -214,6 +224,7 @@ const routes: Routes = [
                 component: ConceptSetDetailsComponent,
                 data: {
                   title: 'Concept Set',
+                  showNavBar: true,
                   breadcrumb: {
                     value: 'Param: Concept Set Name',
                   }
