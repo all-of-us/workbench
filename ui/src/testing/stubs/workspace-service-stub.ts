@@ -117,7 +117,6 @@ export class WorkspacesServiceStub {
     return {
       name: WorkspacesServiceStub.stubWorkspace().name,
       accessLevel: WorkspaceAccessLevel.OWNER,
-      showNavBar: true
     };
   }
 

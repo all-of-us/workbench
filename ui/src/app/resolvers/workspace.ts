@@ -11,7 +11,6 @@ import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
  */
 export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
-  showNavBar: boolean;
 }
 
 @Injectable()
@@ -22,18 +21,12 @@ export class WorkspaceResolver implements Resolve<WorkspaceData> {
   ) {}
 
   resolve(route: ActivatedRouteSnapshot): Promise<WorkspaceData> {
-    let navBar: WorkspaceData['showNavBar'];
-    if (route.firstChild && route.firstChild.firstChild) {
-      navBar = route.firstChild.firstChild.data.showNavBar;
-    } else {
-      navBar = true;
-    }
     const ns: Workspace['namespace'] = route.params.ns;
     const wsid: Workspace['id'] = route.params.wsid;
 
     // console.log(`Resolving Workspace ${ns}/${wsid}:`);
     // console.dir(route);
 
-    return this.workspaceStorageService.getWorkspace(ns, wsid, navBar);
+    return this.workspaceStorageService.getWorkspace(ns, wsid);
   }
 }

@@ -8,7 +8,6 @@ import {WorkspacesService} from 'generated';
 
 export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
-  showNavBar: boolean;
 }
 
 @Injectable()
@@ -25,7 +24,7 @@ export class WorkspaceStorageService {
     return `${wsNs}/${wsId}`;
   }
 
-  reloadWorkspace(wsNs: string, wsId: string, navBar: boolean): Promise<WorkspaceData> {
+  reloadWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     const load = this.workspacesService.getWorkspace(wsNs, wsId)
       .toPromise()
@@ -33,7 +32,6 @@ export class WorkspaceStorageService {
         return {
           ...resp.workspace,
           accessLevel: resp.accessLevel,
-          showNavBar: navBar
         };
       })
       .catch((e) => {
@@ -48,10 +46,10 @@ export class WorkspaceStorageService {
     return load;
   }
 
-  getWorkspace(wsNs: string, wsId: string, navBar: boolean): Promise<WorkspaceData> {
+  getWorkspace(wsNs: string, wsId: string): Promise<WorkspaceData> {
     const key = this.wsKey(wsNs, wsId);
     if (!this.cache.has(key)) {
-      return this.reloadWorkspace(wsNs, wsId, navBar);
+      return this.reloadWorkspace(wsNs, wsId);
     }
     return this.cache.get(key);
   }
