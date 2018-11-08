@@ -55,6 +55,20 @@ export class ProfilePageComponent implements OnInit {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
+  static valid(val: string, len: number): boolean {
+    if (val) {
+      return val.length <= len;
+    }
+    return true;
+  }
+
+  static notEmpty(val: string): boolean {
+    if (val) {
+      return val.length > 0;
+    }
+    return false;
+  }
+
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
@@ -75,20 +89,6 @@ export class ProfilePageComponent implements OnInit {
     });
 
     this.profileStorageService.reload();
-  }
-
-  static valid(val: string, len: number): boolean {
-    if (val) {
-      return val.length <= len;
-    }
-    return true;
-  }
-
-  static notEmpty(val: string): boolean {
-    if (val) {
-      return val.length > 0;
-    }
-    return false;
   }
 
   get isGivenNameValidationError(): boolean {
@@ -148,14 +148,14 @@ export class ProfilePageComponent implements OnInit {
 
   get currentResearchNotEmpty(): boolean {
     if (this.workingProfile) {
-      return ProfilePageComponent.notEmpty(this.workingProfile.areaOfResearch)
+      return ProfilePageComponent.notEmpty(this.workingProfile.areaOfResearch);
     }
   }
 
   get allFieldsValid(): boolean {
-    return (this.givenNameValid && this.givenNameNotEmpty && this.familyNameValid && this.familyNameNotEmpty
-        && this.currentPositionValid && this.currentPositionNotEmpty && this.organizationValid
-        && this.organizationNotEmpty && this.currentResearchNotEmpty)
+    return (this.givenNameValid && this.givenNameNotEmpty && this.familyNameValid
+        && this.familyNameNotEmpty && this.currentPositionValid && this.currentPositionNotEmpty
+        && this.organizationValid && this.organizationNotEmpty && this.currentResearchNotEmpty);
   }
 
   submitChanges(): void {
