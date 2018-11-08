@@ -176,13 +176,9 @@ public class ProfileController implements ProfileApiDelegate {
   private User saveUserWithConflictHandling(User user) {
     validateStringLength(user.getGivenName(), "Given Name", 80, 1);
     validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
+    validateStringLength(user.getCurrentPosition(), "Current Position", 255, 1);
+    validateStringLength(user.getOrganization(), "Organization", 255, 1);
 
-    if (user.getCurrentPosition() != null && user.getCurrentPosition().length() > 255) {
-      throw new BadRequestException("Current Position length exceeds character limit. (255)");
-    }
-    if (user.getOrganization() != null && user.getOrganization().length() > 255) {
-      throw new BadRequestException("Organization length exceeds character limit. (255)");
-    }
     try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
