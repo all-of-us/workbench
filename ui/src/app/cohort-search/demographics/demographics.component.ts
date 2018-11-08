@@ -15,7 +15,6 @@ import {
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
 
 const minAge = 18;
 const maxAge = 120;
@@ -48,7 +47,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
-    @select(participantsCount) count$: Observable<any>;
+    @select(participantsCount) count$;
     readonly minAge = minAge;
     readonly maxAge = maxAge;
     loading = false;
