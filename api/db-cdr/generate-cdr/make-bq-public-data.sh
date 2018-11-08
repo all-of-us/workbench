@@ -54,7 +54,13 @@ else
 fi
 
 tables=$(bq --project=$PUBLIC_PROJECT --dataset=$PUBLIC_DATASET ls)
-if [ "$tables" =~ \\bconcept\\b ] && [ "$tables" =~ \\bachilles_results\\b ] && [ "$tables" =~ \\bconcept_relationship\\b ] [ "$tables" =~ \\bcriteria\\b ] && [ "$tables" =~ \\bsurvey_module\\b ] && [ "$tables" =~ \\bdomain_info\\b ]; then
+c_re=\\bconcept\\b
+cr_re=\\bconcept_relationship\\b
+ar_re=\\bachilles_results\\b
+cri_re=\\bcriteria\\b
+sm_re=\\bsurvey_module\\b
+di_re=\\bdomain_info\\b
+if [[ "$tables" =~ $c_re ]] && [[ "$tables" =~ $ar_re ]] && [[ "$tables" =~ $cr_re ]] && [[ "$tables" =~ $cri_re ]] && [[ "$tables" =~ $sm_re ]] && [[ "$tables" =~ $di_re ]]; then
     echo "Raw count tables exist. Carrying on."
 else
     echo "Raw count tables does not exist. Please try generating counts on this dataset before proceeding."
