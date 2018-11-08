@@ -40,16 +40,16 @@ export class ChartComponent implements OnChanges {
 
   public isSurveyGenderAnalysis() {
     return this.analysis ?
-        (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ||
-        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
-        : false;
+      (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+      : false;
   }
 
   public isGenderIdentityAnalysis() {
     return this.analysis ?
-        (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
-        this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
-        : false;
+      (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+      : false;
   }
 
   public hcChartOptions(): any {
@@ -170,10 +170,10 @@ export class ChartComponent implements OnChanges {
       return this.makeGenderChartOptions();
     }
 
-      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
-          this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
-          return this.makeGenderChartOptions();
-      }
+    if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+      return this.makeGenderChartOptions();
+    }
 
     /* Todo make charts for ethniticy and race
      * maybe cleanup / generalize pie chart
@@ -206,13 +206,13 @@ export class ChartComponent implements OnChanges {
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0;
       }
     );
     cats = cats.sort((a, b) => {
@@ -260,13 +260,13 @@ export class ChartComponent implements OnChanges {
 
     // Sort by count value
     this.concepts = this.concepts.sort((a, b) => {
-        if (a.countValue < b.countValue) {
-          return 1;
-        }
-        if (a.countValue > b.countValue) {
-          return -1;
-        }
-        return 0;
+      if (a.countValue < b.countValue) {
+        return 1;
+      }
+      if (a.countValue > b.countValue) {
+        return -1;
+      }
+      return 0;
       }
     );
 
@@ -340,13 +340,13 @@ export class ChartComponent implements OnChanges {
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0;
       }
     );
     cats = cats.sort((a, b) => {
@@ -391,15 +391,15 @@ export class ChartComponent implements OnChanges {
     // Age results have two stratum-- 1 is concept, 2 is age decile
     // Sort by age decile (stratum2 or stratum5)
     results = results.sort((a, b) => {
-        const anum = Number(a[ageDecileStratum]);
-        const bnum = Number(b[ageDecileStratum]);
-        if (anum > bnum) {
-          return 1;
-        }
-        if (anum < bnum) {
-          return -1;
-        }
-        return 0;
+      const anum = Number(a[ageDecileStratum]);
+      const bnum = Number(b[ageDecileStratum]);
+      if (anum > bnum) {
+        return 1;
+      }
+      if (anum < bnum) {
+        return -1;
+      }
+      return 0;
       }
     );
     const data = [];
