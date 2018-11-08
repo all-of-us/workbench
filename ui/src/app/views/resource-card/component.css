@@ -82,7 +82,7 @@
 
 .card .footer {
   position: absolute;
-  bottom: .01rem;
+  bottom: -0.05rem;
 }
 
 .last-modified {
