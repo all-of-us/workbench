@@ -22,7 +22,7 @@ describe('WorkspaceStorageService', () => {
     spyOn(TestBed.get(WorkspacesService), 'getWorkspace')
       .and.callThrough();
     service.getWorkspace(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, true);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
     tick();
     expect(TestBed.get(WorkspacesService).getWorkspace)
       .toHaveBeenCalledWith(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -34,10 +34,10 @@ describe('WorkspaceStorageService', () => {
     spyOn(TestBed.get(WorkspacesService), 'getWorkspace')
       .and.callThrough();
     service.getWorkspace(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, true);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
     tick();
     service.getWorkspace(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, true);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
     tick();
     expect(TestBed.get(WorkspacesService).getWorkspace).toHaveBeenCalledTimes(1);
   }));
