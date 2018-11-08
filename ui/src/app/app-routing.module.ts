@@ -131,7 +131,7 @@ const routes: Routes = [
                   path: '',
                   component: NotebookListComponent,
                   data: {
-                    title: 'View Notebooks',
+                    title: 'View Notebooks'
                   }
                 }, {
                   path: ':nbName',

@@ -2,9 +2,11 @@ import 'rxjs/Rx';
 
 import {Injectable} from '@angular/core';
 
-import {Workspace} from 'generated';
-import {WorkspaceAccessLevel} from 'generated';
-import {WorkspacesService} from 'generated';
+import {
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspacesService
+} from 'generated';
 
 export interface WorkspaceData extends Workspace {
   accessLevel: WorkspaceAccessLevel;
@@ -16,9 +18,7 @@ export class WorkspaceStorageService {
   // form "ns/id".
   private cache = new Map<string, Promise<WorkspaceData>>();
 
-  constructor(
-    private workspacesService: WorkspacesService,
-  ) {}
+  constructor(private workspacesService: WorkspacesService) {}
 
   private wsKey(wsNs, wsId: string): string {
     return `${wsNs}/${wsId}`;
@@ -31,7 +31,7 @@ export class WorkspaceStorageService {
       .then((resp) => {
         return {
           ...resp.workspace,
-          accessLevel: resp.accessLevel,
+          accessLevel: resp.accessLevel
         };
       })
       .catch((e) => {
