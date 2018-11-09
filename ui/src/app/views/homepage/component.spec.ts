@@ -18,6 +18,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {CohortsService} from 'generated/api/cohorts.service';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
@@ -35,7 +36,6 @@ import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;

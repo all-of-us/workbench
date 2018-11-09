@@ -15,6 +15,7 @@ import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
@@ -30,7 +31,6 @@ import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
-import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
 
 
 describe('RecentWorkComponent', () => {
