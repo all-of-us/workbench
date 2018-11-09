@@ -30,17 +30,20 @@ export class ConceptSetsServiceStub {
         id: 345,
         name: 'Mock Concept Set',
         description: 'Mocked for tests',
-        domain: Domain.CONDITION
+        domain: Domain.CONDITION,
+        lastModifiedTime: new Date().getTime() - 8000
       },  {
         id: 346,
         name: 'Mock Concept Set Measurement',
         description: 'Mocked for tests',
-        domain: Domain.MEASUREMENT
+        domain: Domain.MEASUREMENT,
+        lastModifiedTime: new Date().getTime()
       },  {
         id: 347,
         name: 'Mock Concept Set for condition',
         description: 'Mocked for tests',
-        domain: Domain.CONDITION
+        domain: Domain.CONDITION,
+        lastModifiedTime: new Date().getTime() + 8000
       }
     ];
   }

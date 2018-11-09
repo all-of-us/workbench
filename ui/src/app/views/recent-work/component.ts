@@ -4,6 +4,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {
   CohortsService,
+  ConceptSetsService,
   RecentResource,
   UserMetricsService,
   Workspace,
@@ -35,6 +36,7 @@ export class RecentWorkComponent implements OnInit {
     private userMetricsService: UserMetricsService,
     private workspacesService: WorkspacesService,
     private cohortsService: CohortsService,
+    private conceptSetService: ConceptSetsService,
     private route: ActivatedRoute,
   ) {}
   index: Number;
@@ -81,13 +83,17 @@ export class RecentWorkComponent implements OnInit {
         .getNoteBookList(this.workspace.namespace, this.workspace.id);
       const cohortCall = this.cohortsService
         .getCohortsInWorkspace(this.workspace.namespace, this.workspace.id);
-      Observable.forkJoin(notebookCall, cohortCall)
-        .subscribe(([notebooks, cohorts]) => {
+      const conceptCall = this.conceptSetService
+        .getConceptSetsInWorkspace(this.workspace.namespace, this.workspace.id)
+      Observable.forkJoin(notebookCall, cohortCall, conceptCall)
+        .subscribe(([notebooks, cohorts, concepts]) => {
           const notebookResources = convertToResources(notebooks, this.workspace.namespace,
             this.workspace.id, this.accessLevel, ResourceType.NOTEBOOK);
           const cohortResources = convertToResources(cohorts.items, this.workspace.namespace,
             this.workspace.id, this.accessLevel, ResourceType.COHORT);
-          this.fullList = notebookResources.concat(cohortResources);
+          const conceptResources = convertToResources(concepts.items, this.workspace.namespace,
+              this.workspace.id, this.accessLevel, ResourceType.CONCEPT_SET);
+          this.fullList = notebookResources.concat(cohortResources).concat(conceptResources);
           this.fullList.sort((leftSide, rightSide): number => {
             if (leftSide.modifiedTime < rightSide.modifiedTime) { return 1; }
             if (leftSide.modifiedTime > rightSide.modifiedTime) { return -1; }

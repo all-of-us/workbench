@@ -30,6 +30,7 @@ import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
+import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
 
 
 describe('RecentWorkComponent', () => {
@@ -57,7 +58,7 @@ describe('RecentWorkComponent', () => {
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
-        {provide: ConceptSetsService },
+        {provide: ConceptSetsService, useValue: new ConceptSetsServiceStub()},
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
         {provide: UserMetricsService, useValue: spy},
@@ -86,10 +87,11 @@ describe('RecentWorkComponent', () => {
     updateAndTick(fixture);
     updateAndTick(fixture);
     const cardsOnPage = fixture.debugElement.queryAll(By.css('.card'));
-    expect(cardsOnPage.length).toEqual(3);
+    expect(cardsOnPage.length).toEqual(4);
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
-    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile']);
+    expect(cardNames)
+        .toEqual(['Mock Concept Set for condition', 'sample name', 'sample name 2', 'Mock Concept Set Measurement']);
   }));
 
   // test that it displays 4 most recent resources from UserMetrics cache

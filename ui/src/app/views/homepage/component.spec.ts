@@ -35,6 +35,7 @@ import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
+import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
 
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;
@@ -65,6 +66,7 @@ describe('HomepageComponent', () => {
       ],
       providers: [
         {provide: CohortsService},
+        {provide: ConceptSetsService },
         {provide: ProfileService, useValue: profileStub},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: WorkspacesService },
