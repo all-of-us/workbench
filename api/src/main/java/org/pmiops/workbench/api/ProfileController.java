@@ -160,7 +160,7 @@ public class ProfileController implements ProfileApiDelegate {
     return createFirecloudBillingProject(user);
   }
 
-  private void validateStringLength(String field, String fieldName, Integer max, Integer min) {
+  private void validateStringLength(String field, String fieldName, int max, int min) {
     if (field == null) {
       throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
     }
@@ -168,7 +168,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
     }
     if (field.length() < min) {
-      if (min.equals(0)) {
+      if (min == 1) {
         throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
       } else {
         throw new BadRequestException(String.format("%s is under character minimum. (%d)", fieldName, min));
