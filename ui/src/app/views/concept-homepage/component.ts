@@ -221,14 +221,9 @@ export class ConceptHomepageComponent implements OnInit {
         .subscribe((response) => {
           numCalls += 1;
           numCallsSubject.next(conceptDomain.domain);
-          conceptDomain.items = response.items.map((concept) => {
-            return {
-              ...concept,
-              selected: false
-            };
-          });
-          this.filterConceptSelection(conceptDomain.items);
 
+          this.filterConceptSelection(response.items);
+          conceptDomain.items = response.items;
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
             this.searchLoading = false;
@@ -250,9 +245,8 @@ export class ConceptHomepageComponent implements OnInit {
         selected: false
       };
     });
-
-    this.filterConceptSelection(this.concepts);
-
+    this.filterConceptSelection(cacheItem.items);
+    this.concepts = cacheItem.items;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
       return {
@@ -301,26 +295,20 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
       .subscribe((response) => {
         this.searchLoading = false;
-        this.concepts = response.items.map((vocabulary) => {
-          return {
-            ...vocabulary,
-            selected: false
-          };
-        });
+        this.filterConceptSelection(response.items);
+        this.concepts = response.items;
         this.selectedConcept.every((concept) => concept.selected = false);
-        this.filterConceptSelection(this.concepts);
         this.conceptTable.selectedConcepts = [];
       });
   }
 
   selectConcept(concepts) {
     // TODO Check why clr-datagrid is sending empty and duplicate values
-    concepts = concepts.filter((value) => !(value === undefined || value === null));
     this.selectConceptMap.clear();
     concepts.forEach((concept) => {
       this.selectConceptMap.set(concept.conceptId, concept);
     });
-    this.selectedConcept =  Array.from(this.selectConceptMap.values());
+    this.selectedConcept =  concepts;
     concepts = this.selectedConcept;
 
     const domainName = this.selectedDomain.domain;
@@ -386,13 +374,9 @@ export class ConceptHomepageComponent implements OnInit {
     return this.searchLoading || !this.completedDomainSearches.includes(domain.domain);
   }
 
-  filterConceptSelection(concepts) {
+  private filterConceptSelection(concepts) {
     concepts.forEach((concept) => {
-      const exist = this.selectConceptMap.get(concept.conceptId);
-      if (exist) {
-        concept.selected = true;
-      }
+      concept.selected = this.selectConceptMap.has(concept.conceptId);
     });
   }
-
 }
