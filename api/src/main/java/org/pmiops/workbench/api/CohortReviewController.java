@@ -2,10 +2,25 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -56,22 +71,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -250,7 +249,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -357,7 +356,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       participantCounter.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -389,7 +388,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       reviewQueryBuilder.buildChartDataQuery(participantId, DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -487,7 +486,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DomainType domain = ((ReviewFilter) request).getDomain();
     PageRequest pageRequest = createPageRequest(request);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -572,7 +571,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(
+    TableResult result = bigQueryService.executeQuery(
       bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
         new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -591,7 +590,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * @return
    */
   private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
-                                                                            QueryResult result,
+                                                                            TableResult result,
                                                                             Map<String, Integer> rm) {
     List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
     for (List<FieldValue> row : result.iterateAll()) {

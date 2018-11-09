@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import org.junit.After;
 import org.junit.Before;
@@ -940,7 +940,7 @@ public class CohortReviewControllerTest {
   }
 
   private void stubBigQueryCohortCalls() {
-    QueryResult queryResult = mock(QueryResult.class);
+    TableResult queryResult = mock(TableResult.class);
     Iterable testIterable = new Iterable() {
       @Override
       public Iterator iterator() {

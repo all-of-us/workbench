@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -701,7 +701,7 @@ public class FieldSetQueryBuilder {
   public Iterable<Map<String, Object>> materializeTableQuery(TableQueryAndConfig tableQueryAndConfig,
       ParticipantCriteria criteria, int limit, long offset) {
     QueryConfiguration queryConfiguration = buildQuery(criteria, tableQueryAndConfig, (long) limit, offset);
-    QueryResult result;
+    TableResult result;
     QueryJobConfiguration jobConfiguration = queryConfiguration.getQueryJobConfiguration();
     result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(jobConfiguration));
     return Iterables.transform(result.iterateAll(),
