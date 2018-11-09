@@ -84,7 +84,7 @@ export class RecentWorkComponent implements OnInit {
       const cohortCall = this.cohortsService
         .getCohortsInWorkspace(this.workspace.namespace, this.workspace.id);
       const conceptCall = this.conceptSetService
-        .getConceptSetsInWorkspace(this.workspace.namespace, this.workspace.id)
+        .getConceptSetsInWorkspace(this.workspace.namespace, this.workspace.id);
       Observable.forkJoin(notebookCall, cohortCall, conceptCall)
         .subscribe(([notebooks, cohorts, concepts]) => {
           const notebookResources = convertToResources(notebooks, this.workspace.namespace,
