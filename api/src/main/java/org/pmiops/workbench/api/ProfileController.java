@@ -161,6 +161,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private void validateStringLength(String field, String fieldName, Integer max, Integer min) {
+    if (field == null) {
+      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
+    }
     if (field.length() > max) {
       throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
     }
@@ -178,6 +181,7 @@ public class ProfileController implements ProfileApiDelegate {
     validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
     validateStringLength(user.getCurrentPosition(), "Current Position", 255, 1);
     validateStringLength(user.getOrganization(), "Organization", 255, 1);
+    validateStringLength(user.getAreaOfResearch(), "Current Research", 10000, 1);
 
     try {
       return userDao.save(user);
