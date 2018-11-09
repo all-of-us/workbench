@@ -1306,7 +1306,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       DomainType.DRUG.name(),
       10).getBody();
     assertEquals(1, response.getItems().size());
-    assertEquals(new CohortChartData().name("name11").conceptId(11L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name11").conceptId(1L).count(1L), response.getItems().get(0));
   }
 
   @Test

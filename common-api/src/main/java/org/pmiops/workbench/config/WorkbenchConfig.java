@@ -28,6 +28,7 @@ public class WorkbenchConfig {
     public String registeredDomainName;
     public boolean enforceRegistered;
     public String jupyterUserScriptUri;
+    public String jupyterPlaygroundExtensionUri;
     public String leoBaseUrl;
     public Integer billingRetryCount;
   }

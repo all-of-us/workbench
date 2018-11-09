@@ -4,6 +4,9 @@ import {By} from '@angular/platform-browser';
 
 import {QuickTourModalComponent} from './component';
 
+import {ExpandComponent} from 'app/icons/expand/component';
+import {ShrinkComponent} from 'app/icons/shrink/component';
+
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 describe('QuickTourModalComponent', () => {
@@ -12,7 +15,11 @@ describe('QuickTourModalComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [],
-      declarations: [QuickTourModalComponent],
+      declarations: [
+        ExpandComponent,
+        ShrinkComponent,
+        QuickTourModalComponent
+      ],
       providers: []
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(QuickTourModalComponent);

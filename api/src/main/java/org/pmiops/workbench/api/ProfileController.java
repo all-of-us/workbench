@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -12,10 +14,12 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -31,6 +35,7 @@ import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -162,8 +167,11 @@ public class ProfileController implements ProfileApiDelegate {
     if (user.getFamilyName().length() > 80) {
       throw new BadRequestException("Family Name length exceeds character limit. (80)");
     }
-    if (user.getAreaOfResearch() != null && user.getAreaOfResearch().length() > 255) {
-      throw new BadRequestException("Area of Research length exceeds character limit. (255)");
+    if (user.getCurrentPosition() != null && user.getCurrentPosition().length() > 255) {
+      throw new BadRequestException("Current Position length exceeds character limit. (255)");
+    }
+    if (user.getOrganization() != null && user.getOrganization().length() > 255) {
+      throw new BadRequestException("Organization length exceeds character limit. (255)");
     }
     try {
       return userDao.save(user);
@@ -393,9 +401,15 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    userService.createUser(request.getProfile().getGivenName(),
+    User user = userService.createUser(
+        request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
+        googleUser.getPrimaryEmail(),
+        request.getProfile().getContactEmail(),
+        request.getProfile().getCurrentPosition(),
+        request.getProfile().getOrganization(),
+        request.getProfile().getAreaOfResearch()
+    );
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
@@ -403,9 +417,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new WorkbenchException(e);
     }
 
-    // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
-    // doesn't allow this. Fix.
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return getProfileResponse(user);
   }
 
   @Override
@@ -458,6 +470,15 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
+  private void checkUserCreationNonce(User user, String nonce) {
+    if (Strings.isNullOrEmpty(nonce)) {
+      throw new BadRequestException("missing required creationNonce");
+    }
+    if (user.getCreationNonce() == null || !nonce.equals(user.getCreationNonce().toString())) {
+      throw new UnauthorizedException("invalid creationNonce provided");
+    }
+  }
+
   /*
    * This un-authed API method is limited such that we only allow contact email updates before the user has signed in
    * with the newly created gsuite account. Once the user has logged in, they can change their contact email through
@@ -469,10 +490,11 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
-    String newEmail = updateContactEmailRequest.getContactEmail();
+    checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    String newEmail = updateContactEmailRequest.getContactEmail();
     try {
       new InternetAddress(newEmail).validate();
     } catch (AddressException e) {
@@ -489,6 +511,7 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
+    checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -532,6 +555,8 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setOrganization(updatedProfile.getOrganization());
+    user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
 

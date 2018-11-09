@@ -6,11 +6,12 @@ import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-    activeParameterList,
-    CohortSearchActions,
-    CohortSearchState,
-    demoCriteriaChildren,
-    previewStatus, totalCount
+  activeParameterList,
+  CohortSearchActions,
+  CohortSearchState,
+  demoCriteriaChildren,
+  participantsCount,
+  previewStatus,
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
@@ -46,6 +47,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
+    @select(participantsCount) count$;
     readonly minAge = minAge;
     readonly maxAge = maxAge;
     loading = false;
@@ -143,10 +145,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             .subscribe(sel => this.noSelection = sel)
         );
 
-        this.subscription.add(this.ngRedux
-            .select(totalCount)
-            .subscribe(participantCount => this.count = participantCount)
-        );
+
+      this.subscription = this.count$
+        .subscribe(totalCount => {
+            if (totalCount) {
+              this.count = totalCount;
+            }
+        });
 
         this.subscription.add (this.ngRedux
             .select(activeParameterList)

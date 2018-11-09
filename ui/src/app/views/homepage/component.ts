@@ -10,6 +10,7 @@ import {
   BillingProjectStatus,
   DataAccessLevel,
   IdVerificationStatus,
+  PageVisit,
   Profile,
   ProfileService
 } from 'generated';
@@ -20,6 +21,7 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
+  private static pageId = 'homepage';
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -38,6 +40,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
+  firstVisit = true;
+  newPageVisit: PageVisit = { page: HomepageComponent.pageId};
   footerLinks = [
     {
       title: 'Working Within Researcher Workbench',
@@ -73,10 +77,21 @@ export class HomepageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.profileStorageService.profile$.subscribe((profile) => {
-      if (profile.firstSignInTime === undefined) {
+    this.profileService.getMe().subscribe(profile => {
+      if (profile.pageVisits) {
+        this.firstVisit = !profile.pageVisits.some(v =>
+        v.page === HomepageComponent.pageId);
+      }
+    },
+      e => {},
+      () => {
+      if (this.firstVisit) {
         this.openQuickTour();
       }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
+    this.profileStorageService.profile$.subscribe((profile) => {
+      // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {

@@ -1,17 +1,22 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Random;
+
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +52,7 @@ import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -185,6 +191,11 @@ public class ConceptSetsControllerTest {
     Clock clock() {
       return CLOCK;
     }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
+    }
   }
 
   @Before
@@ -193,8 +204,9 @@ public class ConceptSetsControllerTest {
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider,
-            fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
+        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, conceptSetDao, userDao,
+                userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
+                userRecentResourceService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);

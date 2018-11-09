@@ -70,9 +70,13 @@
     <div class="chart-box lower-box">
       <div class="chart-selector-tabs">
         <div *ngFor="let domain of conceptDomainCounts" class="chart-selector-tab">
-          <button (click)="selectDomain(domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain.domain" [disabled]="searchLoading || !completedDomainSearches.includes(domain.domain)">
+          <button (click)="selectDomain(domain)" class="domain-selector-button btn btn-link nav-link nav-item" [class.active]="domain.domain === selectedDomain.domain" [class.spinnerloading]="domainLoading(domain)"
+                  [disabled]="domainLoading(domain)">
             <div class="chart-selector-header">
               {{domain.name}}
+              <span class="spinner spinner-sm spinner-inline" *ngIf="domainLoading(domain)"
+              style="margin-left:0.5rem;width:18px;">
+               </span>
             </div>
             <div class="flex-flow: row">
               <div style="margin-left:0">{{domain.conceptCount}}</div>

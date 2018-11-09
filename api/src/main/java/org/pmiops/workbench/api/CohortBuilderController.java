@@ -2,7 +2,16 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -14,22 +23,21 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.ConceptIdName;
+import org.pmiops.workbench.model.CriteriaAttributeListResponse;
+import org.pmiops.workbench.model.CriteriaListResponse;
+import org.pmiops.workbench.model.DemoChartInfo;
+import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TreeSubType;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
@@ -117,9 +125,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     String matchExp = modifyKeywordMatch(value);
     List<CriteriaId> ids;
     if (subtype == null) {
-      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     } else {
-      ids = criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue()));
+      ids = type.equals(TreeType.SNOMED.name()) ?
+        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
+        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     }
 
     List<Criteria> criteriaList = ids.isEmpty() ?
@@ -166,7 +176,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
       new ParticipantCriteria(request)));
-    QueryResult result = bigQueryService.executeQuery(qjc);
+    TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<FieldValue> row = result.iterateAll().iterator().next();
@@ -180,7 +190,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
-    QueryResult result = bigQueryService.executeQuery(qjc);
+    TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     for (List<FieldValue> row : result.iterateAll()) {
@@ -282,12 +292,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       throw new BadRequestException(
         String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
     }
-    String[] keywords = value.split("[,+\\s+]");
+    String[] keywords = value.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0] + "\"";
     }
-    return Arrays.stream(keywords)
-      .map(term -> "+" + term + "*")
+
+    return IntStream
+      .range(0, keywords.length)
+      .filter(i -> keywords[i].length() > 2)
+      .mapToObj(i -> {
+        if (i == 0 && keywords.length > 1) {
+          return "+\"" + keywords[i] + "\"";
+        }
+        return "+" + keywords[i] + "*";
+      })
       .collect(Collectors.joining());
   }
 

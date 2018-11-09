@@ -55,6 +55,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   demoParam: string;
   count = 0;
   originalNode: any;
+  disableCursor = false;
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -99,11 +100,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
-      .filter(nodeId => !!nodeId)
-      .subscribe(nodeId => {
-        if (nodeId) {
-          this.setScroll(nodeId);
-        }
+      .filter(nodeIds => !!nodeIds)
+      .subscribe(nodeIds => {
+        this.setScroll(nodeIds[0]);
       })
     );
 
@@ -142,12 +141,18 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
   setScroll(nodeId: string) {
     let node: any;
+    this.disableCursor = true;
     Observable.interval(100)
-      .takeWhile(() => !node)
+      .takeWhile((val, index) => !node && index < 30)
       .subscribe(i => {
         node = document.getElementById('node' + nodeId.toString());
-        if (node && i < 100) {
-          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (node) {
+          setTimeout(() => {
+            node.scrollIntoView({behavior: 'smooth'});
+            this.disableCursor = false;
+          }, 200);
+        } else if (i === 29) {
+          this.disableCursor = false;
         }
       });
   }
@@ -159,7 +164,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   cancel() {
     this.selections = {};
     this.open = false;
-    this.actions.cancelWizard();
+    this.actions.cancelWizard(this.ctype, 0);
   }
 
   back() {
@@ -216,7 +221,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   get showModifiers() {
-    return this.itemType !== TreeType[TreeType.PM] || this.itemType !== TreeType[TreeType.DEMO];
+    return this.itemType !== TreeType[TreeType.PM] &&
+          this.itemType !== TreeType[TreeType.DEMO] &&
+          this.itemType !== TreeType[TreeType.PPI];
   }
 
   get showHeader() {

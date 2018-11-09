@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -11,13 +12,16 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
+
 import javax.inject.Provider;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +49,7 @@ import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -147,7 +152,9 @@ public class ClusterControllerTest {
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
 
-    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, CLOCK, fireCloudService, configProvider);
+    UserService userService = new UserService(
+        userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
+        fireCloudService, configProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
@@ -242,6 +249,7 @@ public class ClusterControllerTest {
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
     req.setNotebookNames(ImmutableList.of("foo.ipynb"));
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
@@ -261,11 +269,31 @@ public class ClusterControllerTest {
   }
 
   @Test
+  public void testLocalizePlaygroundMode() throws Exception {
+    ClusterLocalizeRequest req = new ClusterLocalizeRequest();
+    req.setWorkspaceNamespace(WORKSPACE_NS);
+    req.setWorkspaceId(WORKSPACE_ID);
+    req.setNotebookNames(ImmutableList.of("foo.ipynb"));
+    req.setPlaygroundMode(true);
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
+    ClusterLocalizeResponse resp =
+      clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();
+    assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces:playground/wsid");
+    verify(notebookService).localize(eq(WORKSPACE_NS), eq("cluster"), mapCaptor.capture());
+    Map<String, String> localizeMap = mapCaptor.getValue();
+    JSONObject aouJson = dataUriToJson(localizeMap.get("~/workspaces:playground/wsid/.all_of_us_config.json"));
+    assertThat(aouJson.getString("WORKSPACE_ID")).isEqualTo(WORKSPACE_ID);
+    assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(WORKSPACE_NS);
+    assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
+  }
+
+  @Test
   public void testLocalize_differentNamespace() throws Exception {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
     req.setNotebookNames(ImmutableList.of("foo.ipynb"));
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize("other-proj", "cluster", req).getBody();
@@ -284,6 +312,7 @@ public class ClusterControllerTest {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);
+    req.setPlaygroundMode(false);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     ClusterLocalizeResponse resp =
         clusterController.localize(WORKSPACE_NS, "cluster", req).getBody();

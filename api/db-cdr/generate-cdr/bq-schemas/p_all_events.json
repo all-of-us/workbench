@@ -28,7 +28,12 @@
 	"mode": "NULLABLE",
 	"name": "standard_code",
 	"type": "STRING"
-	}, 
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "standard_concept_id",
+	"type": "integer"
+	},
 	{
 	"mode": "NULLABLE", 
 	"name": "standard_vocabulary",
@@ -43,6 +48,11 @@
 	"mode": "NULLABLE",
 	"name": "source_code",
 	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "source_concept_id",
+	"type": "integer"
 	},
 	{
 	"mode": "NULLABLE", 

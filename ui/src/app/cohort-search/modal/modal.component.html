@@ -59,17 +59,21 @@
               </crit-demographics>
 
               <ng-container *ngSwitchDefault>
+                <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
+                  Loading...
+                </div>
                 <div
                   id="tree"
                   class="panel"
+                  [ngClass]="{'disable-tree':disableCursor}"
                   [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes' || mode === 'snomed'">
-                  <!-- Tree Page -->
-                  <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-tree [node]="rootNode"></crit-tree>
-                  </div>
                    <!-- SNOMED Search -->
                   <div *ngIf="showSnomed" class="panel-left" [class.show]="mode === 'snomed'">
                     <crit-tree [node]="snomedNode"></crit-tree>
+                  </div>
+                  <!-- Tree Page -->
+                  <div class="panel-left" [class.show]="mode === 'tree'">
+                    <crit-tree [node]="rootNode"></crit-tree>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">

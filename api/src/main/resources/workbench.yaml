@@ -243,7 +243,7 @@ paths:
           schema:
             $ref: "#/definitions/CreateAccountRequest"
       responses:
-        201:
+        200:
           description: Account created successfully.
           schema:
             $ref: "#/definitions/Profile"
@@ -1830,16 +1830,21 @@ definitions:
     type: object
     required:
       - username
+      - creationNonce
     properties:
       username:
         type: string
         description: Username of account to resend welcome email to
+      creationNonce:
+        type: string
+        description: The nonce returned from the account creation API.
 
   UpdateContactEmailRequest:
     type: object
     required:
       - contactEmail
       - username
+      - creationNonce
     properties:
       contactEmail:
         type: string
@@ -1847,6 +1852,9 @@ definitions:
       username:
         type: string
         description: Username for account.
+      creationNonce:
+        type: string
+        description: The nonce returned from the account creation API.
 
   BugReport:
     type: object
@@ -1889,6 +1897,11 @@ definitions:
       username:
         description: researchallofus username
         type: string
+      creationNonce:
+        description: >
+          A value which can be used to secure API calls during the account
+          creation flow, prior to account login.
+        type: string
       contactEmail:
         description: email address that can be used to contact the user
         type: string
@@ -1918,6 +1931,12 @@ definitions:
         type: string
       phoneNumber:
         description: the user's phone number
+        type: string
+      currentPosition:
+        description: the user's curent position (job title)
+        type: string
+      organization:
+        description: the user's current organization
         type: string
       authorities:
         description: authorities granted to this user
@@ -2067,6 +2086,7 @@ definitions:
       - workspaceNamespace
       - workspaceId
       - notebookNames
+      - playgroundMode
     properties:
       workspaceNamespace:
         type: string
@@ -2082,6 +2102,9 @@ definitions:
           within the provided workspace's Google Cloud Storage bucket.
         items:
           type: string
+      playgroundMode:
+        type: boolean
+        description: Set to true if playgroundMode needed
 
   ClusterLocalizeResponse:
     type: object

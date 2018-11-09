@@ -4,6 +4,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -18,16 +19,20 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
@@ -38,23 +43,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.CloneWorkspaceRequest;
-import org.pmiops.workbench.model.CloneWorkspaceResponse;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
-import org.pmiops.workbench.model.ShareWorkspaceRequest;
-import org.pmiops.workbench.model.ShareWorkspaceResponse;
-import org.pmiops.workbench.model.UpdateWorkspaceRequest;
-import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.model.WorkspaceListResponse;
-import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.model.WorkspaceResponseListResponse;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +65,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
+  private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
   private final FireCloudService fireCloudService;
@@ -89,6 +79,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
+      ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
       FireCloudService fireCloudService,
@@ -99,6 +90,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
+    this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
@@ -411,9 +403,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       try {
         dbCohort = cohortDao.save(dbCohort);
       } catch (DataIntegrityViolationException e) {
-        throw new BadRequestException(String.format(
+        throw new ServerErrorException(String.format(
             "Cohort \"/%s/%s/%d\" already exists.",
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+      }
+    }
+
+    List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
+    for (JSONObject conceptSet: demoConceptSets) {
+      ConceptSet dbConceptSet = new ConceptSet();
+
+      dbConceptSet.setName(conceptSet.getString("name"));
+      dbConceptSet.setDescription(conceptSet.getString("description"));
+      dbConceptSet.setCreator(userProvider.get());
+      dbConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+      dbConceptSet.setCreationTime(now);
+      dbConceptSet.setLastModifiedTime(now);
+      dbConceptSet.setVersion(1);
+      dbConceptSet.setParticipantCount(conceptSet.getInt("participant_count"));
+      dbConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.fromValue(conceptSet.getString("domain"))));
+      try {
+        List<Object> conceptIdsJSON = conceptSet.getJSONArray("concept_ids").toList();
+        Set<Long> conceptIds = conceptIdsJSON
+                .stream()
+                .map(Object::toString)
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
+        dbConceptSet.getConceptIds().addAll(conceptIds);
+      } catch (JSONException e) {
+        throw new ServerErrorException(String.format(
+           "concept_ids cannot be read from %s", conceptSet.getString("name")
+        ));
+      }
+
+      try {
+        dbConceptSet = conceptSetDao.save(dbConceptSet);
+      } catch (DataIntegrityViolationException e) {
+        throw new ServerErrorException(String.format(
+                "Concept Set \"/%s/%s/%d\" already exists.",
+                dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbConceptSet.getConceptSetId()));
       }
     }
     return ResponseEntity.ok(TO_SINGLE_CLIENT_WORKSPACE_FROM_FC_AND_DB.apply(dbWorkspace, fcWorkspace));

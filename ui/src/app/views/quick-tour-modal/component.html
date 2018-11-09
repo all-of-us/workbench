@@ -1,4 +1,4 @@
-<div class="main" id="quick-tour" *ngIf="learning">
+<div class="main" id="quick-tour" *ngIf="learning && !fullImage">
   <div class="title">
     All of Us Researcher Workbench
   </div>
@@ -32,6 +32,9 @@
     </div>
     <div class="panel-right">
       <img [src]="panelImages.get(selected)" class="panel-image">
+      <div *ngIf="selectedIndex !== 0" style="position: absolute; right: 5%; bottom: 5%; height: 1rem; width: 1rem">
+        <app-expand-icon class="resize-icon" style="position: absolute; z-index: 2;"  (click)="toggleImage()"></app-expand-icon>
+      </div>
     </div>
   </div>
   <div class="controls">
@@ -42,5 +45,11 @@
       <button type="button" class="btn btn-close" id="close" (click)="close()">Close</button>
       <button type="button" class="btn btn-primary" id="next" (click)="next()" [disabled]="selectedIndex >= (panelTitles.length-1)">Next</button>
     </div>
+  </div>
+</div>
+<div class="main" *ngIf="learning && fullImage">
+  <div class="full-image-wrapper">
+    <img [src]="panelImages.get(selected)" style="height: 100%; width: 100%">
+    <app-shrink-icon class="resize-icon" (click)="toggleImage()" style="position: absolute; right: 5%; bottom: 5%"></app-shrink-icon>
   </div>
 </div>

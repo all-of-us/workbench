@@ -308,4 +308,8 @@ export class ConceptHomepageComponent implements OnInit {
     const count = this.activeSelectedConceptCount;
     return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
   }
+
+  domainLoading(domain) {
+    return this.searchLoading || !this.completedDomainSearches.includes(domain.domain);
+  }
 }

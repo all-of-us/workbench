@@ -17,20 +17,26 @@
 <div style="display: flex; justify-content: flex-start;">
   <img *ngIf="profileImage !== null" [src]="profileImage" style="border-radius: 100px; width: 140px; height: 140px; margin-right: 1rem;">
   <div style="display: block">
-    <div class="field-wrapper">
+    <div class="field-wrapper field-wrapper-aligned" [class.field-wrapper-error]="(!givenNameValid || !familyNameValid)">
       <div class="field">
-        <label for="givenName" class="long-text-field">Given Name:</label>
+        <label for="givenName" class="long-text-field">First Name:</label>
         <input *ngIf="profileLoaded else loading" type="text" autofocus
           [(ngModel)]="workingProfile.givenName" id="givenName" [disabled]="!editing">
+        <div *ngIf="profileLoaded && !givenNameValid" class="alert alert-danger error-message" id="givenNameInvalid">
+          First Name must be 80 characters or less.
+        </div>
       </div>
       <div class="field">
-        <label for="familyName" class="long-text-field">Family Name:</label>
+        <label for="familyName" class="long-text-field">Last Name:</label>
         <input *ngIf="profileLoaded else loading" type="text"
           [(ngModel)]="workingProfile.familyName" id="familyName" [disabled]="!editing">
+        <div *ngIf="profileLoaded && !familyNameValid" class="alert alert-danger error-message" id="familyNameInvalid">
+          Last Name must be 80 characters or less.
+        </div>
       </div>
     </div>
     <div class="field-wrapper">
-      <div >
+      <div>
         <label for="contactEmail" class="long-text-field">Contact Email:</label>
         <div style="display: flex; justify-content: left" *ngIf="profileLoaded else loading">
           <div class="field">
@@ -63,11 +69,41 @@
         </div>
       </div>
     </div>
+    <div class="field-wrapper field-wrapper-aligned" [class.error-margin]="!currentPositionValid">
+      <div class="field">
+        <label for="currentPosition" class="long-text-field">Your Current Position:</label>
+        <input *ngIf="profileLoaded else loading" type="text"
+          [(ngModel)]="workingProfile.currentPosition" id="currentPosition" [disabled]="!editing">
+        <div *ngIf="profileLoaded && !currentPositionValid" class="alert alert-danger error-message" id="currentPositionInvalid">
+          Current Position must be 255 characters or less.
+        </div>
+      </div>
+    </div>
+    <div class="field-wrapper field-wrapper-aligned" [class.error-margin]="!organizationValid">
+      <div class="field">
+        <label for="organization" class="long-text-field">Your Organization:</label>
+        <input *ngIf="profileLoaded else loading" type="text"
+               [(ngModel)]="workingProfile.organization" id="organization"
+               [disabled]="!editing">
+        <div *ngIf="profileLoaded && !organizationValid" class="alert alert-danger error-message" id="organizationInvalid">
+          Organization must be 255 characters or less.
+        </div>
+      </div>
+    </div>
     <div class="field-wrapper">
       <div class="field">
-        <label for="areaOfResearch" class="long-text-field">Area of Research:</label>
-        <input *ngIf="profileLoaded else loading" type="text"
+        <div class="flex-row">
+          <label for="areaOfResearch" class="long-text-field padding-right">Current Research Work:</label>
+          <clr-tooltip>
+            <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
+              <div>You are required to describe your current research in order to help All of Us improve the Researcher Workbench.</div>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+        <textarea *ngIf="profileLoaded else loading"
           [(ngModel)]="workingProfile.areaOfResearch" id="areaOfResearch" [disabled]="!editing">
+        </textarea>
       </div>
     </div>
     <div class="field-wrapper">
@@ -180,7 +216,9 @@
       </div>
     </ng-template>
     <div style="margin-top: 2rem;">
-      <button *ngIf="editing" (click)="submitChanges()" class="btn btn-primary">Save Profile</button>
+      <button *ngIf="editing" (click)="submitChanges()" class="btn btn-primary"
+              [disabled]="!(givenNameValid && familyNameValid && currentPositionValid && organizationValid)">
+        Save Profile</button>
       <button *ngIf="editing" (click)="reloadProfile()" class="btn btn-link">Cancel</button>
     </div>
   </div>

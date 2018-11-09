@@ -579,9 +579,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_vocabulary_info\`
 (domain_id,vocabulary_id,all_concept_count,standard_concept_count)
 select d2.domain_id as domain_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
-SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
+COUNT(DISTINCT CASE WHEN c.standard_concept IN ('S', 'C') THEN c.concept_id ELSE NULL END) as standard_concept_count from
+\`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.concept\` c
+join \`$WORKBENCH_PROJECT.$WORKBENCH_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"

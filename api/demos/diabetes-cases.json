@@ -1,13 +1,13 @@
 {
   "type": "cohort",
   "cohort": {
-    "name": "28-29age-toreACL",
+    "name": "diabetes-cases",
     "description": "demo",
     "type": "demo",
     "criteria": {
       "includes": [
         {
-          "id": "includes_91dz5j9lf",
+          "id": "includes_6wlxu3h4z",
           "temporal": false,
           "mention": "",
           "time": "",
@@ -15,31 +15,22 @@
           "timeFrame": "",
           "items": [
             {
-              "id": "items_9fznmx9id",
+              "id": "items_ypz4y1gkq",
               "type": "CONDITION",
               "temporalGroup": 0,
               "searchParameters": [
                 {
-                  "parameterId": "param86376",
-                  "name": "Dislocation and sprain of joints and ligaments of knee",
-                  "value": "S83",
-                  "type": "ICD10",
+                  "parameterId": "param235",
+                  "name": "Diabetes mellitus",
+                  "value": "250",
+                  "type": "ICD9",
                   "subtype": "CM",
                   "group": true,
                   "conceptId": null,
                   "domainId": ""
                 }
               ],
-              "modifiers": [
-                {
-                  "name": "AGE_AT_EVENT",
-                  "operator": "BETWEEN",
-                  "operands": [
-                    "28",
-                    "29"
-                  ]
-                }
-              ]
+              "modifiers": []
             }
           ]
         }

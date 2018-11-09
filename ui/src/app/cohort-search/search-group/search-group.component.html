@@ -7,6 +7,29 @@
 </button>
 
 <div class="card bg-faded">
+  <!--********************************Temporal changes start***************************************-->
+
+  <div class="card-header" *ngIf="temporalDropdown && envFlag">
+    <clr-dropdown>
+      <button type="button" class="btn time-selection-button" clrDropdownTrigger>
+        <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
+        <ng-template #login> Which Mention</ng-template>
+        <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <button
+          *ngFor="let mention of whichMention;"
+          id="{{mention}}"
+          class="dropdown-item"
+          type="button"
+          (click)="getMentionTitle(mention)"
+          clrDropdownItem>{{mention}}</button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <span class="of-text"> of </span>
+  </div>
+  <!--**********************************Temporal changes end******************************************-->
+
   <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
     <app-search-group-item
       [role]="role"
@@ -44,7 +67,76 @@
     </clr-dropdown>
   </div>
 
-  <div class="card-footer text-right">
+  <!--********************************Temporal changes start***************************************-->
+
+  <div class="temporal-sub-card-header" *ngIf="temporalDropdown && envFlag">
+    <clr-dropdown>
+      <button type="button" class="btn time-selection-button" clrDropdownTrigger>
+        <div *ngIf="timeDropdownOption; else time"> {{timeDropdownOption}}</div>
+        <ng-template #time> Define Time</ng-template>
+         <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <button
+          *ngFor="let timeName of timeDropDown"
+          id="{{timeName}}"
+          class="dropdown-item"
+          type="button"
+          (click)="getTimeTitle(timeName)"
+          clrDropdownItem>{{timeName}}</button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <input class="time-inputbox" type="number" placeholder="X">
+  </div>
+
+  <div class="temporal-sub-card-header" *ngIf="temporalDropdown && envFlag">
+    <clr-dropdown>
+      <button type="button" class="btn selection-button" clrDropdownTrigger>
+        Add Criteria <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <ng-container *ngFor="let criteria of domainTypes">
+          <button *ngIf="criteria.name !== 'Demographics'"
+                  id="criteria.type"
+                  class="dropdown-item"
+                  type="button"
+                  [disabled]="criteria.disabled"
+                  (click)="launchWizard(criteria)"
+                  clrDropdownItem>{{criteria.name}}</button>
+        </ng-container>
+
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </div>
+
+  <div class="container card-footer" *ngIf="envFlag">
+    <div class="row">
+      <div class="toggle-switch col-sm-1">
+        <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" (click)="getTemporal($event)">
+        <label class="" for="{{groupId}}">
+          <span class="solid-preview-label"></span>
+         </label>
+      </div>
+      <div class="col-sm-5">Temporal</div>
+      <div class="col-sm-6 text-right">
+        Group Count:
+        <span *ngIf="isRequesting"
+              class="spinner spinner-inline"
+              [style.vertical-align]="'middle'">
+        Loading...
+        </span>
+            <span *ngIf="!isRequesting">
+        {{ group.get('count') || 0 | number }}
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!--********************************Temporal changes End***************************************-->
+
+
+  <div class="card-footer text-right" *ngIf="!envFlag">
     Group Count:
     <span *ngIf="isRequesting"
           class="spinner spinner-inline"

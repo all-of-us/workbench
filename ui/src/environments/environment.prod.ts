@@ -6,5 +6,6 @@ export const environment = {
   publicApiUrl: 'https://public.api.researchallofus.org',
   publicUiUrl: 'https://databrowser.researchallofus.org',
   debug: false,
-  gaId: 'UA-112406425-4'
+  gaId: 'UA-112406425-4',
+  enableTemporal: false
 };

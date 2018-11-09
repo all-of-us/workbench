@@ -29,7 +29,6 @@ import {
   CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
-  CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
   SELECT_CHILDREN_LIST,
@@ -141,6 +140,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['criteria', 'subtree', action.kind], fromJS(action.path))
           .setIn(['criteria', 'subtree', 'selected'], action.ids)
+          .deleteIn(['criteria', 'search', 'options'])
           .deleteIn(['criteria', 'requests', action.kind]);
 
       case CANCEL_CRITERIA_REQUEST:
@@ -160,16 +160,13 @@ export const rootReducer: Reducer<CohortSearchState> =
       case BEGIN_INGREDIENT_REQUEST:
         return state
           .deleteIn(['criteria', 'search', 'errors'])
+          .deleteIn(['criteria', 'search', 'options'])
           .setIn(['criteria', 'search', 'autocomplete'], true);
 
       case LOAD_AUTOCOMPLETE_OPTIONS:
         return state
           .setIn(['criteria', 'search', 'options'], action.options)
           .deleteIn(['criteria', 'search', 'autocomplete']);
-
-      case CLEAR_AUTOCOMPLETE_OPTIONS:
-        return state
-          .deleteIn(['criteria', 'search', 'options']);
 
       case LOAD_INGREDIENT_LIST:
         return state
@@ -499,7 +496,9 @@ export const rootReducer: Reducer<CohortSearchState> =
       }
 
       case SET_WIZARD_CONTEXT:
-        return state.mergeDeepIn(['wizard'], action.context);
+        return state
+          .mergeDeepIn(['wizard'], action.context)
+          .deleteIn(['criteria', 'subtree']);
 
       case LOAD_ENTITIES:
         return state.set('entities', action.entities);

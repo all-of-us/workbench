@@ -193,7 +193,7 @@ public class CriteriaDaoTest {
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     //match on code
-    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", new PageRequest(0, 10));
+    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP123", new PageRequest(0, 10));
     assertEquals(1, labs.size());
     assertEquals(labCriteria.getId(), labs.get(0).getId());
   }
@@ -202,9 +202,14 @@ public class CriteriaDaoTest {
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     //match on code
     List<CriteriaId> conditions =
-      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", "001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria3.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria2.getId(), conditions.get(0).getId());
+
+    conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"002", "002", new PageRequest(0, 10));
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria1.getId(), conditions.get(0).getId());
   }
 
   @Test

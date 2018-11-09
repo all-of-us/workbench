@@ -137,14 +137,23 @@
   margin-bottom: 5%;
   width: 40%;
   height: 90%;
+  position: relative;
+  display: inline-block;
 }
 
 .panel-image {
-  width: 80%;
+  width: 88%;
   margin-top: 11%;
   margin-left: 11%;
+  position: relative;
+  z-index: 1;
+  display: inline;
 }
 
+.full-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
 .controls {
   width: 100%;
   position: absolute;
@@ -171,4 +180,8 @@
 
 .btn.btn-primary {
   margin-right: 10%;
+}
+
+.resize-icon {
+  cursor: pointer;
 }

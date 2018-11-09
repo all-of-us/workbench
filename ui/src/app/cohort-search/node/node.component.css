@@ -13,3 +13,8 @@
 .error {
   color: red;
 }
+
+.root-spinner {
+  left: 50%;
+  top: 50%;
+}
