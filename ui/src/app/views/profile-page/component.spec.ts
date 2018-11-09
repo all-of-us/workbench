@@ -126,7 +126,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty givenName field', fakeAsync(() => {
       simulateInput(
-          fixture, fixture.debugElement.query(By.css('#givenName')),'');
+          fixture, fixture.debugElement.query(By.css('#givenName')), '');
       tick(300);
       updateAndTick(fixture);
       expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
