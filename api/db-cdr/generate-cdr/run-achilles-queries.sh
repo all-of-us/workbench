@@ -157,6 +157,8 @@ group by vo1.visit_source_concept_id"
 
 
 # 400 (3000)	Number of persons with at least one condition occurrence, by condition_concept_id
+# There was weird data in combined20181025 that has rows in condition occurrence table with concept id 19 which was causing problem while fetching domain participant count
+# so added check in there (Remove after checking the data is proper)
 echo "Querying condition_occurrence ..."
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
@@ -166,13 +168,14 @@ CAST(co1.condition_CONCEPT_ID AS STRING) as stratum_1,'Condition' as stratum_3,
 COUNT(distinct co1.PERSON_ID) as count_value, (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co2
 where co2.condition_source_concept_id=co1.condition_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
-where co1.condition_concept_id > 0
+where co1.condition_concept_id > 0 and co1.condition_concept_id != 19
 group by co1.condition_CONCEPT_ID
 union all
 select 0 as id,3000 as analysis_id,CAST(co1.condition_source_concept_id AS STRING) as stratum_1,'Condition' as stratum_3,
 COUNT(distinct co1.PERSON_ID) as count_value,COUNT(distinct co1.PERSON_ID) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co1
 where co1.condition_concept_id != co1.condition_source_concept_id
+and co1.condition_source_concept_id != 19
 group by co1.condition_source_concept_id"
 
 # Condition gender
