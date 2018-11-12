@@ -89,9 +89,6 @@ public class ProfileControllerTest {
   private static final String INVITATION_KEY = "secretpassword";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String BILLING_PROJECT_PREFIX = "all-of-us-free-";
-  private static final String ORGANIZATION = "Test";
-  private static final String CURRENT_POSITION = "Tester";
-  private static final String RESEARCH_PURPOSE = "To test things";
 
   @Mock
   private Provider<User> userProvider;
@@ -140,9 +137,6 @@ public class ProfileControllerTest {
     profile.setFamilyName(FAMILY_NAME);
     profile.setGivenName(GIVEN_NAME);
     profile.setUsername(USERNAME);
-    profile.setCurrentPosition(CURRENT_POSITION);
-    profile.setOrganization(ORGANIZATION);
-    profile.setAreaOfResearch(RESEARCH_PURPOSE);
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
