@@ -33,14 +33,20 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
 
   checkTruncation() {
     const elem = this.button.nativeElement;
-    const id = 'match' + this.option.id.toString();
-    const highlight = document.getElementById(id);
+    const _class = 'match' + this.option.id.toString();
+    const highlights = document.getElementsByClassName(_class);
     this.isTruncated = elem.offsetWidth < elem.scrollWidth;
-    if (this.isTruncated && highlight) {
-      this.checkPosition(elem, highlight);
-    } else if (highlight !== null) {
-      highlight.style.background =
-        'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)';
+    if (this.isTruncated && highlights) {
+      Array.from(highlights).forEach(highlight => {
+        this.checkPosition(elem, highlight);
+      });
+    } else if (highlights !== null) {
+      Array.from(highlights).forEach(highlight => {
+        highlight.setAttribute(
+          'style',
+          'background: linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)'
+        );
+      });
     }
   }
 
