@@ -301,7 +301,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       .range(0, keywords.length)
       .filter(i -> keywords[i].length() > 2)
       .mapToObj(i -> {
-        if (i == 0 && keywords.length > 1) {
+        if ((i + 1) != keywords.length) {
           return "+\"" + keywords[i] + "\"";
         }
         return "+" + keywords[i] + "*";

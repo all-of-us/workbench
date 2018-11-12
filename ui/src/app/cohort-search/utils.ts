@@ -115,10 +115,23 @@ export function highlightMatches(
     if (fullText) {
       const nameTerms = name.split(' ');
       const searchTerms = term.split(' ');
-      nameTerms.forEach((nameTerm, i) => {
-        if (searchTerms.includes(nameTerm)) {
-          nameTerms[i] = '<span class="search-keyword">' + nameTerm + '</span>';
-        }
+      nameTerms.forEach((nameTerm, n) => {
+        searchTerms
+          .filter(text => text.length > 2)
+          .forEach((searchTerm, s) => {
+            if (s === (searchTerms.length - 1)) {
+              const start = nameTerm.toLowerCase().indexOf(searchTerm.toLowerCase());
+              if (start > -1) {
+                const end = start + searchTerm.length;
+                nameTerms[n] = nameTerm.slice(0, start)
+                  + '<span class="search-keyword">'
+                  + nameTerm.slice(start, end) + '</span>'
+                  + nameTerm.slice(end);
+              }
+            } else if (nameTerm.toLowerCase() === searchTerm.toLowerCase()) {
+              nameTerms[n] = '<span class="search-keyword">' + nameTerm + '</span>';
+            }
+          });
       });
       name = nameTerms.join(' ');
     } else {
