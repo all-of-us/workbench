@@ -4,9 +4,9 @@ import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResponse;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,16 +40,13 @@ public class BigQueryService {
     /**
      * Execute the provided query using bigquery.
      */
-    public QueryResult executeQuery(QueryJobConfiguration query) {
-
-        // Execute the query
-        QueryResponse response = null;
+    public TableResult executeQuery(QueryJobConfiguration query) {
         if (workbenchConfigProvider.get().cdr.debugQueries) {
             logger.log(Level.INFO, "Executing query ({0}) with parameters ({1})",
                 new Object[] { query.getQuery(), query.getNamedParameters()});
         }
         try {
-            response = bigquery.query(query, BigQuery.QueryOption.of(BigQuery.QueryResultsOption.maxWaitTime(60000L)));
+          return bigquery.create(JobInfo.of(query)).getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(60000L));
         } catch (InterruptedException e) {
             throw new BigQueryException(500, "Something went wrong with BigQuery: " + e.getMessage());
         } catch (BigQueryException e) {
@@ -64,8 +61,6 @@ public class BigQueryService {
                         query.getNamedParameters()), e);
             }
         }
-
-        return response.getResult();
     }
 
     public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
@@ -82,7 +77,7 @@ public class BigQueryService {
                 .build();
     }
 
-    public Map<String, Integer> getResultMapper(QueryResult result) {
+    public Map<String, Integer> getResultMapper(TableResult result) {
         AtomicInteger index = new AtomicInteger();
         return result.getSchema().getFields().stream().collect(
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));
