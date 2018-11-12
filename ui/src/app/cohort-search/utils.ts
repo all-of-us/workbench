@@ -130,9 +130,16 @@ export function highlightMatches(
                   + nameTerm.slice(start, end) + '</span>'
                   + nameTerm.slice(end);
               }
-            } else if (nameTerm.toLowerCase() === searchTerm.toLowerCase()) {
-              nameTerms[n] = '<span class="' + _class + '">' + nameTerm + '</span>';
+            } else {
+              const re = new RegExp('\\b' + searchTerm + '\\b', 'gi');
+              nameTerms[n] = nameTerm.replace(
+                re,
+                '<span class="' + _class + '">$&</span>'
+              );
             }
+            // } else if (nameTerm.toLowerCase() === searchTerm.toLowerCase()) {
+            //   nameTerms[n] = '<span class="' + _class + '">' + nameTerm + '</span>';
+            // }
           });
       });
       name = nameTerms.join(' ');
