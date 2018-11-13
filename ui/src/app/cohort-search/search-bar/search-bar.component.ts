@@ -179,21 +179,23 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   selectOption(option: any) {
-    this.optionSelected = true;
-    this.searchTerm.setValue(option.name, {emitEvent: false});
-    if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
-      this.actions.fetchIngredientsForBrand(option.conceptId);
-    } else {
-      this.actions.setCriteriaSearchTerms([option.name]);
-      const ids = [option.id];
-      let path = option.path.split('.');
-      if (this.multiples[option.name]) {
-        this.multiples[option.name].forEach(multiple => {
-          ids.push(multiple.id);
-          path = path.concat(multiple.path.split('.'));
-        });
+    if (option) {
+      this.optionSelected = true;
+      this.searchTerm.setValue(option.name, {emitEvent: false});
+      if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
+        this.actions.fetchIngredientsForBrand(option.conceptId);
+      } else {
+        this.actions.setCriteriaSearchTerms([option.name]);
+        const ids = [option.id];
+        let path = option.path.split('.');
+        if (this.multiples[option.name]) {
+          this.multiples[option.name].forEach(multiple => {
+            ids.push(multiple.id);
+            path = path.concat(multiple.path.split('.'));
+          });
+        }
+        this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
       }
-      this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
     }
   }
 
