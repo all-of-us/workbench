@@ -13,7 +13,7 @@ export function typeDisplay(parameter): string {
       'AGE': 'Age',
       'DEC': 'Deceased'
     }[subtype] || '';
-  } else if(!_type.match(/^SNOMED.*/i)) {
+  } else if (!_type.match(/^SNOMED.*/i)) {
     return parameter.get('code', '');
   }
 }
