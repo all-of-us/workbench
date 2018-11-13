@@ -69,7 +69,6 @@ const sourceCode = {
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
-  notField: true,
   displayName: 'Age At Event',
 };
 const visitType = {
