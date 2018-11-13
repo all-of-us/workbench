@@ -138,10 +138,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
             this.successIcon = false;
           }, 2000);
         }, 1000);
-      })
-        .catch(err => {
-          this.textSpinnerFlag = false;
-        });
+      });
     } else {
       this.textSpinnerFlag = false;
     }
