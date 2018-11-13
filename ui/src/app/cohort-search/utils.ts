@@ -115,43 +115,21 @@ export function highlightMatches(
   terms.forEach(term => {
     name = stripHtml(name);
     if (fullText) {
-      const nameTerms = name.trim().split(' ');
-      const searchTerms = term.trim().split(' ');
-      nameTerms.forEach((nameTerm, n) => {
-        searchTerms
-          .filter(text => text.length > 2)
-          .forEach((searchTerm, s) => {
-            if (s === (searchTerms.length - 1)) {
-              const start = nameTerm.toLowerCase().indexOf(searchTerm.toLowerCase());
-              if (start > -1) {
-                const end = start + searchTerm.length;
-                nameTerms[n] = nameTerm.slice(0, start)
-                  + '<span class="' + _class + '">'
-                  + nameTerm.slice(start, end) + '</span>'
-                  + nameTerm.slice(end);
-              }
-            } else {
-              const re = new RegExp('\\b' + searchTerm + '\\b', 'gi');
-              nameTerms[n] = nameTerm.replace(
-                re,
-                '<span class="' + _class + '">$&</span>'
-              );
-            }
-            // } else if (nameTerm.toLowerCase() === searchTerm.toLowerCase()) {
-            //   nameTerms[n] = '<span class="' + _class + '">' + nameTerm + '</span>';
-            // }
-          });
-      });
-      name = nameTerms.join(' ');
+      const searchTerms = term.trim().split(new RegExp(',| '));
+      searchTerms
+        .filter(text => text.length > 2)
+        .forEach((searchTerm, s) => {
+          let re;
+          if (s === (searchTerms.length - 1)) {
+            re = new RegExp(searchTerm, 'gi');
+          } else {
+            re = new RegExp('\\b' + searchTerm + '\\b', 'gi');
+          }
+          name = name.replace(re, '<span class="' + _class + '">$&</span>');
+        });
     } else {
-      const start = name.toLowerCase().indexOf(term.toLowerCase());
-      if (start > -1) {
-        const end = start + term.length;
-        name = name.slice(0, start)
-          + '<span class="' + _class + '">'
-          + name.slice(start, end) + '</span>'
-          + name.slice(end);
-      }
+      const re = new RegExp(term, 'gi');
+      name = name.replace(re, '<span class="' + _class + '">$&</span>');
     }
   });
   return name;
