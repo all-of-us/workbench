@@ -3,6 +3,7 @@ package org.pmiops.workbench.google;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONObject;
 
 /**
@@ -17,7 +18,7 @@ public interface CloudStorageService {
   public List<JSONObject> readAllDemoCohorts();
   public List<JSONObject> readAllDemoConceptSets();
   public List<Blob> getBlobList(String bucketName, String directory);
-  public boolean blobExists(BlobId id);
+  public Set<BlobId> blobsExist(List<BlobId> id);
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();

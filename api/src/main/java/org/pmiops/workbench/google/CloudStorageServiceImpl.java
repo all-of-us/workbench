@@ -9,8 +9,12 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageException;
 import com.google.cloud.storage.StorageOptions;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
@@ -138,7 +142,16 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public boolean blobExists(BlobId id) throws StorageException {
-    return StorageOptions.getDefaultInstance().getService().get(id) != null;
-  }
+  public Set<BlobId> blobsExist(List<BlobId> ids) {
+    if (ids.isEmpty()) {
+      return ImmutableSet.of();
+    }
+    return StorageOptions.getDefaultInstance().getService().get(ids)
+      .stream()
+      .filter(Objects::nonNull)
+      // Clear the "generation" of the blob ID for better symmetry to the input.
+      .map(b -> BlobId.of(b.getBucket(), b.getName()))
+      .collect(Collectors.toSet());
+    }
+
 }
