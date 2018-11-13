@@ -20,7 +20,9 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     const code = this.showCode
-      ? '<span style="font-weight: 700;">' + this.option.code + '</span> ' : '';
+      ? '<span style="font-weight: 700;">'
+      + highlightMatches([this.searchTerm], this.option.code, true)
+      + '</span> ' : '';
     this.option.displayName = code +
       highlightMatches([this.searchTerm], this.option.name, true, this.option.id.toString());
   }
