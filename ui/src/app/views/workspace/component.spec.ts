@@ -110,7 +110,6 @@ describe('WorkspaceComponent', () => {
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
-        { provide: ConceptSetsService },
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
         { provide: Http, useValue: new HttpStub() },
