@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStateService} from '../review-state.service';
 
@@ -9,7 +8,6 @@ import {ReviewStateService} from '../review-state.service';
   styleUrls: ['./set-annotation-modal.component.css']
 })
 export class SetAnnotationModalComponent {
-  subscription: Subscription;
 
   /*
    * The modal displays a list or a form. Default is always list.
