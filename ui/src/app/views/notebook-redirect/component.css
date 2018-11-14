@@ -77,9 +77,10 @@
 }
 
 .i-frame {
-  width: 104%;
+  width: 102%;
   height: 100%;
   margin-left: -.5rem;
+  margin-right: -.5rem;
 }
 
 .hidden {
@@ -88,4 +89,5 @@
 
 #seperator {
   border-bottom: 5px solid #2691D0;
+  width: 100%;
 }
