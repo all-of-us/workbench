@@ -229,8 +229,8 @@ export class DbConfigService {
     const analysis: Analysis = concept.analyses.genderAnalysis;
     let male = null;
     let female = null;
-    const others = [];
-    let otherCount = 0;
+    let intersex = null;
+    let none = null;
 
     // No need to do anything if only one gender
     if (analysis.results.length <= 1) {
@@ -242,25 +242,18 @@ export class DbConfigService {
         male = g;
       } else if (g.stratum2 === this.FEMALE_GENDER_ID) {
         female = g;
-      } else {
-        otherCount += g.countValue;
+      } else if (g.stratum2 === this.INTERSEX_GENDER_ID) {
+        intersex = g;
+      } else if (g.stratum2 === this.NONE_GENDER_ID) {
+        none = g;
       }
     }
 
     // Order genders how we want to display  Male, Female , Others
     if (male) { results.push(male); }
     if (female) { results.push(female); }
-    if (otherCount > 0) {
-      // Make Other results,
-      const otherResult: AchillesResult =  {
-        analysisId: male.analysisId,
-        stratum1: male.stratum1,
-        stratum2: this.OTHER_GENDER_ID,
-        analysisStratumName: 'Other',
-        countValue: otherCount
-      };
-      results.push(otherResult);
-    }
+    if (intersex) { results.push(intersex); }
+    if (none) { results.push(none); }
     analysis.results = results;
   }
 
