@@ -30,9 +30,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   isCancelTimerInitiated: any = false;
   domainTitle: '';
   buttonsDisableFlag = false;
-  private subscription1: Subscription;
-  private subscription2: Subscription;
-  private subscription3: Subscription;
+  private subscription: Subscription;
   domainsData = {};
   condChart: any;
   totalCount: any;
@@ -46,7 +44,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
-    this.subscription1 = this.state.cohort$
+    this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
       .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
       .map(response => (<DemoChartInfoListResponse>response).items)
@@ -54,11 +52,11 @@ export class OverviewPage implements OnInit, OnDestroy {
         this.data = fromJS(data);
         this.buttonsDisableFlag = false;
       });
-    this.subscription2 = this.state.review$.subscribe(review => {
+    this.subscription.add(this.state.review$.subscribe(review => {
       this.review = review;
       this.totalParticipantCount = review.matchedParticipantCount;
 
-    });
+    }));
     this.getDemoCharts();
     this.openChartContainer = true;
     this.fetchChartsData();
@@ -74,13 +72,13 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
-      this.subscription3 = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
+      this.subscription.add(this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
-        });
+        }));
     });
   }
 
@@ -118,9 +116,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription1.unsubscribe();
-    this.subscription2.unsubscribe();
-    this.subscription3.unsubscribe();
+    this.subscription.unsubscribe();
   }
 
 }
