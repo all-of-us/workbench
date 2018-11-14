@@ -138,7 +138,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (items) {
         this.newAnnoId = items.annotationId;
       }
-    })
+    });
   }
 
   toggleExpandText() {
@@ -185,8 +185,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           if (this.newAnnoId) {
             this.handleInput(this.newAnnoId);
           } else {
-            this.handleInput()
-          };
+            this.handleInput();
+          }
         }, 2000);
 
       }
