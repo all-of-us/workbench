@@ -6,7 +6,10 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output
+  Output,
+  AfterViewInit,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -42,6 +45,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   myDate: any;
+  newAnnoId: any;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -49,35 +53,35 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     private cdref: ChangeDetectorRef
   ) {}
 
-    ngOnChanges() {
-        if (this.annotation.value[this.valuePropertyName]) {
-            this.defaultAnnotation = true;
-                this.annotationOption = this.annotation.value[this.valuePropertyName];
-        } else {
-            this.defaultAnnotation = false;
-        }
+  ngOnChanges() {
+    if (this.annotation.value[this.valuePropertyName]) {
+      this.defaultAnnotation = true;
+      this.annotationOption = this.annotation.value[this.valuePropertyName];
+    } else {
+      this.defaultAnnotation = false;
     }
+  }
 
-    ngOnInit() {
-      this.ngAfterContentChecked();
-        this.successIcon = false;
+  ngOnInit() {
+    this.ngAfterContentChecked();
+    this.successIcon = false;
     const oldValue = this.annotation.value[this.valuePropertyName];
     if (oldValue !== undefined) {
       this.control.setValue(oldValue);
     }
   }
 
-    ngAfterContentChecked() {
-        this.cdref.detectChanges();
-    }
+  ngAfterContentChecked() {
+    this.cdref.detectChanges();
+  }
 
 
-    textBlur() {
-        this.successIcon = false;
+  textBlur() {
+    this.successIcon = false;
     this.textSpinnerFlag = true;
     setTimeout (() => {
-        this.handleInput();
-        } , 2000 );
+      this.handleInput();
+    } , 2000 );
   }
 
   integerOnly(event): boolean {
@@ -88,17 +92,17 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     return true;
   }
 
-  handleInput() {
-      this.textSpinnerFlag = false;
-      this.successIcon = true;
+  handleInput(annotationId?) {
+    this.textSpinnerFlag = false;
+    this.successIcon = true;
     /* Parameters from the path */
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const newValue = this.control.value;
-     this.oldValue = this.annotation.value[this.valuePropertyName];
+    this.oldValue = this.annotation.value[this.valuePropertyName];
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId;
+    const annoId = this.annotation.value.annotationId?this.annotation.value.annotationId : annotationId;
 
     let apiCall;
 
@@ -122,7 +126,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
       }
     } else {
-    // There's no annotation ID so this must be a create
+      // There's no annotation ID so this must be a create
       const request = <ParticipantCohortAnnotation> {
         cohortAnnotationDefinitionId: defnId,
         ...this.annotation.value,
@@ -131,10 +135,14 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       apiCall = this.reviewAPI
         .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
     }
-      setTimeout (() => {
-          this.successIcon = false;
-      } , 2000 );
-    apiCall.subscribe();
+    setTimeout (() => {
+      this.successIcon = false;
+    } , 2000 );
+    apiCall.subscribe(items => {
+      if(items) {
+        this.newAnnoId = items.annotationId
+      }
+    })
   }
 
   toggleExpandText() {
@@ -156,10 +164,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   get datatypeDisplay() {
-        return this.showDataType
-          ? ` (${this.annotation.definition.annotationType})`
-          : '';
-      }
+    return this.showDataType
+      ? ` (${this.annotation.definition.annotationType})`
+      : '';
+  }
 
   annotationOptionChange(value) {
     this.annotationOption = value;
@@ -172,13 +180,18 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   dateChange(e) {
     this.successIcon = false;
-    this.textSpinnerFlag = true;
-    setTimeout (() => {
-        if (e !== null) {
-            const newDate = moment(e).format('YYYY-MM-DD');
-            this.control.patchValue(newDate);
-           this.handleInput();
-        } }, 2000);
-  }
+      if (e && e !== '') {
+        this.textSpinnerFlag = true;
+        const newDate = moment(e).format('YYYY-MM-DD');
+        console.log(newDate);
+        this.control.patchValue(newDate);
+        setTimeout(() => {
+          if (this.newAnnoId) {
+            this.handleInput(this.newAnnoId);
+          } else this.handleInput();
+        }, 2000);
 
+      }
+  }
 }
+
