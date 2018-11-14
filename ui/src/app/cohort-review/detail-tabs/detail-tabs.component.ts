@@ -123,7 +123,8 @@ const labRefRange = {
   styleUrls: ['./detail-tabs.component.css']
 })
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
-  subscription: Subscription;
+  subscription1: Subscription;
+  subscription2: Subscription;
   data;
   participantsId: any;
   chartData = {};
@@ -313,7 +314,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscription = this.route.data.map(({participant}) => participant)
+    this.subscription1 = this.route.data.map(({participant}) => participant)
       .subscribe(participants => {
         this.participantsId = participants.participantId;
       });
@@ -339,12 +340,13 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
           this.chartData[domainName].conditionTitle = typeToTitle(domainName);
           this.chartData[domainName].loading = false;
         });
-      this.subscription = getParticipantsDomainData;
+      this.subscription2 = getParticipantsDomainData;
     });
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription1.unsubscribe();
+    this.subscription2.unsubscribe();
   }
 }
 
