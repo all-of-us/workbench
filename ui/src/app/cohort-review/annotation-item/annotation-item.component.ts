@@ -192,8 +192,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           if (this.newAnnoId) {
             this.handleInput(this.newAnnoId);
           } else {
-            this.handleInput()
-          };
+            this.handleInput();
+          }
         }, 2000);
 
       }
