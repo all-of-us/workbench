@@ -48,8 +48,9 @@ export class NewNotebookModalComponent {
       this.nameConflict = true;
       return;
     }
-    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id,
-      {notebookName: this.newName}).subscribe();
+    this.userMetricsService.updateRecentResource(this.workspace.namespace, this.workspace.id, {
+      notebookName: this.newName + '.ipynb'
+    }).subscribe();
     this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
         'notebooks', encodeURIComponent(this.newName)], {
       queryParams: {
