@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
@@ -31,6 +31,7 @@ export class CreateReviewPage implements OnInit {
     private reviewAPI: CohortReviewService,
     private router: Router,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get numParticipants() {
@@ -61,6 +62,7 @@ export class CreateReviewPage implements OnInit {
 
   createReview() {
     this.creating = true;
+    this.cdr.detectChanges();
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     const request = <CreateReviewRequest>{size: this.numParticipants.value};

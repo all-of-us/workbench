@@ -51,7 +51,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   ngOnChanges() {
     if (this.annotation.value[this.valuePropertyName]) {
       this.defaultAnnotation = true;
-      this.annotationOption = this.annotation.value[this.valuePropertyName];
+        this.annotationOption = this.annotation.value[this.valuePropertyName];
     } else {
       this.defaultAnnotation = false;
     }
@@ -60,9 +60,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   ngOnInit() {
     this.ngAfterContentChecked();
     this.successIcon = false;
-    const oldValue = this.annotation.value[this.valuePropertyName];
-    if (oldValue !== undefined) {
-      this.control.setValue(oldValue);
+    this.oldValue = this.annotation.value[this.valuePropertyName];
+    if (this.oldValue !== undefined) {
+      this.control.setValue(this.oldValue);
     }
   }
 
@@ -74,9 +74,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   textBlur() {
     this.successIcon = false;
     this.textSpinnerFlag = true;
-    setTimeout (() => {
-      this.handleInput();
-    } , 2000 );
+    this.handleInput();
   }
 
   integerOnly(event): boolean {
@@ -88,14 +86,11 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   handleInput(annotationId?) {
-    this.textSpinnerFlag = false;
-    this.successIcon = true;
     /* Parameters from the path */
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const newValue = this.control.value;
-    this.oldValue = this.annotation.value[this.valuePropertyName];
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
     const annoId = this.annotation.value.annotationId ?
                    this.annotation.value.annotationId : annotationId;
@@ -104,8 +99,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
     // Nothing to see here - if there's no change, no need to hit the server
     if (newValue === this.oldValue) {
-      return ;
+      this.textSpinnerFlag = false;
+      return;
     }
+    this.oldValue = newValue;
     // If there is an annotation ID then the annotation has already been
     // created, so this must be either delete or update
     if (annoId !== undefined) {
@@ -113,7 +110,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (newValue === '' || newValue === null) {
         apiCall = this.reviewAPI
           .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
-
       } else {
         const request = <ModifyParticipantCohortAnnotationRequest>{
           [this.valuePropertyName]: newValue,
@@ -122,23 +118,33 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
       }
     } else {
-      // There's no annotation ID so this must be a create
-      const request = <ParticipantCohortAnnotation> {
-        cohortAnnotationDefinitionId: defnId,
-        ...this.annotation.value,
-        [this.valuePropertyName]: newValue,
-      };
-      apiCall = this.reviewAPI
-        .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
-    }
-    setTimeout (() => {
-      this.successIcon = false;
-    } , 2000 );
-    apiCall.subscribe(items => {
-      if (items) {
-        this.newAnnoId = items.annotationId;
+      if (newValue) {
+        // There's no annotation ID so this must be a create
+        const request = <ParticipantCohortAnnotation> {
+          cohortAnnotationDefinitionId: defnId,
+          ...this.annotation.value,
+          [this.valuePropertyName]: newValue,
+        };
+        apiCall = this.reviewAPI
+          .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
       }
-    });
+    }
+    if (apiCall) {
+      apiCall.subscribe(items => {
+        if (items) {
+          this.newAnnoId = items.annotationId;
+        }
+        setTimeout (() => {
+          this.textSpinnerFlag = false;
+          this.successIcon = true;
+          setTimeout(() => {
+            this.successIcon = false;
+          }, 2000);
+        }, 1000);
+      });
+    } else {
+      this.textSpinnerFlag = false;
+    }
   }
 
   toggleExpandText() {
@@ -160,10 +166,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   get datatypeDisplay() {
-    return this.showDataType
-      ? ` (${this.annotation.definition.annotationType})`
-      : '';
-  }
+        return this.showDataType
+          ? ` (${this.annotation.definition.annotationType})`
+          : '';
+      }
 
   annotationOptionChange(value) {
     this.annotationOption = value;
@@ -179,16 +185,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (e && e !== '') {
         this.textSpinnerFlag = true;
         const newDate = moment(e).format('YYYY-MM-DD');
-        console.log(newDate);
         this.control.patchValue(newDate);
-        setTimeout(() => {
           if (this.newAnnoId) {
             this.handleInput(this.newAnnoId);
           } else {
             this.handleInput();
           }
-        }, 2000);
-
       }
   }
 }

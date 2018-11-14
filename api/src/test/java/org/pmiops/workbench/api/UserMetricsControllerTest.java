@@ -3,16 +3,18 @@ package org.pmiops.workbench.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.BlobId;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +46,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserMetricsControllerTest {
 
   @Mock
+  private CloudStorageService cloudStorageService;
+  @Mock
   private UserRecentResourceService userRecentResourceService;
   @Mock
   private Provider<User> userProvider;
@@ -51,8 +55,6 @@ public class UserMetricsControllerTest {
   private FireCloudService fireCloudService;
   @Mock
   private WorkspaceService workspaceService;
-  @Mock
-  private CloudStorageService cloudStorageService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
@@ -140,8 +142,13 @@ public class UserMetricsControllerTest {
     when(fireCloudService.getWorkspace(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspaceResponse2);
 
-    when(cloudStorageService.blobExists(any())).thenReturn(true);
-    when(cloudStorageService.blobExists(null)).thenThrow(new NullPointerException());
+    when(cloudStorageService.blobsExist(anyListOf(BlobId.class))).then((i) -> {
+      List<BlobId> ids = i.getArgumentAt(0, List.class);
+      if (ids.contains(null)) {
+        throw new NullPointerException();
+      }
+      return ImmutableSet.copyOf(ids);
+    });
 
     userMetricsController = new UserMetricsController(
         userProvider,
@@ -226,8 +233,8 @@ public class UserMetricsControllerTest {
     resource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
     when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
         .thenReturn(ImmutableList.of(resource1, resource2));
-    when(cloudStorageService.blobExists(
-        BlobId.of("bkt", "notebooks/not-found.ipynb"))).thenReturn(false);
+    when(cloudStorageService.blobsExist(anyListOf(BlobId.class))).thenReturn(
+        ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
 
     RecentResourceResponse recentResources = userMetricsController
         .getUserRecentResources().getBody();
