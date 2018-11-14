@@ -51,11 +51,6 @@ describe('NewNotebookModalComponent', () => {
     });
   }));
 
-  it('should render', fakeAsync(() => {
-    updateAndTick(fixture);
-    expect(fixture).toBeTruthy();
-  }));
-
   it('errors if name exists', fakeAsync(() => {
     updateAndTick(fixture);
     simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), 'mockFile');
@@ -63,6 +58,19 @@ describe('NewNotebookModalComponent', () => {
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
     expect(fixture.debugElement.query(By.css('.error'))).toBeDefined();
     expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeTruthy();
+  }));
+
+  it('update recent resource with correct name', fakeAsync(() => {
+    const metrics = fixture.debugElement.injector.get(UserMetricsService);
+    spyOn(metrics, 'updateRecentResource');
+    updateAndTick(fixture);
+    simulateInput(fixture, fixture.debugElement.query(By.css('#new-name')), 'my-notebook');
+    updateAndTick(fixture);
+    simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
+    expect(metrics.updateRecentResource).toHaveBeenCalledWith(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS, WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, {
+        notebookName: 'my-notebook.ipynb'
+      });
   }));
 
   it('does not allow blank names', fakeAsync(() => {
