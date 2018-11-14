@@ -176,13 +176,15 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private User saveUserWithConflictHandling(User user) {
+  private void validateProfileFields(User user) {
     validateStringLength(user.getGivenName(), "Given Name", 80, 1);
     validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
     validateStringLength(user.getCurrentPosition(), "Current Position", 255, 1);
     validateStringLength(user.getOrganization(), "Organization", 255, 1);
     validateStringLength(user.getAreaOfResearch(), "Current Research", 10000, 1);
+  }
 
+  private User saveUserWithConflictHandling(User user) {
     try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -420,6 +422,7 @@ public class ProfileController implements ProfileApiDelegate {
         request.getProfile().getOrganization(),
         request.getProfile().getAreaOfResearch()
     );
+    validateProfileFields(user);
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
@@ -612,6 +615,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // This does not update the name in Google.
+    validateProfileFields(user);
     saveUserWithConflictHandling(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
