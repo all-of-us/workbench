@@ -30,7 +30,9 @@ export class OverviewPage implements OnInit, OnDestroy {
   isCancelTimerInitiated: any = false;
   domainTitle: '';
   buttonsDisableFlag = false;
-  private subscription: Subscription;
+  private subscription1: Subscription;
+  private subscription2: Subscription;
+  private subscription3: Subscription;
   domainsData = {};
   condChart: any;
   totalCount: any;
@@ -44,7 +46,7 @@ export class OverviewPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
-    this.subscription = this.state.cohort$
+    this.subscription1 = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
       .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
       .map(response => (<DemoChartInfoListResponse>response).items)
@@ -52,7 +54,7 @@ export class OverviewPage implements OnInit, OnDestroy {
         this.data = fromJS(data);
         this.buttonsDisableFlag = false;
       });
-    this.subscription = this.state.review$.subscribe(review => {
+    this.subscription2 = this.state.review$.subscribe(review => {
       this.review = review;
       this.totalParticipantCount = review.matchedParticipantCount;
 
@@ -72,7 +74,7 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
-      this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
+      this.subscription3 = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
@@ -116,7 +118,9 @@ export class OverviewPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription1.unsubscribe();
+    this.subscription2.unsubscribe();
+    this.subscription3.unsubscribe();
   }
 
 }
