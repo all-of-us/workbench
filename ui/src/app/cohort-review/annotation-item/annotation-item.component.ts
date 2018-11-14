@@ -44,6 +44,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   myDate: any;
+  newAnnoId: any;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -95,7 +96,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const newValue = this.control.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId;
+    const annoId = this.annotation.value.annotationId?this.annotation.value.annotationId : annotationId;
 
     let apiCall;
 
@@ -166,10 +167,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   get datatypeDisplay() {
-        return this.showDataType
-          ? ` (${this.annotation.definition.annotationType})`
-          : '';
-      }
+    return this.showDataType
+      ? ` (${this.annotation.definition.annotationType})`
+      : '';
+  }
 
   annotationOptionChange(value) {
     this.annotationOption = value;
@@ -182,13 +183,18 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   dateChange(e) {
     this.successIcon = false;
-    this.textSpinnerFlag = true;
-    setTimeout (() => {
-        if (e !== null) {
-            const newDate = moment(e).format('YYYY-MM-DD');
-            this.control.patchValue(newDate);
-           this.handleInput();
-        } }, 2000);
-  }
+      if (e && e !== '') {
+        this.textSpinnerFlag = true;
+        const newDate = moment(e).format('YYYY-MM-DD');
+        console.log(newDate);
+        this.control.patchValue(newDate);
+        setTimeout(() => {
+          if (this.newAnnoId) {
+            this.handleInput(this.newAnnoId);
+          } else this.handleInput();
+        }, 2000);
 
+      }
+  }
 }
+
