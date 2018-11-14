@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {isBlank} from 'app/utils/index';
 
 import {
   BugReport,
@@ -58,5 +59,9 @@ export class BugReportComponent {
       this.sendBugReportError = true;
       this.submitting = false;
     });
+  }
+
+  get bugReportFieldsEmpty() {
+    return isBlank(this.bugReport.shortDescription) || isBlank(this.bugReport.reproSteps);
   }
 }
