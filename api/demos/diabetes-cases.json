@@ -1,7 +1,7 @@
 {
   "type": "cohort",
   "cohort": {
-    "name": "diabetes-cases",
+    "name": "diabetes cases",
     "description": "demo",
     "type": "demo",
     "criteria": {
