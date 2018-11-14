@@ -182,11 +182,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // deleted or renamed without notification to the Workbench. This makes a batch of GCS requests
     // so it will scale fairly well, but limit to the first N notebooks to avoid excess GCS traffic.
     // TODO: If we find a non-existent notebook, expunge from the cache.
-    Set<BlobId> foundNotebooks = cloudStorageService.blobsExist(workspaceFilteredResources.stream()
-        .map(r -> parseBlobId(r.getNotebookName()))
-        .filter(Objects::nonNull)
-        .limit(MAX_RECENT_NOTEBOOKS)
-        .collect(Collectors.toList()));
+    Set<BlobId> foundNotebooks = cloudStorageService.blobsExist(
+        workspaceFilteredResources.stream()
+          .map(r -> parseBlobId(r.getNotebookName()))
+          .filter(Objects::nonNull)
+          .limit(MAX_RECENT_NOTEBOOKS)
+          .collect(Collectors.toList()));
 
     RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(
