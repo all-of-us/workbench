@@ -191,7 +191,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         setTimeout(() => {
           if (this.newAnnoId) {
             this.handleInput(this.newAnnoId);
-          } else this.handleInput();
+          } else {
+            this.handleInput()
+          };
         }, 2000);
 
       }
