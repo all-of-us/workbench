@@ -2,14 +2,9 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   Input,
   OnChanges,
   OnInit,
-  Output,
-  AfterViewInit,
-  ViewChild,
-  ElementRef
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -102,7 +97,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const newValue = this.control.value;
     this.oldValue = this.annotation.value[this.valuePropertyName];
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId?this.annotation.value.annotationId : annotationId;
+    const annoId = this.annotation.value.annotationId ?
+                   this.annotation.value.annotationId : annotationId;
 
     let apiCall;
 
@@ -139,8 +135,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       this.successIcon = false;
     } , 2000 );
     apiCall.subscribe(items => {
-      if(items) {
-        this.newAnnoId = items.annotationId
+      if (items) {
+        this.newAnnoId = items.annotationId;
       }
     })
   }
@@ -188,7 +184,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         setTimeout(() => {
           if (this.newAnnoId) {
             this.handleInput(this.newAnnoId);
-          } else this.handleInput();
+          } else {
+            this.handleInput()
+          };
         }, 2000);
 
       }
