@@ -176,12 +176,12 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void validateProfileFields(User user) {
-    validateStringLength(user.getGivenName(), "Given Name", 80, 1);
-    validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
-    validateStringLength(user.getCurrentPosition(), "Current Position", 255, 1);
-    validateStringLength(user.getOrganization(), "Organization", 255, 1);
-    validateStringLength(user.getAreaOfResearch(), "Current Research", 3000, 1);
+  private void validateProfileFields(Profile profile) {
+    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
+    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
+    validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
+    validateStringLength(profile.getOrganization(), "Organization", 255, 1);
+    validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
   }
 
   private User saveUserWithConflictHandling(User user) {
@@ -413,6 +413,7 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
+    validateProfileFields(request.getProfile());
     User user = userService.createUser(
         request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
@@ -422,7 +423,6 @@ public class ProfileController implements ProfileApiDelegate {
         request.getProfile().getOrganization(),
         request.getProfile().getAreaOfResearch()
     );
-    validateProfileFields(user);
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
@@ -565,6 +565,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    validateProfileFields(updatedProfile);
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
@@ -615,7 +616,6 @@ public class ProfileController implements ProfileApiDelegate {
     }
 
     // This does not update the name in Google.
-    validateProfileFields(user);
     saveUserWithConflictHandling(user);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
