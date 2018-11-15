@@ -1,12 +1,29 @@
 package org.pmiops.workbench.api;
 
+import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -14,29 +31,19 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
+  private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
-  private Provider<User> userProvider;
-  private UserRecentResourceService userRecentResourceService;
-  private WorkspaceService workspaceService;
-  private FireCloudService fireCloudService;
+  private final Provider<User> userProvider;
+  private final UserRecentResourceService userRecentResourceService;
+  private final WorkspaceService workspaceService;
+  private final FireCloudService fireCloudService;
+  private final CloudStorageService cloudStorageService;
   private int distinctWorkspacelimit = 5;
   private Clock clock;
 
@@ -99,11 +106,13 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
+      CloudStorageService cloudStorageService,
       Clock clock) {
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
+    this.cloudStorageService = cloudStorageService;
     this.clock = clock;
   }
 
@@ -141,13 +150,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   /**
    * Gets the list of all resources recently access by user in order of access date time
-   *
-   * @return
    */
   @Override
   public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    RecentResourceResponse recentResponse = new RecentResourceResponse();
     List<UserRecentResource> userRecentResourceList = userRecentResourceService.findAllResourcesByUser(userId);
     List<Long> workspaceIdList = userRecentResourceList
         .stream()
@@ -158,27 +164,47 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
     // RW-1298
     // This needs to be refactored to only use namespace and FC ID
-    // The purpose of this Map, is to check what is actually still present in FC 
+    // The purpose of this Map, is to check what is actually still present in FC
     Map<Long, WorkspaceResponse> workspaceAccessMap = workspaceIdList.stream().collect(Collectors.toMap(id -> id, id -> {
-      Workspace workspace = workspaceService.findByWorkspaceId((long) id);
+      Workspace workspace = workspaceService.findByWorkspaceId(id);
       WorkspaceResponse workspaceResponse = fireCloudService
-          .getWorkspace(workspace.getWorkspaceNamespace(),
-              workspace.getFirecloudName());
+          .getWorkspace(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
       return workspaceResponse;
     }));
 
-    userRecentResourceList.stream()
-        .filter(userRecentResource -> {
-          return workspaceAccessMap.containsKey(userRecentResource.getWorkspaceId());
-        })
-        .forEach(userRecentResource -> {
-          RecentResource resource = TO_CLIENT.apply(userRecentResource);
-          WorkspaceResponse workspaceDetails = workspaceAccessMap.get(userRecentResource.getWorkspaceId());
-          resource.setPermission(workspaceDetails.getAccessLevel());
-          resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
-          resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
-          recentResponse.add(resource);
-        });
+    List<UserRecentResource> workspaceFilteredResources = userRecentResourceList.stream()
+        .filter(r -> workspaceAccessMap.containsKey(r.getWorkspaceId()))
+        // Drop any invalid notebook resources - parseBlobId will log errors.
+        .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
+        .collect(Collectors.toList());
+
+    // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
+    // deleted or renamed without notification to the Workbench. This makes a batch of GCS requests
+    // so it will scale fairly well, but limit to the first N notebooks to avoid excess GCS traffic.
+    // TODO: If we find a non-existent notebook, expunge from the cache.
+    Set<BlobId> foundNotebooks = cloudStorageService.blobsExist(
+        workspaceFilteredResources.stream()
+          .map(r -> parseBlobId(r.getNotebookName()))
+          .filter(Objects::nonNull)
+          .limit(MAX_RECENT_NOTEBOOKS)
+          .collect(Collectors.toList()));
+
+    RecentResourceResponse recentResponse = new RecentResourceResponse();
+    recentResponse.addAll(
+        workspaceFilteredResources.stream()
+          .filter(r -> {
+            return r.getNotebookName() == null ||
+                foundNotebooks.contains(parseBlobId(r.getNotebookName()));
+          })
+          .map(userRecentResource -> {
+            RecentResource resource = TO_CLIENT.apply(userRecentResource);
+            WorkspaceResponse workspaceDetails = workspaceAccessMap.get(userRecentResource.getWorkspaceId());
+            resource.setPermission(workspaceDetails.getAccessLevel());
+            resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
+            resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
+            return resource;
+          })
+          .collect(Collectors.toList()));
     return ResponseEntity.ok(recentResponse);
   }
 
@@ -186,6 +212,23 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
     Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
+  }
+
+  private BlobId parseBlobId(String uri) {
+    if (uri == null) {
+      return null;
+    }
+    if (!uri.startsWith("gs://")) {
+      log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", uri));
+      return null;
+    }
+    uri = uri.replaceFirst("gs://", "");
+    String[] parts = uri.split("/");
+    if (parts.length <= 1) {
+      log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", uri));
+      return null;
+    }
+    return BlobId.of(parts[0], Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length)));
   }
 
   private FileDetail convertStringToFileDetail(String str) {

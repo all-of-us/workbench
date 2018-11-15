@@ -2,7 +2,7 @@ package org.pmiops.workbench.cdr;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import java.util.Set;
 import org.pmiops.workbench.api.BigQueryService;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ConceptBigQueryService {
-  
+
   private final BigQueryService bigQueryService;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final ConceptService conceptService;
@@ -60,7 +60,7 @@ public class ConceptBigQueryService {
         .setNamedParameters(paramMap.build())
         .setUseLegacySql(false)
         .build();
-    QueryResult result = bigQueryService.executeQuery(
+    TableResult result = bigQueryService.executeQuery(
         bigQueryService.filterBigQueryConfig(jobConfiguration));
     return (int) result.iterateAll().iterator().next().get(0).getLongValue();
   }

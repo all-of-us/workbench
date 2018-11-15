@@ -2,7 +2,6 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ProfileService} from 'generated';
 import {ResendWelcomeEmailRequest, UpdateContactEmailRequest} from 'generated';
-import {ServerConfigService} from '../../services/server-config.service';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -21,17 +20,13 @@ export class AccountCreationModalsComponent {
   emailOffFocus = true;
   waiting = false;
   @Input('username') username: string;
-  @Input('gsuiteDomain') gsuiteDomain: string;
+  @Input('creationNonce') creationNonce: string;
 
   @Output() updateEmail = new EventEmitter<string>();
 
   constructor(
-    private profileService: ProfileService,
-    serverConfigService: ServerConfigService
+    private profileService: ProfileService
   ) {
-    serverConfigService.getConfig().subscribe((config) => {
-      this.gsuiteDomain = config.gsuiteDomain;
-    });
     this.contactEmail = '';
     this.emailOffFocus = false;
   }
@@ -50,12 +45,12 @@ export class AccountCreationModalsComponent {
     if (this.contactEmailInvalidError) {
       return;
     }
-    const request: UpdateContactEmailRequest = {
-      username: this.username + '@' + this.gsuiteDomain,
-      contactEmail: this.contactEmail
-    };
     this.updateEmail.emit(this.contactEmail);
-    this.profileService.updateContactEmail(request).subscribe(() => {
+    this.profileService.updateContactEmail({
+      username: this.username,
+      contactEmail: this.contactEmail,
+      creationNonce: this.creationNonce
+    }).subscribe(() => {
       this.resendingEmail = false;
       this.waiting = false;
       this.changingEmail = false;
@@ -64,10 +59,10 @@ export class AccountCreationModalsComponent {
 
   send() {
     this.waiting = true;
-    const request: ResendWelcomeEmailRequest = {
-      username: this.username + '@' + this.gsuiteDomain
-    };
-    this.profileService.resendWelcomeEmail(request).subscribe(() => {
+    this.profileService.resendWelcomeEmail({
+      username: this.username,
+      creationNonce: this.creationNonce
+    }).subscribe(() => {
       this.resendingEmail = false;
       this.waiting = false;
     });

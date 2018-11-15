@@ -2,7 +2,7 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -112,7 +112,7 @@ public class AuditController implements AuditApiDelegate {
     int numBad = 0;
     int numQueries = 0;
     for (String cdrProjectId : cdrProjects) {
-      QueryResult result = bigQueryService.executeQuery(
+      TableResult result = bigQueryService.executeQuery(
           QueryJobConfiguration.of(auditSql(cdrProjectId, suffixes)));
       Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 

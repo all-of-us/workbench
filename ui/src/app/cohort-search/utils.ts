@@ -13,7 +13,7 @@ export function typeDisplay(parameter): string {
       'AGE': 'Age',
       'DEC': 'Deceased'
     }[subtype] || '';
-  } else {
+  } else if (!_type.match(/^SNOMED.*/i)) {
     return parameter.get('code', '');
   }
 }
@@ -104,22 +104,32 @@ export function subtypeToTitle(subtype: string): string {
   return title;
 }
 
-export function highlightMatches(terms: Array<string>, name: string, id?: string) {
+export function highlightMatches(
+  terms: Array<string>,
+  name: string,
+  fullText?: boolean,
+  id?: string
+) {
+  id = id || '';
+  const _class = (id !== '' ? 'match' + id + ' ' : '') + 'search-keyword';
   terms.forEach(term => {
-    id = id || '';
-    const start = name.toLowerCase().indexOf(term.toLowerCase());
-    if (start > -1) {
-      const end = start + term.length;
-      name = name.slice(0, start)
-        + '<span '
-        + (id !== '' ? 'id="match' + id + '" '
-        + 'style="color: #659F3D;'
-        + 'font-weight: bolder;'
-        + 'background: transparent;'
-        + 'padding: 2px 0;"' : '')
-        + 'class="search-keyword">'
-        + name.slice(start, end) + '</span>'
-        + name.slice(end);
+    name = stripHtml(name);
+    if (fullText) {
+      const searchTerms = term.trim().split(new RegExp(',| '));
+      searchTerms
+        .filter(text => text.length > 2)
+        .forEach((searchTerm, s) => {
+          let re;
+          if (s === (searchTerms.length - 1)) {
+            re = new RegExp(searchTerm, 'gi');
+          } else {
+            re = new RegExp('\\b' + searchTerm + '\\b', 'gi');
+          }
+          name = name.replace(re, '<span class="' + _class + '">$&</span>');
+        });
+    } else {
+      const re = new RegExp(term, 'gi');
+      name = name.replace(re, '<span class="' + _class + '">$&</span>');
     }
   });
   return name;
@@ -130,6 +140,6 @@ export function stripHtml(string: string) {
 }
 
 export function getCodeOptions(itemType: string) {
-  const item =  DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
+  const item = DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
   return (item && item['codes']) ? item['codes'] : false;
 }

@@ -52,3 +52,14 @@ selection-icon-blue {
   white-space: nowrap;
   align-self: baseline;
 }
+
+::ng-deep .search-keyword {
+  color: #659F3D;
+  font-weight: bolder;
+  background-color: rgba(101,159,61,0.2);
+  padding: 2px 0;
+}
+
+::ng-deep .search-keyword[class^="match"] {
+  background: transparent;
+}

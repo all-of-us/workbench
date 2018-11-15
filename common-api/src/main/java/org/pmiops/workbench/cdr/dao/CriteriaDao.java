@@ -31,17 +31,32 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
-    "    and match(synonyms, ?2) > 0 " +
-    "    group by cr.name")
+    "    and (match(synonyms, ?2) > 0 or cr.code like upper(concat(?3,'%')))" +
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
   List<CriteriaId> findCriteriaByTypeForCodeOrName(String type,
-                                                 String value,
-                                                 Pageable page);
+                                                   String modifiedValue,
+                                                   String value,
+                                                   Pageable page);
+
+  @Query(value = "select min(cr.id) as id from Criteria cr " +
+    "    where cr.type = upper(?1) " +
+    "    and cr.subtype = upper(?2) " +
+    "    and (match(synonyms, ?3) > 0 or cr.code like upper(concat(?4,'%')))" +
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
+  List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
+                                                             String subtype,
+                                                             String modifiedValue,
+                                                             String value,
+                                                             Pageable page);
 
   @Query(value = "select min(cr.id) as id from Criteria cr " +
     "    where cr.type = upper(?1) " +
     "    and cr.subtype = upper(?2) " +
     "    and match(synonyms, ?3) > 0 " +
-    "    group by cr.name")
+    "    group by cr.name, cr.count " +
+    "    order by convert(cr.count, decimal) desc")
   List<CriteriaId> findCriteriaByTypeAndSubtypeForCodeOrName(String type,
                                                              String subtype,
                                                              String value,
@@ -66,7 +81,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "order by c.name asc " +
     "limit :limit", nativeQuery = true)
   List<Criteria> findDrugBrandOrIngredientByValue(@Param("value") String value,
-                                                 @Param("limit") Long limit);
+                                                  @Param("limit") Long limit);
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +
@@ -96,13 +111,16 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and code = :code " +
     "and is_group = 1 " +
     "and is_selectable = 1))", nativeQuery = true)
-  List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type, @Param("subtype") String subtype, @Param("code") String code);
+  List<String> findCriteriaByTypeAndSubtypeAndCode(@Param("type") String type,
+                                                   @Param("subtype") String subtype,
+                                                   @Param("code") String code);
 
   @Query(value = "select * from criteria c " +
     "where c.type = :type " +
     "and (match(c.name) against(:value in boolean mode) or match(c.code) against(:value in boolean mode)) " +
     "and c.is_selectable = 1 " +
     "order by c.code asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type, @Param("value") String value);
+  List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type,
+                                                 @Param("value") String value);
 
 }

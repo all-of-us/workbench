@@ -49,35 +49,33 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     private cdref: ChangeDetectorRef
   ) {}
 
-    ngOnChanges() {
-        if (this.annotation.value[this.valuePropertyName]) {
-            this.defaultAnnotation = true;
-                this.annotationOption = this.annotation.value[this.valuePropertyName];
-        } else {
-            this.defaultAnnotation = false;
-        }
-    }
-
-    ngOnInit() {
-      this.ngAfterContentChecked();
-        this.successIcon = false;
-    const oldValue = this.annotation.value[this.valuePropertyName];
-    if (oldValue !== undefined) {
-      this.control.setValue(oldValue);
+  ngOnChanges() {
+    if (this.annotation.value[this.valuePropertyName]) {
+      this.defaultAnnotation = true;
+        this.annotationOption = this.annotation.value[this.valuePropertyName];
+    } else {
+      this.defaultAnnotation = false;
     }
   }
 
-    ngAfterContentChecked() {
-        this.cdref.detectChanges();
+  ngOnInit() {
+    this.ngAfterContentChecked();
+    this.successIcon = false;
+    this.oldValue = this.annotation.value[this.valuePropertyName];
+    if (this.oldValue !== undefined) {
+      this.control.setValue(this.oldValue);
     }
+  }
+
+  ngAfterContentChecked() {
+    this.cdref.detectChanges();
+  }
 
 
-    textBlur() {
-        this.successIcon = false;
+  textBlur() {
+    this.successIcon = false;
     this.textSpinnerFlag = true;
-    setTimeout (() => {
-        this.handleInput();
-        } , 2000 );
+    this.handleInput();
   }
 
   integerOnly(event): boolean {
@@ -89,14 +87,11 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   handleInput() {
-      this.textSpinnerFlag = false;
-      this.successIcon = true;
     /* Parameters from the path */
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const newValue = this.control.value;
-     this.oldValue = this.annotation.value[this.valuePropertyName];
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
     const annoId = this.annotation.value.annotationId;
 
@@ -104,8 +99,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
     // Nothing to see here - if there's no change, no need to hit the server
     if (newValue === this.oldValue) {
-      return ;
+      this.textSpinnerFlag = false;
+      return;
     }
+    this.oldValue = newValue;
     // If there is an annotation ID then the annotation has already been
     // created, so this must be either delete or update
     if (annoId !== undefined) {
@@ -113,7 +110,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (newValue === '' || newValue === null) {
         apiCall = this.reviewAPI
           .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
-
       } else {
         const request = <ModifyParticipantCohortAnnotationRequest>{
           [this.valuePropertyName]: newValue,
@@ -122,19 +118,30 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
       }
     } else {
-    // There's no annotation ID so this must be a create
-      const request = <ParticipantCohortAnnotation> {
-        cohortAnnotationDefinitionId: defnId,
-        ...this.annotation.value,
-        [this.valuePropertyName]: newValue,
-      };
-      apiCall = this.reviewAPI
-        .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
+      if (newValue) {
+        // There's no annotation ID so this must be a create
+        const request = <ParticipantCohortAnnotation> {
+          cohortAnnotationDefinitionId: defnId,
+          ...this.annotation.value,
+          [this.valuePropertyName]: newValue,
+        };
+        apiCall = this.reviewAPI
+          .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
+      }
     }
-      setTimeout (() => {
-          this.successIcon = false;
-      } , 2000 );
-    apiCall.subscribe();
+    if (apiCall) {
+      apiCall.subscribe(() => {
+        setTimeout (() => {
+          this.textSpinnerFlag = false;
+          this.successIcon = true;
+          setTimeout(() => {
+            this.successIcon = false;
+          }, 2000);
+        }, 1000);
+      });
+    } else {
+      this.textSpinnerFlag = false;
+    }
   }
 
   toggleExpandText() {

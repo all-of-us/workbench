@@ -36,26 +36,11 @@
       <div class="row" *ngIf="selectedConcept.analyses && selectedConcept.analyses.genderAnalysis" >
         <!-- Loop through the genders we have results for showing the graph -->
         <div *ngFor="let gender of selectedConcept.analyses.genderAnalysis.results" class="col-md-4 col-xs-12 chart-wrapper">
-
-          <app-chart *ngIf="gender.stratum2 === dbc.FEMALE_GENDER_ID && selectedConcept.analyses &&
-                         selectedConcept.analyses.measurementValueGenderAnalysis" [genderId]="dbc.FEMALE_GENDER_ID"
+          <app-chart *ngIf="[dbc.FEMALE_GENDER_ID, dbc.MALE_GENDER_ID, dbc.INTERSEX_GENDER_ID, dbc.NONE_GENDER_ID].includes(gender.stratum2) && selectedConcept.analyses &&
+                         selectedConcept.analyses.measurementValueGenderAnalysis" [genderId]="gender.stratum2"
                      [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                      [chartType]="selectedConcept.chartType"
                      [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
-
-              <app-chart *ngIf="gender.stratum2 === dbc.MALE_GENDER_ID && selectedConcept.analyses &&
-                         selectedConcept.analyses.measurementValueGenderAnalysis" [genderId]="dbc.MALE_GENDER_ID"
-                         [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
-                         [chartType]="selectedConcept.chartType"
-                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
-
-              <app-chart *ngIf="gender.stratum2 === dbc.OTHER_GENDER_ID && selectedConcept.analyses &&
-                         selectedConcept.analyses.measurementValueGenderAnalysis"
-                         [genderId]="dbc.OTHER_GENDER_ID_GENDER_ID"
-                         [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
-                         [chartType]="selectedConcept.chartType"
-                         [analysis]="selectedConcept.analyses.measurementValueGenderAnalysis[0]"></app-chart>
-
         </div>
 
         <!-- show Age totals -->

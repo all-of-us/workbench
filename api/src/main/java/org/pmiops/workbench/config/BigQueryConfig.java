@@ -10,8 +10,6 @@ public class BigQueryConfig {
 
     @Bean
     public BigQuery bigQuery() {
-        return new BigQueryOptions
-                .DefaultBigqueryFactory()
-                .create( BigQueryOptions.getDefaultInstance() );
+      return BigQueryOptions.getDefaultInstance().getService();
     }
 }

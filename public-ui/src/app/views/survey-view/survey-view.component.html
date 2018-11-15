@@ -140,12 +140,12 @@
 
         <div class="row  answers" [hidden]="!showAnswer[q.conceptId]">
           <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
-            <div  class="row"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
-              <div class="answer-text col-sm-6 col-xs-12" >
-                <label innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+            <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
+              <div class="col-sm-6 col-xs-12">
+                <label class="answer-text" innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
               </div>
               <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
-                <label class="participant-count">{{a.countValue | number}}  </label>
+                <label class="participant-count answer-text">{{a.countValue | number}}  </label>
               </div>
               <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <div class="progress labeled">
@@ -157,7 +157,7 @@
           </div>
 
           <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
-            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer" >
+            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer && q.selectedAnswer.stratum4.toLowerCase() != 'did not answer' " >
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=right
@@ -166,7 +166,7 @@
                 </clr-tooltip-content>
               </clr-tooltip>
               <div class="chart-wrapper col-xs-12 col-sm-12">
-                <div class="col-md">
+                <div class="col-md gender-chart-button">
                   <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
                   </button>
                   <clr-tooltip>

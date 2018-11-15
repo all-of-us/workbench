@@ -69,7 +69,6 @@ const sourceCode = {
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
-  notField: true,
   displayName: 'Age At Event',
 };
 const visitType = {
@@ -134,6 +133,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   conditionTitle: string;
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
+  summaryActive = false;
   readonly stubs = [
     'survey',
   ];
@@ -306,7 +306,9 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     if (this.clickedParticipantId) {
       this.chartLoadedSpinner = true;
       this.participantsId = this.clickedParticipantId;
-      this.getDomainsParticipantsData();
+      if (this.summaryActive) {
+        this.getDomainsParticipantsData();
+      }
     }
   }
 
@@ -337,7 +339,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
           this.chartData[domainName].conditionTitle = typeToTitle(domainName);
           this.chartData[domainName].loading = false;
         });
-      this.subscription = getParticipantsDomainData;
+      this.subscription.add(getParticipantsDomainData);
     });
   }
 

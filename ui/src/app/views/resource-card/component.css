@@ -82,7 +82,8 @@
 
 .card .footer {
   position: absolute;
-  bottom: .01rem;
+  /* This deals with clarity's built in bottom border for cards... */
+  bottom: -1px;
 }
 
 .last-modified {

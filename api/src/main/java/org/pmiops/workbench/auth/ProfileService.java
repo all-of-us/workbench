@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
@@ -40,12 +39,10 @@ public class ProfileService {
       }
     };
 
-  private final FireCloudService fireCloudService;
   private final UserDao userDao;
 
   @Autowired
-  public ProfileService(FireCloudService fireCloudService, UserDao userDao) {
-    this.fireCloudService = fireCloudService;
+  public ProfileService(UserDao userDao) {
     this.userDao = userDao;
   }
 
@@ -60,6 +57,9 @@ public class ProfileService {
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
     profile.setUsername(user.getEmail());
+    if (user.getCreationNonce() != null) {
+      profile.setCreationNonce(user.getCreationNonce().toString());
+    }
     profile.setFamilyName(user.getFamilyName());
     profile.setGivenName(user.getGivenName());
     profile.setOrganization(user.getOrganization());

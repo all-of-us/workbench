@@ -131,7 +131,7 @@ export class NodeComponent implements OnInit, OnDestroy {
           this.subMatches = selectedIds.length;
           if (parentId !== 0) {
             const displayName = selectedIds.includes(parentId)
-              ? highlightMatches(this.searchTerms, this.node.get('name'))
+              ? highlightMatches(this.searchTerms, this.node.get('name'), false)
               : stripHtml(this.node.get('name'));
             this.node = this.node.set('name', displayName);
           }
@@ -242,7 +242,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       path.push(i);
       const matches = this.matchFound(item);
       if (matches.length) {
-        item.name = highlightMatches(matches, item.name);
+        item.name = highlightMatches(matches, item.name, false);
         if (path.length > 1) {
           this.setExpanded(path, 0);
         }

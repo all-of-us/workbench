@@ -4,7 +4,9 @@ import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import java.security.SecureRandom;
 import java.time.Clock;
+import java.util.Random;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,4 +25,7 @@ public class CommonConfig {
 
   @Bean
   Clock clock() { return Clock.systemUTC(); }
+
+  @Bean
+  Random random() { return new SecureRandom(); }
 }

@@ -102,6 +102,13 @@
   color: #f1f2f2;
 }
 
+.btn.btn-primary.nav-link:disabled {
+  background-color: #262262;
+  color: #aeb2b7;
+  opacity: 0.5;
+  cursor: auto;
+}
+
 .app-container {
   width: 100%;
   padding-right: 0.6rem;
