@@ -44,7 +44,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   myDate: any;
-  newAnnoId: any;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -96,7 +95,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const newValue = this.control.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId?this.annotation.value.annotationId : annotationId;
+    const annoId = this.annotation.value.annotationId ;
 
     let apiCall;
 
@@ -135,6 +134,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     if (apiCall) {
       apiCall.subscribe((update) => {
         this.annotationUpdate.emit(update);
+        if (update && !annoId) {
+          this.annotation.value.annotationId = update.annotationId;
+        }
         setTimeout (() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;
@@ -186,16 +188,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       if (e && e !== '') {
         this.textSpinnerFlag = true;
         const newDate = moment(e).format('YYYY-MM-DD');
-        console.log(newDate);
         this.control.patchValue(newDate);
-        setTimeout(() => {
-          if (this.newAnnoId) {
-            this.handleInput(this.newAnnoId);
-          } else {
-            this.handleInput();
-          }
-        }, 2000);
-
+        this.handleInput();
       }
   }
 }
