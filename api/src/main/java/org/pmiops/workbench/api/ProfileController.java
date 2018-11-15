@@ -181,7 +181,7 @@ public class ProfileController implements ProfileApiDelegate {
     validateStringLength(user.getFamilyName(), "Family Name", 80, 1);
     validateStringLength(user.getCurrentPosition(), "Current Position", 255, 1);
     validateStringLength(user.getOrganization(), "Organization", 255, 1);
-    validateStringLength(user.getAreaOfResearch(), "Current Research", 10000, 1);
+    validateStringLength(user.getAreaOfResearch(), "Current Research", 3000, 1);
   }
 
   private User saveUserWithConflictHandling(User user) {
