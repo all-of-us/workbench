@@ -91,8 +91,8 @@ describe('RecentWorkComponent', () => {
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
     expect(cardNames).toEqual(
-        ['Mock Concept Set for condition', 'sample name', 'sample name 2',
-         'Mock Concept Set Measurement']);
+        ['sample name', 'sample name 2',
+         'Mock Concept Set Measurement', 'Mock Concept Set for condition']);
   }));
 
   // test that it displays 4 most recent resources from UserMetrics cache

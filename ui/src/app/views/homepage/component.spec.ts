@@ -21,6 +21,7 @@ import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
+import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
@@ -66,7 +67,7 @@ describe('HomepageComponent', () => {
       ],
       providers: [
         {provide: CohortsService},
-        {provide: ConceptSetsService },
+        {provide: ConceptSetsService, useVale: new ConceptSetsServiceStub() },
         {provide: ProfileService, useValue: profileStub},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: WorkspacesService },
