@@ -8,6 +8,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
+
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -69,29 +71,38 @@ public class ConceptService {
             return null;
         }
         String[] keywords = query.split("[,+\\s+]");
-        for(int i = 0; i < keywords.length; i++){
-            String key = keywords[i];
-            if(key.length() < 3 && !key.isEmpty()){
-                key = "\"" + key + "\"";
-                keywords[i] = key;
-            }
-        }
-
-        StringBuilder query2 = new StringBuilder();
-        for(String key : keywords){
+        List<String> temp = new ArrayList<>();
+        for (String key: keywords) {
             if(!key.isEmpty()){
-                if(query2.length()==0){
-                    query2.append("+");
-                    query2.append(key);
-                }else if(key.contains("\"")){
-                    query2.append(key);
-                }else{
-                    query2.append("+");
-                    query2.append(key);
+                int si = query.indexOf(key);
+                if(si-1 >= 0 && si-1 <= query.length()){
+                    String pre = query.substring(si-1,si);
+                    if(pre.equals("+")) {
+                        temp.add(new String(pre+key));
+                        continue;
+                    }
+                }
+                if(key.contains("-") && !temp.contains(key)){
+                    temp.add(key);
+                }else if(key.contains("*") && key.length() > 1){
+                    temp.add(new String("+"+key));
+                }
+                else{
+                    if(key.length() < 3){
+                        temp.add(new String("\"" + key + "\""));
+                    }else{
+                        temp.add(new String("+"+key));
+                    }
                 }
             }
 
         }
+
+        StringBuilder query2 = new StringBuilder();
+        for(String key : temp){
+            query2.append(key);
+        }
+
         return query2.toString();
     }
 
