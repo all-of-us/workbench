@@ -160,19 +160,31 @@ public class ProfileController implements ProfileApiDelegate {
     return createFirecloudBillingProject(user);
   }
 
+  private void validateStringLength(String field, String fieldName, int max, int min) {
+    if (field == null) {
+      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
+    }
+    if (field.length() > max) {
+      throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
+    }
+    if (field.length() < min) {
+      if (min == 1) {
+        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
+      } else {
+        throw new BadRequestException(String.format("%s is under character minimum. (%d)", fieldName, min));
+      }
+    }
+  }
+
+  private void validateProfileFields(Profile profile) {
+    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
+    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
+    validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
+    validateStringLength(profile.getOrganization(), "Organization", 255, 1);
+    validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
+  }
+
   private User saveUserWithConflictHandling(User user) {
-    if (user.getGivenName().length() > 80) {
-      throw new BadRequestException("Given Name length exceeds character limit. (80)");
-    }
-    if (user.getFamilyName().length() > 80) {
-      throw new BadRequestException("Family Name length exceeds character limit. (80)");
-    }
-    if (user.getCurrentPosition() != null && user.getCurrentPosition().length() > 255) {
-      throw new BadRequestException("Current Position length exceeds character limit. (255)");
-    }
-    if (user.getOrganization() != null && user.getOrganization().length() > 255) {
-      throw new BadRequestException("Organization length exceeds character limit. (255)");
-    }
     try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -401,6 +413,7 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
+    validateProfileFields(request.getProfile());
     User user = userService.createUser(
         request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
@@ -552,6 +565,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    validateProfileFields(updatedProfile);
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
