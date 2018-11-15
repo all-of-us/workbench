@@ -65,33 +65,25 @@ public class ConceptService {
         this.conceptDao = conceptDao;
     }
 
-    public static String modifyMultipleMatchKeyword(String query){
+    public static String modifyMultipleMatchKeyword(String query) {
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
-        if(query == null || query.trim().isEmpty()){
+        if (query == null || query.trim().isEmpty()) {
             return null;
         }
         String[] keywords = query.split("[,+\\s+]");
         List<String> temp = new ArrayList<>();
         for (String key: keywords) {
-            if(!key.isEmpty()){
-                int si = query.indexOf(key);
-                if(si-1 >= 0 && si-1 <= query.length()){
-                    String pre = query.substring(si-1,si);
-                    if(pre.equals("+")) {
-                        temp.add(new String(pre+key));
-                        continue;
-                    }
-                }
-                if(key.contains("-") && !temp.contains(key)){
+            if (!key.isEmpty()) {
+                if (key.contains("-") && !temp.contains(key)) {
                     temp.add(key);
-                }else if(key.contains("*") && key.length() > 1){
-                    temp.add(new String("+"+key));
+                } else if (key.contains("*") && key.length() > 1) {
+                    temp.add(new String("+" + key));
                 }
-                else{
-                    if(key.length() < 3){
+                else {
+                    if (key.length() < 3) {
                         temp.add(new String(key));
-                    }else{
-                        temp.add(new String("+"+key));
+                    } else {
+                        temp.add(new String("+" + key));
                     }
                 }
             }
@@ -99,7 +91,7 @@ public class ConceptService {
         }
 
         StringBuilder query2 = new StringBuilder();
-        for(String key : temp){
+        for (String key : temp) {
             query2.append(key);
         }
 
@@ -129,7 +121,7 @@ public class ConceptService {
 
                     final String keyword = modifyMultipleMatchKeyword(query);
 
-                    if(keyword != null){
+                    if (keyword != null) {
                       Expression<Double> matchExp = criteriaBuilder.function("matchConcept", Double.class,
                                 root.get("conceptName"), root.get("conceptCode"), root.get("vocabularyId"),
                           root.get("synonymsStr"), criteriaBuilder.literal(keyword));
@@ -175,7 +167,7 @@ public class ConceptService {
                         predicates.add(root.get("domainId").in(domainIds));
                     }
 
-                    if(minCount == 1){
+                    if (minCount == 1) {
                         List<Predicate> countPredicates = new ArrayList<>();
                         countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
                         countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
