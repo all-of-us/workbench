@@ -379,8 +379,8 @@ public class WorkspacesControllerTest {
     researchPurpose.setPopulation(true);
     researchPurpose.setPopulationOfFocus("population");
     researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setTimeRequested(new Long(1000));
-    researchPurpose.setTimeReviewed(new Long(1500));
+    researchPurpose.setTimeRequested(1000L);
+    researchPurpose.setTimeReviewed(1500L);
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
@@ -534,6 +534,44 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     Workspace got = workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
+  }
+
+  @Test
+  public void testUpdateWorkspaceResearchPurpose() throws Exception {
+    Workspace ws = createDefaultWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ResearchPurpose rp = new ResearchPurpose()
+            .diseaseFocusedResearch(false)
+            .diseaseOfFocus(null)
+            .methodsDevelopment(false)
+            .controlSet(false)
+            .aggregateAnalysis(false)
+            .ancestry(false)
+            .commercialPurpose(false)
+            .population(false)
+            .populationOfFocus(null)
+            .additionalNotes(null)
+            .reviewRequested(false);
+    ws.setResearchPurpose(rp);
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
+    ResearchPurpose updatedRp = workspacesController
+            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
+            .getBody()
+            .getResearchPurpose();
+
+    assertThat(updatedRp.getDiseaseFocusedResearch()).isFalse();
+    assertThat(updatedRp.getDiseaseOfFocus()).isNull();
+    assertThat(updatedRp.getMethodsDevelopment()).isFalse();
+    assertThat(updatedRp.getControlSet()).isFalse();
+    assertThat(updatedRp.getAggregateAnalysis()).isFalse();
+    assertThat(updatedRp.getAncestry()).isFalse();
+    assertThat(updatedRp.getCommercialPurpose()).isFalse();
+    assertThat(updatedRp.getPopulation()).isFalse();
+    assertThat(updatedRp.getPopulationOfFocus()).isNull();
+    assertThat(updatedRp.getAdditionalNotes()).isNull();
+    assertThat(updatedRp.getReviewRequested()).isFalse();
   }
 
   @Test(expected = ForbiddenException.class)
