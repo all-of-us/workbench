@@ -33,6 +33,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   surveyName: string;
   conceptCodeTooltip: any;
   genderGraph: string;
+  binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
+    '1585820', '1585889', '1585890'];
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -75,6 +77,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
+            
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -214,6 +217,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       } else {
         this.genderGraph = 'BS';
       }
+  }
+  public convertToNum(s) {
+    return Number(s);
   }
 
 }
