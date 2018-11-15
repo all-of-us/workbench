@@ -9,7 +9,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -81,7 +80,7 @@ public class ConceptService {
                 }
                 else {
                     if (key.length() < 3) {
-                        temp.add(new String(key));
+                        temp.add(key);
                     } else {
                         temp.add(new String("+" + key));
                     }
