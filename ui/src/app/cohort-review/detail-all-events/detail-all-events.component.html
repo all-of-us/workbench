@@ -11,8 +11,7 @@
   </clr-dg-column>
 
   <clr-dg-row *clrDgItems="let datum of data"
-    (click)="onClick(datum)"
-    [style.cursor]="'pointer'">
+    (click)="onClick(datum)">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="true">
         <span *ngSwitchCase="col.name === 'itemDate'

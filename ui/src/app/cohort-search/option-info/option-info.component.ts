@@ -1,4 +1,5 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
+import {TreeSubType, TreeType} from 'generated';
 import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
@@ -18,8 +19,12 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.option.displayName =
-      highlightMatches([this.searchTerm], this.option.name, this.option.id.toString());
+    const code = this.showCode
+      ? '<span style="font-weight: 700;">'
+      + highlightMatches([this.searchTerm], this.option.code, true)
+      + '</span> ' : '';
+    this.option.displayName = code +
+      highlightMatches([this.searchTerm], this.option.name, true, this.option.id.toString());
   }
 
   ngAfterViewInit() {
@@ -30,14 +35,20 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
 
   checkTruncation() {
     const elem = this.button.nativeElement;
-    const id = 'match' + this.option.id.toString();
-    const highlight = document.getElementById(id);
+    const _class = 'match' + this.option.id.toString();
+    const highlights = document.getElementsByClassName(_class);
     this.isTruncated = elem.offsetWidth < elem.scrollWidth;
-    if (this.isTruncated && highlight) {
-      this.checkPosition(elem, highlight);
-    } else if (highlight !== null) {
-      highlight.style.background =
-        'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)';
+    if (this.isTruncated && highlights) {
+      Array.from(highlights).forEach(highlight => {
+        this.checkPosition(elem, highlight);
+      });
+    } else if (highlights !== null) {
+      Array.from(highlights).forEach(highlight => {
+        highlight.setAttribute(
+          'style',
+          'background: linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)'
+        );
+      });
     }
   }
 
@@ -55,5 +66,10 @@ export class OptionInfoComponent implements AfterViewInit, OnInit {
       highlight.style.background =
         'linear-gradient(to right, rgba(101,159,61,0.2) 0, rgba(101,159,61,0.2) 100%)';
     }
+  }
+
+  get showCode() {
+    return [TreeType.ICD9, TreeType.ICD10, TreeType.CPT, TreeType.MEAS].includes(this.option.type)
+      || (TreeSubType.ATC === this.option.subtype && !this.option.group);
   }
 }

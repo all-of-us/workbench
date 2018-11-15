@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import java.sql.Timestamp;
@@ -38,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
-  private static final int MAX_RECENT_NOTEBOOKS = 5;
+  private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private final Provider<User> userProvider;
   private final UserRecentResourceService userRecentResourceService;
@@ -180,23 +179,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         .collect(Collectors.toList());
 
     // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
-    // deleted or renamed without notification to the Workbench. This makes serial GCS requests so
-    // we limit to the first N notebooks.
-    // TODO: Dispatch these requests in batch or in parallel.
+    // deleted or renamed without notification to the Workbench. This makes a batch of GCS requests
+    // so it will scale fairly well, but limit to the first N notebooks to avoid excess GCS traffic.
     // TODO: If we find a non-existent notebook, expunge from the cache.
-    Set<BlobId> foundNotebooks = workspaceFilteredResources.stream()
-        .map(r -> parseBlobId(r.getNotebookName()))
-        .filter(Objects::nonNull)
-        .limit(MAX_RECENT_NOTEBOOKS)
-        .filter(id -> {
-          try {
-            return cloudStorageService.blobExists(id);
-          } catch (StorageException e) {
-            log.log(Level.WARNING, "failed to check blob existence, assuming it exists", e);
-            return true;
-          }
-        })
-        .collect(Collectors.toSet());
+    Set<BlobId> foundNotebooks = cloudStorageService.blobsExist(
+        workspaceFilteredResources.stream()
+          .map(r -> parseBlobId(r.getNotebookName()))
+          .filter(Objects::nonNull)
+          .limit(MAX_RECENT_NOTEBOOKS)
+          .collect(Collectors.toList()));
 
     RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(
