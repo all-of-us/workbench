@@ -8,6 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileService} from 'generated';
 
+import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -21,7 +22,6 @@ import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
-import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
