@@ -19,7 +19,6 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-
 if [ -z "${BQ_PROJECT}" ]
 then
   echo "Usage: $USAGE"
@@ -43,6 +42,8 @@ then
   echo "Usage: $USAGE"
   exit 1
 fi
+
+declare -a toBinSurveyQuestions=(1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890)
 
 # Next Populate achilles_results
 echo "Running achilles queries..."
@@ -1117,7 +1118,7 @@ Count(*) as count_value,0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-Where (o.observation_source_concept_id > 0 and o.value_as_number >= 0 and o.observation_source_concept_id not in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+Where (o.observation_source_concept_id > 0 and o.value_as_number >= 0 and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 and o.value_as_number > 0
 Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id,sq.id
 order by sq.id asc"
@@ -1132,7 +1133,7 @@ Count(*) as count_value,0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-Where (o.observation_source_concept_id in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) and o.value_as_number >= 0)
+Where (o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) and o.value_as_number >= 0)
 and o.value_as_number > 0
 Group by o.observation_source_concept_id,stratum_4,sm.concept_id,sq.id
 order by sq.id asc"
@@ -1164,7 +1165,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
-and o.observation_source_concept_id not in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id,sq.id
 order by sq.id asc"
 
@@ -1178,7 +1179,7 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DA
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.observation_source_concept_id in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) and o.value_as_number >= 0)
+where (o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) and o.value_as_number >= 0)
 group by sm.concept_id,o.observation_source_concept_id,stratum_4,p.gender_concept_id,sq.id
 order by sq.id asc"
 
@@ -1208,7 +1209,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
-and o.observation_source_concept_id not in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_identity_concept_id,sq.id
 order by sq.id asc"
 
@@ -1223,7 +1224,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.value_as_number >= 0
-and o.observation_source_concept_id in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
 group by sm.concept_id,o.observation_source_concept_id,stratum_4,p.gender_identity_concept_id,sq.id
 order by sq.id asc"
 
@@ -1273,7 +1274,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
-and o.observation_source_concept_id not in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
 order by sq.id asc"
@@ -1289,7 +1290,7 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DA
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.value_as_number >= 0 and o.observation_source_concept_id in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+where (o.value_as_number >= 0 and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
 group by sm.concept_id,o.observation_source_concept_id,stratum_4,stratum_5,sq.id
 order by sq.id asc"
@@ -1307,7 +1308,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
-and o.observation_source_concept_id not in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
 order by sq.id asc"
@@ -1324,7 +1325,7 @@ join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 where (o.value_as_number >= 0
-and o.observation_source_concept_id in (1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890) )
+and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
 group by sm.concept_id,o.observation_source_concept_id,stratum_4,stratum_5,sq.id
 order by sq.id asc"
