@@ -15,7 +15,7 @@
     <div *ngIf="isMeasurement()">
       <div class="attr-name-color">
         {{displayName}}
-        <div class="attr-refresh" (click)="refresh()">RESET FORM</div>
+        <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
       </div>
       <div class="radio">
         <input type="radio" name="labExists" [value]="true" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
