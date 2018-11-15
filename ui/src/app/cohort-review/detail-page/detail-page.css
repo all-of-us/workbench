@@ -20,6 +20,7 @@
   margin-left: -2rem;
   border-radius: 0.2rem;
   top: 3rem;
+  cursor: pointer;
 }
 
 .detail-page {
