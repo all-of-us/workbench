@@ -89,7 +89,7 @@ public class ConceptService {
                 }
                 else{
                     if(key.length() < 3){
-                        temp.add(new String("\"" + key + "\""));
+                        temp.add(new String(key));
                     }else{
                         temp.add(new String("+"+key));
                     }
