@@ -77,17 +77,15 @@
 }
 
 .i-frame {
-  width: 102%;
-  height: 100%;
-  margin-left: -.5rem;
-  margin-right: -.5rem;
+  width: 100%;
+  height: calc(100vh - 4.48rem);
 }
 
 .hidden {
   display: none;
 }
 
-#seperator {
+#separator {
   border-bottom: 5px solid #2691D0;
   width: 100%;
 }

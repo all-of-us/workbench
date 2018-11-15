@@ -1,6 +1,7 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
 import {
+  ActivatedRoute,
   Router,
 } from '@angular/router';
 
@@ -32,6 +33,7 @@ export class SignedInComponent implements OnInit {
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
+  minimizeChrome = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -57,6 +59,7 @@ export class SignedInComponent implements OnInit {
     /* Angular's */
     private locationService: Location,
     private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -71,6 +74,7 @@ export class SignedInComponent implements OnInit {
           profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
+        this.minimizeChrome = this.shouldMinimize();
       });
     });
 
@@ -88,6 +92,15 @@ export class SignedInComponent implements OnInit {
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
+  }
+
+  shouldMinimize(): boolean {
+    let leaf = this.route.snapshot;
+    while (leaf.firstChild != null) {
+      leaf = leaf.firstChild;
+    }
+    console.log(leaf.data.hideNavBar);
+    return leaf.data.hideNavBar;
   }
 
   private navigateSignOut(): void {

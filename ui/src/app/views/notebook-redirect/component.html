@@ -37,6 +37,6 @@
   </div>
 </div>
 <div *ngIf="progress === Progress.Redirecting || progress === Progress.Loaded" [class.hidden]="progress === Progress.Redirecting" class="i-frame">
-  <div id="seperator" *ngIf="progress === Progress.Loaded"></div>
+  <div id="separator" *ngIf="progress === Progress.Loaded"></div>
   <iframe id="leo-iframe" style="width: 100%; height: 100%;" frameBorder="0" [src]="leoUrl"></iframe>
 </div>
