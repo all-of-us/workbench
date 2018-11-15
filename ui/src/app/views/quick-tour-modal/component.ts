@@ -80,7 +80,7 @@ export class QuickTourModalComponent implements OnInit {
       'You can share this Workspace with other users, allowing them to view or edit ' +
       'your work. The dataset referenced by a workspace is in ' +
       '<a class="link" href="https://www.ohdsi.org/data-standardization/the-common-data-model/" ' +
-      'target="_blank" data-foo="bar">OMOP common data model</a> format. ' +
+      'target="_blank">OMOP common data model</a> format. ' +
       '<a class="link" href="https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data' +
       '-model-and-standardized-vocabularies/" target="_blank">Here</a> are some tutorials to ' +
       'understand OMOP data model.\n\nWhen you create your workspace, you will be prompted ' +
