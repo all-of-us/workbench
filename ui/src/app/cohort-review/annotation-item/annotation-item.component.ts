@@ -132,8 +132,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (apiCall) {
-      apiCall.subscribe((response) => {
-        this.annotationUpdate.emit(response);
+      apiCall.subscribe((update) => {
+        this.annotationUpdate.emit(update);
         setTimeout (() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;
