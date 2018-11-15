@@ -16,6 +16,6 @@
 <app-annotation-item
   *ngFor="let anno of (annotations$ | async)"
   [annotation]="anno"
-  (annotationUpdate)="updateAnno($event)"
+  (annotationUpdate)="updateAnnotation($event)"
   [showDataType]="showDataType">
 </app-annotation-item>

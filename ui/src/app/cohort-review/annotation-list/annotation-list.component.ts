@@ -75,14 +75,13 @@ export class AnnotationListComponent implements OnChanges {
     this.state.editAnnotationManagerOpen.next(true);
   }
 
-  updateAnno(anno: ParticipantCohortAnnotation) {
-    const ind = this.participant.annotations.findIndex(an => an.annotationId === anno.annotationId);
-    if (ind > -1) {
-      this.participant.annotations[ind] = anno;
+  updateAnnotation(update: ParticipantCohortAnnotation) {
+    const index = this.participant.annotations
+      .findIndex(anno => anno.annotationId === update.annotationId);
+    if (index > -1) {
+      this.participant.annotations[index] = update;
     } else {
-      this.participant.annotations.push(anno);
+      this.participant.annotations.push(update);
     }
-    console.log(anno);
-    console.log(this.participant.annotations);
   }
 }
