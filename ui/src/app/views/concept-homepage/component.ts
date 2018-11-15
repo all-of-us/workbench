@@ -42,7 +42,7 @@ interface VocabularyCountSelected extends VocabularyCount {
 })
 export class ConceptHomepageComponent implements OnInit {
   loadingDomains = true;
-  searchTerm: string;
+  searchTerm = '';
   standardConceptsOnly = true;
   searching = false;
   currentSearchString: string;
@@ -53,6 +53,7 @@ export class ConceptHomepageComponent implements OnInit {
     conceptCount: 0
   };
   selectedConcept: Concept[] = [];
+  showSearchError = false;
 
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
@@ -126,17 +127,35 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchButton() {
+    if (this.searchTerm.trim().length < 3) {
+      this.showSearchError = true;
+      return;
+    }
+    this.showSearchError = false;
     this.currentSearchString = this.searchTerm;
     this.reset();
     this.searchConcepts();
+  }
+
+  returnToConcepts() {
+    this.clearSearch();
+    this.searching = false;
   }
 
   reset() {
     this.selectedConcept = [];
     this.selectedConceptDomainMap = new Map<string, number>();
     this.conceptDomainCounts = [];
-
   }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.currentSearchString = '';
+    this.selectedConcept = [];
+    this.selectedConceptDomainMap = new Map<string, number>();
+    this.searchConcepts();
+  }
+
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
     this.selectedDomain =

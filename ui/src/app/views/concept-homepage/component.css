@@ -41,9 +41,9 @@
   text-transform: uppercase;
 }
 
-.btn-search-container {
+.btn-clear-container {
   position: relative;
-  right: 9%;
+  right: 3%;
   width: 6.56%;
 }
 
@@ -238,4 +238,9 @@
   font-weight: 600;
   line-height: 18px;
   margin-right: 3rem;
+}
+
+.concept-search-error {
+  width: 20rem;
+  margin-left: 0.75rem;
 }
