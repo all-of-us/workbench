@@ -124,6 +124,10 @@ input[type=text]:not([readonly]):focus {
   width: 9rem;
 }
 
+.hidden-input {
+  display: none;
+}
+
 .datepicker-trigger .datepicker-trigger-icon {
   width: 2rem;
   height: 1rem;
