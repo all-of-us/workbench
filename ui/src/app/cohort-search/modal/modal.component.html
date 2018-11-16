@@ -107,6 +107,11 @@
                       </crit-selection-info>
                     </ng-container>
                   </div>
+                 <!--hi {{preview.get('count')}}-->
+                 <!--hello1 {{noSelection}}-->
+                 <!--hello 1{{getFlag()}}-->
+                 <!--hi {{noSelection && getFlag()}}-->
+                  <!--hello{{getFlag()}}-->
                   <div class="footer">
                     <button type="button"
                             (click)="cancel()"
@@ -126,12 +131,24 @@
                              class="btn btn-primary">
                       Back
                     </button>
-                    <button type="button"
+
+                    <button type="button"  *ngIf="ctype !== treeType[treeType.DEMO]; else login"
                             [disabled]="noSelection"
                             (click)="finish()"
                             class="btn btn-primary">
-                      Finish
+                     <div>Finish</div>
                     </button>
+                   {{getFlag()}}
+                    <!--{{preview.get('requesting')}}-->
+                    <!--[ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"-->
+                   <ng-template  #login><button type="button"
+                            [disabled]="getFlag()"
+                            (click)="finish()"
+                            class="btn btn-primary">
+                      <div>Finish2</div>
+
+                    </button></ng-template>
+
                   </div>
                 </div>
               </ng-container>

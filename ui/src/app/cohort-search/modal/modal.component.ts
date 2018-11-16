@@ -12,7 +12,7 @@ import {
   activeItem,
   activeParameterList,
   CohortSearchActions,
-  nodeAttributes,
+  nodeAttributes, participantsCount, previewStatus,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
@@ -36,6 +36,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(previewStatus) preview$;
+  @select(participantsCount) count$;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -56,6 +58,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   count = 0;
   originalNode: any;
   disableCursor = false;
+  preview = Map();
+  calculateCount: any;
+  newCount:number
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -66,7 +71,16 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.mode = 'tree';
         this.open = true;
       });
-
+    this.subscription.add(this.preview$.subscribe(prev => {
+      const preview = prev;
+      this.calculateCount = preview.get('count')
+    }));
+    this.subscription = this.count$
+      .subscribe(totalCount => {
+        if (totalCount) {
+          this.newCount = totalCount;
+        }
+      });
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
@@ -181,7 +195,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.open = false;
     this.actions.finishWizard();
   }
-
+  // finish1() {
+  //   this.selections = {};
+  //   this.open = false;
+  //   // this.actions.finishWizard();
+  // }
   /* Used to bootstrap the criteria tree */
   get rootNode() {
     return Map({
@@ -263,10 +281,17 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   getDemoParams(e) {
+
     if (e) {
+      this.calculateCount = 0;
         this.demoItemsType = e.type;
         this.demoParam = e.paramId;
     }
+  }
+
+  getFlag() {
+// console.log(this.calculateCount);
+    return this.noSelection && this.calculateCount || this.newCount > 0? false : !this.calculateCount ;
   }
 }
 

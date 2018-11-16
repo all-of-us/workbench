@@ -443,7 +443,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             this.actions.requestPreview();
             this.testFlag = this.preview.get('count');
             this.showCalculateContainer = false;
-        }, 3000);
+        }, 1000);
 
     }
 
