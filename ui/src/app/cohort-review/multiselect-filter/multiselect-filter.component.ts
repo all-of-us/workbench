@@ -7,16 +7,14 @@ import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 
 import {
-  Filter,
-  Operator,
   ParticipantCohortStatusColumns,
 } from 'generated';
 
 @Component({
-  selector: 'app-choice-filter',
-  templateUrl: './choice-filter.component.html',
+  selector: 'app-multiselect-filter',
+  templateUrl: './multiselect-filter.component.html',
 })
-export class ChoiceFilterComponent
+export class MultiSelectFilterComponent
 implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   @Input() property: ParticipantCohortStatusColumns;
   @Input() options: any[];
@@ -44,9 +42,7 @@ implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
     return this.selection.value.includes(attr);
   }
 
-  toFilters(): Filter[] {
-    const property = this.property;
-    const operator = Operator.IN;
-    return this.selection.value.map(value1 => (<Filter>{property, values: [value1], operator}));
+  get isSelection(): boolean {
+    return !this.selection.value;
   }
 }

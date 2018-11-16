@@ -248,6 +248,18 @@ public class ParticipantCohortStatusDaoTest {
     }
 
     @Test
+    public void findCount() throws Exception {
+        PageRequest pageRequest = new PageRequest()
+          .page(page)
+          .pageSize(1)
+          .sortOrder(SortOrder.ASC)
+          .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+        Long results = participantCohortStatusDao.findCount(1L, Collections.<Filter>emptyList(), pageRequest);
+
+        assertEquals(2L, results.longValue());
+    }
+
+    @Test
     public void findAllParticipantIdSorting() throws Exception {
         PageRequest pageRequest = new PageRequest()
           .page(page)

@@ -442,6 +442,9 @@ definitions:
       reviewedCount:
         type: integer
         format: int64
+      queryResultSize:
+        type: integer
+        format: int64
       reviewStatus:
         $ref: "#/definitions/ReviewStatus"
       participantCohortStatuses:

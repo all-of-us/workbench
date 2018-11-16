@@ -40,6 +40,10 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "ethnicity_concept_id as ethnicityConceptId\n" +
             "from participant_cohort_status pcs\n";
 
+    public static final String SELECT_COUNT_SQL_TEMPLATE =
+      "select count(participant_id)\n" +
+        "from participant_cohort_status pcs\n";
+
     private static final String WHERE_CLAUSE_TEMPLATE = "where cohort_review_id = :cohortReviewId\n";
 
     private static final String ORDERBY_SQL_TEMPLATE = "order by %s\n";
@@ -113,6 +117,33 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     @Override
     public List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("cohortReviewId", cohortReviewId);
+
+        String sqlStatement = SELECT_SQL_TEMPLATE
+                + buildFilteringSql(filtersList, parameters)
+                + String.format(ORDERBY_SQL_TEMPLATE, getSortColumn(pageRequest))
+                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPage() * pageRequest.getPageSize(), pageRequest.getPageSize());
+
+        return namedParameterJdbcTemplate.query(sqlStatement,
+                parameters,
+                new ParticipantCohortStatusRowMapper());
+    }
+
+    @Override
+    public Long findCount(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("cohortReviewId", cohortReviewId);
+
+        String sqlStatement = SELECT_COUNT_SQL_TEMPLATE
+          + buildFilteringSql(filtersList, parameters);
+
+        return namedParameterJdbcTemplate.queryForObject(sqlStatement,
+          parameters,
+          Long.class);
+    }
+
+    private String getSortColumn(PageRequest pageRequest) {
         String sortColumn = pageRequest.getSortColumn();
         if (NON_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
             sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName();
@@ -121,18 +152,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
               ? ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName() + " " + pageRequest.getSortOrder().name() :
               sortColumn + " " + pageRequest.getSortOrder().name() + ", " + ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName();
         }
-
-        MapSqlParameterSource parameters = new MapSqlParameterSource();
-        parameters.addValue("cohortReviewId", cohortReviewId);
-
-        String sqlStatement = SELECT_SQL_TEMPLATE
-                + buildFilteringSql(filtersList, parameters)
-                + String.format(ORDERBY_SQL_TEMPLATE, sortColumn)
-                + String.format(LIMIT_SQL_TEMPLATE, pageRequest.getPage() * pageRequest.getPageSize(), pageRequest.getPageSize());
-
-        return namedParameterJdbcTemplate.query(sqlStatement,
-                parameters,
-                new ParticipantCohortStatusRowMapper());
+        return sortColumn;
     }
 
     private String buildFilteringSql(List<Filter> filtersList, MapSqlParameterSource parameters) {

@@ -24,6 +24,7 @@ public class CohortReview {
     private long matchedParticipantCount;
     private long reviewSize;
     private long reviewedCount;
+    private long queryResultSize;
     private Short reviewStatus;
 
     @Id

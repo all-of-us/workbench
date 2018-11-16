@@ -15,7 +15,8 @@ import {CohortCommonModule} from '../cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
-import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
+import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
+import {MultiSelectFilterComponent} from './multiselect-filter/multiselect-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
@@ -73,7 +74,8 @@ import {TablePage} from './table-page/table-page';
     SetAnnotationModalComponent,
 
     /* Participant Table */
-    ChoiceFilterComponent,
+    ClearButtonFilterComponent,
+    MultiSelectFilterComponent,
     StatusFilterComponent,
     IndividualParticipantsChartsComponent,
     /* Participant Detail */
