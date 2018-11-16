@@ -222,7 +222,7 @@ export class ConceptHomepageComponent implements OnInit {
           numCalls += 1;
           numCallsSubject.next(conceptDomain.domain);
 
-          this.filterConceptSelection(response.items);
+          this.filterConceptSelection(this.convertToConceptInfo(response.items));
           conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
@@ -295,7 +295,7 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
       .subscribe((response) => {
         this.searchLoading = false;
-        this.filterConceptSelection(response.items);
+        this.filterConceptSelection(this.convertToConceptInfo(response.items));
         this.concepts = this.convertToConceptInfo(response.items);
         this.conceptTable.selectedConcepts = [];
       });
