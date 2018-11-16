@@ -153,8 +153,8 @@
              *ngFor="let r of standardConcepts.concat(items), let i = index"
              [ngClass]="{'expanded-grid-row': r.expanded}" >
             <div class="col-md flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard">
-                <div class="col-md flex-xs-middle code-tooltip" innerHtml="<b>Source</b> {{r.conceptName | highlightSearch : prevSearchText}}
-            -- {{r.conceptId}}">
+                <div class="col-md flex-xs-middle code-tooltip">
+                    <app-html-wrapper [isSource]="true" [markedData]="r.conceptName | highlightSearch : prevSearchText" [conceptId]="r.conceptId"></app-html-wrapper>
                 </div>
                 <clr-tooltip>
                     <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
@@ -166,9 +166,9 @@
             </div>
           <ng-template #code_match_standard>
             <div class="col-md flex-xs-middle" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard">
-                <div class="col-md flex-xs-middle code-tooltip" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard"
-                     innerHtml="<b>Standard</b> {{r.conceptName | highlightSearch : prevSearchText}}
-            -- {{r.conceptId}}"></div>
+                <div class="col-md flex-xs-middle code-tooltip" *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard">
+                    <app-html-wrapper [isStandard]="true" [markedData]="r.conceptName | highlightSearch : prevSearchText" [conceptId]="r.conceptId"></app-html-wrapper>
+                </div>
                 <clr-tooltip>
                     <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                     <clr-tooltip-content clrPosition=bottom-right
@@ -180,8 +180,9 @@
           </ng-template>
           <ng-template #code_match_not_standard>
               <div class="col-md flex-xs-middle">
-            <div class="col-md flex-xs-middle code-tooltip" innerHtml="{{i+1}}. {{r.conceptName | highlightSearch : prevSearchText}}
-            -- {{r.conceptId}}"> </div>
+                <div class="col-md flex-xs-middle code-tooltip">
+                    <app-html-wrapper [indNum]="i+1" [markedData]="r.conceptName | highlightSearch : prevSearchText" [conceptId]="r.conceptId"></app-html-wrapper>
+                </div>
                   <clr-tooltip>
                       <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                       <clr-tooltip-content clrPosition=bottom-right
@@ -191,7 +192,9 @@
                   </clr-tooltip>
               </div>
           </ng-template>
-            <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
+            <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
+                <app-html-wrapper [markedData]="r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText"></app-html-wrapper>
+            </div>
             <ng-template #noConceptSynonyms><div class="col-md flex-xs-middle"></div></ng-template>
           <div class="col-md-1 flex-items-xs-right card-view">
             {{r.countValue | number }}
