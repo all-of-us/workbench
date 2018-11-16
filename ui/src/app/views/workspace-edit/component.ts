@@ -148,8 +148,8 @@ export class WorkspaceEditComponent implements OnInit {
   genderIdentityList = {
     'Woman': UnderservedPopulationEnum.GENDERIDENTITYWOMAN,
     'Non-Binary': UnderservedPopulationEnum.GENDERIDENTITYNONBINARY,
-    'Transman/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
-    'Transwoman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
+    'Trans man/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
+    'Trans woman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
     'Genderqueer': UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER,
     'Genderfluid': UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID,
     'Gender Variant': UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT,
