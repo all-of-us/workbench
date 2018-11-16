@@ -1,4 +1,4 @@
-import {select} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
@@ -11,7 +11,7 @@ import {
   activeCriteriaType,
   activeItem,
   activeParameterList,
-  CohortSearchActions,
+  CohortSearchActions, CohortSearchState,
   nodeAttributes, participantsCount, previewStatus,
   subtreeSelected,
   wizardOpen,
@@ -61,7 +61,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   preview = Map();
   calculateCount: any;
   newCount:number
-  constructor(private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
     this.subscription = this.open$
@@ -72,8 +72,8 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.open = true;
       });
     this.subscription.add(this.preview$.subscribe(prev => {
-      const preview = prev;
-      this.calculateCount = preview.get('count');
+      this.preview = prev;
+      this.calculateCount = this.preview.get('count');
     }));
     this.subscription = this.count$
       .subscribe(totalCount => {
@@ -142,6 +142,7 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.subtype = subtype;
       })
     );
+
     this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
@@ -281,17 +282,17 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   getDemoParams(e) {
-
     if (e) {
-      this.calculateCount = 0;
+       this.calculateCount = 0;
         this.demoItemsType = e.type;
         this.demoParam = e.paramId;
     }
   }
 
   getFlag() {
-// console.log(this.calculateCount);
-    return this.noSelection && this.calculateCount || this.newCount > 0? false : !this.calculateCount ;
+    if(this.noSelection) {
+      return  this.preview.get('requesting') && this.demoParam ? false : !(this.preview.get('requesting') && this.demoParam) ;
+    }
   }
 }
 
