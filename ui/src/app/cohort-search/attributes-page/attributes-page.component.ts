@@ -42,7 +42,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   selectedCode: any;
   sysOption: any;
   diaOption: any;
-  resetDisable = false;
+  resetDisable: boolean = false;
   options = [
     {value: 'EQUAL', name: 'Equals', code: '01'},
     {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
