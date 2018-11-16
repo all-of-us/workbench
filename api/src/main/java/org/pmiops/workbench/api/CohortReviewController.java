@@ -461,9 +461,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         convertGenderRaceEthnicitySortOrder(pageRequest));
     lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
+    Long queryResultSize = filters.isEmpty() ? cohortReview.getReviewSize() :
+      cohortReviewService.findCount(cohortReview.getCohortReviewId(),
+        convertGenderRaceEthnicityFilters(filters),
+        convertGenderRaceEthnicitySortOrder(pageRequest));
+
     org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
       participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+    responseReview.setQueryResultSize(queryResultSize);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     userRecentResourceService.updateCohortEntry(cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId, now );

@@ -87,6 +87,16 @@ public interface CohortReviewService {
     List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
 
     /**
+     * Find count for the specified cohortReviewId, filtering and paging.
+     *
+     * @param cohortReviewId
+     * @param filtersList
+     * @param pageRequest
+     * @return
+     */
+    Long findCount(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
+
+    /**
      * Save the specified {@link ParticipantCohortAnnotation}.
      *
      * @param cohortReviewId

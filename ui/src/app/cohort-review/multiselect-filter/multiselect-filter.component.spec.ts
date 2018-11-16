@@ -1,15 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ChoiceFilterComponent} from './choice-filter.component';
+import {MultiSelectFilterComponent} from './multiselect-filter.component';
 
-describe('ChoiceFilterComponent', () => {
-  let component: ChoiceFilterComponent;
-  let fixture: ComponentFixture<ChoiceFilterComponent>;
+describe('MultiSelectFilterComponent', () => {
+  let component: MultiSelectFilterComponent;
+  let fixture: ComponentFixture<MultiSelectFilterComponent>;
 
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ ChoiceFilterComponent ],
+      declarations: [ MultiSelectFilterComponent ],
       imports: [ReactiveFormsModule],
       providers: [],
     })
@@ -17,7 +17,7 @@ describe('ChoiceFilterComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ChoiceFilterComponent);
+    fixture = TestBed.createComponent(MultiSelectFilterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
