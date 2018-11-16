@@ -68,6 +68,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       this.control.setValue(this.oldValue);
       if (this.annotation.definition.annotationType === AnnotationType.DATE) {
         this.test.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
+        this.testDate = new Date(this.test.value);
       }
     }
     if (this.annotation.definition.annotationType === AnnotationType.DATE) {
