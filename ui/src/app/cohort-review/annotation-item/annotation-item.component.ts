@@ -40,13 +40,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   textSpinnerFlag = false;
   successIcon = false;
   control = new FormControl();
-  test = new FormControl();
+  formattedDate = new FormControl();
   private expandText = false;
   defaultAnnotation = false;
   annotationOption: any;
   oldValue: any;
-  myDate: any;
-  testDate: any;
+  dateObj: any;
   subscription: Subscription;
 
   constructor(
@@ -70,14 +69,17 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.oldValue = this.annotation.value[this.valuePropertyName];
     if (this.oldValue !== undefined) {
       this.control.setValue(this.oldValue);
-      if (this.annotation.definition.annotationType === AnnotationType.DATE) {
-        this.test.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
-        this.testDate = new Date(this.test.value);
+      if (this.isDate) {
+        this.formattedDate.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
+        this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
       }
     }
-    if (this.annotation.definition.annotationType === AnnotationType.DATE) {
+    if (this.isDate) {
       this.subscription = this.control.valueChanges.subscribe(val => {
-        this.test.setValue(moment(val).format('YYYY-MM-DD'));
+        this.successIcon = false;
+        this.textSpinnerFlag = true;
+        this.formattedDate.setValue(moment(val).format('YYYY-MM-DD'));
+        this.handleInput();
       });
     }
   }
@@ -106,7 +108,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    const newValue = this.control.value;
+    const newValue = this.isDate ? this.formattedDate.value : this.control.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
     const annoId = this.annotation.value.annotationId ;
 
@@ -196,21 +198,16 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   }
 
-  dateChange(e) {
+  dateBlur() {
     this.successIcon = false;
     this.textSpinnerFlag = true;
-    setTimeout (() => {
-        if (e !== null) {
-            const newDate = moment(e).format('YYYY-MM-DD');
-            this.control.patchValue(newDate);
-           this.handleInput();
-        } }, 2000);
+    this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
+    this.control.setValue(this.dateObj, {emitEvent: false});
+    this.handleInput();
   }
 
-  dateBlur(val) {
-    console.log(val);
-    this.testDate = new Date(this.test.value);
-    this.control.setValue(new Date(this.test.value), {emitEvent: false});
+  get isDate() {
+    return this.annotation.definition.annotationType === AnnotationType.DATE;
   }
 }
 

@@ -30,9 +30,9 @@
             </label>
         </div>
       <div>
-        <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" [formControl]="test">
+        <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" [formControl]="formattedDate">
         <input class="hidden-input"
-               [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="testDate">
+               [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="dateObj">
       </div>
     </div>
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
