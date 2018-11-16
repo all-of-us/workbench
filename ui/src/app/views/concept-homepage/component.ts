@@ -223,7 +223,7 @@ export class ConceptHomepageComponent implements OnInit {
           numCallsSubject.next(conceptDomain.domain);
 
           this.filterConceptSelection(response.items);
-          conceptDomain.items = response.items;
+          conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
             this.searchLoading = false;
@@ -296,20 +296,17 @@ export class ConceptHomepageComponent implements OnInit {
       .subscribe((response) => {
         this.searchLoading = false;
         this.filterConceptSelection(response.items);
-        this.concepts = response.items;
-        this.selectedConcept.every((concept) => concept.selected = false);
+        this.concepts = this.convertToConceptInfo(response.items);
         this.conceptTable.selectedConcepts = [];
       });
   }
 
-  selectConcept(concepts) {
+  selectConcept(concepts: ConceptInfo[]) {
     // TODO Check why clr-datagrid is sending empty and duplicate values
     this.selectConceptMap.clear();
     concepts.forEach((concept) => {
       this.selectConceptMap.set(concept.conceptId, concept);
     });
-    this.selectedConcept =  concepts;
-    concepts = this.selectedConcept;
 
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
@@ -372,6 +369,15 @@ export class ConceptHomepageComponent implements OnInit {
 
   domainLoading(domain) {
     return this.searchLoading || !this.completedDomainSearches.includes(domain.domain);
+  }
+
+  convertToConceptInfo(concepts: Concept[]): ConceptInfo[] {
+    return concepts.map((concept) => {
+      return {
+        ...concept,
+        selected: false
+      };
+    });
   }
 
   private filterConceptSelection(concepts) {
