@@ -380,7 +380,7 @@ export class ConceptHomepageComponent implements OnInit {
     });
   }
 
-  private filterConceptSelection(concepts) {
+  filterConceptSelection(concepts: ConceptInfo[]) {
     concepts.forEach((concept) => {
       concept.selected = this.selectConceptMap.has(concept.conceptId);
     });
