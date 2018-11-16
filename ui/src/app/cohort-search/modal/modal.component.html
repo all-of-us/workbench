@@ -107,8 +107,8 @@
                       </crit-selection-info>
                     </ng-container>
                   </div>
-
-                 <!--hi {{preview.get('requesting')}}-->
+                  <!--hi {{flag}}-->
+                 hi {{preview.get('requesting')}}
                   <div class="footer">
                     <button type="button"
                             (click)="cancel()"
@@ -135,14 +135,14 @@
                             class="btn btn-primary">
                      <div>Finish</div>
                     </button>
-                   {{getFlag()}}
+
                     <!--{{preview.get('requesting')}} {{getFlag() || preview.get('requesting')}}-->
                     <!--[disabled]="!preview.get('requesting')"-->
                     <!---->
                     <!--[ngClass]="[ preview.get('requesting') || getFlag() ? 'btn-secondary': 'btn-primary']"-->
                    <ng-template  #login><button type="button"
                             (click)="finish()"
-                            [disabled]="getFlag() "
+                            [disabled]="noSelection && !preview.get('requesting')"
                             class="btn btn-primary">
                       <div>Finish2</div>
 
