@@ -123,8 +123,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
     while (leaf.firstChild != null) {
       leaf = leaf.firstChild;
     }
-    console.log(leaf.data.hideNavBar);
-    return leaf.data.hideNavBar;
+    return leaf.data.minimizeChrome;
   }
 
   private navigateSignOut(): void {

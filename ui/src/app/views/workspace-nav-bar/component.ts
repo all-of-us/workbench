@@ -85,7 +85,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     while (leaf.firstChild != null) {
       leaf = leaf.firstChild;
     }
-    return !leaf.data.hideNavBar;
+    return !leaf.data.minimizeChrome;
   }
 
   private getTabPath(): string {

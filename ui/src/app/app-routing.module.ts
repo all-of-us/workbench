@@ -141,7 +141,7 @@ const routes: Routes = [
                     breadcrumb: {
                         value: 'Param: Notebook Name'
                     },
-                    hideNavBar: true
+                    minimizeChrome: true
                   }
                 }
               ]
