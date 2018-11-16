@@ -35,8 +35,8 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
 (<any>window).StackTrace = StackTrace;
 
-import { HtmlWrapperComponent } from './html-wrapper/html-wrapper.component';
 import {ConfigService, DataBrowserService} from 'publicGenerated';
+import { HtmlWrapperComponent } from './html-wrapper/html-wrapper.component';
 import {DbConfigService} from './utils/db-config.service';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
