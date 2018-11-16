@@ -34,6 +34,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   @Input() annotation: Annotation;
   @Input() showDataType: boolean;
+  @Output() annotationUpdate: EventEmitter<ParticipantCohortAnnotation> =
+    new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
   private control = new FormControl();
@@ -52,7 +54,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   ngOnChanges() {
     if (this.annotation.value[this.valuePropertyName]) {
       this.defaultAnnotation = true;
-        this.annotationOption = this.annotation.value[this.valuePropertyName];
+      this.annotationOption = this.annotation.value[this.valuePropertyName];
     } else {
       this.defaultAnnotation = false;
     }
@@ -130,7 +132,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (apiCall) {
-      apiCall.subscribe(() => {
+      apiCall.subscribe((update) => {
+        this.annotationUpdate.emit(update);
         setTimeout (() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;

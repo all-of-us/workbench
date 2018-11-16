@@ -138,6 +138,9 @@ describe('InvitationKeyComponent', () => {
     createComponent.profile.givenName = 'Falco';
     createComponent.profile.familyName = 'Lombardi';
     createComponent.profile.contactEmail = 'fake@asdf.com';
+    createComponent.profile.currentPosition = 'researcher';
+    createComponent.profile.organization = 'Test Suite';
+    createComponent.profile.areaOfResearch = 'to test';
     createComponent.password = 'passworD';
     createComponent.passwordAgain = 'passworD';
     updateAndTick(fixture);

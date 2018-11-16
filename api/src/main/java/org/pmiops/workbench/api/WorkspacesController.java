@@ -585,7 +585,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (workspace.getName() != null) {
       dbWorkspace.setName(workspace.getName());
     }
-    // TODO: handle research purpose
+    ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
+    if (researchPurpose != null) {
+      setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      if (researchPurpose.getReviewRequested()) {
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        dbWorkspace.setTimeRequested(now);
+      }
+      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
+    }
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
