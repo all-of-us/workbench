@@ -73,7 +73,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       });
     this.subscription.add(this.preview$.subscribe(prev => {
       const preview = prev;
-      this.calculateCount = preview.get('count')
+      this.calculateCount = preview.get('count');
     }));
     this.subscription = this.count$
       .subscribe(totalCount => {
