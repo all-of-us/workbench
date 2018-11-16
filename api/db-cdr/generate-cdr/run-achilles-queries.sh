@@ -43,6 +43,7 @@ then
   exit 1
 fi
 
+#The list of ppi questions which have user entered values which can have wide range so placing them in ten ranged buckets
 declare -a toBinSurveyQuestions=(1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890)
 
 # Next Populate achilles_results
@@ -1119,7 +1120,6 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.$
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 Where (o.observation_source_concept_id > 0 and o.value_as_number >= 0 and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
-and o.value_as_number > 0
 Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id,sq.id
 order by sq.id asc"
 
@@ -1134,7 +1134,6 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.$
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
 Where (o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) and o.value_as_number >= 0)
-and o.value_as_number > 0
 Group by o.observation_source_concept_id,stratum_4,sm.concept_id,sq.id
 order by sq.id asc"
 
