@@ -1,7 +1,6 @@
 <clr-modal [(clrModalOpen)]="sharing">
   <div class="modal-title">
-    <h2 class="header">
-      Share {{workspace.name}}
+      <label>Share {{workspace.name}}</label>
       <clr-tooltip>
         <clr-icon #infoIcon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition="middle-right" clrSize="lg" *clrIfOpen>
@@ -15,7 +14,6 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-    </h2>
   </div>
   <div class="modal-body" id="sharing-modal-body">
     <div class="dropdown"
