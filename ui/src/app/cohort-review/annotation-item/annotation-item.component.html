@@ -29,9 +29,10 @@
                 <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
             </label>
         </div>
-      <div (click)=" dateChange(myDate)" >
-        <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
-               (ngModelChange)="myDate = $event" [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" clrDate>
+      <div>
+        <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" [formControl]="test">
+        <input class="hidden-input"
+               [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="testDate">
       </div>
     </div>
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
