@@ -1,3 +1,14 @@
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: #313131;
+  opacity: .8;
+  z-index: 1040;
+}
+
 .main {
   height: 79.23%;
   width: 64.92%;
@@ -7,6 +18,7 @@
   position: absolute;
   left: 18%;
   top: 5%;
+  z-index: 1050;
 }
 
 .title {
@@ -178,10 +190,18 @@
   color: #FFFFFF;
 }
 
+.btn.btn-close:hover {
+  background-color: #004a70;
+}
+
 .btn.btn-primary {
   margin-right: 10%;
 }
 
 .resize-icon {
   cursor: pointer;
+}
+
+:host::ng-deep .link, .link:visited {
+  color: #85BDE4;
 }

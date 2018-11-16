@@ -13,9 +13,9 @@
     Edit
   </button>
 </div>
-
 <app-annotation-item
   *ngFor="let anno of (annotations$ | async)"
   [annotation]="anno"
+  (annotationUpdate)="updateAnnotation($event)"
   [showDataType]="showDataType">
 </app-annotation-item>

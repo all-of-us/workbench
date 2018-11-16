@@ -93,7 +93,7 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.givenNameValid).toBeFalsy();
-    expect(fixture.debugElement.queryAll(By.css('#givenNameInvalid')).length).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#givenNameInvalid'))).toBeTruthy();
   }));
 
   it('handles long family name errors', fakeAsync(() => {
@@ -102,7 +102,7 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.familyNameValid).toBeFalsy();
-    expect(fixture.debugElement.queryAll(By.css('#familyNameInvalid')).length).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#familyNameInvalid'))).toBeTruthy();
   }));
 
   it('handles long organization errors', fakeAsync(() => {
@@ -111,7 +111,7 @@ describe('ProfilePageComponent', () => {
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.organizationValid).toBeFalsy();
-    expect(fixture.debugElement.queryAll(By.css('#organizationInvalid')).length).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#organizationInvalid'))).toBeTruthy();
   }));
 
   it('handles long current position errors', fakeAsync(() => {
@@ -121,7 +121,52 @@ describe('ProfilePageComponent', () => {
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentPositionValid).toBeFalsy();
     expect(
-      fixture.debugElement.queryAll(By.css('#currentPositionInvalid')).length).toBeTruthy();
+      fixture.debugElement.query(By.css('#currentPositionInvalid'))).toBeTruthy();
+  }));
+
+  it('handles empty givenName field', fakeAsync(() => {
+      simulateInput(
+          fixture, fixture.debugElement.query(By.css('#givenName')), '');
+      tick(300);
+      updateAndTick(fixture);
+      expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
+      expect(fixture.debugElement.query(By.css('#givenNameEmpty'))).toBeTruthy();
+  }));
+
+  it('handles empty familyName field', fakeAsync(() => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#familyName')), '');
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.familyNameNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#familyNameEmpty'))).toBeTruthy();
+  }));
+
+  it('handles empty current position field', fakeAsync(() => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#currentPosition')), '');
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.currentPositionNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#currentPositionEmpty'))).toBeTruthy();
+  }));
+
+  it('handles empty organization field', fakeAsync(() => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#organization')), '');
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.organizationNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#organizationEmpty'))).toBeTruthy();
+  }));
+
+  it('handles empty organization field', fakeAsync(() => {
+    simulateInput(
+        fixture, fixture.debugElement.query(By.css('#areaOfResearch')), '');
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.currentResearchNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#currentResearchEmpty'))).toBeTruthy();
   }));
 
 });

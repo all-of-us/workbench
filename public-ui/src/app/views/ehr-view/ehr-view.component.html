@@ -117,7 +117,7 @@
                     </clr-tooltip-content>
                 </clr-tooltip>
             </div>
-          <div class="col-md-2 grid-header flex-items-xs-right"> Participants of <b> {{totalParticipants | number}}</b>
+          <div class="col-md-1 grid-header flex-items-xs-right"> Participants of <b> {{totalParticipants | number}}</b>
               <clr-tooltip>
                   <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                   <clr-tooltip-content clrPosition=right
@@ -193,7 +193,7 @@
           </ng-template>
             <div class="col-md flex-xs-middle" *ngIf="r.conceptSynonyms;else noConceptSynonyms" innerHtml="{{ r.conceptSynonyms.join(', ') | highlightSearch : prevSearchText}}"></div>
             <ng-template #noConceptSynonyms><div class="col-md flex-xs-middle"></div></ng-template>
-          <div class="col-md-2 flex-items-xs-right card-view">
+          <div class="col-md-1 flex-items-xs-right card-view">
             {{r.countValue | number }}
           </div>
           <div class="col-md-2 flex-xs-middle">

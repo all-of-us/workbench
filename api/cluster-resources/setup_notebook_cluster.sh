@@ -1,6 +1,7 @@
 #!/bin/bash
-# Initializes a Jupyter notebook cluster. This file is copied to the GCS bucket <PROJECT>-scripts
-# and its GCS path is passed in as jupyterUserScriptUri during notebook cluster creation.
+# Initializes a Jupyter notebook cluster. This file is copied to the GCS bucket
+# <PROJECT>-cluster-resources and its GCS path is passed in as
+# jupyterUserScriptUri during notebook cluster creation.
 
 # As of initial Workbench launch, we will not be offering or have a need for
 # Spark on notebooks clusters. Disable the kernels to avoid presenting spurious
