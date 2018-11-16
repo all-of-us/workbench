@@ -25,6 +25,9 @@
         <div *ngIf="profileLoaded && !givenNameValid" class="alert alert-danger error-message" id="givenNameInvalid">
           First Name must be 80 characters or less.
         </div>
+        <div *ngIf="profileLoaded && !givenNameNotEmpty" class="alert alert-danger error-message" id="givenNameEmpty">
+          First Name cannot be empty.
+        </div>
       </div>
       <div class="field">
         <label for="familyName" class="long-text-field">Last Name:</label>
@@ -32,6 +35,9 @@
           [(ngModel)]="workingProfile.familyName" id="familyName" [disabled]="!editing">
         <div *ngIf="profileLoaded && !familyNameValid" class="alert alert-danger error-message" id="familyNameInvalid">
           Last Name must be 80 characters or less.
+        </div>
+        <div *ngIf="profileLoaded && !familyNameNotEmpty" class="alert alert-danger error-message" id="familyNameEmpty">
+          Last Name cannot be empty.
         </div>
       </div>
     </div>
@@ -77,6 +83,9 @@
         <div *ngIf="profileLoaded && !currentPositionValid" class="alert alert-danger error-message" id="currentPositionInvalid">
           Current Position must be 255 characters or less.
         </div>
+        <div *ngIf="profileLoaded && !currentPositionNotEmpty" class="alert alert-danger error-message" id="currentPositionEmpty">
+          Current Position cannot be empty.
+        </div>
       </div>
     </div>
     <div class="field-wrapper field-wrapper-aligned" [class.error-margin]="!organizationValid">
@@ -87,6 +96,9 @@
                [disabled]="!editing">
         <div *ngIf="profileLoaded && !organizationValid" class="alert alert-danger error-message" id="organizationInvalid">
           Organization must be 255 characters or less.
+        </div>
+        <div *ngIf="profileLoaded && !organizationNotEmpty" class="alert alert-danger error-message" id="organizationEmpty">
+          Organization cannot be empty.
         </div>
       </div>
     </div>
@@ -104,6 +116,9 @@
         <textarea *ngIf="profileLoaded else loading"
           [(ngModel)]="workingProfile.areaOfResearch" id="areaOfResearch" [disabled]="!editing">
         </textarea>
+        <div *ngIf="profileLoaded && !currentResearchNotEmpty" class="alert alert-danger error-message" id="currentResearchEmpty">
+          Current Research cannot be empty.
+        </div>
       </div>
     </div>
     <div class="field-wrapper">
@@ -217,7 +232,7 @@
     </ng-template>
     <div style="margin-top: 2rem;">
       <button *ngIf="editing" (click)="submitChanges()" class="btn btn-primary"
-              [disabled]="!(givenNameValid && familyNameValid && currentPositionValid && organizationValid)">
+              [disabled]="!(allFieldsValid)">
         Save Profile</button>
       <button *ngIf="editing" (click)="reloadProfile()" class="btn btn-link">Cancel</button>
     </div>

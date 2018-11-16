@@ -70,7 +70,9 @@ export class AccountCreationComponent implements AfterViewInit {
     this.showAllFieldsRequiredError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
-         this.profile.username, this.profile.contactEmail];
+         this.profile.username, this.profile.contactEmail,
+         this.profile.currentPosition, this.profile.organization,
+         this.profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
