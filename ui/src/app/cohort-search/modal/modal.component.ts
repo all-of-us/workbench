@@ -61,6 +61,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   preview = Map();
   calculateCount: any;
   newCount:number
+  testFlag = false
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
@@ -289,10 +290,19 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  getFlag() {
-    if(this.noSelection) {
-      return  this.preview.get('requesting') && this.demoParam ? false : !(this.preview.get('requesting') && this.demoParam) ;
+  get flag() {
+    if(this.demoParam && this.noSelection) {
+     return this.testFlag = false;
+    } else {
+      return this.testFlag = true;
     }
+    // if(this.noSelection) {
+    //   return this.noSelection && this.testFlag ;
+    // }
   }
+
+  // get showDropDown() {
+  //   return !this.isEmpty && this.codes && this.node.get('type') !== TreeType[TreeType.SNOMED];
+  // }
 }
 
