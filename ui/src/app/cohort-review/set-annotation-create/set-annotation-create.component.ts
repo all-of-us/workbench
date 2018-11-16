@@ -83,13 +83,14 @@ export class SetAnnotationCreateComponent {
       .do((defns: CohortAnnotationDefinition[]) =>
         this.state.annotationDefinitions.next(defns))
       .subscribe(_ => {
-          this.open = false;
+        this.open = false;
+        this.form.reset();
         this.posting = false;
-          this.annotationOptions = '';
-          // this.isEnum = false;
-          this.kind.patchValue('');
-          this.enumValues.length = 0;
-         this.name.patchValue('');
+        this.annotationOptions = '';
+        // this.isEnum = false;
+        this.kind.patchValue('');
+        this.enumValues.length = 0;
+        this.name.patchValue('');
         this.onFinish.emit(true);
         this.addValue.reset();
       });
@@ -135,6 +136,7 @@ export class SetAnnotationCreateComponent {
   }
 
   closeModal() {
+    this.form.reset();
     this.annotationOptions = '';
     this.open = false;
     this.kind.patchValue('');

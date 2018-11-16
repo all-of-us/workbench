@@ -18,7 +18,6 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 import * as moment from 'moment';
-import {Subscription} from 'rxjs/Subscription';
 interface Annotation {
   definition: CohortAnnotationDefinition;
   value: ParticipantCohortAnnotation;
@@ -39,15 +38,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
-  control = new FormControl();
-  test = new FormControl();
+  private control = new FormControl();
   private expandText = false;
   defaultAnnotation = false;
   annotationOption: any;
   oldValue: any;
   myDate: any;
-  testDate: any;
-  subscription: Subscription;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -70,14 +66,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.oldValue = this.annotation.value[this.valuePropertyName];
     if (this.oldValue !== undefined) {
       this.control.setValue(this.oldValue);
-      if (this.annotation.definition.annotationType === AnnotationType.DATE) {
-        this.test.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
-      }
-    }
-    if (this.annotation.definition.annotationType === AnnotationType.DATE) {
-      this.subscription = this.control.valueChanges.subscribe(val => {
-        this.test.setValue(moment(val).format('YYYY-MM-DD'));
-      });
     }
   }
 
@@ -201,12 +189,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
             this.control.patchValue(newDate);
            this.handleInput();
         } }, 2000);
-  }
-
-  dateBlur(val) {
-    console.log(val);
-    this.testDate = new Date(this.test.value);
-    this.control.setValue(new Date(this.test.value), {emitEvent: false});
   }
 
 }
