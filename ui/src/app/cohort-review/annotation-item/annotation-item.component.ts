@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostListener,
   Input,
   OnChanges,
   OnInit,
@@ -46,7 +47,21 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   dateObj: any;
+  dateBtn: any;
   subscription: Subscription;
+
+  @HostListener('document:mouseup', ['$event.target'])
+  onClick(targetElement) {
+    if (this.isDate) {
+      console.log(targetElement);
+      console.log(this.dateBtn);
+      const clickedInside = this.dateBtn.contains(targetElement);
+      if (clickedInside) {
+        console.log('clicked!!!!');
+        // TODO adjust position of datepicker (if opened)
+      }
+    }
+  }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -81,6 +96,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         this.formattedDate.setValue(moment(val).format('YYYY-MM-DD'));
         this.handleInput();
       });
+      this.dateBtn = document.getElementsByClassName('datepicker-trigger')[0];
     }
   }
 

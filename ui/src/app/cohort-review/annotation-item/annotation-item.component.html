@@ -7,8 +7,8 @@
         <span class="flex-content-main items-text">
           {{ annotation.definition.columnName }}
         </span>
-            <span  *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-           <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
+          <span  *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+          <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
         </label>
       </div>
         <textarea
@@ -20,31 +20,29 @@
         </textarea>
     </div>
     <div *ngSwitchCase="kinds.DATE">
-        <div class="text-container">
-            <label [for]="machineName">
-        <span class="flex-content-main items-date">
-          {{ annotation.definition.columnName }}
-        </span>
-                <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-                <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
-            </label>
-        </div>
-      <div>
+      <div class="text-container">
+        <label [for]="machineName">
+          <span class="flex-content-main items-date">
+            {{ annotation.definition.columnName }}
+          </span>
+          <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+          <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
+          </label>
+      </div>
         <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" [formControl]="formattedDate">
         <input class="hidden-input"
                [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="dateObj">
-      </div>
     </div>
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
-        <div class="integer-container">
-            <label [for]="machineName">
-            <span class="flex-content-main items-integer">
-              {{ annotation.definition.columnName }}
-            </span>
-            <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
-            <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
-            </label>
-        </div>
+      <div class="integer-container">
+        <label [for]="machineName">
+        <span class="flex-content-main items-integer">
+          {{ annotation.definition.columnName }}
+        </span>
+        <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
+        <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
+        </label>
+      </div>
       <input
         class="integer-style"
         (blur)="textBlur()"
