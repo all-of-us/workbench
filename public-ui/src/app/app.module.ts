@@ -40,9 +40,9 @@ import {DbConfigService} from './utils/db-config.service';
 import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
+import { HtmlWrapperComponent } from './html-wrapper/html-wrapper.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
 import { QuickSearchComponent } from './views/quick-search/quick-search.component';
-import { HtmlWrapperComponent } from './html-wrapper/html-wrapper.component';
 
 function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
