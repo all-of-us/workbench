@@ -43,7 +43,7 @@ export class ConceptSetsServiceStub {
         name: 'Mock Concept Set for condition',
         description: 'Mocked for tests',
         domain: Domain.CONDITION,
-        lastModifiedTime: new Date().getTime() - 1000
+        lastModifiedTime: new Date().getTime() - 2000
       }
     ];
   }
