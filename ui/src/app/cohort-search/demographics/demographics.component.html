@@ -99,6 +99,7 @@
   </div>
 </form>
 <div class="container count-preview" *ngIf="!noSelection">
+  {{showCalculateContainer}} {{preview.get('requesting')}}
   <div class="row">
     <div class="col-lg-1 " *ngIf="showCalculateContainer || preview.get('requesting')">
        <span class="spinner spinner-md">
