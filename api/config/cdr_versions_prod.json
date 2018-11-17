@@ -1,7 +1,6 @@
 [
   {
     "cdrVersionId": 1,
-    "isDefault": true,
     "name": "Synthetic Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
@@ -11,5 +10,18 @@
     "numParticipants": 946237,
     "cdrDbName": "cdr20181101",
     "publicDbName": "public20181101"
+  },
+  {
+    "cdrVersionId": 2,
+    "isDefault": true,
+    "name": "All of Us Dataset v1",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "aou-res-curation-prod",
+    "bigqueryDataset": "TODO: should match the dataset used to generate the public counts",
+    "creationTime": "TODO: from curation team?",
+    "releaseNumber": 1,
+    "numParticipants": TODO,
+    "cdrDbName": "TODO: From Jon/Brian/Srushti",
+    "publicDbName": "TODO: From Srushti"
   }
 ]
