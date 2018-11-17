@@ -285,6 +285,7 @@ describe('WorkspaceEditComponent', () => {
 
         testComponent.workspace.namespace = 'foo';
         testComponent.workspace.name = 'created';
+        testComponent.workspace.id = 'created';
         testComponent.workspace.description = '';
         testComponent.fillDetailsLater = true;
         fixture.detectChanges();
