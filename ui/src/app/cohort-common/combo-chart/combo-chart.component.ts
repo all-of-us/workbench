@@ -23,8 +23,6 @@ export class ComboChartComponent {
   readonly axis = {
     x: {
       show: true,
-      label: 'Participant Share By Race',
-      showLabel: true,
       percentFormatter: tick => `${tick}%`
     },
     y: {
