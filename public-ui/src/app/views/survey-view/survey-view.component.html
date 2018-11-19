@@ -114,7 +114,7 @@
             <div class="box-title"> Question {{i + 1}}</div>
             <div class="box-sub-title question-display">
               <div class="box-sub-title question question">
-                <app-html-wrapper [markedData]="q.conceptName | highlightSearch : searchText.value" [conceptId]="q.conceptId"></app-html-wrapper>
+                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId"></app-highlight-search>
               </div>
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
@@ -145,17 +145,17 @@
             <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
               <div class="col-sm-6 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
                 <label class="answer-text">
-                  <app-html-wrapper [markedData]="a.stratum4 | highlightSearch : searchText.value" [conceptId]="a.stratum3"></app-html-wrapper>
+                  <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
                 </label>
               </div>
               <ng-template #binnedSurveyQuestionDisplay>
                 <div class="col-sm-6 col-xs-12">
                   <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel">
-                    <app-html-wrapper [markedData]="a.stratum4 | highlightSearch : searchText.value" [conceptId]="a.stratum3"></app-html-wrapper>
+                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
                   </label>
                   <ng-template #rangeLabel>
                     <label class="answer-text">
-                      <app-html-wrapper [markedData]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)| highlightSearch : searchText.value" [conceptId]="a.stratum3"></app-html-wrapper>
+                      <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
                     </label>
                   </ng-template>
                 </div>
