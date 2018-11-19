@@ -1,10 +1,9 @@
-import {Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
-import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 
 class SortByColumn implements ClrDatagridComparatorInterface<ParticipantData> {
   compare(a: ParticipantData, b: ParticipantData) {
