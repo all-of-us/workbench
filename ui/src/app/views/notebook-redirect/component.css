@@ -77,5 +77,15 @@
 }
 
 .i-frame {
-  height: 0;
+  width: 100%;
+  height: calc(100vh - 4.48rem);
+}
+
+.hidden {
+  display: none;
+}
+
+#separator {
+  border-bottom: 5px solid #2691D0;
+  width: 100%;
 }
