@@ -49,14 +49,16 @@
       </div>
       <!-- The empty state. -->
       <button *ngIf="!conceptSet.concepts?.length" class="btn nav-button"
-              routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts" routerLinkActive="active">
+              routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts"
+              [queryParams]="{domain: conceptSet.domain}" routerLinkActive="active">
         <clr-icon shape="search" class="icon search-icon"></clr-icon>
         Add concepts to set
       </button>
     </div>
     <div class="concept-set-navigation" style="display: inline-block;">
       <button class="btn nav-button" routerLinkActive="active"
-          routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts">
+          routerLink="/workspaces/{{wsNamespace}}/{{wsId}}/concepts"
+          [queryParams]="{domain: conceptSet.domain}">
         <clr-icon shape="search" class="icon search-icon"></clr-icon>
         Add concepts to set
       </button>
