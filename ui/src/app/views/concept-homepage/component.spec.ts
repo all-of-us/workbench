@@ -6,15 +6,13 @@ import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {HighlightSearchComponent} from 'app/highlight-search/highlight-search.component';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-
-import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
-
 
 import {
   ConceptSetsService,
@@ -76,7 +74,7 @@ describe('ConceptHomepageComponent', () => {
         ConceptAddModalComponent,
         ConceptHomepageComponent,
         ConceptTableComponent,
-        HighlightSearchPipe,
+        HighlightSearchComponent,
         SlidingFabComponent,
         ToolTipComponent,
         TopBoxComponent,
