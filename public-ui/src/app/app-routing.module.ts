@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
-import {environment} from "../../../ui/src/environments/environment";
+import {environment} from "../environments/environment";
 
 import {SignInGuard} from './guards/sign-in-guard.service';
 import {DbHomeComponent} from './views/db-home/db-home.component';
