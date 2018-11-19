@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
+import {ClearButtonFilterComponent} from '../clearbutton-in-memory-filter';
 import {CohortReviewService} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';

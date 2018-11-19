@@ -9,6 +9,7 @@ import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated'
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {ClearButtonFilterComponent} from '../clearbutton-in-memory-filter';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
