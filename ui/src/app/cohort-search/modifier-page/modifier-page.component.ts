@@ -1,7 +1,8 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormControl, FormGroup} from '@angular/forms';
-import {ModifierType, TreeType} from 'generated';
+import {ActivatedRoute} from '@angular/router';
+import {CohortBuilderService, ModifierType, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
 import {Subscription} from 'rxjs/Subscription';
@@ -9,8 +10,6 @@ import {
   activeCriteriaType,
   activeModifierList,
   CohortSearchActions,
-  CohortSearchState,
-  criteriaChildren,
   previewStatus
 } from '../redux';
 
@@ -108,42 +107,45 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   constructor(
     private actions: CohortSearchActions,
+    private api: CohortBuilderService,
     private cdref: ChangeDetectorRef,
-    private ngRedux: NgRedux<CohortSearchState>
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.ctype$.subscribe(ctype => {
       this.ctype = ctype;
       if (this.addEncounters) {
-        this.modifiers.push({
-          name: 'encounters',
-          label: 'During Visit Type',
-          inputType: null,
-          modType: ModifierType.ENCOUNTERS,
-          operators: [{
+        this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+          .filter(response => !!response)
+          .subscribe(response => {
+            this.visitCounts = {};
+            const operators = [{
               name: 'Any',
               value: undefined,
-          }]
-        });
-        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
+            }];
+            response.items.forEach(option => {
+              if (option.parentId === 0 && option.count > 0) {
+                operators.push({
+                  name: option.name,
+                  value: option.conceptId.toString()
+                });
+                this.visitCounts[option.conceptId] = option.count;
+              }
+            });
+            this.modifiers.push({
+              name: 'encounters',
+              label: 'During Visit Type',
+              inputType: null,
+              modType: ModifierType.ENCOUNTERS,
+              operators: operators
+            });
+            this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
+          });
       }
     }));
-
-    this.subscription.add(this.ngRedux.select(criteriaChildren(TreeType[TreeType.VISIT], null, 0))
-      .filter(visiTypes => visiTypes.size > 0)
-      .subscribe(visitTypes => {
-        if (this.modifiers[3]) {
-          this.visitCounts = {};
-          visitTypes.toJS().forEach(option => {
-            if (option.parentId === 0 && option.count > 0) {
-              this.modifiers[3].operators.push({name: option.name, value: option.conceptId});
-              this.visitCounts[option.conceptId] = option.count;
-            }
-          });
-        }
-      }));
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
