@@ -117,7 +117,7 @@ export class TablePage implements OnInit, OnDestroy {
 
           const operator = Operator.IN;
           query.filters.items.push(<Filter>{property, values: filter.selection.value, operator});
-        } else if(isClearButtonFilter(filter)) {
+        } else if (isClearButtonFilter(filter)) {
           const property = filter.property;
           this.isFiltered.push(property);
           let operator = Operator.EQUAL;
