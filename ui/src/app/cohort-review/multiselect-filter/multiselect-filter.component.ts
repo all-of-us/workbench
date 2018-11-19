@@ -42,7 +42,7 @@ implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
     return this.selection.value.includes(attr);
   }
 
-  get isSelection(): boolean {
+  get isDisabled(): boolean {
     return !this.selection.value;
   }
 }
