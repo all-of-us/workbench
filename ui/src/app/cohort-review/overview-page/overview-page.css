@@ -166,3 +166,11 @@
 .btn-outline {
     pointer-events: none;
 }
+
+.demo-chart-heading {
+    text-align: center;
+    color: #4A4A4A;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}

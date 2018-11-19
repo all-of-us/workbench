@@ -136,7 +136,7 @@ describe('ConceptSetDetailsComponent', () => {
     expect(findAddConceptsButtons(de).length).toEqual(2);
   }));
 
-  it('should allow valid edits', fakeAsync(() => {
+  it('should allow validLength edits', fakeAsync(() => {
     setUpComponent();
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.edit-button')));

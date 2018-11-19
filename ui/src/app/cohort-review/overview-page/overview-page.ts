@@ -52,11 +52,11 @@ export class OverviewPage implements OnInit, OnDestroy {
         this.data = fromJS(data);
         this.buttonsDisableFlag = false;
       });
-    this.subscription = this.state.review$.subscribe(review => {
+    this.subscription.add(this.state.review$.subscribe(review => {
       this.review = review;
       this.totalParticipantCount = review.matchedParticipantCount;
 
-    });
+    }));
     this.getDemoCharts();
     this.openChartContainer = true;
     this.fetchChartsData();
@@ -72,13 +72,13 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
-      this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
+      this.subscription.add(this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
-        });
+        }));
     });
   }
 

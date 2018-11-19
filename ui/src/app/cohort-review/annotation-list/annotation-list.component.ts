@@ -56,7 +56,6 @@ export class AnnotationListComponent implements OnChanges {
     const defs$ = this.state.annotationDefinitions$.filter(identity);
     const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
       .map(rid => valueFactory([this.participant.id, rid]));
-
     this.annotations$ = Observable
       .combineLatest(defs$, factory$)
       .map(([defs, factoryFunc]) =>
@@ -74,5 +73,15 @@ export class AnnotationListComponent implements OnChanges {
 
   openEditManager(): void {
     this.state.editAnnotationManagerOpen.next(true);
+  }
+
+  updateAnnotation(update: ParticipantCohortAnnotation) {
+    const index = this.participant.annotations
+      .findIndex(anno => anno.annotationId === update.annotationId);
+    if (index > -1) {
+      this.participant.annotations[index] = update;
+    } else {
+      this.participant.annotations.push(update);
+    }
   }
 }

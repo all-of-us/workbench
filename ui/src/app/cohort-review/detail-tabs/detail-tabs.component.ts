@@ -339,7 +339,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
           this.chartData[domainName].conditionTitle = typeToTitle(domainName);
           this.chartData[domainName].loading = false;
         });
-      this.subscription = getParticipantsDomainData;
+      this.subscription.add(getParticipantsDomainData);
     });
   }
 

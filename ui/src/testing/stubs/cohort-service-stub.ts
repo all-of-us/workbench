@@ -69,7 +69,7 @@ export class CohortsServiceStub {
       type: '',
       workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime(),
+      lastModifiedTime: new Date().getTime() - 1000,
     };
 
     const exampleCohortTwo: CohortStub = {
@@ -80,7 +80,7 @@ export class CohortsServiceStub {
       type: '',
       workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime(),
+      lastModifiedTime: new Date().getTime() - 4000,
     };
     this.cohorts = [exampleCohort, exampleCohortTwo];
     this.workspaces = [stubWorkspace];

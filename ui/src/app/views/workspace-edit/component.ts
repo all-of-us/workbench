@@ -148,8 +148,8 @@ export class WorkspaceEditComponent implements OnInit {
   genderIdentityList = {
     'Woman': UnderservedPopulationEnum.GENDERIDENTITYWOMAN,
     'Non-Binary': UnderservedPopulationEnum.GENDERIDENTITYNONBINARY,
-    'Transman/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
-    'Transwoman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
+    'Trans man/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
+    'Trans woman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
     'Genderqueer': UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER,
     'Genderfluid': UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID,
     'Gender Variant': UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT,
@@ -379,9 +379,13 @@ export class WorkspaceEditComponent implements OnInit {
         (r: CloneWorkspaceResponse) => {
           this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
-        () => {
-          // Only expected errors are transient, so allow the user to try again.
+        (error) => {
           this.resetWorkspaceEditor();
+          if (error.status === 409) {
+            this.workspaceCreationConflictError = true;
+          } else {
+            this.workspaceUpdateError = true;
+          }
         });
   }
 
