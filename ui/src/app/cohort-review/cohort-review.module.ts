@@ -16,10 +16,10 @@ import {CohortCommonModule} from '../cohort-common/module';
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
+import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
 import {MultiSelectFilterComponent} from './multiselect-filter/multiselect-filter.component';
 // This is a temporary measure until we have specs and APIs for overview specific charts
-import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
