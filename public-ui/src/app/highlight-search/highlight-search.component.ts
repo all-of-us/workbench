@@ -25,10 +25,7 @@ export class HighlightSearchComponent implements OnInit, OnChanges {
       searchWords = searchWords.filter(w => w.length > 0 );
       searchWords = searchWords.map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
       this.reString = new RegExp(searchWords.join('|'));
-      this.chunks = this.text.split(' ');
-    } else {
-      this.chunks = this.text.split( ' ');
     }
+    this.chunks = this.text.split(' ');
   }
-
 }
