@@ -90,6 +90,7 @@ export class AppComponent implements OnInit {
         this.setTitleFromRoute(event);
     });
 
+    this.setGTagManager();
     this.setTCellAgent();
   }
 
@@ -105,6 +106,33 @@ export class AppComponent implements OnInit {
       currentRoute.data.subscribe(value =>
           this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
     }
+  }
+
+  /**
+   * Setting the Google Analytics ID here.
+   * This first injects Google's gtag script via iife, then secondarily defines
+   * the global gtag function.
+   */
+  private setGTagManager() {
+    const s = this.doc.createElement('script');
+    s.type = 'text/javascript';
+    s.innerHTML =
+      '(function(w,d,s,l,i){' +
+      'w[l]=w[l]||[];' +
+      'var f=d.getElementsByTagName(s)[0];' +
+      'var j=d.createElement(s);' +
+      'var dl=l!=\'dataLayer\'?\'&l=\'+l:\'\';' +
+      'j.async=true;' +
+      'j.src=\'https://www.googletagmanager.com/gtag/js?id=\'+i+dl;' +
+      'f.parentNode.insertBefore(j,f);' +
+      '})' +
+      '(window, document, \'script\', \'dataLayer\', \'' + environment.gaId + '\');' +
+      'window.dataLayer = window.dataLayer || [];' +
+      'function gtag(){dataLayer.push(arguments);}' +
+      'gtag(\'js\', new Date());' +
+      'gtag(\'config\', \'' + environment.gaId + '\');';
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(s);
   }
 
   private setTCellAgent(): void {
