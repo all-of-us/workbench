@@ -1,5 +1,5 @@
-import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {DOCUMENT, Location} from '@angular/common';
+import {Component, ElementRef, HostListener, Inject, OnInit, ViewChild} from '@angular/core';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
@@ -36,7 +36,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     /* Ours */
-
+    @Inject(DOCUMENT) private doc: any,
     /* Angular's */
     private activatedRoute: ActivatedRoute,
     private locationService: Location,
@@ -89,6 +89,8 @@ export class AppComponent implements OnInit {
         }
         this.setTitleFromRoute(event);
     });
+
+    this.setTCellAgent();
   }
 
   /**
@@ -103,6 +105,16 @@ export class AppComponent implements OnInit {
       currentRoute.data.subscribe(value =>
           this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
     }
+  }
+
+  private setTCellAgent(): void {
+    const s = this.doc.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://jsagent.tcell.io/tcellagent.min.js';
+    s.setAttribute('tcellappid', environment.tcellappid);
+    s.setAttribute('tcellapikey', environment.tcellapikey);
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(s);
   }
 
 }
