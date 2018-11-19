@@ -45,8 +45,8 @@ export class ConceptAddModalComponent {
     private conceptSetsService: ConceptSetsService,
     private conceptService: ConceptsService,
     private route: ActivatedRoute) {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+      this.wsNamespace = this.route.snapshot.params['ns'];
+      this.wsId = this.route.snapshot.params['wsid'];
   }
 
   open(): void {
