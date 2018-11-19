@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
 
@@ -23,7 +23,7 @@ export class ClearButtonInMemoryFilterComponent
   }
 
   accepts(person: Participant): boolean {
-    return this.selection.value == '' ||
+    return this.selection.value === '' ||
       ('' + person[this.property]).toLowerCase().startsWith(this.selection.value.toLowerCase());
   }
 
