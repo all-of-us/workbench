@@ -5,8 +5,8 @@ import {CohortReviewService, ParticipantDataListResponse} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
-import {ClearButtonFilterComponent} from '../clearbutton-in-memory-filter';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
+import {ClearButtonFilterComponent} from '../clearbutton-in-memory-filter';
 
 import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
 import {DetailAllEventsComponent} from './detail-all-events.component';
