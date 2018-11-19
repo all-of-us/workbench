@@ -18,11 +18,16 @@
         </div>
       </div>
       <div class="container container-margin">
-        <div class="row">
+        <div class="row" *ngIf="openChartContainer">
           <div class="col-sm-12">
-            <div class="chart-heading" *ngIf="showTitle && openChartContainer">
+            <div class="chart-heading" *ngIf="showTitle ; else demoHeading">
               Top 10 {{title}} of Participants in Cohort
             </div>
+            <ng-template #demoHeading>
+              <div class="demo-chart-heading">
+                Participants by Gender, Age Range & Race
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
