@@ -6,7 +6,7 @@ import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 
-import {ClearButtonFilterComponent} from '../clearbutton-in-memory-filter';
+import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
 import {DetailAllEventsComponent} from './detail-all-events.component';
 
@@ -26,7 +26,7 @@ describe('DetailAllEventsComponent', () => {
     beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ DetailAllEventsComponent, DetailTabTableComponent ],
+      declarations: [ ClearButtonInMemoryFilterComponent, DetailAllEventsComponent, DetailTabTableComponent ],
       imports: [ClarityModule, NgxPopperModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
