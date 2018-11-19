@@ -379,9 +379,13 @@ export class WorkspaceEditComponent implements OnInit {
         (r: CloneWorkspaceResponse) => {
           this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
-        () => {
-          // Only expected errors are transient, so allow the user to try again.
+        (error) => {
           this.resetWorkspaceEditor();
+          if (error.status === 409) {
+            this.workspaceCreationConflictError = true;
+          } else {
+            this.workspaceUpdateError = true;
+          }
         });
   }
 

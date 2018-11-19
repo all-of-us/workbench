@@ -148,9 +148,13 @@
                   {{researchPurposeItems.diseaseFocusedResearch.longDescription}}
                 </div>
                 <div style="display: flex">
-                  <input type="text" class="input" name="disease-specification"
-                      [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" placeholder="Name of Disease"
-                         style="width: calc(50% - 2rem); margin-right: 2rem; margin-to`p: 0.5rem">
+                  <div role="tooltip" aria-haspopup="true" style="width: calc(50% - 2rem); margin-right: 2rem; margin-top: 0.5rem;" class="tooltip tooltip-md tooltip-right">
+                    <input type="text" class="input" name="disease-specification"
+                        [(ngModel)]="workspace.researchPurpose.diseaseOfFocus" placeholder="Name of Disease"
+                           style="width: 100%"
+                           [disabled]="!workspace.researchPurpose.diseaseFocusedResearch">
+                    <span *ngIf="!workspace.researchPurpose.diseaseFocusedResearch" class="tooltip-content">You must select disease focused research to enter a disease of focus</span>
+                  </div>
                 </div>
               </div>
             </div>

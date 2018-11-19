@@ -11,15 +11,6 @@
   width: 90%;
 }
 
-.header {
-  height: 3%;
-  width: 0%;
-  color: rgba(48,41,115,1);
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 24px;
-}
-
 clr-icon {
   height: 18px;
   width: 18px;
@@ -162,7 +153,6 @@ clr-dropdown > button {
   border: 1px solid #CCCCCC;
   border-radius: 3px;
   background-color: #FAFAFA;
-
 }
 
 .wrapper {

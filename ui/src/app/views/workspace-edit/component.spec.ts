@@ -332,4 +332,24 @@ describe('WorkspaceEditComponent', () => {
     expect(workspacesService.workspaces[1].researchPurpose.underservedPopulationDetails)
       .toContain(UnderservedPopulationEnum.AGEOLDERADULTS);
   }));
+
+  it('should not allow duplicate workspace name while cloning', fakeAsync(() => {
+    workspacesService.workspaceAccess.set(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
+    setupComponent(WorkspaceEditMode.Clone);
+    fixture.componentRef.instance.profileStorageService.reload();
+    tick();
+    let de = fixture.debugElement;
+    const workspaceName = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
+    simulateInput(fixture, de.query(By.css('.name')), workspaceName );
+    fixture.debugElement.query(By.css('.add-button'))
+        .triggerEventHandler('click', null);
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    de = fixture.debugElement;
+    const errorText = de.query(By.css('.modal-body')).childNodes[0].nativeNode.data;
+    expect(errorText).toBe(
+        'You already have a workspace named '
+        + workspaceName + '. Please choose another name.');
+  }));
 });

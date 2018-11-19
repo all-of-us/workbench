@@ -43,6 +43,9 @@ then
   exit 1
 fi
 
+#The list of ppi questions which have user entered values which can have wide range so placing them in ten ranged buckets
+declare -a toBinSurveyQuestions=(1585864,1585870,1585873,1585795,1585802,1585820,1585889,1585890)
+
 # Next Populate achilles_results
 echo "Running achilles queries..."
 
@@ -1116,10 +1119,24 @@ Count(*) as count_value,0 as source_count_value
 FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-Where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
-and o.value_as_number > 0
+Where (o.observation_source_concept_id > 0 and o.value_as_number >= 0 and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 Group by o.observation_source_concept_id,o.value_as_number,sm.concept_id,sq.id
 order by sq.id asc"
+
+# Bin and set the survey answer count for the survey question answers that has free text value
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id,analysis_id,stratum_1,stratum_2,stratum_4,stratum_5,count_value,source_count_value)
+SELECT 0 as id, 3110 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(floor(o.value_as_number/10)*10 as string) as stratum_4,cast(sq.id as string) stratum_5,
+Count(*) as count_value,0 as source_count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+Where (o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) and o.value_as_number >= 0)
+Group by o.observation_source_concept_id,stratum_4,sm.concept_id,sq.id
+order by sq.id asc"
+
 
 # Survey question answers count by gender
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1146,8 +1163,23 @@ FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DA
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_concept_id,sq.id
+order by sq.id asc"
+
+# Bin and set the survey answer count by gender for the survey question answers that has free text value
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value,source_count_value)
+select 0,3111 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(floor(o.value_as_number/10)*10 as string) as stratum_4,CAST(p.gender_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value,0 as source_count_value
+FROM \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) and o.value_as_number >= 0)
+group by sm.concept_id,o.observation_source_concept_id,stratum_4,p.gender_concept_id,sq.id
 order by sq.id asc"
 
 # Survey question answers count by gender identity
@@ -1175,8 +1207,24 @@ FROM \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.person_gender_identity\` p inne
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,p.gender_identity_concept_id,sq.id
+order by sq.id asc"
+
+# Bin and set the survey answer count by gender for the survey question answers that has free text value
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value,source_count_value)
+select 0,3113 as analysis_id,CAST(sm.concept_id as string) as stratum_1,CAST(o.observation_source_concept_id as string) as stratum_2,
+CAST(floor(o.value_as_number/10)*10 as string) as stratum_4,CAST(p.gender_identity_concept_id as string) as stratum_5,count(distinct p.person_id) as count_value,0 as source_count_value
+FROM \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.person_gender_identity\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.value_as_number >= 0
+and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
+group by sm.concept_id,o.observation_source_concept_id,stratum_4,p.gender_identity_concept_id,sq.id
 order by sq.id asc"
 
 # Survey Question Answer Count by age decile  30+ yr old deciles
@@ -1224,9 +1272,26 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DA
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
+order by sq.id asc"
+
+# Binned Survey Question Answer Count by age decile  30+ yr old deciles(value as number not null)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value,source_count_value)
+select 0, 3112 as analysis_id,CAST(sm.concept_id as string) as stratum_1,
+CAST(o.observation_source_concept_id as string) as stratum_2,CAST(floor(o.value_as_number/10)*10 as string) as stratum_4,
+CAST(floor((extract(year from o.observation_date) - p.year_of_birth)/10) AS STRING) as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.value_as_number >= 0 and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
+and floor((extract(year from o.observation_date) - p.year_of_birth)/10) >=3
+group by sm.concept_id,o.observation_source_concept_id,stratum_4,stratum_5,sq.id
 order by sq.id asc"
 
 
@@ -1241,18 +1306,36 @@ from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DA
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
 On o.observation_source_concept_id=sq.question_concept_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
-where (o.observation_source_concept_id > 0 and o.value_as_number is not null)
+where (o.observation_source_concept_id > 0 and o.value_as_number >= 0
+and o.observation_source_concept_id not in (${toBinSurveyQuestions[@]}) )
 and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
 group by sm.concept_id,o.observation_source_concept_id,o.value_as_number,stratum_5,sq.id
+order by sq.id asc"
+
+# Binned survey Question Answer Count by age decile  18-29 yr old decile 2(value as number not null)
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2,stratum_4,stratum_5,count_value,source_count_value)
+select 0, 3112 as analysis_id,CAST(sm.concept_id as string) as stratum_1,
+CAST(o.observation_source_concept_id as string) as stratum_2,CAST(floor(o.value_as_number/10)*10 as string) as stratum_4,
+'2' as stratum_5,COUNT(distinct p.PERSON_ID) as count_value,0 as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.person\` p inner join \`${BQ_PROJECT}.${BQ_DATASET}.observation\` o on p.person_id = o.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_question_map\` sq
+On o.observation_source_concept_id=sq.question_concept_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.survey_module\` sm on sq.survey_concept_id = sm.concept_id
+where (o.value_as_number >= 0
+and o.observation_source_concept_id in (${toBinSurveyQuestions[@]}) )
+and ((extract(year from o.observation_date) - p.year_of_birth) >= 18 and (extract(year from o.observation_date) - p.year_of_birth) < 30)
+group by sm.concept_id,o.observation_source_concept_id,stratum_4,stratum_5,sq.id
 order by sq.id asc"
 
 # Condition Domain participant counts
 echo "Getting domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
- (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
- select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3, COUNT(distinct ob.person_id) as count_value, 0 as source_count_value
- from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob"
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3, COUNT(distinct ob.person_id) as count_value, 0 as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob"
 
 # Drug Exposure Domain participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \

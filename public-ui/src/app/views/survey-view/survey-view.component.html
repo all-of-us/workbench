@@ -141,9 +141,17 @@
         <div class="row  answers" [hidden]="!showAnswer[q.conceptId]">
           <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
             <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
-              <div class="col-sm-6 col-xs-12">
+              <div class="col-sm-6 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
                 <label class="answer-text" innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
               </div>
+              <ng-template #binnedSurveyQuestionDisplay>
+                <div class="col-sm-6 col-xs-12">
+                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel" innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+                  <ng-template #rangeLabel>
+                    <label class="answer-text" innerHtml="{{a.stratum4 + '-'  + (convertToNum(a.stratum4) + 10) | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+                  </ng-template>
+                </div>
+              </ng-template>
               <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
                 <label class="participant-count answer-text">{{a.countValue | number}}  </label>
               </div>

@@ -2,10 +2,12 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   HostListener,
   Input,
   OnChanges,
   OnInit,
+  Output
 } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -35,6 +37,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   @Input() annotation: Annotation;
   @Input() showDataType: boolean;
+  @Output() annotationUpdate: EventEmitter<ParticipantCohortAnnotation> =
+    new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
   control = new FormControl();
@@ -67,7 +71,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   ngOnChanges() {
     if (this.annotation.value[this.valuePropertyName]) {
       this.defaultAnnotation = true;
-        this.annotationOption = this.annotation.value[this.valuePropertyName];
+      this.annotationOption = this.annotation.value[this.valuePropertyName];
     } else {
       this.defaultAnnotation = false;
     }
@@ -158,9 +162,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (apiCall) {
-      apiCall.subscribe(items => {
-        if (items && !annoId) {
-          this.annotation.value.annotationId = items.annotationId;
+      apiCall.subscribe((update) => {
+        this.annotationUpdate.emit(update);
+        if (update && !annoId) {
+          this.annotation.value.annotationId = update.annotationId;
         }
         setTimeout (() => {
           this.textSpinnerFlag = false;

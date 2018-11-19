@@ -168,3 +168,10 @@ input[type=radio] {
 .range-padding {
     padding-top: 0.2rem;
 }
+
+.attr-disable {
+    cursor: not-allowed;
+    color: #9B9B9B;
+    margin-left: 1rem;
+    font-size: 12PX;
+}

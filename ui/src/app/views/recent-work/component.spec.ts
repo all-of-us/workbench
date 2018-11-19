@@ -15,6 +15,7 @@ import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
+import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
@@ -57,7 +58,7 @@ describe('RecentWorkComponent', () => {
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},
-        {provide: ConceptSetsService },
+        {provide: ConceptSetsService, useValue: new ConceptSetsServiceStub()},
         {provide: SignInService, useValue: new SignInServiceStub()},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
         {provide: UserMetricsService, useValue: spy},
@@ -86,10 +87,12 @@ describe('RecentWorkComponent', () => {
     updateAndTick(fixture);
     updateAndTick(fixture);
     const cardsOnPage = fixture.debugElement.queryAll(By.css('.card'));
-    expect(cardsOnPage.length).toEqual(3);
+    expect(cardsOnPage.length).toEqual(4);
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
-    expect(cardNames).toEqual(['sample name', 'sample name 2', 'mockFile']);
+    expect(cardNames).toEqual(
+        ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
+        'sample name 2']);
   }));
 
   // test that it displays 4 most recent resources from UserMetrics cache
