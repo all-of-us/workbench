@@ -19,6 +19,7 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 import * as moment from 'moment';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 interface Annotation {
   definition: CohortAnnotationDefinition;
@@ -50,15 +51,13 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   dateBtn: any;
   subscription: Subscription;
 
+  // if calendar icon is clicked, adjust position of datepicker
   @HostListener('document:mouseup', ['$event.target'])
   onClick(targetElement) {
     if (this.isDate) {
-      console.log(targetElement);
-      console.log(this.dateBtn);
-      const clickedInside = this.dateBtn.contains(targetElement);
-      if (clickedInside) {
-        console.log('clicked!!!!');
-        // TODO adjust position of datepicker (if opened)
+      const clickedDateBtn = this.dateBtn.contains(targetElement);
+      if (clickedDateBtn) {
+        this.datepickerPosition();
       }
     }
   }
@@ -220,6 +219,18 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
     this.control.setValue(this.dateObj, {emitEvent: false});
     this.handleInput();
+  }
+
+  datepickerPosition() {
+    let datepicker;
+    Observable.interval()
+      .takeWhile((val, index) => !datepicker && index < 100)
+      .subscribe(() => {
+        datepicker = <HTMLElement>document.getElementsByClassName('datepicker')[0];
+        if (datepicker) {
+          datepicker.style.left = '-9rem';
+        }
+      });
   }
 
   get isDate() {
