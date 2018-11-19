@@ -26,7 +26,8 @@ describe('DetailAllEventsComponent', () => {
     beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ ClearButtonInMemoryFilterComponent, DetailAllEventsComponent, DetailTabTableComponent ],
+      declarations: [ ClearButtonInMemoryFilterComponent,
+        DetailAllEventsComponent, DetailTabTableComponent ],
       imports: [ClarityModule, NgxPopperModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
