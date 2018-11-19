@@ -2,6 +2,7 @@ import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
   ActivatedRoute,
+  NavigationEnd,
   Router,
 } from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
@@ -37,6 +38,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
   billingProjectQuery: NodeJS.Timer;
   private profileLoadingSub: Subscription;
   private profileBlockingSub: Subscription;
+  private subscriptions = [];
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -53,6 +55,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
       this.sidenavToggle = false;
     }
   }
+
   constructor(
     /* Ours */
     public errorHandlingService: ErrorHandlingService,
@@ -102,6 +105,12 @@ export class SignedInComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.subscriptions.push(
+      this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(event => {
+          this.minimizeChrome = this.shouldMinimize();
+        }));
+
   }
 
   ngOnDestroy() {
@@ -110,6 +119,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
     }
     if (this.profileBlockingSub) {
       this.profileBlockingSub.unsubscribe();
+    }
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
     }
   }
 
