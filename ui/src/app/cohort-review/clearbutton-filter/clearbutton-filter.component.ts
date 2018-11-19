@@ -40,7 +40,7 @@ export class ClearButtonFilterComponent
     return this.selection.value === person[this.property];
   }
 
-  get isSelection(): boolean {
+  get isDisabled(): boolean {
     return !this.selection.value;
   }
 }

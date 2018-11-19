@@ -14,3 +14,7 @@ clr-dg-cell.cell {
   min-height: 31rem;
   overflow-y: auto;
 }
+
+.gray{
+  background-color: #E2E2EA;
+}

@@ -22,6 +22,7 @@ import {
   SortOrder,
   Workspace,
 } from 'generated';
+import {ParticipantCohortStatusColumns} from '../../../generated';
 
 function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {
   return (filter instanceof MultiSelectFilterComponent);
@@ -119,7 +120,11 @@ export class TablePage implements OnInit, OnDestroy {
         } else if(isClearButtonFilter(filter)) {
           const property = filter.property;
           this.isFiltered.push(property);
-          const operator = Operator.EQUAL;
+          let operator = Operator.EQUAL;
+          if (filter.property === ParticipantCohortStatusColumns.PARTICIPANTID ||
+            filter.property === ParticipantCohortStatusColumns.BIRTHDATE) {
+            operator = Operator.LIKE;
+          }
           query.filters.items.push(<Filter>{property, values: [filter.selection.value], operator});
         } else {
           const {property, value} = <any>filter;

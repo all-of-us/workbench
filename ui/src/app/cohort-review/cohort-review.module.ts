@@ -38,6 +38,7 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
+import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -77,6 +78,7 @@ import {TablePage} from './table-page/table-page';
     ClearButtonFilterComponent,
     MultiSelectFilterComponent,
     StatusFilterComponent,
+    ClearButtonInMemoryFilterComponent,
     IndividualParticipantsChartsComponent,
     /* Participant Detail */
     ParticipantStatusComponent,

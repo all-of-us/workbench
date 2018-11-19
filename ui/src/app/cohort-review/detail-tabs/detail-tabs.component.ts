@@ -9,7 +9,6 @@ import {CohortReviewService} from '../../../generated';
 import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
-
 /* The most common column types */
 const itemDate = {
   name: 'itemDate',

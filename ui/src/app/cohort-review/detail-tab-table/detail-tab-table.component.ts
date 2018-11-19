@@ -1,11 +1,10 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostBinding, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridComparatorInterface} from '@clr/angular';
-import {fromJS} from 'immutable';
-import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
+import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 
 class SortByColumn implements ClrDatagridComparatorInterface<ParticipantData> {
   compare(a: ParticipantData, b: ParticipantData) {
@@ -33,6 +32,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
 
   readonly pageSize = 25;
   numMentionsSort = new SortByColumn();
+  filtered = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -71,6 +71,14 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
         this.totalCount = resp.count;
         this.loading = false;
       });
+  }
+
+  isFiltered(event) {
+    this.filtered = event;
+  }
+
+  isSelected(column) {
+    return this.filtered.includes(column);
   }
 
   ngOnDestroy() {
