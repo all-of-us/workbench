@@ -6,4 +6,5 @@ export const environment = {
   tcellappid: 'AoUNonProd-WZFW2',
   tcellapikey: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE',
   debug: false,
+  gaId: 'UA-112406425-3',
 };

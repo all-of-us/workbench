@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
+import {environment} from "../../../ui/src/environments/environment";
 
 import {SignInGuard} from './guards/sign-in-guard.service';
 import {DbHomeComponent} from './views/db-home/db-home.component';
@@ -11,7 +12,6 @@ import {SurveyViewComponent} from './views/survey-view/survey-view.component';
 import {SurveysComponent} from './views/surveys/surveys.component';
 
 declare let gtag: Function;
-declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
@@ -72,7 +72,7 @@ export class AppRoutingModule {
  constructor(public router: Router) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        gtag('config', ga_tracking_id, { 'page_path': event.urlAfterRedirects });
+        gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
       }
     });
   }
