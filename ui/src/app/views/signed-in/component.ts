@@ -1,6 +1,10 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -29,10 +33,12 @@ export class SignedInComponent implements OnInit, OnDestroy {
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
+  minimizeChrome = false;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   private profileLoadingSub: Subscription;
   private profileBlockingSub: Subscription;
+  private subscriptions = [];
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -49,6 +55,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
       this.sidenavToggle = false;
     }
   }
+
   constructor(
     /* Ours */
     public errorHandlingService: ErrorHandlingService,
@@ -58,6 +65,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
     /* Angular's */
     private locationService: Location,
     private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -72,6 +80,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
           profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
+        this.minimizeChrome = this.shouldMinimize();
       });
     });
 
@@ -96,6 +105,12 @@ export class SignedInComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.subscriptions.push(
+      this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(event => {
+          this.minimizeChrome = this.shouldMinimize();
+        }));
+
   }
 
   ngOnDestroy() {
@@ -105,11 +120,22 @@ export class SignedInComponent implements OnInit, OnDestroy {
     if (this.profileBlockingSub) {
       this.profileBlockingSub.unsubscribe();
     }
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
+  }
+
+  shouldMinimize(): boolean {
+    let leaf = this.route.snapshot;
+    while (leaf.firstChild != null) {
+      leaf = leaf.firstChild;
+    }
+    return leaf.data.minimizeChrome;
   }
 
   private navigateSignOut(): void {

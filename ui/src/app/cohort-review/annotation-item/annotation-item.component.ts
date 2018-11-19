@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
+  HostListener,
   Input,
   OnChanges,
   OnInit,
@@ -18,6 +19,8 @@ import {
   ParticipantCohortAnnotation,
 } from 'generated';
 import * as moment from 'moment';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 interface Annotation {
   definition: CohortAnnotationDefinition;
   value: ParticipantCohortAnnotation;
@@ -38,12 +41,30 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
-  private control = new FormControl();
+  control = new FormControl();
+  formattedDate = new FormControl();
   private expandText = false;
   defaultAnnotation = false;
   annotationOption: any;
   oldValue: any;
-  myDate: any;
+  dateObj: any;
+  dateBtns: any;
+  subscription: Subscription;
+
+  // if calendar icon is clicked, adjust position of datepicker
+  @HostListener('document:mouseup', ['$event.target'])
+  onClick(targetElement) {
+    if (this.isDate) {
+      const length = this.dateBtns.length;
+      for (let i = 0; i < length; i++) {
+        const dateBtn = <HTMLElement>this.dateBtns[i];
+        if (dateBtn.contains(targetElement)) {
+          this.datepickerPosition();
+          break;
+        }
+      }
+    }
+  }
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -66,6 +87,19 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.oldValue = this.annotation.value[this.valuePropertyName];
     if (this.oldValue !== undefined) {
       this.control.setValue(this.oldValue);
+      if (this.isDate) {
+        this.formattedDate.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
+        this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
+      }
+    }
+    if (this.isDate) {
+      this.subscription = this.control.valueChanges.subscribe(val => {
+        this.successIcon = false;
+        this.textSpinnerFlag = true;
+        this.formattedDate.setValue(moment(val).format('YYYY-MM-DD'));
+        this.handleInput();
+      });
+      this.dateBtns = document.getElementsByClassName('datepicker-trigger');
     }
   }
 
@@ -93,9 +127,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    const newValue = this.control.value;
+    const newValue = this.isDate ? this.formattedDate.value : this.control.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId;
+    const annoId = this.annotation.value.annotationId ;
 
     let apiCall;
 
@@ -134,6 +168,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     if (apiCall) {
       apiCall.subscribe((update) => {
         this.annotationUpdate.emit(update);
+        if (update && !annoId) {
+          this.annotation.value.annotationId = update.annotationId;
+        }
         setTimeout (() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;
@@ -166,10 +203,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   get datatypeDisplay() {
-        return this.showDataType
-          ? ` (${this.annotation.definition.annotationType})`
-          : '';
-      }
+    return this.showDataType
+      ? ` (${this.annotation.definition.annotationType})`
+      : '';
+  }
 
   annotationOptionChange(value) {
     this.annotationOption = value;
@@ -180,15 +217,28 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   }
 
-  dateChange(e) {
+  dateBlur() {
     this.successIcon = false;
     this.textSpinnerFlag = true;
-    setTimeout (() => {
-        if (e !== null) {
-            const newDate = moment(e).format('YYYY-MM-DD');
-            this.control.patchValue(newDate);
-           this.handleInput();
-        } }, 2000);
+    this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
+    this.control.setValue(this.dateObj, {emitEvent: false});
+    this.handleInput();
   }
 
+  datepickerPosition() {
+    let datepicker;
+    Observable.interval()
+      .takeWhile((val, index) => !datepicker && index < 1000)
+      .subscribe(() => {
+        datepicker = <HTMLElement>document.getElementsByClassName('datepicker')[0];
+        if (datepicker) {
+          datepicker.style.left = '-9rem';
+        }
+      });
+  }
+
+  get isDate() {
+    return this.annotation.definition.annotationType === AnnotationType.DATE;
+  }
 }
+

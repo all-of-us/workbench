@@ -35,6 +35,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   deleting = false;
   workspaceDeletionError = false;
   tabPath: string;
+  display = true;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -64,10 +65,12 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(this.route.params.subscribe(handleParams));
 
     this.tabPath = this.getTabPath();
+    this.display = this.shouldDisplay();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
+          this.display = this.shouldDisplay();
         }));
   }
 
@@ -75,6 +78,14 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
+  }
+
+  private shouldDisplay(): boolean {
+    let leaf = this.route.snapshot;
+    while (leaf.firstChild != null) {
+      leaf = leaf.firstChild;
+    }
+    return !leaf.data.minimizeChrome;
   }
 
   private getTabPath(): string {

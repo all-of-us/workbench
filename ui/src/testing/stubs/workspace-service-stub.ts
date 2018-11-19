@@ -256,6 +256,11 @@ export class WorkspacesServiceStub {
                  cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
     return new Observable<CloneWorkspaceResponse>(observer => {
       setTimeout(() => {
+        if (cloneReq.workspace.name === WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME) {
+          const msg = 'Workspace with name already exist';
+          observer.error({error: new Error(msg), status: 409});
+          return;
+        }
         const source = this.workspaces.find(w => w.id === workspaceId);
         if (!source) {
           const msg = `Error Cloning. Workspace with id: ${workspaceId} does not exist.`;
