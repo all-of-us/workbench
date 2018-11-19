@@ -131,7 +131,7 @@ describe('ConceptSetAddComponent', () => {
     expect(conceptSetAddCreatePage.formSections.length).toBe(2);
   }));
 
-  it('does not display option to add to existing if concept set does not exist',
+  it('disables option to add to existing if concept set does not exist',
       fakeAsync(() => {
     conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.DRUG;
     conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
@@ -139,7 +139,9 @@ describe('ConceptSetAddComponent', () => {
     conceptSetAddCreatePage.fixture.componentInstance.open();
     conceptSetAddCreatePage.readPageData();
     tick();
-    expect(conceptSetAddCreatePage.formSections.length).toBe(1);
+    expect(conceptSetAddCreatePage.formSections.length).toBe(2);
+    expect(conceptSetAddCreatePage.fixture.debugElement
+      .query(By.css('#select-add')).properties['disabled']).toBeTruthy();
   }));
 
   it('selects Add to Existing option by default'
