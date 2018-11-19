@@ -48,16 +48,20 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   annotationOption: any;
   oldValue: any;
   dateObj: any;
-  dateBtn: any;
+  dateBtns: any;
   subscription: Subscription;
 
   // if calendar icon is clicked, adjust position of datepicker
   @HostListener('document:mouseup', ['$event.target'])
   onClick(targetElement) {
     if (this.isDate) {
-      const clickedDateBtn = this.dateBtn.contains(targetElement);
-      if (clickedDateBtn) {
-        this.datepickerPosition();
+      const length = this.dateBtns.length;
+      for (let i = 0; i < length; i++) {
+        const dateBtn = <HTMLElement>this.dateBtns[i];
+        if (dateBtn.contains(targetElement)) {
+          this.datepickerPosition();
+          break;
+        }
       }
     }
   }
@@ -95,7 +99,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
         this.formattedDate.setValue(moment(val).format('YYYY-MM-DD'));
         this.handleInput();
       });
-      this.dateBtn = document.getElementsByClassName('datepicker-trigger')[0];
+      this.dateBtns = document.getElementsByClassName('datepicker-trigger');
     }
   }
 
@@ -224,7 +228,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   datepickerPosition() {
     let datepicker;
     Observable.interval()
-      .takeWhile((val, index) => !datepicker && index < 100)
+      .takeWhile((val, index) => !datepicker && index < 1000)
       .subscribe(() => {
         datepicker = <HTMLElement>document.getElementsByClassName('datepicker')[0];
         if (datepicker) {
