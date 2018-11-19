@@ -52,7 +52,7 @@
                 <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
-                <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
+                <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd': 'UTC/GMT'"
                        (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
               </div>
               <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
