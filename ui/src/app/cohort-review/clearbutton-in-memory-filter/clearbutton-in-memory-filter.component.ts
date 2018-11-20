@@ -15,7 +15,7 @@ export class ClearButtonInMemoryFilterComponent
   selection = new FormControl();
   changes: EventEmitter<any> = new EventEmitter<any>(false);
   @Output()
-  filterChanges: EventEmitter<string[]> = new EventEmitter<string[]>();
+  filterChanges: EventEmitter<any> = new EventEmitter<any>();
   filteredColumns = [];
 
   isActive(): boolean {
@@ -30,18 +30,15 @@ export class ClearButtonInMemoryFilterComponent
   refreshData() {
     this.changes.emit(true);
     if (this.selection.value) {
-      this.filteredColumns = this.filteredColumns.filter(col => col !== this.property);
-      this.filteredColumns.push(this.property);
+      this.filterChanges.emit({column: this.property, action: 'add'});
     } else {
-      this.filteredColumns = this.filteredColumns.filter(col => col !== this.property);
+      this.filterChanges.emit({column: this.property, action: 'remove'});
     }
-    this.filterChanges.emit(this.filteredColumns);
   }
 
   reset() {
     this.selection.reset();
-    this.filteredColumns = this.filteredColumns.filter(col => col !== this.property);
-    this.filterChanges.emit(this.filteredColumns);
+    this.filterChanges.emit({column: this.property, action: 'remove'});
   }
 
   get isDisabled(): boolean {

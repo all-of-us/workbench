@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortReviewService} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
+import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 

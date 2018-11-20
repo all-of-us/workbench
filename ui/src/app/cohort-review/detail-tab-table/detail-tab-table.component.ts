@@ -73,7 +73,12 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   }
 
   isFiltered(event) {
-    this.filtered = event;
+    if (event.action === 'add') {
+      this.filtered.push(event.column);
+    } else {
+      this.filtered =
+        this.filtered.filter(col => col !== event.column);
+    }
   }
 
   isSelected(column) {
