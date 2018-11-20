@@ -3,7 +3,6 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
-  HostListener,
   OnDestroy,
   OnInit
 } from '@angular/core';
@@ -30,8 +29,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
   formChanges = false;
-  dateValueA: any;
-  dateValueB: any;
   ctype: string;
   existing = List();
   preview = Map();
@@ -41,7 +38,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     selected: ['Any', 'Any', 'Any', 'Any']
   };
   visitCounts: any;
-  dateBtns: any;
 
   readonly modifiers = [{
     name: 'ageAtEvent',
@@ -114,19 +110,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateA = new FormControl();
   dateB = new FormControl();
 
-  // if calendar icon is clicked, adjust position of datepicker
-  // @HostListener('document:mouseup', ['$event.target'])
-  // onClick(targetElement) {
-  //   const length = this.dateBtns.length;
-  //   for (let i = 0; i < length; i++) {
-  //     const dateBtn = <HTMLElement>this.dateBtns[i];
-  //     if (dateBtn.contains(targetElement)) {
-  //       this.datepickerPosition();
-  //       break;
-  //     }
-  //   }
-  // }
-
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -196,13 +179,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
                 new Date(mod.getIn(['operands', 0]) + 'T08:00:00'),
                 new Date(mod.getIn(['operands', 1]) + 'T08:00:00')
               ];
-              // this.myDate = mod.getIn(['operands', 0]);
-              // this.selectedDate = mod.getIn(['operands', 1]);
-              // this.form.get(meta.name).patchValue({
-              //   operator: mod.get('operator'),
-              //   valueA: mod.getIn(['operands', 0]),
-              //   valueB: mod.getIn(['operands', 1]),
-              // }, {emitEvent: false});
             }
             this.form.get(meta.name).patchValue({
               operator: mod.get('operator'),
@@ -257,7 +233,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       const formatted = moment(value).format('YYYY-MM-DD');
       this.form.get(['eventDate', 'valueB']).setValue(formatted);
     }));
-    this.dateBtns = document.getElementsByClassName('datepicker-trigger');
   }
 
   ngAfterContentChecked() {
@@ -290,11 +265,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return;
         }
         if (inputType === 'date') {
-          this.dateValueA = moment(valueA).format('YYYY-MM-DD');
-          this.dateValueB = moment(valueB).format('YYYY-MM-DD');
-          const operands = [this.dateValueA];
-          if (between && this.dateValueB) {
-            operands.push(this.dateValueB);
+          const dateValueA = moment(valueA).format('YYYY-MM-DD');
+          const dateValueB = moment(valueB).format('YYYY-MM-DD');
+          const operands = [dateValueA];
+          if (between && dateValueB) {
+            operands.push(dateValueB);
           }
           return fromJS({name: modType, operator, operands});
         } else {
@@ -324,11 +299,5 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateBlur(index: number) {
     const control = index === 0 ? 'valueA' : 'valueB';
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
-  }
-
-  dateChange(index: number) {
-    const control = index === 0 ? 'valueA' : 'valueB';
-    const formatted = moment(this.dateObjs[index]).format('YYYY-MM-DD');
-    this.form.get(['eventDate', control]).setValue(formatted);
   }
 }
