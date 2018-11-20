@@ -12,7 +12,7 @@ import {
   activeItem,
   activeParameterList,
   CohortSearchActions, CohortSearchState,
-  nodeAttributes, participantsCount, previewStatus,
+  nodeAttributes, previewStatus,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
@@ -37,7 +37,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
   @select(previewStatus) preview$;
-  @select(participantsCount) count$;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -59,10 +58,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   originalNode: any;
   disableCursor = false;
   preview = Map();
-  calculateCount: any;
-  newCount:number
-  testFlag = false
-  constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
+
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     this.subscription = this.open$
@@ -72,16 +69,8 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.mode = 'tree';
         this.open = true;
       });
-    this.subscription.add(this.preview$.subscribe(prev => {
-      this.preview = prev;
-      this.calculateCount = this.preview.get('count');
-    }));
-    this.subscription = this.count$
-      .subscribe(totalCount => {
-        if (totalCount) {
-          this.newCount = totalCount;
-        }
-      });
+    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
+
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
@@ -197,11 +186,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.open = false;
     this.actions.finishWizard();
   }
-  // finish1() {
-  //   this.selections = {};
-  //   this.open = false;
-  //   // this.actions.finishWizard();
-  // }
+
   /* Used to bootstrap the criteria tree */
   get rootNode() {
     return Map({
@@ -284,25 +269,12 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   getDemoParams(e) {
     if (e) {
-       this.calculateCount = 0;
         this.demoItemsType = e.type;
         this.demoParam = e.paramId;
     }
   }
-
-  get flag() {
-    if(this.demoParam && this.noSelection) {
-     return this.testFlag = false;
-    } else {
-      return this.testFlag = true;
-    }
-    // if(this.noSelection) {
-    //   return this.noSelection && this.testFlag ;
-    // }
-  }
-
-  // get showDropDown() {
-  //   return !this.isEmpty && this.codes && this.node.get('type') !== TreeType[TreeType.SNOMED];
-  // }
+   get disableFlag() {
+     return !this.preview.get('requesting') && this.preview.get('count') >= 0;
+   }
 }
 
