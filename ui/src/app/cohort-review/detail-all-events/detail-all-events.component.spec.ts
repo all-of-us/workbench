@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortReviewService} from 'generated';
@@ -28,8 +29,8 @@ describe('DetailAllEventsComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ ClearButtonInMemoryFilterComponent,
-        DetailAllEventsComponent, DetailTabTableComponent ],
-      imports: [ClarityModule, NgxPopperModule],
+        DetailAllEventsComponent, DetailTabTableComponent],
+      imports: [ClarityModule, NgxPopperModule, ReactiveFormsModule, FormsModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
