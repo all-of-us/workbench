@@ -52,8 +52,8 @@
                 <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
-                <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd': 'UTC/GMT'"
-                       (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
+                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
+                <input class="hidden-input" type="date" [formControl]="dateA" [(clrDate)]="dateObjs[0]">
               </div>
               <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
                 <div class="and-text">
@@ -68,8 +68,8 @@
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
-                         (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
+                  <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(1)" formControlName="valueB">
+                  <input class="hidden-input" type="date" [formControl]="dateB" [(clrDate)]="dateObjs[1]">
                 </div>
               </ng-container>
             </ng-container>
@@ -80,7 +80,7 @@
 </form>
 <div class="container count-preview">
   <div class="row">
-    <div class="col-lg-2 ">
+    <div class="col-lg-3">
       <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
         class="btn "
         [clrLoading]="preview.get('requesting')"
