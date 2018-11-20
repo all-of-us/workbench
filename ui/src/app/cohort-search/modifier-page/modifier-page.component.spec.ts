@@ -10,7 +10,6 @@ import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
 import {ModifierPageComponent} from './modifier-page.component';
-import {Observable} from 'rxjs/Observable';
 
 class MockActions {
   @dispatch() activeModifierList = activeModifierList;
