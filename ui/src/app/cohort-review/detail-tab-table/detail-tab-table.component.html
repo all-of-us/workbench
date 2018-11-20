@@ -25,7 +25,7 @@
           || col.name === 'endDate'
           || col.name === 'firstMention'
           || col.name === 'lastMention'">
-          {{ datum[col.name] | date: 'yyyy-MM-dd HH:mm': 'UTC/GMT' }}
+          {{ datum[col.name] | date: 'yyyy-MM-dd': 'UTC/GMT' }}
         </span>
         <span *ngSwitchCase="col.name === 'sourceVocabulary'"
           [style.width.%]="100"
