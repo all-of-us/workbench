@@ -101,15 +101,25 @@ public enum ParticipantCohortStatusDbInfo {
                     .map(v -> parseDate(filter.getProperty().toString(), v))
                     .collect(Collectors.toList()));
         } else {
-            String wildcard = (filter.getOperator().equals(Operator.LIKE) ? "%" : "");
-            parameters.addValue(filter.getProperty().toString(),
-                    parseDate(filter.getProperty().toString(), filter.getValues().get(0)) + wildcard);
+            if (filter.getOperator().equals(Operator.EQUAL)) {
+                parameters.addValue(filter.getProperty().toString(),
+                  parseDate(filter.getProperty().toString(), filter.getValues().get(0)));
+            } else {
+                parameters.addValue(filter.getProperty().toString(),
+                  filter.getValues().get(0) + "%");
+            }
         }
         return buildSqlString(filter);
     }
 
     private static String buildSqlString(Filter filter) {
-        if (filter.getOperator().equals(Operator.IN)) {
+        if (filter.getProperty().equals(ParticipantCohortStatusColumns.BIRTHDATE)
+          && filter.getOperator().equals(Operator.LIKE)) {
+            return "cast(" + fromName(filter.getProperty().name()).getDbName() + " as char)" +
+              " " + OperatorUtils.getSqlOperator(filter.getOperator()) +
+              " :" + filter.getProperty().toString() + "\n";
+        }
+        else if (filter.getOperator().equals(Operator.IN)) {
             return fromName(filter.getProperty().name()).getDbName() +
                 " " + OperatorUtils.getSqlOperator(filter.getOperator()) +
                 " (:" + filter.getProperty().toString() + ")\n";

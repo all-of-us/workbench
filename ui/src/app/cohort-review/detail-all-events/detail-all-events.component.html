@@ -6,8 +6,16 @@
     [clrDgField]="col.notField ? null : col.name"
     [clrDgSortBy]="sortByColumn(col.name)"
     [ngClass]="col.classNames"
+    [class.gray]="isSelected(col.name)"
     >
     {{ col.displayName }}
+    <clr-dg-filter [clrDgFilter]="clearFilter">
+      <app-clearbutton-in-memory-filter
+        #clearFilter
+        [property]="col.name"
+        (filterChanges)="isFiltered($event)">
+      </app-clearbutton-in-memory-filter>
+    </clr-dg-filter>
   </clr-dg-column>
 
   <clr-dg-row *clrDgItems="let datum of data"

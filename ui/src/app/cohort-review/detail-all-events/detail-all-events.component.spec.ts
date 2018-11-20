@@ -1,12 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {CohortReviewService, ParticipantDataListResponse} from 'generated';
+import {CohortReviewService} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 
+import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
 import {DetailAllEventsComponent} from './detail-all-events.component';
 
@@ -26,8 +28,9 @@ describe('DetailAllEventsComponent', () => {
     beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ DetailAllEventsComponent, DetailTabTableComponent ],
-      imports: [ClarityModule, NgxPopperModule],
+      declarations: [ ClearButtonInMemoryFilterComponent,
+        DetailAllEventsComponent, DetailTabTableComponent],
+      imports: [ClarityModule, NgxPopperModule, ReactiveFormsModule, FormsModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},

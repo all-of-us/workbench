@@ -16,4 +16,6 @@ public interface ParticipantCohortStatusDaoCustom {
     void saveParticipantCohortStatusesCustom(List<ParticipantCohortStatus> participantCohortStatuses);
 
     List<ParticipantCohortStatus> findAll(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
+
+    Long findCount(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest);
 }

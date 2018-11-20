@@ -998,6 +998,7 @@ public class CohortReviewControllerTest {
         .matchedParticipantCount(actualReview.getMatchedParticipantCount())
         .reviewSize(actualReview.getReviewSize())
         .reviewedCount(actualReview.getReviewedCount())
+        .queryResultSize(2L)
         .participantCohortStatuses(newParticipantCohortStatusList)
         .page(page)
         .pageSize(pageSize)

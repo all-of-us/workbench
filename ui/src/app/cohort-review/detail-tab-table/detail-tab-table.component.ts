@@ -1,8 +1,6 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridComparatorInterface} from '@clr/angular';
-import {fromJS} from 'immutable';
-import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
@@ -33,6 +31,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
 
   readonly pageSize = 25;
   numMentionsSort = new SortByColumn();
+  filtered = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -71,6 +70,19 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
         this.totalCount = resp.count;
         this.loading = false;
       });
+  }
+
+  isFiltered(event) {
+    if (event.action === 'add') {
+      this.filtered.push(event.column);
+    } else {
+      this.filtered =
+        this.filtered.filter(col => col !== event.column);
+    }
+  }
+
+  isSelected(column) {
+    return this.filtered.includes(column);
   }
 
   ngOnDestroy() {

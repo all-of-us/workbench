@@ -133,6 +133,11 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     }
 
     @Override
+    public Long findCount(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
+        return participantCohortStatusDao.findCount(cohortReviewId, filterList, pageRequest);
+    }
+
+    @Override
     public ParticipantCohortAnnotation saveParticipantCohortAnnotation(Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation) {
         CohortAnnotationDefinition cohortAnnotationDefinition =
                 findCohortAnnotationDefinition(participantCohortAnnotation.getCohortAnnotationDefinitionId());
