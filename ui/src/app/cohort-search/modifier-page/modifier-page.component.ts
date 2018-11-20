@@ -11,6 +11,7 @@ import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, ModifierType, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaType,
@@ -123,31 +124,30 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.subscription.add(this.ctype$.subscribe(ctype => {
       this.ctype = ctype;
       if (this.addEncounters) {
+        this.modifiers.push({
+          name: 'encounters',
+          label: 'During Visit Type',
+          inputType: null,
+          modType: ModifierType.ENCOUNTERS,
+          operators: [{
+            name: 'Any',
+            value: undefined,
+          }]
+        });
+        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
         this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
           .filter(response => !!response)
           .subscribe(response => {
             this.visitCounts = {};
-            const operators = [{
-              name: 'Any',
-              value: undefined,
-            }];
             response.items.forEach(option => {
               if (option.parentId === 0 && option.count > 0) {
-                operators.push({
+                this.modifiers[3].operators.push({
                   name: option.name,
                   value: option.conceptId.toString()
                 });
                 this.visitCounts[option.conceptId] = option.count;
               }
             });
-            this.modifiers.push({
-              name: 'encounters',
-              label: 'During Visit Type',
-              inputType: null,
-              modType: ModifierType.ENCOUNTERS,
-              operators: operators
-            });
-            this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
           });
       }
     }));
@@ -160,13 +160,22 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         const meta = this.modifiers.find(_mod => mod.get('name') === _mod.modType);
         if (meta) {
           if (meta.modType === ModifierType.ENCOUNTERS) {
-            const selected = meta.operators.find(
-              operator => operator.value && operator.value.toString() === mod.getIn(['operands', 0])
-            );
-            this.dropdownOption.selected[3] = selected.name;
-            this.form.get(meta.name).patchValue({
-              operator: mod.getIn(['operands', 0]),
-            }, {emitEvent: false});
+            let selected;
+            // make sure the encounters options are loaded before setting the value
+            Observable.interval(100)
+              .takeWhile((val, index) => !selected && index < 10)
+              .subscribe(i => {
+                selected = meta.operators.find(
+                  operator => operator.value
+                    && operator.value.toString() === mod.getIn(['operands', 0])
+                );
+                if (selected) {
+                  this.dropdownOption.selected[3] = selected.name;
+                  this.form.get(meta.name).patchValue({
+                    operator: mod.getIn(['operands', 0]),
+                  }, {emitEvent: false});
+                }
+              });
           } else {
             const selected = meta.operators.find(
               operator => operator.value === mod.get('operator')
