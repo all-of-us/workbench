@@ -133,9 +133,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
   summaryActive = false;
-  readonly stubs = [
-    'survey',
-  ];
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
@@ -160,6 +157,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     }
   };
 
+  // TODO add Surveys tab when we have data to show
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,

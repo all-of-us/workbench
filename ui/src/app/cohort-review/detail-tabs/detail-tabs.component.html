@@ -68,16 +68,4 @@
       </app-detail-tab-table>
     </clr-tab-content>
   </clr-tab>
-
-  <!-- Stubs: when the endpoint for each of these is available, make it a data
-       entry and put it in the above for loop.  OR if it is too custom, make it
-       a new component. -->
-  <clr-tab *ngFor="let stub of stubs">
-    <button clrTabLink id="detail-{{ stub }}-tab">
-      {{ stub.replace('-', ' ') | titlecase }}
-    </button>
-    <clr-tab-content id="detail-{{ stub }}-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
-  </clr-tab>
 </clr-tabs>
