@@ -296,4 +296,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.progressComplete[p] = true;
     this.progress = p;
   }
+
+  get name(): string {
+    return decodeURIComponent(this.notebookName);
+  }
 }

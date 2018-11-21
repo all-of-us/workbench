@@ -2,8 +2,8 @@
   <div *ngIf="progress !== Progress.Loaded">
     <div style="display: flex; flex-direction: column; margin-left: 3rem; width: 780px; padding-top: 1rem">
       <div style="display: flex; flex-direction: row; justify-content: space-between; flex-grow: 1;">
-        <h2 class="notebooks-header" *ngIf="!creating">Loading Notebook '{{notebookName}}'</h2>
-        <h2 class="notebooks-header" *ngIf="creating">Creating New Notebook '{{notebookName}}'</h2>
+        <h2 class="notebooks-header" *ngIf="!creating">Loading Notebook '{{name}}'</h2>
+        <h2 class="notebooks-header" *ngIf="creating">Creating New Notebook '{{name}}'</h2>
         <button id="cancelButton" class="btn btn-secondary" style="margin-right: 0;" (click)="navigateBack()">Cancel</button>
       </div>
       <div class="progress-container">
