@@ -147,16 +147,23 @@ export class ConceptHomepageComponent implements OnInit {
     this.searching = false;
   }
 
+  private rebuildSelectedConceptDomainMap() {
+    this.selectedConceptDomainMap = new Map<string, number>();
+    this.conceptDomainList.forEach((domain) => {
+      this.selectedConceptDomainMap.set(domain.name, 0);
+    });
+  }
+
   reset() {
     this.selectedConcept = [];
-    this.selectedConceptDomainMap = new Map<string, number>();
+    this.rebuildSelectedConceptDomainMap();
     this.conceptDomainCounts = [];
   }
 
   clearSearch() {
     this.searchTerm = '';
     this.currentSearchString = '';
-    this.selectedConceptDomainMap = new Map<string, number>();
+    this.rebuildSelectedConceptDomainMap();
     this.searchConcepts();
   }
 
@@ -171,6 +178,7 @@ export class ConceptHomepageComponent implements OnInit {
     if (this.conceptTable) {
       this.selectedConcept = [];
       this.conceptTable.selectedConcepts = [];
+      this.rebuildSelectedConceptDomainMap();
     }
     this.searching = true;
     this.searchLoading = true;
