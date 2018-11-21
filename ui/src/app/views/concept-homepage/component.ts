@@ -107,6 +107,11 @@ export class ConceptHomepageComponent implements OnInit {
         });
         this.selectedDomain = this.conceptDomainCounts[0];
       });
+      if (this.route.snapshot.queryParams['domain'] !== undefined) {
+        this.browseDomain(
+          this.conceptDomainList.find(
+            domainInfo => domainInfo.domain === this.route.snapshot.queryParams['domain']));
+      }
       this.loadingDomains = false;
     });
   }
