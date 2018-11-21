@@ -1,25 +1,22 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
-import {Subject} from 'rxjs/Subject';
-import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
 
 import {
-  Filter,
-  Operator,
   ParticipantCohortStatusColumns,
 } from 'generated';
+import {Subject} from 'rxjs/Subject';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'app-choice-filter',
-  templateUrl: './choice-filter.component.html',
+  selector: 'app-clearbutton-filter',
+  templateUrl: './clearbutton-filter.component.html',
 })
-export class ChoiceFilterComponent
-implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
+export class ClearButtonFilterComponent
+  implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   @Input() property: ParticipantCohortStatusColumns;
-  @Input() options: any[];
 
   selection = new FormControl();
   changes = new Subject<any>();
@@ -36,17 +33,14 @@ implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   }
 
   isActive(): boolean {
-    return (this.selection.value && this.selection.value.length > 0);
+    return this.selection.value;
   }
 
   accepts(person: Participant): boolean {
-    const attr = person[this.property];
-    return this.selection.value.includes(attr);
+    return this.selection.value === person[this.property];
   }
 
-  toFilters(): Filter[] {
-    const property = this.property;
-    const operator = Operator.IN;
-    return this.selection.value.map(value1 => (<Filter>{property, values: [value1], operator}));
+  get isDisabled(): boolean {
+    return !this.selection.value;
   }
 }

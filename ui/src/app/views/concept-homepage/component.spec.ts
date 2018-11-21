@@ -47,7 +47,8 @@ const activatedRouteStub  = {
         ...WorkspacesServiceStub.stubWorkspace(),
         accessLevel: WorkspaceAccessLevel.OWNER,
       }
-    }
+    },
+    queryParams: {}
   }
 };
 

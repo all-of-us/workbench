@@ -1,15 +1,16 @@
 import {Component, Input} from '@angular/core';
 
-import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
+import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
 import {Participant} from '../participant.model';
 
 import {CohortStatus, ParticipantCohortStatusColumns} from 'generated';
+import {WorkspaceAccessLevel} from '../../../generated';
 
 @Component({
   selector: 'app-status-filter',
   templateUrl: './status-filter.component.html',
 })
-export class StatusFilterComponent extends ChoiceFilterComponent {
+export class StatusFilterComponent extends MultiSelectFilterComponent {
   @Input() property = ParticipantCohortStatusColumns.STATUS;
   @Input() options = [
     CohortStatus.INCLUDED,
@@ -19,4 +20,5 @@ export class StatusFilterComponent extends ChoiceFilterComponent {
   ];
   CohortStatus = CohortStatus;
   formatStatus = Participant.formatStatusForText;
+
 }

@@ -140,7 +140,8 @@ const routes: Routes = [
                     title: 'Notebook',
                     breadcrumb: {
                         value: 'Param: Notebook Name'
-                    }
+                    },
+                    minimizeChrome: true
                   }
                 }
               ]

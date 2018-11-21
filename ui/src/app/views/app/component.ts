@@ -86,6 +86,7 @@ export class AppComponent implements OnInit {
     });
 
     this.setGTagManager();
+    this.setTCellAgent();
   }
 
   /**
@@ -131,4 +132,15 @@ export class AppComponent implements OnInit {
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }
+
+  private setTCellAgent(): void {
+    const s = this.doc.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://jsagent.tcell.io/tcellagent.min.js';
+    s.setAttribute('tcellappid', environment.tcellappid);
+    s.setAttribute('tcellapikey', environment.tcellapikey);
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(s);
+  }
+
 }
