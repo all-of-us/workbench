@@ -156,7 +156,6 @@ export class ConceptHomepageComponent implements OnInit {
   clearSearch() {
     this.searchTerm = '';
     this.currentSearchString = '';
-    this.selectedConcept = [];
     this.selectedConceptDomainMap = new Map<string, number>();
     this.searchConcepts();
   }
