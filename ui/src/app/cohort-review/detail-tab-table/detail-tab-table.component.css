@@ -9,9 +9,10 @@
 clr-dg-cell.cell {
   font-size: 0.5rem;
 }
+
 .datagrid-host {
-  max-height: 31rem;
-  min-height: 31rem;
+  max-height: calc(100vh - 260px);
+  min-height: 20rem;
   overflow-y: auto;
 }
 
