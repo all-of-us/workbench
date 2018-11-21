@@ -211,9 +211,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   setNotebookNames(): void {
     this.notebookName =
       decodeURIComponent(this.route.snapshot.params['nbName']);
-    this.notebookName = this.notebookName.replace('#', '\\#');
-    this.notebookName = this.notebookName.replace('$', '\\$');
-
     if (this.route.snapshot.params['nbName'].endsWith('.ipynb')) {
       this.fullNotebookName =
         decodeURIComponent(this.route.snapshot.params['nbName']);
