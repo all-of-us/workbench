@@ -45,7 +45,7 @@ export class ConceptHomepageComponent implements OnInit {
   searchTerm = '';
   standardConceptsOnly = true;
   searching = false;
-  currentSearchString: string;
+  currentSearchString = '';
   searchLoading = false;
   selectedDomain: DomainCount = {
     name: '',
@@ -127,7 +127,12 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchButton() {
-    if (this.searchTerm.trim().length < 3) {
+    const searchTermLength = this.searchTerm.trim().length;
+    if (searchTermLength === 0) {
+      this.clearSearch();
+      return;
+    }
+    if (searchTermLength < 3) {
       this.showSearchError = true;
       return;
     }
