@@ -17,11 +17,11 @@
     "name": "All of Us Dataset v1",
     "dataAccessLevel": 1,
     "bigqueryProject": "aou-res-curation-prod",
-    "bigqueryDataset": "TODO: should match the dataset used to generate the public counts",
-    "creationTime": "TODO: from curation team?",
+    "bigqueryDataset": "deid_output_20181116_v2",
+    "creationTime": "2018-11-13 15:09:27Z",
     "releaseNumber": 1,
-    "numParticipants": TODO,
-    "cdrDbName": "TODO: From Jon/Brian/Srushti",
-    "publicDbName": "TODO: From Srushti"
+    "numParticipants": 63174,
+    "cdrDbName": "cdr20181120",
+    "publicDbName": "public20181120"
   }
 ]
