@@ -311,7 +311,7 @@ export class ConceptHomepageComponent implements OnInit {
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
       const filterConceptsCount = concepts
-          .filter(concept => {
+        .filter(concept => {
           return concept.domainId.toLowerCase() ===
             this.selectedDomain.domain.toString().toLowerCase();
           })
