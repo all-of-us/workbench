@@ -5,8 +5,7 @@ import {NgModule} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import { ChartModule } from 'angular2-highcharts';
-import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
+import {ChartModule} from 'angular2-highcharts';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 
@@ -53,7 +52,7 @@ import {TablePage} from './table-page/table-page';
     ClarityModule,
     NgxChartsModule,
     NgxPopperModule,
-    ChartModule,
+    ChartModule.forRoot(require('highcharts')),
     // Ours
     CohortCommonModule,
 
@@ -90,12 +89,7 @@ import {TablePage} from './table-page/table-page';
     ParticipantsChartsComponent
 
   ],
-  providers: [ReviewStateService,
-    {
-      provide: HighchartsStatic,
-      useValue: highCharts
-    },
-  ]
+  providers: [ReviewStateService]
 })
 export class CohortReviewModule {
 
