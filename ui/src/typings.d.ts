@@ -11,5 +11,3 @@ other source files but are globally available.
 */
 
 declare module "dom-to-image";
-
-declare var ResizeObserver: any;
