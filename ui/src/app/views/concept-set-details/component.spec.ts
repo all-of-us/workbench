@@ -7,6 +7,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import { HighlightSearchComponent } from 'app/highlight-search/highlight-search.component';
 import {EditComponent} from 'app/icons/edit/component';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetDetailsComponent} from 'app/views/concept-set-details/component';
@@ -14,8 +15,6 @@ import {ConceptTableComponent} from 'app/views/concept-table/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-
-import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
 
 import {
   ConceptSet,
@@ -73,7 +72,7 @@ describe('ConceptSetDetailsComponent', () => {
         ConceptTableComponent,
         ConfirmDeleteModalComponent,
         EditComponent,
-        HighlightSearchPipe,
+        HighlightSearchComponent,
         SlidingFabComponent,
         TopBoxComponent,
       ],

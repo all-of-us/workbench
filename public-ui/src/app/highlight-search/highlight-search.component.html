@@ -1,0 +1,14 @@
+<span *ngIf="isSource"><b> Source </b></span>
+<span *ngIf="isStandard"><b> Standard </b></span>
+<span *ngIf="indNum">{{indNum}}. </span>
+<ng-container *ngIf="searchTerm; else noSearchTerm">
+  <span *ngFor="let word of words" [class.highlight]="reString.test(word.toLowerCase())">
+    {{word}}
+  </span>
+</ng-container>
+<ng-template #noSearchTerm>
+  <span *ngFor="let word of words">
+    {{word}}
+  </span>
+</ng-template>
+<span *ngIf="conceptId"> -- {{conceptId}}</span>
