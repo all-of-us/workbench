@@ -80,6 +80,8 @@ export class ConceptHomepageComponent implements OnInit {
   wsNamespace: string;
   wsId: string;
   selectConceptMap = new Map<number, ConceptInfo>();
+  showSearchError = false;
+
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -184,7 +186,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   searchConcepts() {
     if (this.conceptTable) {
-      this.selectedConcept = [];
+      this.selectConceptMap.clear();
       this.conceptTable.selectedConcepts = [];
       this.rebuildSelectedConceptDomainMap();
     }
@@ -271,6 +273,7 @@ export class ConceptHomepageComponent implements OnInit {
     }
     if (this.vocabularies.filter(vocabulary => vocabulary.selected).length === 0) {
       this.concepts = [];
+      this.selectedConceptDomainMap = new Map<string, number>();
       this.placeholderValue = 'No vocabularies selected. Please select at least one vocabulary.';
       return;
     }
@@ -296,6 +299,7 @@ export class ConceptHomepageComponent implements OnInit {
       .subscribe((response) => {
         this.searchLoading = false;
         this.filterConceptSelection(this.convertToConceptInfo(response.items));
+        this.rebuildSelectedConceptDomainMap();
         this.concepts = this.convertToConceptInfo(response.items);
         this.conceptTable.selectedConcepts = [];
       });
