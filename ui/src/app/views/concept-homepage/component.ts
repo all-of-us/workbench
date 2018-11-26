@@ -42,10 +42,10 @@ interface VocabularyCountSelected extends VocabularyCount {
 })
 export class ConceptHomepageComponent implements OnInit {
   loadingDomains = true;
-  searchTerm: string;
+  searchTerm = '';
   standardConceptsOnly = true;
   searching = false;
-  currentSearchString: string;
+  currentSearchString = '';
   searchLoading = false;
   selectedDomain: DomainCount = {
     name: '',
@@ -53,6 +53,7 @@ export class ConceptHomepageComponent implements OnInit {
     conceptCount: 0
   };
   selectedConcept: Concept[] = [];
+  showSearchError = false;
 
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
@@ -131,17 +132,46 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchButton() {
+    const searchTermLength = this.searchTerm.trim().length;
+    if (searchTermLength === 0) {
+      this.clearSearch();
+      return;
+    }
+    if (searchTermLength < 3) {
+      this.showSearchError = true;
+      return;
+    }
+    this.showSearchError = false;
     this.currentSearchString = this.searchTerm;
     this.reset();
     this.searchConcepts();
   }
 
+  returnToConcepts() {
+    this.clearSearch();
+    this.searching = false;
+  }
+
+  private rebuildSelectedConceptDomainMap() {
+    this.selectedConceptDomainMap = new Map<string, number>();
+    this.conceptDomainList.forEach((domain) => {
+      this.selectedConceptDomainMap.set(domain.name, 0);
+    });
+  }
+
   reset() {
     this.selectedConcept = [];
-    this.selectedConceptDomainMap = new Map<string, number>();
+    this.rebuildSelectedConceptDomainMap();
     this.conceptDomainCounts = [];
-
   }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.currentSearchString = '';
+    this.rebuildSelectedConceptDomainMap();
+    this.searchConcepts();
+  }
+
   browseDomain(domain: DomainInfo) {
     this.currentSearchString = '';
     this.selectedDomain =
@@ -151,7 +181,9 @@ export class ConceptHomepageComponent implements OnInit {
 
   searchConcepts() {
     if (this.conceptTable) {
+      this.selectedConcept = [];
       this.conceptTable.selectedConcepts = [];
+      this.rebuildSelectedConceptDomainMap();
     }
     this.searching = true;
     this.searchLoading = true;
@@ -195,13 +227,13 @@ export class ConceptHomepageComponent implements OnInit {
               this.conceptDomainCounts.find(domainCount => domainCount.domain === request.domain);
             this.setConceptsAndVocabularies();
           }
-      });
+        });
     });
   }
 
   setConceptsAndVocabularies() {
     const cacheItem = this.conceptsCache.find(
-        conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
+      conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
@@ -260,11 +292,11 @@ export class ConceptHomepageComponent implements OnInit {
     const domainName = this.selectedDomain.domain;
     if (concepts && concepts.length > 0 ) {
       const filterConceptsCount = concepts
-          .filter(concept => {
+        .filter(concept => {
           return concept.domainId.toLowerCase() ===
-              this.selectedDomain.domain.toString().toLowerCase();
-          })
-          .length;
+            this.selectedDomain.domain.toString().toLowerCase();
+        })
+        .length;
       this.selectedConceptDomainMap[domainName] = filterConceptsCount;
     } else {
       this.selectedConceptDomainMap[domainName] = 0;
@@ -283,23 +315,25 @@ export class ConceptHomepageComponent implements OnInit {
   setConceptsSaveText() {
     const conceptsCount = this.selectedConceptDomainMap[this.selectedDomain.domain];
     this.conceptsSavedText = conceptsCount + ' ' + this.selectedDomain.name +
-        (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added ';
+      (conceptsCount > 1 ? ' concepts ' : ' concept ') + 'have been added ';
     setTimeout(() => {
       this.conceptsSavedText = '';
     }, 5000);
   }
 
   /* This is done because clr-datagrid has a bug which causes unselected entries to
-    appear as selected on refresh*/
+   appear as selected on refresh*/
   cloneCacheConcepts() {
     const cacheItem = this.conceptsCache.find(
-        conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
+      conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     const cloneConcepts = cacheItem.items.map(x => Object.assign({}, x));
     cacheItem.items = cloneConcepts;
   }
 
   get activeSelectedConceptCount(): number {
-    if (!this.selectedDomain || !this.selectedDomain.domain) {
+    if (!this.selectedDomain
+      || !this.selectedDomain.domain
+      || this.selectedConceptDomainMap.size === 0) {
       return 0;
     }
     return this.selectedConceptDomainMap[this.selectedDomain.domain];
