@@ -1,4 +1,3 @@
-import {NgRedux} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
@@ -42,7 +41,6 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
     const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))

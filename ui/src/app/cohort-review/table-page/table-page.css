@@ -7,3 +7,10 @@
 .gray {
   background-color: #E2E2EA;
 }
+
+.review-name {
+  font-size: 20px;
+  font-weight: 300;
+  color: #4a4a4a;
+  margin-bottom: 1rem;
+}
