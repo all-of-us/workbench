@@ -62,7 +62,8 @@ public class ParticipantCounter {
       ")\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
-    "group by name, conceptId\n" +
+    "and standard_concept_id != 0\n" +
+      "group by name, conceptId\n" +
       "order by count desc, name asc\n" +
       "limit ${limit}\n";
 
