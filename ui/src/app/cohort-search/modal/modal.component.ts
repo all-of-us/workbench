@@ -69,6 +69,7 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.mode = 'tree';
         this.open = true;
       });
+
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     this.subscription.add(this.criteriaType$

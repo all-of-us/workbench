@@ -451,5 +451,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         } else {
             this.showCalculateContainer = false;
         }
+
     }
 }
