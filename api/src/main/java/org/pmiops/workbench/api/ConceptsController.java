@@ -186,7 +186,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
 
-    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery(), "domain");
+    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
     addDomainCounts(request, response, matchExp, standardConceptFilter);
