@@ -435,8 +435,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     getSearchResponse() {
+        if (this.isCancelTimerInitiated) {
+            clearTimeout(this.isCancelTimerInitiated);
+        }
+        this.isCancelTimerInitiated = setTimeout(() => {
             this.actions.requestPreview();
             this.showCalculateContainer = false;
+        }, 200);
     }
 
     getItems(flag) {

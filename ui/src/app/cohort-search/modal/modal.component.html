@@ -135,13 +135,11 @@
 
                    <ng-template  #demoButton>
                      <button type="button"
-                             [ngClass]="[!noSelection && disableFlag ? 'btn btn-primary' : 'btn-disable']"
-                            (click)="finish()"
-                            >
-                      <div>Finish2</div>
+                             [ngClass]="[!noSelection && disableFlag ? 'btn btn-primary' : 'btn btn-disable']"
+                            (click)="finish()">
+                      Finish
                     </button>
                    </ng-template>
-
                   </div>
                 </div>
               </ng-container>
