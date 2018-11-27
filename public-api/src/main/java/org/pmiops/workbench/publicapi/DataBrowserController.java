@@ -298,7 +298,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<DomainInfosAndSurveyModulesResponse> getDomainSearchResults(String query){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        String keyword = ConceptService.modifyMultipleMatchKeyword(query);
+        String keyword = ConceptService.modifyMultipleMatchKeyword(query, "domain");
         Long conceptId = null;
         try {
             conceptId = Long.parseLong(query);
@@ -308,7 +308,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // TODO: consider parallelizing these lookups
 
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, conceptId);
-        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword);
+        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(ConceptService.modifyMultipleMatchKeyword(query,"survey"));
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
             .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
