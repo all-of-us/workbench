@@ -1,0 +1,25 @@
+<div class="report-header">
+  <button
+    type="button"
+    class="btn btn-sm"
+    title="Go Back to the Participant Table"
+    [routerLink]="['../participants']">
+    <clr-icon shape="angle-double" dir="left"></clr-icon>
+    Participants
+  </button>
+  <h4>Cohort Query Report</h4>
+</div>
+<div class="report-content">
+  Cohort name: {{cohort.name}} <br>
+  Created by: {{cohort.creator}} <br>
+  Date created: {{ cohort.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}} <br><br>
+
+  Cohort definition:<br>
+  <div *ngFor="let group of definition.includes; let g = index;">
+    <div *ngFor="let item of group.items; let i = index">
+      <div *ngFor="let param of item.searchParameters; let p = index;">
+        <div>{{param.type}} | {{param.name}} | {{param.value}}</div>
+      </div>
+    </div>
+  </div>
+</div>
