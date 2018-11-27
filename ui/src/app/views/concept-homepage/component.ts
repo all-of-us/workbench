@@ -24,14 +24,12 @@ interface ConceptCacheSet {
 
   items: Array<ConceptInfo>;
 }
-
 interface VocabularyCountSelected extends VocabularyCount {
   selected: boolean;
 }
 interface ConceptInfo extends Concept {
   selected: boolean;
 }
-
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -43,6 +41,7 @@ interface ConceptInfo extends Concept {
     './component.css'],
   templateUrl: './component.html',
 })
+
 export class ConceptHomepageComponent implements OnInit {
   loadingDomains = true;
   searchTerm = '';
@@ -56,7 +55,6 @@ export class ConceptHomepageComponent implements OnInit {
     conceptCount: 0
   };
   showSearchError = false;
-
 
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
@@ -80,8 +78,6 @@ export class ConceptHomepageComponent implements OnInit {
   wsNamespace: string;
   wsId: string;
   selectConceptMap = new Map<number, ConceptInfo>();
-  showSearchError = false;
-
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -158,6 +154,7 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   private rebuildSelectedConceptDomainMap() {
+    this.selectConceptMap.clear();
     this.selectedConceptDomainMap = new Map<string, number>();
     this.conceptDomainList.forEach((domain) => {
       this.selectedConceptDomainMap.set(domain.name, 0);
@@ -166,7 +163,6 @@ export class ConceptHomepageComponent implements OnInit {
 
   reset() {
     this.rebuildSelectedConceptDomainMap();
-    this.selectConceptMap.clear();
     this.conceptDomainCounts = [];
   }
 
@@ -186,7 +182,6 @@ export class ConceptHomepageComponent implements OnInit {
 
   searchConcepts() {
     if (this.conceptTable) {
-      this.selectConceptMap.clear();
       this.conceptTable.selectedConcepts = [];
       this.rebuildSelectedConceptDomainMap();
     }
@@ -223,7 +218,6 @@ export class ConceptHomepageComponent implements OnInit {
         .subscribe((response) => {
           numCalls += 1;
           numCallsSubject.next(conceptDomain.domain);
-
           this.filterConceptSelection(this.convertToConceptInfo(response.items));
           conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
@@ -241,13 +235,6 @@ export class ConceptHomepageComponent implements OnInit {
   setConceptsAndVocabularies() {
     const cacheItem = this.conceptsCache.find(
       conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
-    this.concepts = cacheItem.items.map((concept) => {
-      return {
-        ...concept,
-        selected: false
-      };
-    });
-    this.filterConceptSelection(cacheItem.items);
     this.concepts = cacheItem.items;
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
@@ -258,14 +245,6 @@ export class ConceptHomepageComponent implements OnInit {
     });
   }
 
-  get getSearchDisabled() {
-    return this.searchLoading || this.loadingDomains || this.searchTermNotLongEnough;
-  }
-
-  get searchTermNotLongEnough() {
-    return this.searchTerm === undefined || this.searchTerm.length < 3;
-  }
-
   filterList() {
     if (this.blockMultipleSearchFromFilter) {
       this.blockMultipleSearchFromFilter = false;
@@ -273,7 +252,8 @@ export class ConceptHomepageComponent implements OnInit {
     }
     if (this.vocabularies.filter(vocabulary => vocabulary.selected).length === 0) {
       this.concepts = [];
-      this.selectedConceptDomainMap = new Map<string, number>();
+      this.conceptTable.selectedConcepts = [];
+      this.rebuildSelectedConceptDomainMap();
       this.placeholderValue = 'No vocabularies selected. Please select at least one vocabulary.';
       return;
     }
@@ -298,10 +278,10 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptsService.searchConcepts(this.wsNamespace, this.wsId, request)
       .subscribe((response) => {
         this.searchLoading = false;
-        this.filterConceptSelection(this.convertToConceptInfo(response.items));
-        this.rebuildSelectedConceptDomainMap();
         this.concepts = this.convertToConceptInfo(response.items);
-        this.conceptTable.selectedConcepts = [];
+        this.filterConceptSelection(this.concepts);
+        this.conceptTable.selectedConcepts = this.concepts.filter(v => {return v.selected});
+        this.selectedConceptDomainMap[this.selectedDomain.domain] = this.conceptTable.selectedConcepts.length;
       });
   }
 
@@ -313,22 +293,13 @@ export class ConceptHomepageComponent implements OnInit {
     });
 
     const domainName = this.selectedDomain.domain;
-    if (concepts && concepts.length > 0 ) {
-      const filterConceptsCount = concepts
-        .filter(concept => {
-          return concept.domainId.toLowerCase() ===
-            this.selectedDomain.domain.toString().toLowerCase();
-          })
-          .length;
-      this.selectedConceptDomainMap[domainName] = filterConceptsCount;
-    } else {
-      this.selectedConceptDomainMap[domainName] = 0;
-    }
+    this.selectedConceptDomainMap[domainName] = concepts.filter(concept => {
+      return concept.domainId.toLowerCase() === this.selectedDomain.domain.toString().toLowerCase();
+    }).length
   }
 
   afterConceptsSaved() {
     this.setConceptsSaveText();
-
     // Once concepts are saved clear the selection from concept homepage for active Domain
     this.conceptTable.selectedConcepts.length = 0;
     this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
@@ -376,12 +347,14 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   convertToConceptInfo(concepts: Concept[]): ConceptInfo[] {
-    return concepts.map((concept) => {
+    const conceptInfos = concepts.map((concept) => {
       return {
         ...concept,
         selected: false
       };
     });
+    this.filterConceptSelection(conceptInfos);
+    return conceptInfos;
   }
 
   filterConceptSelection(concepts: ConceptInfo[]) {
