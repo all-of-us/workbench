@@ -132,7 +132,6 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.subtype = subtype;
       })
     );
-
     this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
@@ -269,12 +268,13 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   getDemoParams(e) {
     if (e) {
-        this.demoItemsType = e.type;
-        this.demoParam = e.paramId;
+      this.demoItemsType = e.type;
+      this.demoParam = e.paramId;
     }
   }
+
    get disableFlag() {
-     return !this.preview.get('requesting') && this.preview.get('count') >= 0;
+       return !this.preview.get('requesting') && this.preview.get('count') >= 0;
    }
 }
 
