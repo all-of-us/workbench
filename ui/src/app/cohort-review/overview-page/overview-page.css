@@ -126,13 +126,6 @@
     color: #4a4a4a;
 }
 
-.selected-cohort {
-    font-size: 20px;
-    font-weight: 300;
-    color: #4a4a4a;
-    margin-bottom: 1rem;
-}
-
 .btn-outline {
     pointer-events: none;
 }

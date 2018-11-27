@@ -61,6 +61,7 @@ export class TablePage implements OnInit, OnDestroy {
   races: string[] = [];
   ethnicities: string[] = [];
   isFiltered = [];
+  cohortName: string;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -71,6 +72,7 @@ export class TablePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = false;
+    this.cohortName = this.route.snapshot.data.cohort.name;
     this.subscription = this.state.review$.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
