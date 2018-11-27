@@ -43,8 +43,8 @@
       <button type="button" class="btn btn-close" id="previous" (click)="previous()" [disabled]="selectedIndex <= 0">PREVIOUS</button>
     </div>
     <div class="right">
-      <button type="button" class="btn btn-close" id="close" (click)="close()">Close</button>
-      <button type="button" class="btn btn-primary" id="next" (click)="next()" [disabled]="selectedIndex >= (panelTitles.length-1)">Next</button>
+      <button type="button" class="btn btn-close" id="close" [class.invisible]="lastPanel" (click)="close()">Close</button>
+      <button type="button" class="btn btn-primary" id="next" (click)="next()" [innerHTML]="lastPanelText"></button>
     </div>
   </div>
 </div>

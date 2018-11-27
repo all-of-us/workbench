@@ -11,13 +11,13 @@
 
 .main {
   height: 79.23%;
-  width: 64.92%;
+  width: 80%;
   border-radius: 8px;
   background-color: #262262;
   box-shadow: 0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16);
   position: absolute;
-  left: 18%;
-  top: 5%;
+  left: 10%;
+  top: 1%;
   z-index: 1050;
 }
 
@@ -169,7 +169,7 @@
 .controls {
   width: 100%;
   position: absolute;
-  bottom: 5%;
+  bottom: 8%;
   display: flex;
   justify-content: space-between;
 }
@@ -200,6 +200,10 @@
 
 .resize-icon {
   cursor: pointer;
+}
+
+.invisible {
+  display: none;
 }
 
 :host::ng-deep .link, .link:visited {

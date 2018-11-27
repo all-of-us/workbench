@@ -43,6 +43,10 @@ export class QuickTourModalComponent implements OnInit {
   next(): void {
     this.completed = this.panelTitles.slice(0, this.selectedIndex);
     this.selectedIndex = this.selectedIndex + 1;
+    if (this.selectedIndex === this.panels.size) {
+      this.learning = false;
+      this.selectedIndex = this.selectedIndex - 1;
+    }
     this.selected = this.panelTitles[this.selectedIndex];
   }
 
@@ -62,6 +66,14 @@ export class QuickTourModalComponent implements OnInit {
 
   toggleImage(): void {
     this.fullImage = !this.fullImage;
+  }
+
+  get lastPanel(): boolean {
+    return this.panels.size === (this.selectedIndex + 1);
+  }
+
+  get lastPanelText(): string {
+    return (this.lastPanel ? 'Close' : 'Next');
   }
 
   setPanels(): void {
