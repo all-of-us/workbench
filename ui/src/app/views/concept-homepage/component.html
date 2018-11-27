@@ -106,5 +106,5 @@
     </div>
   </app-top-box>
 </ng-template>
-<app-concept-add-modal [selectedDomain]="selectedDomain.domain" [selectedConcepts]="filterConceptSelection(concepts)"
+<app-concept-add-modal [selectedDomain]="selectedDomain.domain" [selectedConcepts]="conceptsToAdd"
                        (saveComplete)="afterConceptsSaved()"></app-concept-add-modal>
