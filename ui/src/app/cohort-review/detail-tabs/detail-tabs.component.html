@@ -3,7 +3,7 @@
     <button clrTabLink id="detail-summary-tab"(click) = "getDomainsParticipantsData()">Summary</button>
     <ng-template [(clrIfActive)]="summaryActive">
       <clr-tab-content id="detail-summary-content" *clrIfActive>
-        <div class="container summary-container">
+        <div class="container-fluid summary-container">
           <div class="row">
             <div class="col-sm-4" *ngFor = "let charts of domainList">
               <div *ngIf="chartData[charts].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
@@ -19,7 +19,7 @@
 
   <!-- All Events: the "combined tabs" view -->
   <clr-tab>
-    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab" title="{{ allEvents.name | titlecase }}">
       {{ allEvents.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
@@ -54,7 +54,7 @@
 
   <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
-    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab" title="{{ tab.name | titlecase }}">
       {{ tab.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
