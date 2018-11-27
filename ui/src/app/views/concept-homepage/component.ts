@@ -78,6 +78,7 @@ export class ConceptHomepageComponent implements OnInit {
   wsNamespace: string;
   wsId: string;
   selectConceptMap = new Map<number, ConceptInfo>();
+  conceptsToAdd: Concept[];
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
@@ -183,6 +184,7 @@ export class ConceptHomepageComponent implements OnInit {
   searchConcepts() {
     if (this.conceptTable) {
       this.conceptTable.selectedConcepts = [];
+      this.conceptsToAdd = [];
       this.rebuildSelectedConceptDomainMap();
     }
     this.searching = true;
@@ -218,7 +220,6 @@ export class ConceptHomepageComponent implements OnInit {
         .subscribe((response) => {
           numCalls += 1;
           numCallsSubject.next(conceptDomain.domain);
-          this.filterConceptSelection(this.convertToConceptInfo(response.items));
           conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
@@ -236,6 +237,7 @@ export class ConceptHomepageComponent implements OnInit {
     const cacheItem = this.conceptsCache.find(
       conceptDomain => conceptDomain.domain === this.selectedDomain.domain);
     this.concepts = cacheItem.items;
+    this.conceptsToAdd = this.concepts.filter((c) => c.selected);
     this.vocabularies = [];
     this.vocabularies = cacheItem.vocabularyList.map((vocabulary) => {
       return {
@@ -252,6 +254,7 @@ export class ConceptHomepageComponent implements OnInit {
     }
     if (this.vocabularies.filter(vocabulary => vocabulary.selected).length === 0) {
       this.concepts = [];
+      this.conceptsToAdd = [];
       this.conceptTable.selectedConcepts = [];
       this.rebuildSelectedConceptDomainMap();
       this.placeholderValue = 'No vocabularies selected. Please select at least one vocabulary.';
@@ -280,8 +283,10 @@ export class ConceptHomepageComponent implements OnInit {
         this.searchLoading = false;
         this.concepts = this.convertToConceptInfo(response.items);
         this.filterConceptSelection(this.concepts);
-        this.conceptTable.selectedConcepts = this.concepts.filter(v => {return v.selected});
-        this.selectedConceptDomainMap[this.selectedDomain.domain] = this.conceptTable.selectedConcepts.length;
+        this.conceptTable.selectedConcepts = this.concepts.filter(v => v.selected);
+        this.conceptsToAdd = this.conceptTable.selectedConcepts;
+        this.selectedConceptDomainMap[this.selectedDomain.domain] =
+          this.conceptTable.selectedConcepts.length;
       });
   }
 
@@ -291,11 +296,11 @@ export class ConceptHomepageComponent implements OnInit {
     concepts.forEach((concept) => {
       this.selectConceptMap.set(concept.conceptId, concept);
     });
-
+    this.conceptsToAdd = concepts;
     const domainName = this.selectedDomain.domain;
     this.selectedConceptDomainMap[domainName] = concepts.filter(concept => {
       return concept.domainId.toLowerCase() === this.selectedDomain.domain.toString().toLowerCase();
-    }).length
+    }).length;
   }
 
   afterConceptsSaved() {
