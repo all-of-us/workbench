@@ -21,6 +21,10 @@
   z-index: 1050;
 }
 
+.main.full-image {
+  height: 50%;
+}
+
 .title {
   color: #FFFFFF;
   margin-top: 2%;
