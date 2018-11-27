@@ -1,0 +1,304 @@
+version: "3"
+services:
+  scripts:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+  db:
+    image: mysql:5.7
+    env_file:
+      - db/vars.env
+    volumes:
+      - db:/var/lib/mysql
+  public-api:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/public-api
+    volumes:
+      - ..:/w:cached
+      - gradle-public-api-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: gradle :appengineRun
+    env_file:
+      - db/vars.env
+    ports:
+      - 8083:8083
+      - 8084:8002
+  db-migration:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./run-migrations.sh main
+    env_file:
+      - db/vars.env
+  db-cdr-migration:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr
+    env_file:
+      - db-cdr/vars.env
+  db-public-migration:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public
+    env_file:
+      - db-cdr/vars.env
+  db-cdr-data-migration:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr --run-list data --context local
+    env_file:
+      - db-cdr/vars.env
+  db-public-data-migration:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+      command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public --run-list data --context local
+      env_file:
+        - db-cdr/vars.env
+  db-make-bq-denormalized-tables:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+        - ~/.config:/.config:cached
+        - ~/.gsutil:/.gsutil:cached
+
+      entrypoint: ["./generate-cdr/make-bq-denormalized-tables.sh"]
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+      env_file:
+        - db-cdr/vars.env
+  db-generate-public-cdr-counts:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/generate-public-cdr-counts.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
+  db-generate-cloudsql-db:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+        - ~/.config:/.config:cached
+        - ~/.gsutil:/.gsutil:cached
+
+      entrypoint: ["./generate-cdr/generate-cloudsql-db.sh"]
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+      env_file:
+        - db-cdr/vars.env
+  db-generate-local-cdr-db:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/generate-local-cdr-db.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
+  db-generate-local-count-dbs:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/generate-local-count-dbs.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
+  db-mysqldump-local-db:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/make-mysqldump.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
+  db-cloudsql-import:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/cloudsql-import.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db/vars.env
+  db-local-mysql-import:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/local-mysql-import.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db/vars.env
+  drop-cdr-db:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+    command: wait-for db:3306 -- ./run-drop-db.sh
+    env_file:
+      - db-cdr/vars.env
+  cloud-sql-proxy:
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+    command: |
+      cloud_sql_proxy
+        -instances all-of-us-workbench-test:us-central1:workbenchmaindb=tcp:0.0.0.0:3307
+        -credential_file=/w/sa-key.json
+  mysql-cloud:
+    depends_on:
+      - cloud-sql-proxy
+    image: mysql:5.7
+    user: ${UID}
+    working_dir: /w
+    volumes:
+      - .:/w:cached
+    entrypoint: mysql --host=cloud-sql-proxy --port=3307
+  update-config:
+    depends_on:
+      - db
+    build:
+     context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+    entrypoint: wait-for db:3306 -- ./gradlew :tools:loadConfig
+    env_file:
+      - db/vars.env
+  update-cdr-versions:
+      depends_on:
+        - db
+      build:
+       context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/api
+      volumes:
+        - ..:/w:cached
+        - gradle-cache:/.gradle
+      entrypoint: wait-for db:3306 -- ./gradlew :tools:updateCdrVersions
+      env_file:
+        - db/vars.env
+volumes:
+  db:
+  gradle-cache:
+  gradle-public-api-cache:
