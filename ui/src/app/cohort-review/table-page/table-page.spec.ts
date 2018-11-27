@@ -14,7 +14,8 @@ import {CohortBuilderService} from '../../../generated';
 import {CohortBuilderServiceStub} from '../../../testing/stubs/cohort-builder-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {CohortSearchActions} from '../../cohort-search/redux';
-import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
+import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filter.component';
+import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {ReviewStateService} from '../review-state.service';
@@ -65,7 +66,8 @@ describe('TablePage', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        ChoiceFilterComponent,
+        ClearButtonFilterComponent,
+        MultiSelectFilterComponent,
         TablePage,
         StatusFilterComponent,
         OverviewPage,

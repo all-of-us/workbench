@@ -210,10 +210,6 @@ export class NodeComponent implements OnInit, OnDestroy {
     } else {
       this.actions.fetchCriteria(_type, parentId);
     }
-    // Load options for Encounters modifier
-    if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
-      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
-    }
   }
 
   toggleExpanded() {

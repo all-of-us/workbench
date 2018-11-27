@@ -2,14 +2,21 @@
   <h3 class="modal-title">Add {{selectConceptList?.length}} Concepts to {{selectDomain|titlecase}} Concept Set</h3>
   <div class="modal-body">
     <label *ngIf="errorSaving" class="error">{{errorMsg}}</label>
-    <div *ngIf="conceptSets?.length > 0" class="form-section">
-      <div style="display:flex; flex-direction: row;">
-        <input id="select-add" type="radio" [(ngModel)]="existingSetSelected" [value]="true"
-               [checked]="selectChange()"/>
-        <label class="header">Choose existing set</label>
-        <input id="select-create" type="radio" style="margin-left: 0.7rem;" [(ngModel)]="existingSetSelected" [value]="false"
-               [checked]="selectChange()"/>
-        <label class="header create-header">Create new set</label>
+    <div  class="form-section">
+      <div style="display:flex; flex-direction: row; padding-bottom: 1.5rem;">
+        <clr-tooltip>
+          <span clrTooltipTrigger>
+            <input id="select-add" type="radio" [(ngModel)]="existingSetSelected" [value]="true" [disabled]="conceptSets?.length === 0"
+                   [checked]="selectChange()"/>
+            <label class="header" [class.disabled]="conceptSets?.length === 0">Choose existing set</label>
+          </span>
+          <clr-tooltip-content clrPosition="top-right" clrSize="lg" *ngIf="conceptSets?.length === 0">No Concept Sets in domain {{selectDomain|titlecase}}</clr-tooltip-content>
+        </clr-tooltip>
+        <span style="display: flex; align-items: center;">
+          <input id="select-create" type="radio" style="margin-left: 0.7rem;" [(ngModel)]="existingSetSelected" [value]="false"
+                 [checked]="selectChange()"/>
+          <label class="header create-header">Create new set</label>
+        </span>
       </div>
       <select *ngIf="existingSetSelected" class="concept-select" [(ngModel)]="selectedConceptSet">
         <option *ngFor="let conceptSet of conceptSets" [ngValue]="conceptSet">{{conceptSet.name}}</option>
@@ -17,7 +24,6 @@
     </div>
     <div class="form-section">
       <label *ngIf="errorNameReq" class="error">{{errorMsg}}</label>
-      <label class="header" style="padding-left: 0rem;" *ngIf="conceptSets?.length === 0">Create a new Concept Set</label>
       <input *ngIf="!existingSetSelected || conceptSets?.length === 0" id="new-name" type="text" class="inputName" placeholder="Name"
              [(ngModel)]="name">
       <textarea *ngIf="!existingSetSelected || conceptSets?.length === 0" name="description" class="description" placeholder="Add a Description"

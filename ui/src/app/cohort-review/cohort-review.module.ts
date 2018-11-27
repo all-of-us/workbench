@@ -15,15 +15,17 @@ import {CohortCommonModule} from '../cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
-import {ChoiceFilterComponent} from './choice-filter/choice-filter.component';
+import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
+import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
-// This is a temporary measure until we have specs and APIs for overview specific charts
 import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
+// This is a temporary measure until we have specs and APIs for overview specific charts
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
 import {DetailTabTableComponent} from './detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from './individual-participants-charts/individual-participants-charts';
+import {MultiSelectFilterComponent} from './multiselect-filter/multiselect-filter.component';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
@@ -73,8 +75,10 @@ import {TablePage} from './table-page/table-page';
     SetAnnotationModalComponent,
 
     /* Participant Table */
-    ChoiceFilterComponent,
+    ClearButtonFilterComponent,
+    MultiSelectFilterComponent,
     StatusFilterComponent,
+    ClearButtonInMemoryFilterComponent,
     IndividualParticipantsChartsComponent,
     /* Participant Detail */
     ParticipantStatusComponent,

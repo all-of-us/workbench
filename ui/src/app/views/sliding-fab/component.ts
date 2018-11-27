@@ -22,4 +22,11 @@ export class SlidingFabComponent {
   @Input('expanded') expanded = '';
   @Input('disable') disable = false;
   hovering = false;
+
+  attemptSubmit() {
+    if (this.disable) {
+      return;
+    }
+    this.submit.emit();
+  }
 }

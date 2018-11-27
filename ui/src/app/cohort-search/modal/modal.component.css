@@ -309,7 +309,7 @@ h5.selection-title {
 
 @media only screen and (min-width: 1500px) and  (min-height: 780px){
   .crit-modal-content {
-    width: calc(100vw - calc(19rem + 60px));
+    width: calc(100vw - calc(17rem + 60px));
     overflow-y: auto;
     height: auto;
   }

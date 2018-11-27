@@ -15,6 +15,7 @@ import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {AnnotationListComponent} from '../annotation-list/annotation-list.component';
+import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {DetailAllEventsComponent} from '../detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from '../detail-header/detail-header.component';
@@ -77,6 +78,7 @@ describe('DetailPage', () => {
       declarations: [
         AnnotationItemComponent,
         AnnotationListComponent,
+        ClearButtonInMemoryFilterComponent,
         CreateReviewPage,
         DetailAllEventsComponent,
         DetailHeaderComponent,

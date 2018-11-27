@@ -113,7 +113,9 @@
           <div class="col-xs-12 col-sm-12">
             <div class="box-title"> Question {{i + 1}}</div>
             <div class="box-sub-title question-display">
-              <div class="box-sub-title question question" innerHtml="{{ q.conceptName | highlightSearch : searchText.value}} -- {{q.conceptId}}"></div>
+              <div class="box-sub-title question question">
+                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId"></app-highlight-search>
+              </div>
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=bottom-left
@@ -142,13 +144,19 @@
           <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
             <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
               <div class="col-sm-6 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
-                <label class="answer-text" innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+                <label class="answer-text">
+                  <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                </label>
               </div>
               <ng-template #binnedSurveyQuestionDisplay>
                 <div class="col-sm-6 col-xs-12">
-                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel" innerHtml="{{a.stratum4 | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel">
+                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                  </label>
                   <ng-template #rangeLabel>
-                    <label class="answer-text" innerHtml="{{a.stratum4 + '-'  + (convertToNum(a.stratum4) + 10) | highlightSearch : searchText.value }} -- {{a.stratum3}}"> {{a.stratum4}} </label>
+                    <label class="answer-text">
+                      <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                    </label>
                   </ng-template>
                 </div>
               </ng-template>

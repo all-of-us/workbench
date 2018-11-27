@@ -7,14 +7,19 @@
   width: 20rem;
 }
 
+:host::ng-deep .modal-header {
+  padding-bottom: 0.5rem;
+}
+
 :host::ng-deep .modal-title {
   height: 19px;
-  width: 357px;
+  width: 400px;
   color: #262262;
   font-family: Montserrat, sans-serif;
   font-size: 16px;
   font-weight: 600;
   line-height: 19px;
+  padding-bottom: 0.5rem;
 }
 
 .header {
@@ -23,15 +28,15 @@
   color: #000000;
   font-size: 14px;
   font-family: Montserrat, sans-serif;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 19px;
   background-color: transparent;
-  padding-bottom: 1.8rem;
   padding-left: 0.5rem;
+  display: inline-block;
 }
 
-.create-header {
-  padding-bottom: 1.5rem;
+.header.disabled {
+  color: #C3C3C3;
 }
 
 .inputName, .concept-select {
@@ -55,7 +60,6 @@
 
 .description {
   height: 168px;
-  width: 406px;
   border: 1px solid #979797;
   border-radius: 5px;
   background-color: #FFFFFF;

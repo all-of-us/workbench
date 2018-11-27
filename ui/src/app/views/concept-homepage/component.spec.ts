@@ -6,15 +6,13 @@ import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {HighlightSearchComponent} from 'app/highlight-search/highlight-search.component';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 import {SlidingFabComponent} from 'app/views/sliding-fab/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
-
-import {HighlightSearchPipe} from 'app/utils/highlight-search.pipe';
-
 
 import {
   ConceptSetsService,
@@ -27,7 +25,7 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {simulateClick, simulateEvent, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 
 const activatedRouteStub  = {
@@ -47,7 +45,8 @@ const activatedRouteStub  = {
         ...WorkspacesServiceStub.stubWorkspace(),
         accessLevel: WorkspaceAccessLevel.OWNER,
       }
-    }
+    },
+    queryParams: {}
   }
 };
 
@@ -76,7 +75,7 @@ describe('ConceptHomepageComponent', () => {
         ConceptAddModalComponent,
         ConceptHomepageComponent,
         ConceptTableComponent,
-        HighlightSearchPipe,
+        HighlightSearchComponent,
         SlidingFabComponent,
         ToolTipComponent,
         TopBoxComponent,
@@ -107,8 +106,10 @@ describe('ConceptHomepageComponent', () => {
 
     const searchTerm = 'test';
 
-    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    simulateInput(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateEvent(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
@@ -151,8 +152,10 @@ describe('ConceptHomepageComponent', () => {
     simulateClick(fixture, fixture.debugElement
       .query(By.css('.standard-concepts-checkbox')).children[0]);
 
-    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    simulateInput(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateEvent(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
@@ -181,8 +184,10 @@ describe('ConceptHomepageComponent', () => {
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement
         .query(By.css('.standard-concepts-checkbox')).children[0]);
-    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    simulateInput(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateEvent(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
     const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
     const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
@@ -201,8 +206,10 @@ describe('ConceptHomepageComponent', () => {
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement
         .query(By.css('.standard-concepts-checkbox')).children[0]);
-    simulateInput(fixture, fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-search')));
+    simulateInput(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
+    simulateEvent(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
     const button = fixture.debugElement.query(By.css('.sliding-button'))
        .query(By.css('.text'));
@@ -225,7 +232,8 @@ describe('ConceptHomepageComponent', () => {
 
     simulateClick(fixture, de.query(By.css('.standard-concepts-checkbox')).children[0]);
     simulateInput(fixture, de.query(By.css('#concept-search-input')), 'test');
-    simulateClick(fixture, de.query(By.css('.btn-search')));
+    simulateEvent(fixture,
+      fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
     const dataRow = de.queryAll(By.css('.concept-row'));
     const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]

@@ -19,7 +19,6 @@ import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {WINDOW_REF} from './utils';
-import {HighlightSearchPipe} from './utils/highlight-search.pipe';
 
 import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
@@ -80,6 +79,7 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -146,7 +146,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConfirmDeleteModalComponent,
     EditModalComponent,
     ErrorHandlerComponent,
-    HighlightSearchPipe,
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
@@ -172,7 +171,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
-    HomepageComponent
+    HomepageComponent,
+    HighlightSearchComponent,
   ],
   providers: [
     {
