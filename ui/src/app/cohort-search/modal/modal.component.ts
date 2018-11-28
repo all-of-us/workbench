@@ -11,7 +11,7 @@ import {
   activeCriteriaType,
   activeItem,
   activeParameterList,
-  CohortSearchActions, CohortSearchState,
+  CohortSearchActions,
   nodeAttributes, previewStatus,
   subtreeSelected,
   wizardOpen,
