@@ -22,15 +22,14 @@ export class QueryReportComponent implements OnInit {
   }
 
   mapDefinition() {
-    this.definition = [];
     const definition = JSON.parse(this.cohort.criteria);
-    ['includes', 'excludes'].forEach(role => {
+    this.definition = ['includes', 'excludes'].map(role => {
       if (definition[role].length) {
         const roleObj = {role, groups: []};
         definition[role].forEach(group => {
           roleObj.groups.push(this.mapGroup(group));
         });
-        this.definition.push(roleObj);
+        return roleObj;
       }
     });
   }

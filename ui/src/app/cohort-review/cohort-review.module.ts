@@ -30,6 +30,7 @@ import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
+import {QueryReportComponent} from './query-report/query-report.component';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -39,7 +40,6 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
-import { QueryReportComponent } from './query-report/query-report.component';
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -65,6 +65,7 @@ import { QueryReportComponent } from './query-report/query-report.component';
     DetailPage,
     OverviewPage,
     PageLayout,
+    QueryReportComponent,
     TablePage,
 
     /* Annotations */
@@ -89,8 +90,6 @@ import { QueryReportComponent } from './query-report/query-report.component';
     DetailTabTableComponent,
     DetailAllEventsComponent,
     ParticipantsChartsComponent,
-    QueryReportComponent
-
   ],
   providers: [ReviewStateService,
     {
