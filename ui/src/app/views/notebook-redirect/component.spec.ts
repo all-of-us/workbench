@@ -386,10 +386,8 @@ describe('NotebookRedirectComponent', () => {
     updateAndTick(fixture);
     fixture.detectChanges();
     tick(10000);
-    // Leo Url needs to be decoded else it will download file with special characters(eg #)
-    // than display in iframe
     expect(fixture.debugElement.query(By.css('#leo-iframe'))
-      .properties['src']).toMatch('1%2B1.ipynb');
+      .properties['src']).toMatch(/1\+1.ipynb/);
   }));
 
 });
