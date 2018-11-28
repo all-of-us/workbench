@@ -357,8 +357,8 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   private filterConceptSelection(concepts: ConceptInfo[]) {
+    const conceptSet = new Set(this.conceptsToAdd.map(c => c.conceptId));
     concepts.forEach((concept) => {
-      const conceptSet = new Set(this.conceptsToAdd.map(c => c.conceptId));
       concept.selected = conceptSet.has(concept.conceptId);
     });
   }
