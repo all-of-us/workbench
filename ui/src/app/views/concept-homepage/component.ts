@@ -77,7 +77,7 @@ export class ConceptHomepageComponent implements OnInit {
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
-  conceptsToAdd: Concept[];
+  conceptsToAdd: Concept[] = [];
 
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
