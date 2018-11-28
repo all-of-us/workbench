@@ -1,4 +1,4 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
@@ -12,7 +12,8 @@ import {
   activeItem,
   activeParameterList,
   CohortSearchActions,
-  nodeAttributes, previewStatus,
+  nodeAttributes,
+  previewStatus,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
