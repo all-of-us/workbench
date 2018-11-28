@@ -40,15 +40,15 @@
   </div>
   <div class="controls">
     <div class="left">
-      <button type="button" class="btn btn-close" id="previous" (click)="previous()" [disabled]="selectedIndex <= 0">PREVIOUS</button>
+      <button type="button" class="btn btn-close" id="previous" (click)="previous()" [class.invisible]="selectedIndex === 0">PREVIOUS</button>
     </div>
     <div class="right">
-      <button type="button" class="btn btn-close" id="close" (click)="close()">Close</button>
-      <button type="button" class="btn btn-primary" id="next" (click)="next()" [disabled]="selectedIndex >= (panelTitles.length-1)">Next</button>
+      <button type="button" class="btn btn-close" id="close" [class.invisible]="lastPanel" (click)="close()">Close</button>
+      <button type="button" class="btn btn-primary" id="next" (click)="next()" [innerHTML]="lastPanelButtonText"></button>
     </div>
   </div>
 </div>
-<div class="main" *ngIf="learning && fullImage">
+<div class="main full-image" *ngIf="learning && fullImage">
   <div class="full-image-wrapper">
     <img [src]="panelImages.get(selected)" style="height: 100%; width: 100%">
     <app-shrink-icon class="resize-icon" (click)="toggleImage()" style="position: absolute; right: 5%; bottom: 5%"></app-shrink-icon>

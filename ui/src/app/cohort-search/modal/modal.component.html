@@ -126,12 +126,20 @@
                              class="btn btn-primary">
                       Back
                     </button>
-                    <button type="button"
+                    <button type="button"  *ngIf="ctype !== treeType[treeType.DEMO]; else demoButton"
                             [disabled]="noSelection"
                             (click)="finish()"
                             class="btn btn-primary">
+                     <div>Finish</div>
+                    </button>
+
+                   <ng-template  #demoButton>
+                     <button type="button"
+                             [ngClass]="[!noSelection && disableFlag ? 'btn btn-primary' : 'btn btn-disable']"
+                            (click)="finish()">
                       Finish
                     </button>
+                   </ng-template>
                   </div>
                 </div>
               </ng-container>
