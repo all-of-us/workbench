@@ -358,8 +358,8 @@ export class ConceptHomepageComponent implements OnInit {
 
   private filterConceptSelection(concepts: ConceptInfo[]) {
     concepts.forEach((concept) => {
-      concept.selected = this.conceptsToAdd.map(c => c.conceptId)
-        .indexOf(concept.conceptId) > -1;
+      const conceptSet = new Set(this.conceptsToAdd.map(c => c.conceptId));
+      concept.selected = conceptSet.has(concept.conceptId);
     });
   }
 }
