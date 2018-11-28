@@ -58,7 +58,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
-      this.surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
+      this.surveyPdfUrl = '/assets/surveys/' + survey.name.replace(' ', '_') + '.pdf';
     }
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
