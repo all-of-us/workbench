@@ -186,7 +186,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       && (this.node.get('selectable')
       || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
       && this.node.get('group')
-      && this.node.get('code') !== null ));
+      && this.node.get('code') !== null )
+      || this.node.get('type') === TreeType[TreeType.CPT]);
   }
 
   get isPM() {
