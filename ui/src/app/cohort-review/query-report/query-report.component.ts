@@ -1,6 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
+import {TreeSubType, TreeType} from 'generated';
+import {subtypeToTitle, typeToTitle} from '../../cohort-search/utils';
+
 @Component({
   selector: 'app-query-report',
   templateUrl: './query-report.component.html',
@@ -36,8 +39,19 @@ export class QueryReportComponent implements OnInit {
 
   mapGroup(group: any) {
     group.items.forEach(item => {
-
+      switch (item.type) {
+        case TreeType.PM:
+          this.mapPMParams(item.searchParameters);
+          break;
+      }
     });
   }
 
+  mapPMParams(params: Array<any>) {
+    params.forEach(param => {
+      // process params
+    });
+  }
+
+//  TODO create search param mapping functions for each for each domain/type with different format
 }
