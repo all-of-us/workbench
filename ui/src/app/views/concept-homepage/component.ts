@@ -77,7 +77,6 @@ export class ConceptHomepageComponent implements OnInit {
   vocabularies: Array<VocabularyCountSelected> = [];
   wsNamespace: string;
   wsId: string;
-  selectConceptMap = new Map<number, ConceptInfo>();
   conceptsToAdd: Concept[];
 
   // For some reason clr checkboxes trigger click events twice on click. This
@@ -155,7 +154,6 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   private rebuildSelectedConceptDomainMap() {
-    this.selectConceptMap.clear();
     this.selectedConceptDomainMap = new Map<string, number>();
     this.conceptDomainList.forEach((domain) => {
       this.selectedConceptDomainMap.set(domain.name, 0);
@@ -292,10 +290,6 @@ export class ConceptHomepageComponent implements OnInit {
 
   selectConcept(concepts: ConceptInfo[]) {
     // TODO Check why clr-datagrid is sending empty and duplicate values
-    this.selectConceptMap.clear();
-    concepts.forEach((concept) => {
-      this.selectConceptMap.set(concept.conceptId, concept);
-    });
     this.conceptsToAdd = concepts;
     const domainName = this.selectedDomain.domain;
     this.selectedConceptDomainMap[domainName] = concepts.filter(concept => {
@@ -362,9 +356,10 @@ export class ConceptHomepageComponent implements OnInit {
     return conceptInfos;
   }
 
-  filterConceptSelection(concepts: ConceptInfo[]) {
+  private filterConceptSelection(concepts: ConceptInfo[]) {
     concepts.forEach((concept) => {
-      concept.selected = this.selectConceptMap.has(concept.conceptId);
+      concept.selected = this.conceptsToAdd.map(c => c.conceptId)
+        .indexOf(concept.conceptId) > -1;
     });
   }
 }

@@ -19,7 +19,6 @@ export class ConceptTableComponent {
   selectedConcepts: Array<any> = [];
 
   onSelectedChanged($event) {
-    $event = $event.filter((el, i, a) => i === a.indexOf(el));
     this.getSelectedConcepts.emit($event);
   }
 }
