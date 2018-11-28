@@ -13,6 +13,7 @@ import {
   activeParameterList,
   CohortSearchActions,
   nodeAttributes,
+  previewStatus,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
@@ -36,6 +37,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(previewStatus) preview$;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -56,6 +58,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   count = 0;
   originalNode: any;
   disableCursor = false;
+  preview = Map();
+
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -66,6 +70,8 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.mode = 'tree';
         this.open = true;
       });
+
+    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
@@ -264,9 +270,13 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   getDemoParams(e) {
     if (e) {
-        this.demoItemsType = e.type;
-        this.demoParam = e.paramId;
+      this.demoItemsType = e.type;
+      this.demoParam = e.paramId;
     }
   }
+
+   get disableFlag() {
+       return !this.preview.get('requesting') && this.preview.get('count') >= 0;
+   }
 }
 

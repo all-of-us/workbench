@@ -42,6 +42,10 @@ export class QuickTourModalComponent implements OnInit {
 
   next(): void {
     this.completed = this.panelTitles.slice(0, this.selectedIndex);
+    if (this.lastPanel) {
+      this.learning = false;
+      return;
+    }
     this.selectedIndex = this.selectedIndex + 1;
     this.selected = this.panelTitles[this.selectedIndex];
   }
@@ -53,15 +57,19 @@ export class QuickTourModalComponent implements OnInit {
   }
 
   selectedTitle(title: string) {
-    if (title === 'Intro') {
-      return 'Introduction';
-    } else {
-      return title;
-    }
+    return ((title === 'Intro') ? 'Introduction' : title);
   }
 
   toggleImage(): void {
     this.fullImage = !this.fullImage;
+  }
+
+  get lastPanel(): boolean {
+    return this.panels.size === (this.selectedIndex + 1);
+  }
+
+  get lastPanelButtonText(): string {
+    return (this.lastPanel ? 'Close' : 'Next');
   }
 
   setPanels(): void {
