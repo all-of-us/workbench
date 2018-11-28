@@ -86,7 +86,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     noSelection = true;
     isCancelTimerInitiated: any = false;
     showCalculateContainer = false;
-    testFlag: any;
     count: any;
     constructor(
         private route: ActivatedRoute,
@@ -441,10 +440,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         }
         this.isCancelTimerInitiated = setTimeout(() => {
             this.actions.requestPreview();
-            this.testFlag = this.preview.get('count');
             this.showCalculateContainer = false;
-        }, 3000);
-
+        }, 200);
     }
 
     getItems(flag) {
