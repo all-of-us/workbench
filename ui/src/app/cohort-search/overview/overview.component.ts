@@ -1,10 +1,12 @@
+import {select} from '@angular-redux/store';
 import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions} from '../redux';
+import {CohortSearchActions, searchRequestError} from '../redux';
 
 import {Cohort, CohortsService, Workspace} from 'generated';
 
@@ -24,16 +26,19 @@ export class OverviewComponent {
   @Input() chartData$: Observable<List<any>>;
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
+  @select(searchRequestError) error$: Observable<boolean>;
 
   cohortForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl()
   });
 
+  error: boolean;
   stackChart = false;
   showGenderChart = true;
   showComboChart = true;
   showConflictError = false;
+  subscription: Subscription;
 
   constructor(
     private actions: CohortSearchActions,

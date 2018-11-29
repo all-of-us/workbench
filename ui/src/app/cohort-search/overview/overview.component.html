@@ -8,6 +8,14 @@
       <span class="count-header" *ngIf="!(isRequesting$ | async)">
         {{ total$ | async | number }}
       </span>
+      <span class="count-header" *ngIf="(error$ | async)">
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="error-standard" size="18"></clr-icon>
+          <clr-tooltip-content clrPosition="bottom" clrSize="md"  *clrIfOpen>
+            <span>An error occured during the request. Please try again.</span>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </span>
     </h2>
     <div>
       <button
