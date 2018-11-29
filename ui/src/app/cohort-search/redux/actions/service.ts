@@ -487,9 +487,7 @@ export class CohortSearchActions {
 
   mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
-      // parameterId: null,
-      parameterId: TreeType[TreeType.ICD9] === immParam.get('type')
-        ? null : immParam.get('parameterId'),
+      parameterId: immParam.get('parameterId'),
       name: stripHtml(immParam.get('name', '')),
       value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
           ? immParam.get('name') : immParam.get('code'),
