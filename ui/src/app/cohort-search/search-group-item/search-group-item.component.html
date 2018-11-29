@@ -24,8 +24,16 @@
       Loading...
     </span>
     <small *ngIf="!isRequesting" class="code-text">
-      {{ item.get('count', 0) | number }}
+      {{ item.get('count') | number }}
     </small>
+    <span *ngIf="error">
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="error-standard" size="16"></clr-icon>
+        <clr-tooltip-content clrPosition="bottom" clrSize="md"  *clrIfOpen>
+          <span>A problem occurred and we were not able to retrieve the requested data</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </span>
   </div>
 
   <div>

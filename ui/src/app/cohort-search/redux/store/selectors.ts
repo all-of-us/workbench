@@ -38,6 +38,12 @@ export const getSearchRequest = searchRequestId => state =>
 export const searchRequestError = (state): boolean =>
   state.getIn(['entities', 'searchRequests', SR_ID, 'error'], false);
 
+export const groupError = (groupId) => (state): boolean =>
+  state.getIn(['entities', 'groups', groupId, 'error'], false);
+
+export const itemError = (itemId) => (state): boolean =>
+  state.getIn(['entities', 'items', itemId, 'error'], false);
+
 export const countFor = (kind, id) => state =>
   state.getIn(['entities', kind, id, 'count'], null);
 
