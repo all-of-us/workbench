@@ -309,4 +309,12 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     const control = index === 0 ? 'valueA' : 'valueB';
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
   }
+
+  numberValidation(event) {
+    if(!((event.keyCode > 95 && event.keyCode < 106)
+      || (event.keyCode > 47 && event.keyCode < 58)
+      || event.keyCode == 8)) {
+      return false;
+    }
+  }
 }
