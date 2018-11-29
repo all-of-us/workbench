@@ -38,18 +38,25 @@ export class QueryReportComponent implements OnInit {
   }
 
   mapGroup(group: any) {
-    group.items.forEach(item => {
+    return group.items.map(item => {
       switch (item.type) {
         case TreeType.PM:
-          this.mapPMParams(item.searchParameters);
-          break;
+          return this.mapPMParams(item.searchParameters);
+        default:
+          return this.mapParams(item.type, item.searchParameters);
       }
     });
   }
 
   mapPMParams(params: Array<any>) {
-    params.forEach(param => {
-      // process params
+    return params.map(param => {
+      return typeToTitle(param.type) + ' | ' + param.name;
+    });
+  }
+
+  mapParams(_type: string, params: Array<any>) {
+    return params.map(param => {
+      return typeToTitle(_type) + ' | ' + param.type + ' | ' + param.value;
     });
   }
 
