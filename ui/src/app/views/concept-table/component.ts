@@ -10,7 +10,7 @@ import {Domain} from 'generated';
 })
 export class ConceptTableComponent {
   @Input() concepts: Object[];
-  @Output() getSelectedConcepts = new EventEmitter<any>();
+  @Output() getSelectedConcepts = new EventEmitter<any>(true);
   @Input() loading = false;
   @Input() searchTerm = '';
   @Input() placeholderValue = '';

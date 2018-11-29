@@ -19,7 +19,7 @@
 
   <!-- All Events: the "combined tabs" view -->
   <clr-tab>
-    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab" title="{{ allEvents.name | titlecase }}">
       {{ allEvents.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
@@ -54,7 +54,7 @@
 
   <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
-    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab" title="{{ tab.name | titlecase }}">
       {{ tab.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>

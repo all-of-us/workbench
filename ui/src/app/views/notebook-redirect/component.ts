@@ -190,8 +190,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
         this.leoUrl = this.sanitizer
-          .bypassSecurityTrustResourceUrl(
-              decodeURIComponent(this.notebookUrl(this.cluster, nbName)));
+          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
         // Angular 2 only provides a load hook for iFrames
         // the load hook triggers on url definition, not on completion of url load
         // so instead just giving it a sec to "redirect"
@@ -220,7 +219,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         decodeURIComponent(this.route.snapshot.params['nbName']);
       this.fullNotebookName = this.notebookName + '.ipynb';
     }
-    this.notebookName = encodeURIComponent(this.notebookName);
   }
 
   private clusterRetryDelay(errs: Observable<Error>) {
@@ -261,7 +259,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           'type': 'file',
           'format': 'text',
           'content': JSON.stringify(fileContent)
-        }).map(resp => `${localDir}/` + this.notebookName + '.ipynb');
+        }).map(resp => `${localDir}/${resp.name}`);
     });
   }
 
@@ -292,9 +290,5 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   private incrementProgress(p: Progress): void {
     this.progressComplete[p] = true;
     this.progress = p;
-  }
-
-  get name(): string {
-    return decodeURIComponent(this.notebookName);
   }
 }
