@@ -195,11 +195,16 @@
 }
 
 .btn.btn-close:hover {
-  background-color: #004a70;
+  background-color: rgba(255,255,255,0.3);
 }
 
 .btn.btn-primary {
+  border: 0px;
   margin-right: 10%;
+}
+
+.btn.btn-primary:hover {
+  background-color: #50ACE1;
 }
 
 .resize-icon {
