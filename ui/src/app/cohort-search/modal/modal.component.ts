@@ -208,18 +208,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     });
   }
 
-  get selectionTitle() {
-    const _type = [
-      TreeType[TreeType.CONDITION],
-      TreeType[TreeType.PROCEDURE]
-    ].includes(this.itemType)
-      ? this.itemType : this.ctype;
-    const title = typeToTitle(_type);
-    return title
-      ? `Add Selected ${title} Criteria to Cohort`
-      : 'No Selection';
-  }
-
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
