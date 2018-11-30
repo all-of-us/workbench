@@ -108,12 +108,14 @@ export const previewStatus = (state) =>
 export const attributesPreviewStatus = (state) =>
   state.getIn(['wizard', 'calculate'], Map());
 
+export const previewError = (state): boolean =>
+  state.getIn(['wizard', 'preview', 'error'], false);
+
 export const nodeAttributes = (state): any =>
     state.getIn(['wizard', 'item', 'attributes', 'node'], Map());
 
-export const isAttributeLoading =
-  () => (state): boolean =>
-    state.getIn(['wizard', 'item', 'attributes', 'loading'], false);
+export const isAttributeLoading = (state): boolean =>
+    state.getIn(['wizard', 'preview', 'requesting'], false);
 
 export const participantsCount = (state): any =>
   state.getIn(['wizard', 'item', 'count'], false);

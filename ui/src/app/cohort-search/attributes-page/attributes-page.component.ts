@@ -10,6 +10,7 @@ import {
   CohortSearchActions,
   isAttributeLoading,
   nodeAttributes,
+  previewError,
 } from '../redux';
 
 import {Operator, TreeSubType, TreeType} from 'generated';
@@ -26,6 +27,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   @select(attributesPreviewStatus) preview$;
   @select(isAttributeLoading) loading$;
   @select(nodeAttributes) node$;
+  @select(previewError) error$;
   node: Map<any, any>;
   units = PM_UNITS;
   attrs = {EXISTS: false, NUM: [], CAT: []};
