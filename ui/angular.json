@@ -33,6 +33,7 @@
             ]
           },
           "configurations": {
+            "dev": {},
             "local": {
               "fileReplacements": [
                 {
@@ -92,6 +93,9 @@
             "browserTarget": "aou-workbench-ui:build"
           },
           "configurations": {
+            "dev": {
+              "browserTarget": "aou-workbench-ui:build:test"
+            },
             "local": {
               "browserTarget": "aou-workbench-ui:build:local"
             },
