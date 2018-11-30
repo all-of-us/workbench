@@ -1,4 +1,31 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+
+class testComponentReact extends React.Component {
+  state: {selected: number};
+  props: {learning: boolean};
+
+  // panelTitles: String[];
+  // panels = new Map<String, String>();
+  // panelImages = new Map<String, String>();
+  // checkImg = '/assets/images/check.svg';
+  // selected: String;
+  // completed: String[];
+  // selectedIndex: number;
+  // fullImage = false;
+
+  constructor(props: Object) {
+    super(props);
+    this.state = {selected: 0};
+  }
+
+  render() {
+    return React.createElement('div', {
+
+    }, 'hello world', this.props.learning.toString());
+  }
+}
 
 @Component({
   selector: 'app-quick-tour-modal',
@@ -8,6 +35,11 @@ import {Component, OnInit} from '@angular/core';
 
 export class QuickTourModalComponent implements OnInit {
 
+  @Input('learning')
+  learning = false;
+  @Input('onClose')
+  public onClose: Function;
+
   panelTitles: String[];
   panels = new Map<String, String>();
   panelImages = new Map<String, String>();
@@ -15,7 +47,6 @@ export class QuickTourModalComponent implements OnInit {
   selected: String;
   completed: String[];
   selectedIndex: number;
-  learning = false;
   fullImage = false;
 
   constructor() {}
@@ -26,12 +57,18 @@ export class QuickTourModalComponent implements OnInit {
     this.selected = this.panelTitles[this.selectedIndex];
   }
 
-  open(): void {
-    this.learning = true;
+  ngDoCheck(): void {
+    //ReactDOM.render(React.createElement(testComponentReact, {learning: this.learning}), document.getElementById('react-test'));
   }
 
+  // open(): void {
+  //   this.learning = true;
+  // }
+
   close(): void {
-    this.learning = false;
+    //this.learning = false;
+    console.log('trying to close');
+    this.onClose();
   }
 
   previous(): void {
@@ -71,6 +108,10 @@ export class QuickTourModalComponent implements OnInit {
   get lastPanelButtonText(): string {
     return (this.lastPanel ? 'Close' : 'Next');
   }
+
+  // get quickTourOpen(): boolean {
+  //   return this.quickTourOpen;
+  // }
 
   setPanels(): void {
     this.panelTitles = ['Intro', 'Workspaces', 'Cohorts', 'Concepts',

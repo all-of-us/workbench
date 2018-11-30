@@ -77,13 +77,12 @@
     </div>
   </div>
 </div>
-<app-quick-tour-modal></app-quick-tour-modal>
+<app-quick-tour-modal [learning]="quickTour" [onClose]="closeQuickTour"></app-quick-tour-modal>
 <clr-modal [(clrModalOpen)]="open" [clrModalSize]="'md'">
   <div class="modal-body">
   <video *ngIf="open" controls #myVideo style="width: 100%" autoplay>
     <source [src]=src type="video/mp4" />
   </video>
-
   </div>
 </clr-modal>
 
