@@ -202,7 +202,7 @@ def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
-  common.run_inline %W{gradle appengineStart}
+  common.run_inline %W{gradle --stacktrace appengineStart}
 end
 
 Common.register_command({
