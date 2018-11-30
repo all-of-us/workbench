@@ -1,5 +1,8 @@
 # All of Us Workbench Public UI -- aka Databrowser
 
+**Warning**: This directory is in the process of being migrated to https://github.com/all-of-us/data-browser.
+New development should happen in the new repository, or be applied to both locations.
+
 The Public UI is an Angular app in TypeScript. For an intro to Angular, see
 [the tutorial](https://angular.io/docs/ts/latest/tutorial/).
 
