@@ -134,7 +134,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             value: undefined,
           }]
         });
-        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
+        this.form.addControl('encounters',
+          new FormGroup({operator: new FormControl(),
+            encounterType: new FormControl()}));
         this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
           .filter(response => !!response)
           .subscribe(response => {
@@ -256,6 +258,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.dropdownOption.selected[index] = opt.name;
     const modForm = <FormArray>this.form.controls[mod.name];
     const valueForm = <FormArray>modForm;
+    if (mod.name === 'encounters') {
+      valueForm.get('encounterType').patchValue(opt.name);
+    }
     valueForm.get('operator').patchValue(opt.value);
   }
 
@@ -266,7 +271,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         if (!vals[name].operator) {
           return;
         }
-        return fromJS({name: modType, operator: 'IN', operands: [vals[name].operator.toString()]});
+        return fromJS({name: modType, operator: 'IN',
+          encounterType: vals[name].encounterType.toString(),
+          operands: [vals[name].operator.toString()]});
       } else {
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
