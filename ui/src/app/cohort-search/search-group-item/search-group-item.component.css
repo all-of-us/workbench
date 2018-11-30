@@ -37,3 +37,7 @@
   font-size: 12px;
   color: #333333;
 }
+
+clr-icon[shape^=error-standard] {
+  color: #d9534f;
+}
