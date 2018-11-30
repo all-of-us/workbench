@@ -134,7 +134,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             value: undefined,
           }]
         });
-        this.form.addControl('encounters', new FormGroup({operator: new FormControl(), encounterType: new FormControl()}));
+        this.form.addControl('encounters',
+          new FormGroup({operator: new FormControl(), encounterType: new FormControl()}));
         this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
           .filter(response => !!response)
           .subscribe(response => {
