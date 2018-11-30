@@ -147,3 +147,7 @@
   padding-top: 0.2rem;
   font-size: 14px;
 }
+
+clr-icon[shape^=error-standard] {
+  color: #d9534f;
+}
