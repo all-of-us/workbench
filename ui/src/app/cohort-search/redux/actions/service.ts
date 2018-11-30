@@ -289,7 +289,7 @@ export class CohortSearchActions {
   }
 
   fetchAttributes(node: any): void {
-    const isLoading = isAttributeLoading()(this.state);
+    const isLoading = isAttributeLoading(this.state);
     if (isLoading) {
       return;
     }
