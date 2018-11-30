@@ -65,4 +65,10 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
         "group by c.vocabularyId\n" +
         "order by c.vocabularyId\n")
     List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String domainId);
+
+    @Query(value = "select c1.* from concept_relationship cr " +
+            "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
+            "and cr.concept_id_1 in (?1) " +
+            "and c1.concept_class_id = 'Ingredient') ", nativeQuery = true)
+    List<Concept> findDrugIngredientsByBrandConceptId(List<Long> conceptIds);
 }

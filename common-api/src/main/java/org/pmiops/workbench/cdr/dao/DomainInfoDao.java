@@ -23,12 +23,12 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
       "d.conceptId, 0L, COUNT(*), 0L)\n" +
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
-      "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
-      "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
-      "(c.standardConcept IN ('S', 'C') or c.conceptId = ?3 or c.conceptCode = ?2)\n" +
+      "where (c.countValue > 0 or c.sourceCountValue > 0) and \n" +
+      "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+      "c.standardConcept IN ('S', 'C')) or c.conceptId in (?3) or c.conceptCode = ?2\n" +
       "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
       "order by d.domainId")
-  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query, Long conceptId);
+  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query, List<Long> conceptIds);
 
   /**
    * Returns domain metadata and concept counts for domains, matching only standard concepts by name,
