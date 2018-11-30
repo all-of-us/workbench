@@ -1,9 +1,7 @@
 version: "3"
 services:
   deploy:
-    build:
-      context: ../ci
-      dockerfile: Dockerfile.circle_build
+    image: allofustest/workbench:buildimage-0.0.13
     entrypoint: /bootstrap-docker.sh
     user: circleci
     environment:
