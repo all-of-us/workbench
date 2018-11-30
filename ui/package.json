@@ -51,6 +51,8 @@
     "ngx-popper": "^5.1.7",
     "nouislider": "10.0.0",
     "popper.js": "^1.13.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.6",
@@ -61,7 +63,7 @@
   "devDependencies": {
     "@angular-devkit/core": "0.4.7",
     "@angular-devkit/schematics": "0.4.7",
-    "@angular/cli": "^1.6.6",
+    "@angular/cli": "^1.7.3",
     "@angular/compiler-cli": "^5.2.2",
     "@angular/language-service": "^5.2.2",
     "@types/google.analytics": "0.0.36",
