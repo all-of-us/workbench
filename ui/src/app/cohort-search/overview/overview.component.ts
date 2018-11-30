@@ -4,7 +4,6 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 
 import {CohortSearchActions, searchRequestError} from '../redux';
 
@@ -38,7 +37,6 @@ export class OverviewComponent {
   showGenderChart = true;
   showComboChart = true;
   showConflictError = false;
-  subscription: Subscription;
 
   constructor(
     private actions: CohortSearchActions,
