@@ -289,7 +289,7 @@ export class CohortSearchActions {
   }
 
   fetchAttributes(node: any): void {
-    const isLoading = isAttributeLoading()(this.state);
+    const isLoading = isAttributeLoading(this.state);
     if (isLoading) {
       return;
     }
@@ -327,7 +327,7 @@ export class CohortSearchActions {
     const groupItem = <SearchGroupItem>{
       id: itemId,
       type: searchParam[0].type,
-      searchParameters: searchParam,
+      searchParameters: null,
       modifiers: [],
     };
     const request = <SearchRequest>{
