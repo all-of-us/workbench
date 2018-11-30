@@ -327,7 +327,7 @@ export class CohortSearchActions {
     const groupItem = <SearchGroupItem>{
       id: itemId,
       type: searchParam[0].type,
-      searchParameters: null,
+      searchParameters: searchParam,
       modifiers: [],
     };
     const request = <SearchRequest>{

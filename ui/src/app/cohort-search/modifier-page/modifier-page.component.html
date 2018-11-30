@@ -3,6 +3,15 @@
     <div class="modifier-header">
       The following modifiers are optional and apply to all selected criteria
     </div>
+    <div *ngIf="preview.get('error')" class="alert alert-danger alert-sm">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-text">
+            A problem occurred and we were not able to retrieve the requested data
+          </div>
+        </div>
+      </div>
+    </div>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
         <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
