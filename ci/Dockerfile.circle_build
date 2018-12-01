@@ -44,6 +44,6 @@ ENV GRADLE_VERSION 4.10.2
 
 RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
   && sudo unzip /tmp/gradle.zip -d /opt/gradle
-ENV PATH="${PATH}:/opt/gradle/gradle-${GRADLE_VERSION}/bin"
+ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 RUN sudo gem install jira-ruby
