@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -41,8 +42,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Autowired
     private ConceptDao conceptDao;
     @Autowired
-    private CriteriaDao criteriaDao;
-    @Autowired
     private QuestionConceptDao  questionConceptDao;
     @Autowired
     private AchillesAnalysisDao achillesAnalysisDao;
@@ -67,7 +66,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao,
         DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao,
         AchillesResultDao achillesResultDao,
-        AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao, CriteriaDao criteriaDao,
+        AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao,
         EntityManager entityManager, Provider<CdrVersion> defaultCdrVersionProvider) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
@@ -76,7 +75,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         this.achillesResultDao = achillesResultDao;
         this.achillesAnalysisDao = achillesAnalysisDao;
         this.achillesResultDistDao = achillesResultDistDao;
-        this.criteriaDao = criteriaDao;
         this.entityManager = entityManager;
         this.defaultCdrVersionProvider = defaultCdrVersionProvider;
     }
@@ -301,15 +299,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // expected
         }
         // TODO: consider parallelizing these lookups
-        List<String> drugMatchConceptIds = criteriaDao.findDrugConceptIdByBrand(query);
         List<Long> toMatchConceptIds = new ArrayList<>();
         toMatchConceptIds.add(conceptId);
-        if (drugMatchConceptIds.size() > 0) {
-            List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(drugMatchConceptIds.stream().map(Long::valueOf).collect(Collectors.toList()));
-            if (drugMatchedConcepts.size() > 0) {
-                toMatchConceptIds.addAll(drugMatchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList()));
-            }
-        }
+        List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(query);
+        if (drugMatchedConcepts.size() > 0) {
+            toMatchConceptIds.addAll(drugMatchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList())); }
+
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, toMatchConceptIds);
         List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
@@ -377,15 +372,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             response.setMatchType(MatchType.NAME);
         }
 
-        List<String> drugBrandMatchConceptIds = criteriaDao.findDrugConceptIdByBrand(searchConceptsRequest.getQuery());
-        List<Concept> drugMatchedConcepts = new ArrayList<>();
-        if(drugBrandMatchConceptIds.size() > 0) {
-            drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(drugBrandMatchConceptIds.stream().map(Long::valueOf).collect(Collectors.toList()));
-        }
-
         List<Concept> conceptList = new ArrayList(concepts.getContent());
-        if(drugMatchedConcepts.size() > 0 && searchConceptsRequest.getDomain().equals(Domain.DRUG)) {
-            conceptList.addAll(drugMatchedConcepts);
+
+        if(searchConceptsRequest.getDomain().equals(Domain.DRUG)) {
+            List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(searchConceptsRequest.getQuery());
+
+            if(drugMatchedConcepts.size() > 0) {
+                conceptList.addAll(drugMatchedConcepts);
+            }
         }
 
         response.setItems(conceptList.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));

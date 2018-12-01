@@ -122,12 +122,4 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "order by c.code asc", nativeQuery = true)
   List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type,
                                                  @Param("value") String value);
-
-  @Query(value = "select distinct concept_id from criteria c \n" +
-          "where c.type = 'DRUG' \n" +
-          "and c.subtype in ('BRAND') \n" +
-          "and c.is_selectable = 1\n" +
-          "and (c.name = :value or c.code = :value)", nativeQuery = true)
-  List<String> findDrugConceptIdByBrand(@Param("value") String value);
-
 }

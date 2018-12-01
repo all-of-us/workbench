@@ -16,7 +16,6 @@ import org.pmiops.workbench.cdr.dao.AchillesAnalysisDao;
 import org.pmiops.workbench.cdr.dao.AchillesResultDao;
 import org.pmiops.workbench.cdr.dao.AchillesResultDistDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptRelationshipDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -386,8 +385,6 @@ public class DataBrowserControllerTest {
     private AchillesResultDao achillesResultDao;
     @Autowired
     private AchillesResultDistDao achillesResultDistDao;
-    @Autowired
-    private CriteriaDao criteriaDao;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -400,7 +397,7 @@ public class DataBrowserControllerTest {
         saveData();
         ConceptService conceptService = new ConceptService(entityManager, conceptDao);
         dataBrowserController = new DataBrowserController(conceptService, conceptDao, domainInfoDao,
-            surveyModuleDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, criteriaDao, entityManager,
+            surveyModuleDao, achillesResultDao, achillesAnalysisDao, achillesResultDistDao, entityManager,
             () -> cdrVersion);
     }
 

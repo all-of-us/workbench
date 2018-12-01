@@ -66,9 +66,16 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
         "order by c.vocabularyId\n")
     List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String domainId);
 
-    @Query(value = "select c1.* from concept_relationship cr " +
+    @Query(value = "select distinct c1.* from concept_relationship cr " +
             "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
-            "and cr.concept_id_1 in (?1) " +
+            "and cr.concept_id_1 in (" +
+            "select distinct c.concept_id from criteria c\n" +
+            "where c.type = 'DRUG' " +
+            "and c.subtype in ('BRAND') " +
+            "and c.is_selectable = 1 " +
+            "and (upper(c.name) like upper(concat('%',?1,'%')) " +
+            "or upper(c.code) like upper(concat('%',?1,'%'))) " +
+            "order by c.name asc) " +
             "and c1.concept_class_id = 'Ingredient') ", nativeQuery = true)
-    List<Concept> findDrugIngredientsByBrandConceptId(List<Long> conceptIds);
+    List<Concept> findDrugIngredientsByBrandConceptId(String query);
 }
