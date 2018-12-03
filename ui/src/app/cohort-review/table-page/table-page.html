@@ -2,7 +2,11 @@
   {{cohortName}}
   <button class="btn btn-primary btn-sm" [routerLink]="['../report']">Query Report</button>
 </div>
-<app-overview-charts></app-overview-charts>
+<div class="participant-container">
+  <div class="participant-title">Participants</div>
+  <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
+</div>
+<!--<app-overview-charts></app-overview-charts>-->
 
 <clr-datagrid
   (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">

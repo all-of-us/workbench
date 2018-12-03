@@ -14,3 +14,25 @@
   color: #4a4a4a;
   margin-bottom: 1rem;
 }
+
+.participant-container {
+  display:flex;
+  margin-bottom: 1rem;
+}
+
+.participant-container .participant-title {
+  color: #262262;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 24px;
+  width: 78%;
+
+}
+
+.participant-container .total-heading {
+  color: #262262;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 24px;
+  white-space: nowrap;
+}

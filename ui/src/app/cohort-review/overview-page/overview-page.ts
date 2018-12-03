@@ -23,15 +23,11 @@ export class OverviewPage implements OnInit, OnDestroy {
     DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
-  selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
-  isCancelTimerInitiated: any = false;
-  domainTitle: '';
   buttonsDisableFlag = false;
   private subscription: Subscription;
   domainsData = {};
-  condChart: any;
   totalCount: any;
   constructor(
     private chartAPI: CohortBuilderService,
@@ -55,7 +51,6 @@ export class OverviewPage implements OnInit, OnDestroy {
       this.totalParticipantCount = review.matchedParticipantCount;
 
     }));
-    this.getDemoCharts();
     this.openChartContainer = true;
     this.fetchChartsData();
   }
@@ -70,47 +65,19 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
+      this.domainsData[domainName] = {
+              conditionTitle: '',
+              loading: true
+            };
       this.subscription.add(this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
+          this.domainsData[domainName].loading = false;
         }));
     });
-  }
-
-
-  getDemoCharts () {
-    this.buttonsDisableFlag = true;
-    this.condChart = '';
-    setTimeout(() => {
-      this.demoGraph = true;
-      if (this.data.size) {
-        this.buttonsDisableFlag = false;
-      }
-    }, 1000);
-    this.showTitle = false;
-    this.domainTitle = '';
-    this.isCancelTimerInitiated = false;
-  }
-
-  getDifferentCharts(names) {
-    this.buttonsDisableFlag = true;
-    this.demoGraph = false;
-    this.domainTitle = names;
-    this.showTitle = true;
-    this.setNames(names);
-    this.title = typeToTitle(names);
-    return this.title;
-  }
-
-  setNames(names) {
-     this.condChart = '';
-    setTimeout(() => {
-      this.condChart = names;
-      this.buttonsDisableFlag = false;
-    }, 1000);
   }
 
   ngOnDestroy() {

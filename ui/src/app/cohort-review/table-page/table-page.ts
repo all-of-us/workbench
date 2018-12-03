@@ -62,6 +62,7 @@ export class TablePage implements OnInit, OnDestroy {
   ethnicities: string[] = [];
   isFiltered = [];
   cohortName: string;
+  totalParticipantCount: number;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -76,6 +77,7 @@ export class TablePage implements OnInit, OnDestroy {
     this.subscription = this.state.review$.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
+      this.totalParticipantCount = review.matchedParticipantCount;
     });
 
     const {concepts} = this.route.snapshot.data;
@@ -83,6 +85,11 @@ export class TablePage implements OnInit, OnDestroy {
     this.races = this.extractDemographics(concepts.raceList);
     this.genders = this.extractDemographics(concepts.genderList);
     this.ethnicities = this.extractDemographics(concepts.ethnicityList);
+    // this.subscription.add(this.state.review$.subscribe(review => {
+    //   this.review = review;
+    //
+    //
+    // }));
   }
 
 
