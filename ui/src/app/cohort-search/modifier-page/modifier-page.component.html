@@ -1,5 +1,5 @@
 <form [formGroup]="form">
-  <div *ngIf="showEroor && formChanges" class="alert alert-danger alert-sm">
+  <div *ngIf="showError && formChanges" class="alert alert-danger alert-sm">
     <div class="alert-items">
       <div class="alert-item static">
         <div class="alert-text">
@@ -100,7 +100,7 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-3">
-      <button type="button" [ngClass]="[ preview.get('requesting') || showEroor? 'greyed-button': 'calculate-btn']"
+      <button type="button" [ngClass]="[ preview.get('requesting') || showError? 'greyed-button': 'calculate-btn']"
         class="btn "
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"

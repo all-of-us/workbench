@@ -110,7 +110,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-  showEroor = false;
+  showError = false;
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -331,7 +331,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return o < 0;
         });
       });
-     this.showEroor = modArr.toJS().flat().includes(true);
+     this.showError = modArr.toJS().flat().includes(true);
     });
   }
 }
