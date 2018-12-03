@@ -324,11 +324,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }
   }
 
-  negativeNumber(){
+  negativeNumber() {
    this.modifiers$.forEach(item => {
     const modArr = item.map(modValue => {
        return modValue.toJS().operands.map( o => {
-          return parseInt(o) < 0;
+          return o < 0;
         });
       });
      this.showEroor = modArr.toJS().flat().includes(true);
