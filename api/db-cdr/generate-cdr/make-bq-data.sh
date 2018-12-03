@@ -52,20 +52,6 @@ then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
   exit 1
 fi
-if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls)
-if [ -z "$datasets" ]
-then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
 re=\\b$BQ_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
@@ -84,6 +70,10 @@ else
   bq --project=$OUTPUT_PROJECT mk $OUTPUT_DATASET
 fi
 
+#Check if tables to be copied over exists in bq project dataset
+tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
+cri_table_check=\\bcriteria\\b
+cri_attr_table_check=\\bcriteria_attribute\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -108,265 +98,269 @@ done
 ############
 # criteria #
 ############
-echo "Inserting criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\`
- (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
-SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
-"
+if [[ $tables =~ $cri_table_check ]]; then
+    echo "Inserting criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\`
+     (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
+    SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+    "
 
-echo "Updating SNOMED PCS criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'SNOMED' and subtype = 'PCS'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating SNOMED PCS criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'SNOMED' and subtype = 'PCS'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating SNOMED CM criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'SNOMED' and subtype = 'CM'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating SNOMED CM criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'SNOMED' and subtype = 'CM'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating ICD9 CM criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'ICD9' and subtype = 'CM'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating ICD9 CM criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'ICD9' and subtype = 'CM'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating ICD9 PROC criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'ICD9' and subtype = 'PROC'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating ICD9 PROC criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'ICD9' and subtype = 'PROC'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating ICD10 CM criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'ICD10' and subtype = 'CM'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating ICD10 CM criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'ICD10' and subtype = 'CM'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating ICD10 PCS criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'ICD10' and subtype = 'PCS'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating ICD10 PCS criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'ICD10' and subtype = 'PCS'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating CPT criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'CPT'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating CPT criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'CPT'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating MEAS CLIN criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'MEAS' and subtype = 'CLIN'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating MEAS CLIN criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'MEAS' and subtype = 'CLIN'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating MEAS LAB criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-when c.name is null and c.code is not null
-then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-when c.name is not null and c.code is null
-then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'MEAS' and subtype = 'LAB'
-group by c.id, c.name, c.code) as crit
-where crit.id = ct.id"
+    echo "Updating MEAS LAB criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    when c.name is null and c.code is not null
+    then concat(c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    when c.name is not null and c.code is null
+    then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'MEAS' and subtype = 'LAB'
+    group by c.id, c.name, c.code) as crit
+    where crit.id = ct.id"
 
-echo "Updating PPI criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null
-then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
-else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
-on c.concept_id=cs.concept_id
-and type = 'PPI'
-group by c.id, c.name) as crit
-where crit.id = ct.id"
+    echo "Updating PPI criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null
+    then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
+    else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
+    on c.concept_id=cs.concept_id
+    and type = 'PPI'
+    group by c.id, c.name) as crit
+    where crit.id = ct.id"
 
-echo "Updating criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null and c.code is null
-then ''
-when c.name is null and c.code is not null
-then c.code
-when c.name is not null and c.code is null
-then c.name
-else concat(c.name,'|',c.code)
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
-where c.type in ('MEAS','CPT','ICD10','ICD9','SNOMED')
-and cs.synonyms is null) as crit
-where crit.id = ct.id"
+    echo "Updating criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null and c.code is null
+    then ''
+    when c.name is null and c.code is not null
+    then c.code
+    when c.name is not null and c.code is null
+    then c.name
+    else concat(c.name,'|',c.code)
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
+    where c.type in ('MEAS','CPT','ICD10','ICD9','SNOMED')
+    and cs.synonyms is null) as crit
+    where crit.id = ct.id"
 
-echo "Updating criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
-set ct.synonyms = crit.synonyms
-from (
-select c.id,
-case when c.name is null
-then ''
-else c.name
-end as synonyms
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
-where c.type = 'PPI'
-and cs.synonyms is null) as crit
-where crit.id = ct.id"
+    echo "Updating criteria"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+    set ct.synonyms = crit.synonyms
+    from (
+    select c.id,
+    case when c.name is null
+    then ''
+    else c.name
+    end as synonyms
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
+    join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
+    where c.type = 'PPI'
+    and cs.synonyms is null) as crit
+    where crit.id = ct.id"
+fi
 
 ######################
 # criteria_attribute #
 ######################
-echo "Inserting criteria_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria_attribute\`
- (id, concept_id, value_as_concept_id, concept_name, type, est_count)
-SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
+if [[ $tables =~ $cri_attr_table_check ]]; then
+    echo "Inserting criteria_attribute"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria_attribute\`
+     (id, concept_id, value_as_concept_id, concept_name, type, est_count)
+    SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
+fi
 
 ##########
 # domain #
