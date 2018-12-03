@@ -49,7 +49,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @select(participantsCount) count$;
     readonly minAge = minAge;
     readonly maxAge = maxAge;
-    loading = false;
+    loading = {
+      'AGE': false,
+      'GEN': false,
+      'RACE': false,
+      'ETH': false,
+      'DEC': false
+    };
     subscription = new Subscription();
     hasSelection = false;
     selectedNode: any;
@@ -115,8 +121,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     ngOnInit() {
         // Set back to false at the end of loadNodesFromApi (i.e. the end of the
         // initialization routine)
-        this.loading = true;
-
         this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
         this.initAgeControls();
         this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
@@ -187,6 +191,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             TreeSubType[TreeSubType.RACE],
             TreeSubType[TreeSubType.ETH]
         ].map(code => {
+            this.loading[code] = true;
             this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
                 .subscribe(response => {
                     const items = response.items
@@ -207,6 +212,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     loadOptions(nodes: any, subtype: string) {
+        this.loading[subtype] = false;
         switch (subtype) {
             /* Age and Deceased are single nodes we use as templates */
             case TreeSubType[TreeSubType.AGE]:
@@ -228,7 +234,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                 this.ethnicityNodes = nodes;
                 break;
         }
-        this.loading = false;
     }
 
     /*
