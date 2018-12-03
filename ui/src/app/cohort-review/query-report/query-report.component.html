@@ -1,27 +1,47 @@
-<div class="report-header">
-  <button
-    type="button"
-    class="btn btn-sm"
-    title="Go Back to the Participant Table"
-    [routerLink]="['../participants']">
-    <clr-icon shape="angle-double" dir="left"></clr-icon>
-    Participants
-  </button>
-  <h4>Cohort Query Report</h4>
+<div class="container doNotPrint">
+  <div class="row header-border">
+    <div class="col-sm-1 col-xs-1 btn-margin">
+      <button
+        type="button"
+        class="btn btn-sm"
+        title="Go Back to the Participant Table"
+        [routerLink]="['../participants']">
+        <clr-icon shape="angle-double" dir="left"></clr-icon>
+        Participants
+      </button>
+    </div>
+      <h4 class="col-sm-11 col-xs-11">Cohort Query Report</h4>
+  </div>
 </div>
-<div class="report-content">
-  Cohort name: {{cohort.name}} <br>
-  Created by: {{cohort.creator}} <br>
-  Date created: {{ cohort.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}} <br><br>
 
-  Cohort definition:<br>
+<div class="report-background">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-10 col-xs-10">
+        Cohort name: {{cohort.name}} <br>
+        Created by: {{cohort.creator}} <br>
+        Date created: {{ cohort.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}} <br><br>
+        <!--Cohort definition:<br>-->
+      </div>
+      <div class="col-sm-2 col-xs-2">
+        <clr-icon class="doNotPrint" shape="printer" size="48"></clr-icon>
+        <button class="doNotPrint btn btn-primary" (click)="onPrint()">PRINT REPORT</button>
+      </div>
 
-  <app-overview-charts></app-overview-charts>
-  <!--<div *ngFor="let group of definition.includes; let g = index;">-->
+    </div>
+  </div>
+  <div class="report-content">
+    <app-overview-charts class="test-print"></app-overview-charts>
+    <!--<div *ngFor="let group of definition.includes; let g = index;">-->
     <!--<div *ngFor="let item of group.items; let i = index">-->
-      <!--<div *ngFor="let param of item.searchParameters; let p = index;">-->
-        <!--<div>{{param.type}} | {{param.name}} | {{param.value}}</div>-->
-      <!--</div>-->
+    <!--<div *ngFor="let param of item.searchParameters; let p = index;">-->
+    <!--<div>{{param.type}} | {{param.name}} | {{param.value}}</div>-->
     <!--</div>-->
-  <!--</div>-->
+    <!--</div>-->
+    <!--</div>-->
+  </div>
 </div>
+
+
+
+

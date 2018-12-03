@@ -85,3 +85,33 @@
 .btn-outline {
   pointer-events: none;
 }
+
+.graph-border {
+  border: 1px solid black;
+  padding: 0.3rem;
+}
+
+.chart-heading {
+  /*padding-left: 29.5rem;*/
+  /*color: #4A4A4A;*/
+  /*font-size: 12px;*/
+  /*font-weight: bold;*/
+
+  text-align: center;
+  color: #4A4A4A;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.domain-title {
+  margin-top: 2rem;
+  padding-bottom: 0.5rem;
+}
+@media print{
+  .graph-border {
+    padding: 2rem;
+    page-break-inside:avoid;
+  }
+
+}
