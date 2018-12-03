@@ -121,38 +121,41 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   ngOnInit() {
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
-    this.subscription.add(this.ctype$.subscribe(ctype => {
-      this.ctype = ctype;
-      if (this.addEncounters) {
-        this.modifiers.push({
-          name: 'encounters',
-          label: 'During Visit Type',
-          inputType: null,
-          modType: ModifierType.ENCOUNTERS,
-          operators: [{
-            name: 'Any',
-            value: undefined,
-          }]
-        });
-        this.form.addControl('encounters',
-          new FormGroup({operator: new FormControl(),
-            encounterType: new FormControl()}));
-        this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
-          .filter(response => !!response)
-          .subscribe(response => {
-            this.visitCounts = {};
-            response.items.forEach(option => {
-              if (option.parentId === 0 && option.count > 0) {
-                this.modifiers[3].operators.push({
-                  name: option.name,
-                  value: option.conceptId.toString()
-                });
-                this.visitCounts[option.conceptId] = option.count;
-              }
-            });
+    this.subscription.add(this.ctype$
+      .filter(ctype => !! ctype)
+      .subscribe(ctype => {
+        this.ctype = ctype;
+        if (this.addEncounters) {
+          this.modifiers.push({
+            name: 'encounters',
+            label: 'During Visit Type',
+            inputType: null,
+            modType: ModifierType.ENCOUNTERS,
+            operators: [{
+              name: 'Any',
+              value: undefined,
+            }]
           });
-      }
-    }));
+          this.form.addControl('encounters',
+            new FormGroup({operator: new FormControl(),
+              encounterType: new FormControl()}));
+          this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+            .filter(response => !!response)
+            .subscribe(response => {
+              this.visitCounts = {};
+              response.items.forEach(option => {
+                if (option.parentId === 0 && option.count > 0) {
+                  this.modifiers[3].operators.push({
+                    name: option.name,
+                    value: option.conceptId.toString()
+                  });
+                  this.visitCounts[option.conceptId] = option.count;
+                }
+              });
+            });
+        }
+      })
+    );
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
