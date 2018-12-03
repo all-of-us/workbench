@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -301,7 +300,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // TODO: consider parallelizing these lookups
         List<Long> toMatchConceptIds = new ArrayList<>();
         toMatchConceptIds.add(conceptId);
-        List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(query);
+        List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrand(query);
         if (drugMatchedConcepts.size() > 0) {
             toMatchConceptIds.addAll(drugMatchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList())); }
 
@@ -374,8 +373,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         List<Concept> conceptList = new ArrayList(concepts.getContent());
 
-        if(searchConceptsRequest.getDomain().equals(Domain.DRUG)) {
-            List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrandConceptId(searchConceptsRequest.getQuery());
+        if(searchConceptsRequest.getDomain() != null && searchConceptsRequest.getDomain().equals(Domain.DRUG)) {
+            List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrand(searchConceptsRequest.getQuery());
 
             if(drugMatchedConcepts.size() > 0) {
                 conceptList.addAll(drugMatchedConcepts);

@@ -77,5 +77,5 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
             "or upper(c.code) like upper(concat('%',?1,'%'))) " +
             "order by c.name asc) " +
             "and c1.concept_class_id = 'Ingredient') ", nativeQuery = true)
-    List<Concept> findDrugIngredientsByBrandConceptId(String query);
+    List<Concept> findDrugIngredientsByBrand(String query);
 }
