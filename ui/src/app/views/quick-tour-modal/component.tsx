@@ -70,20 +70,9 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-type QuickTourProps = {
-    learning: boolean,
-    closeFunction: Function
-}
-
-type QuickTourState = {
-    selected: number,
-    fullImage: boolean,
-    numPanels: number
-}
-
-class quickTourReact extends React.Component<QuickTourProps, QuickTourState> {
-  state: QuickTourState;
-  props: QuickTourProps;
+class quickTourReact extends React.Component<any, any> {
+  state: {selected: number, fullImage: boolean, numPanels: number};
+  props: {learning: boolean, closeFunction: Function};
 
   checkImg = '/assets/images/check.svg';
 
@@ -124,14 +113,15 @@ class quickTourReact extends React.Component<QuickTourProps, QuickTourState> {
   render() {
       return  <>
         <div className={this.props.learning ? "modal-backdrop" : undefined}></div>
-        {this.props.learning && !this.state.fullImage && <div className="main" id="quick-tour">
+        {this.props.learning && !this.state.fullImage &&
+        <div className="main" id="quick-tour">
           <div className="title">All of Us Researcher Workbench</div>
           <div className="intro">Quick Tour</div>
           <div className="breadcrumbs">
               {panels.map((p, i) => {
-                  return <>
-                  <div className="breadcrumb-component">
-                    <div className={"circle" + (i <= this.state.selected ? " completed" : "")} onClick={() => this.selectPanel(i)}>
+                  return <><div className="breadcrumb-component">
+                    <div className={"circle" + (i <= this.state.selected ? " completed" : "")}
+                         onClick={() => this.selectPanel(i)}>
                         {(i < this.state.selected) && <div className="check"><img src={this.checkImg}/></div>}
                         {(i ===  this.state.selected) && <div className="current"></div>}
 
@@ -139,8 +129,7 @@ class quickTourReact extends React.Component<QuickTourProps, QuickTourState> {
                     <div className="breadcrumb-title">{p.title}</div>
                     {(i !== this.state.numPanels - 1) &&
                     <div className={"connector" + ((i < this.state.selected) ? " completed" : "")}></div>}
-                  </div>
-                  </>;
+                  </div></>;
               })}
           </div>
           <div style={{width: "100%", paddingTop: "5%"}}>
@@ -155,8 +144,9 @@ class quickTourReact extends React.Component<QuickTourProps, QuickTourState> {
             </div>
             <div className="panel-right">
               <img src={panels[this.state.selected].image} className="panel-image"/>
-                {this.state.selected !== 0 && <div style={{position: "absolute", right: "5%", bottom: "5%", height: "1rem", width: "1rem"}}></div>}
-              <app-expand-icon className="resize-icon" style={{position: "absolute", zIndex: "2"}}></app-expand-icon>
+                {this.state.selected !== 0 &&
+                <div style={{position: "absolute", right: "5%", bottom: "5%", height: "1rem", width: "1rem"}}></div>}
+              {/*<app-expand-icon className="resize-icon" style={{position: "absolute", zIndex: "2"}}></app-expand-icon>*/}
             </div>
           </div>
           <div className="controls">
@@ -177,7 +167,7 @@ class quickTourReact extends React.Component<QuickTourProps, QuickTourState> {
         {this.props.learning && this.state.fullImage && <div className="main full-image">
           <div className="full-image-wrapper">
             <img src={panels[this.state.selected].image} style={{height: "100%", width: "100%"}}/>
-            <app-shrink-icon className="resize-icon" onClick={() => this.toggleImage()} style={{position: "absolute", right: "5%", bottom: "5%"}}></app-shrink-icon>
+            {/*<app-shrink-icon className="resize-icon" onClick={() => this.toggleImage()} style={{position: "absolute", right: "5%", bottom: "5%"}}></app-shrink-icon>*/}
           </div>
         </div>}
       </>;
