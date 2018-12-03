@@ -48,7 +48,6 @@ public class CriteriaDaoTest {
 
   private Criteria icd9Criteria1;
   private Criteria icd9Criteria2;
-  private Criteria icd9Criteria3;
   private Criteria demoCriteria1;
   private Criteria demoCriteria1a;
   private Criteria demoCriteria2;
@@ -71,7 +70,6 @@ public class CriteriaDaoTest {
   public void setUp() {
     icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
     icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
-    icd9Criteria3 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, false, true, null).conceptId("123").synonyms("001");
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
     demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
@@ -90,7 +88,6 @@ public class CriteriaDaoTest {
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
-    criteriaDao.save(icd9Criteria3);
     criteriaDao.save(parentDemo);
     criteriaDao.save(demoCriteria1);
     criteriaDao.save(demoCriteria1a);
@@ -142,6 +139,12 @@ public class CriteriaDaoTest {
     criteriaDao.delete(drugCriteriaIngredient1);
     criteriaDao.delete(drugCriteriaBrand);
     criteriaDao.delete(labCriteria);
+  }
+
+  @Test
+  public void findCriteriaByTypeAndId() throws Exception {
+    Criteria criteria = criteriaDao.findCriteriaByTypeAndId(icd9Criteria1.getType(), icd9Criteria1.getId());
+    assertEquals(icd9Criteria1, criteria);
   }
 
   @Test

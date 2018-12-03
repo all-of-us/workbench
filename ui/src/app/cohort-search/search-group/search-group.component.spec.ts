@@ -133,15 +133,6 @@ describe('SearchGroupComponent', () => {
     });
   });
 
-  it('Should render zero if no group count', () => {
-    const footer = fixture.debugElement.query(By.css('div.card-footer'));
-    const spinner = fixture.debugElement.query(By.css('span.spinner'));
-    const text = footer.nativeElement.textContent.replace(/\s+/g, ' ').trim();
-
-    expect(text).toEqual('Group Count: 0');
-    expect(spinner).toBeNull();
-  });
-
   it('Should render group count if group count', () => {
     comp.group = group.set('count', 25);
     fixture.detectChanges();

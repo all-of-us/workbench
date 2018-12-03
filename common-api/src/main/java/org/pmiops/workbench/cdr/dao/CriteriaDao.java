@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
+  Criteria findCriteriaByTypeAndId(@Param("type") String type, @Param("id") Long id);
+
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                            @Param("parentId") Long parentId);
 

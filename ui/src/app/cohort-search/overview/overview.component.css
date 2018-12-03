@@ -21,6 +21,10 @@
   border-bottom: none;
 }
 
+clr-icon[shape^=error-standard] {
+  color: #d9534f;
+}
+
 /* Save Cohort Modal */
 /*
  * ng-deep is technically "deprecated" but there's no upgrade path and no other

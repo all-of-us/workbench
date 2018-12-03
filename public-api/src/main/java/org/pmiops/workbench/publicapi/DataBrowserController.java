@@ -308,7 +308,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // TODO: consider parallelizing these lookups
 
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, conceptId);
-        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword);
+        List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(query);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
             .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
@@ -666,6 +666,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 ar.setAnalysisStratumName(QuestionConcept.ageStratumNameMap.get(ar.getStratum2()));
             }
         }
+        aa.setResults(aa.getResults().stream().filter(ar -> ar.getAnalysisStratumName() != null).collect(Collectors.toList()));
         if(uniqueAgeDeciles.size() < 7){
             Set<String> completeAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
             completeAgeDeciles.removeAll(uniqueAgeDeciles);

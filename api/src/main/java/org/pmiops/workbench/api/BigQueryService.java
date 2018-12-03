@@ -7,6 +7,8 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,6 +80,9 @@ public class BigQueryService {
     }
 
     public Map<String, Integer> getResultMapper(TableResult result) {
+        if (result.getTotalRows() == 0) {
+            return Collections.emptyMap();
+        }
         AtomicInteger index = new AtomicInteger();
         return result.getSchema().getFields().stream().collect(
                 Collectors.toMap(Field::getName, s -> index.getAndIncrement()));

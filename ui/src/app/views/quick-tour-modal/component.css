@@ -116,6 +116,7 @@
 .panel {
   margin-top: 5%;
   width: 100%;
+  height: 30%;
   display: flex;
 }
 
@@ -154,13 +155,15 @@
   width: 40%;
   height: 90%;
   position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .panel-image {
-  width: 88%;
-  margin-top: 11%;
-  margin-left: 11%;
+  width: 78%;
+  height: 95%;
+  margin-top: 5%;
+  margin-left: 20%;
   position: relative;
   z-index: 1;
   display: inline;
@@ -195,11 +198,16 @@
 }
 
 .btn.btn-close:hover {
-  background-color: #004a70;
+  background-color: rgba(255,255,255,0.3);
 }
 
 .btn.btn-primary {
+  border: 0px;
   margin-right: 10%;
+}
+
+.btn.btn-primary:hover {
+  background-color: #50ACE1;
 }
 
 .resize-icon {

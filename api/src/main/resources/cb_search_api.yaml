@@ -39,6 +39,33 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{id}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a criteria
+      operationId: "getCriteriaByTypeAndId"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: id
+          type: integer
+          format: int64
+          required: true
+          description: the id
+      responses:
+        200:
+          description: A criteria
+          schema:
+            $ref: "#/definitions/Criteria"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -587,6 +614,9 @@ definitions:
       name:
         description: name/type of modifier
         $ref: "#/definitions/ModifierType"
+      encounterType:
+        type: string
+        description: If encounter then this prop will hold the type
       operator:
         description: Machine name of the operator
         $ref: "#/definitions/Operator"

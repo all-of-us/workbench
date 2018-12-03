@@ -59,6 +59,7 @@ public class QuestionConcept {
     public static void setGenderIdentityStratumNameMap() {
         genderIdentityStratumNameMap.put("1585840", "Woman");
         genderIdentityStratumNameMap.put("903070", "Other");
+        genderIdentityStratumNameMap.put("903096", "Skip");
         genderIdentityStratumNameMap.put("903079", "Prefer Not To Answer");
         genderIdentityStratumNameMap.put("1585841", "Non-binary");
         genderIdentityStratumNameMap.put("1585839", "Man");
