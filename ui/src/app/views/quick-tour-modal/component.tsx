@@ -75,6 +75,7 @@ class quickTourReact extends React.Component<any, any> {
   props: {learning: boolean, closeFunction: Function};
 
   checkImg = '/assets/images/check.svg';
+  expandIcon = '/assets/icons/expand.svg';
 
   constructor(props: Object) {
     super(props);
@@ -144,9 +145,14 @@ class quickTourReact extends React.Component<any, any> {
             </div>
             <div className="panel-right">
               <img src={panels[this.state.selected].image} className="panel-image"/>
-                {this.state.selected !== 0 &&
-                <div style={{position: "absolute", right: "5%", bottom: "5%", height: "1rem", width: "1rem"}}></div>}
-              {/*<app-expand-icon className="resize-icon" style={{position: "absolute", zIndex: "2"}}></app-expand-icon>*/}
+                {(this.state.selected !== 0) &&
+                <div style={{position: "absolute", right: "5%", bottom: "5%", height: "1rem", width: "1rem"}}>
+                    <div className="resize-icon" style={{position: "absolute", zIndex: 2}}
+                         onClick={() => this.toggleImage()}>
+                        <img src={this.expandIcon}/>
+                    </div>
+                </div>}
+
             </div>
           </div>
           <div className="controls">
@@ -167,7 +173,10 @@ class quickTourReact extends React.Component<any, any> {
         {this.props.learning && this.state.fullImage && <div className="main full-image">
           <div className="full-image-wrapper">
             <img src={panels[this.state.selected].image} style={{height: "100%", width: "100%"}}/>
-            {/*<app-shrink-icon className="resize-icon" onClick={() => this.toggleImage()} style={{position: "absolute", right: "5%", bottom: "5%"}}></app-shrink-icon>*/}
+              <div className="resize-icon" onClick={() => this.toggleImage()}
+                   style={{position: "absolute", right: "5%", bottom: "5%"}}>
+                  <img src={this.expandIcon}/>
+              </div>
           </div>
         </div>}
       </>;
@@ -190,11 +199,15 @@ export class QuickTourModalComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    ReactDOM.render(React.createElement(quickTourReact, {learning: this.learning, closeFunction: this.onClose}), document.getElementById('quick-tour'));
+    ReactDOM.render(React.createElement(quickTourReact,
+        {learning: this.learning, closeFunction: this.onClose}),
+        document.getElementById('quick-tour'));
   }
 
   ngDoCheck(): void {
-    ReactDOM.render(React.createElement(quickTourReact, {learning: this.learning, closeFunction: this.onClose}), document.getElementById('quick-tour'));
+    ReactDOM.render(React.createElement(quickTourReact,
+        {learning: this.learning, closeFunction: this.onClose}),
+        document.getElementById('quick-tour'));
   }
 
 
