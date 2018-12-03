@@ -17,7 +17,7 @@ import {
   activeCriteriaType,
   activeModifierList,
   CohortSearchActions,
-  previewStatus
+  previewStatus,
 } from '../redux';
 
 @Component({
@@ -110,7 +110,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-
+  showEroor = false;
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -203,7 +203,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       .do(console.log)
       .map(vals => this.currentMods(vals))
       .subscribe(newMods => {
-
         /*
          * NOTE: the way this process works is basically as follows: 1) compute
          * a modifier per modifier category 2) merge those with the existing
@@ -316,5 +315,16 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       || event.keyCode === 8)) {
       return false;
     }
+  }
+
+  negativeNumber(){
+   this.modifiers$.forEach(item => {
+    const modArr = item.map(modValue => {
+       return modValue.toJS().operands.map( o => {
+          return parseInt(o) < 0;
+        });
+      });
+     this.showEroor = modArr.toJS().flat().includes(true);
+    });
   }
 }
