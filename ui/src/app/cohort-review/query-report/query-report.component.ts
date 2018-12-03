@@ -59,7 +59,7 @@ export class QueryReportComponent implements OnInit {
       return typeToTitle(_type) + ' | ' + param.type + ' | ' + param.value;
     });
   }
-  onPrint(){
+  onPrint() {
     window.print();
   }
 //  TODO create search param mapping functions for each for each domain/type with different format
