@@ -1,6 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
-import {FormControl, FormGroup, NgForm} from '@angular/forms';
+import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -9,7 +9,6 @@ import {
   activeParameterList,
   CohortSearchActions,
   CohortSearchState,
-  demoCriteriaChildren,
   participantsCount,
   previewStatus,
 } from '../redux';
@@ -145,12 +144,12 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         );
 
 
-      this.subscription = this.count$
+      this.subscription.add(this.count$
         .subscribe(totalCount => {
             if (totalCount) {
               this.count = totalCount;
             }
-        });
+        }));
 
         this.subscription.add (this.ngRedux
             .select(activeParameterList)
@@ -188,32 +187,22 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             TreeSubType[TreeSubType.RACE],
             TreeSubType[TreeSubType.ETH]
         ].map(code => {
-            this.subscription.add(this.ngRedux.select
-                (demoCriteriaChildren(TreeType[TreeType.DEMO], code))
-                    .subscribe(options => {
-                        if (options.size) {
-                            this.loadOptions(options, code);
-                        } else {
-                            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-                                .subscribe(response => {
-                                    const items = response.items
-                                        .filter(item => item.parentId !== 0
-                                            || code === TreeSubType[TreeSubType.DEC]);
-                                    items.sort(sortByCountThenName);
-                                    const nodes = fromJS(items).map(node => {
-                                        if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                                            const paramId =
-                                                `param${node.get('conceptId', node.get('code'))}`;
-                                            node = node.set('parameterId', paramId);
-                                        }
-                                        return node;
-                                    });
-                                    this.actions.loadDemoCriteriaRequestResults
-                                    (TreeType[TreeType.DEMO], code, nodes);
-                                });
+            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
+                .subscribe(response => {
+                    const items = response.items
+                        .filter(item => item.parentId !== 0
+                            || code === TreeSubType[TreeSubType.DEC]);
+                    items.sort(sortByCountThenName);
+                    const nodes = fromJS(items).map(node => {
+                        if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+                            const paramId =
+                                `param${node.get('conceptId', node.get('code'))}`;
+                            node = node.set('parameterId', paramId);
                         }
-                    })
-            );
+                        return node;
+                    });
+                    this.loadOptions(nodes, code);
+                });
         });
     }
 
