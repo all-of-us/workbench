@@ -317,7 +317,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         toMatchConceptIds.add(conceptId);
         List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrand(query);
         if (drugMatchedConcepts.size() > 0) {
-            toMatchConceptIds.addAll(drugMatchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList())); }
+            toMatchConceptIds.addAll(drugMatchedConcepts.stream().map(Concept::getConceptId).collect(Collectors.toList()));
+        }
 
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(keyword, query, toMatchConceptIds);
         List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(keyword);
