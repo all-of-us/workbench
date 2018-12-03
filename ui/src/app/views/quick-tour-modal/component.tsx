@@ -28,14 +28,15 @@ const panels = [
         When you create your Workspace, you will be prompted
         to state your research purpose.  For example, when you create a Workspace to study Type
         2 Diabetes, for research purpose you could enter: “I will use this Workspace to
-        investigate the impact of Geography on use of different medications to treat Type 2Diabetes.”</div>,
+        investigate the impact of Geography on use of different medications to treat
+        Type 2Diabetes.”</div>,
       image: '/assets/images/workspaces.png'
     },
     {
       title: 'Cohorts',
-      content: <div>A “Cohort” is a group of participants you are interested in researching. The Cohort
-        Builder allows you to create and review cohorts and annotate participants in your study
-        group.
+      content: <div>A “Cohort” is a group of participants you are interested in researching.
+        The Cohort Builder allows you to create and review cohorts and annotate
+        participants in your study group.
         <br/><br/>
         For example, you can build a Cohort called “diabetes cases,” to include people
         who have been diagnosed with type II diabetes, using a combination of billing codes and
@@ -47,9 +48,9 @@ const panels = [
     },
     {
       title: 'Concepts',
-      content: <div>Concepts describe information in a patient’s medical record, such as a condition they
-          have, a  prescription they are taking or their physical measurements. In the Workbench we
-          refer to subject areas such as conditions, drugs, measurements etc. as “domains.” You can
+      content: <div>Concepts describe information in a patient’s medical record, such as a condition
+          they have, a  prescription they are taking or their physical measurements. In the Workbench
+          we refer to subject areas such as conditions, drugs, measurements etc. as “domains.” You can
           search for and save collections of concepts from a particular domain as a “Concept Set.”
           <br/><br/>
           For example, if you want to select height, weight and blood pressure information
@@ -72,7 +73,7 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-class quickTourReact extends React.Component<any, any> {
+class QuickTourReact extends React.Component<any, any> {
   state: {selected: number, fullImage: boolean, numPanels: number};
   props: {learning: boolean, closeFunction: Function};
 
@@ -91,7 +92,7 @@ class quickTourReact extends React.Component<any, any> {
   next(): void {
     if (this.state.selected === 4) {
       this.close();
-      return
+      return;
     }
     this.setState({selected: this.state.selected + 1});
   }
@@ -123,7 +124,7 @@ class quickTourReact extends React.Component<any, any> {
           <div className='breadcrumbs'>
               {panels.map((p, i) => {
                   return <><div className='breadcrumb-component'>
-                    <div className={'circle' + (i <= this.state.selected ? ' completed' : "")}
+                    <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
                          onClick={() => this.selectPanel(i)}>
                         {(i < this.state.selected) && <div className='check'>
                             <img src={this.checkImg}/>
@@ -133,7 +134,7 @@ class quickTourReact extends React.Component<any, any> {
                     </div>
                     <div className='breadcrumb-title'>{p.title}</div>
                     {(i !== this.state.numPanels - 1) &&
-                    <div className={'connector' + ((i < this.state.selected) ? ' completed' : "")}>
+                    <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
                     </div>}
                   </div></>;
               })}
@@ -198,20 +199,20 @@ class quickTourReact extends React.Component<any, any> {
 export class QuickTourModalComponent implements OnInit {
 
   @Input('learning')
-  learning = false;
+  learning: boolean;
   @Input('onClose')
   public onClose: Function;
 
   constructor() {}
 
   ngOnInit(): void {
-    ReactDOM.render(React.createElement(quickTourReact,
+    ReactDOM.render(React.createElement(QuickTourReact,
         {learning: this.learning, closeFunction: this.onClose}),
         document.getElementById('quick-tour'));
   }
 
   ngDoCheck(): void {
-    ReactDOM.render(React.createElement(quickTourReact,
+    ReactDOM.render(React.createElement(QuickTourReact,
         {learning: this.learning, closeFunction: this.onClose}),
         document.getElementById('quick-tour'));
   }
