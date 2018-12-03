@@ -149,3 +149,14 @@
     font-weight: bold;
     white-space: nowrap;
 }
+
+.graph-border {
+    border: 1px solid black;
+    padding: 0.3rem;
+    margin-left: 0.4rem;
+}
+
+.demography-title {
+    margin-left: 0.4rem;
+    padding-bottom: 0.5rem;
+}

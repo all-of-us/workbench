@@ -1,3 +1,33 @@
 .report-header {
   display: flex;
 }
+
+.container {
+  min-width: 100%;
+}
+
+
+
+.header-border .btn-margin {
+  margin-top : 0.7rem;
+}
+
+.report-background {
+  background-color: white;
+  padding-top: 1rem;
+}
+
+@media print{
+  .doNotPrint{
+    display:none !important;
+    -webkit-print-color-adjust: exact;
+
+  }
+  .test-print {
+    page-break-inside:auto;
+  }
+
+  .header-border {
+    border-bottom: 1px solid #5FAEE0;
+  }
+}
