@@ -133,6 +133,22 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
+  public void getCriteriaByTypeAndId() throws Exception {
+    assertEquals(
+      createResponseCriteria(icd9CriteriaParent),
+      controller
+        .getCriteriaByTypeAndId(1L, TreeType.ICD9.name(), icd9CriteriaParent.getId())
+        .getBody()
+    );
+    assertEquals(
+      createResponseCriteria(icd9CriteriaChild),
+      controller
+        .getCriteriaByTypeAndId(1L, TreeType.ICD9.name(), icd9CriteriaChild.getId())
+        .getBody()
+    );
+  }
+
+  @Test
   public void getCriteriaByTypeAndParentId() throws Exception {
     assertEquals(
       createResponseCriteria(icd9CriteriaParent),
