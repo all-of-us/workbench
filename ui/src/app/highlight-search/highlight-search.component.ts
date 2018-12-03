@@ -19,4 +19,25 @@ export class HighlightSearchComponent implements OnChanges {
     }
     this.words = this.text.split(' ');
   }
+  public highlight(word: string) {
+    const splitWords = word.split(' ');
+    const temp = [];
+    for (let i = 0; i < splitWords.length; i++) {
+      const m = splitWords[i].match(this.reString);
+      if (m) {
+        const splitMatchedWord = splitWords[i].split(m[0]);
+        for (let j = 0; j < splitMatchedWord.length; j++) {
+          if (j !== splitMatchedWord.length - 1 ) {
+            temp.push(splitMatchedWord[j]);
+            temp.push(m[0]);
+          } else {
+            temp.push(splitMatchedWord[j]);
+          }
+        }
+      } else {
+        temp.push(splitWords[i]);
+      }
+    }
+    return temp;
+  }
 }
