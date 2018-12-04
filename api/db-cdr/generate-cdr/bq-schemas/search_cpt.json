@@ -11,8 +11,18 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "code",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "source_concept_id",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "subtype",
+    "type": "string"
   },
   {
     "mode": "NULLABLE",
