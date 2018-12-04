@@ -2,6 +2,10 @@ import {Component, DoCheck, Input, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
+    'omop-common-data-model-and-standardized-vocabularies/';
+const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
+
 const panels = [
     {
       title: 'Intro',
@@ -18,10 +22,9 @@ const panels = [
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
-        <a className='link' href='https://www.ohdsi.org/data-standardization/the-common-data-model/'
-        target='_blank'> OMOP common data model</a> format. Here are some
-        <a className='link' href='https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data-model-and-standardized-vocabularies/'
-           target='_blank'> tutorials</a>
+        <a className='link' href={OMOPDataSetLink} target='_blank'> OMOP common data model</a>
+          format. Here are some
+        <a className='link' href={OMOPTutorialsLink} target='_blank'> tutorials</a>
         to understand OMOP data model.
         <br/><br/>
         When you create your Workspace, you will be prompted
