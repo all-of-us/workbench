@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test --sourcemaps=false",
+    "test": "ng test --source-map=false",
     "lint": "ng lint --type-check",
     "e2e": "ng e2e",
     "codegen": "yarn run merge-swagger && yarn run codegen-clean && yarn run codegen-swagger && yarn run post-codegen && yarn run notebooks-codegen-swagger && yarn run notebooks-post-codegen",
@@ -16,7 +16,7 @@
     "post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/generated/variables.ts",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated --additional-properties ngVersion=2",
     "notebooks-post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/notebooks-generated/variables.ts",
-    "coverage": "ng test --sourcemaps=false --watch=false --code-coverage"
+    "coverage": "ng test --source-map=false --watch=false --code-coverage"
   },
   "private": true,
   "dependencies": {
