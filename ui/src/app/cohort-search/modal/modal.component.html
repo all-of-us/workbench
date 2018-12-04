@@ -33,7 +33,7 @@
                   *ngIf="showModifiers"
                   [class.active]="mode === 'modifiers'"
                   [disabled]="noSelection"
-                  (click)="mode = 'modifiers'">
+                  (click)="setMode('modifiers')">
                   Modifiers
                 </button>
               </ng-container>
