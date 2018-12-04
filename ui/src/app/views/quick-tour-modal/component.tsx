@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, DoCheck, Input, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -20,10 +20,9 @@ const panels = [
        your work. The dataset referenced by a workspace is in
         <a className='link' href='https://www.ohdsi.org/data-standardization/the-common-data-model/'
         target='_blank'> OMOP common data model</a> format. Here are some
-        <a className='link' href=
-            'https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data-model-and-standardized-vocabularies/'
+        <a className='link' href='https://www.ohdsi.org/past-events/2017-tutorials-omop-common-data-model-and-standardized-vocabularies/'
            target='_blank'> tutorials</a>
-          to understand OMOP data model.
+        to understand OMOP data model.
         <br/><br/>
         When you create your Workspace, you will be prompted
         to state your research purpose.  For example, when you create a Workspace to study Type
@@ -48,10 +47,11 @@ const panels = [
     },
     {
       title: 'Concepts',
-      content: <div>Concepts describe information in a patient’s medical record, such as a condition
-          they have, a  prescription they are taking or their physical measurements. In the Workbench
-          we refer to subject areas such as conditions, drugs, measurements etc. as “domains.” You can
-          search for and save collections of concepts from a particular domain as a “Concept Set.”
+      content: <div>Concepts describe information in a patient’s medical record, such as a
+          condition they have, a  prescription they are taking or their physical measurements.
+          In the Workbench we refer to subject areas such as conditions, drugs, measurements
+          etc. as “domains.” You can search for and save collections of concepts from a
+          particular domain as a “Concept Set.”
           <br/><br/>
           For example, if you want to select height, weight and blood pressure information
           (concepts) from your “diabetes cases” Cohort, you can search for the 3 concepts
@@ -79,6 +79,7 @@ class QuickTourReact extends React.Component<any, any> {
 
   checkImg = '/assets/images/check.svg';
   expandIcon = '/assets/icons/expand.svg';
+  shrinkIcon = '/assets/icons/shrink.svg';
 
   constructor(props: Object) {
     super(props);
@@ -182,7 +183,7 @@ class QuickTourReact extends React.Component<any, any> {
             <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
               <div className='resize-icon' onClick={() => this.toggleImage()}
                    style={{position: 'absolute', right: '5%', bottom: '5%'}}>
-                  <img src={this.expandIcon}/>
+                  <img src={this.shrinkIcon}/>
               </div>
           </div>
         </div>}
@@ -196,7 +197,7 @@ class QuickTourReact extends React.Component<any, any> {
   templateUrl: './component.html'
 })
 
-export class QuickTourModalComponent implements OnInit {
+export class QuickTourModalComponent implements DoCheck, OnInit {
 
   @Input('learning')
   learning: boolean;
