@@ -159,7 +159,9 @@ class QuickTourReact extends React.Component<any, any> {
           </div>
           <div className='panel'>
             <div className='panel-left'>
-              <div className='panel-title'>{panels[this.state.selected].title}</div>
+              <div className='panel-title'>
+                  {this.state.selected === 0 ? 'Introduction' : panels[this.state.selected].title}
+              </div>
               <div className='panel-contents'>
                 <div className='panel-text'>{panels[this.state.selected].content}</div>
               </div>

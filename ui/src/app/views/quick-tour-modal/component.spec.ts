@@ -4,20 +4,16 @@ import {By} from '@angular/platform-browser';
 
 import {QuickTourModalComponent} from './component';
 
-import {ExpandComponent} from 'app/icons/expand/component';
-import {ShrinkComponent} from 'app/icons/shrink/component';
-
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 describe('QuickTourModalComponent', () => {
   let fixture: ComponentFixture<QuickTourModalComponent>;
   let de: DebugElement;
+  let panelTitles: ["Introduction", "Workspaces", "Cohorts", "Concepts", "Notebooks"];
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [],
       declarations: [
-        ExpandComponent,
-        ShrinkComponent,
         QuickTourModalComponent
       ],
       providers: []
@@ -45,11 +41,11 @@ describe('QuickTourModalComponent', () => {
     const panelTitle = de.query(By.css('.panel-title'));
     simulateClick(fixture, nextButton);
     updateAndTick(fixture);
-    const nextPanelTitle = fixture.componentInstance.panelTitles[1].toString();
+    const nextPanelTitle = panelTitles[1].toString();
     expect(panelTitle.nativeElement.innerText).toMatch(nextPanelTitle);
     simulateClick(fixture, prevButton);
     updateAndTick(fixture);
-    const origPanelTitle = fixture.componentInstance.panelTitles[0].toString();
+    const origPanelTitle = panelTitles[0].toString();
     expect(panelTitle.nativeElement.innerText).toMatch(origPanelTitle);
   }));
 
