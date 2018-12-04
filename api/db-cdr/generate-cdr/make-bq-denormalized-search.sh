@@ -68,9 +68,7 @@ fi
 schema_path=generate-cdr/bq-schemas
 bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_person
 bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_person.json $BQ_DATASET.search_person
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_demo
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_demo.json $BQ_DATASET.search_demo
-create_tables=(search_icd9 search_icd10 search_cpt search_snomed)
+create_tables=(search_icd9 search_icd10 search_cpt search_snomed search_drug)
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
@@ -90,22 +88,6 @@ select p.person_id, g.concept_code as gender,
 case when r.concept_name is null then 'Unknown' else r.concept_name end as race,
 cast(floor(date_diff(current_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age
 from \`$BQ_PROJECT.$BQ_DATASET.person\` p
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id and g.vocabulary_id in ('Gender', 'None'))
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')"
-
-################################################
-#   insert condition data into search_demo     #
-################################################
-echo "Inserting conditions data into search_demo"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_demo\`
- (person_id, gender_concept_id, gender, race_concept_id, race, ethnicity_concept_id, age, deceased)
-select p.person_id, p.gender_concept_id, g.concept_code as gender, p.race_concept_id,
-case when r.concept_name is null then 'Unknown' else r.concept_name end as race, p.ethnicity_concept_id,
-cast(floor(date_diff(current_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age,
-case when d.person_id is null then 0 else 1 end as deceased
-from \`$BQ_PROJECT.$BQ_DATASET.person\` p
-left join \`$BQ_PROJECT.$BQ_DATASET.death\` d on (p.person_id = d.person_id)
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id and g.vocabulary_id in ('Gender', 'None'))
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')"
 
@@ -276,3 +258,18 @@ from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
 join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = po.procedure_source_concept_id and c.is_selectable = 1 and c.type = 'SNOMED')
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = po.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)"
+
+################################################
+#   insert condition data into search_drug     #
+################################################
+echo "Inserting conditions data into search_drug"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_drug\`
+ (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
+select de.person_id, de.drug_exposure_start_date as entry_date, c.code, de.drug_source_concept_id as source_concept_id, c.subtype,
+cast(floor(date_diff(de.drug_exposure_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
+vo.visit_concept_id
+from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
+join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = de.drug_source_concept_id and c.is_selectable = 1 and c.type = 'DRUG' and c.subtype = 'ATC')
+join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = de.person_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = de.visit_occurrence_id)"
