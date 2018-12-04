@@ -76,9 +76,20 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-class QuickTourReact extends React.Component<any, any> {
-  state: {selected: number, fullImage: boolean, numPanels: number};
-  props: {learning: boolean, closeFunction: Function};
+type QuickTourState = {
+    selected: number,
+    fullImage: boolean,
+    numPanels: number
+}
+
+type QuickTourProps = {
+    learning: boolean,
+    closeFunction: Function
+}
+
+class QuickTourReact extends React.Component<QuickTourProps, QuickTourState> {
+  state: QuickTourState;
+  props: QuickTourProps;
 
   checkImg = '/assets/images/check.svg';
   expandIcon = '/assets/icons/expand.svg';
@@ -90,7 +101,9 @@ class QuickTourReact extends React.Component<any, any> {
   }
 
   previous(): void {
-    this.setState({selected: this.state.selected - 1});
+    this.setState(state => {
+      return {selected: state.selected - 1};
+    });
   }
 
   next(): void {
@@ -98,7 +111,9 @@ class QuickTourReact extends React.Component<any, any> {
       this.close();
       return;
     }
-    this.setState({selected: this.state.selected + 1});
+    this.setState(state => {
+      return {selected: state.selected + 1};
+    });
   }
 
   close(): void {
