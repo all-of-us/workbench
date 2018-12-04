@@ -98,7 +98,7 @@ where count_value >= 0"
 
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit') and concept_code not in ('OMOP generated') and lower(vocabulary_id) not in ('ppi')"
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit','Drug') and concept_code not in ('OMOP generated') and lower(vocabulary_id) not in ('ppi')"
 
 #delete concepts from concept_relationship that are not in concepts
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \

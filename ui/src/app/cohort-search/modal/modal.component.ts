@@ -232,7 +232,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
-    if (mode === 'snomed') {
+    if (mode === 'snomed' && this.ctype !== TreeType[TreeType.SNOMED]) {
       this.originalNode = Map({
         type: this.ctype,
         subtype: this.subtype,
@@ -240,11 +240,13 @@ export class ModalComponent implements OnInit, OnDestroy {
         id: 0,
       });
     }
-    const node = mode === 'tree' ? this.originalNode : this.snomedNode;
-    const criteriaType = node.get('type');
-    const criteriaSubtype = node.get('subtype');
-    const context = {criteriaType, criteriaSubtype};
-    this.actions.setWizardContext(context);
+    if (mode !== 'modifiers') {
+      const node = mode === 'tree' ? this.originalNode : this.snomedNode;
+      const criteriaType = node.get('type');
+      const criteriaSubtype = node.get('subtype');
+      const context = {criteriaType, criteriaSubtype};
+      this.actions.setWizardContext(context);
+    }
     this.mode = mode;
   }
 

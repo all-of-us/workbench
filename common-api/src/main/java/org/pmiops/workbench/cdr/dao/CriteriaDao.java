@@ -124,5 +124,4 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "order by c.code asc", nativeQuery = true)
   List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type,
                                                  @Param("value") String value);
-
 }
