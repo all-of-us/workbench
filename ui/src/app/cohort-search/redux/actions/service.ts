@@ -349,7 +349,7 @@ export class CohortSearchActions {
       includes: [],
       excludes: [],
       [role]: [{
-        items: [this.mapGroupItem(itemId, false)],
+        items: [this.mapGroupItem(itemId)],
       }]
     };
     this.requestCounts(this.cdrVersionId, 'items', itemId, request);
@@ -466,7 +466,7 @@ export class CohortSearchActions {
     return searchGroup;
   }
 
-  mapGroupItem = (itemId: string, temporal: boolean): SearchGroupItem => {
+  mapGroupItem = (itemId: string, temporal?: boolean): SearchGroupItem => {
     const item = getItem(itemId)(this.state);
     const critIds = item.get('searchParameters', List());
 
@@ -499,13 +499,16 @@ export class CohortSearchActions {
       attributes: immParam.get('attributes'),
     };
 
-    ['value', 'conceptId', 'domainId'].forEach(prop => {
-      if (immParam.get(prop)) {
-        param[prop] = immParam.get(prop);
-      }
-    });
-    if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype') && immParam.get('name')) {
+    if (immParam.get('conceptId')) {
+      param.conceptId = immParam.get('conceptId');
+    }
+    if (immParam.get('domainId')) {
+      param.domainId = immParam.get('domainId');
+    }
+    if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
+    } else if (immParam.get('code')) {
+      param.value = immParam.get('code');
     }
     return param;
   }
