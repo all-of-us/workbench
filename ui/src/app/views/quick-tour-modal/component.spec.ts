@@ -9,7 +9,7 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 describe('QuickTourModalComponent', () => {
   let fixture: ComponentFixture<QuickTourModalComponent>;
   let de: DebugElement;
-  let panelTitles: ["Introduction", "Workspaces", "Cohorts", "Concepts", "Notebooks"];
+  const panelTitles = ['Introduction', 'Workspaces', 'Cohorts', 'Concepts', 'Notebooks'];
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [],
