@@ -1,0 +1,42 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gender_concept_id",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gender",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "race_concept_id",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "race",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "ethnicity_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "age",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "deceased",
+    "type": "INTEGER"
+  }
+]
