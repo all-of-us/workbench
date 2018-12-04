@@ -21,25 +21,79 @@
         Cohort name: {{cohort.name}} <br>
         Created by: {{cohort.creator}} <br>
         Date created: {{ cohort.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}} <br><br>
-        <!--Cohort definition:<br>-->
       </div>
       <div class="col-sm-2 col-xs-2">
         <clr-icon class="doNotPrint" shape="printer" size="48"></clr-icon>
         <button class="doNotPrint btn btn-primary" (click)="onPrint()">PRINT REPORT</button>
       </div>
-
     </div>
   </div>
+<!--Cohort Definition HTML start-->
   <div class="report-content">
-    <app-overview-charts class="test-print"></app-overview-charts>
-    <!--<div *ngFor="let group of definition.includes; let g = index;">-->
-    <!--<div *ngFor="let item of group.items; let i = index">-->
-    <!--<div *ngFor="let param of item.searchParameters; let p = index;">-->
-    <!--<div>{{param.type}} | {{param.name}} | {{param.value}}</div>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
+      Cohort definition:<br>
+    <div style="margin-left: 1.2rem;">
+      <ng-container *ngFor="let group of definition; let g = index;">
+        <ng-container *ngFor="let item of group?.groups; let i = index">
+          <div *ngIf="i > 0">AND</div>
+          <div class="group-background">
+              <ng-container *ngFor="let param of item; let p = index;">
+                <div *ngIf="p > 0 ">OR</div>
+                <div style="border: 1px solid black;">
+                  <ng-container *ngFor="let query of param; let s = index;">
+                    <ng-container *ngIf="s > 0">
+                      <div *ngIf="query?.type ==='DEMO'; else or ">AND</div>
+                      <ng-template #or>OR</ng-template>
+                    </ng-container>
+                    <div>
+                      {{query?.items}}
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-container>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
   </div>
+  <!--Cohort Definition HTML END-->
+
+  <!--Descriptive HTML Start-->
+  <div>
+    Descriptive Statistics:<br>
+    <div style="width: 60%; border: 1px solid black;">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-4"></div>
+          <div class="col-sm-4">
+            Total Count
+          </div>
+          <div class="col-sm-4">
+            Percent of Cohort
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+              Gender
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-4">
+            <div>Male</div>
+          </div>
+          <div class="col-sm-4">
+               1027
+          </div>
+          <div class="col-sm-4">
+            100%
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!--Descriptive HTML END-->
+    <app-overview-charts class="test-print"></app-overview-charts>
 </div>
 
 

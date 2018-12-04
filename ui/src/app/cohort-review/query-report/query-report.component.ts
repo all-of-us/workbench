@@ -13,7 +13,6 @@ export class QueryReportComponent implements OnInit {
   cohort: any;
   review: any;
   definition: Array<any>;
-
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -25,7 +24,7 @@ export class QueryReportComponent implements OnInit {
   }
 
   mapDefinition() {
-    const definition = JSON.parse(this.cohort.criteria);
+    const definition = JSON.parse(this.cohort.criteria)
     this.definition = ['includes', 'excludes'].map(role => {
       if (definition[role].length) {
         const roleObj = {role, groups: []};
@@ -35,6 +34,7 @@ export class QueryReportComponent implements OnInit {
         return roleObj;
       }
     });
+    // console.log( this.definition)
   }
 
   mapGroup(group: any) {
@@ -50,15 +50,16 @@ export class QueryReportComponent implements OnInit {
 
   mapPMParams(params: Array<any>) {
     return params.map(param => {
-      return typeToTitle(param.type) + ' | ' + param.name;
+       return {items: typeToTitle(param.type) + ' | ' + param.name, type:param.type};
     });
   }
 
   mapParams(_type: string, params: Array<any>) {
     return params.map(param => {
-      return typeToTitle(_type) + ' | ' + param.type + ' | ' + param.value;
+       return {items: typeToTitle(_type) + ' | ' + param.subtype + ' | ' + param.name, type: param.type};
     });
   }
+
   onPrint() {
     window.print();
   }
