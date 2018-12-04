@@ -87,7 +87,7 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   @Query(value = "select * from criteria c " +
     "inner join ( " +
-    "select cr.concept_id_2 from concept_relationship cr " +
+    "select cr.concept_id_2 from criteria_relationship cr " +
     "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
     "and cr.concept_id_1 = :conceptId " +
     "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
