@@ -27,6 +27,29 @@
             <column name="concept_id_2" type="bigint"></column>
         </createIndex>
 
+        <createTable tableName="criteria_ancestor">
+            <column name="ancestor_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="descendant_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex
+          indexName="idx_descendant_ancestor"
+          tableName="criteria_ancestor"
+          unique="false">
+            <column name="descendant_id"/>
+        </createIndex>
+
+        <createIndex
+          indexName="idx_ancestor_id"
+          tableName="criteria_ancestor"
+          unique="false">
+            <column name="ancestor_id"/>
+        </createIndex>
+
     </changeSet>
 
 </databaseChangeLog>
