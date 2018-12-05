@@ -47,6 +47,18 @@ public class CohortBuilderControllerTest {
   private static final String SUBTYPE_ATC = "ATC";
   private static final String SUBTYPE_BRAND = "BRAND";
 
+  private Criteria icd9CriteriaParent;
+  private Criteria icd9CriteriaChild;
+  private Criteria demoCriteria;
+  private Criteria labMeasurement;
+  private Criteria drugATCCriteria;
+  private Criteria drugATCCriteriaChild;
+  private Criteria drugBrandCriteria;
+  private Criteria ppiCriteriaParent;
+  private Criteria ppiCriteriaChild;
+  private CriteriaAttribute criteriaAttributeMin;
+  private CriteriaAttribute criteriaAttributeMax;
+
   @Autowired
   private CohortBuilderController controller;
 
@@ -83,21 +95,60 @@ public class CohortBuilderControllerTest {
   public void getCriteriaByTypeAndId() throws Exception {
     Criteria icd9CriteriaParent = criteriaDao.save(
       createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true)
+    icd9CriteriaParent = criteriaDao.save(
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true, true)
     );
-    Criteria icd9CriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false)
+    icd9CriteriaChild = criteriaDao.save(
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false, true)
     );
+    demoCriteria = criteriaDao.save(
+      createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true, true)
+    );
+    labMeasurement = criteriaDao.save(
+      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false, true).synonyms("+LP12*")
+    );
+    drugATCCriteria = criteriaDao.save(
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
+    );
+    drugBrandCriteria = criteriaDao.save(
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true, true)
+    );
+    drugATCCriteriaChild = criteriaDao.save(
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false, true).synonyms("+drugN*")
+    );
+    ppiCriteriaParent = criteriaDao.save(
+      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
+        "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
+        DomainType.OBSERVATION.name(), "43529119", true, false).synonyms("+covered*")
+    );
+    ppiCriteriaChild = criteriaDao.save(
+      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), ppiCriteriaParent.getId(), "324836",
+        "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
+        DomainType.OBSERVATION.name(), "43529119", false, true).synonyms("+covered*")
+    );
+    conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
+    conceptRelationshipDao.save(
+      new ConceptRelationship().conceptRelationshipId(
+        new ConceptRelationshipId()
+          .relationshipId("1")
+          .conceptId2(12345)
+          .conceptId1(1247)
+      )
+    );
+    criteriaAttributeMin = criteriaAttributeDao.save(
+      new CriteriaAttribute().conceptId(1L).conceptName("MIN").estCount("10").type("NUM").valueAsConceptId(0L)
+    );
+    criteriaAttributeMax = criteriaAttributeDao.save(
+      new CriteriaAttribute().conceptId(1L).conceptName("MAX").estCount("100").type("NUM").valueAsConceptId(0L)
+    );
+  }
 
+  @Test
+  public void getPPICriteriaParent() throws Exception {
     assertEquals(
-      createResponseCriteria(icd9CriteriaParent),
+      createResponseCriteria(ppiCriteriaParent),
       controller
-        .getCriteriaByTypeAndId(1L, TreeType.ICD9.name(), icd9CriteriaParent.getId())
-        .getBody()
-    );
-    assertEquals(
-      createResponseCriteria(icd9CriteriaChild),
-      controller
-        .getCriteriaByTypeAndId(1L, TreeType.ICD9.name(), icd9CriteriaChild.getId())
+        .getPPICriteriaParent(1L, TreeType.PPI.name(), ppiCriteriaChild.getConceptId())
         .getBody()
     );
   }
@@ -249,7 +300,7 @@ public class CohortBuilderControllerTest {
     );
 
     assertEquals(
-      createResponseCriteria(ppiCriteria),
+      createResponseCriteria(ppiCriteriaParent),
       controller
         .getCriteriaAutoComplete(1L, TreeType.PPI.name(),"covered", null, null)
         .getBody()
@@ -352,7 +403,7 @@ public class CohortBuilderControllerTest {
     criteriaAttributeDao.delete(criteriaAttributeMax.getId());
   }
 
-  private Criteria createCriteria(String type, String subtype, long parentId, String code, String name, String domain, String conceptId, boolean group) {
+  private Criteria createCriteria(String type, String subtype, long parentId, String code, String name, String domain, String conceptId, boolean group, boolean selectable) {
     return new Criteria()
       .parentId(parentId)
       .type(type)
@@ -360,7 +411,7 @@ public class CohortBuilderControllerTest {
       .code(code)
       .name(name)
       .group(group)
-      .selectable(true)
+      .selectable(selectable)
       .count("16")
       .domainId(domain)
       .conceptId(conceptId)
