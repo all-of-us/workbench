@@ -232,7 +232,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
-    if (mode === 'snomed' && this.ctype !== TreeType[TreeType.SNOMED]) {
+    if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
       this.originalNode = Map({
         type: this.ctype,
         subtype: this.subtype,
