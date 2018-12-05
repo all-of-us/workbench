@@ -147,7 +147,6 @@ public class Cohort {
       this.cohortReviews = cohortReviews;
       return;
     }
-    this.cohortReviews.clear();
     this.cohortReviews.addAll(cohortReviews);
   }
 
