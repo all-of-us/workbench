@@ -451,21 +451,22 @@ export class CohortSearchActions {
 
   mapGroup = (groupId: string): SearchGroup => {
     const group = getGroup(groupId)(this.state);
-    let items = group.get('items', List()).map(this.mapGroupItem);
+    const temporal = group.get('temporal');
+    let items = group.get('items', List()).map(item => this.mapGroupItem(item, temporal));
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{
-      id: groupId,
-      temporal: group.get('temporal'),
-      mention: group.get('mention'),
-      time: group.get('time'),
-      timeValue: group.get('timeValue'),
-      timeFrame: group.get('timeFrame'),
-      items};
+    const searchGroup = <SearchGroup>{id: groupId, items, temporal};
+    if (temporal) {
+      searchGroup.mention = group.get('mention');
+      searchGroup.time = group.get('time');
+      searchGroup.timeValue = group.get('timeValue');
+      searchGroup.timeFrame = group.get('timeFrame');
+    }
+    return searchGroup;
   }
 
-  mapGroupItem = (itemId: string): SearchGroupItem => {
+  mapGroupItem = (itemId: string, temporal?: boolean): SearchGroupItem => {
     const item = getItem(itemId)(this.state);
     const critIds = item.get('searchParameters', List());
 
@@ -476,29 +477,39 @@ export class CohortSearchActions {
       .map(this.mapParameter)
       .toJS();
 
-    return <SearchGroupItem>{
+    const searchGroupItem =  <SearchGroupItem>{
       id: itemId,
       type: item.get('type', '').toUpperCase(),
-      temporalGroup: item.get('temporalGroup'),
       searchParameters: params,
       modifiers: item.get('modifiers', List()).toJS(),
     };
+    if (temporal) {
+      searchGroupItem.temporalGroup = item.get('temporalGroup');
+    }
+    return searchGroupItem;
   }
 
   mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
       name: stripHtml(immParam.get('name', '')),
-      value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
-          ? immParam.get('name') : immParam.get('code'),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
       attributes: immParam.get('attributes'),
-      conceptId: immParam.get('conceptId'),
-      domainId: immParam.get('domainId')
     };
 
+    if (immParam.get('conceptId')) {
+      param.conceptId = immParam.get('conceptId');
+    }
+    if (immParam.get('domainId')) {
+      param.domainId = immParam.get('domainId');
+    }
+    if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
+      param.value = immParam.get('name');
+    } else if (immParam.get('code')) {
+      param.value = immParam.get('code');
+    }
     return param;
   }
 
