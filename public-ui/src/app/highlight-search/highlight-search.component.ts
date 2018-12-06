@@ -25,20 +25,10 @@ export class HighlightSearchComponent implements OnChanges {
     const splits = this.text.split(new RegExp(this.matchString, 'i'));
     if (matches && this.searchTerm) {
       for (let i = 0; i < matches.length; i++) {
-        // did not want to highlight whole of disorder of (, when searched by disorder
-        const tempSplitwords = splits[i].split(' ');
-        for (let j = 0; j < tempSplitwords.length; j++) {
-          this.words.push(tempSplitwords[j]);
-        }
-        const tempMatchWords = matches[i].split(' ');
-        for (let j = 0; j < tempMatchWords.length; j++) {
-          this.words.push(tempMatchWords[j]);
-        }
+        this.words.push(splits[i]);
+        this.words.push(matches[i]);
       }
-      const tempSplitWords = splits[splits.length - 1].split(' ');
-      for (let j = 0; j < tempSplitWords.length; j++) {
-        this.words.push(tempSplitWords[j]);
-      }
+      this.words.push(splits[splits.length - 1]);
     } else {
       this.words.push(this.text);
     }

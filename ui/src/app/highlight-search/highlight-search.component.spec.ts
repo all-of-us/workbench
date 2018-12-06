@@ -4,8 +4,15 @@ import {By} from '@angular/platform-browser';
 
 import { HighlightSearchComponent } from './highlight-search.component';
 
+@Component({
+  template: '<app-highlight-search ' +
+  '[text]="\'lung enlargement with_another disorder_foo\'" ' +
+  '[searchTerm]="\'lung disorder\'"></app-highlight-search>'
+})
+class TestHighlightComponent {}
+
 describe('HighlightSearchComponent', () => {
-  let fixture: ComponentFixture<HighlightSearchComponent>;
+  let fixture: ComponentFixture<TestHighlightComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
         declarations: [
@@ -23,10 +30,4 @@ describe('HighlightSearchComponent', () => {
     const tokens = fixture.debugElement.queryAll(By.css('.highlight'));
     expect(tokens.length).toBe(2);
   });
-  @Component({
-    template: '<app-highlight-search ' +
-    '[text]="\'lung enlargement with_another disorder_foo\'" ' +
-    '[searchTerm]="\'lung disorder\'"></app-highlight-search>'
-  })
-  class TestHighlightComponent {}
 });
