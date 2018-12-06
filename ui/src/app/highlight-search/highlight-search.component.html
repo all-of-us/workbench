@@ -1,14 +1,9 @@
 <ng-container *ngIf="searchTerm; else noSearchTerm">
-  <span *ngFor="let word of words">
-    <ng-container *ngIf="matchString.test(word.toLowerCase()); else noHighlight">
-      <span class="noExtraSpace" *ngFor="let w of highlight(word)" [class.highlight]="matchString.test(w.toLowerCase())">
-        {{w}}
-      </span>
-    </ng-container>
-    <ng-template #noHighlight>
+  <ng-container *ngFor="let word of words">
+    <span [class.highlight]="matchString.test(word.toLowerCase())">
       {{word}}
-    </ng-template>
-  </span>
+    </span>
+  </ng-container>
 </ng-container>
 <ng-template #noSearchTerm>
   <span *ngFor="let word of words">

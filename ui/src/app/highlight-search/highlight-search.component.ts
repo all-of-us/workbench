@@ -8,7 +8,7 @@ import { Component, Input, OnChanges } from '@angular/core';
 export class HighlightSearchComponent implements OnChanges {
   @Input() text: string;
   @Input() searchTerm: string;
-  words: string[];
+  words: string[] = [];
   matchString: RegExp;
   ngOnChanges() {
     if (this.searchTerm) {
@@ -17,20 +17,25 @@ export class HighlightSearchComponent implements OnChanges {
       searchWords = searchWords.map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
       this.matchString = new RegExp(searchWords.join('|'));
     }
-    this.words = this.text.split(' ');
-  }
-  public highlight(word) {
-    const matches = word.match(new RegExp(this.matchString, 'g'));
-    const splits = word.split(new RegExp(this.matchString));
-    const temp = [];
-    if (matches) {
+    const matches = this.text.match(new RegExp(this.matchString, 'g'));
+    const splits = this.text.split(new RegExp(this.matchString));
+    if (matches && this.searchTerm.length > 0) {
       for (let i = 0; i < matches.length; i++) {
-        temp.push(splits[i], matches[i]);
+        const tempSplitwords = splits[i].split(' ');
+        for (let j = 0; j < tempSplitwords.length; j++) {
+          this.words.push(tempSplitwords[j]);
+        }
+        const tempMatchWords = matches[i].split(' ');
+        for (let j = 0; j < tempMatchWords.length; j++) {
+          this.words.push(tempMatchWords[j]);
+        }
       }
-      temp.push(splits[splits.length - 1]);
+      const tempSplitWords = splits[splits.length - 1].split(' ');
+      for (let j = 0; j < tempSplitWords.length; j++) {
+        this.words.push(tempSplitWords[j]);
+      }
     } else {
-      temp.push(word);
+      this.words.push(this.text);
     }
-    return temp;
   }
 }

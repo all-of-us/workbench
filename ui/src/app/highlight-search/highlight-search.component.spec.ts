@@ -1,29 +1,32 @@
+import { Component } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HighlightSearchComponent } from './highlight-search.component';
+import {By} from '@angular/platform-browser';
 
 describe('HighlightSearchComponent', () => {
-  let component: HighlightSearchComponent;
   let fixture: ComponentFixture<HighlightSearchComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        declarations: [ HighlightSearchComponent ]
+        declarations: [
+          HighlightSearchComponent,
+          TestHighlightComponent
+        ]
       })
       .compileComponents();
   }));
   beforeEach(() => {
-    fixture = TestBed.createComponent(HighlightSearchComponent);
-    component = fixture.componentInstance;
+    fixture = TestBed.createComponent(TestHighlightComponent);
     fixture.detectChanges();
   });
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  fit('should highlight search terms', () => {
+    const tokens = fixture.debugElement.queryAll(By.css('.highlight'));
+    expect(tokens.length).toBe(2);
   });
-  it('highlight_split_test', () => {
-    component = new HighlightSearchComponent();
-    component.matchString = new RegExp('lung|disorder');
-    const matchedWords = component.highlight('lung_enlargement_with_another_disorder');
-    expect(matchedWords).toContain('lung');
-    expect(matchedWords).toContain('disorder');
-  });
+  @Component({
+    template: '<app-highlight-search ' +
+    '[text]="\'lung enlargement with_another disorder_foo\'" ' +
+    '[searchTerm]="\'lung disorder\'"></app-highlight-search>'
+  })
+  class TestHighlightComponent {}
 });
