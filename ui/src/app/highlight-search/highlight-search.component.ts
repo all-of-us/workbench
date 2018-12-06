@@ -21,8 +21,7 @@ export class HighlightSearchComponent implements OnChanges {
     const splits = this.text.split(new RegExp(this.matchString, 'gi'));
     if (matches && this.searchTerm) {
       for (let i = 0; i < matches.length; i++) {
-        this.words.push(splits[i]);
-        this.words.push(matches[i]);
+        this.words.push(splits[i], matches[i]);
       }
       this.words.push(splits[splits.length - 1]);
     } else {
