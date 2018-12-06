@@ -3,6 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 
 import {TreeSubType, TreeType} from 'generated';
 import {subtypeToTitle, typeToTitle} from '../../cohort-search/utils';
+import * as moment from "moment";
 
 
 @Component({
@@ -16,6 +17,7 @@ export class QueryReportComponent implements OnInit {
   definition: Array<any>;
   testing: any;
   test: any;
+  duplicateItems = [];
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -23,7 +25,7 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
     this.test= JSON.parse(this.cohort.criteria);
-    console.log(JSON.parse(cohort.criteria));
+    // console.log(cohort.criteria);
     this.mapDefinition();
   }
 
@@ -105,6 +107,7 @@ export class QueryReportComponent implements OnInit {
       });
     }
   }
+
 
   onPrint() {
     window.print();
