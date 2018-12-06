@@ -65,10 +65,12 @@ public class CriteriaDaoTest {
   private Criteria drugCriteriaIngredient1;
   private Criteria drugCriteriaBrand;
   private Criteria labCriteria;
+  private Criteria ppiCriteriaParent;
+  private Criteria ppiCriteriaChild;
 
   @Before
   public void setUp() {
-    icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null).conceptId("99");
     icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
     parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
@@ -85,6 +87,7 @@ public class CriteriaDaoTest {
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
     labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    ppiCriteriaParent = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "", "Race", 3272493, true, false, "3272493").conceptId("1586140");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -107,6 +110,9 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaIngredient1);
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
+    criteriaDao.save(ppiCriteriaParent);
+    ppiCriteriaChild = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "1586146", "White Alone", ppiCriteriaParent.getId(), false, true, ppiCriteriaParent.getPath() + "." + ppiCriteriaParent.getId()).conceptId("1586140");
+    criteriaDao.save(ppiCriteriaChild);
 
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -142,9 +148,9 @@ public class CriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByTypeAndId() throws Exception {
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndId(icd9Criteria1.getType(), icd9Criteria1.getId());
-    assertEquals(icd9Criteria1, criteria);
+  public void getPPICriteriaParent() throws Exception {
+    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(ppiCriteriaChild.getType(), ppiCriteriaChild.getConceptId(), false);
+    assertEquals(ppiCriteriaParent, criteria);
   }
 
   @Test
