@@ -81,7 +81,7 @@ export class QueryReportComponent implements OnInit {
   }
 
   removeUnderScoreLowerCase(name: string) {
-    return name.replace(/_/g, " ").toLowerCase();
+    return name.replace(/_/g, ' ').toLowerCase();
   }
 
   operatorConversion(operator){
@@ -104,24 +104,24 @@ export class QueryReportComponent implements OnInit {
          name = mod.reduce((acc, m) => {
            const concatOperand = m.operands.reduce((final, o) => `${final} ${o}`, '');
            return acc !== '' ?
-             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} 
-              ${this.operatorConversion(m.operator)} 
+             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)}
+              ${this.operatorConversion(m.operator)}
                ${concatOperand}`
              :
-             `${this.removeUnderScoreLowerCase(m.name)} 
-              ${this.operatorConversion(m.operator)} 
+             `${this.removeUnderScoreLowerCase(m.name)}
+              ${this.operatorConversion(m.operator)}
                 ${concatOperand}`;
          }, '');
          return {
-           items: `${typeToTitle(_type)} | 
-                    ${eachParam.type} | ${eachParam.value} 
+           items: `${typeToTitle(_type)} |
+                    ${eachParam.type} | ${eachParam.value}
                     ${eachParam.name} | ${name}`,
            type: eachParam.type
          };
       });
     } else {
       return params.map(param => {
-        return {items:`${typeToTitle(_type)} 
+        return {items: `${typeToTitle(_type)}
                       | ${param.type} | ${param.value}  ${param.name}`,
                 type: param.type};
       });

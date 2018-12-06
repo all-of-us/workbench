@@ -20,6 +20,18 @@ import { QueryReportComponent } from './query-report.component';
 describe('QueryReportComponent', () => {
   let component: QueryReportComponent;
   let fixture: ComponentFixture<QueryReportComponent>;
+  const criteria = {
+    includes: [{
+      items: [{
+        type: 'PM',
+        searchParameters: [{
+          name: 'Hypotensive (Systolic <= 90 / Diastolic <= 60)',
+          type: 'PM'
+        }]
+      }]
+    }],
+    excludes: []
+  };
   const activatedRouteStub = {
     data: Observable.of({
       participant: {},
@@ -32,7 +44,7 @@ describe('QueryReportComponent', () => {
         },
         cohort: {
           name: '',
-          criteria: '{"includes":[{"id":"includes_k6chli1bh","items":[{"id":"items_c0xgoxmfq","type":"PM","searchParameters":[{"parameterId":"param3272848","name":"Hypotensive (Systolic <= 90 / Diastolic <= 60)","type":"PM","subtype":"BP","group":false,"attributes":[{"conceptId":903118,"name":"Systolic","operands":["90"],"operator":"LESS_THAN_OR_EQUAL_TO"},{"conceptId":903115,"name":"Diastolic","operands":["60"],"operator":"LESS_THAN_OR_EQUAL_TO"}],"domainId":"Measurement"}],"modifiers":[]}],"temporal":false}],"excludes":[]}'
+          criteria: JSON.stringify(criteria)
         },
         params: {
           ns: 'workspaceNamespace',
