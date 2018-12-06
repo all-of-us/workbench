@@ -23,13 +23,14 @@ export class QueryReportComponent implements OnInit {
     const {cohort, review} = this.route.snapshot.data;
     this.cohort = cohort;
     this.review = review;
-    this.test= JSON.parse(this.cohort.criteria);
+    this.test = JSON.parse(this.cohort.criteria);
     console.log(JSON.parse(cohort.criteria));
     this.mapDefinition();
   }
 
   mapDefinition() {
-    const definition = JSON.parse(this.cohort.criteria)
+    const definition = JSON.parse(this.cohort.criteria);
+    console.log(definition);
     this.ppiCheck(definition).then(parents => {
       this.ppiParents = parents;
       console.log(this.ppiParents);
@@ -43,7 +44,7 @@ export class QueryReportComponent implements OnInit {
         }
       });
     });
-     console.log( this.definition)
+    console.log(this.definition);
   }
 
   mapGroup(group: any) {
