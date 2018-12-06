@@ -17,9 +17,9 @@ export class HighlightSearchComponent implements OnChanges {
       searchWords = searchWords.map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
       this.matchString = new RegExp(searchWords.join('|'));
     }
-    const matches = this.text.match(new RegExp(this.matchString, 'g'));
-    const splits = this.text.split(new RegExp(this.matchString));
-    if (matches && this.searchTerm.length > 0) {
+    const matches = this.text.match(new RegExp(this.matchString, 'gi'));
+    const splits = this.text.split(new RegExp(this.matchString, 'i'));
+    if (matches && this.searchTerm) {
       for (let i = 0; i < matches.length; i++) {
         const tempSplitwords = splits[i].split(' ');
         for (let j = 0; j < tempSplitwords.length; j++) {
