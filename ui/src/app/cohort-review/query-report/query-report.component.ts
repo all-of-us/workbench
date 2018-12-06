@@ -13,28 +13,31 @@ export class QueryReportComponent implements OnInit {
   cohort: any;
   review: any;
   definition: Array<any>;
+  ppiParents: any;
   constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     const {cohort, review} = this.route.snapshot.data;
     this.cohort = cohort;
     this.review = review;
-    // console.log(JSON.parse(cohort.criteria));
     this.mapDefinition();
   }
 
   mapDefinition() {
     const definition = JSON.parse(this.cohort.criteria)
-    this.definition = ['includes', 'excludes'].map(role => {
-      if (definition[role].length) {
-        const roleObj = {role, groups: []};
-        definition[role].forEach(group => {
-          roleObj.groups.push(this.mapGroup(group));
-        });
-        return roleObj;
-      }
+    this.ppiCheck(definition).then(parents => {
+      this.ppiParents = parents;
+      console.log(this.ppiParents);
+      this.definition = ['includes', 'excludes'].map(role => {
+        if (definition[role].length) {
+          const roleObj = {role, groups: []};
+          definition[role].forEach(group => {
+            roleObj.groups.push(this.mapGroup(group));
+          });
+          return roleObj;
+        }
+      });
     });
-    // console.log( this.definition)
   }
 
   mapGroup(group: any) {
@@ -59,16 +62,12 @@ export class QueryReportComponent implements OnInit {
     });
   }
 
-  async mapPPIParams(params: Array<any>) {
-    const questions = {};
-    console.log(params);
-    for (const param of params) {
-      questions[param.conceptId] = await this.getPPIParent(param.conceptId.toString());
-      console.log(questions);
-    }
+  mapPPIParams(params: Array<any>) {
     return params.map(param => {
       return {
-        items: typeToTitle(param.type) + ' | ' + questions[param.conceptId] + ' | ' + param.name,
+        items: typeToTitle(param.type)
+          + ' | ' + this.ppiParents[param.conceptId]
+          + ' | ' + param.name,
         type: param.type
       };
     });
@@ -83,12 +82,35 @@ export class QueryReportComponent implements OnInit {
     });
   }
 
+  async ppiCheck(definition: any) {
+    const parents = {}
+    for (const role in definition) {
+      if (definition.hasOwnProperty(role)) {
+        for (const group of definition[role]) {
+          for (const item of group.items) {
+            if (item.type !== TreeType[TreeType.PPI]) {
+              continue;
+            }
+            for (const param of item.searchParameters) {
+              const name = await this.getPPIParent(param.conceptId);
+              parents[param.conceptId] = name;
+            }
+          }
+        }
+      }
+    }
+    return new Promise(resolve => {
+      resolve(parents);
+    });
+  }
+
   async getPPIParent(conceptId: string) {
-    this.api.getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
-      .subscribe(crit => {
-        console.log(crit);
-        return crit.name;
-      });
+    let name;
+    await this.api
+      .getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
+      .toPromise()
+      .then(parent => name = parent.name);
+    return name;
   }
 
   onPrint() {
