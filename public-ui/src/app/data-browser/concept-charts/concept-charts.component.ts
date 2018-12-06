@@ -41,6 +41,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   unitNames: string[] = [];
   selectedUnit: string;
   genderResults: AchillesResult[] = [];
+  displayMeasurementGraphs = false;
   toDisplayMeasurementGenderAnalysis: Analysis;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
@@ -64,6 +65,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       }
       this.unitNames = [];
       if (this.analyses.measurementValueGenderAnalysis) {
+        this.displayMeasurementGraphs = true;
         for (const aa of this.analyses.measurementValueGenderAnalysis) {
           this.unitNames.push(aa.unitName);
         }
