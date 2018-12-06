@@ -15,5 +15,5 @@ jupyter kernelspec uninstall -f pyspark3
 echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
 
 for v in "2.7" "3"; do
-  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-16.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade 'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
 done
