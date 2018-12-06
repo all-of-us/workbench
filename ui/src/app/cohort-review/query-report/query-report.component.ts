@@ -78,7 +78,7 @@ export class QueryReportComponent implements OnInit {
     return name.replace(/_/g, ' ').toLowerCase();
   }
 
-  operatorConversion(operator){
+  operatorConversion(operator) {
     switch (operator) {
       case 'GREATER_THAN_OR_EQUAL_TO':
         return '>=';
@@ -92,7 +92,7 @@ export class QueryReportComponent implements OnInit {
   }
 
   mapParams(_type: string, params: Array<any>, mod) {
-    if(mod.length > 0) {
+    if (mod.length > 0) {
        return params.map(eachParam => {
          let name;
          name = mod.reduce((acc, m) => {
@@ -123,7 +123,7 @@ export class QueryReportComponent implements OnInit {
   }
 
   async ppiCheck(definition: any) {
-    const parents = {}
+    const parents = {};
     for (const role in definition) {
       if (definition.hasOwnProperty(role)) {
         for (const group of definition[role]) {
