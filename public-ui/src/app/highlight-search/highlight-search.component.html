@@ -2,11 +2,9 @@
 <span *ngIf="isStandard"><b> Standard </b></span>
 <span *ngIf="indNum">{{indNum}}. </span>
 <ng-container *ngIf="searchTerm; else noSearchTerm">
-  <ng-container *ngFor="let word of words">
-    <span [class.highlight]="matchString.test(word.toLowerCase())">
-      {{word}}
-    </span>
-  </ng-container>
+  <span [class.highlight]="matchString.test(word.toLowerCase())" *ngFor="let word of words">
+    {{word}}
+  </span>
 </ng-container>
 <ng-template #noSearchTerm>
   <span *ngFor="let word of words">
