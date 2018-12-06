@@ -1,0 +1,12 @@
+.query-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262262;
+}
+.group-background {
+  background-color: #ccc;
+  color: black;
+  padding: 0.3rem 0.6rem;
+  margin: 0.7rem 0rem;
+  display: inline-block;
+}

@@ -88,6 +88,8 @@ public class CohortBuilderControllerTest {
 
   @Before
   public void setUp() {
+    icd9CriteriaParent = criteriaDao.save(
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true, true)
     jdbcTemplate.execute("delete from criteria");
   }
 

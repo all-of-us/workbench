@@ -40,6 +40,8 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
+import {QueryCohortDefinitionComponent} from "./query-cohort-definition/query-cohort-definition.component";
+
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -90,6 +92,7 @@ import {TablePage} from './table-page/table-page';
     DetailTabTableComponent,
     DetailAllEventsComponent,
     ParticipantsChartsComponent,
+    QueryCohortDefinitionComponent
   ],
   providers: [ReviewStateService,
     {

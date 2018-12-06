@@ -37,6 +37,9 @@ public class CriteriaDaoTest {
   private ConceptDao conceptDao;
 
   @Autowired
+  private ConceptRelationshipDao conceptRelationshipDao;
+
+  @Autowired
   private ConceptSynonymDao conceptSynonymDao;
 
   @Autowired

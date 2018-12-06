@@ -1,10 +1,26 @@
-.report-header {
-  display: flex;
-}
-
 .container {
   min-width: 100%;
 }
+
+.report-background {
+  background-color: white;
+  padding-top: 1rem;
+
+}
+.report-background .query-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262262;
+}
+
+.report-background .query-content {
+  font-size: 13px
+}
+
+
+
+
+
 
 
 
@@ -12,18 +28,9 @@
   margin-top : 0.7rem;
 }
 
-.report-background {
-  background-color: white;
-  padding-top: 1rem;
-}
 
-.group-background {
-  background-color: #ccc;
-  color: black;
-  padding: 0.3rem 0.6rem;
-  margin: 0.7rem 0rem;
-  display: inline-block;
-}
+
+
 @media print{
   .doNotPrint{
     display:none !important;
