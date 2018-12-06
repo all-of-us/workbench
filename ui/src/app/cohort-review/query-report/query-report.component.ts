@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
 import {subtypeToTitle, typeToTitle} from '../../cohort-search/utils';
 
+
 @Component({
   selector: 'app-query-report',
   templateUrl: './query-report.component.html',
