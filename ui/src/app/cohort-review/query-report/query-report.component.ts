@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, TreeSubType, TreeType} from 'generated';
 import {subtypeToTitle, typeToTitle} from '../../cohort-search/utils';
 
+
 @Component({
   selector: 'app-query-report',
   templateUrl: './query-report.component.html',
@@ -14,12 +15,16 @@ export class QueryReportComponent implements OnInit {
   review: any;
   definition: Array<any>;
   ppiParents: any;
+  testing: any;
+  test: any;
   constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     const {cohort, review} = this.route.snapshot.data;
     this.cohort = cohort;
     this.review = review;
+    this.test= JSON.parse(this.cohort.criteria);
+    console.log(JSON.parse(cohort.criteria));
     this.mapDefinition();
   }
 
@@ -38,6 +43,7 @@ export class QueryReportComponent implements OnInit {
         }
       });
     });
+     console.log( this.definition)
   }
 
   mapGroup(group: any) {
@@ -48,7 +54,7 @@ export class QueryReportComponent implements OnInit {
         case TreeType.PPI:
           return this.mapPPIParams(item.searchParameters);
         default:
-          return this.mapParams(item.type, item.searchParameters);
+          return this.mapParams(item.type, item.searchParameters, item.modifiers);
       }
     });
   }
@@ -73,13 +79,52 @@ export class QueryReportComponent implements OnInit {
     });
   }
 
-  mapParams(_type: string, params: Array<any>) {
-    return params.map(param => {
-       return {
-         items: typeToTitle(_type) + ' | ' + param.subtype + ' | ' + param.name,
-         type: param.type
-       };
-    });
+  removeUnderScoreLowerCase(name: string) {
+    return name.replace(/_/g, " ").toLowerCase();
+  }
+
+  operatorConversion(operator){
+    switch (operator) {
+      case 'GREATER_THAN_OR_EQUAL_TO':
+        return '>=';
+      case 'LESS_THAN_OR_EQUAL_TO':
+        return '<=';
+      case 'EQUAL':
+        return '=';
+      case 'BETWEEN':
+        return 'between';
+    }
+  }
+
+  mapParams(_type: string, params: Array<any>, mod) {
+    if(mod.length > 0) {
+       return params.map(eachParam => {
+         let name;
+         name = mod.reduce((acc, m) => {
+           const concatOperand = m.operands.reduce((final, o) => `${final} ${o}`, '');
+           return acc !== '' ?
+             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} 
+              ${this.operatorConversion(m.operator)} 
+               ${concatOperand}`
+             :
+             `${this.removeUnderScoreLowerCase(m.name)} 
+              ${this.operatorConversion(m.operator)} 
+                ${concatOperand}`;
+         }, '');
+         return {
+           items: `${typeToTitle(_type)} | 
+                    ${eachParam.type} | ${eachParam.value} 
+                    ${eachParam.name} | ${name}`,
+           type: eachParam.type
+         };
+      });
+    } else {
+      return params.map(param => {
+        return {items:`${typeToTitle(_type)} 
+                      | ${param.type} | ${param.value}  ${param.name}`,
+                type: param.type};
+      });
+    }
   }
 
   async ppiCheck(definition: any) {
