@@ -19,7 +19,7 @@ describe('HighlightSearchComponent', () => {
     fixture = TestBed.createComponent(TestHighlightComponent);
     fixture.detectChanges();
   });
-  fit('should highlight search terms', () => {
+  it('should highlight search terms', () => {
     const tokens = fixture.debugElement.queryAll(By.css('.highlight'));
     expect(tokens.length).toBe(2);
   });
