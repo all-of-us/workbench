@@ -49,7 +49,7 @@ export class QueryReportComponent implements OnInit {
         case TreeType.PPI:
           return this.mapPPIParams(item.searchParameters);
         default:
-          return this.mapParams(item.type, item.searchParameters);
+          return this.mapParams(item.type, item.searchParameters, item.modifiers);
       }
     });
   }
@@ -74,13 +74,52 @@ export class QueryReportComponent implements OnInit {
     });
   }
 
-  mapParams(_type: string, params: Array<any>) {
-    return params.map(param => {
-       return {
-         items: typeToTitle(_type) + ' | ' + param.subtype + ' | ' + param.name,
-         type: param.type
-       };
-    });
+  removeUnderScoreLowerCase(name: string) {
+    return name.replace(/_/g, " ").toLowerCase();
+  }
+
+  operatorConversion(operator){
+    switch (operator) {
+      case 'GREATER_THAN_OR_EQUAL_TO':
+        return '>=';
+      case 'LESS_THAN_OR_EQUAL_TO':
+        return '<=';
+      case 'EQUAL':
+        return '=';
+      case 'BETWEEN':
+        return 'between';
+    }
+  }
+
+  mapParams(_type: string, params: Array<any>, mod) {
+    if(mod.length > 0) {
+       return params.map(eachParam => {
+         let name;
+         name = mod.reduce((acc, m) => {
+           const concatOperand = m.operands.reduce((final, o) => `${final} ${o}`, '');
+           return acc !== '' ?
+             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} 
+              ${this.operatorConversion(m.operator)} 
+               ${concatOperand}`
+             :
+             `${this.removeUnderScoreLowerCase(m.name)} 
+              ${this.operatorConversion(m.operator)} 
+                ${concatOperand}`;
+         }, '');
+         return {
+           items: `${typeToTitle(_type)} | 
+                    ${eachParam.type} | ${eachParam.value} 
+                    ${eachParam.name} | ${name}`,
+           type: eachParam.type
+         };
+      });
+    } else {
+      return params.map(param => {
+        return {items:`${typeToTitle(_type)} 
+                      | ${param.type} | ${param.value}  ${param.name}`,
+                type: param.type};
+      });
+    }
   }
 
   async ppiCheck(definition: any) {
