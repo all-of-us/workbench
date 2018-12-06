@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
@@ -16,6 +16,8 @@ import {ReviewStateService} from '../review-state.service';
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
   demoGraph = false;
+  @Output()
+  @Output() dataItems = new EventEmitter<any>();
   data = List();
   typesList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
@@ -41,9 +43,10 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.subscription = this.state.cohort$
       .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
       .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
-      .map(response => (<DemoChartInfoListResponse>response).items)
+       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
+        this.dataItems.emit(this.data);
         this.buttonsDisableFlag = false;
       });
     this.subscription.add(this.state.review$.subscribe(review => {
