@@ -12,15 +12,24 @@ export class HighlightSearchComponent implements OnChanges {
   @Input() conceptId: string;
   @Input() isStandard: string;
   @Input() indNum: number;
-  words: string[];
-  reString: RegExp;
+  words: string[] = [];
+  matchString: RegExp;
   ngOnChanges() {
     if (this.searchTerm) {
       let searchWords = this.searchTerm.split(new RegExp(',| '));
       searchWords = searchWords.filter(w => w.length > 0 );
       searchWords = searchWords.map(word => word.replace(/[&!^\/\\#,+()$~%.'":*?<>{}]/g, ''));
-      this.reString = new RegExp(searchWords.join('|'));
+      this.matchString = new RegExp(searchWords.join('|'));
     }
-    this.words = this.text.split(' ');
+    const matches = this.text.match(new RegExp(this.matchString, 'gi'));
+    const splits = this.text.split(new RegExp(this.matchString, 'i'));
+    if (matches && this.searchTerm) {
+      for (let i = 0; i < matches.length; i++) {
+        this.words.push(splits[i], matches[i]);
+      }
+      this.words.push(splits[splits.length - 1]);
+    } else {
+      this.words.push(this.text);
+    }
   }
 }
