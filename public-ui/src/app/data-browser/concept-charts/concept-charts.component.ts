@@ -32,10 +32,12 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   femaleGenderResult: AchillesResult;
   intersexGenderResult: AchillesResult;
   noneGenderResult: AchillesResult;
+  otherGenderResult: AchillesResult;
   maleGenderChartTitle =  '';
   femaleGenderChartTitle = '';
   intersexGenderChartTitle = '';
   noneGenderChartTitle = '';
+  otherGenderChartTitle = '';
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
   unitNames: string[] = [];
@@ -108,6 +110,9 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       } else if (g.stratum2 === this.dbc.NONE_GENDER_ID) {
         this.noneGenderResult = g;
         this.noneGenderChartTitle = chartTitle;
+      } else if (g.stratum2 === this.dbc.OTHER_GENDER_ID) {
+        this.otherGenderResult = g;
+        this.otherGenderChartTitle = chartTitle;
       }
     }
 
