@@ -33,7 +33,7 @@
                   *ngIf="showModifiers"
                   [class.active]="mode === 'modifiers'"
                   [disabled]="noSelection"
-                  (click)="mode = 'modifiers'">
+                  (click)="setMode('modifiers')">
                   Modifiers
                 </button>
               </ng-container>
@@ -94,7 +94,7 @@
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>
                 <div class="panel-right-container">
-                  <h5 class="selection-title">{{ selectionTitle }}</h5>
+                  <h5 class="selection-title">Selected Criteria</h5>
                   <div class="panel-right selected">
                     <ng-container *ngFor="let type of objectKey(selections); let i = index">
                       <span *ngIf="ctype === treeType[treeType.DEMO] && i > 0" class="font-weight-bold and-style">AND</span>

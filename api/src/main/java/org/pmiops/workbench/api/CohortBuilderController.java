@@ -256,6 +256,22 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<org.pmiops.workbench.model.Criteria> getCriteriaByTypeAndId(Long cdrVersionId, String type, Long id) {
+    Optional.ofNullable(type)
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
+    Arrays
+      .stream(TreeType.values())
+      .filter(treeType -> treeType.name().equalsIgnoreCase(type))
+      .findFirst()
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
+    Optional.ofNullable(id)
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid id. %s is not valid.", id )));
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    Criteria criteria = criteriaDao.findCriteriaByTypeAndId(type, id);
+    return ResponseEntity.ok(TO_CLIENT_CRITERIA.apply(criteria));
+  }
+
+  @Override
   public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(Long cdrVersionId, String type, String value) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     String nameOrCode = value + "*";

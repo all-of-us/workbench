@@ -209,11 +209,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   annotationOptionChange(value) {
+    this.successIcon = false;
+    this.textSpinnerFlag = true;
     this.annotationOption = value;
     this.defaultAnnotation = true;
     this.control.patchValue(value);
-    this.oldValue = value;
-    this.textBlur();
+    this.handleInput();
 
   }
 

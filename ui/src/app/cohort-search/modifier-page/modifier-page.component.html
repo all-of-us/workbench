@@ -1,4 +1,14 @@
 <form [formGroup]="form">
+  <div *ngIf="showError && formChanges" class="alert alert-danger alert-sm">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-text">
+          Form cannot accept negative values
+        </div>
+      </div>
+    </div>
+  </div>
+
   <section class="form-block">
     <div class="modifier-header">
       The following modifiers are optional and apply to all selected criteria
@@ -57,8 +67,8 @@
           </div>
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
-              <div>
-                <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+              <div (keypress)="numberValidation($event)">
+                <input *ngIf="mod.inputType !== 'date'" min="0"  (ngModelChange) ="negativeNumber()"   class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
@@ -68,8 +78,8 @@
                 <div class="and-text">
                   <div>and</div>
                 </div>
-                <div>
-                  <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                <div (keypress)="numberValidation($event)">
+                  <input *ngIf="mod.inputType !== 'date'"  min="0"  (ngModelChange) ="negativeNumber()"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
@@ -90,7 +100,7 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-3">
-      <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
+      <button type="button" [ngClass]="[ preview.get('requesting') || showError? 'greyed-button': 'calculate-btn']"
         class="btn "
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
