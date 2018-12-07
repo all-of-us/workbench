@@ -30,6 +30,9 @@ describe('TablePage', () => {
   const activatedRouteStub = {
       snapshot: {
           data: {
+            cohort: {
+              name: '',
+             },
               concepts: {
                   raceList: [],
                   genderList: [],

@@ -130,8 +130,8 @@ export class QueryCohortDefinitionComponent implements OnInit {
     }
   }
 
-  async ppiCheck(definition: any) {
-    const parents = {}
+async ppiCheck(definition: any) {
+    const parents = {};
     for (const role in definition) {
       if (definition.hasOwnProperty(role)) {
         for (const group of definition[role]) {
