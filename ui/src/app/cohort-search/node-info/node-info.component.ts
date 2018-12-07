@@ -182,7 +182,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get showCount() {
-    return this.node.get('count') !== null
+    return this.node.get('count') > -1
       && (this.node.get('selectable')
       || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
       && this.node.get('group')
