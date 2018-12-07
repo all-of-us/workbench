@@ -98,7 +98,8 @@ where count_value >= 0"
 
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "delete from \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
-where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit','Drug') and concept_code not in ('OMOP generated') and lower(vocabulary_id) not in ('ppi')"
+where (count_value=0 and source_count_value=0) and domain_id not in ('Race','Gender','Ethnicity','Unit','Drug')
+and concept_code not in ('OMOP generated') and lower(vocabulary_id) not in ('ppi')"
 
 #delete concepts from concept_relationship that are not in concepts
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
@@ -179,3 +180,9 @@ bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 #Drop survey_question_map table
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "drop table \`$PUBLIC_PROJECT.$PUBLIC_DATASET.survey_question_map\` "
+
+# Updating domain_id of few survey questions from measurement to observation to avoid confusion in display
+bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
+"Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
+set domain_id = 'Observation'
+where concept_id in (40770349, 40766240, 40766930, 40766219, 40767339, 40766306, 40766645, 40766357, 40769140, 40766229, 40767407, 40766333, 40766241, 40766929, 40766643, 40766307)"
