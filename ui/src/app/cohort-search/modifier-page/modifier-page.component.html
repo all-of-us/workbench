@@ -67,8 +67,8 @@
           </div>
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
-              <div (keypress)="numberValidation($event)">
-                <input *ngIf="mod.inputType !== 'date'" min="0"  (ngModelChange) ="negativeNumber()"   class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+              <div>
+                <input *ngIf="mod.inputType !== 'date'" min="0" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType" required>
               </div>
               <div *ngIf="mod.inputType === 'date'" >
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
@@ -78,8 +78,8 @@
                 <div class="and-text">
                   <div>and</div>
                 </div>
-                <div (keypress)="numberValidation($event)">
-                  <input *ngIf="mod.inputType !== 'date'"  min="0"  (ngModelChange) ="negativeNumber()"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                <div>
+                  <input *ngIf="mod.inputType !== 'date'"  min="0" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType" required>
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
@@ -104,7 +104,7 @@
         class="btn "
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled] = "!formChanges">
+        [disabled] = "!formChanges || form.invalid">
         Calculate
       </button>
     </div>
