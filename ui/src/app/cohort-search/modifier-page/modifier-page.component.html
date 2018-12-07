@@ -25,13 +25,13 @@
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
         <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
-        <ng-container *ngIf = "mod.label === 'Shifted Event Date'">
+        <ng-container *ngIf="mod.label === 'Shifted Event Date'">
           <small class="name"
                  [popper]="codesPopper"
                  [popperTrigger]="'hover'"
                  [popperPlacement]="'top'">
             <div class="label-info">
-              <clr-icon  class=" is-solid" shape="info-standard"></clr-icon>
+              <clr-icon  class="is-solid" shape="info-standard"></clr-icon>
             </div>
           </small>
           <popper-content #codesPopper>
@@ -68,7 +68,7 @@
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
-                <input *ngIf="mod.inputType !== 'date'" min="0" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType" required>
+                <input *ngIf="mod.inputType !== 'date'" min="0" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
@@ -79,7 +79,7 @@
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf="mod.inputType !== 'date'"  min="0" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType" required>
+                  <input *ngIf="mod.inputType !== 'date'"  min="0" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
@@ -100,11 +100,11 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-3">
-      <button type="button" [ngClass]="[ preview.get('requesting') || showError? 'greyed-button': 'calculate-btn']"
-        class="btn "
+      <button type="button"
+        class="btn calculate-btn"
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled] = "!formChanges || form.invalid">
+        [disabled]="disableCalculate">
         Calculate
       </button>
     </div>

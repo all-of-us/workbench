@@ -6,9 +6,9 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {CohortBuilderService, ModifierType, TreeType} from 'generated';
+import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
@@ -262,6 +262,21 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     const valueForm = <FormArray>modForm;
     if (mod.name === 'encounters') {
       valueForm.get('encounterType').patchValue(opt.name);
+    } else {
+      if (opt.name === 'Any') {
+        this.form.get([mod.name, 'valueA']).clearValidators();
+        this.form.get([mod.name, 'valueB']).clearValidators();
+        this.form.get([mod.name, 'valueA']).reset();
+        this.form.get([mod.name, 'valueB']).reset();
+      } else {
+        this.form.get([mod.name, 'valueA']).setValidators(Validators.required);
+        if (opt.value === Operator.BETWEEN) {
+          this.form.get([mod.name, 'valueB']).setValidators(Validators.required);
+        } else {
+          this.form.get([mod.name, 'valueB']).clearValidators();
+          this.form.get([mod.name, 'valueB']).reset();
+        }
+      }
     }
     valueForm.get('operator').patchValue(opt.value);
   }
@@ -324,5 +339,12 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateBlur(index: number) {
     const control = index === 0 ? 'valueA' : 'valueB';
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
+  }
+
+  get disableCalculate() {
+    return this.preview.get('requesting')
+      || this.showError
+      || !this.formChanges
+      || this.form.invalid;
   }
 }
