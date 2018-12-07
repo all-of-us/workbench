@@ -562,7 +562,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                     AchillesAnalysis unitGenderAnalysis = new AchillesAnalysis(aa);
                                     unitGenderAnalysis.setResults(results.get(unit));
                                     unitGenderAnalysis.setUnitName(unit);
-                                    processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                    if(!unit.toLowerCase().equals("no unit")) {
+                                        processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                    }
                                     unitSeperateAnalysis.add(unitGenderAnalysis);
                                 }
                             }
@@ -585,7 +587,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 AchillesAnalysis unitAgeAnalysis = new AchillesAnalysis(aa);
                                 unitAgeAnalysis.setResults(results.get(unit));
                                 unitAgeAnalysis.setUnitName(unit);
-                                processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                if(!unit.toLowerCase().equals("no unit")) {
+                                    processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                }
                                 addAgeStratum(unitAgeAnalysis,conceptId);
                                 unitSeperateAnalysis.add(unitAgeAnalysis);
                             }
