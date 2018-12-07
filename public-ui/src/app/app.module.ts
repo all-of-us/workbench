@@ -6,8 +6,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
 import { ResponsiveModule } from 'ngx-responsive';
-import {ErrorReporterService} from './services/error-reporter.service';
 import * as StackTrace from 'stacktrace-js';
+import {ErrorReporterService} from './services/error-reporter.service';
 
 import {AppComponent, overriddenUrlKey} from './views/app/app.component';
 
