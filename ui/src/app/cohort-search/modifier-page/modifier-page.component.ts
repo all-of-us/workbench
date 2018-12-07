@@ -268,6 +268,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   currentMods(vals) {
     this.ngAfterContentChecked();
+    this.showError = false;
     return this.modifiers.map(({name, inputType, modType}) => {
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
@@ -279,7 +280,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       } else {
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
-        if (!operator || !valueA || (between && !valueB)) {
+        if (!operator || (!valueA && !valueB)) {
           return;
         }
         if (inputType === 'date') {
@@ -292,8 +293,14 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return fromJS({name: modType, operator, operands});
         } else {
           const operands = [valueA];
+          if (valueA < 0) {
+            this.showError = true;
+          }
           if (between) {
             operands.push(valueB);
+            if (valueB < 0) {
+              this.showError = true;
+            }
           }
           return fromJS({name: modType, operator, operands});
         }
@@ -317,24 +324,5 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateBlur(index: number) {
     const control = index === 0 ? 'valueA' : 'valueB';
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
-  }
-
-  numberValidation(event) {
-    if (!((event.keyCode > 95 && event.keyCode < 106)
-      || (event.keyCode > 47 && event.keyCode < 58)
-      || event.keyCode === 8)) {
-      return false;
-    }
-  }
-
-  negativeNumber() {
-   this.modifiers$.forEach(item => {
-    const modArr = item.map(modValue => {
-       return modValue.toJS().operands.map( o => {
-          return o < 0;
-        });
-      });
-     this.showError = modArr.toJS().flat().includes(true);
-    });
   }
 }
