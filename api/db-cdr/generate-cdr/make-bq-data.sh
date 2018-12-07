@@ -356,9 +356,9 @@ if [[ $tables =~ $cri_table_check ]]; then
         "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
         set ct.synonyms = concat(ct.synonyms, '|', crit.synonyms)
         from (
-        select min(id) as id, 'rank1' as synonyms
+        select min(id) as id, '[rank1]' as synonyms
         from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\`
-        group by name) as crit
+        group by name, type, subtype) as crit
         where crit.id = ct.id"
 fi
 
