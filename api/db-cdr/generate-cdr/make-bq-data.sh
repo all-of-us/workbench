@@ -106,7 +106,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\`
      (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
     SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
-    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\`
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
     "
 
     echo "Updating SNOMED PCS criteria"
@@ -123,7 +123,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'SNOMED' and subtype = 'PCS'
@@ -144,7 +144,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'SNOMED' and subtype = 'CM'
@@ -165,7 +165,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'ICD9' and subtype = 'CM'
@@ -186,7 +186,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'ICD9' and subtype = 'PROC'
@@ -207,7 +207,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'ICD10' and subtype = 'CM'
@@ -228,7 +228,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'ICD10' and subtype = 'PCS'
@@ -249,7 +249,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'CPT'
@@ -270,7 +270,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'MEAS' and subtype = 'CLIN'
@@ -291,7 +291,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     else concat(c.name,'|',c.code,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'MEAS' and subtype = 'LAB'
@@ -308,7 +308,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then string_agg(replace(cs.concept_synonym_name,'|','||'),'|')
     else concat(c.name,'|',string_agg(replace(cs.concept_synonym_name,'|','||'),'|'))
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` cs
     on c.concept_id=cs.concept_id
     and type = 'PPI'
@@ -329,7 +329,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then c.name
     else concat(c.name,'|',c.code)
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
     where c.type in ('MEAS','CPT','ICD10','ICD9','SNOMED')
     and cs.synonyms is null) as crit
@@ -345,7 +345,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     then ''
     else c.name
     end as synonyms
-    from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\` c
+    from \`$BQ_PROJECT.$BQ_DATASET.criteria\` c
     join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cs on c.id = cs.id
     where c.type = 'PPI'
     and cs.synonyms is null) as crit
@@ -357,7 +357,7 @@ if [[ $tables =~ $cri_table_check ]]; then
         set ct.synonyms = concat(ct.synonyms, '|', crit.synonyms)
         from (
         select min(id) as id, '[rank1]' as synonyms
-        from \`$BQ_PROJECT.$BQ_DATASET.criteria_switch\`
+        from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
         group by name, type, subtype) as crit
         where crit.id = ct.id"
 fi
