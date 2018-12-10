@@ -44,6 +44,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     name: 'ageAtEvent',
     label: 'Age At Event',
     inputType: 'number',
+    min: 1,
+    max: 120,
     modType: ModifierType.AGEATEVENT,
     operators: [{
       name: 'Any',
@@ -62,6 +64,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     name: 'eventDate',
     label: 'Shifted Event Date',
     inputType: 'date',
+    min: null,
+    max: null,
     modType: ModifierType.EVENTDATE,
     operators: [{
       name: 'Any',
@@ -80,6 +84,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     name: 'hasOccurrences',
     label: 'Has Occurrences',
     inputType: 'number',
+    min: 1,
+    max: 99,
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
         name: 'Any',
@@ -110,7 +116,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-  showError = false;
+  errors = [];
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -130,6 +136,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             name: 'encounters',
             label: 'During Visit Type',
             inputType: null,
+            min: null,
+            max: null,
             modType: ModifierType.ENCOUNTERS,
             operators: [{
               name: 'Any',
@@ -267,12 +275,16 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       if (opt.name === 'Any') {
         this.form.get([mod.name, 'valueA']).clearValidators();
         this.form.get([mod.name, 'valueB']).clearValidators();
-        this.form.get([mod.name, 'valueA']).reset();
-        this.form.get([mod.name, 'valueB']).reset();
+        this.form.get(mod.name).reset();
       } else {
-        this.form.get([mod.name, 'valueA']).setValidators(Validators.required);
+        const validators = [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(mod.name === 'ageAtEvent' ? 120 : 99)
+        ]
+        this.form.get([mod.name, 'valueA']).setValidators(validators);
         if (opt.value === Operator.BETWEEN) {
-          this.form.get([mod.name, 'valueB']).setValidators(Validators.required);
+          this.form.get([mod.name, 'valueB']).setValidators(validators);
         } else {
           this.form.get([mod.name, 'valueB']).clearValidators();
           this.form.get([mod.name, 'valueB']).reset();
@@ -284,8 +296,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   currentMods(vals) {
     this.ngAfterContentChecked();
-    this.showError = false;
-    return this.modifiers.map(({name, inputType, modType}) => {
+    this.errors = [];
+    return this.modifiers.map(mod => {
+      const {name, inputType, min, max, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
           return;
@@ -309,13 +322,13 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return fromJS({name: modType, operator, operands});
         } else {
           const operands = [valueA];
-          if (valueA < 0) {
-            this.showError = true;
+          if (valueA && (valueA < min || valueA > max)) {
+            this.errors.push(mod);
           }
           if (between) {
             operands.push(valueB);
-            if (valueB < 0) {
-              this.showError = true;
+            if (valueB && (valueB < min || valueB > max) && !this.errors.includes(mod)) {
+              this.errors.push(mod);
             }
           }
           return fromJS({name: modType, operator, operands});
@@ -344,7 +357,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   get disableCalculate() {
     return this.preview.get('requesting')
-      || this.showError
+      || this.errors.length
       || this.form.invalid;
   }
 }
