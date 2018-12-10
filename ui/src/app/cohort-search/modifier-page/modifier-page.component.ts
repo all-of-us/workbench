@@ -281,7 +281,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           Validators.required,
           Validators.min(1),
           Validators.max(mod.name === 'ageAtEvent' ? 120 : 99)
-        ]
+        ];
         this.form.get([mod.name, 'valueA']).setValidators(validators);
         if (opt.value === Operator.BETWEEN) {
           this.form.get([mod.name, 'valueB']).setValidators(validators);
