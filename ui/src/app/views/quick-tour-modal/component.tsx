@@ -133,7 +133,7 @@ export class QuickTourReact extends React.Component<any, any> {
       return  <>
         <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
         {this.props.learning && !this.state.fullImage &&
-        <div className='main' id='quick-tour'>
+        <div className='main' id='quick-tour-react'>
           <div className='title'>All of Us Researcher Workbench</div>
           <div className='intro'>Quick Tour</div>
           <div className='breadcrumbs'>
