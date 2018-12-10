@@ -86,12 +86,12 @@ set count_value =
         cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
-    case when source_count_value < ${BIN_SIZE}
+    case when source_count_value < ${BIN_SIZE} and source_count_value > 0
         then ${BIN_SIZE}
     else
         cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where count_value >= 0"
+where count_value > 0"
 
 
 #delete concepts with 0 count / source count value
@@ -117,7 +117,7 @@ set count_value =
         cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
-    case when source_count_value < ${BIN_SIZE}
+    case when source_count_value < ${BIN_SIZE} and source_count_value > 0
         then ${BIN_SIZE}
     else
         cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
