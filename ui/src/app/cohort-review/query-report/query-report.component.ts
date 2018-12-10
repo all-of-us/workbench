@@ -12,6 +12,7 @@ export class QueryReportComponent implements OnInit {
   cohort: any;
   review: any;
   cdrId:any;
+  data: any;
   constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -20,7 +21,11 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
   }
-
+  getDemoChartData(d){
+    if(d) {
+      this.data = d
+    }
+  }
   onPrint() {
     window.print();
   }

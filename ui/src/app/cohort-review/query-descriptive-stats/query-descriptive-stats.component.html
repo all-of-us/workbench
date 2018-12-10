@@ -1,0 +1,39 @@
+<div>
+  Descriptive Statistics:<br>
+  <!--<div style="width: 60%; border: 1px solid black;">-->
+    <!--<div class="container">-->
+      <!--<div class="row">-->
+        <!--<div class="col-sm-4"></div>-->
+        <!--<div class="col-sm-4">-->
+          <!--Total Count-->
+        <!--</div>-->
+        <!--<div class="col-sm-4">-->
+          <!--Percent of Cohort-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="col-sm-12">-->
+          <!--Gender-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="col-sm-4">-->
+          <!--<div>Male</div>-->
+        <!--</div>-->
+        <!--<div class="col-sm-4">-->
+          <!--1027-->
+        <!--</div>-->
+        <!--<div class="col-sm-4">-->
+          <!--100%-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</div>-->
+</div>
+<div *ngFor="let i of groupKeys">
+  {{i}}
+  <div *ngFor="let j of graphData[i]">
+
+    {{j.group}} {{j?.count}} {{j?.percentage|number:'1.0-0'}} %
+  </div>
+</div>

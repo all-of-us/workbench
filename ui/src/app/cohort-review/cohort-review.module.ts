@@ -41,6 +41,7 @@ import {SidebarContentComponent} from './sidebar-content/sidebar-content.compone
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
 import {QueryCohortDefinitionComponent} from "./query-cohort-definition/query-cohort-definition.component";
+import {QueryDescriptiveStatsComponent} from "./query-descriptive-stats/query-descriptive-stats.component";
 
 /* tslint:enable:max-line-length */
 
@@ -92,7 +93,8 @@ import {QueryCohortDefinitionComponent} from "./query-cohort-definition/query-co
     DetailTabTableComponent,
     DetailAllEventsComponent,
     ParticipantsChartsComponent,
-    QueryCohortDefinitionComponent
+    QueryCohortDefinitionComponent,
+    QueryDescriptiveStatsComponent
   ],
   providers: [ReviewStateService,
     {

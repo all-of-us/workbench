@@ -12,21 +12,20 @@ export class QueryCohortDefinitionComponent implements OnInit {
   // review: any;
   definition: Array<any>;
   ppiParents: any;
-
-
   @Input() cohort: any;
   @Input() review: any;
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
-    this.mapDefinition()
+    this.mapDefinition();
+    // console.log(JSON.parse(this.cohort.criteria))
   }
 
   mapDefinition() {
     const definition = JSON.parse(this.cohort.criteria)
     this.ppiCheck(definition).then(parents => {
       this.ppiParents = parents;
-      console.log(this.ppiParents);
+      // console.log(this.ppiParents);
       this.definition = ['includes', 'excludes'].map(role => {
         if (definition[role].length) {
           const roleObj = {role, groups: []};
@@ -36,8 +35,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
           return roleObj;
         }
       });
+      // console.log(this.definition)
     });
-    console.log( this.definition)
+
   }
 
   mapGroup(group: any) {
