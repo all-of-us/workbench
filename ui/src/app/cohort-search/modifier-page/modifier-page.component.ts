@@ -345,7 +345,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   get disableCalculate() {
     return this.preview.get('requesting')
       || this.showError
-      || !this.formChanges
       || this.form.invalid;
   }
 }

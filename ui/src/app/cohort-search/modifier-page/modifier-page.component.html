@@ -104,7 +104,7 @@
         class="btn calculate-btn"
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled]="disableCalculate">
+        [disabled]="disableCalculate || !formChanges">
         Calculate
       </button>
     </div>
