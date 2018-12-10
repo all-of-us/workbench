@@ -26,7 +26,7 @@ import {WorkspacesService} from 'generated/api/workspaces.service';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
-import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
+import {QuickTourReact, QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -38,9 +38,13 @@ import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component'
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
 
+import * as React from 'react';
+import * as ReactTestUtils from 'react-dom/test-utils'
+
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;
   let profileStub: ProfileServiceStub;
+  let reactComponent, reactElement;
   beforeEach(fakeAsync(() => {
     profileStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
@@ -81,6 +85,8 @@ describe('HomepageComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(HomepageComponent);
+      reactElement = React.createElement(QuickTourReact, {learning: true, closeFunction: null});
+      reactComponent = ReactTestUtils.renderIntoDocument(reactElement);
     });
   }));
 
@@ -116,10 +122,13 @@ describe('HomepageComponent', () => {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
     tick(1000);
-    expect(fixture.debugElement.queryAll(By.css('#quick-tour')).length).toBe(0);
+    console.log(ReactTestUtils.findRenderedDOMComponentWithClass(component,'#quick-tour'));
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(component,'#quick-tour')).toBeTruthy();
   }));
 
   it('should close quick tour when closed', fakeAsync(() => {
+    console.log(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent,'btn btn-close'));
+
     updateAndTick(fixture);
     tick(1000);
     updateAndTick(fixture);

@@ -76,7 +76,7 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-class QuickTourReact extends React.Component<any, any> {
+export class QuickTourReact extends React.Component<any, any> {
   state: {
       selected: number,
       fullImage: boolean,
