@@ -746,6 +746,11 @@ def cloudsql_import(cmd_name, *args)
       ->(opts, v) { opts.bucket = v},
       "Name of the GCS bucket containing the SQL dump"
   )
+  op.add_option(
+      "--file [file]",
+      ->(opts, v) { opts.file = v},
+      "File name to import"
+    )
   op.parse.validate
 
   ServiceAccountContext.new(op.opts.project).run do
@@ -753,7 +758,7 @@ def cloudsql_import(cmd_name, *args)
     #common.run_inline %W{docker-compose run db-cloudsql-import} + args
     common.run_inline %W{docker-compose run db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
-          --bucket #{op.opts.bucket}}
+          --bucket #{op.opts.bucket} --file #{op.opts.file}}
   end
 end
 
@@ -807,7 +812,6 @@ Dumps the local mysql db and uploads the .sql file to bucket",
 
 def local_mysql_import(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-
   op.add_option(
     "--sql-dump-file [filename]",
     ->(opts, v) { opts.file = v},
@@ -1586,7 +1590,7 @@ def create_project_resources(gcc)
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-cluster-resources/}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
-                       --activation-policy=ALWAYS --backup-start-time 00:00
+                       --activation-policy=ALWAYS --backup-start-time 00:00 --require-ssl
                        --failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log
                        --database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase --async --maintenance-release-channel preview --maintenance-window-day SAT --maintenance-window-hour 5}
   common.status "Waiting for database instance to become ready..."

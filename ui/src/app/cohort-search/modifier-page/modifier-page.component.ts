@@ -17,7 +17,7 @@ import {
   activeCriteriaType,
   activeModifierList,
   CohortSearchActions,
-  previewStatus
+  previewStatus,
 } from '../redux';
 
 @Component({
@@ -110,7 +110,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-
+  showError = false;
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -121,36 +121,41 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   ngOnInit() {
     const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
-    this.subscription.add(this.ctype$.subscribe(ctype => {
-      this.ctype = ctype;
-      if (this.addEncounters) {
-        this.modifiers.push({
-          name: 'encounters',
-          label: 'During Visit Type',
-          inputType: null,
-          modType: ModifierType.ENCOUNTERS,
-          operators: [{
-            name: 'Any',
-            value: undefined,
-          }]
-        });
-        this.form.addControl('encounters', new FormGroup({operator: new FormControl()}));
-        this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
-          .filter(response => !!response)
-          .subscribe(response => {
-            this.visitCounts = {};
-            response.items.forEach(option => {
-              if (option.parentId === 0 && option.count > 0) {
-                this.modifiers[3].operators.push({
-                  name: option.name,
-                  value: option.conceptId.toString()
-                });
-                this.visitCounts[option.conceptId] = option.count;
-              }
-            });
+    this.subscription.add(this.ctype$
+      .filter(ctype => !! ctype)
+      .subscribe(ctype => {
+        this.ctype = ctype;
+        if (this.addEncounters) {
+          this.modifiers.push({
+            name: 'encounters',
+            label: 'During Visit Type',
+            inputType: null,
+            modType: ModifierType.ENCOUNTERS,
+            operators: [{
+              name: 'Any',
+              value: undefined,
+            }]
           });
-      }
-    }));
+          this.form.addControl('encounters',
+            new FormGroup({operator: new FormControl(),
+              encounterType: new FormControl()}));
+          this.api.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+            .filter(response => !!response)
+            .subscribe(response => {
+              this.visitCounts = {};
+              response.items.forEach(option => {
+                if (option.parentId === 0 && option.count > 0) {
+                  this.modifiers[3].operators.push({
+                    name: option.name,
+                    value: option.conceptId.toString()
+                  });
+                  this.visitCounts[option.conceptId] = option.count;
+                }
+              });
+            });
+        }
+      })
+    );
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
@@ -203,7 +208,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       .do(console.log)
       .map(vals => this.currentMods(vals))
       .subscribe(newMods => {
-
         /*
          * NOTE: the way this process works is basically as follows: 1) compute
          * a modifier per modifier category 2) merge those with the existing
@@ -256,6 +260,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.dropdownOption.selected[index] = opt.name;
     const modForm = <FormArray>this.form.controls[mod.name];
     const valueForm = <FormArray>modForm;
+    if (mod.name === 'encounters') {
+      valueForm.get('encounterType').patchValue(opt.name);
+    }
     valueForm.get('operator').patchValue(opt.value);
   }
 
@@ -266,7 +273,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         if (!vals[name].operator) {
           return;
         }
-        return fromJS({name: modType, operator: 'IN', operands: [vals[name].operator.toString()]});
+        return fromJS({name: modType, operator: 'IN',
+          encounterType: vals[name].encounterType.toString(),
+          operands: [vals[name].operator.toString()]});
       } else {
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
@@ -308,5 +317,24 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateBlur(index: number) {
     const control = index === 0 ? 'valueA' : 'valueB';
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
+  }
+
+  numberValidation(event) {
+    if (!((event.keyCode > 95 && event.keyCode < 106)
+      || (event.keyCode > 47 && event.keyCode < 58)
+      || event.keyCode === 8)) {
+      return false;
+    }
+  }
+
+  negativeNumber() {
+   this.modifiers$.forEach(item => {
+    const modArr = item.map(modValue => {
+       return modValue.toJS().operands.map( o => {
+          return o < 0;
+        });
+      });
+     this.showError = modArr.toJS().flat().includes(true);
+    });
   }
 }

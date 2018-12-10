@@ -245,29 +245,32 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case PREVIEW_REQUEST_ERROR:
         return state
-          .setIn(['wizard', 'preview', 'error'], action.error)
+          .setIn(['wizard', 'preview', 'error'], true)
           .setIn(['wizard', 'preview', 'requesting'], false);
 
       case BEGIN_CHARTS_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
+          .deleteIn(['entities', action.entityType, action.entityId, 'error'])
+          .deleteIn(['entities', action.entityType, action.entityId, 'count'])
           .set('initShowChart', true);
 
       case BEGIN_COUNT_REQUEST:
         return state
           .setIn(['entities', action.entityType, action.entityId, 'isRequesting'], true)
           .deleteIn(['entities', action.entityType, action.entityId, 'error'])
+          .deleteIn(['entities', action.entityType, action.entityId, 'count'])
           .set('initShowChart', true);
 
       case BEGIN_ATTR_PREVIEW_REQUEST:
         return state
-          .deleteIn(['wizard', 'calculate', 'error'])
-          .setIn(['wizard', 'calculate', 'requesting'], true);
+          .deleteIn(['wizard', 'preview', 'error'])
+          .setIn(['wizard', 'preview', 'requesting'], true);
 
       case LOAD_ATTR_PREVIEW_RESULTS:
         return state
           .setIn(['wizard', 'calculate', 'count'], action.count)
-          .setIn(['wizard', 'calculate', 'requesting'], false);
+          .setIn(['wizard', 'preview', 'requesting'], false);
 
       case ADD_ATTR_FOR_PREVIEW:
         return state.setIn(['wizard', 'count', 'parameters'], fromJS([action.parameter]));

@@ -1,8 +1,8 @@
-<span *ngIf="isSource"><b> Source </b></span>
-<span *ngIf="isStandard"><b> Standard </b></span>
-<span *ngIf="indNum">{{indNum}}. </span>
+<ng-container *ngIf="isSource"><b> Source </b></ng-container>
+<ng-container *ngIf="isStandard"><b> Standard </b></ng-container>
+<ng-container *ngIf="indNum">{{indNum}}. </ng-container>
 <ng-container *ngIf="searchTerm; else noSearchTerm">
-  <span *ngFor="let word of words" [class.highlight]="reString.test(word.toLowerCase())">
+  <span [class.highlight]="matchString.test(word.toLowerCase())" *ngFor="let word of words">
     {{word}}
   </span>
 </ng-container>
@@ -11,4 +11,4 @@
     {{word}}
   </span>
 </ng-template>
-<span *ngIf="conceptId"> -- {{conceptId}}</span>
+<ng-container *ngIf="conceptId"> -- {{conceptId}}</ng-container>

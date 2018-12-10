@@ -208,18 +208,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     });
   }
 
-  get selectionTitle() {
-    const _type = [
-      TreeType[TreeType.CONDITION],
-      TreeType[TreeType.PROCEDURE]
-    ].includes(this.itemType)
-      ? this.itemType : this.ctype;
-    const title = typeToTitle(_type);
-    return title
-      ? `Add Selected ${title} Criteria to Cohort`
-      : 'No Selection';
-  }
-
   get attributeTitle() {
     return this.ctype === TreeType[TreeType.PM]
       ? stripHtml(this.attributesNode.get('name'))
@@ -244,7 +232,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
 
   setMode(mode: any) {
-    if (mode === 'snomed') {
+    if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
       this.originalNode = Map({
         type: this.ctype,
         subtype: this.subtype,
@@ -252,11 +240,13 @@ export class ModalComponent implements OnInit, OnDestroy {
         id: 0,
       });
     }
-    const node = mode === 'tree' ? this.originalNode : this.snomedNode;
-    const criteriaType = node.get('type');
-    const criteriaSubtype = node.get('subtype');
-    const context = {criteriaType, criteriaSubtype};
-    this.actions.setWizardContext(context);
+    if (mode !== 'modifiers') {
+      const node = mode === 'tree' ? this.originalNode : this.snomedNode;
+      const criteriaType = node.get('type');
+      const criteriaSubtype = node.get('subtype');
+      const context = {criteriaType, criteriaSubtype};
+      this.actions.setWizardContext(context);
+    }
     this.mode = mode;
   }
 

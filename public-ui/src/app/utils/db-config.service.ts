@@ -15,7 +15,9 @@ export class DbConfigService {
   /* CONSTANTS */
   MALE_GENDER_ID = '8507';
   FEMALE_GENDER_ID = '8532';
-  OTHER_GENDER_ID = '8521';
+  // OTHER_GENDER_ID = '8521';
+  // Current data has 0 for other gender.
+  OTHER_GENDER_ID = '0';
   INTERSEX_GENDER_ID = '1585848';
   NONE_GENDER_ID = '1585849';
   PREGNANCY_CONCEPT_ID = '903120';
@@ -47,6 +49,7 @@ export class DbConfigService {
     '1585839': '#8DC892',
     '1585840': '#6CAEE3',
     '903070': '#252660',
+    '903096': '#252660',
     '903079': '#80C4EC',
     '1585841': '#4259A5',
     '1585842': '#80C4EC',

@@ -125,8 +125,16 @@
               [style.vertical-align]="'middle'">
         Loading...
         </span>
-            <span *ngIf="!isRequesting">
-        {{ group.get('count') || 0 | number }}
+
+        <span *ngIf="!isRequesting">
+          {{ group.get('count') | number }}
+        </span>
+        <span *ngIf="error">
+          <clr-icon
+            [popper]="errorPopper"
+            [popperTrigger]="'hover'"
+            shape="error-standard"
+            size="18"></clr-icon>
         </span>
       </div>
     </div>
@@ -144,7 +152,18 @@
       Loading...
     </span>
     <span *ngIf="!isRequesting">
-    {{ group.get('count') || 0 | number }}
+      {{ group.get('count') | number }}
+    </span>
+    <span *ngIf="error">
+      <clr-icon
+        [popper]="errorPopper"
+        [popperTrigger]="'hover'"
+        shape="error-standard"
+        size="18"></clr-icon>
     </span>
   </div>
 </div>
+
+<popper-content #errorPopper>
+  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+</popper-content>
