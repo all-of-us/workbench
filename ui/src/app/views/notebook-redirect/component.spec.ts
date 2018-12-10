@@ -1,4 +1,4 @@
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {Response, ResponseOptions} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -257,7 +257,7 @@ describe('NotebookRedirectComponent', () => {
     tick(10000);
     expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
       .children[0].nativeElement).toBe(spinner());
-
+    discardPeriodicTasks()
   }));
 
   it('should display spinners to match progress status when loading a notebook', fakeAsync(() => {
@@ -286,6 +286,7 @@ describe('NotebookRedirectComponent', () => {
     expect(fixture.debugElement.queryAll(By.css('#redirecting'))[0]
       .children[0].nativeElement).toBe(spinner());
 
+    discardPeriodicTasks()
   }));
 
   it('should properly display notebooks names', fakeAsync(() => {
@@ -315,6 +316,7 @@ describe('NotebookRedirectComponent', () => {
     fixture.detectChanges();
     expect(fixture.debugElement.queryAll(By.css('.notebooks-header'))[0].nativeElement.textContent)
       .toMatch('Loading Notebook \'foo.ipynb\'');
+    discardPeriodicTasks()
   }));
 
   it('should return to the notebooks list page if we cancel notebook creation', fakeAsync(() => {
@@ -326,6 +328,7 @@ describe('NotebookRedirectComponent', () => {
     // expect notebook not to have loaded
     fixture.detectChanges();
     expect(fixture.debugElement.queryAll(By.css('.i-frame')).length).toBe(0);
+    discardPeriodicTasks()
   }));
 });
 
