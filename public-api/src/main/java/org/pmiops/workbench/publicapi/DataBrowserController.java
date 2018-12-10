@@ -534,7 +534,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 //aa.setUnitName(unitName);
-                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID) {
+                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !domainId.isEmpty()) {
                     aa.setResults(aa.getResults().stream().filter(ar -> ar.getStratum3().equalsIgnoreCase(domainId)).collect(Collectors.toList()));
                 }
                 if(analysisId == GENDER_ANALYSIS_ID){
