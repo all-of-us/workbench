@@ -3,6 +3,7 @@
   Cohort Definition
 </div>
 <ng-container *ngFor="let group of definition; let g = index;">
+  <div *ngIf="group?.role ==='excludes'">EXCLUDES</div>
   <ng-container *ngFor="let item of group?.groups; let i = index">
     <div *ngIf="i > 0">AND</div>
     <div class="group-background">

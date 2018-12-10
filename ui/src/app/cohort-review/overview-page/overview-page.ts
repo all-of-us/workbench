@@ -16,7 +16,6 @@ import {ReviewStateService} from '../review-state.service';
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
   demoGraph = false;
-  @Output()
   @Output() dataItems = new EventEmitter<any>();
   data = List();
   typesList = [DomainType[DomainType.CONDITION],

@@ -12,6 +12,7 @@ export class QueryReportComponent implements OnInit {
   cohort: any;
   review: any;
   cdrId:any;
+  data: any;
   constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
 
   ngOnInit() {
@@ -20,38 +21,11 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
   }
-
-  // async ppiCheck(definition: any) {
-  //   const parents = {};
-  //   for (const role in definition) {
-  //     if (definition.hasOwnProperty(role)) {
-  //       for (const group of definition[role]) {
-  //         for (const item of group.items) {
-  //           if (item.type !== TreeType[TreeType.PPI]) {
-  //             continue;
-  //           }
-  //           for (const param of item.searchParameters) {
-  //             const name = await this.getPPIParent(param.conceptId);
-  //             parents[param.conceptId] = name;
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return new Promise(resolve => {
-  //     resolve(parents);
-  //   });
-  // }
-  //
-  // async getPPIParent(conceptId: string) {
-  //   let name;
-  //   await this.api
-  //     .getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
-  //     .toPromise()
-  //     .then(parent => name = parent.name);
-  //   return name;
-  // }
-
+  getDemoChartData(d){
+    if(d) {
+      this.data = d
+    }
+  }
   onPrint() {
     window.print();
   }
