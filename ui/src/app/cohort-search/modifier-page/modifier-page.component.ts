@@ -168,7 +168,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             let selected;
             // make sure the encounters options are loaded before setting the value
             Observable.interval(100)
-              .takeWhile((val, index) => !selected && index < 10)
+              .takeWhile((val, index) => !selected && index < 30)
               .subscribe(i => {
                 selected = meta.operators.find(
                   operator => operator.value
@@ -178,6 +178,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
                   this.dropdownOption.selected[3] = selected.name;
                   this.form.get(meta.name).patchValue({
                     operator: mod.getIn(['operands', 0]),
+                    encounterType: mod.get('encounterType')
                   }, {emitEvent: false});
                 }
               });
