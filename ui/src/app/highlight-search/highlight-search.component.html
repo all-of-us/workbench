@@ -1,5 +1,5 @@
 <ng-container *ngIf="searchTerm; else noSearchTerm">
-  <span *ngFor="let word of words" [class.highlight]="reString.test(word.toLowerCase())">
+  <span [class.highlight]="matchString.test(word.toLowerCase())" *ngFor="let word of words">
     {{word}}
   </span>
 </ng-container>

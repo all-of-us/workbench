@@ -32,15 +32,18 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   femaleGenderResult: AchillesResult;
   intersexGenderResult: AchillesResult;
   noneGenderResult: AchillesResult;
+  otherGenderResult: AchillesResult;
   maleGenderChartTitle =  '';
   femaleGenderChartTitle = '';
   intersexGenderChartTitle = '';
   noneGenderChartTitle = '';
+  otherGenderChartTitle = '';
   sourceConcepts: Concept[] = null;
   analyses: ConceptAnalysis;
   unitNames: string[] = [];
   selectedUnit: string;
   genderResults: AchillesResult[] = [];
+  displayMeasurementGraphs = false;
   toDisplayMeasurementGenderAnalysis: Analysis;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
@@ -64,6 +67,7 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       }
       this.unitNames = [];
       if (this.analyses.measurementValueGenderAnalysis) {
+        this.displayMeasurementGraphs = true;
         for (const aa of this.analyses.measurementValueGenderAnalysis) {
           this.unitNames.push(aa.unitName);
         }
@@ -108,6 +112,9 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       } else if (g.stratum2 === this.dbc.NONE_GENDER_ID) {
         this.noneGenderResult = g;
         this.noneGenderChartTitle = chartTitle;
+      } else if (g.stratum2 === this.dbc.OTHER_GENDER_ID) {
+        this.otherGenderResult = g;
+        this.otherGenderChartTitle = chartTitle;
       }
     }
 
