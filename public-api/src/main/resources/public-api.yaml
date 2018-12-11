@@ -90,6 +90,11 @@ paths:
             type: string
           required: true
           description: concept id
+        - in: query
+          name: domain-id
+          type: string
+          required: false
+          description: domain id
       responses:
         200:
           description: A collection of analysis for concept
