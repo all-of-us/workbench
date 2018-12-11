@@ -1,7 +1,7 @@
-import {Component, OnInit, Input} from '@angular/core';
- import {CohortBuilderService, TreeType} from 'generated';
- import {typeToTitle,} from '../../cohort-search/utils';
-import * as moment from "moment";
+import {Component, Input, OnInit} from '@angular/core';
+import {CohortBuilderService, TreeType} from 'generated';
+import {typeToTitle} from '../../cohort-search/utils';
+
 
 
 @Component({
@@ -10,25 +10,24 @@ import * as moment from "moment";
   styleUrls: ['./query-cohort-definition.component.css']
 })
 export class QueryCohortDefinitionComponent implements OnInit {
-  // review: any;
   definition: Array<any>;
   ppiParents: any;
   values: Array<any>;
   pmNames: Array<any>;
   ppNames: Array<any>;
-  types = ['ICD9', 'ICD10', 'CPT', 'VISIT', 'PM', 'DRUG', 'MEAS', 'CONDITION', 'PROCEDURE', 'SNOMED' ];
-  type1 = [];
+  types = ['ICD9', 'ICD10', 'CPT', 'VISIT', 'PM', 'DRUG',
+    'MEAS', 'CONDITION', 'PROCEDURE', 'SNOMED' ];
   @Input() cohort: any;
   @Input() review: any;
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
     this.mapDefinition();
-     console.log(JSON.parse(this.cohort.criteria))
+     console.log(JSON.parse(this.cohort.criteria));
   }
 
   mapDefinition() {
-    const definition = JSON.parse(this.cohort.criteria)
+    const definition = JSON.parse(this.cohort.criteria);
     this.ppiCheck(definition).then(parents => {
       this.ppiParents = parents;
       // console.log(this.ppiParents);
@@ -75,10 +74,10 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getPMNames(p) {
     this.pmNames = p.map(m => {
       if (m.name) {
-        return m.name
+        return m.name;
       }
     }).reduce((acc, v) => {
-      return `${acc} ${v} , `
+      return `${acc} ${v} , `;
     }, '');
     return this.pmNames;
   }
@@ -88,16 +87,16 @@ export class QueryCohortDefinitionComponent implements OnInit {
     this.ppNames = p.map(m => {
       if (m.name) {
         return  this.ppiParents[m.conceptId]
-        + ' | ' + m.name
+        + ' | ' + m.name ;
       }
     }).reduce((acc, v) => {
-      return `${acc} ${v} , `
+      return `${acc} ${v} , ` ;
     }, '');
     return this.ppNames;
   }
 
   mapPPIParams(params: Array<any>) {
-    this.getPPIValues(params)
+    this.getPPIValues(params);
     const PpiArray = params.map(param => {
       return {
         items: typeToTitle(param.type)
@@ -109,24 +108,24 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
   removeUnderScoreLowerCase(name: string) {
-    return name.replace(/_/g, " ").toLowerCase();
+    return name.replace(/_/g, '').toLowerCase();
   }
 
   operatorConversion(operator){
     switch (operator) {
-      case 'GREATER_THAN_OR_EQUAL_TO':
+      case 'GREATER_THAN_OR_EQUAL_TO' :
         return '>=';
-      case 'LESS_THAN_OR_EQUAL_TO':
+      case 'LESS_THAN_OR_EQUAL_TO' :
         return '<=';
-      case 'EQUAL':
+      case 'EQUAL' :
         return '=';
-      case 'BETWEEN':
+      case 'BETWEEN' :
         return 'between';
-      case 'ETH':
+      case 'ETH' :
         return 'Ethnicity';
-      case 'RACE':
+      case 'RACE' :
         return 'Race';
-      case 'AGE':
+      case 'AGE' :
         return 'Age';
     }
   }
