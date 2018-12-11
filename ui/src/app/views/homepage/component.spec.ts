@@ -85,8 +85,6 @@ describe('HomepageComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(HomepageComponent);
-      reactElement = React.createElement(QuickTourReact, {learning: true, closeFunction: null});
-      reactComponent = ReactTestUtils.renderIntoDocument(reactElement);
     });
   }));
 
@@ -106,25 +104,38 @@ describe('HomepageComponent', () => {
   it('should display quick tour when clicked', fakeAsync(() =>  {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
+    expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
+        ReactTestUtils.renderIntoDocument(React.createElement(
+            QuickTourReact, {learning: fixture.componentInstance.quickTour,
+              closeFunction: () => {}})), 'main').length).toBe(0);
     simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
     tick(1000);
     // must check the inner piece of the react element here because the quick-tour element
     //   is always rendered, but empty when not open
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(
+        ReactTestUtils.renderIntoDocument(React.createElement(
+            QuickTourReact, {learning: fixture.componentInstance.quickTour,
+          closeFunction: () => {}})), 'main')).toBeTruthy();
   }));
 
   it('should display quick tour on first visit', fakeAsync(() => {
     updateAndTick(fixture);
     tick(1000);
     updateAndTick(fixture);
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(
+        ReactTestUtils.renderIntoDocument(React.createElement(
+            QuickTourReact, {learning: fixture.componentInstance.quickTour,
+              closeFunction: () => {}})), 'main')).toBeTruthy();
   }));
 
   it('should not auto display quick tour if not first visit', fakeAsync(() => {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
     tick(1000);
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
+    expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
+        ReactTestUtils.renderIntoDocument(React.createElement(
+            QuickTourReact, {learning: fixture.componentInstance.quickTour,
+              closeFunction: () => {}})), 'main').length).toBe(0);
   }));
 
 });
