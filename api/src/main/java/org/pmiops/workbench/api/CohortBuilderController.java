@@ -123,18 +123,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     String matchExp = modifyKeywordMatch(value);
-    List<CriteriaId> ids;
+    List<Criteria> criteriaList;
     if (subtype == null) {
-      ids = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
+      criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     } else {
-      ids = type.equals(TreeType.SNOMED.name()) ?
-        criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
+      criteriaList = type.equals(TreeType.SNOMED.name()) ?
+        criteriaDao.findCriteriaByTypeAndSubtypeForName(type, subtype, matchExp, new PageRequest(0, resultLimit.intValue())) :
         criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(type, subtype, matchExp, value, new PageRequest(0, resultLimit.intValue()));
     }
-
-    List<Criteria> criteriaList = ids.isEmpty() ?
-      new ArrayList<>() :
-      criteriaDao.findCriteriaByIds(ids.stream().map(CriteriaId::getId).collect(Collectors.toList()));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
@@ -322,7 +318,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         }
         return "+" + keywords[i] + "*";
       })
-      .collect(Collectors.joining());
+      .collect(Collectors.joining())
+      + "+\"[rank1]\"";
   }
 
 }

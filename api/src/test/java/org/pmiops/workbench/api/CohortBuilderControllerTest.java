@@ -99,7 +99,7 @@ public class CohortBuilderControllerTest {
       createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true)
     );
     labMeasurement = criteriaDao.save(
-      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false).synonyms("+LP12*")
+      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false).synonyms("LP12*\"[rank1]\"")
     );
     drugATCCriteria = criteriaDao.save(
       createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
@@ -108,12 +108,12 @@ public class CohortBuilderControllerTest {
       createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true)
     );
     drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("+drugN*")
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("drugN*\"[rank1]\"")
     );
     ppiCriteria = criteriaDao.save(
       createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
         "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", false).synonyms("+covered*")
+        DomainType.OBSERVATION.name(), "43529119", false).synonyms("covered*\"[rank1]\"")
     );
     conceptDao.save(new Concept().conceptId(12345).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(

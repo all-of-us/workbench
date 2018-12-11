@@ -65,6 +65,7 @@ public class CriteriaDaoTest {
   private Criteria drugCriteriaIngredient1;
   private Criteria drugCriteriaBrand;
   private Criteria labCriteria;
+  private Criteria labCriteria1;
 
   @Before
   public void setUp() {
@@ -84,7 +85,8 @@ public class CriteriaDaoTest {
     drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
     drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
     drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
-    labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "xxx", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    labCriteria1 = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
 
     criteriaDao.save(icd9Criteria1);
     criteriaDao.save(icd9Criteria2);
@@ -107,6 +109,7 @@ public class CriteriaDaoTest {
     criteriaDao.save(drugCriteriaIngredient1);
     criteriaDao.save(drugCriteriaBrand);
     criteriaDao.save(labCriteria);
+    criteriaDao.save(labCriteria1);
 
     conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
     conceptRelationshipDao.save(
@@ -196,23 +199,33 @@ public class CriteriaDaoTest {
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
     //match on code
-    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP123", new PageRequest(0, 10));
-    assertEquals(1, labs.size());
-    assertEquals(labCriteria.getId(), labs.get(0).getId());
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP1234", new PageRequest(0, 10));
+    assertEquals(2, labs.size());
+    assertEquals(labCriteria1, labs.get(0));
+    assertEquals(labCriteria, labs.get(1));
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
     //match on code
-    List<CriteriaId> conditions =
+    List<Criteria> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", "001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria2, conditions.get(0));
 
     conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"002", "002", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria1.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria1, conditions.get(0));
+  }
+
+  @Test
+  public void findCriteriaByTypeAndSubtypeForName() throws Exception {
+    //match on code
+    List<Criteria> conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
   }
 
   @Test
