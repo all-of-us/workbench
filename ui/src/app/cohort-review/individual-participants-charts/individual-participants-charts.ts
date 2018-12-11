@@ -36,6 +36,7 @@ export class IndividualParticipantsChartsComponent implements OnChanges {
        findName =>
          findName.name === items.standardName
        );
+      // console.log(duplicateFound)
       // duplicate items found return true otherwise push the the item in duplicateItems array
       if (duplicateFound) {
         Object.assign(items, {

@@ -9,15 +9,18 @@
     <div class="group-background">
       <ng-container *ngFor="let param of item; let p = index;">
         <div *ngIf="p > 0 ">OR</div>
-        <div style="border: 1px solid black;">
+        <!--<div style="border: 1px solid black;">-->
+          <div>
           <ng-container *ngFor="let query of param; let s = index;">
             <ng-container *ngIf="s > 0">
               <div *ngIf="query?.type ==='DEMO'; else or ">AND</div>
               <ng-template #or>OR</ng-template>
+              <!--<div *ngIf="query?.type ==='DEMO'">AND</div>-->
+              <!--<ng-template #or>OR</ng-template>-->
             </ng-container>
-          <div>
-          {{query?.items}}
-          </div>
+            <div>
+              {{query?.items}}
+            </div>
           </ng-container>
         </div>
       </ng-container>
