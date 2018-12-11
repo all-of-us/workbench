@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "ancestor_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "descendant_id",
+    "type": "INTEGER"
+  }
+]

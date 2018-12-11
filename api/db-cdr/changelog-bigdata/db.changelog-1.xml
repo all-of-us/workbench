@@ -169,40 +169,27 @@
                 tableName="concept_relationship"/>
     </changeSet>
 
-    <changeSet id="add idx_concept_ancestor" author="brianfreeman" runAlways="true">
+    <changeSet id="add idx_criteria_concept_1" author="brianfreeman" runAlways="true">
         <validCheckSum>ANY</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_concept_ancestor"/>
+                <indexExists indexName="idx_criteria_concept_1"/>
             </not>
         </preConditions>
-        <createIndex tableName="concept_ancestor" indexName="idx_concept_ancestor">
-            <column name="ancestor_concept_id"/>
-            <column name="descendant_concept_id"/>
+        <createIndex tableName="criteria_relationship" indexName="idx_criteria_concept_1">
+            <column name="concept_id_1" type="bigint"></column>
         </createIndex>
     </changeSet>
 
-    <changeSet id="add idx_ancestor_concept_id" author="brianfreeman" runAlways="true">
+    <changeSet id="add idx_criteria_concept_2" author="brianfreeman" runAlways="true">
         <validCheckSum>ANY</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
-                <indexExists indexName="idx_ancestor_concept_id"/>
+                <indexExists indexName="idx_criteria_concept_2"/>
             </not>
         </preConditions>
-        <createIndex tableName="concept_ancestor" indexName="idx_ancestor_concept_id">
-            <column name="ancestor_concept_id"/>
-        </createIndex>
-    </changeSet>
-
-    <changeSet id="add idx_descendant_concept_id" author="brianfreeman" runAlways="true">
-        <validCheckSum>ANY</validCheckSum>
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists indexName="idx_descendant_concept_id"/>
-            </not>
-        </preConditions>
-        <createIndex tableName="concept_ancestor" indexName="idx_descendant_concept_id">
-            <column name="descendant_concept_id"/>
+        <createIndex tableName="criteria_relationship" indexName="idx_criteria_concept_2">
+            <column name="concept_id_2" type="bigint"></column>
         </createIndex>
     </changeSet>
 
