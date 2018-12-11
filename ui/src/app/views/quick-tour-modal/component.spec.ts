@@ -2,7 +2,7 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
-import {QuickTourReact, QuickTourModalComponent} from './component';
+import {QuickTourModalComponent, QuickTourReact} from './component';
 
 import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
