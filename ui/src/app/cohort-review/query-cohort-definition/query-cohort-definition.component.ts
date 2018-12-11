@@ -109,7 +109,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     return name.replace(/_/g, '').toLowerCase();
   }
 
-  operatorConversion(operator){
+  operatorConversion(operator) {
     switch (operator) {
       case 'GREATER_THAN_OR_EQUAL_TO' :
         return '>=';
@@ -132,23 +132,21 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getValues(p) {
     this.values = p.map(m => {
       if (m.value && m.type !== 'SNOMED') {
-        if(m.group === true){
-          return  'Parent ' + m.value
+        if (m.group === true) {
+          return  'Parent ' + m.value;
         } else {
-          return  m.value
+          return  m.value;
         }
       } else {
-        return m.name
+        return m.name;
       }
     }).reduce((acc, v) => {
-      return `${acc} ${v} , `
+      return `${acc} ${v} , `;
     }, '');
     return  this.values;
-
   }
 
-
-  removeDuplicates(arr){
+  removeDuplicates(arr) {
     return arr.filter((thing, index, self) =>
       index === self.findIndex((t) => (
          t.items === thing.items && t.type === thing.type
