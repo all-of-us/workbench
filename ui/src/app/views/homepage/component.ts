@@ -113,7 +113,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   public closeQuickTour(): void {
-    console.log("homepage: closing aquick tour");
     this.quickTour = false;
   }
 
