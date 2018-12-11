@@ -11,7 +11,7 @@ import {CohortBuilderService} from 'generated';
 export class QueryReportComponent implements OnInit {
   cohort: any;
   review: any;
-  cdrId:any;
+  cdrId: any;
   data: any;
   constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
 
@@ -21,9 +21,9 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
   }
-  getDemoChartData(d){
-    if(d) {
-      this.data = d
+  getDemoChartData(d) {
+    if (d) {
+      this.data = d;
     }
   }
   onPrint() {
