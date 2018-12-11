@@ -126,7 +126,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       range: 'Values for Has Occurrences must be between 1 and 99',
       integer: 'Values for Has Occurrencest must be valid integers'
     }
-  }
+  };
+  
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
