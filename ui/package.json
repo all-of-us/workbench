@@ -51,6 +51,8 @@
     "ngx-popper": "^5.1.7",
     "nouislider": "10.0.0",
     "popper.js": "^1.13.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.6",
