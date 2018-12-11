@@ -18,7 +18,6 @@ import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;

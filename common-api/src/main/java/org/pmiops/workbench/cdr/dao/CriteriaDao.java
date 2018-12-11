@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -36,9 +35,9 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "    and (match(synonyms, ?2) > 0 or cr.code like upper(concat(?3,'%')))" +
     "    order by cr.count desc")
   List<Criteria> findCriteriaByTypeForCodeOrName(String type,
-                                                   String modifiedValue,
-                                                   String value,
-                                                   Pageable page);
+                                                 String modifiedValue,
+                                                 String value,
+                                                 Pageable page);
 
   @Query(value = "select cr from Criteria cr " +
     "    where cr.type = upper(?1) " +

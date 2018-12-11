@@ -9,7 +9,6 @@ import org.pmiops.workbench.cdr.model.ConceptRelationship;
 import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
 import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
