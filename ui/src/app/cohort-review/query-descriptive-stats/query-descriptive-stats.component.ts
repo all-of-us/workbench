@@ -54,8 +54,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     }, {});
 
      this.updateShape = Object.keys(test).map(k => {
-
-       if( k === 'F' || k === 'M') {
+       if (k === 'F' || k === 'M') {
          return Object.assign({}, {
            group: this.getFormattedGroup(k),
            data: test[k].data
@@ -81,7 +80,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     this.graphData[groupBy] = this.updateShape;
   }
 
-onPrint(){
+onPrint() {
   window.print();
 }
 
