@@ -16,7 +16,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "concept_id",
+    "name": "source_concept_id",
     "type": "INTEGER"
   },
   {
@@ -26,12 +26,12 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "age_at_event",
-    "type": "INTEGER"
+    "name": "value_as_number",
+    "type": "float"
   },
   {
     "mode": "NULLABLE",
-    "name": "visit_concept_id",
+    "name": "value_as_concept_id",
     "type": "integer"
   }
 ]

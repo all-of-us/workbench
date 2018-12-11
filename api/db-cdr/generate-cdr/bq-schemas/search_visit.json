@@ -21,17 +21,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "subtype",
-    "type": "string"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "age_at_event",
     "type": "INTEGER"
-  },
-  {
-    "mode": "NULLABLE",
-    "name": "visit_concept_id",
-    "type": "integer"
   }
 ]
