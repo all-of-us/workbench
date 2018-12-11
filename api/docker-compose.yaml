@@ -133,24 +133,6 @@ services:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
       env_file:
         - db-cdr/vars.env
-  db-make-bq-denormalized-search:
-      depends_on:
-        - db
-      build:
-        context: ./src/dev/server
-      user: ${UID}
-      working_dir: /w/db-cdr
-      volumes:
-        - gradle-cache:/.gradle
-        - .:/w:cached
-        - ~/.config:/.config:cached
-        - ~/.gsutil:/.gsutil:cached
-
-      entrypoint: ["./generate-cdr/make-bq-denormalized-search.sh"]
-      environment:
-        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
-      env_file:
-        - db-cdr/vars.env
   db-generate-private-cdr-counts:
     depends_on:
       - db
