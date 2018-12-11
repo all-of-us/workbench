@@ -1,9 +1,9 @@
 <form [formGroup]="form">
-  <div *ngIf="errors.length && formChanges" class="alert alert-danger alert-sm">
+  <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
     <div class="alert-items">
-      <div *ngFor="let mod of errors" class="alert-item static">
+      <div *ngFor="let error of errors" class="alert-item static">
         <div class="alert-text">
-          Values for {{mod.label}} must be between {{mod.min}} and {{mod.max}}
+          {{errorMessages[error.name][error.type]}}
         </div>
       </div>
     </div>
@@ -68,7 +68,7 @@
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
-                <input *ngIf="mod.inputType !== 'date'" min="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+                <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
@@ -79,7 +79,7 @@
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf="mod.inputType !== 'date'" min="1" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                  <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
