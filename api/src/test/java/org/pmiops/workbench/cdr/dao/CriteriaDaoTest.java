@@ -1,13 +1,10 @@
 package org.pmiops.workbench.cdr.dao;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,13 +131,16 @@ public class CriteriaDaoTest {
 
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
-    Criteria labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    Criteria labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "xxx", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    Criteria labCriteria1 = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
     criteriaDao.save(labCriteria);
+    criteriaDao.save(labCriteria1);
 
     //match on code
-    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP123", new PageRequest(0, 10));
-    assertEquals(1, labs.size());
-    assertEquals(labCriteria.getId(), labs.get(0).getId());
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP1234", new PageRequest(0, 10));
+    assertEquals(2, labs.size());
+    assertEquals(labCriteria1, labs.get(0));
+    assertEquals(labCriteria, labs.get(1));
   }
 
   @Test
@@ -151,15 +151,26 @@ public class CriteriaDaoTest {
     criteriaDao.save(icd9Criteria2);
 
     //match on code
-    List<CriteriaId> conditions =
+    List<Criteria> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", "001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria2, conditions.get(0));
 
     conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"002", "002", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria1.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria1, conditions.get(0));
+  }
+
+  @Test
+  public void findCriteriaByTypeAndSubtypeForName() throws Exception {
+    //match on code
+    Criteria icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
+    criteriaDao.save(icd9Criteria2);
+    List<Criteria> conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
   }
 
   @Test

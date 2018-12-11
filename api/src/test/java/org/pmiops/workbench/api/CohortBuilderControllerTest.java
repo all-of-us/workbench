@@ -211,7 +211,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteNoSubtype() throws Exception {
     Criteria labMeasurement = criteriaDao.save(
-      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false).synonyms("+LP12*")
+      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false).synonyms("LP12*\"[rank1]\"")
     );
 
     assertEquals(
@@ -227,7 +227,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteWithSubtype() throws Exception {
     Criteria drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("+drugN*")
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("drugN*\"[rank1]\"")
     );
 
     assertEquals(
@@ -245,7 +245,7 @@ public class CohortBuilderControllerTest {
     Criteria ppiCriteria = criteriaDao.save(
       createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
         "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", false).synonyms("+covered*")
+        DomainType.OBSERVATION.name(), "43529119", false).synonyms("covered*\"[rank1]\"")
     );
 
     assertEquals(
