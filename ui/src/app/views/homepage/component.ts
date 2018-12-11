@@ -105,8 +105,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.reload();
   }
 
-  openQuickTour(): void {
-    this.quickTourModal.open();
+  public closeQuickTour(): void {
+    this.quickTour = false;
   }
 
   public get completedTasks() {
