@@ -43,7 +43,7 @@ public class CriteriaDaoTest {
   private JdbcTemplate jdbcTemplate;
 
   @Before
-  public void setup() {
+  public void setUp() {
     jdbcTemplate.execute("delete from criteria");
   }
 

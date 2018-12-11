@@ -75,7 +75,7 @@ public class CohortBuilderControllerTest {
   static class Configuration {}
 
   @Before
-  public void setup() {
+  public void setUp() {
     jdbcTemplate.execute("delete from criteria");
   }
 
