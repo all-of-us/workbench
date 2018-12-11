@@ -15,6 +15,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
   groupKeys = [
     'gender', 'ageRange', 'race'
   ];
+
   totalCount: number;
   constructor(private state: ReviewStateService) {}
 
@@ -29,6 +30,14 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     }
   }
 
+  getFormattedGroup(group) {
+    switch (group) {
+      case 'F' :
+        return 'Female';
+      case 'M' :
+        return 'Male';
+    }
+  }
   ngOnInit() {
     this.subscription = this.state.review$.subscribe(review => {
       this.totalCount = review.matchedParticipantCount;
@@ -36,6 +45,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
   }
 
   getGroupedData(data, groupBy) {
+
     const test = data.reduce((acc, i) => {
       const key = i[groupBy]; // F or M
        acc[key] = acc[key] || { data: []};
@@ -44,29 +54,35 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     }, {});
 
      this.updateShape = Object.keys(test).map(k => {
-      return Object.assign({}, {
-        group: k,
-        data: test[k].data
-      });
+
+       if( k === 'F' || k === 'M') {
+         return Object.assign({}, {
+           group: this.getFormattedGroup(k),
+           data: test[k].data
+         });
+       } else {
+         return Object.assign({}, {
+           group: k,
+           data: test[k].data
+         });
+       }
+
     }).map(item => {
       return Object.assign({}, item, {
         count: item.data.reduce((sum, d) => {
           return sum = sum + d.count;
         }, 0)
-         // countPerct:this.totalCount/ count
       });
     }).map(item => {
        return Object.assign({}, item, {
-         // count: item.data.reduce((sum, d) => {
-         //   return sum = sum + d.count;
-         // }, 0)
          percentage: (item.count / this.totalCount) * 100
-     });
-     });
+      });
+   });
     this.graphData[groupBy] = this.updateShape;
-    console.log(this.updateShape);
+
+    // console.log(this.graphData[groupBy].length);
   }
-
-
-
+onPrint(){
+  window.print();
+}
 }
