@@ -79,10 +79,10 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
       });
    });
     this.graphData[groupBy] = this.updateShape;
-
-    // console.log(this.graphData[groupBy].length);
   }
+
 onPrint(){
   window.print();
 }
+
 }
