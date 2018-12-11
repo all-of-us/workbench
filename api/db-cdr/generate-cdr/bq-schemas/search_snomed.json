@@ -16,7 +16,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "source_concept_id",
+    "name": "concept_id",
     "type": "INTEGER"
   },
   {

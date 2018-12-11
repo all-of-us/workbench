@@ -16,7 +16,7 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "age",
-    "type": "integer"
+    "name": "dob",
+    "type": "timestamp"
   }
 ]
