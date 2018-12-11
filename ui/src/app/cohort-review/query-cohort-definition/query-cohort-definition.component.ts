@@ -47,13 +47,10 @@ export class QueryCohortDefinitionComponent implements OnInit {
     return group.items.map(item => {
       switch (item.type) {
         case TreeType.PM:
-          console.log(item.type)
           return this.mapPMParams(item.searchParameters, item.type);
         case TreeType.PPI:
-          console.log(item.type)
           return this.mapPPIParams(item.searchParameters, item.type);
         default:
-          console.log(item.type)
           return this.mapParams(item.type, item.searchParameters, item.modifiers);
       }
     });
@@ -198,7 +195,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
   getValues(p, type) {
     this.values = p.map(m => {
-      if(type === 'PM') {
+      if (type === 'PM') {
         if (m.name) {
           return m.name;
         }
