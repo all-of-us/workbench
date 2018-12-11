@@ -48,7 +48,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
   selections = {};
-  objectKey = Object.keys;
+  objectKeys = Object.keys;
   open = false;
   noSelection = true;
   title = '';
