@@ -96,12 +96,12 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">Selected Criteria</h5>
                   <div class="panel-right selected">
-                    <ng-container *ngFor="let type of objectKey(selections); let i = index">
+                    <ng-container *ngFor="let type of objectKeys(selections); let i = index">
                       <span *ngIf="ctype === treeType[treeType.DEMO] && i > 0" class="font-weight-bold and-style">AND</span>
                       <span class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</span>
                       <crit-selection-info
-                        *ngFor="let parameter of selections[type]; let i = index"
-                        [index]="i"
+                        *ngFor="let parameter of selections[type]; let p = index"
+                        [indexes]="[i,p]"
                         [parameter]="parameter"
                         (demoItems) = "getDemoParams($event)">
                       </crit-selection-info>

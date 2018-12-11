@@ -11,7 +11,7 @@ import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
 })
 export class SelectionInfoComponent {
     @Input() parameter;
-    @Input() index;
+    @Input() indexes;
     @Output() demoItems = new EventEmitter<any>();
     treeType = TreeType;
 
@@ -34,6 +34,9 @@ export class SelectionInfoComponent {
         return this.parameter.get('type') !== TreeType.PM
           && this.parameter.get('type') !== TreeType.DRUG
           && this.parameter.get('type') !== TreeType.PPI;
+    }
+    get showOr() {
+        return this.indexes[0] > 0 || this.indexes[1] > 0;
     }
 }
 
