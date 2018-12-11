@@ -1,6 +1,7 @@
 import {Component, OnInit, Input} from '@angular/core';
  import {CohortBuilderService, TreeType} from 'generated';
- import {typeToTitle} from '../../cohort-search/utils';
+ import {typeToTitle,} from '../../cohort-search/utils';
+import * as moment from "moment";
 
 
 @Component({
@@ -12,13 +13,18 @@ export class QueryCohortDefinitionComponent implements OnInit {
   // review: any;
   definition: Array<any>;
   ppiParents: any;
+  values: Array<any>;
+  pmNames: Array<any>;
+  ppNames: Array<any>;
+  types = ['ICD9', 'ICD10', 'CPT', 'VISIT', 'PM', 'DRUG', 'MEAS', 'CONDITION', 'PROCEDURE', 'SNOMED' ];
+  type1 = [];
   @Input() cohort: any;
   @Input() review: any;
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
     this.mapDefinition();
-    // console.log(JSON.parse(this.cohort.criteria))
+     console.log(JSON.parse(this.cohort.criteria))
   }
 
   mapDefinition() {
@@ -35,7 +41,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
           return roleObj;
         }
       });
-      // console.log(this.definition)
+
+      console.log(this.definition);
+
     });
 
   }
@@ -54,23 +62,50 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
   mapPMParams(params: Array<any>) {
-    return params.map(param => {
+    this.getPMNames(params);
+    const PMarray = params.map(param => {
       return {
-        items: typeToTitle(param.type) + ' | ' + param.name,
+        items: typeToTitle(param.type) + ' | ' + this.pmNames,
         type: param.type
       };
     });
+    return this.removeDuplicates(PMarray);
+  }
+
+  getPMNames(p) {
+    this.pmNames = p.map(m => {
+      if (m.name) {
+        return m.name
+      }
+    }).reduce((acc, v) => {
+      return `${acc} ${v} , `
+    }, '');
+    return this.pmNames;
+  }
+
+
+  getPPIValues(p) {
+    this.ppNames = p.map(m => {
+      if (m.name) {
+        return  this.ppiParents[m.conceptId]
+        + ' | ' + m.name
+      }
+    }).reduce((acc, v) => {
+      return `${acc} ${v} , `
+    }, '');
+    return this.ppNames;
   }
 
   mapPPIParams(params: Array<any>) {
-    return params.map(param => {
+    this.getPPIValues(params)
+    const PpiArray = params.map(param => {
       return {
         items: typeToTitle(param.type)
-          + ' | ' + this.ppiParents[param.conceptId]
-          + ' | ' + param.name,
+          + ' | ' + this.ppNames,
         type: param.type
       };
     });
+    return this.removeDuplicates(PpiArray);
   }
 
   removeUnderScoreLowerCase(name: string) {
@@ -87,16 +122,52 @@ export class QueryCohortDefinitionComponent implements OnInit {
         return '=';
       case 'BETWEEN':
         return 'between';
+      case 'ETH':
+        return 'Ethnicity';
+      case 'RACE':
+        return 'Race';
+      case 'AGE':
+        return 'Age';
     }
   }
 
+
+  getValues(p) {
+    this.values = p.map(m => {
+      if (m.value && m.type !== 'SNOMED') {
+        if(m.group === true){
+          return  'Parent ' + m.value
+        } else {
+          return  m.value
+        }
+      } else{
+        return m.name
+      }
+    }).reduce((acc, v) => {
+      return `${acc} ${v} , `
+    }, '');
+    return  this.values;
+
+  }
+
+
+  removeDuplicates(arr){
+    return arr.filter((thing, index, self) =>
+      index === self.findIndex((t) => (
+         t.items === thing.items && t.type === thing.type
+      ))
+    )
+  }
+
+
   mapParams(_type: string, params: Array<any>, mod) {
+     this.getValues(params);
     if(mod.length > 0) {
-      return params.map(eachParam => {
+      const modArray = params.map(eachParam => {
         let name;
         name = mod.reduce((acc, m) => {
           const concatOperand = m.operands.reduce((final, o) => {
-            return final!=='' ? `${final} ${o}` : `${final} ${o} &`
+            return final!=='' ? `${final} ${o}` : `${final} ${o}`
           } , '');
           return acc !== '' ?
             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} 
@@ -109,26 +180,34 @@ export class QueryCohortDefinitionComponent implements OnInit {
         }, '');
         return {
           items: `${typeToTitle(_type)} | 
-                    ${eachParam.type} | ${eachParam.value} 
-                    ${eachParam.name} | ${name}`,
+                    ${eachParam.type} | ${this.values} 
+                     | ${name}`,
           type: eachParam.type
         };
       });
+      return this.removeDuplicates(modArray);
     } else {
-      return params.map(param => {
+      const noModArray = params.map(param => {
         if(param.type === 'DEMO')
         {
           return {items:`${typeToTitle(_type)} 
-                      | ${param.type} | ${param.name}`,
+                      | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
             type: param.type};
-        }else {
-          return {items:`${typeToTitle(_type)} 
-                      | ${param.type} | ${param.value}  ${param.name}`,
+        }else if(param.type === 'VISIT'){
+          return {items:`${typeToTitle(_type)} | ${param.name}`,
             type: param.type};
+        } else{
+          return _type === 'CONDITION' || _type === 'PROCEDURE' ?
+            {items:`${typeToTitle(_type)} | ${param.type} | ${this.values}`,
+            type: param.type} :
+            {items:`${typeToTitle(_type)} | ${this.values}`,
+            type: param.type}
         }
       });
+      return this.removeDuplicates(noModArray);
     }
   }
+
 
 async ppiCheck(definition: any) {
     const parents = {};
