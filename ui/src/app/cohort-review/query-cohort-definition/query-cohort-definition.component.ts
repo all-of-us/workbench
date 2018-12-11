@@ -137,7 +137,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
         } else {
           return  m.value
         }
-      } else{
+      } else {
         return m.name
       }
     }).reduce((acc, v) => {
@@ -153,13 +153,13 @@ export class QueryCohortDefinitionComponent implements OnInit {
       index === self.findIndex((t) => (
          t.items === thing.items && t.type === thing.type
       ))
-    )
+    );
   }
 
 
   mapParams(_type: string, params: Array<any>, mod) {
      this.getValues(params);
-    if(mod.length > 0) {
+    if (mod.length > 0) {
       const modArray = params.map(eachParam => {
         let name;
         name = mod.reduce((acc, m) => {
@@ -167,38 +167,33 @@ export class QueryCohortDefinitionComponent implements OnInit {
             return final!=='' ? `${final} ${o}` : `${final} ${o}`
           } , '');
           return acc !== '' ?
-            `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} 
-              ${this.operatorConversion(m.operator)} 
-               ${concatOperand}`
+            `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)} 
+            ${concatOperand}`
             :
-            `${this.removeUnderScoreLowerCase(m.name)} 
-              ${this.operatorConversion(m.operator)} 
-                ${concatOperand}`;
+            `${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)} 
+            ${concatOperand}`;
         }, '');
         return {
-          items: `${typeToTitle(_type)} | 
-                    ${eachParam.type} | ${this.values} 
-                     | ${name}`,
+          items: `${typeToTitle(_type)} | ${eachParam.type} | ${this.values} | ${name}`,
           type: eachParam.type
         };
       });
       return this.removeDuplicates(modArray);
     } else {
       const noModArray = params.map(param => {
-        if(param.type === 'DEMO')
-        {
-          return {items:`${typeToTitle(_type)} 
+        if (param.type === 'DEMO') {
+          return {items: `${typeToTitle(_type)} 
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
             type: param.type};
-        }else if(param.type === 'VISIT'){
-          return {items:`${typeToTitle(_type)} | ${param.name}`,
+        } else if (param.type === 'VISIT') {
+          return {items: `${typeToTitle(_type)} | ${param.name}`,
             type: param.type};
-        } else{
+        } else {
           return _type === 'CONDITION' || _type === 'PROCEDURE' ?
-            {items:`${typeToTitle(_type)} | ${param.type} | ${this.values}`,
+            {items: `${typeToTitle(_type)} | ${param.type} | ${this.values}`,
             type: param.type} :
-            {items:`${typeToTitle(_type)} | ${this.values}`,
-            type: param.type}
+            {items: `${typeToTitle(_type)} | ${this.values}`,
+            type: param.type};
         }
       });
       return this.removeDuplicates(noModArray);
