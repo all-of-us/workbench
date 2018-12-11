@@ -26,9 +26,6 @@ export class QueryReportComponent implements OnInit {
       this.data = d;
     }
   }
-  onPrint() {
-    window.print();
-  }
 
 //  TODO create search param mapping functions for each for each domain/type with different format
 }

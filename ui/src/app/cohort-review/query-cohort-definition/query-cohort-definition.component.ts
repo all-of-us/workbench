@@ -13,8 +13,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
   definition: Array<any>;
   ppiParents: any;
   values: Array<any>;
-  pmNames: Array<any>;
-  ppNames: Array<any>;
   types = ['ICD9', 'ICD10', 'CPT', 'VISIT', 'PM', 'DRUG',
     'MEAS', 'CONDITION', 'PROCEDURE', 'SNOMED' ];
   @Input() cohort: any;
@@ -51,120 +49,87 @@ export class QueryCohortDefinitionComponent implements OnInit {
     return group.items.map(item => {
       switch (item.type) {
         case TreeType.PM:
-          return this.mapPMParams(item.searchParameters);
+          console.log(item.type)
+          return this.mapPMParams(item.searchParameters, item.type);
         case TreeType.PPI:
-          return this.mapPPIParams(item.searchParameters);
+          console.log(item.type)
+          return this.mapPPIParams(item.searchParameters, item.type);
         default:
+          console.log(item.type)
           return this.mapParams(item.type, item.searchParameters, item.modifiers);
       }
     });
   }
 
-  mapPMParams(params: Array<any>) {
-    this.getPMNames(params);
+  // Physical Measurement
+  mapPMParams(params: Array<any>, _type) {
+    this.getValues(params, _type);
     const PMarray = params.map(param => {
       return {
-        items: typeToTitle(param.type) + ' | ' + this.pmNames,
+        items: typeToTitle(param.type) + ' | ' + this.values,
         type: param.type
       };
     });
     return this.removeDuplicates(PMarray);
   }
 
-  getPMNames(p) {
-    this.pmNames = p.map(m => {
-      if (m.name) {
-        return m.name;
-      }
-    }).reduce((acc, v) => {
-      return `${acc} ${v} , `;
-    }, '');
-    return this.pmNames;
-  }
 
+  // PPI
 
-  getPPIValues(p) {
-    this.ppNames = p.map(m => {
-      if (m.name) {
-        return  this.ppiParents[m.conceptId]
-        + ' | ' + m.name ;
-      }
-    }).reduce((acc, v) => {
-      return `${acc} ${v} , ` ;
-    }, '');
-    return this.ppNames;
-  }
-
-  mapPPIParams(params: Array<any>) {
-    this.getPPIValues(params);
+  mapPPIParams(params: Array<any>, _type) {
+    this.getValues(params, _type);
     const PpiArray = params.map(param => {
       return {
         items: typeToTitle(param.type)
-          + ' | ' + this.ppNames,
+          + ' | ' + this.values,
         type: param.type
       };
     });
     return this.removeDuplicates(PpiArray);
   }
 
-  removeUnderScoreLowerCase(name: string) {
-    return name.replace(/_/g, '').toLowerCase();
-  }
 
-  operatorConversion(operator) {
-    switch (operator) {
-      case 'GREATER_THAN_OR_EQUAL_TO' :
-        return '>=';
-      case 'LESS_THAN_OR_EQUAL_TO' :
-        return '<=';
-      case 'EQUAL' :
-        return '=';
-      case 'BETWEEN' :
-        return 'between';
-      case 'ETH' :
-        return 'Ethnicity';
-      case 'RACE' :
-        return 'Race';
-      case 'AGE' :
-        return 'Age';
-    }
-  }
-
-
-  getValues(p) {
-    this.values = p.map(m => {
-      if (m.value && m.type !== 'SNOMED') {
-        if (m.group === true) {
-          return  'Parent ' + m.value;
-        } else {
-          return  m.value;
+  async ppiCheck(definition: any) {
+    const parents = {};
+    for (const role in definition) {
+      if (definition.hasOwnProperty(role)) {
+        for (const group of definition[role]) {
+          for (const item of group.items) {
+            if (item.type !== TreeType[TreeType.PPI]) {
+              continue;
+            }
+            for (const param of item.searchParameters) {
+              const name = await this.getPPIParent(param.conceptId);
+              parents[param.conceptId] = name;
+            }
+          }
         }
-      } else {
-        return m.name;
       }
-    }).reduce((acc, v) => {
-      return `${acc} ${v} , `;
-    }, '');
-    return  this.values;
+    }
+    return new Promise(resolve => {
+      resolve(parents);
+    });
   }
 
-  removeDuplicates(arr) {
-    return arr.filter((thing, index, self) =>
-      index === self.findIndex((t) => (
-         t.items === thing.items && t.type === thing.type
-      ))
-    );
+  async getPPIParent(conceptId: string) {
+    let name;
+    await this.api
+      .getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
+      .toPromise()
+      .then(parent => name = parent.name);
+    return name;
   }
 
+  // other than ppi and PM
 
   mapParams(_type: string, params: Array<any>, mod) {
-     this.getValues(params);
+     this.getValues(params, _type);
     if (mod.length > 0) {
       const modArray = params.map(eachParam => {
         let name;
         name = mod.reduce((acc, m) => {
           const concatOperand = m.operands.reduce((final, o) => {
-            return final !== '' ? `${final} ${o}` : `${final} ${o}`;
+            return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
           } , '');
           return acc !== '' ?
             `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)}
@@ -201,38 +166,64 @@ export class QueryCohortDefinitionComponent implements OnInit {
     }
   }
 
+// utils
+  removeDuplicates(arr) {
+    return arr.filter((thing, index, self) =>
+      index === self.findIndex((t) => (
+        t.items === thing.items && t.type === thing.type
+      ))
+    );
+  }
 
-async ppiCheck(definition: any) {
-    const parents = {};
-    for (const role in definition) {
-      if (definition.hasOwnProperty(role)) {
-        for (const group of definition[role]) {
-          for (const item of group.items) {
-            if (item.type !== TreeType[TreeType.PPI]) {
-              continue;
-            }
-            for (const param of item.searchParameters) {
-              const name = await this.getPPIParent(param.conceptId);
-              parents[param.conceptId] = name;
-            }
+  removeUnderScoreLowerCase(name: string) {
+    return name.replace(/_/g, ' ').toLowerCase();
+  }
+
+  operatorConversion(operator) {
+    switch (operator) {
+      case 'GREATER_THAN_OR_EQUAL_TO' :
+        return '>=';
+      case 'LESS_THAN_OR_EQUAL_TO' :
+        return '<=';
+      case 'EQUAL' :
+        return '=';
+      case 'BETWEEN' :
+        return 'between';
+      case 'ETH' :
+        return 'Ethnicity';
+      case 'RACE' :
+        return 'Race';
+      case 'AGE' :
+        return 'Age';
+    }
+  }
+
+  getValues(p, type) {
+    this.values = p.map(m => {
+      if(type === 'PM') {
+        if (m.name) {
+          return m.name;
+        }
+      } else if (type === 'PPI') {
+        if (m.name) {
+          return  this.ppiParents[m.conceptId] + ' | ' + m.name ;
+        }
+      } else {
+        if (m.value && m.type !== 'SNOMED') {
+          if (m.group === true) {
+            return  'Parent ' + m.value;
+          } else {
+            return  m.value;
           }
+        } else {
+          return m.name;
         }
       }
-    }
-    return new Promise(resolve => {
-      resolve(parents);
-    });
+    }).reduce((acc, v) => {
+      return acc !== '' ? ` ${acc}, ${v}  ` : `${acc} ${v} `;
+    }, '');
+    return  this.values;
   }
-
-  async getPPIParent(conceptId: string) {
-    let name;
-    await this.api
-      .getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
-      .toPromise()
-      .then(parent => name = parent.name);
-    return name;
-  }
-
 
 //  TODO create search param mapping functions for each for each domain/type with different format
 }
