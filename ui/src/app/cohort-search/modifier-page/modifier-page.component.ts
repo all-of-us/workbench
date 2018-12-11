@@ -59,7 +59,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }, {
       name: 'Between',
       value: 'BETWEEN',
-    }]
+    }],
   }, {
     name: 'eventDate',
     label: 'Shifted Event Date',
@@ -93,7 +93,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }, {
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
-    }]
+    }],
   }];
 
   form = new FormGroup({
@@ -116,7 +116,17 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-  errors = [];
+  errors = new Set();
+  readonly errorMessages = {
+    ageAtEvent: {
+      range: 'Values for Age At Event must be between 1 and 120',
+      integer: 'Values for Age At Event must be valid integers'
+    },
+    hasOccurrences: {
+      range: 'Values for Has Occurrences must be between 1 and 99',
+      integer: 'Values for Has Occurrencest must be valid integers'
+    }
+  }
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -277,11 +287,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.form.get([mod.name, 'valueB']).clearValidators();
         this.form.get(mod.name).reset();
       } else {
-        const validators = [
-          Validators.required,
-          Validators.min(1),
-          Validators.max(mod.name === 'ageAtEvent' ? 120 : 99)
-        ];
+        const validators = [Validators.required];
+        if (mod.modType !== ModifierType.EVENTDATE) {
+          validators.push(Validators.min(1));
+          validators.push(Validators.max(mod.name === 'ageAtEvent' ? 120 : 99));
+        }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
         if (opt.value === Operator.BETWEEN) {
           this.form.get([mod.name, 'valueB']).setValidators(validators);
@@ -295,8 +305,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   currentMods(vals) {
+    console.log(this.form);
     this.ngAfterContentChecked();
-    this.errors = [];
+    this.errors = new Set();
     return this.modifiers.map(mod => {
       const {name, inputType, min, max, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
@@ -322,15 +333,17 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           return fromJS({name: modType, operator, operands});
         } else {
           const operands = [valueA];
-          if (valueA && (valueA < min || valueA > max)) {
-            this.errors.push(mod);
-          }
           if (between) {
             operands.push(valueB);
-            if (valueB && (valueB < min || valueB > max) && !this.errors.includes(mod)) {
-              this.errors.push(mod);
-            }
           }
+          operands.forEach(value => {
+            if (value && (value < min || value > max)) {
+              this.errors.add({name, type: 'range'});
+            }
+            if (value && !Number.isInteger(parseFloat(value))) {
+              this.errors.add({name, type: 'integer'});
+            }
+          });
           return fromJS({name: modType, operator, operands});
         }
       }
@@ -357,7 +370,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   get disableCalculate() {
     return this.preview.get('requesting')
-      || this.errors.length
+      || this.errors.size
       || this.form.invalid;
   }
 }
