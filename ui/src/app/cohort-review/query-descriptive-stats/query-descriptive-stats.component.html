@@ -1,39 +1,45 @@
-<div>
-  Descriptive Statistics:<br>
-  <!--<div style="width: 60%; border: 1px solid black;">-->
-    <!--<div class="container">-->
-      <!--<div class="row">-->
-        <!--<div class="col-sm-4"></div>-->
-        <!--<div class="col-sm-4">-->
-          <!--Total Count-->
-        <!--</div>-->
-        <!--<div class="col-sm-4">-->
-          <!--Percent of Cohort-->
-        <!--</div>-->
-      <!--</div>-->
-      <!--<div class="row">-->
-        <!--<div class="col-sm-12">-->
-          <!--Gender-->
-        <!--</div>-->
-      <!--</div>-->
-      <!--<div class="row">-->
-        <!--<div class="col-sm-4">-->
-          <!--<div>Male</div>-->
-        <!--</div>-->
-        <!--<div class="col-sm-4">-->
-          <!--1027-->
-        <!--</div>-->
-        <!--<div class="col-sm-4">-->
-          <!--100%-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</div>-->
-  <!--</div>-->
-</div>
-<div *ngFor="let i of groupKeys">
-  {{i}}
-  <div *ngFor="let j of graphData[i]">
-
-    {{j.group}} {{j?.count}} {{j?.percentage|number:'1.0-0'}} %
+<div class="container">
+  <div class="row">
+    <div class="col-sm-10 col-xs-10 query-title">
+      Descriptive Statistics
+    </div>
+      <clr-icon class="is-solid print-icon co-sm-2 col-xs-2" (click)="onPrint()" shape="printer" size="32"></clr-icon>
   </div>
+
+</div>
+<div *ngFor="let g of groupKeys; let i = index">
+  <div class="container">
+    <div class="row group-header">
+      <div class="col-sm-7 col-xs-7 group-text">
+        {{g  | titlecase}}
+      </div>
+      <div class="col-sm-2 col-xs-2 group-text" *ngIf="i === 0">
+        Total
+      </div>
+      <div class="col-sm-3 col-xs-3 group-text" *ngIf="i === 0">
+        % of Cohort
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="graphData[g]?.length <= 0" class="loading-spinner spinner spinner-lg spin-in-overlay">
+    Loading...
+  </div>
+    <ng-container *ngFor="let j of graphData[g]">
+      <div class="container">
+        <div class="row group-content">
+          <div class="col-sm-7 col-xs-7">
+            {{j?.group}}
+          </div>
+          <div class="col-sm-2 col-xs-2">
+            {{j?.count}}
+          </div>
+          <div class="col-sm-3 col-xs-3">
+            {{j?.percentage|number:'1.0-0'}} %
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  <!--</ng-container>-->
+
 </div>

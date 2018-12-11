@@ -17,19 +17,9 @@
   font-size: 13px
 }
 
-
-
-
-
-
-
-
 .header-border .btn-margin {
   margin-top : 0.7rem;
 }
-
-
-
 
 @media print{
   .doNotPrint{
