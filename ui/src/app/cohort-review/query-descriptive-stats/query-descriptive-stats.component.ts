@@ -24,7 +24,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
       const data = this.demoData.toJS();
       this.groupKeys.forEach( k => {
         const groupBy = k;
-        this.getGroupedData(data,groupBy);
+        this.getGroupedData(data, groupBy);
       });
     }
   }
