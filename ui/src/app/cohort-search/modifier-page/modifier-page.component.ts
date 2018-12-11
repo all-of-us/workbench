@@ -33,7 +33,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   ctype: string;
   existing = List();
   preview = Map();
-  dateObjs = [new Date(), new Date()];
+  dateObjs = [null , null];
   subscription: Subscription;
   dropdownOption = {
     selected: ['Any', 'Any', 'Any', 'Any']
