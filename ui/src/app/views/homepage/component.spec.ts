@@ -26,7 +26,7 @@ import {WorkspacesService} from 'generated/api/workspaces.service';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
-import {QuickTourReact, QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
+import {QuickTourModalComponent, QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
@@ -39,7 +39,7 @@ import {RightScrollComponent} from 'app/icons/right-scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
 
 import * as React from 'react';
-import * as ReactTestUtils from 'react-dom/test-utils'
+import * as ReactTestUtils from 'react-dom/test-utils';
 
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;
@@ -110,21 +110,21 @@ describe('HomepageComponent', () => {
     tick(1000);
     // must check the inner piece of the react element here because the quick-tour element
     //   is always rendered, but empty when not open
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent,'main')).toBeTruthy();
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
   }));
 
   it('should display quick tour on first visit', fakeAsync(() => {
     updateAndTick(fixture);
     tick(1000);
     updateAndTick(fixture);
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent,'main')).toBeTruthy();
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
   }));
 
   it('should not auto display quick tour if not first visit', fakeAsync(() => {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
     tick(1000);
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent,'main')).toBeTruthy();
+    expect(ReactTestUtils.findRenderedDOMComponentWithClass(reactComponent, 'main')).toBeTruthy();
   }));
 
 });
