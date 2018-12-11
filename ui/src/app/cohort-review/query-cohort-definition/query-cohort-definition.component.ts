@@ -164,13 +164,14 @@ export class QueryCohortDefinitionComponent implements OnInit {
         let name;
         name = mod.reduce((acc, m) => {
           const concatOperand = m.operands.reduce((final, o) => {
-            return final!=='' ? `${final} ${o}` : `${final} ${o}`
+            return final !== '' ? `${final} ${o}` : `${final} ${o}`;
           } , '');
           return acc !== '' ?
-            `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)} 
+            `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)}
+            ${this.operatorConversion(m.operator)}
             ${concatOperand}`
             :
-            `${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)} 
+            `${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)}
             ${concatOperand}`;
         }, '');
         return {
@@ -182,7 +183,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     } else {
       const noModArray = params.map(param => {
         if (param.type === 'DEMO') {
-          return {items: `${typeToTitle(_type)} 
+          return {items: `${typeToTitle(_type)}
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
             type: param.type};
         } else if (param.type === 'VISIT') {
