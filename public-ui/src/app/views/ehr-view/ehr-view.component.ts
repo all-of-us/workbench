@@ -38,6 +38,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
   private initSearchSubscription: ISubscription = null;
+  /* Show more synonyms when toggled */
   showMoreSynonyms = {};
 
   /* Show different graphs depending on domain we are in */
@@ -191,10 +192,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
   public toggleSynonyms(conceptId) {
-    if (!this.showMoreSynonyms[conceptId]) {
-      this.showMoreSynonyms[conceptId] = true;
-    } else if (this.showMoreSynonyms[conceptId]) {
-      this.showMoreSynonyms[conceptId] = false;
-    }
+    this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
   }
 }
