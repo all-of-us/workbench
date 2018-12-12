@@ -93,7 +93,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }, {
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
-    }],
+    }]
   }];
 
   form = new FormGroup({
@@ -306,7 +306,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   currentMods(vals) {
-    console.log(this.form);
     this.ngAfterContentChecked();
     this.errors = new Set();
     return this.modifiers.map(mod => {

@@ -1,14 +1,4 @@
 <form [formGroup]="form">
-  <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
-    <div class="alert-items">
-      <div *ngFor="let error of errors" class="alert-item static">
-        <div class="alert-text">
-          {{errorMessages[error.name][error.type]}}
-        </div>
-      </div>
-    </div>
-  </div>
-
   <section class="form-block">
     <div class="modifier-header">
       The following modifiers are optional and apply to all selected criteria
@@ -18,6 +8,15 @@
         <div class="alert-item static">
           <div class="alert-text">
             A problem occurred and we were not able to retrieve the requested data
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
+      <div class="alert-items">
+        <div *ngFor="let error of errors" class="alert-item static">
+          <div class="alert-text">
+            {{errorMessages[error.name][error.type]}}
           </div>
         </div>
       </div>
