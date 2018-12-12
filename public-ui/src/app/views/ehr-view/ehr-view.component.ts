@@ -104,7 +104,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.title   = 'Keyword: ' + this.searchText;
       this.title = 'Domain Search Results: ' + 'Error - no result for domain selected';
     }
-
     if (this.ehrDomain) {
       // Set the graphs we want to show for this domain
       this.setGraphsToDisplay();
@@ -132,14 +131,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         (query) => this.loading = true ));
     }
   }
-
   ngOnDestroy() {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
     this.initSearchSubscription.unsubscribe();
   }
-
   private setGraphsToDisplay() {
     if (this.ehrDomain.name === 'Measurements') {
       this.showGender = false;
@@ -174,9 +171,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     };
     this.prevSearchText = query;
     return this.api.searchConcepts(this.searchRequest);
-
   }
-
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
@@ -186,7 +181,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       row.viewSynonyms = true;
     }
   }
-
   public selectGenderGraph(g) {
     if (g === 'Gender Identity') {
       this.showGenderIdentity = true;
@@ -203,5 +197,4 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.showMoreSynonyms[conceptId] = false;
     }
   }
-
 }
