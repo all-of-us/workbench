@@ -3,8 +3,10 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   OnDestroy,
-  OnInit
+  OnInit,
+  Output
 } from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
@@ -29,6 +31,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   @select(activeCriteriaType) ctype$;
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
+  @Output() disabled = new EventEmitter<boolean>();
   formChanges = false;
   ctype: string;
   existing = List();
@@ -369,8 +372,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   get disableCalculate() {
-    return this.preview.get('requesting')
-      || this.errors.size
-      || this.form.invalid;
+    const disable = !!this.preview.get('requesting') || !!this.errors.size || this.form.invalid;
+    this.disabled.emit(disable);
+    return disable;
   }
 }
