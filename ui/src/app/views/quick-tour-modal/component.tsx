@@ -130,7 +130,7 @@ export class QuickTourReact extends React.Component<any, any> {
   }
 
   render() {
-    return  <>
+    return <React.Fragment>
       <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
       {this.props.learning && !this.state.fullImage &&
         <div className='main' id='quick-tour-react'>
@@ -138,7 +138,7 @@ export class QuickTourReact extends React.Component<any, any> {
           <div className='intro'>Quick Tour</div>
           <div className='breadcrumbs'>
             {panels.map((p, i) => {
-              return <>
+              return <React.Fragment>
                 <div className='breadcrumb-component'>
                   <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
                        onClick={() => this.selectPanel(i)}>
@@ -152,7 +152,7 @@ export class QuickTourReact extends React.Component<any, any> {
                   <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
                   </div>}
                 </div>
-              </>;
+              </React.Fragment>;
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
@@ -205,7 +205,7 @@ export class QuickTourReact extends React.Component<any, any> {
         </div>
       </div>
       }
-    </>;
+    </React.Fragment>;
   }
 }
 
