@@ -7,10 +7,9 @@
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
   <changeSet author="brianfreeman" id="changelog-23">
 
-    <sql dbms="mysql">
-      ALTER TABLE criteria
-      modify column est_count bigint(20);
-    </sql>
+    <modifyDataType columnName="est_count"
+                    newDataType="bigint"
+                    tableName="criteria"/>
 
   </changeSet>
 </databaseChangeLog>
