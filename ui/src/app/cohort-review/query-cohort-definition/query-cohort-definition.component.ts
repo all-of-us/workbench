@@ -135,13 +135,13 @@ export class QueryCohortDefinitionComponent implements OnInit {
             ${concatOperand}`;
         }, '');
         return {
-          items: `${typeToTitle(_type)} | ${eachParam.type} | ${typeMatched.customString} | ${name}`,
+          items: `${typeToTitle(_type)} | ${eachParam.type} |
+          ${typeMatched.customString} | ${name}`,
           type: eachParam.type
         };
       });
       return this.removeDuplicates(modArray);
-    }
-    else {
+    } else {
       const noModArray = params.map(param => {
         const typeMatched = groupedData.find( matched => matched.group === param.type);
         if (param.type === 'DEMO') {
@@ -179,17 +179,17 @@ export class QueryCohortDefinitionComponent implements OnInit {
         group: k,
         data: test[k].data,
         customString : test[k].data.reduce((acc, d) => {
-         if(d.group === false) {
-           if(k === 'SNOMED' ) {
-             return acc === '' ? d.name : `${acc}, ${d.name}`
+         if (d.group === false) {
+           if (k === 'SNOMED' ) {
+             return acc === '' ? d.name : `${acc}, ${d.name}`;
            } else {
-             return acc === '' ? d.value : `${acc}, ${d.value}`
+             return acc === '' ? d.value : `${acc}, ${d.value}`;
            }
          } else {
-           if(k === 'SNOMED' ) {
-             return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`
+           if (k === 'SNOMED' ) {
+             return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`;
            } else {
-             return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`
+             return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`;
            }
          }
         }, '')
@@ -231,7 +231,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getValues(p, type) {
 
     this.values = p.map(m => {
-      if(m.group === false) {
+      if (m.group === false) {
         if (type === 'PM') {
           if (m.name) {
             return m.name;
