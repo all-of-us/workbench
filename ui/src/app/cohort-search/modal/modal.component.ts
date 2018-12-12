@@ -60,6 +60,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   count = 0;
   originalNode: any;
   disableCursor = false;
+  modifiersDisabled = false;
   preview = Map();
 
   constructor(private actions: CohortSearchActions) {}
@@ -267,11 +268,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
 
-   get disableFlag() {
-     return this.noSelection
-       || this.preview.get('requesting')
-       || this.preview.get('count') === 0
-       || (this.modifiers && this.modifiers.disableCalculate);
-   }
+  get disableFlag() {
+    return this.noSelection
+      || this.preview.get('requesting')
+      || this.preview.get('count') === 0
+      || this.modifiersDisabled;
+  }
 }
 
