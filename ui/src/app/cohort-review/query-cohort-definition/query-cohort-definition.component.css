@@ -14,3 +14,34 @@
 .testing {
   border: 1px solid black;
 }
+
+.circle-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+}
+
+.and-circle {
+  background-color: rgb(226, 226, 233);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  text-align: center;
+}
+
+.exclude-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+}
+
+.exclude {
+  background-color: rgb(226, 226, 233);
+  border-radius: 1rem;
+  width: 4.5rem;
+  height: 2.2rem;
+  line-height: 2.2rem;
+  text-align: center;
+
+}

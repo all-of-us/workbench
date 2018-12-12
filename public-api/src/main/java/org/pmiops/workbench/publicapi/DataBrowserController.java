@@ -114,6 +114,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public static final long FEMALE = 8532;
     public static final long INTERSEX = 1585848;
     public static final long NONE = 1585849;
+    public static final long OTHER = 0;
 
     public static final long GENDER_ANALYSIS = 2;
     public static final long RACE_ANALYSIS = 4;
@@ -388,8 +389,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
         List<Concept> conceptList = new ArrayList(concepts.getContent());
-
-        if(searchConceptsRequest.getDomain() != null && searchConceptsRequest.getDomain().equals(Domain.DRUG)) {
+        if(searchConceptsRequest.getDomain() != null && searchConceptsRequest.getDomain().equals(Domain.DRUG) && !searchConceptsRequest.getQuery().isEmpty()) {
             List<Concept> drugMatchedConcepts = conceptDao.findDrugIngredientsByBrand(searchConceptsRequest.getQuery());
 
             if(drugMatchedConcepts.size() > 0) {
@@ -475,7 +475,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     }
 
     @Override
-    public ResponseEntity<ConceptAnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds){
+    public ResponseEntity<ConceptAnalysisListResponse> getConceptAnalysisResults(List<String> conceptIds, String domainId){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         ConceptAnalysisListResponse resp=new ConceptAnalysisListResponse();
         List<ConceptAnalysis> conceptAnalysisList=new ArrayList<>();
@@ -534,6 +534,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 //aa.setUnitName(unitName);
+                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !domainId.isEmpty()) {
+                    aa.setResults(aa.getResults().stream().filter(ar -> ar.getStratum3().equalsIgnoreCase(domainId)).collect(Collectors.toList()));
+                }
                 if(analysisId == GENDER_ANALYSIS_ID){
                     addGenderStratum(aa);
                     conceptAnalysis.setGenderAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
@@ -562,7 +565,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                     AchillesAnalysis unitGenderAnalysis = new AchillesAnalysis(aa);
                                     unitGenderAnalysis.setResults(results.get(unit));
                                     unitGenderAnalysis.setUnitName(unit);
-                                    processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                    if(!unit.equalsIgnoreCase("no unit")) {
+                                        processMeasurementGenderMissingBins(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,unitGenderAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                    }
                                     unitSeperateAnalysis.add(unitGenderAnalysis);
                                 }
                             }
@@ -585,7 +590,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 AchillesAnalysis unitAgeAnalysis = new AchillesAnalysis(aa);
                                 unitAgeAnalysis.setResults(results.get(unit));
                                 unitAgeAnalysis.setUnitName(unit);
-                                processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                if(!unit.equalsIgnoreCase("no unit")) {
+                                    processMeasurementAgeDecileMissingBins(MEASUREMENT_AGE_DIST_ANALYSIS_ID,unitAgeAnalysis, conceptId, unit, new ArrayList<>(unitDistResults.get(unit)));
+                                }
                                 addAgeStratum(unitAgeAnalysis,conceptId);
                                 unitSeperateAnalysis.add(unitAgeAnalysis);
                             }
@@ -733,6 +740,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         Float noneBinMin = null;
         Float noneBinMax = null;
 
+        Float otherBinMin = null;
+        Float otherBinMax = null;
+
         for(AchillesResultDist ard:resultDists){
             if(Integer.parseInt(ard.getStratum3())== MALE) {
                 maleBinMin = Float.valueOf(ard.getStratum4());
@@ -750,6 +760,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 noneBinMin = Float.valueOf(ard.getStratum4());
                 noneBinMax = Float.valueOf(ard.getStratum5());
             }
+            else if(Integer.parseInt(ard.getStratum3()) == OTHER) {
+                otherBinMin = Float.valueOf(ard.getStratum4());
+                otherBinMax = Float.valueOf(ard.getStratum5());
+            }
         }
 
 
@@ -757,6 +771,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         TreeSet<Float> femaleBinRanges = new TreeSet<Float>();
         TreeSet<Float> intersexBinRanges = new TreeSet<Float>();
         TreeSet<Float> noneBinRanges = new TreeSet<Float>();
+        TreeSet<Float> otherBinRanges = new TreeSet<Float>();
 
         if(maleBinMax != null && maleBinMin != null){
             maleBinRanges = makeBins(maleBinMin, maleBinMax);
@@ -774,6 +789,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             noneBinRanges = makeBins(noneBinMin, noneBinMax);
         }
 
+        if(otherBinMax != null && otherBinMin != null){
+            otherBinRanges = makeBins(otherBinMin, otherBinMax);
+        }
+
         for(AchillesResult ar: aa.getResults()){
             String analysisStratumName=ar.getAnalysisStratumName();
             if(Long.valueOf(ar.getStratum3()) == MALE && maleBinRanges.contains(Float.parseFloat(ar.getStratum4()))){
@@ -784,6 +803,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 intersexBinRanges.remove(Float.parseFloat(ar.getStratum4()));
             }else if(Long.valueOf(ar.getStratum3()) == NONE && noneBinRanges.contains(Float.parseFloat(ar.getStratum4()))){
                 noneBinRanges.remove(Float.parseFloat(ar.getStratum4()));
+            }else if(Long.valueOf(ar.getStratum3()) == OTHER && otherBinRanges.contains(Float.parseFloat(ar.getStratum4()))){
+                otherBinRanges.remove(Float.parseFloat(ar.getStratum4()));
             }
             if (analysisStratumName == null || analysisStratumName.equals("")) {
                 ar.setAnalysisStratumName(QuestionConcept.genderStratumNameMap.get(ar.getStratum2()));
@@ -807,6 +828,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         for(float noneRemaining: noneBinRanges){
             AchillesResult ar = new AchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, unitName, String.valueOf(NONE), String.valueOf(noneRemaining), null, 0L, 0L);
+            aa.addResult(ar);
+        }
+
+        for(float otherRemaining: otherBinRanges){
+            AchillesResult ar = new AchillesResult(MEASUREMENT_GENDER_ANALYSIS_ID, conceptId, unitName, String.valueOf(OTHER), String.valueOf(otherRemaining), null, 0L, 0L);
             aa.addResult(ar);
         }
 

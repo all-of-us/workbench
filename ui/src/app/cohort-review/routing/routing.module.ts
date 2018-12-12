@@ -11,7 +11,6 @@ import {ParticipantResolver} from './participant.resolver';
 
 import {AnnotationDefinitionsResolver} from '../../resolvers/annotation-definitions';
 import {ReviewResolver} from '../../resolvers/review';
-import {QueryReportComponent} from '../query-report/query-report.component';
 
 
 const routes: Routes = [{
@@ -26,15 +25,15 @@ const routes: Routes = [{
   children: [{
     path: 'participants',
     component: TablePage,
-    resolve: {
-      concepts: DemographicConceptMapsResolver,
-    },
-    data: {
-      breadcrumb: {
-        value: 'Participants',
-        intermediate: true
+      resolve: {
+          concepts: DemographicConceptMapsResolver,
       },
-    }
+      data: {
+          breadcrumb: {
+            value: 'Participants',
+            intermediate: true
+          },
+      }
   }, {
     path: 'participants/:pid',
     component: DetailPage,
@@ -46,15 +45,6 @@ const routes: Routes = [{
     data: {
       breadcrumb: {
         value: 'Participant :pid',
-        intermediate: false
-      }
-    }
-  }, {
-    path: 'report',
-    component: QueryReportComponent,
-    data: {
-      breadcrumb: {
-        value: 'Query Report',
         intermediate: false
       }
     }

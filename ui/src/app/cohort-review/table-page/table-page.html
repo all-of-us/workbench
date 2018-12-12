@@ -1,20 +1,13 @@
 <div class="review-name">
   {{cohortName}}
-  <!--<button class="btn btn-primary btn-sm" [routerLink]="['../report']">Query Report</button>-->
 </div>
 <clr-tabs>
   <clr-tab>
-    <button clrTabLink id="link1">Participants</button>
+    <button class="review-button" clrTabLink id="link1">Participants</button>
     <clr-tab-content id="content1" *clrIfActive ="true">
-      <!--{{cohortName}}-->
-      <!--<button class="btn btn-primary btn-sm" [routerLink]="['../report']">Query Report</button>-->
-      <!--</div>-->
       <div class="participant-container">
-        <div class="participant-title">Participants</div>
-        <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
+        <div class="total-heading" *ngIf="review.queryResultSize"> Total Participants: {{review.queryResultSize | number}} Participants</div>
       </div>
-      <!--<app-overview-charts></app-overview-charts>-->
-
       <clr-datagrid
         (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">
         <clr-dg-placeholder>No Participants</clr-dg-placeholder>
@@ -98,7 +91,6 @@
             {{ participant.formattedStatusText }}
           </clr-dg-cell>
         </clr-dg-row>
-
         <clr-dg-footer>
           {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
           {{ review.queryResultSize }} Selected for Review from
@@ -109,13 +101,15 @@
                              [clrDgPage]="review.page + 1">
           </clr-dg-pagination>
         </clr-dg-footer>
-
       </clr-datagrid>
     </clr-tab-content>
   </clr-tab>
   <clr-tab>
-    <button clrTabLink>Cohort Query Report</button>
+    <button class="review-button" clrTabLink>Cohort Query Report</button>
     <clr-tab-content *clrIfActive>
+      <div class="participant-container">
+        <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
+      </div>
       <app-query-report></app-query-report>
     </clr-tab-content>
   </clr-tab>

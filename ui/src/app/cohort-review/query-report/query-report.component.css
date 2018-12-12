@@ -5,8 +5,9 @@
 .report-background {
   background-color: white;
   padding-top: 1rem;
-
+  margin-top: 1rem;
 }
+
 .report-background .query-title {
   font-size: 16px;
   font-weight: 600;
