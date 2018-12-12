@@ -13,8 +13,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   definition: Array<any>;
   ppiParents: any;
   values: Array<any>;
-  types = ['ICD9', 'ICD10', 'CPT', 'VISIT', 'PM', 'DRUG',
-    'MEAS', 'CONDITION', 'PROCEDURE', 'SNOMED' ];
+  types = ['ICD9', 'ICD10', 'CPT', 'SNOMED' ];
   @Input() cohort: any;
   @Input() review: any;
   constructor(private api: CohortBuilderService) {}
@@ -28,7 +27,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
     const definition = JSON.parse(this.cohort.criteria);
     this.ppiCheck(definition).then(parents => {
       this.ppiParents = parents;
-      // console.log(this.ppiParents);
       this.definition = ['includes', 'excludes'].map(role => {
         if (definition[role].length) {
           const roleObj = {role, groups: []};
@@ -40,7 +38,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
       });
       // console.log(this.definition)
     });
-
   }
 
   mapGroup(group: any) {
@@ -56,9 +53,10 @@ export class QueryCohortDefinitionComponent implements OnInit {
     });
   }
 
+
   // Physical Measurement
   mapPMParams(params: Array<any>, _type) {
-    this.getValues(params, _type);
+     this.getValues(params, _type);
     const PMarray = params.map(param => {
       return {
         items: typeToTitle(param.type) + ' | ' + this.values,
@@ -72,7 +70,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   // PPI
 
   mapPPIParams(params: Array<any>, _type) {
-    this.getValues(params, _type);
+     this.getValues(params, _type);
     const PpiArray = params.map(param => {
       return {
         items: typeToTitle(param.type)
@@ -118,9 +116,11 @@ export class QueryCohortDefinitionComponent implements OnInit {
   // other than ppi and PM
 
   mapParams(_type: string, params: Array<any>, mod) {
-     this.getValues(params, _type);
+    const groupedData = this.getGroupedData(params, 'type');
     if (mod.length > 0) {
-      const modArray = params.map(eachParam => {
+      const modArray =  params.map(eachParam => {
+        const typeMatched = groupedData.find( matched => matched.group === eachParam.type);
+        // console.log(typeMatched)
         let name;
         name = mod.reduce((acc, m) => {
           const concatOperand = m.operands.reduce((final, o) => {
@@ -135,13 +135,15 @@ export class QueryCohortDefinitionComponent implements OnInit {
             ${concatOperand}`;
         }, '');
         return {
-          items: `${typeToTitle(_type)} | ${eachParam.type} | ${this.values} | ${name}`,
+          items: `${typeToTitle(_type)} | ${eachParam.type} | ${typeMatched.customString} | ${name}`,
           type: eachParam.type
         };
       });
       return this.removeDuplicates(modArray);
-    } else {
+    }
+    else {
       const noModArray = params.map(param => {
+        const typeMatched = groupedData.find( matched => matched.group === param.type);
         if (param.type === 'DEMO') {
           return {items: `${typeToTitle(_type)}
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
@@ -151,9 +153,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
             type: param.type};
         } else {
           return _type === 'CONDITION' || _type === 'PROCEDURE' ?
-            {items: `${typeToTitle(_type)} | ${param.type} | ${this.values}`,
+            {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
             type: param.type} :
-            {items: `${typeToTitle(_type)} | ${this.values}`,
+            {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
             type: param.type};
         }
       });
@@ -162,6 +164,39 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
 // utils
+
+  getGroupedData(p, t) {
+    const test = p.reduce((acc, i) => {
+      const key = i[t];
+      // console.log(key);
+      acc[key] = acc[key] || { data: []};
+      acc[key].data.push(i);
+      return acc;
+    }, {});
+
+    return Object.keys(test).map(k => {
+      return Object.assign({}, {
+        group: k,
+        data: test[k].data,
+        customString : test[k].data.reduce((acc, d) => {
+         if(d.group === false) {
+           if(k === 'SNOMED' ) {
+             return acc === '' ? d.name : `${acc}, ${d.name}`
+           } else {
+             return acc === '' ? d.value : `${acc}, ${d.value}`
+           }
+         } else {
+           if(k === 'SNOMED' ) {
+             return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`
+           } else {
+             return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`
+           }
+         }
+        }, '')
+      });
+    });
+  }
+
   removeDuplicates(arr) {
     return arr.filter((thing, index, self) =>
       index === self.findIndex((t) => (
@@ -194,30 +229,33 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
   getValues(p, type) {
+
     this.values = p.map(m => {
-      if (type === 'PM') {
-        if (m.name) {
-          return m.name;
-        }
-      } else if (type === 'PPI') {
-        if (m.name) {
-          return  this.ppiParents[m.conceptId] + ' | ' + m.name ;
+      if(m.group === false) {
+        if (type === 'PM') {
+          if (m.name) {
+            return m.name;
+          }
+        } else if (type === 'PPI') {
+          if (m.name) {
+            return  this.ppiParents[m.conceptId] + ' | ' + m.name ;
+          }
         }
       } else {
-        if (m.value && m.type !== 'SNOMED') {
-          if (m.group === true) {
-            return  'Parent ' + m.value;
-          } else {
-            return  m.value;
+        if (type === 'PM') {
+          if (m.name) {
+            return 'Parent' + m.name;
           }
-        } else {
-          return m.name;
+        } else if (type === 'PPI') {
+          if (m.name) {
+            return  'Parent' + this.ppiParents[m.conceptId] + ' | '  + m.name ;
+          }
         }
       }
+
     }).reduce((acc, v) => {
       return acc !== '' ? ` ${acc}, ${v}  ` : `${acc} ${v} `;
     }, '');
-    return  this.values;
   }
 
 //  TODO create search param mapping functions for each for each domain/type with different format
