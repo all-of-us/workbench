@@ -1,11 +1,19 @@
-import {Component, ViewChildren} from '@angular/core';
+import {Component, DoCheck, OnInit, ViewChildren} from '@angular/core';
 
 import {LoginComponent} from '../login/component';
 
 import {InvitationVerificationRequest, ProfileService} from 'generated';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
+}
+
+class InvitationReact extends React.Component<any, any> {
+  render() {
+    return <><div>ne invitation key</div></>;
+  }
 }
 
 @Component ({
@@ -15,7 +23,8 @@ function isBlank(s: string) {
   templateUrl: './component.html'
 })
 
-export class InvitationKeyComponent {
+export class InvitationKeyComponent implements DoCheck, OnInit {
+
   invitationKey: string;
   invitationKeyVerified: boolean;
   invitationKeyReq: boolean;
@@ -40,6 +49,16 @@ export class InvitationKeyComponent {
       }, 0);
 
     }
+
+  ngOnInit(): void {
+    ReactDOM.render(React.createElement(InvitationReact),
+        document.getElementById('in'));
+
+  }
+  ngDoCheck(): void {
+    ReactDOM.render(React.createElement(InvitationReact),
+        document.getElementById('in'));
+  }
 
   next(): void {
     if (isBlank(this.invitationKey)) {
