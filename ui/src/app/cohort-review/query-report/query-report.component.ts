@@ -21,6 +21,7 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
   }
+
   getDemoChartData(d) {
     if (d) {
       this.data = d;

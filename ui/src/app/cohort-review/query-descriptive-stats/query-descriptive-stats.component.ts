@@ -25,7 +25,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
       const data = this.demoData.toJS();
       this.groupKeys.forEach( k => {
         const groupBy = k;
-        this.getGroupedData(data, groupBy);
+        this.getChartGroupedData(data, groupBy);
       });
     }
   }
@@ -44,15 +44,13 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     });
   }
 
-  getGroupedData(data, groupBy) {
-
+  getChartGroupedData(data, groupBy) {
     const test = data.reduce((acc, i) => {
       const key = i[groupBy]; // F or M
        acc[key] = acc[key] || { data: []};
        acc[key].data.push(i);
        return acc;
     }, {});
-
      this.updateShape = Object.keys(test).map(k => {
        if (k === 'F' || k === 'M') {
          return Object.assign({}, {
@@ -65,7 +63,6 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
            data: test[k].data
          });
        }
-
     }).map(item => {
       return Object.assign({}, item, {
         count: item.data.reduce((sum, d) => {
