@@ -125,12 +125,12 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   errors = new Set();
   readonly errorMessages = {
     ageAtEvent: {
-      range: 'Values for Age At Event must be between 1 and 120',
-      integer: 'Values for Age At Event must be valid integers'
+      range: 'Age At Event must be between 1 and 120',
+      integer: 'Age At Event must be a whole number'
     },
     hasOccurrences: {
-      range: 'Values for Has Occurrences must be between 1 and 99',
-      integer: 'Values for Has Occurrencest must be valid integers'
+      range: 'Has Occurrences must be between 1 and 99',
+      integer: 'Has Occurrences must be a whole number'
     }
   };
 
@@ -350,11 +350,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
               value = value.slice(0, maxLength);
               this.form.get([name, input]).setValue(value, {emitEvent: false});
             }
-            if (value && (value < min || value > max)) {
-              this.errors.add({name, type: 'range'});
-            }
             if (value && !Number.isInteger(parseFloat(value))) {
               this.errors.add({name, type: 'integer'});
+            } else if (value && (value < min || value > max)) {
+              this.errors.add({name, type: 'range'});
             }
           });
           return fromJS({name: modType, operator, operands});
