@@ -34,7 +34,7 @@ module Workbench
       unless File.exist?(SWAGGER_CODEGEN_CLI_JAR)
         common = Common.new
         jar_url = "https://storage.googleapis.com" +
-          "/swagger-codegen-cli/swagger-codegen-cli-2.3.0-20170814.101630-90.jar"
+          "/swagger-codegen-cli/swagger-codegen-cli-2.4.0.jar"
         common.status "#{jar_url} > #{SWAGGER_CODEGEN_CLI_JAR}..."
         download(jar_url, SWAGGER_CODEGEN_CLI_JAR)
       end
