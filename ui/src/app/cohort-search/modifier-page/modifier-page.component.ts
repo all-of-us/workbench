@@ -49,6 +49,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     inputType: 'number',
     min: 1,
     max: 120,
+    maxLength: 3,
     modType: ModifierType.AGEATEVENT,
     operators: [{
       name: 'Any',
@@ -69,6 +70,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     inputType: 'date',
     min: null,
     max: null,
+    maxLength: null,
     modType: ModifierType.EVENTDATE,
     operators: [{
       name: 'Any',
@@ -89,6 +91,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     inputType: 'number',
     min: 1,
     max: 99,
+    maxLength: 2,
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
         name: 'Any',
@@ -152,6 +155,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             inputType: null,
             min: null,
             max: null,
+            maxLength: null,
             modType: ModifierType.ENCOUNTERS,
             operators: [{
               name: 'Any',
@@ -293,8 +297,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       } else {
         const validators = [Validators.required];
         if (mod.modType !== ModifierType.EVENTDATE) {
-          validators.push(Validators.min(1));
-          validators.push(Validators.max(mod.name === 'ageAtEvent' ? 120 : 99));
+          validators.push(Validators.min(mod.min));
+          validators.push(Validators.max(mod.max));
+          validators.push(Validators.maxLength(mod.maxLength));
         }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
         if (opt.value === Operator.BETWEEN) {
@@ -312,7 +317,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.ngAfterContentChecked();
     this.errors = new Set();
     return this.modifiers.map(mod => {
-      const {name, inputType, min, max, modType} = mod;
+      const {name, inputType, min, max, maxLength, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
           return;
@@ -339,7 +344,12 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           if (between) {
             operands.push(valueB);
           }
-          operands.forEach(value => {
+          operands.forEach((value, i) => {
+            if (value.length > maxLength) {
+              const input = i === 0 ? 'valueA' : 'valueB';
+              value = value.slice(0, maxLength);
+              this.form.get([name, input]).setValue(value, {emitEvent: false});
+            }
             if (value && (value < min || value > max)) {
               this.errors.add({name, type: 'range'});
             }
