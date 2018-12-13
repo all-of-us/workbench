@@ -19,6 +19,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
+import {validDateString} from '../validation';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -111,6 +112,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateA = new FormControl();
   dateB = new FormControl();
   showError = false;
+  errors = new Set();
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
