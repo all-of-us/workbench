@@ -135,6 +135,9 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     if (this.noneGenderResult) {
       analysis.results.push(this.noneGenderResult);
     }
+    if (this.otherGenderResult) {
+      analysis.results.push(this.otherGenderResult);
+    }
   }
 
   showMeasurementGenderHistogram(unit: string) {

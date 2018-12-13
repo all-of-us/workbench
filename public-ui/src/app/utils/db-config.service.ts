@@ -42,7 +42,8 @@ export class DbConfigService {
     '8507': '#8DC892',
     '8532': '#6CAEE3',
     '1585848': '#4259A5',
-    '1585849': '#252660'
+    '1585849': '#252660',
+    '0': '#4259A5'
   };
 
   GENDER_IDENTITY_COLORS = {
