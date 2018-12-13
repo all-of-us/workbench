@@ -1,8 +1,9 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
-import {Observable} from "rxjs/Observable";
-import {List} from "immutable";
+
 
 @Component({
   selector: 'app-descriptive-stats',
