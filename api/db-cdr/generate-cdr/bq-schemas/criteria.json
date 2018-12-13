@@ -42,7 +42,7 @@
       {
         "mode": "NULLABLE", 
         "name": "est_count", 
-        "type": "STRING"
+        "type": "INTEGER"
       },
       {
         "mode": "NULLABLE", 

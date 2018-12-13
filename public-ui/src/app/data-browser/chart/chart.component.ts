@@ -101,7 +101,12 @@ export class ChartComponent implements OnChanges {
             style: this.isGenderIdentityAnalysis()
                 ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
             distance: this.isGenderIdentityAnalysis() ? 3 : -30,
-            format: '{point.name} {point.percentage:.0f}%',
+            formatter: function () {
+              if (this.percentage < 1) {
+                return this.point.name + ' ' + Number(this.percentage).toFixed(1) + '%';
+              }
+              return this.point.name + ' ' + Number(this.percentage).toFixed(0) + '%';
+            }
           }
         },
         column: {
@@ -328,6 +333,9 @@ export class ChartComponent implements OnChanges {
       }
       if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
         color = this.dbc.GENDER_COLORS[a.stratum5];
+      }
+      if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+        color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum5];
       }
       if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
         color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum2];

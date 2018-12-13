@@ -74,10 +74,12 @@ fi
 tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
 cri_table_check=\\bcriteria\\b
 cri_attr_table_check=\\bcriteria_attribute\\b
+cri_rel_table_check=\\bcriteria_relationship\\b
+cri_anc_table_check=\\bcriteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute domain_info survey_module domain vocabulary concept_ancestor concept_synonym domain_vocabulary_info unit_map survey_question_map person_gender_identity)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute criteria_relationship criteria_ancestor domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info unit_map survey_question_map person_gender_identity)
 
 for t in "${create_tables[@]}"
 do
@@ -348,6 +350,16 @@ if [[ $tables =~ $cri_table_check ]]; then
     where c.type = 'PPI'
     and cs.synonyms is null) as crit
     where crit.id = ct.id"
+
+    echo "Updating criteria"
+        bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+        "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` ct
+        set ct.synonyms = concat(ct.synonyms, '|', crit.synonyms)
+        from (
+        select min(id) as id, '[rank1]' as synonyms
+        from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+        group by name, type, subtype) as crit
+        where crit.id = ct.id"
 fi
 
 ######################
@@ -360,6 +372,30 @@ if [[ $tables =~ $cri_attr_table_check ]]; then
      (id, concept_id, value_as_concept_id, concept_name, type, est_count)
     SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
     FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
+fi
+
+#########################
+# criteria_relationship #
+#########################
+if [[ $tables =~ $cri_rel_table_check ]]; then
+    echo "Inserting criteria_relationship"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria_relationship\`
+     (concept_id_1, concept_id_2)
+    SELECT concept_id_1, concept_id_2
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_relationship\`"
+fi
+
+#########################
+#   criteria_ancestor   #
+#########################
+if [[ $tables =~ $cri_anc_table_check ]]; then
+    echo "Inserting criteria_ancestor"
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria_ancestor\`
+     (ancestor_id, descendant_id)
+    SELECT ancestor_id, descendant_id
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\`"
 fi
 
 ##########
@@ -381,16 +417,6 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id)
 SELECT vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.vocabulary\`"
-
-##############
-# concept_ancestor #
-##############
-echo "Inserting concept-ancestor"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_ancestor\`
- (ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation)
-SELECT ancestor_concept_id, descendant_concept_id, min_levels_of_separation, max_levels_of_separation
-FROM \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`"
 
 ##############
 # person_gender_identity #
