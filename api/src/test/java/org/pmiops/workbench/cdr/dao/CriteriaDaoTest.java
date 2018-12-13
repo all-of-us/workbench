@@ -1,15 +1,10 @@
 package org.pmiops.workbench.cdr.dao;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.ConceptRelationship;
-import org.pmiops.workbench.cdr.model.ConceptRelationshipId;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,115 +37,41 @@ public class CriteriaDaoTest {
   private ConceptDao conceptDao;
 
   @Autowired
-  private ConceptRelationshipDao conceptRelationshipDao;
-
-  @Autowired
   private ConceptSynonymDao conceptSynonymDao;
 
-  private Criteria icd9Criteria1;
-  private Criteria icd9Criteria2;
-  private Criteria demoCriteria1;
-  private Criteria demoCriteria1a;
-  private Criteria demoCriteria2;
-  private Criteria icd10Criteria1;
-  private Criteria icd10Criteria2;
-  private Criteria cptCriteria1;
-  private Criteria cptCriteria2;
-  private Criteria parentIcd9;
-  private Criteria childIcd9;
-  private Criteria parentDemo;
-  private Criteria parentIcd10;
-  private Criteria childIcd10;
-  private Criteria pmCriteria;
-  private Criteria drugCriteriaIngredient;
-  private Criteria drugCriteriaIngredient1;
-  private Criteria drugCriteriaBrand;
-  private Criteria labCriteria;
-  private Criteria labCriteria1;
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   @Before
   public void setUp() {
-    icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
-    icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
-    parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
-    demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
-    demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
-    demoCriteria2 = createCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), "Age", "demo age", 0, false, true, null);
-    icd10Criteria1 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "002", "icd10 test 1", 0, false, true, null);
-    icd10Criteria2 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "001", "icd10 test 2", 0, false, true, null);
-    cptCriteria1 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0039T", "zzzcptzzz", 0, false, true, null);
-    cptCriteria2 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0001T", "zzzCPTxxx", 0, false, true, null);
-    parentIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003", "name", 0, true, true, null);
-    parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003", "name", 0, true, true, "1.2");
-    pmCriteria = createCriteria(TreeType.PM.name(), TreeSubType.BP.name(), "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true, "1.2.3.4");
-    drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
-    drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
-    drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
-    labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
-
-    criteriaDao.save(icd9Criteria1);
-    criteriaDao.save(icd9Criteria2);
-    criteriaDao.save(parentDemo);
-    criteriaDao.save(demoCriteria1);
-    criteriaDao.save(demoCriteria1a);
-    criteriaDao.save(demoCriteria2);
-    criteriaDao.save(icd10Criteria1);
-    criteriaDao.save(icd10Criteria2);
-    criteriaDao.save(cptCriteria1);
-    criteriaDao.save(cptCriteria2);
-    criteriaDao.save(parentIcd9);
-    criteriaDao.save(parentIcd10);
-    childIcd9 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "003.1", "name", parentIcd9.getId(), false, true, null);
-    criteriaDao.save(childIcd9);
-    childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
-    criteriaDao.save(childIcd10);
-    criteriaDao.save(pmCriteria);
-    criteriaDao.save(drugCriteriaIngredient);
-    criteriaDao.save(drugCriteriaIngredient1);
-    criteriaDao.save(drugCriteriaBrand);
-    criteriaDao.save(labCriteria);
-
-    conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
-    conceptRelationshipDao.save(
-      new ConceptRelationship().conceptRelationshipId(
-        new ConceptRelationshipId().relationshipId("1").conceptId1(12345L).conceptId2(1L)
-      )
-    );
-    conceptDao.save(new Concept().conceptId(123L));
-    conceptSynonymDao.save(new ConceptSynonym().conceptId(123).conceptSynonymName("test1mywordTest"));
-  }
-
-  @After
-  public void tearDown() {
-    criteriaDao.delete(icd9Criteria1);
-    criteriaDao.delete(icd9Criteria2);
-    criteriaDao.delete(demoCriteria1);
-    criteriaDao.delete(demoCriteria1a);
-    criteriaDao.delete(demoCriteria2);
-    criteriaDao.delete(icd10Criteria1);
-    criteriaDao.delete(icd10Criteria2);
-    criteriaDao.delete(cptCriteria1);
-    criteriaDao.delete(cptCriteria2);
-    criteriaDao.delete(parentIcd9);
-    criteriaDao.delete(childIcd9);
-    criteriaDao.delete(parentDemo);
-    criteriaDao.delete(parentIcd10);
-    criteriaDao.delete(childIcd10);
-    criteriaDao.delete(pmCriteria);
-    criteriaDao.delete(drugCriteriaIngredient);
-    criteriaDao.delete(drugCriteriaIngredient1);
-    criteriaDao.delete(drugCriteriaBrand);
-    criteriaDao.delete(labCriteria);
+    jdbcTemplate.execute("delete from criteria");
   }
 
   @Test
   public void findCriteriaByTypeAndId() throws Exception {
+    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    criteriaDao.save(icd9Criteria1);
     Criteria criteria = criteriaDao.findCriteriaByTypeAndId(icd9Criteria1.getType(), icd9Criteria1.getId());
     assertEquals(icd9Criteria1, criteria);
   }
 
   @Test
   public void findCriteriaByParentId() throws Exception {
+    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    Criteria icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
+    Criteria icd10Criteria1 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "002", "icd10 test 1", 0, false, true, null);
+    Criteria icd10Criteria2 = createCriteria(TreeType.ICD10.name(), TreeSubType.CM.name(), "001", "icd10 test 2", 0, false, true, null);
+    Criteria cptCriteria1 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0039T", "zzzcptzzz", 0, false, true, null);
+    Criteria cptCriteria2 = createCriteria(TreeType.CPT.name(), TreeSubType.CPT4.name(), "0001T", "zzzCPTxxx", 0, false, true, null);
+    Criteria pmCriteria = createCriteria(TreeType.PM.name(), TreeSubType.BP.name(), "1", "Hypotensive (Systolic <= 90 / Diastolic <= 60)", 0, false, true, "1.2.3.4");
+    criteriaDao.save(icd9Criteria1);
+    criteriaDao.save(icd9Criteria2);
+    criteriaDao.save(icd10Criteria1);
+    criteriaDao.save(icd10Criteria2);
+    criteriaDao.save(cptCriteria1);
+    criteriaDao.save(cptCriteria2);
+    criteriaDao.save(pmCriteria);
+
     final List<Criteria> icd9List =
       criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TreeType.ICD9.name(), 0L);
     assertEquals(icd9Criteria1, icd9List.get(0));
@@ -172,6 +94,11 @@ public class CriteriaDaoTest {
 
   @Test
   public void findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc() throws Exception {
+    Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    Criteria drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
+    criteriaDao.save(drugCriteriaIngredient);
+    criteriaDao.save(drugCriteriaIngredient1);
+
     final List<Criteria> drugList =
       criteriaDao.findCriteriaByTypeAndSubtypeAndParentIdOrderByIdAsc(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0L);
     assertEquals(drugCriteriaIngredient, drugList.get(0));
@@ -180,6 +107,11 @@ public class CriteriaDaoTest {
 
   @Test
   public void findCriteriaChildrenByTypeAndParentId() throws Exception {
+    Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    Criteria drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
+    criteriaDao.save(drugCriteriaIngredient);
+    criteriaDao.save(drugCriteriaIngredient1);
+
     final List<Criteria> drugList =
       criteriaDao.findCriteriaChildrenByTypeAndParentId(TreeType.DRUG.name(), 2L);
     assertEquals(drugCriteriaIngredient, drugList.get(0));
@@ -188,6 +120,9 @@ public class CriteriaDaoTest {
 
   @Test
   public void findCriteriaByType() throws Exception {
+    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    criteriaDao.save(icd9Criteria1);
+
     final List<Criteria> icd9List =
       criteriaDao.findCriteriaByType(TreeType.ICD9.name());
     final Set<String> typeList = icd9List.stream().map(Criteria::getType).collect(Collectors.toSet());
@@ -196,28 +131,57 @@ public class CriteriaDaoTest {
 
   @Test
   public void findCriteriaByTypeForCodeOrName() throws Exception {
+    Criteria labCriteria = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "xxx", "mysearchname", 0, false, false, "0.12345").conceptId("123").synonyms("LP123");
+    Criteria labCriteria1 = createCriteria(TreeType.MEAS.name(), TreeSubType.LAB.name(), "LP1234", "mysearchname", 0, false, false, "0.12345").conceptId("123");
+    criteriaDao.save(labCriteria);
+    criteriaDao.save(labCriteria1);
+
     //match on code
-    List<CriteriaId> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP123", new PageRequest(0, 10));
-    assertEquals(1, labs.size());
-    assertEquals(labCriteria.getId(), labs.get(0).getId());
+    List<Criteria> labs = criteriaDao.findCriteriaByTypeForCodeOrName(TreeType.MEAS.name(), "LP123", "LP1234", new PageRequest(0, 10));
+    assertEquals(2, labs.size());
+    assertEquals(labCriteria1, labs.get(0));
+    assertEquals(labCriteria, labs.get(1));
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeForCodeOrName() throws Exception {
+    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
+    Criteria icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
+    criteriaDao.save(icd9Criteria1);
+    criteriaDao.save(icd9Criteria2);
+
     //match on code
-    List<CriteriaId> conditions =
+    List<Criteria> conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", "001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria2.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria2, conditions.get(0));
 
     conditions =
       criteriaDao.findCriteriaByTypeAndSubtypeForCodeOrName(TreeType.ICD9.name(), TreeSubType.CM.name(),"002", "002", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
-    assertEquals(icd9Criteria1.getId(), conditions.get(0).getId());
+    assertEquals(icd9Criteria1, conditions.get(0));
+  }
+
+  @Test
+  public void findCriteriaByTypeAndSubtypeForName() throws Exception {
+    //match on code
+    Criteria icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
+    criteriaDao.save(icd9Criteria2);
+    List<Criteria> conditions =
+      criteriaDao.findCriteriaByTypeAndSubtypeForName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
+    assertEquals(1, conditions.size());
+    assertEquals(icd9Criteria2, conditions.get(0));
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeOrderByIdAsc() throws Exception {
+    Criteria parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
+    Criteria demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
+    Criteria demoCriteria1a = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "B", "African American", parentDemo.getId(), false, true, null);
+    criteriaDao.save(parentDemo);
+    criteriaDao.save(demoCriteria1);
+    criteriaDao.save(demoCriteria1a);
+
     final List<Criteria> demoList =
       criteriaDao.findCriteriaByTypeAndSubtypeOrderByIdAsc(TreeType.DEMO.name(), TreeSubType.RACE.name());
     assertEquals(3, demoList.size());
@@ -228,6 +192,13 @@ public class CriteriaDaoTest {
 
   @Test
   public void findDrugBrandOrIngredientByName() throws Exception {
+    Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    Criteria drugCriteriaIngredient1 = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "2", "MIN1", 0, false, true, "1.2.3.4").conceptId("2");
+    Criteria drugCriteriaBrand = createCriteria(TreeType.DRUG.name(), TreeSubType.BRAND.name(), "3", "BLAH", 0, false, true, "");
+    criteriaDao.save(drugCriteriaIngredient);
+    criteriaDao.save(drugCriteriaIngredient1);
+    criteriaDao.save(drugCriteriaBrand);
+
     List<Criteria> drugList = criteriaDao.findDrugBrandOrIngredientByValue("ETAM", null);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
@@ -256,13 +227,25 @@ public class CriteriaDaoTest {
 
   @Test
   public void findDrugIngredientsByConceptId() throws Exception {
+    jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
+    jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
+    Criteria drugCriteriaIngredient = createCriteria(TreeType.DRUG.name(), TreeSubType.ATC.name(), "1", "ACETAMIN", 0, false, true, "1.2.3.4").conceptId("1");
+    criteriaDao.save(drugCriteriaIngredient);
+    conceptDao.save(new Concept().conceptId(1L).conceptClassId("Ingredient"));
+
     List<Criteria> drugList = criteriaDao.findDrugIngredientByConceptId(12345L);
     assertEquals(1, drugList.size());
     assertEquals(drugCriteriaIngredient, drugList.get(0));
+    jdbcTemplate.execute("drop table criteria_relationship");
   }
 
   @Test
   public void findCriteriaByTypeAndSubtypeAndCode() throws Exception {
+    Criteria parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003", "name", 0, true, true, "1.2");
+    criteriaDao.save(parentIcd10);
+    Criteria childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
+    criteriaDao.save(childIcd10);
+
     final List<String> icd10DomainList =
       criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
         TreeType.ICD10.name(),

@@ -101,6 +101,25 @@
     />
   </changeSet>
 
+  <changeSet id="drop idx_concept_1" author="brianfreeman" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_criteria_concept_1"/>
+    </preConditions>
+    <dropIndex tableName="criteria_relationship" indexName="idx_criteria_concept_1"/>
+  </changeSet>
+
+  <changeSet id="drop idx_concept_2" author="brianfreeman" runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <indexExists indexName="idx_√_concept_2"/>
+    </preConditions>
+    <dropIndex
+      tableName="criteria_relationship"
+      indexName="idx_criteria_concept_2"
+    />
+  </changeSet>
+
   <changeSet id="drop idx_relationship_id" author="biopete" runAlways="true">
     <validCheckSum>ANY</validCheckSum>
     <preConditions onFail="MARK_RAN">
@@ -119,39 +138,6 @@
     </preConditions>
     <dropPrimaryKey
       tableName="concept_relationship"/>
-  </changeSet>
-
-  <changeSet author="brianfreeman" id="drop idx_concept_ancestor" runAlways="true">
-    <validCheckSum>ANY</validCheckSum>
-    <preConditions onFail="MARK_RAN">
-      <indexExists indexName="idx_concept_ancestor"/>
-    </preConditions>
-    <dropIndex
-            tableName="concept_ancestor"
-            indexName="idx_concept_ancestor"
-    />
-  </changeSet>
-
-  <changeSet author="brianfreeman" id="drop idx_ancestor_concept_id" runAlways="true">
-    <validCheckSum>ANY</validCheckSum>
-    <preConditions onFail="MARK_RAN">
-      <indexExists indexName="idx_ancestor_concept_id"/>
-    </preConditions>
-    <dropIndex
-            tableName="concept_ancestor"
-            indexName="idx_ancestor_concept_id"
-    />
-  </changeSet>
-
-  <changeSet author="brianfreeman" id="drop idx_descendant_concept_id" runAlways="true">
-    <validCheckSum>ANY</validCheckSum>
-    <preConditions onFail="MARK_RAN">
-      <indexExists indexName="idx_descendant_concept_id"/>
-    </preConditions>
-    <dropIndex
-            tableName="concept_ancestor"
-            indexName="idx_descendant_concept_id"
-    />
   </changeSet>
 
   <changeSet author="srushtigangireddy" id="drop concept_synonym_name_index" runAlways="true">
