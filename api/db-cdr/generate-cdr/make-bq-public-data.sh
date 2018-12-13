@@ -86,12 +86,12 @@ set count_value =
         cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
-    case when source_count_value < ${BIN_SIZE}
+    case when source_count_value < ${BIN_SIZE} and source_count_value > 0
         then ${BIN_SIZE}
     else
         cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where count_value >= 0"
+where count_value > 0"
 
 
 #delete concepts with 0 count / source count value
@@ -117,7 +117,7 @@ set count_value =
         cast(CEIL(count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end,
     source_count_value =
-    case when source_count_value < ${BIN_SIZE}
+    case when source_count_value < ${BIN_SIZE} and source_count_value > 0
         then ${BIN_SIZE}
     else
         cast(CEIL(source_count_value / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
@@ -140,12 +140,12 @@ where count_value > 0 or lower(vocabulary_id) ='ppi' "
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.criteria\`
 set est_count =
-    case when cast(est_count as int64) < ${BIN_SIZE}
-        then cast(${BIN_SIZE} as string)
+    case when est_count < ${BIN_SIZE}
+        then ${BIN_SIZE}
     else
-        cast(ROUND(cast(est_count as int64) / ${BIN_SIZE}) * ${BIN_SIZE} as string)
+        cast(ROUND(est_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
-where cast(est_count as int64) > 0"
+where est_count > 0"
 
 # domain_info
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \

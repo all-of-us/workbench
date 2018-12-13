@@ -130,29 +130,30 @@ export class QuickTourReact extends React.Component<any, any> {
   }
 
   render() {
-      return  <>
-        <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
-        {this.props.learning && !this.state.fullImage &&
+    return <React.Fragment>
+      <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
+      {this.props.learning && !this.state.fullImage &&
         <div className='main' id='quick-tour-react'>
           <div className='title'>All of Us Researcher Workbench</div>
           <div className='intro'>Quick Tour</div>
           <div className='breadcrumbs'>
-              {panels.map((p, i) => {
-                  return <><div className='breadcrumb-component'>
-                    <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
-                         onClick={() => this.selectPanel(i)}>
-                        {(i < this.state.selected) && <div className='check'>
-                            <img src={this.checkImg}/>
-                        </div>}
-                        {(i ===  this.state.selected) && <div className='current'></div>}
-
-                    </div>
-                    <div className='breadcrumb-title'>{p.title}</div>
-                    {(i !== this.state.numPanels - 1) &&
-                    <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
+            {panels.map((p, i) => {
+              return <React.Fragment>
+                <div className='breadcrumb-component'>
+                  <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
+                       onClick={() => this.selectPanel(i)}>
+                    {(i < this.state.selected) && <div className='check'>
+                        <img src={this.checkImg}/>
                     </div>}
-                  </div></>;
-              })}
+                    {(i ===  this.state.selected) && <div className='current'></div>}
+                  </div>
+                  <div className='breadcrumb-title'>{p.title}</div>
+                  {(i !== this.state.numPanels - 1) &&
+                  <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
+                  </div>}
+                </div>
+              </React.Fragment>;
+            })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
              <div className='divider'></div>
@@ -176,7 +177,6 @@ export class QuickTourReact extends React.Component<any, any> {
                         <img src={this.expandIcon}/>
                     </div>
                 </div>}
-
             </div>
           </div>
           <div className='controls'>
@@ -193,17 +193,19 @@ export class QuickTourReact extends React.Component<any, any> {
                       onClick={() => this.next()}>{this.lastButtonText()}</button>
             </div>
           </div>
-        </div>}
-        {this.props.learning && this.state.fullImage && <div className='main full-image'>
-          <div className='full-image-wrapper'>
-            <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
-              <div className='resize-icon' onClick={() => this.toggleImage()}
-                   style={{position: 'absolute', right: '5%', bottom: '5%'}}>
-                  <img src={this.shrinkIcon}/>
-              </div>
+        </div>
+      }
+      {this.props.learning && this.state.fullImage && <div className='main full-image'>
+        <div className='full-image-wrapper'>
+          <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
+          <div className='resize-icon' onClick={() => this.toggleImage()}
+               style={{position: 'absolute', right: '5%', bottom: '5%'}}>
+            <img src={this.shrinkIcon}/>
           </div>
-        </div>}
-      </>;
+        </div>
+      </div>
+      }
+    </React.Fragment>;
   }
 }
 
@@ -220,18 +222,20 @@ export class QuickTourModalComponent implements DoCheck, OnInit {
   @Input('onClose')
   public onClose: Function;
 
+  componentId = 'quick-tour';
+
   constructor() {}
 
   ngOnInit(): void {
     ReactDOM.render(React.createElement(QuickTourReact,
         {learning: this.learning, closeFunction: this.onClose}),
-        document.getElementById('quick-tour'));
+        document.getElementById(this.componentId));
   }
 
   ngDoCheck(): void {
     ReactDOM.render(React.createElement(QuickTourReact,
         {learning: this.learning, closeFunction: this.onClose}),
-        document.getElementById('quick-tour'));
+        document.getElementById(this.componentId));
   }
 
 

@@ -41,7 +41,7 @@
     "@angular-redux/store": "^6.6.0",
     "@angular/animations": "^5.2.2",
     "@angular/common": "^5.2.2",
-    "@angular/compiler": "^5.2.2",
+    "@angular/compiler": "7.1.3",
     "@angular/core": "^5.2.2",
     "@angular/forms": "^5.2.2",
     "@angular/http": "^5.2.2",
