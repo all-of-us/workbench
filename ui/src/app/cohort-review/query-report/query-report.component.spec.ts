@@ -15,7 +15,7 @@ import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from '../query-descriptive-stats/query-descriptive-stats.component';
-import {QueryReportComponent} from './query-report.component';
+import {QueryReportComponent} from '../query-report/query-report.component';
 import {ReviewStateService} from '../review-state.service';
 
 
