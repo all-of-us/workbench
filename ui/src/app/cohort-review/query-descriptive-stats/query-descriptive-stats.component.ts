@@ -1,6 +1,8 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 import {ReviewStateService} from '../review-state.service';
+import {Observable} from "rxjs/Observable";
+import {List} from "immutable";
 
 @Component({
   selector: 'app-descriptive-stats',
@@ -8,7 +10,7 @@ import {ReviewStateService} from '../review-state.service';
   styleUrls: ['./query-descriptive-stats.component.css']
 })
 export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
- @Input() demoData: any;
+ @Input() demoData: Observable<List<any>>;
  graphData = {};
   updateShape: any;
   subscription: Subscription;
@@ -22,7 +24,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     if (this.demoData) {
-      const data = this.demoData.toJS();
+      const data = this.demoData;
       this.groupKeys.forEach( k => {
         const groupBy = k;
         this.getChartGroupedData(data, groupBy);
