@@ -110,9 +110,6 @@
             },
             "prod": {
               "browserTarget": "aou-workbench-ui:build:prod"
-            },
-            "production": {
-              "browserTarget": "aou-workbench-ui:build:production"
             }
           }
         },
