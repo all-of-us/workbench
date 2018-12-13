@@ -325,6 +325,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           }
           return;
         }
+        let error;
         if (inputType === 'date') {
           const dateValueA = moment(valueA).format('YYYY-MM-DD');
           const dateValueB = moment(valueB).format('YYYY-MM-DD');
@@ -332,6 +333,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           if (between && dateValueB) {
             operands.push(dateValueB);
           }
+          operands.forEach(date => {
+            if (error = validDateString(date)) {
+              this.errors.add(error);
+            }
+          })
           return fromJS({name: modType, operator, operands});
         } else {
           const operands = [valueA];

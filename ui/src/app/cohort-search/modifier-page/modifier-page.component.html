@@ -12,11 +12,11 @@
         </div>
       </div>
     </div>
-    <div *ngIf="errors.size" class="alert alert-danger alert-sm">
+    <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
       <div class="alert-items">
         <div *ngFor="let error of errors" class="alert-item static">
           <div class="alert-text">
-            {{errorMessages[error.name][error.type]}}
+            {{error}}
           </div>
         </div>
       </div>

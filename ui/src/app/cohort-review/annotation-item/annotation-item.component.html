@@ -1,4 +1,13 @@
 <div>
+  <div *ngIf="error" class="alert alert-danger alert-sm">
+    <div class="alert-items">
+      <div class="alert-item static">
+        <div class="alert-text">
+          {{error}}
+        </div>
+      </div>
+    </div>
+  </div>
   <div [ngSwitch]="annotation.definition.annotationType">
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
@@ -94,6 +103,6 @@
         <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
         <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
     </div>
-</div>
+  </div>
 </div>
 
