@@ -12,7 +12,7 @@
         </div>
       </div>
     </div>
-    <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
+    <div *ngIf="errors.size" class="alert alert-danger alert-sm">
       <div class="alert-items">
         <div *ngFor="let error of errors" class="alert-item static">
           <div class="alert-text">
@@ -107,7 +107,7 @@
         Calculate
       </button>
     </div>
-    <ng-container *ngIf="!preview.get('requesting')" >
+    <ng-container *ngIf="!preview.get('requesting')">
       <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
         <div class="result-text">
           Results

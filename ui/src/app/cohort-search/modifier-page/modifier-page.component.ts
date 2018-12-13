@@ -329,6 +329,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
         if (!operator || (!valueA && !valueB)) {
+          if (this.form.get([name, 'valueA']).dirty || this.form.get([name, 'valueB']).dirty) {
+            this.errors.add({name, type: 'integer'});
+          }
           return;
         }
         if (inputType === 'date') {
@@ -345,15 +348,21 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             operands.push(valueB);
           }
           operands.forEach((value, i) => {
-            if (value.length > maxLength) {
-              const input = i === 0 ? 'valueA' : 'valueB';
-              value = value.slice(0, maxLength);
-              this.form.get([name, input]).setValue(value, {emitEvent: false});
-            }
-            if (value && !Number.isInteger(parseFloat(value))) {
-              this.errors.add({name, type: 'integer'});
-            } else if (value && (value < min || value > max)) {
-              this.errors.add({name, type: 'range'});
+            const input = i === 0 ? 'valueA' : 'valueB';
+            if (!value) {
+              if (this.form.get([name, input]).dirty) {
+                this.errors.add({name, type: 'integer'});
+              }
+            } else {
+              if (value.length > maxLength) {
+                value = value.slice(0, maxLength);
+                this.form.get([name, input]).setValue(value, {emitEvent: false});
+              }
+              if (value && !Number.isInteger(parseFloat(value))) {
+                this.errors.add({name, type: 'integer'});
+              } else if (value && (value < min || value > max)) {
+                this.errors.add({name, type: 'range'});
+              }
             }
           });
           return fromJS({name: modType, operator, operands});
