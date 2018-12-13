@@ -21,6 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
+import {validDateString} from '../validation';
 
 @Component({
     selector: 'crit-modifier-page',
