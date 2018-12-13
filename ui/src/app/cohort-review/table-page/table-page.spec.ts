@@ -18,12 +18,13 @@ import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filt
 import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
-import {ReviewStateService} from '../review-state.service';
-import {StatusFilterComponent} from '../status-filter/status-filter.component';
-import {TablePage} from './table-page';
 import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from '../query-descriptive-stats/query-descriptive-stats.component';
 import {QueryReportComponent} from '../query-report/query-report.component';
+import {ReviewStateService} from '../review-state.service';
+import {StatusFilterComponent} from '../status-filter/status-filter.component';
+import {TablePage} from './table-page';
+
 
 
 describe('TablePage', () => {

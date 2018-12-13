@@ -13,10 +13,11 @@ import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-serv
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
-import {ReviewStateService} from '../review-state.service';
 import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from '../query-descriptive-stats/query-descriptive-stats.component';
 import {QueryReportComponent} from './query-report.component';
+import {ReviewStateService} from '../review-state.service';
+
 
 describe('QueryReportComponent', () => {
   let component: QueryReportComponent;
