@@ -74,10 +74,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "observation",
       "drug_exposure",
       "phecode_criteria_icd",
-      "concept_relationship",
+      "criteria_relationship",
       "death",
       "visit_occurrence",
-      "concept_ancestor",
+      "criteria_ancestor",
       "criteria");
   }
 

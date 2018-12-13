@@ -13,3 +13,6 @@
 .flex-xs-middle.code-tooltip {
     display: inline;
 }
+.hand-cursor {
+    cursor: pointer;
+}

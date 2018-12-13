@@ -33,7 +33,7 @@ fi
 #export CDR_DB_NAME
 
 # If CDR_DB_NAME matches ^public, we want to the public_db_user env var substituted in the create_db.sql
-if [[ CDR_DB_NAME =~ ^public ]]
+if [[ $CDR_DB_NAME =~ ^public ]]
 then
   echo "Working the public db init cdr"
   export WORKBENCH_DB_USER=$PUBLIC_DB_USER

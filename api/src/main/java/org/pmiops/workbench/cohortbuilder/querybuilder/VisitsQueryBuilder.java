@@ -39,9 +39,9 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String VISIT_PARENT_CLAUSE_TEMPLATE =
     "where a.visit_concept_id in (\n" +
-      "select descendant_concept_id\n" +
-      "from `${projectId}.${dataSetId}.concept_ancestor` \n" +
-      "where ancestor_concept_id in unnest(${parentIds}))\n";
+      "select descendant_id\n" +
+      "from `${projectId}.${dataSetId}.criteria_ancestor` \n" +
+      "where ancestor_id in unnest(${parentIds}))\n";
 
   private static final String UNION_TEMPLATE = " union all\n";
 
