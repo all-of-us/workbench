@@ -1,8 +1,9 @@
-import { AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService} from 'generated';
-import {Observable} from "rxjs/Observable";
-import {List} from "immutable";
+import {List} from 'immutable';
+import {Observable} from 'rxjs/Observable';
+
 
 
 @Component({
@@ -15,7 +16,9 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
   review: any;
   cdrId: any;
   data:  Observable<List<any>>;
-  constructor(private api: CohortBuilderService, private route: ActivatedRoute, private cdref: ChangeDetectorRef) {}
+  constructor(private api: CohortBuilderService,
+              private route: ActivatedRoute,
+              private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
     const {cohort, review} = this.route.snapshot.data;
