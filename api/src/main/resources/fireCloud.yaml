@@ -140,6 +140,8 @@ paths:
             type: string
         tags:
           - Billing
+        consumes:
+          - application/json
         summary: add user to billing project the caller owns
         operationId: addUserToBillingProject
         security:
@@ -226,6 +228,8 @@ paths:
           type: string
       tags:
         - Billing
+      consumes:
+        - application/json
       summary: grant a google role to a user and their pet in the billing project the caller owns
       operationId: grantGoogleRoleToUser
       security:
@@ -490,6 +494,8 @@ paths:
           type: string
       tags:
         - Groups
+      consumes:
+        - application/json
       summary: create a new group
       operationId: createGroup
       security:
@@ -534,6 +540,8 @@ paths:
           type: string
       tags:
         - Groups
+      consumes:
+        - application/json
       summary: add a user to a group the caller owns
       operationId: addUserToGroup
       security:
