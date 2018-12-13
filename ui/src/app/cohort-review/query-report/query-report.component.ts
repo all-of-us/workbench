@@ -1,6 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import { AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService} from 'generated';
+import {Observable} from "rxjs/Observable";
+import {List} from "immutable";
 
 
 @Component({
@@ -8,12 +10,12 @@ import {CohortBuilderService} from 'generated';
   templateUrl: './query-report.component.html',
   styleUrls: ['./query-report.component.css']
 })
-export class QueryReportComponent implements OnInit {
+export class QueryReportComponent implements OnInit, AfterContentChecked {
   cohort: any;
   review: any;
   cdrId: any;
-  data: any;
-  constructor(private api: CohortBuilderService, private route: ActivatedRoute) {}
+  data:  Observable<List<any>>;
+  constructor(private api: CohortBuilderService, private route: ActivatedRoute, private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
     const {cohort, review} = this.route.snapshot.data;
@@ -21,10 +23,13 @@ export class QueryReportComponent implements OnInit {
     this.cohort = cohort;
     this.review = review;
   }
-
+  ngAfterContentChecked() {
+    this.cdref.detectChanges();
+  }
   getDemoChartData(d) {
+    this.ngAfterContentChecked();
     if (d) {
-      this.data = d;
+      this.data = d.toJS();
     }
   }
 

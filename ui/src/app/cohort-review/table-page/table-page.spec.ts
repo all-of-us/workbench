@@ -21,7 +21,9 @@ import {ParticipantsChartsComponent} from '../participants-charts/participant-ch
 import {ReviewStateService} from '../review-state.service';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {TablePage} from './table-page';
-
+import {QueryReportComponent} from "../query-report/query-report.component";
+import {QueryCohortDefinitionComponent} from "../query-cohort-definition/query-cohort-definition.component";
+import {QueryDescriptiveStatsComponent} from "../query-descriptive-stats/query-descriptive-stats.component";
 
 describe('TablePage', () => {
   let component: TablePage;
@@ -75,7 +77,10 @@ describe('TablePage', () => {
         StatusFilterComponent,
         OverviewPage,
         ComboChartComponent,
-        ParticipantsChartsComponent
+        ParticipantsChartsComponent,
+        QueryReportComponent,
+        QueryCohortDefinitionComponent,
+        QueryDescriptiveStatsComponent
       ],
       imports: [ClarityModule,
                 ReactiveFormsModule,

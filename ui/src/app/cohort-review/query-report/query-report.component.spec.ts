@@ -14,16 +14,23 @@ import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.c
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {ReviewStateService} from '../review-state.service';
-
+import {QueryCohortDefinitionComponent} from "../query-cohort-definition/query-cohort-definition.component";
+import {QueryDescriptiveStatsComponent} from "../query-descriptive-stats/query-descriptive-stats.component";
 import { QueryReportComponent } from './query-report.component';
 
 describe('QueryReportComponent', () => {
   let component: QueryReportComponent;
   let fixture: ComponentFixture<QueryReportComponent>;
+
   const criteria = {
     includes: [{
       items: [{
         type: 'PM',
+        modifiers:[{
+          name: 'AGE_AT_EVENT',
+          operands:['60', '30'],
+          operator:'GREATER_THAN_OR_EQUAL_TO'
+        }],
         searchParameters: [{
           name: 'Hypotensive (Systolic <= 90 / Diastolic <= 60)',
           type: 'PM'
@@ -90,7 +97,9 @@ describe('QueryReportComponent', () => {
         ComboChartComponent,
         OverviewPage,
         ParticipantsChartsComponent,
-        QueryReportComponent
+        QueryReportComponent,
+        QueryCohortDefinitionComponent,
+        QueryDescriptiveStatsComponent
       ],
       imports: [
         ClarityModule,
