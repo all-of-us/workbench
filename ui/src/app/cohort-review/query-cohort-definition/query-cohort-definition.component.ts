@@ -13,7 +13,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   definition: Array<any>;
   ppiParents: any;
   values: Array<any>;
-  types = ['ICD9', 'ICD10', 'CPT', 'SNOMED' ];
+  // types = ['ICD9', 'ICD10', 'CPT', 'SNOMED' ];
   @Input() cohort: any;
   @Input() review: any;
   constructor(private api: CohortBuilderService) {}
@@ -47,14 +47,33 @@ export class QueryCohortDefinitionComponent implements OnInit {
           return this.mapPMParams(item.searchParameters, item.type);
         case TreeType.PPI:
           return this.mapPPIParams(item.searchParameters, item.type);
+        case TreeType.DRUG:
+          return this.mapDrugParams(item.searchParameters);
         default:
           return this.mapParams(item.type, item.searchParameters, item.modifiers);
       }
     });
   }
 
+// Drug
+
+  mapDrugParams(params: Array<any>) {
+    const groupedData = this.getGroupedData(params, 'group');
+    const drugArray = [];
+      params.map(p => {
+      const typeMatched = groupedData.find( matched => matched.group === p.group.toString());
+      if(typeMatched){
+        drugArray.push({
+          items: typeToTitle(p.type) + ' | ' + typeMatched.customString,
+          type: p.type
+        });
+      }
+    });
+     return this.removeDuplicates(drugArray);
+  }
 
   // Physical Measurement
+
   mapPMParams(params: Array<any>, _type) {
      this.getValues(params, _type);
     const PMarray = params.map(param => {
@@ -68,7 +87,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
 
   // PPI
-
   mapPPIParams(params: Array<any>, _type) {
      this.getValues(params, _type);
     const PpiArray = params.map(param => {
@@ -119,19 +137,19 @@ export class QueryCohortDefinitionComponent implements OnInit {
     const groupedData = this.getGroupedData(params, 'type');
     if (mod.length > 0) {
       const modArray =  params.map(eachParam => {
-        const typeMatched = groupedData.find( matched => matched.group === eachParam.type);
-        // console.log(typeMatched)
+      //  TODO to avoid undefined
+      const typeMatched = groupedData.find( matched => matched.group === eachParam.type);
         let name;
         name = mod.reduce((acc, m) => {
           const concatOperand = m.operands.reduce((final, o) => {
             return final !== '' ? `${final} & ${o}` : `${final} ${o}`;
           } , '');
           return acc !== '' ?
-            `${acc} ,  ${this.removeUnderScoreLowerCase(m.name)}
+            `${acc} ,  ${this.operatorConversion(m.name)}
             ${this.operatorConversion(m.operator)}
             ${concatOperand}`
             :
-            `${this.removeUnderScoreLowerCase(m.name)} ${this.operatorConversion(m.operator)}
+            `${this.operatorConversion(m.name)} ${this.operatorConversion(m.operator)}
             ${concatOperand}`;
         }, '');
         return {
@@ -143,6 +161,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
       return this.removeDuplicates(modArray);
     } else {
       const noModArray = params.map(param => {
+        //  TODO to avoid undefined
         const typeMatched = groupedData.find( matched => matched.group === param.type);
         if (param.type === 'DEMO') {
           return {items: `${typeToTitle(_type)}
@@ -179,23 +198,27 @@ export class QueryCohortDefinitionComponent implements OnInit {
         group: k,
         data: test[k].data,
         customString : test[k].data.reduce((acc, d) => {
-         if (d.group === false) {
-           if (k === 'SNOMED' ) {
-             return acc === '' ? d.name : `${acc}, ${d.name}`;
-           } else {
-             return acc === '' ? d.value : `${acc}, ${d.value}`;
-           }
-         } else {
-           if (k === 'SNOMED' ) {
-             return acc === '' ? `Parent ${d.name}` : `${acc}, Parent ${d.name}`;
-           } else {
-             return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`;
-           }
-         }
+          //TODO for PM, PPI, Condition, Procedure
+          if(d.type === 'DRUG') {
+            if (d.group === false) {
+              return acc === '' ? `RXNORM | ${d.value}` : `${acc}, ${d.value}`;
+            } else {
+              return acc === '' ? `ATC | ${d.value}` : `${acc}, ${d.value}`;
+            }
+          } else {
+            if (d.group === false) {
+              return acc === '' ? d.value : `${acc}, ${d.value}`;
+            } else {
+              return acc === '' ? `Parent ${d.value}` : `${acc}, Parent ${d.value}`;
+            }
+          }
+
         }, '')
       });
     });
   }
+
+
 
   removeDuplicates(arr) {
     return arr.filter((thing, index, self) =>
@@ -205,9 +228,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
     );
   }
 
-  removeUnderScoreLowerCase(name: string) {
-    return name.replace(/_/g, ' ').toLowerCase();
-  }
+  // removeUnderScoreLowerCase(name: string) {
+  //   return name.replace(/_/g, ' ').toLowerCase();
+  // }
 
   operatorConversion(operator) {
     switch (operator) {
@@ -218,13 +241,17 @@ export class QueryCohortDefinitionComponent implements OnInit {
       case 'EQUAL' :
         return '=';
       case 'BETWEEN' :
-        return 'between';
+        return 'Between';
       case 'ETH' :
         return 'Ethnicity';
       case 'RACE' :
         return 'Race';
       case 'AGE' :
         return 'Age';
+      case 'AGE_AT_EVENT' :
+        return 'Age at Event';
+      case 'NUM_OF_OCCURRENCES' :
+        return 'Num of Occurrences';
     }
   }
 

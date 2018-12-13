@@ -33,21 +33,32 @@
               </div>
             </div>
             <div class="col-sm-12 col-xs-12">
-              <app-query-cohort-definition [cohort]="cohort" [review]="review"></app-query-cohort-definition>
+              <app-query-cohort-definition class="page-break" [cohort]="cohort" [review]="review"></app-query-cohort-definition>
             </div>
           </div>
         </div>
       </div>
-      <div class="col-sm-6 col-xs-6" style="padding-left: 6rem;">
-
+      <div class="col-sm-6 col-xs-6 stats-left-padding ">
         <!--Descriptive HTML Start-->
-
-        <app-descriptive-stats [demoData]="data"></app-descriptive-stats>
+        <app-descriptive-stats class="page-break" [demoData]="data"></app-descriptive-stats>
         <!--Descriptive HTML END-->
       </div>
     </div>
   </div>
-  <app-overview-charts class="test-print" (dataItems) = "getDemoChartData($event)" ></app-overview-charts>
+  <!--Descriptive HTML Start-->
+  <div class="temporal-container">
+    <div class="query-title">
+      Temporal Constraints
+    </div>
+    <div class="query-content">
+      None
+    </div>
+  </div>
+  <!--Descriptive HTML Start-->
+
+  <!--CHarts HTML Start-->
+    <app-overview-charts class="page-break" (dataItems) = "getDemoChartData($event)" ></app-overview-charts>
+  <!--CHarts HTML End-->
 </div>
 
 

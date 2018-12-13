@@ -35,4 +35,27 @@
   font-weight: bold;
   line-height: 24px;
   white-space: nowrap;
+  padding-top: 0.5rem;
+}
+
+.review-button {
+  font-size: 18px!important;
+  color: #2691D0!important;
+  padding-bottom: 1.7rem;
+}
+
+.review-button.active, review-button:active, review-button:focus, review-button:hover  {
+  font-weight: bold !important;
+}
+
+.review-button.active, review-button:active, review-button:hover {
+  box-shadow: inset 0 -6px 0 #007cbb !important;
+}
+
+@media print{
+.doNotPrint {
+  display: none !important;
+  -webkit-print-color-adjust: exact;
+  box-shadow: none !important;
+  }
 }
