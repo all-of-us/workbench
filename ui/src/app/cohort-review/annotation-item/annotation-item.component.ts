@@ -21,7 +21,7 @@ import {
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {dateValidator} from '../../cohort-search/validators';
+import {validDateString} from '../../cohort-search/validation';
 
 interface Annotation {
   definition: CohortAnnotationDefinition;
@@ -96,18 +96,20 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (this.isDate) {
-      this.formattedDate.setValidators(dateValidator());
       this.subscription = this.control.valueChanges.subscribe(val => {
         this.successIcon = false;
+        this.textSpinnerFlag = true;
         this.formattedDate.setValue(
           moment(val).format('YYYY-MM-DD'),
           {emitEvent: false}
           );
-        if (!this.formattedDate.errors) {
-          this.textSpinnerFlag = true;
-          this.handleInput();
-        }
+        this.handleInput();
       });
+      this.subscription.add(this.formattedDate.valueChanges
+        .debounceTime(300)
+        .subscribe(date => {
+          this.error = validDateString(date);
+        }));
       this.dateBtns = document.getElementsByClassName('datepicker-trigger');
     }
   }
