@@ -34,6 +34,7 @@
   font-weight: bold;
   line-height: 24px;
   white-space: nowrap;
+  padding-top: 0.5rem;
 }
 
 .review-button {
@@ -48,4 +49,12 @@
 
 .review-button.active, review-button:active, review-button:hover {
   box-shadow: inset 0 -6px 0 #007cbb !important;
+}
+
+@media print{
+.doNotPrint {
+  display: none !important;
+  -webkit-print-color-adjust: exact;
+  box-shadow: none !important;
+  }
 }

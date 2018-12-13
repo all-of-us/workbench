@@ -1,9 +1,15 @@
-.query-title {
+.definition-container {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.definition-container .query-title {
   font-size: 16px;
   font-weight: 600;
   color: #262262;
 }
-.group-background {
+
+.definition-container .group-background {
   background-color: #E2E2EA;
   color: black;
   padding: 0.3rem 0.6rem;
@@ -11,17 +17,13 @@
   display: inline-block;
 }
 
-.testing {
-  border: 1px solid black;
-}
-
-.circle-wrapper {
+.definition-container .circle-wrapper {
   width: 100%;
   display: flex;
   justify-content: start;
 }
 
-.and-circle {
+.definition-container .and-circle {
   background-color: rgb(226, 226, 233);
   border-radius: 50%;
   width: 2.5rem;
@@ -30,18 +32,30 @@
   text-align: center;
 }
 
-.exclude-wrapper {
+.definition-container .exclude-wrapper {
   width: 100%;
   display: flex;
   justify-content: start;
 }
 
-.exclude {
+.definition-container .exclude {
   background-color: rgb(226, 226, 233);
   border-radius: 1rem;
   width: 4.5rem;
   height: 2.2rem;
   line-height: 2.2rem;
   text-align: center;
+
+}
+
+.definition-container .loading-spinner {
+  margin-left: 5rem;
+  margin-top: 1rem;
+}
+
+@media print{
+  .page-break {
+    page-break-inside: avoid;
+  }
 
 }

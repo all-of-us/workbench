@@ -2,11 +2,11 @@
   {{cohortName}}
 </div>
 <clr-tabs>
-  <clr-tab>
+  <clr-tab class="">
     <button class="review-button" clrTabLink id="link1">Participants</button>
     <clr-tab-content id="content1" *clrIfActive ="true">
       <div class="participant-container">
-        <div class="total-heading" *ngIf="review.queryResultSize"> Total Participants: {{review.queryResultSize | number}} Participants</div>
+        <div class="total-heading" *ngIf="review.queryResultSize"> Total Participants: {{review.queryResultSize | number}}</div>
       </div>
       <clr-datagrid
         (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading">

@@ -1,34 +1,34 @@
-<!--Cohort Definition HTML start-->
-<div class="query-title">
-  Cohort Definition
-</div>
-<ng-container *ngFor="let group of definition; let g = index;">
-  <div *ngIf="group?.role ==='excludes'" class="exclude-wrapper">
-    <div class="exclude">EXCLUDING</div>
+<div class="definition-container">
+  <div class="query-title">
+    Cohort Definition
   </div>
-  <ng-container *ngFor="let item of group?.groups; let i = index">
-    <div *ngIf="i > 0" class="circle-wrapper">
-      <div class="and-circle">AND</div>
+  <div *ngIf="definition?.length <= 0" class="loading-spinner spinner spinner-lg spin-in-overlay">
+    Loading...
+  </div>
+  <ng-container *ngFor="let group of definition; let g = index;">
+    <div *ngIf="group?.role ==='excludes'" class="exclude-wrapper page-break">
+      <div class="exclude">EXCLUDING</div>
     </div>
-    <div class="group-background">
-      <ng-container *ngFor="let param of item; let p = index;">
-        <div *ngIf="p > 0 ">OR</div>
-        <!--<div style="border: 1px solid black;">-->
-          <div>
-          <ng-container *ngFor="let query of param; let s = index;">
-            <ng-container *ngIf="s > 0">
-              <div *ngIf="query?.type ==='DEMO'; else or ">AND</div>
-              <ng-template #or>OR</ng-template>
-              <!--<div *ngIf="query?.type ==='DEMO'">AND</div>-->
-              <!--<ng-template #or>OR</ng-template>-->
-            </ng-container>
+    <ng-container *ngFor="let item of group?.groups; let i = index">
+      <div *ngIf="i > 0" class="circle-wrapper page-break">
+        <div class="and-circle">AND</div>
+      </div>
+      <div class="group-background">
+        <ng-container *ngFor="let param of item; let p = index;">
+          <div *ngIf="p > 0 ">OR</div>
             <div>
-              {{query?.items}}
-            </div>
-          </ng-container>
-        </div>
-      </ng-container>
-    </div>
+            <ng-container *ngFor="let query of param; let s = index;">
+              <ng-container *ngIf="s > 0">
+                <div *ngIf="query?.type ==='DEMO'; else or ">AND</div>
+                <ng-template #or>OR</ng-template>
+              </ng-container>
+              <div>
+                {{query?.items}}
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
   </ng-container>
-</ng-container>
-<!--Cohort Definition HTML END-->
+</div>

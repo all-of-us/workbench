@@ -1,4 +1,3 @@
-
 <div class="container container-margin">
   <div class="row">
     <div class="col-sm-12 col-xs-12">
@@ -6,20 +5,19 @@
         <div class="row">
           <div class="col-sm-12 col-xs-12">
             <div>
-              <!--overview-title-->
-              <span class="">Chart :</span>
+              <span class="chart-title">Charts</span>
             </div>
           </div>
         </div>
       </div>
       <div class="container container-margin" *ngIf="openChartContainer">
         <div class="row" [ngClass]="showTitle?'button-padding-zero' :'button-padding'">
-          <div class="col-sm-10 col-xs-10 col-lg-10 col-xl-10">
+          <div class="col-sm-8 col-xs-8 col-lg-8 col-xl-8">
             <div class="chart-container">
               <div *ngIf="buttonsDisableFlag" class="loading-spinner spinner spinner-lg spin-in-overlay">
                 Loading...
               </div>
-              <div *ngIf="data?.size" class="demography-title">Demographics</div>
+              <div *ngIf="data?.size" class="demography-title ">Demographics</div>
               <div class="graph-border" *ngIf="data?.size">
                 <div class="demo-chart-heading">
                   Participants by Gender, Age Range & Race
@@ -30,6 +28,10 @@
                   [data]="data">
                 </app-combo-chart>
               </div>
+            </div>
+          </div>
+          <div class="col-sm-10 col-xs-10 col-lg-10 col-xl-10">
+            <div class="chart-container">
               <div *ngFor = "let name of typesList">
                 <div *ngIf="domainsData[name].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
                   Loading...
