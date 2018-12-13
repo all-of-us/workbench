@@ -21,6 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
+import {validDateString} from '../validation';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -123,17 +124,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateA = new FormControl();
   dateB = new FormControl();
   errors = new Set();
-  readonly errorMessages = {
-    ageAtEvent: {
-      range: 'Age At Event must be between 1 and 120',
-      integer: 'Age At Event must be a whole number'
-    },
-    hasOccurrences: {
-      range: 'Has Occurrences must be between 1 and 99',
-      integer: 'Has Occurrences must be a whole number'
-    }
-  };
-
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
