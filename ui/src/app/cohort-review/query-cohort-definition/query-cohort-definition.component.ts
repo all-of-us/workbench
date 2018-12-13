@@ -57,7 +57,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     const drugArray = [];
       params.map(p => {
       const typeMatched = groupedData.find( matched => matched.group === p.group.toString());
-      if(typeMatched){
+      if (typeMatched) {
         drugArray.push({
           items: typeToTitle(p.type) + ' | ' + typeMatched.customString,
           type: p.type
@@ -72,9 +72,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
   mapParams(_type: string, params: Array<any>, mod) {
     const groupedData = this.getGroupedData(params, 'type');
     if (mod.length) {
-      return this.getModifierFormattedData(groupedData,params, mod, _type);
+      return this.getModifierFormattedData(groupedData, params, mod, _type);
     } else {
-      return this.getOtherTreeFormattedData(groupedData,params, _type);
+      return this.getOtherTreeFormattedData(groupedData, params, _type);
     }
   }
 
@@ -103,7 +103,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     return this.removeDuplicates(modArray);
   }
 
-  getOtherTreeFormattedData(groupedData,params, _type) {
+  getOtherTreeFormattedData(groupedData, params, _type) {
 
     const noModArray = params.map(param => {
       //  TODO to avoid undefined
@@ -173,7 +173,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
         group: k,
         data: test[k].data,
         customString : test[k].data.reduce((acc, d) => {
-         return this.getFormattedString(acc,d);
+         return this.getFormattedString(acc, d);
         }, '')
       });
     });
@@ -188,7 +188,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
       }
     } else if (d.type === 'PM' || d.type === 'VISIT') {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
-    } else if (d.type === 'PPI'){
+    } else if (d.type === 'PPI') {
       if (d.group === false) {
         return acc === '' ? `${this.ppiParents[d.conceptId]} | ${d.name}` :
           `${acc}, ${this.ppiParents[d.conceptId]} | ${d.name}`;
