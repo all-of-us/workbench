@@ -40,7 +40,7 @@ export class AccountCreationSuccessComponent {
     this.signInService.signIn();
   }
 
-  receiveMessage($event) {
-    this.contactEmail = $event;
+  public getEmail(contactemail: string) {
+    this.contactEmail = contactemail;
   }
 }
