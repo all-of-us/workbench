@@ -91,6 +91,162 @@ export class QuickTourReact extends React.Component<any, any> {
   expandIcon = '/assets/icons/expand.svg';
   shrinkIcon = '/assets/icons/shrink.svg';
 
+  modalBackdrop = {
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    backgroundColor: '#313131',
+    opacity: .8,
+    zIndex: 1040,
+  };
+
+  mainStyling = {
+    height: '79.23%',
+    width: '80%',
+    borderRadius: '8px',
+    backgroundColor: '#262262',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    position: 'absolute',
+    left: '10%',
+    top: '1%',
+    zIndex: 1050,
+  };
+
+  title = {
+    color: '#FFFFFF',
+    marginTop: '2%',
+    marginLeft: '3%',
+    fontSize: '21px',
+    width: '100%',
+    fontWeight: 500
+  };
+
+  mainTitle = {
+    color: '#FFFFFF',
+    fontSize: '48px',
+    width: '100%',
+    marginTop: '3%',
+    marginLeft: '3%',
+    fontWeight: 'bold'
+  };
+
+  breadcrumbs = {
+    width: '100%',
+    marginTop: '5%',
+    justifyContent: 'center',
+    display: 'flex',
+    flexDirection: 'row'
+  };
+
+  circle = {
+    border: '2px solid #8C9BA5',
+    borderRadius: '50%',
+    height: '21.92px',
+    width: '21.92px',
+    left: '21.92px'
+  };
+
+  circleCompleted = Object.assign(
+    this.circle,
+    {
+      left: '0px',
+      border: '2px solid #2691D0',
+    }
+    );
+
+  check = {
+    minHeight: '10px',
+    minWidth: '10px',
+    marginLeft: '2px',
+    marginTop: '-3px'
+  };
+
+  current = {
+    minHeight: '12px',
+    minWidth: '12px',
+    marginLeft: '3px',
+    marginBottom: '2px',
+    backgroundColor: '#2691D0',
+    borderRadius: '50%',
+    display: 'inline-block'
+  };
+
+  connector = {
+    border: '2px solid #8C9BA5',
+    boxSizing: 'border-box',
+    height: '3px',
+    width: '107px',
+    position: 'relative',
+    left: '21.92px',
+    top: '-36px'
+  };
+
+  connectorCompleted = Object.assign(
+      this.connector,
+      {
+        border: '2px solid #2691D0'
+      }
+  );
+
+  breadcrumbTitle = {
+    transform: 'translate(-40%)',
+    textAlign: 'center',
+    color: '#2691D0'
+  };
+
+  panel = {
+    transform: 'translate(-40%)',
+    textAlign: 'center',
+    color: '#2691D0'
+  };
+
+  panelTitle = {
+    width: '100%',
+    marginLeft: '5%',
+    color: '#FFFFFF',
+    fontSize: '28px',
+    fontWeight: 'bold'
+  };
+
+  panelContents = {
+    paddingLeft: '5%',
+    marginTop: '1%',
+    color: '#FFFFFF',
+    fontSize: '14px',
+    textAlign: 'left'
+  };
+
+  panelText = {
+    marginRight: '2%',
+    paddingTop: '.5%',
+    fontSize: '16px',
+    lineHeight: '24px',
+    whiteSpace: 'pre-line',
+    textAlign: 'left'
+  };
+
+  panelRight = {
+    marginRight: '5%',
+    marginBottom: '5%',
+    width: '40%',
+    height: '90%',
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'flex-end'
+  };
+
+  panelImage = {
+    width: '78%',
+    height: '95%',
+    marginTop: '5%',
+    marginLeft: '20%',
+    position: 'relative',
+    zIndex: 1,
+    display: 'inline'
+  };
+
   constructor(props: Object) {
     super(props);
     this.state = {selected: 0, fullImage: false, numPanels: 5};
@@ -131,25 +287,25 @@ export class QuickTourReact extends React.Component<any, any> {
 
   render() {
     return <React.Fragment>
-      <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
+      <div style={this.props.learning ? this.modalBackdrop : undefined}></div>
       {this.props.learning && !this.state.fullImage &&
-        <div className='main' id='quick-tour-react'>
-          <div className='title'>All of Us Researcher Workbench</div>
-          <div className='intro'>Quick Tour</div>
-          <div className='breadcrumbs'>
+        <div style={this.mainStyling} id='quick-tour-react'>
+          <div style={this.title}>All of Us Researcher Workbench</div>
+          <div style={this.mainTitle}>Quick Tour</div>
+          <div style={this.breadcrumbs}>
             {panels.map((p, i) => {
               return <React.Fragment>
-                <div className='breadcrumb-component'>
-                  <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
+                <div style={{width: '128px'}}>
+                  <div style={this.state.selected ? this.circleCompleted : this.circle}
                        onClick={() => this.selectPanel(i)}>
-                    {(i < this.state.selected) && <div className='check'>
+                    {(i < this.state.selected) && <div style={this.check}>
                         <img src={this.checkImg}/>
                     </div>}
-                    {(i ===  this.state.selected) && <div className='current'></div>}
+                    {(i ===  this.state.selected) && <div style={this.current}></div>}
                   </div>
-                  <div className='breadcrumb-title'>{p.title}</div>
+                  <div style={this.breadcrumbTitle}>{p.title}</div>
                   {(i !== this.state.numPanels - 1) &&
-                  <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
+                  <div style={i < this.state.selected ? this.connectorCompleted : this.connector}>
                   </div>}
                 </div>
               </React.Fragment>;
@@ -158,17 +314,17 @@ export class QuickTourReact extends React.Component<any, any> {
           <div style={{width: '100%', paddingTop: '5%'}}>
              <div className='divider'></div>
           </div>
-          <div className='panel'>
-            <div className='panel-left'>
-              <div className='panel-title'>
+          <div style={this.panel}>
+            <div style={{width: '75%'}}>
+              <div style={this.panelTitle}>
                   {this.state.selected === 0 ? 'Introduction' : panels[this.state.selected].title}
               </div>
-              <div className='panel-contents'>
-                <div className='panel-text'>{panels[this.state.selected].content}</div>
+              <div style={this.panelContents}>
+                <div style={this.panelText}>{panels[this.state.selected].content}</div>
               </div>
             </div>
-            <div className='panel-right'>
-              <img src={panels[this.state.selected].image} className='panel-image'/>
+            <div style={this.panelRight}>
+              <img src={panels[this.state.selected].image} style={this.panelImage}/>
                 {(this.state.selected !== 0) &&
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
