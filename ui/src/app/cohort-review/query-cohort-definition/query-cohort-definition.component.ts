@@ -108,7 +108,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     const noModArray = params.map(param => {
       const typeMatched = groupedData.find( matched => matched.group === param.type);
       if (param.type === 'DEMO') {
-        return {items: param.subtype === 'DEC'? `${typeToTitle(_type)}
+        return {items: param.subtype === 'DEC' ? `${typeToTitle(_type)}
                       | ${param.type} | ${param.name}` :
                       `${typeToTitle(_type)}
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
