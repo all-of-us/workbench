@@ -1,18 +1,20 @@
 import * as React from 'react';
 
+const headerColor = '#262262';
+
 export const styles = {
   h1: {
-    color: '#262262',
+    color: headerColor,
     fontWeight: 500,
     fontSize: '1.6rem',
   },
   h2: {
-    color: '#262262',
+    color: headerColor,
     fontWeight: 800,
     fontSize: '1.25rem',
   },
   h3: {
-    color: '#262262',
+    color: headerColor,
     fontWeight: 800,
     fontSize: '1rem',
   },

@@ -1,16 +1,19 @@
-
 import {Component, DoCheck, Input, OnInit, ViewChild} from '@angular/core';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {LoginComponent} from 'app/views/login/component';
-import {AccountCreationComponent} from 'app/views/account-creation/component';
-import {AccountCreationModalsComponent} from 'app/views/account-creation-modals/component';
+
 import {SignInService} from 'app/services/sign-in.service';
+
 import {
   BolderHeader,
   Header,
   SmallHeader
 } from 'app/common/common';
+import {AccountCreationComponent} from 'app/views/account-creation/component';
+import {AccountCreationModalsComponent} from 'app/views/account-creation-modals/component';
+import {LoginComponent} from 'app/views/login/component';
+
 export class AccountCreationSuccessReact extends React.Component<any, any> {
   state: {};
   props: {
