@@ -19,6 +19,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
     'gender', 'ageRange', 'race'
   ];
   totalCount: number;
+  enablePrint = false;
   constructor(private state: ReviewStateService) {}
 
 
@@ -29,6 +30,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
         const groupBy = k;
         this.getChartGroupedData(data, groupBy);
       });
+      this.enablePrint = true;
     }
   }
   ngOnInit() {

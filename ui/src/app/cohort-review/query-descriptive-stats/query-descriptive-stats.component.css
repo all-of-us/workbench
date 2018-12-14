@@ -30,5 +30,9 @@
 .print-icon {
   color: #262262;
   cursor: pointer;
+}
 
+.print-icon-disable {
+  pointer-events: none;
+  color: #E2E2EA;
 }
