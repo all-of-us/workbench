@@ -7,10 +7,11 @@ import {Subscription} from 'rxjs/Subscription';
   templateUrl: './validator-errors.component.html',
   styleUrls: ['./validator-errors.component.css']
 })
-export class ValidatorErrorsComponent implements OnInit{
+export class ValidatorErrorsComponent implements OnInit {
 
   private static readonly errorMessages = {
-    dateFormat: (params) => params.message
+    dateFormat: (params) => params.message,
+    integer: (params) => params.message
   };
 
   @Input() private form: FormGroup;
@@ -19,7 +20,6 @@ export class ValidatorErrorsComponent implements OnInit{
 
   ngOnInit(): void {
     this.subscription = this.form.valueChanges
-      .debounceTime(300)
       .subscribe(() => {
         this.errors = new Set();
         this.validateControls(this.form.controls);
@@ -32,7 +32,9 @@ export class ValidatorErrorsComponent implements OnInit{
 
   getErrors(errors: any) {
     Object.keys(errors).forEach(_type => {
-      this.errors.add(ValidatorErrorsComponent.errorMessages[_type](errors[_type]));
+      if (ValidatorErrorsComponent.errorMessages.hasOwnProperty(_type)) {
+        this.errors.add(ValidatorErrorsComponent.errorMessages[_type](errors[_type]));
+      }
     });
   }
 

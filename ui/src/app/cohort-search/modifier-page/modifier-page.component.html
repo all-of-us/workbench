@@ -59,7 +59,7 @@
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
-                <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+                <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType" appIntegerValidator>
               </div>
               <div *ngIf="mod.inputType === 'date'">
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA" appDateValidator>
@@ -70,7 +70,7 @@
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                  <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType"appIntegerValidator>
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
@@ -78,7 +78,7 @@
                   <div>and</div>
                 </div>
                 <div>
-                  <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(1)" formControlName="valueB">
+                  <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(1)" formControlName="valueB" appDateValidator>
                   <input class="hidden-input" type="date" [formControl]="dateB" [(clrDate)]="dateObjs[1]">
                 </div>
               </ng-container>
