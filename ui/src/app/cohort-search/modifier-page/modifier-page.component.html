@@ -68,7 +68,7 @@
                   [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'">
-                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
+                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA" appDateValidator>
                 <input class="hidden-input" type="date" [formControl]="dateA" [(clrDate)]="dateObjs[0]">
               </div>
               <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
