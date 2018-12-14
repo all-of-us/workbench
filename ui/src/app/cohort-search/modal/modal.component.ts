@@ -1,10 +1,11 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
+import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -38,6 +39,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
   @select(previewStatus) preview$;
+  @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -58,6 +60,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   count = 0;
   originalNode: any;
   disableCursor = false;
+  modifiersDisabled = false;
   preview = Map();
 
   constructor(private actions: CohortSearchActions) {}
@@ -91,8 +94,8 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
       this.subscription.add(this.selection$
-          .map(sel => sel.size === 0)
-          .subscribe(sel => this.noSelection = sel)
+        .map(sel => sel.size === 0)
+        .subscribe(sel => this.noSelection = sel)
       );
     this.subscription.add(this.attributes$
       .subscribe(node => {
@@ -216,8 +219,8 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get showModifiers() {
     return this.itemType !== TreeType[TreeType.PM] &&
-          this.itemType !== TreeType[TreeType.DEMO] &&
-          this.itemType !== TreeType[TreeType.PPI];
+      this.itemType !== TreeType[TreeType.DEMO] &&
+      this.itemType !== TreeType[TreeType.PPI];
   }
 
   get showHeader() {
@@ -265,8 +268,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
 
-   get disableFlag() {
-       return !this.preview.get('requesting') && this.preview.get('count') >= 0;
-   }
+  get disableFlag() {
+    return this.noSelection
+      || this.preview.get('requesting')
+      || this.preview.get('count') === 0
+      || this.modifiersDisabled;
+  }
 }
 
