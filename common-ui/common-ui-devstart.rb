@@ -276,7 +276,7 @@ class DeployUI
     environment_name = environment_names[@opts.project]
 
     swagger_regen(@cmd_name)
-    build(@cmd_name, %W{--configuration #{environment_name}})
+    build(@cmd_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
       common.run_inline(cmd_prefix + %W{gcloud app deploy
