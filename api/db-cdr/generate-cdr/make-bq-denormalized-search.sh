@@ -66,8 +66,9 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
+
 bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_person
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_person.json $BQ_DATASET.search_person
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.search_person
 
 create_concept_tables=(search_snomed search_drug search_measurement search_visit)
 for t in "${create_concept_tables[@]}"
@@ -97,7 +98,7 @@ case when r.concept_name is null then 'Unknown' else r.concept_name end as race,
 birth_datetime as dob
 from \`$BQ_PROJECT.$BQ_DATASET.person\` p
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id and g.vocabulary_id in ('Gender', 'None'))
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')"
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')"
 
 ################################################
 #   insert condition data into search_icd9     #
@@ -106,7 +107,7 @@ echo "Inserting conditions data into search_icd9"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd9\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select co.person_id, co.condition_start_date as entry_date, c.code, co.condition_source_concept_id as concept_id, c.subtype,
+select co.person_id, co.condition_start_date as entry_date, c.code, co.condition_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(co.condition_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
@@ -118,7 +119,7 @@ echo "Inserting procedures data into search_icd9"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd9\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as concept_id, c.subtype,
+select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(po.procedure_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
@@ -130,7 +131,7 @@ echo "Inserting measurements data into search_icd9"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd9\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as concept_id, c.subtype,
+select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(m.measurement_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
@@ -142,7 +143,7 @@ echo "Inserting observations data into search_icd9"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd9\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as concept_id, c.subtype,
+select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(o.observation_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
@@ -157,7 +158,7 @@ echo "Inserting conditions data into search_icd10"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd10\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select co.person_id, co.condition_start_date as entry_date, c.code, co.condition_source_concept_id as concept_id, c.subtype,
+select co.person_id, co.condition_start_date as entry_date, c.code, co.condition_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(co.condition_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
@@ -169,7 +170,7 @@ echo "Inserting procedures data into search_icd10"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd10\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as concept_id, c.subtype,
+select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(po.procedure_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
@@ -181,7 +182,7 @@ echo "Inserting observations data into search_icd10"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_icd10\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as concept_id, c.subtype,
+select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(o.observation_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
@@ -196,7 +197,7 @@ echo "Inserting drug data into search_cpt"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_cpt\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select de.person_id, de.drug_exposure_start_date as entry_date, c.code, de.drug_source_concept_id as concept_id, c.subtype,
+select de.person_id, de.drug_exposure_start_date as entry_date, c.code, de.drug_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(de.drug_exposure_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
@@ -208,7 +209,7 @@ echo "Inserting procedures data into search_cpt"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_cpt\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as concept_id, c.subtype,
+select po.person_id, po.procedure_date as entry_date, c.code, po.procedure_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(po.procedure_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
@@ -220,7 +221,7 @@ echo "Inserting measurements data into search_cpt"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_cpt\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as concept_id, c.subtype,
+select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(m.measurement_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
@@ -232,7 +233,7 @@ echo "Inserting observations data into search_cpt"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_cpt\`
  (person_id, entry_date, code, source_concept_id, subtype, age_at_event, visit_concept_id)
-select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as concept_id, c.subtype,
+select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as source_concept_id, c.subtype,
 cast(floor(date_diff(o.observation_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
@@ -317,7 +318,7 @@ echo "Inserting conditions data into search_ppi"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_ppi\`
  (person_id, entry_date, code, source_concept_id, subtype, value_as_number, value_as_concept_id)
-select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as concept_id,
+select o.person_id, o.observation_date as entry_date, c.code, o.observation_source_concept_id as source_concept_id,
 c.subtype, o.value_as_number, o.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = o.observation_source_concept_id and c.is_selectable = 1 and c.type = 'PPI')
@@ -330,7 +331,7 @@ echo "Inserting conditions data into search_pm"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_pm\`
  (person_id, entry_date, code, source_concept_id, subtype, value_as_number, value_as_concept_id)
-select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as concept_id,
+select m.person_id, m.measurement_date as entry_date, c.code, m.measurement_source_concept_id as source_concept_id,
 c.subtype, m.value_as_number, m.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = m.measurement_source_concept_id and c.is_selectable = 1 and c.type = 'PM')

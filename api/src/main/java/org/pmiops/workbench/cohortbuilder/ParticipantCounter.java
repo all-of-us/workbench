@@ -21,7 +21,7 @@ public class ParticipantCounter {
 
   private static final String COUNT_SQL_TEMPLATE =
     "select count(*) as count\n" +
-      "from `${projectId}.${dataSetId}.person` person\n" +
+      "from `${projectId}.${dataSetId}.search_person` person\n" +
       "where\n";
 
   private static final String ID_SQL_TEMPLATE =
@@ -30,17 +30,15 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-    "select concept1.concept_code as gender, \n" +
-      "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+    "select gender, \n" +
+      "race, \n" +
       "case " + getAgeRangeSql(0, 18) + "\n" +
       getAgeRangeSql(19, 44) + "\n" +
       getAgeRangeSql(45, 64) + "\n" +
       "else '> 65'\n" +
       "end as ageRange,\n" +
       "count(*) as count\n" +
-      "from `${projectId}.${dataSetId}.person` person\n" +
-      "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id in ('Gender', 'None'))\n" +
-      "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+      "from `${projectId}.${dataSetId}.search_person` person\n" +
       "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
@@ -143,7 +141,7 @@ public class ParticipantCounter {
      * @return
      */
     private static String getAgeRangeSql(int lo, int hi) {
-        return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= " + lo +
-                " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
+        return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.dob), MONTH)/12) as INT64) >= " + lo +
+                " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.dob), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }
