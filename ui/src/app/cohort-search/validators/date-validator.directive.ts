@@ -1,18 +1,19 @@
 import {Directive} from '@angular/core';
-import {FormControl, ValidationErrors} from '@angular/forms';
+import {FormControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angular/forms';
 
 import * as moment from 'moment';
 
 @Directive({
-  selector: '[appDateValidator]'
+  selector: '[appDateValidator]',
+  providers: [{provide: NG_VALIDATORS, useExisting: DateValidatorDirective, multi: true}]
 })
-export class DateValidatorDirective {
+export class DateValidatorDirective implements Validator {
 
   validate(form: FormControl): ValidationErrors {
     const dateString = form.value;
-    const isValid = moment(dateString, 'YYYY-MM-DD', true).isValid();
+    const isValid = form.pristine || moment(dateString, 'YYYY-MM-DD', true).isValid();
     const message = {
-      format: {
+      dateFormat: {
         message: 'Dates must be in the format \'YYYY-MM-DD\''
       }
     };
