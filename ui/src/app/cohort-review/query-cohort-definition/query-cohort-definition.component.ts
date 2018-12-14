@@ -18,8 +18,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
-
-    if(this.cohort) {
+    if (this.cohort) {
       this.mapDefinition();
     }
   }
@@ -110,7 +109,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
       const typeMatched = groupedData.find( matched => matched.group === param.type);
       if (param.type === 'DEMO') {
         return {items: param.subtype === 'DEC'? `${typeToTitle(_type)}
-                      | ${param.type} | ${param.name}`:
+                      | ${param.type} | ${param.name}` :
                       `${typeToTitle(_type)}
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
           type: param.type};
