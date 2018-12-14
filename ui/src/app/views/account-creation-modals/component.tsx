@@ -24,7 +24,6 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     contactEmail: string,
     emailOffFocus: boolean,
     waiting: boolean,
-    loading: boolean
     };
   props: {
     username: string,
@@ -43,7 +42,6 @@ class AccountCreationModalsReact extends React.Component<any, any> {
       contactEmail: '',
       emailOffFocus: true,
       waiting: false,
-      loading: false
     };
   }
 
@@ -57,7 +55,11 @@ class AccountCreationModalsReact extends React.Component<any, any> {
       return;
     }
     this.props.passNewEmail(this.state.contactEmail);
-    const request: UpdateContactEmailRequest = {username: this.props.username, contactEmail: this.state.contactEmail, creationNonce: this.props.creationNonce};
+    const request: UpdateContactEmailRequest = {
+      username: this.props.username,
+      contactEmail: this.state.contactEmail,
+      creationNonce: this.props.creationNonce
+    };
     const args: FetchArgs = ProfileApiFetchParamCreator().updateContactEmail(request);
     fetch(this.fullUrl(args.url), args.options).then(() => {
       this.setState({resendingEmail: false, waiting: false, changingEmail: false});
@@ -66,11 +68,13 @@ class AccountCreationModalsReact extends React.Component<any, any> {
 
   send() {
     this.setState({waiting: true});
-    const request: ResendWelcomeEmailRequest = {username: this.props.username, creationNonce: this.props.creationNonce};
+    const request: ResendWelcomeEmailRequest = {
+      username: this.props.username,
+      creationNonce: this.props.creationNonce
+    };
     const args: FetchArgs = ProfileApiFetchParamCreator().resendWelcomeEmail(request);
     fetch(this.fullUrl(args.url), args.options).then(() => {
       this.setState({resending: false, waiting: false});
-      this.toggleLoading();
     });
   }
 
@@ -79,7 +83,7 @@ class AccountCreationModalsReact extends React.Component<any, any> {
   enterFocusEmail(): void { this.setState({emailOffFocus: false}); }
 
   contactEmailInvalidError(): boolean {
-    return !(new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/).test(this.state.contactEmail))
+    return !(new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/).test(this.state.contactEmail));
   }
 
   showEmailValidationError(): boolean {
@@ -89,10 +93,6 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     return this.contactEmailInvalidError();
   }
 
-  toggleLoading(): void {
-    this.setState((prevState, props) => {loading: !prevState.loading});
-  }
-
   close(): void {
     this.props.closeFunction();
   }
@@ -100,35 +100,35 @@ class AccountCreationModalsReact extends React.Component<any, any> {
   render() {
     return <React.Fragment>
         {this.props.update &&
-        <div className="modal-main change-account-email" id={'change-account-email'}>
-          <h3 className="modal-title">Change contact email</h3>
-          <div className="modal-body">
-            <div className="form-section">
+        <div className='modal-main change-account-email' id={'change-account-email'}>
+          <h3 className='modal-title'>Change contact email</h3>
+          <div className='modal-body'>
+            <div className='form-section'>
               <label>Contact Email:</label>
-              <input id={"change-contact-email"} type={"text"}
+              <input id={'change-contact-email'} type={'text'}
                      className={this.showEmailValidationError() ? 'input unsuccessfulInput' : 'input'}
-                     name={"contact-email"} onBlur={() => this.leaveFocusEmail()}
+                     name={'contact-email'} onBlur={() => this.leaveFocusEmail()}
                      onFocus={() => this.enterFocusEmail()}/>
             </div>
             {this.showEmailValidationError &&
-            <div className="error" id="invalid-email-error">
+            <div className='error' id='invalid-email-error'>
               Email is not valid.
             </div>}
           </div>
-          <div className="modal-footer">
-            <button type={"button"} className="btn btn-outline" onClick={() => this.close()}>Cancel</button>
-            <button id={"change_email"} type={"button"}
-                    className={"btn btn-primary" + (this.state.loading ? 'is-loading' : '')}
+          <div className='modal-footer'>
+            <button type={'button'} className='btn btn-outline' onClick={() => this.close()}>Cancel</button>
+            <button id={'change_email'} type={'button'}
+                    className={'btn btn-primary'}
                     onClick={() => this.updateAndSend()}>Apply</button>
           </div>
         </div>}
       {this.props.resend &&
-      <div className="modal resend_welcome" id={'resend-instructions'}>
-        <h3 className="modal-title">Resend Instructions</h3>
-        <div className="modal-footer">
-          <button type={'button'} className="btn btn-outline" onClick={() => this.close()}>Cancel</button>
+      <div className='modal resend_welcome' id={'resend-instructions'}>
+        <h3 className='modal-title'>Resend Instructions</h3>
+        <div className='modal-footer'>
+          <button type={'button'} className='btn btn-outline' onClick={() => this.close()}>Cancel</button>
           <button type={'button'} id={'resend_instructions'}
-                  className={'btn btn-primary' + (this.state.loading ? 'is-loading' : '')}
+                  className={'btn btn-primary'}
                   onClick={() => this.send()}>Send</button>
         </div>
       </div>}
