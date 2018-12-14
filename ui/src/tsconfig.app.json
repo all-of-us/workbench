@@ -4,10 +4,14 @@
     "outDir": "../out-tsc/app",
     "baseUrl": "./",
     "module": "es2015",
-    "types": ["node"]
+    "types": ["node"],
+    "jsx": "react"
   },
   "exclude": [
     "test.ts",
     "**/*.spec.ts"
-  ]
+  ],
+  "resolve": {
+    "extensions": [".js", ".json", ".ts", ".tsx"]
+  }
 }

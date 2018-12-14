@@ -53,7 +53,7 @@ def build(cmd_name, args)
     optimize = "--prod"
   end
   common.run_inline %W{yarn run build
-      #{optimize} --environment=#{options.env} --no-watch --no-progress}
+      #{optimize} --configuration=#{options.env} --no-watch --no-progress}
 end
 
 class CommonUiDevStart
@@ -78,7 +78,7 @@ class CommonUiDevStart
 
     install_dependencies
 
-    ENV["ENV_FLAG"] = "--environment=#{options.env}"
+    ENV["ENV_FLAG"] = "--configuration=#{options.env}"
     at_exit { common.run_inline %W{docker-compose down} }
 
     # Can't use swagger_regen here as it enters docker.
@@ -276,7 +276,7 @@ class DeployUI
     environment_name = environment_names[@opts.project]
 
     swagger_regen(@cmd_name)
-    build(@cmd_name, %W{--environment #{environment_name}})
+    build(@cmd_name, %W{--configuration #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
       common.run_inline(cmd_prefix + %W{gcloud app deploy

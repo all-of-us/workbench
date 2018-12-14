@@ -71,13 +71,17 @@ export class HomepageComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
   @ViewChild(QuickTourModalComponent)
   quickTourModal: QuickTourModalComponent;
+  quickTour: boolean;
 
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+    // create bound methods to use as callbacks
+    this.closeQuickTour = this.closeQuickTour.bind(this);
+  }
 
   ngOnInit(): void {
     this.profileService.getMe().subscribe(profile => {
@@ -89,7 +93,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       e => {},
       () => {
       if (this.firstVisit) {
-        this.openQuickTour();
+        this.quickTour = true;
       }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
@@ -108,8 +112,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.reload();
   }
 
-  openQuickTour(): void {
-    this.quickTourModal.open();
+  public closeQuickTour(): void {
+    this.quickTour = false;
   }
 
   play(type): void {
