@@ -3,7 +3,6 @@ import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
 

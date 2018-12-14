@@ -1,7 +1,5 @@
-import {NgRedux} from '@angular-redux/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {CohortBuilderService, CohortReviewService} from 'generated';
@@ -106,7 +104,6 @@ describe('QueryReportComponent', () => {
         ClarityModule,
         NgxChartsModule,
         NgxPopperModule,
-        RouterTestingModule
       ],
       providers: [
         {provide: ActivatedRoute, useValue: activatedRouteStub},

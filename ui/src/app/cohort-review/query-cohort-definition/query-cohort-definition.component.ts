@@ -18,8 +18,10 @@ export class QueryCohortDefinitionComponent implements OnInit {
   constructor(private api: CohortBuilderService) {}
 
   ngOnInit() {
-    this.mapDefinition();
-     console.log(JSON.parse(this.cohort.criteria));
+
+    if(this.cohort) {
+      this.mapDefinition();
+    }
   }
 
   mapDefinition() {
@@ -35,7 +37,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
           return roleObj;
         }
       });
-      // console.log(this.definition);
     });
   }
 
@@ -106,10 +107,11 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getOtherTreeFormattedData(groupedData, params, _type) {
 
     const noModArray = params.map(param => {
-      //  TODO to avoid undefined
       const typeMatched = groupedData.find( matched => matched.group === param.type);
       if (param.type === 'DEMO') {
-        return {items: `${typeToTitle(_type)}
+        return {items: param.subtype === 'DEC'? `${typeToTitle(_type)}
+                      | ${param.type} | ${param.name}`:
+                      `${typeToTitle(_type)}
                       | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
           type: param.type};
       } else if (param.type === 'VISIT') {
@@ -162,17 +164,17 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
 // utils
   getGroupedData(p, t) {
-    const test = p.reduce((acc, i) => {
+    const groupedData = p.reduce((acc, i) => {
       const key = i[t];
       acc[key] = acc[key] || { data: []};
       acc[key].data.push(i);
       return acc;
     }, {});
-    return Object.keys(test).map(k => {
+    return Object.keys(groupedData).map(k => {
       return Object.assign({}, {
         group: k,
-        data: test[k].data,
-        customString : test[k].data.reduce((acc, d) => {
+        data: groupedData[k].data,
+        customString : groupedData[k].data.reduce((acc, d) => {
          return this.getFormattedString(acc, d);
         }, '')
       });

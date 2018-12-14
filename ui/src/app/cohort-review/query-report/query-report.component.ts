@@ -26,15 +26,15 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
     this.cohort = cohort;
     this.review = review;
   }
+
   ngAfterContentChecked() {
     this.cdref.detectChanges();
   }
+
   getDemoChartData(d) {
     this.ngAfterContentChecked();
     if (d) {
       this.data = d.toJS();
     }
   }
-
-//  TODO create search param mapping functions for each for each domain/type with different format
 }
