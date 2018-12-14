@@ -55,9 +55,9 @@ public abstract class AbstractQueryBuilder {
   private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_occurrence_id in (\n" +
     "select visit_occurrence_id from `${projectId}.${dataSetId}.visit_occurrence`\n" +
     "where visit_concept_id in (\n" +
-    "select descendant_concept_id\n" +
-    "from `${projectId}.${dataSetId}.concept_ancestor`\n" +
-    "where ancestor_concept_id ${encounterOperator} unnest(${encounterConceptId})))\n";
+    "select descendant_id\n" +
+    "from `${projectId}.${dataSetId}.criteria_ancestor`\n" +
+    "where ancestor_id ${encounterOperator} unnest(${encounterConceptId})))\n";
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified

@@ -326,7 +326,7 @@ export class ConceptHomepageComponent implements OnInit {
   get activeSelectedConceptCount(): number {
     if (!this.selectedDomain
       || !this.selectedDomain.domain
-      || this.selectedConceptDomainMap.size === 0) {
+      || this.selectedConceptDomainMap[this.selectedDomain.domain] === 0) {
       return 0;
     }
     return this.selectedConceptDomainMap[this.selectedDomain.domain];

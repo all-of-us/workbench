@@ -77,7 +77,7 @@
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
-                    <crit-modifier-page></crit-modifier-page>
+                    <crit-modifier-page (disabled)="modifiersDisabled = $event"></crit-modifier-page>
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
@@ -96,12 +96,12 @@
                 <div class="panel-right-container">
                   <h5 class="selection-title">Selected Criteria</h5>
                   <div class="panel-right selected">
-                    <ng-container *ngFor="let type of objectKey(selections); let i = index">
+                    <ng-container *ngFor="let type of objectKeys(selections); let i = index">
                       <span *ngIf="ctype === treeType[treeType.DEMO] && i > 0" class="font-weight-bold and-style">AND</span>
                       <span class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</span>
                       <crit-selection-info
-                        *ngFor="let parameter of selections[type]; let i = index"
-                        [index]="i"
+                        *ngFor="let parameter of selections[type]; let p = index"
+                        [indexes]="[i,p]"
                         [parameter]="parameter"
                         (demoItems) = "getDemoParams($event)">
                       </crit-selection-info>
@@ -109,37 +109,29 @@
                   </div>
                   <div class="footer">
                     <button type="button"
-                            (click)="cancel()"
-                            class="btn btn-link">
+                      (click)="cancel()"
+                      class="btn btn-link">
                       Cancel
                     </button>
                     <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode !== 'modifiers'"
                       type="button"
                       [disabled]="noSelection"
-                      (click)="mode = 'modifiers'"
+                      (click)="setMode('modifiers')"
                       class="btn btn-primary">
                       Next
                     </button>
-                    <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode === 'modifiers'"
-                             type="button"
-                             (click)="setMode('tree')"
-                             class="btn btn-primary">
+                    <button *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode === 'modifiers'"
+                      type="button"
+                      (click)="setMode('tree')"
+                      class="btn btn-primary">
                       Back
                     </button>
-                    <button type="button"  *ngIf="ctype !== treeType[treeType.DEMO]; else demoButton"
-                            [disabled]="noSelection"
-                            (click)="finish()"
-                            class="btn btn-primary">
-                     <div>Finish</div>
-                    </button>
-
-                   <ng-template  #demoButton>
-                     <button type="button"
-                             [ngClass]="[!noSelection && disableFlag ? 'btn btn-primary' : 'btn btn-disable']"
-                            (click)="finish()">
+                    <button type="button"
+                      [disabled]="disableFlag"
+                      (click)="finish()"
+                      class="btn btn-primary">
                       Finish
                     </button>
-                   </ng-template>
                   </div>
                 </div>
               </ng-container>

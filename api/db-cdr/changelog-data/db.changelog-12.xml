@@ -9,7 +9,6 @@
 
     <validCheckSum>ANY</validCheckSum>
 
-
     <delete tableName="vocabulary"/>
 
     <loadData tableName="vocabulary" file="csv/vocabulary.csv" encoding="UTF-8" quotchar='"'>

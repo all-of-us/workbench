@@ -233,8 +233,7 @@ public class Criteria {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Criteria criteria = (Criteria) o;
-        return id == criteria.id &&
-          parentId == criteria.parentId &&
+        return parentId == criteria.parentId &&
           group == criteria.group &&
           selectable == criteria.selectable &&
           Objects.equals(type, criteria.type) &&
