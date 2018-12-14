@@ -344,9 +344,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           if (between && dateValueB) {
             operands.push(dateValueB);
           }
+          console.log(this.form);
           operands.forEach(date => {
             if (error = validDateString(date)) {
-              this.errors.add(error);
+              // this.errors.add(error);
             }
           })
           return fromJS({name: modType, operator, operands});

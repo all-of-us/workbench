@@ -12,24 +12,7 @@
         </div>
       </div>
     </div>
-    <div *ngIf="errors.size" class="alert alert-danger alert-sm">
-      <div class="alert-items">
-        <div *ngFor="let error of errors" class="alert-item static">
-          <div class="alert-text">
-            {{errorMessages[error.name][error.type]}}
-          </div>
-        </div>
-      </div>
-    </div>
-    <div *ngIf="errors.size && formChanges" class="alert alert-danger alert-sm">
-      <div class="alert-items">
-        <div *ngFor="let error of errors" class="alert-item static">
-          <div class="alert-text">
-            {{error}}
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-validator-errors [form]="form"></app-validator-errors>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
         <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
@@ -78,8 +61,8 @@
               <div>
                 <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
-              <div *ngIf="mod.inputType === 'date'" >
-                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
+              <div *ngIf="mod.inputType === 'date'">
+                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA" appDateValidator>
                 <input class="hidden-input" type="date" [formControl]="dateA" [(clrDate)]="dateObjs[0]">
               </div>
               <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
@@ -91,7 +74,7 @@
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
-                <div class="and-text" >
+                <div class="and-text">
                   <div>and</div>
                 </div>
                 <div>
