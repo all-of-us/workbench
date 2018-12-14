@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -106,7 +106,9 @@ class AccountCreationModalsReact extends React.Component<any, any> {
             <div className='form-section'>
               <label>Contact Email:</label>
               <input id={'change-contact-email'} type={'text'}
-                     className={this.showEmailValidationError() ? 'input unsuccessfulInput' : 'input'}
+                     className={
+                       this.showEmailValidationError() ? 'input unsuccessfulInput' : 'input'
+                     }
                      name={'contact-email'} onBlur={() => this.leaveFocusEmail()}
                      onFocus={() => this.enterFocusEmail()}/>
             </div>
@@ -116,7 +118,8 @@ class AccountCreationModalsReact extends React.Component<any, any> {
             </div>}
           </div>
           <div className='modal-footer'>
-            <button type={'button'} className='btn btn-outline' onClick={() => this.close()}>Cancel</button>
+            <button type={'button'} className='btn btn-outline'
+                    onClick={() => this.close()}>Cancel</button>
             <button id={'change_email'} type={'button'}
                     className={'btn btn-primary'}
                     onClick={() => this.updateAndSend()}>Apply</button>
@@ -126,7 +129,8 @@ class AccountCreationModalsReact extends React.Component<any, any> {
       <div className='modal resend_welcome' id={'resend-instructions'}>
         <h3 className='modal-title'>Resend Instructions</h3>
         <div className='modal-footer'>
-          <button type={'button'} className='btn btn-outline' onClick={() => this.close()}>Cancel</button>
+          <button type={'button'} className='btn btn-outline'
+                  onClick={() => this.close()}>Cancel</button>
           <button type={'button'} id={'resend_instructions'}
                   className={'btn btn-primary'}
                   onClick={() => this.send()}>Send</button>
@@ -144,7 +148,7 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     '../../styles/buttons.css'],
 })
 
-export class AccountCreationModalsComponent {
+export class AccountCreationModalsComponent implements OnInit {
   @Input('updateEmail')
   public updateEmail: Function;
   @Input('close')
@@ -168,11 +172,11 @@ export class AccountCreationModalsComponent {
       document.getElementById('account-creation-modal'));
   }
 
-  ngDoCheck(): void {
-    ReactDOM.render(React.createElement(AccountCreationModalsReact,
-      {username: this.userName, creationNonce: this.creationNonce,
-        passNewEmail: this.updateEmail, update: this.update, resend: this.resend,
-        closeFunction: this.close}),
-      document.getElementById('account-creation-modal'));
-  }
+  // ngDoCheck(): void {
+  //   ReactDOM.render(React.createElement(AccountCreationModalsReact,
+  //     {username: this.userName, creationNonce: this.creationNonce,
+  //       passNewEmail: this.updateEmail, update: this.update, resend: this.resend,
+  //       closeFunction: this.close}),
+  //     document.getElementById('account-creation-modal'));
+  // }
 }
