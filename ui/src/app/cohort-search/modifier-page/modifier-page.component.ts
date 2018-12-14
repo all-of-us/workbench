@@ -63,7 +63,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }, {
       name: 'Between',
       value: 'BETWEEN',
-    }]
+    }],
   }, {
     name: 'eventDate',
     label: 'Shifted Event Date',
