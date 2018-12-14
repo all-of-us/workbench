@@ -113,10 +113,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   play(type): void {
-    switch (type) {
-      case 'workspace': this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4'; break;
-      case 'notebook': this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4'; break;
-      case 'cohort': this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4'; break;
+    this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4';
+    if (type === 'notebook') {
+      this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4';
     }
     this.open = true;
   }
