@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -10,15 +10,14 @@ import {ReviewStateService} from '../review-state.service';
   templateUrl: './query-descriptive-stats.component.html',
   styleUrls: ['./query-descriptive-stats.component.css']
 })
-export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
- @Input() demoData: Observable<List<any>>;
- graphData = {};
+export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() demoData: Observable<List<any>>;
+  graphData = {};
   updateShape: any;
   subscription: Subscription;
   groupKeys = [
     'gender', 'ageRange', 'race'
   ];
-
   totalCount: number;
   constructor(private state: ReviewStateService) {}
 
@@ -32,6 +31,11 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
       });
     }
   }
+  ngOnInit() {
+    this.subscription = this.state.review$.subscribe(review => {
+      this.totalCount = review.matchedParticipantCount;
+    });
+  }
 
   getFormattedGroup(group) {
     switch (group) {
@@ -41,35 +45,30 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
         return 'Male';
     }
   }
-  ngOnInit() {
-    this.subscription = this.state.review$.subscribe(review => {
-      this.totalCount = review.matchedParticipantCount;
-    });
-  }
 
   getChartGroupedData(data, groupBy) {
-    const test = data.reduce((acc, i) => {
+    const chartData = data.reduce((acc, i) => {
       const key = i[groupBy]; // F or M
        acc[key] = acc[key] || { data: []};
        acc[key].data.push(i);
        return acc;
     }, {});
-     this.updateShape = Object.keys(test).map(k => {
+     this.updateShape = Object.keys(chartData).map(k => {
        if (k === 'F' || k === 'M') {
          return Object.assign({}, {
            group: this.getFormattedGroup(k),
-           data: test[k].data
+           data: chartData[k].data
          });
        } else {
          return Object.assign({}, {
            group: k,
-           data: test[k].data
+           data: chartData[k].data
          });
        }
     }).map(item => {
       return Object.assign({}, item, {
         count: item.data.reduce((sum, d) => {
-          return sum = sum + d.count;
+          return  sum + d.count;
         }, 0)
       });
     }).map(item => {
@@ -80,8 +79,12 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges {
     this.graphData[groupBy] = this.updateShape;
   }
 
-onPrint() {
-  window.print();
-}
+  onPrint() {
+    window.print();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
 }
