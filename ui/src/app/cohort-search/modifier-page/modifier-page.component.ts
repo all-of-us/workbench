@@ -329,7 +329,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
         if (!operator || (!valueA && !valueB)) {
-          if (this.form.get([name, 'valueA']).dirty || this.form.get([name, 'valueB']).dirty) {
+          if (inputType !== 'date'
+            && (this.form.get([name, 'valueA']).dirty || this.form.get([name, 'valueB']).dirty)) {
             this.errors.add({name, type: 'integer'});
           }
           return;
