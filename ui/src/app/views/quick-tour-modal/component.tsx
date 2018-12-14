@@ -78,13 +78,12 @@ const panels = [
 
 export class QuickTourReact extends React.Component<any, any> {
   state: {
-      selected: number,
-      fullImage: boolean,
-      numPanels: number
+    selected: number,
+    fullImage: boolean
   };
   props: {
-      learning: boolean,
-      closeFunction: Function
+    learning: boolean,
+    closeFunction: Function
   };
 
   checkImg = '/assets/images/check.svg';
@@ -93,7 +92,7 @@ export class QuickTourReact extends React.Component<any, any> {
 
   constructor(props: Object) {
     super(props);
-    this.state = {selected: 0, fullImage: false, numPanels: 5};
+    this.state = {selected: 0, fullImage: false};
   }
 
   previous(): void {
@@ -103,7 +102,7 @@ export class QuickTourReact extends React.Component<any, any> {
   }
 
   next(): void {
-    if (this.state.selected === 4) {
+    if (this.state.selected === panels.length - 1) {
       this.close();
       return;
     }
@@ -148,7 +147,7 @@ export class QuickTourReact extends React.Component<any, any> {
                     {(i ===  this.state.selected) && <div className='current'></div>}
                   </div>
                   <div className='breadcrumb-title'>{p.title}</div>
-                  {(i !== this.state.numPanels - 1) &&
+                  {(i !== panels.length - 1) &&
                   <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
                   </div>}
                 </div>
@@ -186,7 +185,7 @@ export class QuickTourReact extends React.Component<any, any> {
                       onClick={() => this.previous()}>Previous</button>}
             </div>
             <div className='right'>
-              {this.state.selected !== (this.state.numPanels - 1) &&
+              {this.state.selected !== (panels.length - 1) &&
               <button type='button' className='btn btn-close' id='close'
                       onClick={() => this.close()}>Close</button>}
               <button type='button' className='btn btn-primary' id='next'
@@ -214,7 +213,6 @@ export class QuickTourReact extends React.Component<any, any> {
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
-
 export class QuickTourModalComponent implements DoCheck, OnInit {
 
   @Input('learning')
@@ -237,7 +235,4 @@ export class QuickTourModalComponent implements DoCheck, OnInit {
         {learning: this.learning, closeFunction: this.onClose}),
         document.getElementById(this.componentId));
   }
-
-
-
 }
