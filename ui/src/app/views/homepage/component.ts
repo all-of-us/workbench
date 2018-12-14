@@ -22,11 +22,14 @@ import {
 
 export class HomepageComponent implements OnInit, OnDestroy {
   private static pageId = 'homepage';
+  @ViewChild('myVideo') myVideo: any;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
+  open = false;
+  src = '';
   spinnerValues = [
     {
       'name': this.completedTasksName,
@@ -68,13 +71,17 @@ export class HomepageComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
   @ViewChild(QuickTourModalComponent)
   quickTourModal: QuickTourModalComponent;
+  quickTour: boolean;
 
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+    // create bound methods to use as callbacks
+    this.closeQuickTour = this.closeQuickTour.bind(this);
+  }
 
   ngOnInit(): void {
     this.profileService.getMe().subscribe(profile => {
@@ -86,7 +93,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       e => {},
       () => {
       if (this.firstVisit) {
-        this.openQuickTour();
+        this.quickTour = true;
       }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
@@ -105,8 +112,16 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.profileStorageService.reload();
   }
 
-  openQuickTour(): void {
-    this.quickTourModal.open();
+  public closeQuickTour(): void {
+    this.quickTour = false;
+  }
+
+  play(type): void {
+    this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4';
+    if (type === 'notebook') {
+      this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4';
+    }
+    this.open = true;
   }
 
   public get completedTasks() {

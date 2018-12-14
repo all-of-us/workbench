@@ -1,14 +1,4 @@
 <form [formGroup]="form">
-  <div *ngIf="showError && formChanges" class="alert alert-danger alert-sm">
-    <div class="alert-items">
-      <div class="alert-item static">
-        <div class="alert-text">
-          Form cannot accept negative values
-        </div>
-      </div>
-    </div>
-  </div>
-
   <section class="form-block">
     <div class="modifier-header">
       The following modifiers are optional and apply to all selected criteria
@@ -22,16 +12,25 @@
         </div>
       </div>
     </div>
+    <div *ngIf="errors.size" class="alert alert-danger alert-sm">
+      <div class="alert-items">
+        <div *ngFor="let error of errors" class="alert-item static">
+          <div class="alert-text">
+            {{errorMessages[error.name][error.type]}}
+          </div>
+        </div>
+      </div>
+    </div>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
         <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
-        <ng-container *ngIf = "mod.label === 'Shifted Event Date'">
+        <ng-container *ngIf="mod.label === 'Shifted Event Date'">
           <small class="name"
                  [popper]="codesPopper"
                  [popperTrigger]="'hover'"
                  [popperPlacement]="'top'">
             <div class="label-info">
-              <clr-icon  class=" is-solid" shape="info-standard"></clr-icon>
+              <clr-icon  class="is-solid" shape="info-standard"></clr-icon>
             </div>
           </small>
           <popper-content #codesPopper>
@@ -67,8 +66,8 @@
           </div>
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
-              <div (keypress)="numberValidation($event)">
-                <input *ngIf="mod.inputType !== 'date'" min="0"  (ngModelChange) ="negativeNumber()"   class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+              <div>
+                <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
               </div>
               <div *ngIf="mod.inputType === 'date'" >
                 <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
@@ -78,8 +77,8 @@
                 <div class="and-text">
                   <div>and</div>
                 </div>
-                <div (keypress)="numberValidation($event)">
-                  <input *ngIf="mod.inputType !== 'date'"  min="0"  (ngModelChange) ="negativeNumber()"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                <div>
+                  <input *ngIf="mod.inputType !== 'date'" min="1" step="1" class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
@@ -100,15 +99,15 @@
 <div class="container count-preview">
   <div class="row">
     <div class="col-lg-3">
-      <button type="button" [ngClass]="[ preview.get('requesting') || showError? 'greyed-button': 'calculate-btn']"
-        class="btn "
+      <button type="button"
+        class="btn calculate-btn"
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled] = "!formChanges">
+        [disabled]="disableCalculate || !formChanges">
         Calculate
       </button>
     </div>
-    <ng-container *ngIf="!preview.get('requesting')" >
+    <ng-container *ngIf="!preview.get('requesting')">
       <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
         <div class="result-text">
           Results
