@@ -1,0 +1,9 @@
+<div *ngIf="showErrors" class="alert alert-danger alert-sm">
+  <div class="alert-items">
+    <div *ngFor="let error of errors" class="alert-item static">
+      <div class="alert-text">
+        {{error}}
+      </div>
+    </div>
+  </div>
+</div>
