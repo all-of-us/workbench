@@ -3,6 +3,8 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import {environment} from 'environments/environment';
+
 import {
   FetchArgs,
   ProfileApiFetchParamCreator,
@@ -27,7 +29,10 @@ class AccountCreationModalsReact extends React.Component<any, any> {
   props: {
     username: string,
     creationNonce: string,
-    passNewEmail: Function
+    passNewEmail: Function,
+    update: boolean,
+    resend: boolean
+    closeFunction: Function,
     };
 
   constructor(props: Object) {
@@ -42,20 +47,8 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     };
   }
 
-  updateAndSendEmail(): void {
-    this.setState({changingEmail: true});
-  }
-
-  cancelChangeEmail(): void {
-    this.setState({changingEmail: false});
-  }
-
-  resendInstructions(): void {
-    this.setState({resendingEmail: true});
-  }
-
-  cancelResend(): void {
-    this.setState({resendingEmail: false});
+  fullUrl(url: string): string {
+    return environment.allOfUsApiUrl + url;
   }
 
   updateAndSend(): void {
@@ -66,7 +59,7 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     this.props.passNewEmail(this.state.contactEmail);
     const request: UpdateContactEmailRequest = {username: this.props.username, contactEmail: this.state.contactEmail, creationNonce: this.props.creationNonce};
     const args: FetchArgs = ProfileApiFetchParamCreator().updateContactEmail(request);
-    fetch(args.url, args.options).then(() => {
+    fetch(this.fullUrl(args.url), args.options).then(() => {
       this.setState({resendingEmail: false, waiting: false, changingEmail: false});
     });
   }
@@ -75,7 +68,7 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     this.setState({waiting: true});
     const request: ResendWelcomeEmailRequest = {username: this.props.username, creationNonce: this.props.creationNonce};
     const args: FetchArgs = ProfileApiFetchParamCreator().resendWelcomeEmail(request);
-    fetch(args.url, args.options).then(() => {
+    fetch(this.fullUrl(args.url), args.options).then(() => {
       this.setState({resending: false, waiting: false});
       this.toggleLoading();
     });
@@ -100,10 +93,14 @@ class AccountCreationModalsReact extends React.Component<any, any> {
     this.setState((prevState, props) => {loading: !prevState.loading});
   }
 
+  close(): void {
+    this.props.closeFunction();
+  }
+
   render() {
     return <React.Fragment>
-        {this.state.changingEmail &&
-        <div className="change-account-email" id={'change-account-email'}>
+        {this.props.update &&
+        <div className="modal-main change-account-email" id={'change-account-email'}>
           <h3 className="modal-title">Change contact email</h3>
           <div className="modal-body">
             <div className="form-section">
@@ -119,17 +116,17 @@ class AccountCreationModalsReact extends React.Component<any, any> {
             </div>}
           </div>
           <div className="modal-footer">
-            <button type={"button"} className="btn btn-outline" onClick={() => this.cancelChangeEmail()}>Cancel</button>
+            <button type={"button"} className="btn btn-outline" onClick={() => this.close()}>Cancel</button>
             <button id={"change_email"} type={"button"}
                     className={"btn btn-primary" + (this.state.loading ? 'is-loading' : '')}
                     onClick={() => this.updateAndSend()}>Apply</button>
           </div>
         </div>}
-      {this.state.resendingEmail &&
-      <div className="resend_welcome" id={'resend-instructions'}>
+      {this.props.resend &&
+      <div className="modal resend_welcome" id={'resend-instructions'}>
         <h3 className="modal-title">Resend Instructions</h3>
         <div className="modal-footer">
-          <button type={'button'} className="btn btn-outline" onClick={() => this.cancelResend()}>Cancel</button>
+          <button type={'button'} className="btn btn-outline" onClick={() => this.close()}>Cancel</button>
           <button type={'button'} id={'resend_instructions'}
                   className={'btn btn-primary' + (this.state.loading ? 'is-loading' : '')}
                   onClick={() => this.send()}>Send</button>
@@ -150,22 +147,32 @@ class AccountCreationModalsReact extends React.Component<any, any> {
 export class AccountCreationModalsComponent {
   @Input('updateEmail')
   public updateEmail: Function;
+  @Input('close')
+  public close: Function;
   @Input('username')
   public userName: string;
   @Input('creationNonce')
   public creationNonce: string;
+  @Input('update')
+  public update: boolean;
+  @Input('resend')
+  public resend: boolean;
 
   constructor() {}
 
   ngOnInit(): void {
     ReactDOM.render(React.createElement(AccountCreationModalsReact,
-      {username: this.userName, creationNonce: this.creationNonce, updateEmail: this.creationNonce}),
+      {username: this.userName, creationNonce: this.creationNonce,
+        passNewEmail: this.updateEmail, update: this.update, resend: this.resend,
+        closeFunction: this.close}),
       document.getElementById('account-creation-modal'));
   }
 
   ngDoCheck(): void {
     ReactDOM.render(React.createElement(AccountCreationModalsReact,
-      {username: this.userName, creationNonce: this.creationNonce, updateEmail: this.creationNonce}),
+      {username: this.userName, creationNonce: this.creationNonce,
+        passNewEmail: this.updateEmail, update: this.update, resend: this.resend,
+        closeFunction: this.close}),
       document.getElementById('account-creation-modal'));
   }
 }

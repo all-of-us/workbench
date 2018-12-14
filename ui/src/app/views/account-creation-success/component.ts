@@ -15,8 +15,11 @@ import {LoginComponent} from '../login/component';
 })
 export class AccountCreationSuccessComponent {
   username: string;
-  @Input('contactEmail') contactEmail: string;
+  @Input('contactEmail')
+  contactEmail: string;
   creationNonce: string;
+  updateModal: boolean;
+  resendModal: boolean;
 
   @ViewChild(AccountCreationModalsComponent)
   accountCreationModalsComponent: AccountCreationModalsComponent;
@@ -34,10 +37,21 @@ export class AccountCreationSuccessComponent {
     }, 0);
     this.username = account.profile.username;
     this.creationNonce = account.profile.creationNonce;
+    // create bound methods to use as callbacks
+    this.closeModals = this.closeModals.bind(this);
   }
 
   signIn(): void {
     this.signInService.signIn();
+  }
+
+  updateEmail(newEmail: string): void {
+    this.contactEmail = newEmail;
+  }
+
+  public closeModals(): void {
+    this.resendModal = false;
+    this.updateModal = false;
   }
 
   public getEmail(contactemail: string) {
