@@ -7,9 +7,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
-import org.pmiops.workbench.cdm.DomainTableEnum;
+import org.pmiops.workbench.cdm.SearchTableEnum;
 import org.pmiops.workbench.model.SearchParameter;
-import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -64,19 +63,14 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "${encounterSql}";
 
   private static final String GROUP_CODE_LIKE_TEMPLATE =
-    "in (select concept_id \n" +
-      "from `${projectId}.${dataSetId}.criteria` \n" +
-      "where is_group = 0\n" +
-      "and is_selectable = 1\n" +
-      "and path in (\n" +
-      "  select CONCAT( path, '.', CAST(id as STRING)) as path\n" +
+    "in (select concept_id\n" +
       "  from `${projectId}.${dataSetId}.criteria`\n" +
       "  where type = ${type}\n" +
       "  and subtype = ${subtype}\n" +
       "  and REGEXP_CONTAINS(code, ${code})\n" +
-      "  and is_group = 1\n" +
       "  and is_selectable = 1\n" +
-      "))\n" +
+      "  and concept_id is not null\n" +
+      ")\n" +
       "${encounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
@@ -128,19 +122,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
-  private void buildInnerQuery(String type,
-                               String subtype,
-                               List<String> queryParts,
+  private void buildInnerQuery(String type, String subtype, List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
-                               String domain, QueryParameterValue codes,
-                               String groupOrChildSql) {
+                               String domain, QueryParameterValue codes, String groupOrChildSql) {
     ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder()
-      .put("${tableName}", DomainTableEnum.getTableName(domain))
-        .put("${modifierColumns}", DomainTableEnum.getEntryDate(domain) +
-            " as entry_date, " + DomainTableEnum.getSourceConceptId(domain))
-        .put("${tableId}", TreeType.SNOMED.name().equalsIgnoreCase(type) ?
-          DomainTableEnum.getConceptId(domain) :
-          DomainTableEnum.getSourceConceptId(domain));
+      .put("${tableName}", SearchTableEnum.getTableName(type))
+      .put("${modifierColumns}", "entry_date, " + SearchTableEnum.getConceptIdOrSourceConceptId(type))
+      .put("${tableId}", SearchTableEnum.getConceptIdOrSourceConceptId(type));
 
     if (codes.getType().equals(StandardSQLTypeName.ARRAY)) {
       String conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
