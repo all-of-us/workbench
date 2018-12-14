@@ -9,9 +9,9 @@ import * as moment from 'moment';
 })
 export class DateValidatorDirective implements Validator {
 
-  validate(form: FormControl): ValidationErrors {
-    const dateString = form.value;
-    const isValid = form.pristine || moment(dateString, 'YYYY-MM-DD', true).isValid();
+  validate(control: FormControl): ValidationErrors {
+    const dateString = control.value;
+    const isValid = control.pristine || moment(dateString, 'YYYY-MM-DD', true).isValid();
     const message = {
       dateFormat: {
         message: 'Dates must be in the format \'YYYY-MM-DD\''
