@@ -137,7 +137,7 @@ export class QuickTourReact extends React.Component<any, any> {
           <div className='intro'>Quick Tour</div>
           <div className='breadcrumbs'>
             {panels.map((p, i) => {
-              return <React.Fragment>
+              return <React.Fragment key={i}>
                 <div className='breadcrumb-component'>
                   <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
                        onClick={() => this.selectPanel(i)}>
