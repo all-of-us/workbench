@@ -48,6 +48,8 @@ export class OverviewPage implements OnInit, OnDestroy {
       });
     this.review = review;
     this.totalParticipantCount = review.matchedParticipantCount;
+
+
     this.openChartContainer = true;
     this.fetchChartsData();
   }

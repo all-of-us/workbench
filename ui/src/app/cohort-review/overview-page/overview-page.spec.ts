@@ -24,6 +24,25 @@ describe('OverviewPage', () => {
       participant: {},
       annotations: [],
     }),
+    snapshot: {
+      data: {
+        workspace: {
+          cdrVersionId: 1
+        },
+        cohort: {
+          name: '',
+          criteria: '{}'
+        },
+        review: {
+
+        },
+        params: {
+          ns: 'workspaceNamespace',
+          wsid: 'workspaceId',
+          cid: 1
+        }
+      },
+    },
     parent: {
       snapshot: {
         data: {
