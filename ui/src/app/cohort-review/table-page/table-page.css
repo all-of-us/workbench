@@ -58,4 +58,7 @@
   -webkit-print-color-adjust: exact;
   box-shadow: none !important;
   }
+  ::ng-deep .nav {
+    box-shadow: none!important;
+  }
 }

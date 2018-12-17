@@ -98,7 +98,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
         return {items: param.subtype === 'DEC' ? `${typeToTitle(_type)}
                       | ${param.name}` :
                       `${typeToTitle(_type)}
-                      | ${this.operatorConversion(param.subtype)} ${param.name}`,
+                      | ${this.operatorConversion(param.subtype)} | ${param.name}`,
           type: param.type};
       } else if (param.type === 'VISIT') {
         return {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
