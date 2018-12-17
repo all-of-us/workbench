@@ -120,3 +120,9 @@
 .answer-text {
     cursor: pointer;
 }
+
+.answer-box {
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 0 0;
+    min-height: 2rem;
+}
