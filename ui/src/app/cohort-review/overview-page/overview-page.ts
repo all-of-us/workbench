@@ -37,21 +37,17 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
-    this.subscription = this.state.cohort$
-      .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
-      .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
-       .map(response => (<DemoChartInfoListResponse>response).items)
+    const {cohort, review, workspace} = this.route.snapshot.data;
+    const request = <SearchRequest>(JSON.parse(cohort.criteria));
+    this.chartAPI.getDemoChartInfo(workspace.cdrVersionId, request)
+      .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
         this.dataItems.emit(this.data);
         this.buttonsDisableFlag = false;
       });
-    this.subscription.add(this.state.review$.subscribe(review => {
-      this.review = review;
-      this.totalParticipantCount = review.matchedParticipantCount;
-
-    }));
+    this.review = review;
+    this.totalParticipantCount = review.matchedParticipantCount;
     this.openChartContainer = true;
     this.fetchChartsData();
   }
@@ -70,14 +66,14 @@ export class OverviewPage implements OnInit, OnDestroy {
               conditionTitle: '',
               loading: true
             };
-      this.subscription.add(this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
+      this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
           this.domainsData[domainName].loading = false;
-        }));
+        });
     });
   }
 
