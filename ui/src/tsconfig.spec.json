@@ -8,13 +8,17 @@
     "types": [
       "jasmine",
       "node"
-    ]
+    ],
+    "jsx": "react"
   },
   "files": [
-    "test.ts"
+    "test.ts",
+    "polyfills.ts"
   ],
   "include": [
     "**/*.spec.ts",
-    "**/*.d.ts"
+    "**/*.spec.tsx",
+    "**/*.d.ts",
+    "**/*.tsx"
   ]
 }
