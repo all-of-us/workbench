@@ -41,36 +41,14 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
   mapGroup(group: any) {
     return group.items.map(item => {
-      switch (item.type) {
-        case TreeType.DRUG:
-          return this.mapDrugParams(item.searchParameters);
-        default:
-          return this.mapParams(item.type, item.searchParameters, item.modifiers);
-      }
+      return this.mapParams(item.type, item.searchParameters, item.modifiers);
     });
   }
 
-
-// Drug
-  mapDrugParams(params: Array<any>) {
-    const groupedData = this.getGroupedData(params, 'group');
-    const drugArray = [];
-      params.map(p => {
-      const typeMatched = groupedData.find( matched => matched.group === p.group.toString());
-      if (typeMatched) {
-        drugArray.push({
-          items: typeToTitle(p.type) + ' | ' + typeMatched.customString,
-          type: p.type
-        });
-      }
-    });
-     return this.removeDuplicates(drugArray);
-  }
-
-
-  // other than Drug
   mapParams(_type: string, params: Array<any>, mod) {
-    const groupedData = this.getGroupedData(params, 'type');
+    let groupedData;
+    _type === 'DRUG' ? groupedData = this.getGroupedData(params, 'group')
+      : groupedData = this.getGroupedData(params, 'type');
     if (mod.length) {
       return this.getModifierFormattedData(groupedData, params, mod, _type);
     } else {
@@ -79,8 +57,13 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
   getModifierFormattedData(groupedData, params, mod, _type) {
+    let typeMatched;
     const modArray =  params.map(eachParam => {
-      const typeMatched = groupedData.find( matched => matched.group === eachParam.type);
+      if(eachParam.type === 'DRUG') {
+         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
+      } else {
+        typeMatched = groupedData.find( matched => matched.group === eachParam.type);
+      }
       let name;
       name = mod.reduce((acc, m) => {
         const concatOperand = m.operands.reduce((final, o) => {
@@ -104,14 +87,19 @@ export class QueryCohortDefinitionComponent implements OnInit {
   }
 
   getOtherTreeFormattedData(groupedData, params, _type) {
-
+    let typeMatched;
     const noModArray = params.map(param => {
-      const typeMatched = groupedData.find( matched => matched.group === param.type);
+      if(param.type === 'DRUG') {
+        typeMatched = groupedData.find( matched => matched.group === param.group.toString());
+      } else {
+        typeMatched = groupedData.find( matched => matched.group === param.type);
+      }
+      // const typeMatched = groupedData.find( matched => matched.group === param.type);
       if (param.type === 'DEMO') {
         return {items: param.subtype === 'DEC' ? `${typeToTitle(_type)}
-                      | ${param.type} | ${param.name}` :
+                      | ${param.name}` :
                       `${typeToTitle(_type)}
-                      | ${param.type} | ${this.operatorConversion(param.subtype)} ${param.name}`,
+                      | ${this.operatorConversion(param.subtype)} ${param.name}`,
           type: param.type};
       } else if (param.type === 'VISIT') {
         return {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,

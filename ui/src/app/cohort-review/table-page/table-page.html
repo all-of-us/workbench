@@ -1,9 +1,9 @@
-<div class="review-name">
+<div class="review-name doNotPrint">
   {{cohortName}}
 </div>
 <clr-tabs>
-  <clr-tab class="">
-    <button class="review-button" clrTabLink id="link1">Participants</button>
+  <clr-tab class="doNotPrint">
+    <button class="review-button doNotPrint" clrTabLink id="link1">Participants</button>
     <clr-tab-content id="content1" *clrIfActive ="true">
       <div class="participant-container">
         <div class="total-heading" *ngIf="review.queryResultSize"> Total Participants: {{review.queryResultSize | number}}</div>
@@ -105,10 +105,10 @@
     </clr-tab-content>
   </clr-tab>
   <clr-tab>
-    <button class="review-button" clrTabLink>Cohort Query Report</button>
+    <button class="review-button doNotPrint" clrTabLink>Cohort Query Report</button>
     <clr-tab-content *clrIfActive>
-      <div class="participant-container">
-        <div class="total-heading" *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
+      <div class="participant-container doNotPrint">
+        <div class="total-heading " *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
       </div>
       <app-query-report></app-query-report>
     </clr-tab-content>
