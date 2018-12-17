@@ -10,8 +10,8 @@ import {
   Header,
   SmallHeader
 } from 'app/common/common';
-import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {AccountCreationModalsComponent} from 'app/views/account-creation-modals/component';
+import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
 
 export class AccountCreationSuccessReact extends React.Component<any, any> {
