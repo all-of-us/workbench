@@ -1,3 +1,4 @@
+import _ from 'lodash/fp';
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 
@@ -47,3 +48,10 @@ export function randomString(len): string {
   }
   return str;
 }
+
+export const DEFAULT = Symbol();
+
+export const switchCase = (value, ...pairs) => {
+  const match = _.find(([v]) => v === value || v === DEFAULT, pairs);
+  return match && match[1]();
+};
