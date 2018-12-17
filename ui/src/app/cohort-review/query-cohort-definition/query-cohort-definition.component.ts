@@ -59,7 +59,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getModifierFormattedData(groupedData, params, mod, _type) {
     let typeMatched;
     const modArray =  params.map(eachParam => {
-      if(eachParam.type === 'DRUG') {
+      if (eachParam.type === 'DRUG') {
          typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === eachParam.type);
@@ -89,12 +89,11 @@ export class QueryCohortDefinitionComponent implements OnInit {
   getOtherTreeFormattedData(groupedData, params, _type) {
     let typeMatched;
     const noModArray = params.map(param => {
-      if(param.type === 'DRUG') {
+      if (param.type === 'DRUG') {
         typeMatched = groupedData.find( matched => matched.group === param.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === param.type);
       }
-      // const typeMatched = groupedData.find( matched => matched.group === param.type);
       if (param.type === 'DEMO') {
         return {items: param.subtype === 'DEC' ? `${typeToTitle(_type)}
                       | ${param.name}` :
