@@ -122,4 +122,8 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
     this.contactEmail = $event;
     this.renderReactComponent();
   }
+
+  get getAccount() {
+    return this.account;
+  }
 }
