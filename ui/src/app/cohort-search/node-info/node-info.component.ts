@@ -98,8 +98,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return nameIsCode ? '' : this.node.get('name', '');
+    return this.node.get('name', '');
   }
 
   get popperName() {
