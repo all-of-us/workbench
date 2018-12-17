@@ -69,6 +69,10 @@
     height: 100%;
 }
 
+.selected-answer-on-graph {
+    margin: 0 auto;
+}
+
 /* remove space between list and charts */
 .answer-list {
 
