@@ -13,7 +13,6 @@ import {ReviewStateService} from '../review-state.service';
 export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() demoData: Observable<List<any>>;
   graphData = {};
-  updateShape: any;
   subscription: Subscription;
   groupKeys = [
     'gender', 'ageRange', 'race'
@@ -21,7 +20,6 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
   totalCount: number;
   enablePrint = false;
   constructor(private state: ReviewStateService) {}
-
 
   ngOnChanges() {
     if (this.demoData) {
@@ -33,6 +31,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
       this.enablePrint = true;
     }
   }
+
   ngOnInit() {
     this.subscription = this.state.review$.subscribe(review => {
       this.totalCount = review.matchedParticipantCount;
@@ -45,40 +44,31 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
         return 'Female';
       case 'M' :
         return 'Male';
+      default:
+        return group;
     }
   }
 
   getChartGroupedData(data, groupBy) {
     const chartData = data.reduce((acc, i) => {
       const key = i[groupBy]; // F or M
-       acc[key] = acc[key] || { data: []};
-       acc[key].data.push(i);
-       return acc;
+      acc[key] = acc[key] || { data: []};
+      acc[key].data.push(i);
+      return acc;
     }, {});
-     this.updateShape = Object.keys(chartData).map(k => {
-       if (k === 'F' || k === 'M') {
-         return Object.assign({}, {
-           group: this.getFormattedGroup(k),
-           data: chartData[k].data
-         });
-       } else {
-         return Object.assign({}, {
-           group: k,
-           data: chartData[k].data
-         });
-       }
-    }).map(item => {
-      return Object.assign({}, item, {
-        count: item.data.reduce((sum, d) => {
-          return  sum + d.count;
-        }, 0)
-      });
-    }).map(item => {
-       return Object.assign({}, item, {
-         percentage: (item.count / this.totalCount) * 100
-      });
-   });
-    this.graphData[groupBy] = this.updateShape;
+    this.graphData[groupBy] = Object.keys(chartData).map(k => {
+      const newData = chartData[k].data;
+      const count = newData.reduce((sum, d) => {
+        return  sum + d.count;
+      }, 0);
+      const percentage = (count / this.totalCount) * 100;
+      return {
+        group: this.getFormattedGroup(k),
+        data: newData,
+        count: count,
+        percentage: percentage
+      };
+    });
   }
 
   onPrint() {
