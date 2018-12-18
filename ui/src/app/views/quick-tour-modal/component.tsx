@@ -76,6 +76,169 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
+
+/** @type {{search: React.CSSProperties}} */
+const styles = {
+  modalBackdrop: {
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    backgroundColor: '#313131',
+    opacity: .8,
+    zIndex: 1040,
+  },
+  mainStyling: {
+    height: '79.23%',
+    width: '80%',
+    borderRadius: '8px',
+    backgroundColor: '#262262',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    position: 'absolute',
+    left: '10%',
+    top: '1%',
+    zIndex: 1050,
+  },
+  title: {
+    color: '#FFFFFF',
+    marginTop: '2%',
+    marginLeft: '3%',
+    fontSize: '21px',
+    width: '100%',
+    fontWeight: 500
+  },
+  mainTitle: {
+    color: '#FFFFFF',
+    fontSize: '48px',
+    width: '100%',
+    marginTop: '3%',
+    marginLeft: '3%',
+    fontWeight: 'bold'
+  },
+  breadcrumbs: {
+    width: '100%',
+    marginTop: '5%',
+    justifyContent: 'center',
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  circle: {
+    border: '2px solid #8C9BA5',
+    borderRadius: '50%',
+    height: '21.92px',
+    width: '21.92px',
+    left: '21.92px'
+  },
+  check: {
+    minHeight: '10px',
+    minWidth: '10px',
+    marginLeft: '2px',
+    marginTop: '-3px'
+  },
+
+  current: {
+    minHeight: '12px',
+    minWidth: '12px',
+    marginLeft: '3px',
+    marginBottom: '2px',
+    backgroundColor: '#2691D0',
+    borderRadius: '50%',
+    display: 'inline-block'
+  },
+  connector: {
+    border: '2px solid #8C9BA5',
+    boxSizing: 'border-box',
+    height: '3px',
+    width: '107px',
+    position: 'relative',
+    left: '21.92px',
+    top: '-36px'
+  },
+  breadcrumbTitle: {
+    transform: 'translate(-40%)',
+    textAlign: 'center',
+    color: '#2691D0'
+  },
+
+  divider: {
+    boxSizing: 'border-box',
+    height: '2px',
+    width: '90%',
+    border: '0.5px solid #FFFFFF',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    margin: 'auto'
+  },
+  panel: {
+    transform: 'translate(-40%)',
+    textAlign: 'center',
+    color: '#2691D0'
+  },
+  panelTitle: {
+    width: '100%',
+    marginLeft: '5%',
+    color: '#FFFFFF',
+    fontSize: '28px',
+    fontWeight: 'bold'
+  },
+  panelContents: {
+    paddingLeft: '5%',
+    marginTop: '1%',
+    color: '#FFFFFF',
+    fontSize: '14px',
+    textAlign: 'left'
+  },
+  panelText: {
+    marginRight: '2%',
+    paddingTop: '.5%',
+    fontSize: '16px',
+    lineHeight: '24px',
+    whiteSpace: 'pre-line',
+    textAlign: 'left'
+  },
+  panelRight: {
+    marginRight: '5%',
+    marginBottom: '5%',
+    width: '40%',
+    height: '90%',
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'flex-end'
+  },
+  panelImage: {
+    width: '78%',
+    height: '95%',
+    marginTop: '5%',
+    marginLeft: '20%',
+    position: 'relative',
+    zIndex: 1,
+    display: 'inline'
+  },
+  controls: {
+    width: '100%',
+    position: 'absolute',
+    bottom: '8%',
+    display: 'flex',
+    justifyContent: 'space-between'
+  }
+};
+
+const completedStyles = {
+  circleCompleted: Object.assign(
+      styles.circle,
+      {
+        left: '0px',
+        border: '2px solid #2691D0',
+      }
+  ),
+  connectorCompleted: Object.assign(
+      styles.connector,
+      {
+        border: '2px solid #2691D0'
+      }
+  )
+};
+
 export class QuickTourReact extends React.Component<any, any> {
   state: {
     selected: number,
@@ -90,178 +253,7 @@ export class QuickTourReact extends React.Component<any, any> {
   expandIcon = '/assets/icons/expand.svg';
   shrinkIcon = '/assets/icons/shrink.svg';
 
-  modalBackdrop = {
-    position: 'fixed',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    backgroundColor: '#313131',
-    opacity: .8,
-    zIndex: 1040,
-  };
 
-  mainStyling = {
-    height: '79.23%',
-    width: '80%',
-    borderRadius: '8px',
-    backgroundColor: '#262262',
-    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
-    position: 'absolute',
-    left: '10%',
-    top: '1%',
-    zIndex: 1050,
-  };
-
-  title = {
-    color: '#FFFFFF',
-    marginTop: '2%',
-    marginLeft: '3%',
-    fontSize: '21px',
-    width: '100%',
-    fontWeight: 500
-  };
-
-  mainTitle = {
-    color: '#FFFFFF',
-    fontSize: '48px',
-    width: '100%',
-    marginTop: '3%',
-    marginLeft: '3%',
-    fontWeight: 'bold'
-  };
-
-  breadcrumbs = {
-    width: '100%',
-    marginTop: '5%',
-    justifyContent: 'center',
-    display: 'flex',
-    flexDirection: 'row'
-  };
-
-  circle = {
-    border: '2px solid #8C9BA5',
-    borderRadius: '50%',
-    height: '21.92px',
-    width: '21.92px',
-    left: '21.92px'
-  };
-
-  circleCompleted = Object.assign(
-    this.circle,
-    {
-      left: '0px',
-      border: '2px solid #2691D0',
-    }
-    );
-
-  check = {
-    minHeight: '10px',
-    minWidth: '10px',
-    marginLeft: '2px',
-    marginTop: '-3px'
-  };
-
-  current = {
-    minHeight: '12px',
-    minWidth: '12px',
-    marginLeft: '3px',
-    marginBottom: '2px',
-    backgroundColor: '#2691D0',
-    borderRadius: '50%',
-    display: 'inline-block'
-  };
-
-  connector = {
-    border: '2px solid #8C9BA5',
-    boxSizing: 'border-box',
-    height: '3px',
-    width: '107px',
-    position: 'relative',
-    left: '21.92px',
-    top: '-36px'
-  };
-
-  connectorCompleted = Object.assign(
-      this.connector,
-      {
-        border: '2px solid #2691D0'
-      }
-  );
-
-  breadcrumbTitle = {
-    transform: 'translate(-40%)',
-    textAlign: 'center',
-    color: '#2691D0'
-  };
-
-  divider = {
-    boxSizing: 'border-box',
-    height: '2px',
-    width: '90%',
-    border: '0.5px solid #FFFFFF',
-    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
-    margin: 'auto'
-  };
-
-  panel = {
-    transform: 'translate(-40%)',
-    textAlign: 'center',
-    color: '#2691D0'
-  };
-
-  panelTitle = {
-    width: '100%',
-    marginLeft: '5%',
-    color: '#FFFFFF',
-    fontSize: '28px',
-    fontWeight: 'bold'
-  };
-
-  panelContents = {
-    paddingLeft: '5%',
-    marginTop: '1%',
-    color: '#FFFFFF',
-    fontSize: '14px',
-    textAlign: 'left'
-  };
-
-  panelText = {
-    marginRight: '2%',
-    paddingTop: '.5%',
-    fontSize: '16px',
-    lineHeight: '24px',
-    whiteSpace: 'pre-line',
-    textAlign: 'left'
-  };
-
-  panelRight = {
-    marginRight: '5%',
-    marginBottom: '5%',
-    width: '40%',
-    height: '90%',
-    position: 'relative',
-    display: 'flex',
-    justifyContent: 'flex-end'
-  };
-
-  panelImage = {
-    width: '78%',
-    height: '95%',
-    marginTop: '5%',
-    marginLeft: '20%',
-    position: 'relative',
-    zIndex: 1,
-    display: 'inline'
-  };
-
-  controls = {
-    width: '100%',
-    position: 'absolute',
-    bottom: '8%',
-    display: 'flex',
-    justifyContent: 'space-between'
-  };
 
   constructor(props: Object) {
     super(props);
@@ -303,44 +295,44 @@ export class QuickTourReact extends React.Component<any, any> {
 
   render() {
     return <React.Fragment>
-      <div style={this.props.learning ? this.modalBackdrop : undefined}></div>
+      <div style={this.props.learning ? styles.modalBackdrop : undefined}></div>
       {this.props.learning && !this.state.fullImage &&
-        <div style={this.mainStyling} id='quick-tour-react'>
-          <div style={this.title}>All of Us Researcher Workbench</div>
-          <div style={this.mainTitle}>Quick Tour</div>
-          <div style={this.breadcrumbs}>
+        <div style={styles.mainStyling} id='quick-tour-react'>
+          <div style={styles.title}>All of Us Researcher Workbench</div>
+          <div style={styles.mainTitle}>Quick Tour</div>
+          <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {
               return <React.Fragment>
                 <div style={{width: '128px'}}>
-                  <div style={this.state.selected ? this.circleCompleted : this.circle}
+                  <div style={this.state.selected ? completedStyles.circleCompleted : styles.circle}
                        onClick={() => this.selectPanel(i)}>
-                    {(i < this.state.selected) && <div style={this.check}>
+                    {(i < this.state.selected) && <div style={styles.check}>
                         <img src={this.checkImg}/>
                     </div>}
-                    {(i ===  this.state.selected) && <div style={this.current}></div>}
+                    {(i ===  this.state.selected) && <div style={styles.current}></div>}
                   </div>
-                  <div style={this.breadcrumbTitle}>{p.title}</div>
-                  {(i !== this.panels.length - 1) &&
-                  <div style={i < this.state.selected ? this.connectorCompleted : this.connector}>
+                  <div style={styles.breadcrumbTitle}>{p.title}</div>
+                  {(i !== panels.length - 1) &&
+                  <div style={i < this.state.selected ? completedStyles.connectorCompleted : styles.connector}>
                   </div>}
                 </div>
               </React.Fragment>;
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-          <div style={this.divider}></div>
+          <div style={styles.divider}></div>
           </div>
-          <div style={this.panel}>
+          <div style={styles.panel}>
             <div style={{width: '75%'}}>
-              <div style={this.panelTitle}>
+              <div style={styles.panelTitle}>
                   {this.state.selected === 0 ? 'Introduction' : panels[this.state.selected].title}
               </div>
-              <div style={this.panelContents}>
-                <div style={this.panelText}>{panels[this.state.selected].content}</div>
+              <div style={styles.panelContents}>
+                <div style={styles.panelText}>{panels[this.state.selected].content}</div>
               </div>
             </div>
-            <div style={this.panelRight}>
-              <img src={panels[this.state.selected].image} style={this.panelImage}/>
+            <div style={styles.panelRight}>
+              <img src={panels[this.state.selected].image} style={styles.panelImage}/>
                 {(this.state.selected !== 0) &&
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
@@ -351,14 +343,14 @@ export class QuickTourReact extends React.Component<any, any> {
                 </div>}
             </div>
           </div>
-          <div style={this.controls}>
+          <div style={styles.controls}>
             <div style={{width: '50%'}}>
               {this.state.selected !== 0 &&
               <button type='button' className='btn btn-close' id='previous'
                       onClick={() => this.previous()}>Previous</button>}
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
-              {this.state.selected !== (this.panels.length - 1) &&
+              {this.state.selected !== (panels.length - 1) &&
               <button type='button' className='btn btn-close' id='close'
                       onClick={() => this.close()}>Close</button>}
               <button type='button' className='btn btn-primary' id='next'
