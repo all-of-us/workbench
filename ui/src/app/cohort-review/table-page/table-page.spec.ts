@@ -32,41 +32,44 @@ describe('TablePage', () => {
   let fixture: ComponentFixture<TablePage>;
 
   const activatedRouteStub = {
-      snapshot: {
-          data: {
-            cohort: {
-              name: '',
-             },
-              concepts: {
-                  raceList: [],
-                  genderList: [],
-                  ethnicityList: [],
-              }
-          },
-          pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
+    snapshot: {
+      data: {
+        cohort: {
+          name: '',
+          criteria: '{}'
+        },
+        concepts: {
+          raceList: [],
+          genderList: [],
+          ethnicityList: [],
+        },
+        review: {},
+        workspace: {}
       },
-      parent: {
-          snapshot: {
-              data: {
-                  workspace: {
-                      cdrVersionId: 1
-                  },
-                  cohort: {
-                      name: ''
-                  },
-              },
-            params: {
-              ns: 'workspaceNamespace',
-              wsid: 'workspaceId',
-              cid: 1
-            }
+      pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
+    },
+    parent: {
+      snapshot: {
+        data: {
+          workspace: {
+            cdrVersionId: 1
           },
+          cohort: {
+            name: ''
+          },
+        },
         params: {
           ns: 'workspaceNamespace',
           wsid: 'workspaceId',
           cid: 1
         }
       },
+      params: {
+        ns: 'workspaceNamespace',
+        wsid: 'workspaceId',
+        cid: 1
+      }
+    },
   };
   let route;
   beforeEach(async(() => {

@@ -63,6 +63,7 @@ export class TablePage implements OnInit, OnDestroy {
   isFiltered = [];
   cohortName: string;
   totalParticipantCount: number;
+  tab = 'participants';
 
   constructor(
     private reviewAPI: CohortReviewService,

@@ -52,6 +52,10 @@
   box-shadow: inset 0 -6px 0 #007cbb !important;
 }
 
+.inactive {
+  display: none;
+}
+
 @media print{
 .doNotPrint {
   display: none !important;
