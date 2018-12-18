@@ -53,7 +53,7 @@ def build(cmd_name, args)
     optimize = "--prod"
   end
   common.run_inline %W{yarn run build
-      #{optimize} --environment=#{options.env} --no-watch --no-progress}
+      #{optimize} --configuration=#{options.env} --no-watch --no-progress}
 end
 
 class CommonUiDevStart
@@ -78,7 +78,7 @@ class CommonUiDevStart
 
     install_dependencies
 
-    ENV["ENV_FLAG"] = "--environment=#{options.env}"
+    ENV["ENV_FLAG"] = "--configuration=#{options.env}"
     at_exit { common.run_inline %W{docker-compose down} }
 
     # Can't use swagger_regen here as it enters docker.
