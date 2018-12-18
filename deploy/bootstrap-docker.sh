@@ -19,10 +19,10 @@ if [[ ! -d ~/workbench/.git ]]; then
 fi
 cd ~/workbench
 git fetch
+# Drop any ignored files which may have carried over, to ensure a clean build.
+git clean -fdx
 git checkout "${WORKBENCH_VERSION}"
 git submodule update --init --recursive
-# Drop any ignored files which may have carried over, to ensure a clean build.
-git clean -fX
 git status
 
 exec "$@"
