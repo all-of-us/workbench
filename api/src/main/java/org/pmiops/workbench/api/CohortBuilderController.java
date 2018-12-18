@@ -305,7 +305,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     }
     String[] keywords = value.split("\\W+");
     if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0] + "\"";
+      return "+\"" + keywords[0] + "\"+\"[rank1]\"";
     }
 
     return IntStream
