@@ -13,7 +13,7 @@ p {
     line-height: 20px;
 }
 
-.title, .view-title, .box-title, .box-heading, .selected-answer-on-graph {
+.title, .view-title, .box-title, .box-heading, .survey-graph-answer {
     color: #302C71;
 }
 
