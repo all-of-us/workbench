@@ -78,13 +78,12 @@ const panels = [
 
 export class QuickTourReact extends React.Component<any, any> {
   state: {
-      selected: number,
-      fullImage: boolean,
-      numPanels: number
+    selected: number,
+    fullImage: boolean
   };
   props: {
-      learning: boolean,
-      closeFunction: Function
+    learning: boolean,
+    closeFunction: Function
   };
 
   checkImg = '/assets/images/check.svg';
@@ -266,7 +265,7 @@ export class QuickTourReact extends React.Component<any, any> {
 
   constructor(props: Object) {
     super(props);
-    this.state = {selected: 0, fullImage: false, numPanels: 5};
+    this.state = {selected: 0, fullImage: false};
   }
 
   previous(): void {
@@ -276,7 +275,7 @@ export class QuickTourReact extends React.Component<any, any> {
   }
 
   next(): void {
-    if (this.state.selected === 4) {
+    if (this.state.selected === panels.length - 1) {
       this.close();
       return;
     }
@@ -321,7 +320,7 @@ export class QuickTourReact extends React.Component<any, any> {
                     {(i ===  this.state.selected) && <div style={this.current}></div>}
                   </div>
                   <div style={this.breadcrumbTitle}>{p.title}</div>
-                  {(i !== this.state.numPanels - 1) &&
+                  {(i !== this.panels.length - 1) &&
                   <div style={i < this.state.selected ? this.connectorCompleted : this.connector}>
                   </div>}
                 </div>
@@ -329,7 +328,7 @@ export class QuickTourReact extends React.Component<any, any> {
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-             <div style={this.divider}></div>
+          <div style={this.divider}></div>
           </div>
           <div style={this.panel}>
             <div style={{width: '75%'}}>
@@ -359,7 +358,7 @@ export class QuickTourReact extends React.Component<any, any> {
                       onClick={() => this.previous()}>Previous</button>}
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
-              {this.state.selected !== (this.state.numPanels - 1) &&
+              {this.state.selected !== (this.panels.length - 1) &&
               <button type='button' className='btn btn-close' id='close'
                       onClick={() => this.close()}>Close</button>}
               <button type='button' className='btn btn-primary' id='next'
@@ -387,7 +386,6 @@ export class QuickTourReact extends React.Component<any, any> {
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
-
 export class QuickTourModalComponent implements DoCheck, OnInit {
 
   @Input('learning')
@@ -410,7 +408,4 @@ export class QuickTourModalComponent implements DoCheck, OnInit {
         {learning: this.learning, closeFunction: this.onClose}),
         document.getElementById(this.componentId));
   }
-
-
-
 }

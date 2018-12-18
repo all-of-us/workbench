@@ -96,7 +96,7 @@ describe('HomepageComponent', () => {
 
   // From https://stackoverflow.com/questions/36434002/
   //        new-compilation-errors-with-react-addons-test-utils
-  function renderIntoDocument (reactEl: React.ReactElement<{}>) {
+  function renderIntoDocument(reactEl: React.ReactElement<{}>) {
     return ReactTestUtils.renderIntoDocument(reactEl) as React.Component<{}, {}>;
   }
 

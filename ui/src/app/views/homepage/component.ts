@@ -22,11 +22,14 @@ import {
 
 export class HomepageComponent implements OnInit, OnDestroy {
   private static pageId = 'homepage';
+  @ViewChild('myVideo') myVideo: any;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
+  open = false;
+  src = '';
   spinnerValues = [
     {
       'name': this.completedTasksName,
@@ -111,6 +114,14 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   public closeQuickTour(): void {
     this.quickTour = false;
+  }
+
+  play(type): void {
+    this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4';
+    if (type === 'notebook') {
+      this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4';
+    }
+    this.open = true;
   }
 
   public get completedTasks() {
