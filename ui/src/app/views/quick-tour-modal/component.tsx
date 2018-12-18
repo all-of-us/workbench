@@ -196,6 +196,15 @@ export class QuickTourReact extends React.Component<any, any> {
     color: '#2691D0'
   };
 
+  divider = {
+    boxSizing: 'border-box',
+    height: '2px',
+    width: '90%',
+    border: '0.5px solid #FFFFFF',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    margin: 'auto'
+  };
+
   panel = {
     transform: 'translate(-40%)',
     textAlign: 'center',
@@ -245,6 +254,14 @@ export class QuickTourReact extends React.Component<any, any> {
     position: 'relative',
     zIndex: 1,
     display: 'inline'
+  };
+
+  controls = {
+    width: '100%',
+    position: 'absolute',
+    bottom: '8%',
+    display: 'flex',
+    justifyContent: 'space-between'
   };
 
   constructor(props: Object) {
@@ -312,7 +329,7 @@ export class QuickTourReact extends React.Component<any, any> {
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-             <div className='divider'></div>
+             <div style={this.divider}></div>
           </div>
           <div style={this.panel}>
             <div style={{width: '75%'}}>
@@ -328,20 +345,20 @@ export class QuickTourReact extends React.Component<any, any> {
                 {(this.state.selected !== 0) &&
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
-                    <div className='resize-icon' style={{position: 'absolute', zIndex: 2}}
+                    <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer'}}
                          onClick={() => this.toggleImage()}>
                         <img src={this.expandIcon}/>
                     </div>
                 </div>}
             </div>
           </div>
-          <div className='controls'>
-            <div className='left'>
+          <div style={this.controls}>
+            <div style={{width: '50%'}}>
               {this.state.selected !== 0 &&
               <button type='button' className='btn btn-close' id='previous'
                       onClick={() => this.previous()}>Previous</button>}
             </div>
-            <div className='right'>
+            <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {this.state.selected !== (this.state.numPanels - 1) &&
               <button type='button' className='btn btn-close' id='close'
                       onClick={() => this.close()}>Close</button>}
