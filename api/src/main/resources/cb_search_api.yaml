@@ -214,8 +214,6 @@ paths:
     post:
       tags:
         - cohortBuilder
-      consumes:
-        - application/json
       description: Searches for participants based on criteria, criteria specific parameters, and modifiers.
       operationId: "countParticipants"
       parameters:
@@ -238,8 +236,6 @@ paths:
     post:
       tags:
         - cohortBuilder
-      consumes:
-        - application/json
       description: Searches for demographic info about subjects.
       operationId: "getDemoChartInfo"
       parameters:
