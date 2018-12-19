@@ -93,8 +93,6 @@ paths:
             $ref: '#/definitions/CreateRawlsBillingProjectFullRequest'
       tags:
         - Billing
-      consumes:
-        - application/json
       summary: create billing project in FireCloud and google
       operationId: createBillingProjectFull
       security:
@@ -140,8 +138,6 @@ paths:
             type: string
         tags:
           - Billing
-        consumes:
-          - application/json
         summary: add user to billing project the caller owns
         operationId: addUserToBillingProject
         security:
@@ -228,8 +224,6 @@ paths:
           type: string
       tags:
         - Billing
-      consumes:
-        - application/json
       summary: grant a google role to a user and their pet in the billing project the caller owns
       operationId: grantGoogleRoleToUser
       security:
@@ -276,8 +270,6 @@ paths:
     post:
       tags:
         - Workspaces
-      consumes:
-        - application/json
       operationId: createWorkspace
       summary: Create workspace
       parameters:
@@ -342,8 +334,6 @@ paths:
     patch:
       tags:
         - Workspaces
-      consumes:
-        - application/json
       operationId: updateWorkspaceACL
       summary: Update workspace ACL
       parameters:
@@ -379,8 +369,6 @@ paths:
     post:
       tags:
         - Workspaces
-      consumes:
-        - application/json
       operationId: cloneWorkspace
       summary: Clone Workspace
       parameters:
@@ -430,8 +418,6 @@ paths:
       post:
         tags:
           - Profile
-        consumes:
-          - application/json
         operationId: setProfile
         summary: Sets a profile object in the user profile service for the currently logged-in user.
         parameters:
@@ -494,8 +480,6 @@ paths:
           type: string
       tags:
         - Groups
-      consumes:
-        - application/json
       summary: create a new group
       operationId: createGroup
       security:
@@ -540,8 +524,6 @@ paths:
           type: string
       tags:
         - Groups
-      consumes:
-        - application/json
       summary: add a user to a group the caller owns
       operationId: addUserToGroup
       security:

@@ -113,8 +113,6 @@ paths:
     post:
       tags:
         - bugReport
-      consumes:
-        - application/json
       description: Sends an email to developers about a user reported bug
       operationId: sendBugReport
       parameters:
@@ -174,8 +172,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Only for accounts that have not logged in yet, update contact email.
       operationId: updateContactEmail
       security: []
@@ -218,8 +214,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Verifies invitation key.
       operationId: invitationKeyVerification
       security: []
@@ -240,8 +234,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Creates an account in the researchallofus.org domain.
       operationId: createAccount
       security: []
@@ -264,8 +256,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Request identity verification.
       operationId: submitIdVerification
       responses:
@@ -278,8 +268,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Updates a users profile
       operationId: updateProfile
       parameters:
@@ -300,8 +288,6 @@ paths:
     post:
       tags:
       - profile
-      consumes:
-        - application/json
       description: Updates a users page visits
       operationId: updatePageVisits
       parameters:
@@ -325,8 +311,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Submits consent to the terms of service for researchers.
       operationId: submitTermsOfService
       responses:
@@ -340,8 +324,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Completes ethics training.
       operationId: completeEthicsTraining
       responses:
@@ -355,8 +337,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Submits demographic survey responses.
       operationId: submitDemographicsSurvey
       responses:
@@ -369,8 +349,6 @@ paths:
     post:
       tags:
         - authDomain
-      consumes:
-        - application/json
       description: This endpoint will create the registered auth domain.
       operationId: "createAuthDomain"
       parameters:
@@ -389,8 +367,6 @@ paths:
     post:
       tags:
         - authDomain
-      consumes:
-        - application/json
       responses:
         204:
           description: Successfully Added User To Group
@@ -544,8 +520,6 @@ paths:
       operationId: localize
       tags:
         - cluster
-      consumes:
-        - application/json
       parameters:
       - in: path
         name: clusterNamespace
@@ -612,8 +586,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Creates a workspace
       operationId: createWorkspace
       parameters:
@@ -645,8 +617,6 @@ paths:
     patch:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: >
         Modifies the workspace definition with the specified ID and namespace;
         fields that are omitted will not be modified
@@ -747,8 +717,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: >
           Manually sets the ID verfication status for a user. Requires
           REVIEW_ID_VERIFICATION authority.
@@ -771,8 +739,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Sets a research purpose review result.
       operationId: reviewWorkspace
       parameters:
@@ -831,8 +797,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Shares a workspace with users
       operationId: shareWorkspace
       parameters:
@@ -854,8 +818,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: >
         Clone an existing workspace, with given modifications to workspace metadata. Caller will own
         the newly cloned workspace, and must have read access to the source workspace. In
@@ -884,8 +846,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Renames specified notebook
       operationId: "renameNotebook"
       parameters:
@@ -914,8 +874,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Clones specified notebook
       operationId: "cloneNotebook"
       parameters:
@@ -968,8 +926,6 @@ paths:
     post:
       tags:
         - cohorts
-      consumes:
-        - application/json
       description: Creates a cohort definition in a workspace.
       operationId: "createCohort"
       parameters:
@@ -1002,8 +958,6 @@ paths:
     patch:
       tags:
         - cohorts
-      consumes:
-        - application/json
       description: >
         Modifies the cohort definition with the specified ID; fields that are omitted
         will not be modified
@@ -1037,8 +991,6 @@ paths:
     post:
       tags:
         - cohorts
-      consumes:
-        - application/json
       description: >
         Materializes a cohort for a given CDR version to specified output.
       operationId: "materializeCohort"
@@ -1074,8 +1026,6 @@ paths:
     post:
       tags:
         - userMetrics
-      consumes:
-        - application/json
       description: Add/update user recent resource
       operationId: updateRecentResource
       parameters:
@@ -1136,8 +1086,6 @@ paths:
     post:
       tags:
         - conceptSets
-      consumes:
-        - application/json
       description: Creates a concept set in a workspace.
       operationId: "createConceptSet"
       parameters:
@@ -1170,8 +1118,6 @@ paths:
     patch:
       tags:
         - conceptSets
-      consumes:
-        - application/json
       description: >
         Modifies the name or description of the concept set with the specified ID;
         fields that are omitted will not be modified
@@ -1206,8 +1152,6 @@ paths:
     post:
       tags:
         - conceptSets
-      consumes:
-        - application/json
       description: >
         Adds or removes concepts from the concept set.
       operationId: "updateConceptSetConcepts"

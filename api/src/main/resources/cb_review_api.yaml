@@ -79,8 +79,6 @@ paths:
     post:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description:  >
         This endpoint will create an cohort review which is a participant cohort sample
         specified by the review size parameter.
@@ -107,8 +105,6 @@ paths:
     post:
       tags:
           - cohortReview
-      consumes:
-        - application/json
       description:  >
         Returns a collection of participants for the specified cohortId and cdrVersionId. This endpoint
         does pagination based on page, limit, order and column.
@@ -146,8 +142,6 @@ paths:
     put:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description: Modifies the ParticipantCohortStatus status
       operationId: updateParticipantCohortStatus
       parameters:
@@ -229,8 +223,6 @@ paths:
     post:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description: This endpoint will create a ParticipantCohortAnnotation.
       operationId: "createParticipantCohortAnnotation"
       parameters:
@@ -266,8 +258,6 @@ paths:
     post:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description:  >
             Returns a collection of participant data for the specified params based off the PageFilterRequest. This endpoint
             does pagination based on page, limit, order and column.
@@ -301,8 +291,6 @@ paths:
     put:
       tags:
         - cohortReview
-      consumes:
-        - application/json
       description: This endpoint will modify a ParticipantCohortAnnotation.
       operationId: "updateParticipantCohortAnnotation"
       parameters:
@@ -337,8 +325,6 @@ paths:
     post:
       tags:
         - cohortAnnotationDefinition
-      consumes:
-        - application/json
       description: This endpoint will create a CohortAnnotationDefinition.
       operationId: "createCohortAnnotationDefinition"
       parameters:
@@ -388,8 +374,6 @@ paths:
     put:
       tags:
         - cohortAnnotationDefinition
-      consumes:
-        - application/json
       description: modify the CohortAnnotationDefinition.
       operationId: updateCohortAnnotationDefinition
       parameters:
