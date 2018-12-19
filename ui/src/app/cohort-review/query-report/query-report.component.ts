@@ -3,8 +3,9 @@ import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, Workspace} from 'generated';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
-import {CdrVersionStorageService} from "../../services/cdr-version-storage.service";
 import {WorkspaceData} from '../../resolvers/workspace';
+import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
+
 
 
 
@@ -31,8 +32,9 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
     this.workspace = wsData;
     this.cohort = cohort;
     this.review = review;
-    this.cdrVersionStorageService.cdrVersions$.subscribe(resp =>
-    { this.cdrDetails = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId); });
+    this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
+      this.cdrDetails = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
+    });
   }
 
   ngAfterContentChecked() {

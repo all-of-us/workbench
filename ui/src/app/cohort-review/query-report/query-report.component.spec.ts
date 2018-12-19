@@ -9,9 +9,9 @@ import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-se
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
-import {WorkspacesServiceStub} from "../../../testing/stubs/workspace-service-stub";
-import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
+import {WorkspacesServiceStub} from '../../../testing/stubs/workspace-service-stub';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
+import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
 import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-cohort-definition.component';
