@@ -13,7 +13,7 @@ p {
     line-height: 20px;
 }
 
-.title, .view-title, .box-title, .box-heading  {
+.title, .view-title, .box-title, .box-heading, .survey-graph-answer {
     color: #302C71;
 }
 
@@ -28,9 +28,6 @@ p {
     font-weight: 300;
     line-height: 20px;
 }
-
-
-
 
 .white-box {
     padding: 1rem;
