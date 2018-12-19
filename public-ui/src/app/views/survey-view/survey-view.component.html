@@ -64,7 +64,7 @@
     </div>
   </div>
   -->
-  <div class="info-text"> Note: The survey questions appear in the order in which people actualy took the survey.</div>
+  <div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.</div>
   <div class="survey-results" *ngIf="resultsComplete">
     <div class="row search">
       <div class="col-xs-12 flex-xs-middle search-input-full ">
@@ -113,7 +113,7 @@
             <div class="box-title"> Question {{i + 1}}</div>
             <div class="box-sub-title question-display">
               <div class="box-sub-title question question">
-                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value"> [conceptId]="q.stratum2"</app-highlight-search>
+                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId"></app-highlight-search>
               </div>
             </div>
           </div>
@@ -169,7 +169,7 @@
               </div>
               <ng-template #binnedSurveyQuestionDisplay>
                 <div class="col-sm-4 col-xs-12">
-                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel">
+                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
                     <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
                   </label>
                   <ng-template #rangeLabel>

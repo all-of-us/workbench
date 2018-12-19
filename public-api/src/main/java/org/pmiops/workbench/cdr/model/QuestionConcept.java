@@ -2,9 +2,8 @@ package org.pmiops.workbench.cdr.model;
 
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -131,6 +130,8 @@ public class QuestionConcept {
 
     }
 
+    public static Set<String> validAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
+
     static {
         setAgeStratumNameMap();
         setGenderStratumNameMap();
@@ -168,7 +169,9 @@ public class QuestionConcept {
                 String rStratum5Name = r.getAnalysisStratumName();
                 if (rStratum5Name == null || rStratum5Name.equals("")) {
                     if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
-                        r.setAnalysisStratumName(ageStratumNameMap.get(r.getStratum5()));
+                        if (validAgeDeciles.contains(r.getStratum5())) {
+                            r.setAnalysisStratumName(ageStratumNameMap.get(r.getStratum5()));
+                        }
                     }
                     if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
                         r.setAnalysisStratumName(genderStratumNameMap.get(r.getStratum5()));
@@ -178,6 +181,7 @@ public class QuestionConcept {
                     }
                 }
             }
+            analysis.setResults(analysis.getResults().stream().filter(ar -> ar.getAnalysisStratumName() != null).collect(Collectors.toList()));
         }
     }
 
