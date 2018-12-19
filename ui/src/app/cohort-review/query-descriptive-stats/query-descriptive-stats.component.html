@@ -10,9 +10,15 @@
   <div *ngFor="let g of groupKeys; let i = index">
     <div class="container">
       <div class="row group-header">
-        <div class="col-sm-7 col-xs-7 group-text">
-          {{g  | titlecase}}
+        <div *ngIf="g ==='ageRange'; else other" class="col-sm-7 col-xs-7 group-text">
+          Age
         </div>
+        <ng-template #other>
+          <div class="col-sm-7 col-xs-7 group-text">
+            {{g  | titlecase}}
+          </div>
+        </ng-template>
+
         <div class="col-sm-2 col-xs-2 group-text" *ngIf="i === 0">
           Total
         </div>
