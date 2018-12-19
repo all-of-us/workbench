@@ -6,12 +6,15 @@ import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {CohortReviewService} from 'generated';
+import {CohortReviewService, DataAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortBuilderService} from '../../../generated';
 import {CohortBuilderServiceStub} from '../../../testing/stubs/cohort-builder-service-stub';
+import {CdrVersionStorageServiceStub} from '../../../testing/stubs/cdr-version-storage-service-stub';
+import {WorkspacesServiceStub} from '../../../testing/stubs/workspace-service-stub';
+import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filter.component';
@@ -95,6 +98,16 @@ describe('TablePage', () => {
       providers: [
         {provide: NgRedux},
         {provide: CohortReviewService},
+        { provide: CdrVersionStorageService,
+          useValue: new CdrVersionStorageServiceStub({
+            defaultCdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+            items: [{
+              name: 'cdr1',
+              cdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+              dataAccessLevel: DataAccessLevel.Registered,
+              creationTime: 0
+            }]
+          })},
         {provide: CohortSearchActions},
         {provide: APP_BASE_HREF, useValue: '/'},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},

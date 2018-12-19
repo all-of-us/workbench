@@ -2,12 +2,15 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {CohortBuilderService, CohortReviewService} from 'generated';
+import {CohortBuilderService, CohortReviewService, DataAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
+import {WorkspacesServiceStub} from "../../../testing/stubs/workspace-service-stub";
+import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {OverviewPage} from '../overview-page/overview-page';
 import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
@@ -15,6 +18,9 @@ import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-c
 import {QueryDescriptiveStatsComponent} from '../query-descriptive-stats/query-descriptive-stats.component';
 import {QueryReportComponent} from '../query-report/query-report.component';
 import {ReviewStateService} from '../review-state.service';
+
+
+
 
 
 describe('QueryReportComponent', () => {
@@ -110,6 +116,16 @@ describe('QueryReportComponent', () => {
       ],
       providers: [
         {provide: ActivatedRoute, useValue: activatedRouteStub},
+        { provide: CdrVersionStorageService,
+          useValue: new CdrVersionStorageServiceStub({
+            defaultCdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+            items: [{
+              name: 'cdr1',
+              cdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+              dataAccessLevel: DataAccessLevel.Registered,
+              creationTime: 0
+            }]
+          })},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
