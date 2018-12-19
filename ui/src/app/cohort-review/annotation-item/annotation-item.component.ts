@@ -99,12 +99,14 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       this.formattedDate.setValidators(dateValidator());
       this.subscription = this.control.valueChanges.subscribe(val => {
         this.successIcon = false;
-        this.textSpinnerFlag = true;
         this.formattedDate.setValue(
           moment(val).format('YYYY-MM-DD'),
           {emitEvent: false}
           );
-        this.handleInput();
+        if (!this.formattedDate.errors) {
+          this.textSpinnerFlag = true;
+          this.handleInput();
+        }
       });
       this.dateBtns = document.getElementsByClassName('datepicker-trigger');
     }
@@ -227,10 +229,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   dateBlur() {
     this.successIcon = false;
-    this.textSpinnerFlag = true;
-    this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
-    this.control.setValue(this.dateObj, {emitEvent: false});
-    this.handleInput();
+    if (!this.formattedDate.errors) {
+      this.textSpinnerFlag = true;
+      this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
+      this.control.setValue(this.dateObj, {emitEvent: false});
+      this.handleInput();
+    }
   }
 
   datepickerPosition() {
