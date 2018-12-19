@@ -11,7 +11,8 @@ export class ValidatorErrorsComponent implements OnInit {
 
   private static readonly errorMessages = {
     dateFormat: (params) => params.message,
-    integer: (params) => params.message
+    integer: (params) => params.message,
+    range: (params) => params.message
   };
 
   @Input() private form: FormGroup;

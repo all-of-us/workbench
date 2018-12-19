@@ -21,7 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
-import {validDateString} from '../validation';
+import {rangeValidator, validDateString} from '../validation';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -287,8 +287,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       } else {
         const validators = [Validators.required];
         if (mod.modType !== ModifierType.EVENTDATE) {
-          validators.push(Validators.min(mod.min));
-          validators.push(Validators.max(mod.max));
+          validators.push(rangeValidator(mod.min, mod.max));
           validators.push(Validators.maxLength(mod.maxLength));
         }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
