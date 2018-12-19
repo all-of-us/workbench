@@ -33,15 +33,3 @@ export function dateValidator(): ValidatorFn {
     return isValid ? null : message;
   };
 }
-
-export function validDateString(date: string, name?: string): string {
-  if (!moment(date, 'YYYY-MM-DD', true).isValid()) {
-    return 'Dates must be in the format \'YYYY-MM-DD\'';
-  }
-  return null;
-}
-
-function getControlName(control: AbstractControl) {
-  const formGroup = control.parent.controls;
-  return Object.keys(formGroup).find(name => control === formGroup[name]) || null;
-}
