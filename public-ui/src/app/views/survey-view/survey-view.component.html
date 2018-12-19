@@ -113,7 +113,7 @@
             <div class="box-title"> Question {{i + 1}}</div>
             <div class="box-sub-title question-display">
               <div class="box-sub-title question question">
-                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value"></app-highlight-search>
+                <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value"> [conceptId]="q.stratum2"</app-highlight-search>
               </div>
             </div>
           </div>
