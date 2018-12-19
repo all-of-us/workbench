@@ -21,7 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
-import {rangeValidator, validDateString} from '../validation';
+import {dateValidator, rangeValidator} from '../validation';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -286,8 +286,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.form.get(mod.name).reset();
       } else {
         const validators = [Validators.required];
-        if (mod.modType !== ModifierType.EVENTDATE) {
-          validators.push(rangeValidator(mod.min, mod.max));
+        if (mod.modType === ModifierType.EVENTDATE) {
+          validators.push(dateValidator());
+        } else {
+          validators.push(rangeValidator(mod.label, mod.min, mod.max));
           validators.push(Validators.maxLength(mod.maxLength));
         }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
@@ -324,7 +326,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           }
           return;
         }
-        let error;
         if (inputType === 'date') {
           const dateValueA = moment(valueA).format('YYYY-MM-DD');
           const dateValueB = moment(valueB).format('YYYY-MM-DD');
@@ -332,12 +333,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           if (between && dateValueB) {
             operands.push(dateValueB);
           }
-          console.log(this.form);
-          operands.forEach(date => {
-            if (error = validDateString(date)) {
-              // this.errors.add(error);
-            }
-          })
           return fromJS({name: modType, operator, operands});
         } else {
           const operands = [valueA];
