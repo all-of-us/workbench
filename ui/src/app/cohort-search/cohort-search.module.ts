@@ -33,9 +33,8 @@ import {TreeComponent} from './tree/tree.component';
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
-import { DateValidatorDirective } from './validators/date-validator.directive';
 import { ValidatorErrorsComponent } from './validator-errors/validator-errors.component';
-import { IntegerValidatorDirective } from './validators/integer-validator.directive';
+import { DateValidatorDirective } from './validators/date-validator.directive';
 
 
 const routes: Routes = [{
@@ -84,7 +83,6 @@ const routes: Routes = [{
     SafeHtmlPipe,
     DateValidatorDirective,
     ValidatorErrorsComponent,
-    IntegerValidatorDirective,
   ],
   providers: [
     CohortSearchActions,
