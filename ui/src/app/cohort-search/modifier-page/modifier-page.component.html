@@ -60,7 +60,8 @@
             <ng-container *ngIf="mod.inputType">
               <div>
                 <input *ngIf="mod.inputType !== 'date'"
-                  min="1"
+                  [min]="mod.min"
+                  [max]="mod.max"
                   step="1"
                   class="modifier-event-indicator"
                   formControlName="valueA"
@@ -76,7 +77,8 @@
                 </div>
                 <div>
                   <input *ngIf="mod.inputType !== 'date'"
-                    min="1"
+                    [min]="mod.min"
+                    [max]="mod.max"
                     step="1"
                     class="modifier-event-indicator"
                     formControlName="valueB"
