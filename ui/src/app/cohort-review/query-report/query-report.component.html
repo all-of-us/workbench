@@ -9,13 +9,13 @@
                 Cohort Name
               </div>
               <div class="query-content">
-                {{cohort.name}}
+                {{cohort?.name}}
               </div>
               <div class="query-title">
                 Created By
               </div>
               <div class="query-content">
-                {{cohort.creator}}
+                {{cohort?.creator}}
               </div>
             </div>
             <div class="col-sm-6 col-xs-6">
@@ -23,13 +23,13 @@
                 Date created
               </div>
               <div class="query-content">
-                {{cohort.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}}
+                {{cohort?.creationTime | date: 'yyyy-MM-dd': 'UTC/GMT'}}
               </div>
               <div class="query-title">
-                CDR Version
+                Dataset
               </div>
               <div class="query-content">
-                {{cdrId}}
+                {{cdrDetails?.name}}
               </div>
             </div>
             <div class="col-sm-12 col-xs-12">
