@@ -5,11 +5,11 @@
 <ul class="nav" role="tablist">
   <li role="presentation" class="nav-item">
     <button class="btn btn-link nav-link review-button doNotPrint" [class.active]="tab === 'participants'" aria-controls="panel1"
-            aria-selected="true" type="button" (click)="tab = 'participants'">Participants</button>
+            aria-selected="true" type="button" (click)="setTab('participants')">Participants</button>
   </li>
   <li role="presentation" class="nav-item">
-    <button class="btn btn-link nav-link review-button doNotPrint" [class.active]="tab === 'query'" aria-controls="panel2"
-            aria-selected="false" type="button" (click)="tab = 'query'">Cohort Query Report</button>
+    <button class="btn btn-link nav-link review-button doNotPrint" [class.active]="tab === 'report'" aria-controls="panel2"
+            aria-selected="false" type="button" (click)="setTab('report')">Cohort Query Report</button>
   </li>
 </ul>
 
@@ -112,7 +112,7 @@
     </clr-dg-footer>
   </clr-datagrid>
 </section>
-<section role="tabpanel" aria-labelledby="tab2" [class.inactive]="tab !== 'query'">
+<section *ngIf="reportInit" role="tabpanel" aria-labelledby="tab2" [class.inactive]="tab !== 'report'">
   <div class="participant-container doNotPrint">
     <div class="total-heading " *ngIf="totalParticipantCount">Cohort Total: {{totalParticipantCount | number}} Participants</div>
   </div>

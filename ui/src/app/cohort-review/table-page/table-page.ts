@@ -64,6 +64,7 @@ export class TablePage implements OnInit, OnDestroy {
   cohortName: string;
   totalParticipantCount: number;
   tab = 'participants';
+  reportInit = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
@@ -181,5 +182,12 @@ export class TablePage implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  setTab(tab: string) {
+    this.tab = tab;
+    if (tab === 'report' && !this.reportInit) {
+      this.reportInit = true;
+    }
   }
 }
