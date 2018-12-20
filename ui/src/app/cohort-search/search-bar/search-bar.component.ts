@@ -90,8 +90,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.noResults = !this.optionSelected
-            && !this.options.length;
+          this.noResults = !this.optionSelected && !this.options.length;
         }
       });
 
