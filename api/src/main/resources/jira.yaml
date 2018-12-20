@@ -33,6 +33,8 @@ paths:
       description: "Creates issue in JIRA and return IssueResponse"
       tags:
         - Jira
+      consumes:
+        - application/json
       operationId: createIssue
       parameters:
         - name: fields
