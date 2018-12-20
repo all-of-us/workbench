@@ -39,6 +39,7 @@ export class AccountCreationSuccessComponent {
     this.creationNonce = account.profile.creationNonce;
     // create bound methods to use as callbacks
     this.closeModals = this.closeModals.bind(this);
+    this.updateEmail = this.updateEmail.bind(this);
   }
 
   signIn(): void {
