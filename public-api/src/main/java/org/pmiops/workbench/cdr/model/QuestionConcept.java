@@ -187,7 +187,6 @@ public class QuestionConcept {
                     }
                 }
             }
-            analysis.setResults(analysis.getResults().stream().filter(ar -> ar.getAnalysisStratumName() != null).collect(Collectors.toList()));
         }
     }
 
