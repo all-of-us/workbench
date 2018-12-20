@@ -468,7 +468,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             List<AchillesAnalysis> analyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, qlist);
             QuestionConcept.mapAnalysesToQuestions(questions, analyses);
         }
-
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }

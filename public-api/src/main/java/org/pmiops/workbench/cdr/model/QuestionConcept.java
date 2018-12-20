@@ -165,7 +165,13 @@ public class QuestionConcept {
                     q.setAnalysis(new AchillesAnalysis(analysis));
                 }
                 AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
-                questionAnalysis.addResult(r);
+                if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
+                    if (validAgeDeciles.contains(r.getStratum5())) {
+                        questionAnalysis.addResult(r);
+                    }
+                } else{
+                    questionAnalysis.addResult(r);
+                }
                 String rStratum5Name = r.getAnalysisStratumName();
                 if (rStratum5Name == null || rStratum5Name.equals("")) {
                     if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
