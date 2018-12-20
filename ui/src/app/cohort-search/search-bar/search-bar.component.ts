@@ -135,7 +135,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         if (value.length >= trigger) {
           this.inputChange();
         } else {
-          this.actions.setCriteriaSearchTerms([]);
+          if (!this.optionSelected) {
+            this.actions.setCriteriaSearchTerms([]);
+          }
           this.options = [];
           this.noResults = false;
         }
