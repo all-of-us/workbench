@@ -4,11 +4,8 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {CohortResolver} from '../resolvers/cohort';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
 
-import {ApiModule} from 'generated';
-
 @NgModule({
   imports: [
-    ApiModule,
     NgxChartsModule,
   ],
   declarations: [
