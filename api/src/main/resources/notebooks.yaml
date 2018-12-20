@@ -246,8 +246,6 @@ paths:
       operationId: stopCluster
       tags:
         - cluster
-      consumes:
-        - application/json
       parameters:
         - in: path
           name: googleProject
@@ -283,8 +281,6 @@ paths:
       operationId: startCluster
       tags:
         - cluster
-      consumes:
-        - application/json
       parameters:
         - in: path
           name: googleProject
