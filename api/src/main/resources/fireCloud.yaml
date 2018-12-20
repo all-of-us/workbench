@@ -93,6 +93,8 @@ paths:
             $ref: '#/definitions/CreateRawlsBillingProjectFullRequest'
       tags:
         - Billing
+      consumes:
+        - application/json
       summary: create billing project in FireCloud and google
       operationId: createBillingProjectFull
       security:
@@ -270,6 +272,8 @@ paths:
     post:
       tags:
         - Workspaces
+      consumes:
+        - application/json
       operationId: createWorkspace
       summary: Create workspace
       parameters:
@@ -334,6 +338,8 @@ paths:
     patch:
       tags:
         - Workspaces
+      consumes:
+        - application/json
       operationId: updateWorkspaceACL
       summary: Update workspace ACL
       parameters:
@@ -369,6 +375,8 @@ paths:
     post:
       tags:
         - Workspaces
+      consumes:
+        - application/json
       operationId: cloneWorkspace
       summary: Clone Workspace
       parameters:
@@ -418,6 +426,8 @@ paths:
       post:
         tags:
           - Profile
+        consumes:
+          - application/json
         operationId: setProfile
         summary: Sets a profile object in the user profile service for the currently logged-in user.
         parameters:

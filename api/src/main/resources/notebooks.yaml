@@ -194,6 +194,8 @@ paths:
       operationId: createClusterV2
       tags:
         - cluster
+      consumes:
+        - application/json
       parameters:
         - in: path
           name: googleProject
@@ -360,6 +362,8 @@ paths:
       operationId: proxyLocalize
       tags:
         - notebooks
+      consumes:
+        - application/json
       parameters:
         - in: path
           name: googleProject
@@ -577,6 +581,8 @@ paths:
       description: "A POST to /api/contents/path creates a New untitled, empty file or directory. A POST to /api/contents/path with body {'copy_from': '/path/to/OtherNotebook.ipynb'} creates a new copy of OtherNotebook in path."
       tags:
         - jupyter
+      consumes:
+        - application/json
       operationId: postContents
       parameters:
         - name: model
@@ -639,6 +645,8 @@ paths:
       description: "Saves the file in the location specified by name and path.  PUT is very similar to POST, but the requester specifies the name, whereas with POST, the server picks the name."
       tags:
         - jupyter
+      consumes:
+        - application/json
       operationId: putContents
       parameters:
         - name: model

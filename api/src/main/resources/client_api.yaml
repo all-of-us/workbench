@@ -60,6 +60,8 @@ paths:
     post:
       tags:
         - cohorts
+      consumes:
+        - application/json
       description: >
         Translates a data table specification into a SQL query to run against the CDR.
       operationId: "getDataTableQuery"
@@ -82,6 +84,8 @@ paths:
     post:
       tags:
         - cohorts
+      consumes:
+        - application/json
       description: >
         Retrieves annotations for a cohort in the workspace
       operationId: "getCohortAnnotations"
@@ -101,6 +105,8 @@ paths:
       post:
         tags:
           - concepts
+        consumes:
+          - application/json
         description: >
           Searches for concepts in concept table by name, and optionally filter on
           domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
