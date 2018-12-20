@@ -15,7 +15,7 @@ export class ValidatorErrorsComponent implements OnInit {
     range: (params) => params.message
   };
 
-  @Input() private form: FormGroup;
+  @Input() form: FormGroup;
   errors = new Set();
   subscription: Subscription;
 

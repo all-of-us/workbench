@@ -9,6 +9,7 @@ import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
+import {ValidatorErrorsComponent} from '../validator-errors/validator-errors.component';
 import {ModifierPageComponent} from './modifier-page.component';
 
 class MockActions {
@@ -30,6 +31,7 @@ describe('ModifierPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         ModifierPageComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,

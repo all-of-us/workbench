@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {FormControl, FormGroup} from '@angular/forms';
 
 import { ValidatorErrorsComponent } from './validator-errors.component';
 
@@ -16,6 +17,7 @@ describe('ValidatorErrorsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ValidatorErrorsComponent);
     component = fixture.componentInstance;
+    component.form = new FormGroup({testControl: new FormControl()});
     fixture.detectChanges();
   });
 

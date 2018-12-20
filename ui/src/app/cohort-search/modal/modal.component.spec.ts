@@ -26,6 +26,7 @@ import {SafeHtmlPipe} from '../safe-html.pipe';
 import {SearchBarComponent} from '../search-bar/search-bar.component';
 import {SelectionInfoComponent} from '../selection-info/selection-info.component';
 import {TreeComponent} from '../tree/tree.component';
+import {ValidatorErrorsComponent} from '../validator-errors/validator-errors.component';
 import {ModalComponent} from './modal.component';
 
 class MockActions {
@@ -62,6 +63,7 @@ describe('ModalComponent', () => {
         SearchBarComponent,
         SelectionInfoComponent,
         TreeComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,

@@ -36,15 +36,13 @@ import {SearchGroupSelectComponent} from '../search-group-select/search-group-se
 import {SearchGroupComponent} from '../search-group/search-group.component';
 import {SelectionInfoComponent} from '../selection-info/selection-info.component';
 import {TreeComponent} from '../tree/tree.component';
+import {ValidatorErrorsComponent} from '../validator-errors/validator-errors.component';
 import {CohortSearchComponent} from './cohort-search.component';
 
 class MockActions {
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
-
-  loadFromJSON(json: string): void {}
-  runAllRequests() {}
 }
 
 describe('CohortSearchComponent', () => {
@@ -81,7 +79,8 @@ describe('CohortSearchComponent', () => {
         SearchGroupListComponent,
         SearchGroupSelectComponent,
         SelectionInfoComponent,
-        TreeComponent
+        TreeComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,
