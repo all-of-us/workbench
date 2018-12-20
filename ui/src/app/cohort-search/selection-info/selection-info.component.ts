@@ -13,7 +13,6 @@ export class SelectionInfoComponent {
     @Input() parameter;
     @Input() indexes;
     @Output() demoItems = new EventEmitter<any>();
-    treeType = TreeType;
 
     constructor(private actions: CohortSearchActions) {}
 
@@ -36,7 +35,8 @@ export class SelectionInfoComponent {
           && this.parameter.get('type') !== TreeType.PPI;
     }
     get showOr() {
-        return this.indexes && (this.indexes[0] > 0 || this.indexes[1] > 0);
+        return (this.indexes && (this.indexes[0] > 0 || this.indexes[1] > 0))
+          && this.parameter.get('type') !== TreeType.DEMO;
     }
 }
 
