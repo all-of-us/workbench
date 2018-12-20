@@ -181,6 +181,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   selectOption(option: any) {
     if (option) {
       this.optionSelected = true;
+      this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
       if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
         this.actions.fetchIngredientsForBrand(option.conceptId);
