@@ -373,7 +373,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   get addEncounters() {
-    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(this.ctype) === -1
+    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[this.ctype]) === -1
       && !this.modifiers.find(modifier => modifier.modType === ModifierType.ENCOUNTERS);
   }
 

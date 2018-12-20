@@ -20,6 +20,8 @@ paths:
     post:
       tags:
         - mandrill
+      consumes:
+        - application/json
       operationId: send
       summary: Send an email via mandrill
       responses:
