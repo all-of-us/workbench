@@ -1,6 +1,6 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NgForm} from '@angular/forms';
+import {FormControl, FormGroup, NgForm} from '@angular/forms';
 
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -52,6 +52,11 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     {value: 'BETWEEN', name: 'Between', code: '04'},
   ];
 
+  form = new FormGroup({
+    NUM: new FormGroup({}),
+    CAT: new FormGroup({})
+  });
+
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -63,9 +68,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
-              if (this.attrs.NUM.length) {
-                this.attrs.NUM[0][attr.conceptName] = attr.estCount;
-              } else {
+              if (!this.attrs.NUM.length) {
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
                   name: 'NUM',
@@ -73,8 +76,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                   operands: [null],
                   conceptId: attr.conceptId
                 });
-                this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               }
+              this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               break;
             case 'CAT':
               if (parseInt(attr.estCount, 10) > 0) {
