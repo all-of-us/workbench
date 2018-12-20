@@ -59,8 +59,6 @@ paths:
      summary: Add attachment to the jira ticket
      tags:
        - Jira
-     consumes:
-       - application/json
      operationId: addAttachments
      consumes:
        - multipart/form-data
