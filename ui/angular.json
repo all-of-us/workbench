@@ -24,8 +24,7 @@
               "node_modules/@clr/icons/clr-icons.min.css",
               "node_modules/@clr/ui/clr-ui.min.css",
               "node_modules/nouislider/distribute/nouislider.min.css",
-              "src/styles.css",
-              "src/assets/scss/styles.scss"
+              "src/styles.css"
             ],
             "scripts": [
               "node_modules/mutationobserver-shim/dist/mutationobserver.min.js",

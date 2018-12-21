@@ -1,19 +1,83 @@
 import * as React from 'react';
+export const styles = {
+  modalMain: {
+    // tricky little bit required to get certain CSSProperties
+    // to work properly in this setup
+    position: 'fixed' as 'fixed',
+    background: 'white',
+    borderRadius: '8px',
+    width: '30%',
+    height: 'auto',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%,-50%)',
+    zIndex: 1050
+  },
 
-export const Modal = ({...props}) => {
-  return <div>
-    <div className='modal-backdrop'></div>
-    <div className='modal-main' {...props}>{props.children}</div>
-  </div>;
+  modalBackdrop: {
+    position: 'fixed' as 'fixed',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    backgroundColor: '#313131',
+    opacity: .85,
+    zIndex: 1040
+  },
+
+  modalTitle: {
+    marginTop: '4%',
+    marginLeft: '5%',
+    fontSize: '20px',
+    color: '#302973'
+  },
+
+  modalBody: {
+    fontSize: '14px',
+    lineHeight: '.8rem',
+    marginLeft: '5%',
+    marginTop: '3%'
+  },
+
+  input: {
+    marginLeft: '.5rem',
+    width: '90%'
+  },
+
+  unsuccessfulInput: {
+    backgroundColor: '#FCEFEC',
+    borderColor: '#F68D76'
+  },
+
+  error: {
+    padding: '0 0.5rem',
+    fontWeight: 600,
+    color: '#2F2E7E',
+    marginTop: '0.2rem',
+    width: '90%'
+  },
+
+  modalFooter: {
+    display: 'flex' as 'flex',
+    justifyContent: 'flex-end' as 'flex-end',
+    marginBottom: '.4rem',
+    marginRight: '.4rem',
+    marginTop: '.4rem'
+  }
 };
-export const ModalTitle = ({...props}) =>
-  <div {...props} className="modal-title">{props.children}</div>;
-export const ModalBody = ({...props}) =>
-  <div {...props} className="modal-body">{props.children}</div>;
-export const FieldInput = ({...props}) =>
-  <input {...props} className={"modal-input " + props.className}></input>;
-export const ModalFooter = ({...props}) =>
-  <div {...props} className="modal-footer">{props.children}</div>;
-export const Error = ({...props}) =>
-  <div {...props} className="modal-error">{props.children}</div>;
+
+export const Modal = ({children, style = {}, ...props}) => {
+  return <div><div style={{...styles.modalBackdrop}}></div>
+    <div {...props} style={{...styles.modalMain, ...style}}>{children}</div></div>;
+};
+export const ModalTitle = ({children, style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalTitle, ...style}}>{children}</div>;
+export const ModalBody = ({children, style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalBody, ...style}}>{children}</div>;
+export const FieldInput = ({style = {}, ...props}) =>
+  <input {...props} style={{...styles.input, ...style}}></input>;
+export const ModalFooter = ({children, style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalFooter, ...style}}>{children}</div>;
+export const Error = ({children, style = {}, ...props}) =>
+  <div {...props} style={{...styles.error, ...style}}>{children}</div>;
 
