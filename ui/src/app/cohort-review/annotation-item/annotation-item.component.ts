@@ -88,19 +88,27 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.ngAfterContentChecked();
     this.successIcon = false;
     this.oldValue = this.annotation.value[this.valuePropertyName];
-    if (this.isDate) {
-      this.form.controls.formattedDate.setValidators(dateValidator());
-      this.subscription = this.form.controls.annotation.valueChanges.subscribe(val => {
+    this.subscription = this.form.controls.annotation.valueChanges.subscribe(val => {
+      if (this.isInt) {
+        if (val && val.toString().length > 9) {
+          const value = parseFloat(val.toString().slice(0, 9));
+          this.form.controls.annotation.setValue(value, {emitEvent: false});
+        }
+      }
+      if (this.isDate) {
         this.successIcon = false;
         this.form.controls.formattedDate.setValue(
           moment(val).format('YYYY-MM-DD'),
           {emitEvent: false}
-          );
+        );
         if (!this.form.controls.formattedDate.errors) {
           this.textSpinnerFlag = true;
           this.handleInput();
         }
-      });
+      }
+    });
+    if (this.isDate) {
+      this.form.controls.formattedDate.setValidators(dateValidator());
       this.dateBtns = document.getElementsByClassName('datepicker-trigger');
     }
     if (this.isInt) {
@@ -129,14 +137,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       this.textSpinnerFlag = true;
       this.handleInput();
     }
-  }
-
-  integerOnly(event): boolean {
-    const charCode = (event.charCode) ? event.charCode : event.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-      return false;
-    }
-    return true;
   }
 
   handleInput() {
