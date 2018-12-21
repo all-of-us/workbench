@@ -158,10 +158,10 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaByTypeAndParentId() throws Exception {
     Criteria icd9CriteriaParent = criteriaDao.save(
-      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true)
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true, true)
     );
     Criteria icd9CriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false)
+      createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, icd9CriteriaParent.getId(), "001.1", "name", DomainType.CONDITION.name(), null, false, true)
     );
 
     assertEquals(
@@ -216,7 +216,7 @@ public class CohortBuilderControllerTest {
   public void getCriteriaByTypeAndSubtypeAndParentId() throws Exception {
     jdbcTemplate.execute("delete from criteria where subtype = 'ATC'");
     Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
     );
 
     assertEquals(
@@ -232,7 +232,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaChildrenByTypeAndParentId() throws Exception {
     Criteria drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("+drugN*")
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false, true).synonyms("+drugN*")
     );
 
     assertEquals(
@@ -248,7 +248,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaByTypeAndSubtype() throws Exception {
     Criteria demoCriteria = criteriaDao.save(
-      createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true)
+      createCriteria(TreeType.DEMO.name(), SUBTYPE_AGE, 0L, null, "age", null, null, true, true)
     );
 
     assertEquals(
@@ -264,7 +264,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteNoSubtype() throws Exception {
     Criteria labMeasurement = criteriaDao.save(
-      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false).synonyms("LP12*\"[rank1]\"")
+      createCriteria(TreeType.MEAS.name(), SUBTYPE_LAB, 0L, "xxxLP12345", "name", DomainType.MEASUREMENT.name(), null, false, true).synonyms("LP12*\"[rank1]\"")
     );
 
     assertEquals(
@@ -280,7 +280,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaAutoCompleteWithSubtype() throws Exception {
     Criteria drugATCCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false).synonyms("drugN*\"[rank1]\"")
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP72636", "differentName", DomainType.DRUG.name(), "12345", false, true).synonyms("drugN*\"[rank1]\"")
     );
 
     assertEquals(
@@ -295,10 +295,10 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaAutoCompletePPI() throws Exception {
-    Criteria ppiCriteria = criteriaDao.save(
+    Criteria ppiCriteriaParent = criteriaDao.save(
       createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
         "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", false).synonyms("covered*\"[rank1]\"")
+        DomainType.OBSERVATION.name(), "43529119", false, true).synonyms("covered*\"[rank1]\"")
     );
 
     assertEquals(
@@ -314,10 +314,10 @@ public class CohortBuilderControllerTest {
   @Test
   public void getDrugBrandOrIngredientByName() throws Exception {
     Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
     );
     Criteria drugBrandCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_BRAND, 0L, "LP6789", "brandName", DomainType.DRUG.name(), "1235", true, true)
     );
 
     assertEquals(
@@ -351,7 +351,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getDrugIngredientByConceptId() throws Exception {
     Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
     );
     jdbcTemplate.execute("create table criteria_relationship (concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute("insert into criteria_relationship(concept_id_1, concept_id_2) values (1247, 12345)");
@@ -372,7 +372,7 @@ public class CohortBuilderControllerTest {
   @Test
   public void getCriteriaByType() throws Exception {
     Criteria drugATCCriteria = criteriaDao.save(
-      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true)
+      createCriteria(TreeType.DRUG.name(), SUBTYPE_ATC, 0L, "LP12345", "drugName", DomainType.DRUG.name(), "12345", true, true)
     );
 
     assertEquals(
