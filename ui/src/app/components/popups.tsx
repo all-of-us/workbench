@@ -154,7 +154,7 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
         style={{
           transform: `translate(${position.left}px, ${position.top}px)`,
           ...styles.tooltip
-        }}
+        } as React.CSSProperties}
       >
         {children}
         <svg viewBox='0 0 2 1' style={{...getNotchPosition(), ...styles.notch}}>
@@ -233,7 +233,7 @@ export const Popup = flow(
         ref={elementRef}
         style={{
           transform: `translate(${position.left}px, ${position.top}px)`,
-          ...styles.popup}}
+          ...styles.popup} as React.CSSProperties}
       >{children}</div>
     </PopupPortal>;
   }
