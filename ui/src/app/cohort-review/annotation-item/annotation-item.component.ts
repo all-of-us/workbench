@@ -9,7 +9,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {
   AnnotationType,
@@ -43,16 +43,16 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
-  control = new FormControl();
-  formattedDate = new FormControl();
-  private expandText = false;
+  form = new FormGroup({
+    annotation: new FormControl(),
+    formattedDate: new FormControl()
+  });
   defaultAnnotation = false;
   annotationOption: any;
   oldValue: any;
   dateObj: any;
   dateBtns: any;
   subscription: Subscription;
-  error: string;
 
   // if calendar icon is clicked, adjust position of datepicker
   @HostListener('document:mouseup', ['$event.target'])
@@ -88,27 +88,33 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.ngAfterContentChecked();
     this.successIcon = false;
     this.oldValue = this.annotation.value[this.valuePropertyName];
-    if (this.oldValue !== undefined) {
-      this.control.setValue(this.oldValue);
-      if (this.isDate) {
-        this.formattedDate.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
-        this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
-      }
-    }
     if (this.isDate) {
-      this.formattedDate.setValidators(dateValidator());
-      this.subscription = this.control.valueChanges.subscribe(val => {
+      this.form.get('formattedDate').setValidators(dateValidator());
+      this.subscription = this.form.get('annotation').valueChanges.subscribe(val => {
         this.successIcon = false;
-        this.formattedDate.setValue(
+        this.form.get('formattedDate').setValue(
           moment(val).format('YYYY-MM-DD'),
           {emitEvent: false}
           );
-        if (!this.formattedDate.errors) {
+        if (!this.form.get('formattedDate').errors) {
           this.textSpinnerFlag = true;
           this.handleInput();
         }
       });
       this.dateBtns = document.getElementsByClassName('datepicker-trigger');
+    }
+    if (this.isInt) {
+      this.form.get('annotation').setValidators([Validators.max(999999999)]);
+    }
+    if (this.isText) {
+      this.form.get('annotation').setValidators([Validators.maxLength(40)]);
+    }
+    if (this.oldValue !== undefined) {
+      this.form.get('annotation').setValue(this.oldValue);
+      if (this.isDate) {
+        this.form.get('formattedDate').setValue(moment(this.oldValue).format('YYYY-MM-DD'));
+        this.dateObj = new Date(this.form.get('formattedDate').value + 'T08:00:00');
+      }
     }
   }
 
@@ -136,7 +142,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    const newValue = this.isDate ? this.formattedDate.value : this.control.value;
+    const newValue = this.isDate
+      ? this.form.get('formattedDate').value : this.form.get('annotation').value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
     const annoId = this.annotation.value.annotationId ;
 
@@ -193,10 +200,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
   }
 
-  toggleExpandText() {
-    this.expandText = !this.expandText;
-  }
-
   get valuePropertyName() {
     return {
       [AnnotationType.STRING]:   'annotationValueString',
@@ -211,34 +214,28 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     return this.annotation.definition.columnName.split(' ').join('-');
   }
 
-  get datatypeDisplay() {
-    return this.showDataType
-      ? ` (${this.annotation.definition.annotationType})`
-      : '';
-  }
-
   annotationOptionChange(value) {
     this.successIcon = false;
     this.textSpinnerFlag = true;
     this.annotationOption = value;
     this.defaultAnnotation = true;
-    this.control.patchValue(value);
+    this.form.get('annotation').patchValue(value);
     this.handleInput();
 
   }
 
   dateBlur() {
     this.successIcon = false;
-    if (!this.formattedDate.errors) {
+    if (!this.form.get('formattedDate').errors) {
       this.textSpinnerFlag = true;
-      this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
-      this.control.setValue(this.dateObj, {emitEvent: false});
+      this.dateObj = new Date(this.form.get('formattedDate').value + 'T08:00:00');
+      this.form.get('annotation').setValue(this.dateObj, {emitEvent: false});
       this.handleInput();
     }
   }
 
   datepickerPosition() {
-    let datepicker;
+    let datepicker: any;
     Observable.interval()
       .takeWhile((val, index) => !datepicker && index < 1000)
       .subscribe(() => {
@@ -251,6 +248,14 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   get isDate() {
     return this.annotation.definition.annotationType === AnnotationType.DATE;
+  }
+
+  get isInt() {
+    return this.annotation.definition.annotationType === AnnotationType.INTEGER;
+  }
+
+  get isText() {
+    return this.annotation.definition.annotationType === AnnotationType.STRING;
   }
 }
 

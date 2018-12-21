@@ -1,13 +1,5 @@
-<div>
-  <div *ngIf="formattedDate.errors" class="alert alert-danger alert-sm">
-    <div class="alert-items">
-      <div class="alert-item static">
-        <div class="alert-text">
-          {{formattedDate.errors.dateFormat.message}}
-        </div>
-      </div>
-    </div>
-  </div>
+<form [formGroup]="form">
+  <app-validator-errors [form]="form"></app-validator-errors>
   <div [ngSwitch]="annotation.definition.annotationType">
     <!-- STRING, DATE, INTEGER all rely on the blur event to update the annotation -->
     <div *ngSwitchCase="kinds.STRING">
@@ -25,7 +17,7 @@
           (blur)="textBlur()"
           [name]="machineName"
           [id]="machineName"
-          [formControl]="control">
+          formControlName="annotation">
         </textarea>
     </div>
     <div *ngSwitchCase="kinds.DATE">
@@ -38,9 +30,9 @@
           <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
           </label>
       </div>
-        <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" [formControl]="formattedDate">
+        <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur()" formControlName="formattedDate">
         <input class="hidden-input"
-               [name]="machineName" [id]="machineName" [formControl]="control"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="dateObj">
+               [name]="machineName" [id]="machineName" formControlName="annotation"  placeholder="YYYY-MM-DD" type="date" [(clrDate)]="dateObj">
     </div>
     <div *ngSwitchCase="kinds.INTEGER" class="text-container">
       <div class="integer-container">
@@ -59,7 +51,7 @@
         type="number"
         [name]="machineName"
         [id]="machineName"
-        [formControl]="control">
+        formControlName="annotation">
     </div>
     <!-- ENUM and BOOLEAN rely on the change event to update the annotation -->
     <div *ngSwitchCase="kinds.ENUM">
@@ -99,10 +91,10 @@
           type="checkbox"
           [name]="machineName"
           [id]="machineName"
-          [formControl]="control">
+          formControlName="annotation">
         <span *ngIf="textSpinnerFlag" class="spinner spinner-inline spinner-md spin-in-overlay"> Loading...   </span>
         <span><clr-icon *ngIf="successIcon" class="success is-solid" shape="success-standard" ></clr-icon></span>
     </div>
   </div>
-</div>
+</form>
 
