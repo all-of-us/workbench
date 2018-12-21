@@ -12,7 +12,9 @@ export class ValidatorErrorsComponent implements OnInit {
   private static readonly errorMessages = {
     dateFormat: (params) => params.message,
     integer: (params) => params.message,
-    range: (params) => params.message
+    range: (params) => params.message,
+    max: (params) => 'Max input value of ' + params.max + ' exceeded',
+    maxlength: (params) => 'Max character limit of ' + params.requiredLength + ' exceeded'
   };
 
   @Input() form: FormGroup;
