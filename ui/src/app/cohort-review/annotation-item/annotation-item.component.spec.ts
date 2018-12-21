@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
 import {CohortAnnotationDefinition, CohortReviewService, ParticipantCohortAnnotation} from 'generated';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AnnotationItemComponent} from './annotation-item.component';
 
 interface Annotation {
@@ -18,7 +19,7 @@ describe('AnnotationItemComponent', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ AnnotationItemComponent ],
+      declarations: [AnnotationItemComponent, ValidatorErrorsComponent],
       imports: [ClarityModule, ReactiveFormsModule],
       providers: [
         {provide: CohortReviewService, useValue: {}},
