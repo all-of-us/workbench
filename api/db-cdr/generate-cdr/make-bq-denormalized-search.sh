@@ -70,6 +70,9 @@ schema_path=generate-cdr/bq-schemas
 bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_person
 bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.search_person
 
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_enc
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_enc.json --time_partitioning_type=DAY --clustering_fields person_id,concept_id_or_source_concept_id $BQ_DATASET.search_enc
+
 create_concept_tables=(search_snomed search_drug search_measurement search_visit)
 for t in "${create_concept_tables[@]}"
 do
@@ -150,6 +153,16 @@ from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = o.observation_source_concept_id and c.is_selectable = 1 and c.type = 'ICD9')
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = o.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)"
+
+echo "Inserting data into search_enc"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_enc\`
+ (person_id, concept_id_or_source_concept_id, count)
+select person_id, source_concept_id, count(*) as count from (
+select s.person_id, s.source_concept_id
+from \`$BQ_PROJECT.$BQ_DATASET.search_icd9\` s
+group by person_id, entry_date, source_concept_id)
+group by person_id, source_concept_id"
 
 ################################################
 #   insert condition data into search_icd10    #
