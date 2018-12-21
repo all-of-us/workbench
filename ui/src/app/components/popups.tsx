@@ -124,7 +124,7 @@ export const PopupPortal = ({ children }) => {
 };
 
 export const Tooltip = withDynamicPosition()(class TooltipComponent extends React.Component {
-  static defaultProps = {
+  static readonly defaultProps = {
     side: 'bottom'
   };
 
@@ -154,7 +154,7 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
         style={{
           transform: `translate(${position.left}px, ${position.top}px)`,
           ...styles.tooltip
-        } as React.CSSProperties}
+        }}
       >
         {children}
         <svg viewBox='0 0 2 1' style={{...getNotchPosition(), ...styles.notch}}>
@@ -208,7 +208,7 @@ export const Popup = flow(
   onClickOutside,
   withDynamicPosition()
 )(class PopupComponent extends React.Component {
-  static defaultProps = {
+  static readonly defaultProps = {
     side: 'right'
   };
 
@@ -233,14 +233,14 @@ export const Popup = flow(
         ref={elementRef}
         style={{
           transform: `translate(${position.left}px, ${position.top}px)`,
-          ...styles.popup} as React.CSSProperties}
+          ...styles.popup}}
       >{children}</div>
     </PopupPortal>;
   }
 });
 
 export class PopupTrigger extends React.Component {
-  static defaultProps = {
+  static readonly defaultProps = {
     closeOnClick: false
   };
 
