@@ -468,6 +468,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             List<AchillesAnalysis> analyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, qlist);
             QuestionConcept.mapAnalysesToQuestions(questions, analyses);
         }
+
         resp.setItems(questions.stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList()));
         return ResponseEntity.ok(resp);
     }
@@ -532,7 +533,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 //aa.setUnitName(unitName);
-                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !Strings.isNullOrEmpty(domainId)){
+                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !domainId.isEmpty()) {
                     aa.setResults(aa.getResults().stream().filter(ar -> ar.getStratum3().equalsIgnoreCase(domainId)).collect(Collectors.toList()));
                 }
                 if(analysisId == GENDER_ANALYSIS_ID){
