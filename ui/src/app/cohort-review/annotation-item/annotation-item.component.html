@@ -17,7 +17,8 @@
           (blur)="textBlur()"
           [name]="machineName"
           [id]="machineName"
-          formControlName="annotation">
+          formControlName="annotation"
+          maxlength="4000">
         </textarea>
     </div>
     <div *ngSwitchCase="kinds.DATE">
