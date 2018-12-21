@@ -169,7 +169,7 @@ public class QuestionConcept {
                     if (validAgeDeciles.contains(r.getStratum5())) {
                         questionAnalysis.addResult(r);
                     }
-                } else{
+                } else {
                     questionAnalysis.addResult(r);
                 }
                 String rStratum5Name = r.getAnalysisStratumName();
