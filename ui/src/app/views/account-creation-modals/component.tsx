@@ -19,7 +19,6 @@ import {
   ModalBody,
   ModalFooter,
   ModalTitle,
-  styles,
 } from 'app/react-components/modals';
 
 function isBlank(s: string) {
@@ -123,7 +122,7 @@ class AccountCreationModalsReact extends React.Component<any, any> {
                 <td><label>Contact Email:</label></td>
                 <td style={{width: '70%'}}><FieldInput
                   id={'change-contact-email'}
-                  style={this.showEmailValidationError() ? styles.unsuccessfulInput : {}}
+                  className={this.showEmailValidationError() ? 'modal-unsuccessful-input' : ''}
                   onBlur={(e) => this.leaveFocusEmail(e)}
                   onFocus={() => this.enterFocusEmail()}
                 >
@@ -150,12 +149,12 @@ class AccountCreationModalsReact extends React.Component<any, any> {
           </ModalFooter>
         </Modal>}
       {this.props.resend &&
-      <Modal id={'resend-instructions>'}>
+      <Modal id={'resend-instructions'}>
         <ModalTitle>Resend Instructions</ModalTitle>
         <ModalFooter>
-          <button type={'button'} className='btn btn-outline'
+          <button type='button' className='btn btn-outline'
                   onClick={() => this.close()}>Cancel</button>
-          <button type={'button'} id={'resend_instructions'}
+          <button type='button' id='resend_instructions'
                   className={'btn btn-primary'}
                   onClick={() => this.send()}>Send</button>
         </ModalFooter>
