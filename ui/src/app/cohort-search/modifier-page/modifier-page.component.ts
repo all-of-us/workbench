@@ -341,7 +341,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           }
           operands.forEach((value, i) => {
             const input = i === 0 ? 'valueA' : 'valueB';
-            if (!value && value.length > maxLength) {
+            if (value && value.length > maxLength) {
               value = value.slice(0, maxLength);
               this.form.get([name, input]).setValue(value, {emitEvent: false});
             }

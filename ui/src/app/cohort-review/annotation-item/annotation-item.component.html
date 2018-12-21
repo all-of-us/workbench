@@ -48,8 +48,8 @@
       <input
         class="integer-style"
         (blur)="textBlur()"
-        (keypress)="integerOnly($event)"
         type="number"
+        max="999999999"
         [name]="machineName"
         [id]="machineName"
         formControlName="annotation">
