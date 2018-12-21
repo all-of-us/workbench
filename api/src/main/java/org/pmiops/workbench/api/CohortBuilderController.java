@@ -251,7 +251,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<org.pmiops.workbench.model.Criteria> getCriteriaByTypeAndId(Long cdrVersionId, String type, Long id) {
+  public ResponseEntity<org.pmiops.workbench.model.Criteria> getPPICriteriaParent(Long cdrVersionId, String type, String conceptId) {
     Optional.ofNullable(type)
       .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
     Arrays
@@ -259,10 +259,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       .filter(treeType -> treeType.name().equalsIgnoreCase(type))
       .findFirst()
       .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
-    Optional.ofNullable(id)
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid id. %s is not valid.", id )));
+    Optional.ofNullable(conceptId)
+      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid conceptId. %s is not valid.", conceptId )));
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndId(type, id);
+    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(type, conceptId, false);
     return ResponseEntity.ok(TO_CLIENT_CRITERIA.apply(criteria));
   }
 
