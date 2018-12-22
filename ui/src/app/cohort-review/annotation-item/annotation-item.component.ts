@@ -184,10 +184,16 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (apiCall) {
-      apiCall.subscribe((update) => {
-        this.annotationUpdate.emit(update);
-        if (update && !annoId) {
-          this.annotation.value.annotationId = update.annotationId;
+      apiCall.toPromise().then((update) => {
+        if (update) {
+          if (update.annotationId) {
+            this.annotationUpdate.emit(update);
+          } else {
+            this.annotation.value.annotationId = undefined;
+          }
+          if (update && !annoId) {
+            this.annotation.value.annotationId = update.annotationId;
+          }
         }
         setTimeout (() => {
           this.textSpinnerFlag = false;
