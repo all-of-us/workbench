@@ -82,7 +82,7 @@ public class ConceptService {
                     if (key.length() < 3) {
                         temp.add(key);
                     } else {
-                        temp.add(new String("+" + key + "*"));
+                        temp.add(new String("+" + key));
                     }
                 }
             }
