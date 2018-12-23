@@ -306,7 +306,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<DomainInfosAndSurveyModulesResponse> getDomainSearchResults(String query){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        String keyword = ConceptService.modifyMultipleMatchKeyword(query, "counts");
+        String keyword = ConceptService.modifyMultipleMatchKeyword(query);
         Long conceptId = 0L;
         try {
             conceptId = Long.parseLong(query);
