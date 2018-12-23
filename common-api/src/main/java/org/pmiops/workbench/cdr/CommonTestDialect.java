@@ -13,7 +13,7 @@ public class CommonTestDialect extends MySQL57InnoDBDialect {
         // Because LOCATE / MATCH returns a number, we need to have this function use DOUBLE.
 
         registerFunction("match", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
-                "LOCATE(REPLACE(REPLACE(?2, '+'),'*'), ?1)"));
+                "LOCATE(REPLACE(?2, '+'), ?1)"));
 
         registerFunction("matchConcept", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
             "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
