@@ -82,7 +82,7 @@ public class ConceptService {
                     if (key.length() < 3) {
                         temp.add(key);
                     } else {
-                        if (domain.equals("counts")) {
+                        if ("counts".equalsIgnoreCase(domain)) {
                             temp.add(new String("+" + key + "*"));
                         } else {
                             temp.add(new String("+" + key));
