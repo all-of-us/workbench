@@ -31,6 +31,5 @@ export class HighlightSearchComponent implements OnChanges {
     } else {
       this.words.push(this.text);
     }
-    console.log(this.words);
   }
 }
