@@ -10,6 +10,7 @@ export class ParticipantsChartsComponent implements  OnChanges {
 
   @Input() chartItems = [];
   @Input() totalCount: any;
+  @Input() domainName = '';
   constructor() {}
 
   ngOnChanges() {
