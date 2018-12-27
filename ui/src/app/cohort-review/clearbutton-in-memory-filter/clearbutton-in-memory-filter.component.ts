@@ -1,16 +1,16 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
-
+import {Subject, Subscription} from 'rxjs';
 import {Participant} from '../participant.model';
-import {Subject, Subscription} from "rxjs";
+
 
 @Component({
   selector: 'app-clearbutton-in-memory-filter',
   templateUrl: './clearbutton-in-memory-filter.component.html',
 })
 export class ClearButtonInMemoryFilterComponent
-  implements ClrDatagridFilterInterface<Participant> {
+  implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   @Input() property: string;
   selection = new FormControl();
   @Output()
