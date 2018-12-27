@@ -1,7 +1,8 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
-import {Subject, Subscription} from 'rxjs';
+import {Subject} from 'rxjs/Subject';
+import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 
 
