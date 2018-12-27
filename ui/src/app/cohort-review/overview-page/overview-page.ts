@@ -1,10 +1,8 @@
-import {NgRedux} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {typeToTitle} from '../../cohort-search/utils';
 import {ReviewStateService} from '../review-state.service';
 
 
@@ -17,6 +15,7 @@ import {ReviewStateService} from '../review-state.service';
 export class OverviewPage implements OnInit, OnDestroy {
   openChartContainer = false;
   demoGraph = false;
+  @Output() dataItems = new EventEmitter<any>();
   data = List();
   typesList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
@@ -24,15 +23,11 @@ export class OverviewPage implements OnInit, OnDestroy {
     DomainType[DomainType.LAB]];
   title: string;
   showTitle = false;
-  selectedCohortName: string;
   review: CohortReview;
   totalParticipantCount: number;
-  isCancelTimerInitiated: any = false;
-  domainTitle: '';
   buttonsDisableFlag = false;
   private subscription: Subscription;
   domainsData = {};
-  condChart: any;
   totalCount: any;
   constructor(
     private chartAPI: CohortBuilderService,
@@ -42,22 +37,19 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.selectedCohortName = this.route.parent.snapshot.data.cohort.name;
-    const {cdrVersionId} = this.route.parent.snapshot.data.workspace;
-    this.subscription = this.state.cohort$
-      .map(({criteria}) => <SearchRequest>(JSON.parse(criteria)))
-      .switchMap(request => this.chartAPI.getDemoChartInfo(cdrVersionId, request))
+    const {cohort, review, workspace} = this.route.snapshot.data;
+    const request = <SearchRequest>(JSON.parse(cohort.criteria));
+    this.chartAPI.getDemoChartInfo(workspace.cdrVersionId, request)
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
+        this.dataItems.emit(this.data);
         this.buttonsDisableFlag = false;
       });
-    this.subscription.add(this.state.review$.subscribe(review => {
-      this.review = review;
-      this.totalParticipantCount = review.matchedParticipantCount;
+    this.review = review;
+    this.totalParticipantCount = review.matchedParticipantCount;
 
-    }));
-    this.getDemoCharts();
+
     this.openChartContainer = true;
     this.fetchChartsData();
   }
@@ -72,47 +64,19 @@ export class OverviewPage implements OnInit, OnDestroy {
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
-      this.subscription.add(this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
+      this.domainsData[domainName] = {
+              conditionTitle: '',
+              loading: true
+            };
+      this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
-        }));
+          this.domainsData[domainName].loading = false;
+        });
     });
-  }
-
-
-  getDemoCharts () {
-    this.buttonsDisableFlag = true;
-    this.condChart = '';
-    setTimeout(() => {
-      this.demoGraph = true;
-      if (this.data.size) {
-        this.buttonsDisableFlag = false;
-      }
-    }, 1000);
-    this.showTitle = false;
-    this.domainTitle = '';
-    this.isCancelTimerInitiated = false;
-  }
-
-  getDifferentCharts(names) {
-    this.buttonsDisableFlag = true;
-    this.demoGraph = false;
-    this.domainTitle = names;
-    this.showTitle = true;
-    this.setNames(names);
-    this.title = typeToTitle(names);
-    return this.title;
-  }
-
-  setNames(names) {
-     this.condChart = '';
-    setTimeout(() => {
-      this.condChart = names;
-      this.buttonsDisableFlag = false;
-    }, 1000);
   }
 
   ngOnDestroy() {
