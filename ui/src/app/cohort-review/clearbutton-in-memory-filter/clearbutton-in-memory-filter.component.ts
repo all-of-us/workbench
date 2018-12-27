@@ -12,12 +12,9 @@ import {Subject, Subscription} from "rxjs";
 export class ClearButtonInMemoryFilterComponent
   implements ClrDatagridFilterInterface<Participant> {
   @Input() property: string;
-
   selection = new FormControl();
-   // changes: EventEmitter<any> = new EventEmitter<any>(false);
   @Output()
   filterChanges: EventEmitter<any> = new EventEmitter<any>();
-  filteredColumns = [];
    changes = new Subject<any>();
   subscription: Subscription;
 
@@ -37,7 +34,6 @@ export class ClearButtonInMemoryFilterComponent
   }
 
   refreshData() {
-    // this.changes.next(true)
     if (this.selection.value) {
       this.filterChanges.emit({column: this.property, action: 'add'});
     } else {
@@ -51,7 +47,6 @@ export class ClearButtonInMemoryFilterComponent
   }
 
   get isDisabled(): boolean {
-    // this.changes.next(true)
     return !this.selection.value;
   }
 
