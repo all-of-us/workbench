@@ -1,8 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/switchMap';
@@ -19,6 +18,7 @@ import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/mode
         './quick-search.component.css']
 })
 export class QuickSearchComponent implements OnInit, OnDestroy {
+    @ViewChild('qsc') private container: ElementRef;
     pageImage = '/assets/db-images/man-standing.png';
     title = 'Search Across Data Types';
     subTitle = 'Conduct a search across all AoU Research Program data types, including surveys, ' +
@@ -62,6 +62,8 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+      // Scroll to the top of the page on component refresh/ route change
+      this.container.nativeElement.parentElement.parentElement.scrollTop = 0;
         // Set title based on datatype
       if (this.dataType === this.EHR_DATATYPE) {
         this.title = 'Electronic Health Data';

@@ -3,7 +3,6 @@ import {Component, ElementRef, HostListener, Inject, OnInit, ViewChild} from '@a
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
-
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -15,7 +14,6 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {environment} from 'environments/environment';
-
 import {SignInService} from 'app/services/sign-in.service';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -42,7 +40,7 @@ export class AppComponent implements OnInit {
     private locationService: Location,
     private router: Router,
     private signInService: SignInService,
-    private titleService: Title
+    private titleService: Title,
   ) {}
 
   ngOnInit(): void {
