@@ -9,9 +9,3 @@
     /* the logo has a little padding in it not lining up with text so move it left a hair */
     margin-left: -.20rem;
 }
-
-.page-image {
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-}

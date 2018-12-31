@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
     private locationService: Location,
     private router: Router,
     private signInService: SignInService,
-    private titleService: Title,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {
