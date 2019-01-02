@@ -202,12 +202,13 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
   @Input('resend')
   public resend: boolean;
 
-  constructor() {}
+  constructor(
+  ) {}
 
-  ngOnInit(): void {
+  renderModal(): void {
     let component;
     const props = {username: this.userName, creationNonce: this.creationNonce,
-                 closeFunction: this.close};
+                   closeFunction: this.close};
     if (this.resend) {
       component = AccountCreationResendModalReact;
       props['resend'] = this.resend;
@@ -220,19 +221,11 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
       document.getElementById('account-creation-modal'));
   }
 
+  ngOnInit(): void {
+    this.renderModal();
+  }
+
   ngDoCheck(): void {
-    let component;
-    const props = {username: this.userName, creationNonce: this.creationNonce,
-      closeFunction: this.close};
-    if (this.resend) {
-      component = AccountCreationResendModalReact;
-      props['resend'] = this.resend;
-    } else {
-      component = AccountCreationUpdateModalReact;
-      props['passNewEmail'] = this.updateEmail;
-      props['update'] = this.update;
-    }
-    ReactDOM.render(React.createElement(component, props),
-      document.getElementById('account-creation-modal'));
+    this.renderModal();
   }
 }
