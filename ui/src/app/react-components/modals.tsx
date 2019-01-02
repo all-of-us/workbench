@@ -66,18 +66,18 @@ export const styles = {
   }
 };
 
-export const Modal = ({children, style = {}, ...props}) => {
+export const Modal = ({style = {}, ...props}) => {
   return <div><div style={{...styles.modalBackdrop}}></div>
-    <div {...props} style={{...styles.modalMain, ...style}}>{children}</div></div>;
+    <div {...props} style={{...styles.modalMain, ...style}}>{props.children}</div></div>;
 };
-export const ModalTitle = ({children, style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalTitle, ...style}}>{children}</div>;
-export const ModalBody = ({children, style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalBody, ...style}}>{children}</div>;
+export const ModalTitle = ({style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalTitle, ...style}}>{props.children}</div>;
+export const ModalBody = ({style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalBody, ...style}}>{props.children}</div>;
 export const FieldInput = ({style = {}, ...props}) =>
   <input {...props} style={{...styles.input, ...style}}></input>;
-export const ModalFooter = ({children, style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalFooter, ...style}}>{children}</div>;
-export const Error = ({children, style = {}, ...props}) =>
-  <div {...props} style={{...styles.error, ...style}}>{children}</div>;
+export const ModalFooter = ({style = {}, ...props}) =>
+  <div {...props} style={{...styles.modalFooter, ...style}}>{props.children}</div>;
+export const Error = ({style = {}, ...props}) =>
+  <div {...props} style={{...styles.error, ...style}}>{props.children}</div>;
 
