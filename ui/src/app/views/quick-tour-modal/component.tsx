@@ -6,7 +6,7 @@ const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
     'omop-common-data-model-and-standardized-vocabularies/';
 const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
 
-const panels = [
+export const panels = [
     {
       title: 'Intro',
       content: <div>Welcome to the All of Us Research Workbench!<br/><br/>All workbench analyses
@@ -140,6 +140,7 @@ export class QuickTourReact extends React.Component<any, any> {
               return <React.Fragment key={i}>
                 <div className='breadcrumb-component'>
                   <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
+                       id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
                     {(i < this.state.selected) && <div className='check'>
                         <img src={this.checkImg}/>
@@ -172,6 +173,7 @@ export class QuickTourReact extends React.Component<any, any> {
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
                     <div className='resize-icon' style={{position: 'absolute', zIndex: 2}}
+                         id='expand-icon'
                          onClick={() => this.toggleImage()}>
                         <img src={this.expandIcon}/>
                     </div>
@@ -198,6 +200,7 @@ export class QuickTourReact extends React.Component<any, any> {
         <div className='full-image-wrapper'>
           <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
           <div className='resize-icon' onClick={() => this.toggleImage()}
+               id='shrink-icon'
                style={{position: 'absolute', right: '5%', bottom: '5%'}}>
             <img src={this.shrinkIcon}/>
           </div>

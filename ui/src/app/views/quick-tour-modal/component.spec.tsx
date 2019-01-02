@@ -1,4 +1,4 @@
-import {QuickTourReact} from './component';
+import {panels, QuickTourReact} from './component';
 
 import * as React from 'react';
 import { shallow } from 'enzyme';
@@ -10,6 +10,7 @@ describe('QuickTourModalComponent', () => {
     learning: boolean,
     closeFunction: Function
   };
+  const lastPanel = panels.length - 1;
 
   const component = () => {
     return shallow(<QuickTourReact {...props}/>);
@@ -41,6 +42,13 @@ describe('QuickTourModalComponent', () => {
     expect(wrapper.state().selected).toBe(firstSlide + 1);
   });
 
+  it('should go to the panel we select from the breadcrumbs', () => {
+    const wrapper = component();
+    const panelNum = 2;
+    wrapper.find('#breadcrumb' + panelNum).simulate('click');
+    expect(wrapper.state().selected).toBe(panelNum);
+  });
+
   it('should go to the previous slide when we click previous', () => {
     const wrapper = component();
     const firstSlide = wrapper.state().selected;
@@ -51,24 +59,20 @@ describe('QuickTourModalComponent', () => {
 
   it('should not show the next button when we are on the last slide', () => {
     const wrapper = component();
-    let i = 0;
-    do {
-      wrapper.find('#next').simulate('click');
-      i++;
-    }
-    while (i < 4);
+    wrapper.find('#breadcrumb' + lastPanel).simulate('click');
     expect(wrapper.exists('#close')).toBeFalsy();
     expect(wrapper.find('#next').text()).toBe('Close');
   });
 
-  it('should expand the image when we click the expand icon', () => {
+  it('should expand and retract the image when the resize icon is clicked', () => {
     const wrapper = component();
+    // You cannot expand the image on the first page of the quick tour
+    wrapper.find('#next').simulate('click');
     expect(wrapper.state().fullImage).toBeFalsy();
-    // TODO
-  });
-
-  it('should retract the image when we click the retract icon', () => {
-
+    wrapper.find('#expand-icon').simulate('click');
+    expect(wrapper.state().fullImage).toBeTruthy();
+    wrapper.find('#shrink-icon').simulate('click');
+    expect(wrapper.state().fullImage).toBeFalsy();
   });
 
 });
