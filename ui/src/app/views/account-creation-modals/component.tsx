@@ -207,37 +207,34 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
   constructor() {}
 
   ngOnInit(): void {
+    let component;
+    let props = {username: this.userName, creationNonce: this.creationNonce,
+                 closeFunction: this.close};
     if (this.resend) {
-      ReactDOM.render(React.createElement(AccountCreationResendModalReact,
-        {username: this.userName, creationNonce: this.creationNonce,
-         resend: this.resend, closeFunction: this.close}),
-        document.getElementById('account-creation-modal'));
+      component = AccountCreationResendModalReact;
+      props['resend'] = this.resend;
     } else {
-      ReactDOM.render(React.createElement(AccountCreationUpdateModalReact,
-        {username: this.userName, creationNonce: this.creationNonce,
-          passNewEmail: this.updateEmail, update: this.update,
-          closeFunction: this.close
-        }),
-        document.getElementById('account-creation-modal'));
+      component = AccountCreationUpdateModalReact;
+      props['passNewEmail'] = this.updateEmail;
+      props['update'] = this.update;
     }
+    ReactDOM.render(React.createElement(component, props),
+      document.getElementById('account-creation-modal'));
   }
 
   ngDoCheck(): void {
+    let component;
+    let props = {username: this.userName, creationNonce: this.creationNonce,
+      closeFunction: this.close};
     if (this.resend) {
-      ReactDOM.render(React.createElement(AccountCreationResendModalReact,
-        {
-          username: this.userName, creationNonce: this.creationNonce,
-          resend: this.resend, closeFunction: this.close
-        }),
-        document.getElementById('account-creation-modal'));
+      component = AccountCreationResendModalReact;
+      props['resend'] = this.resend;
     } else {
-      ReactDOM.render(React.createElement(AccountCreationUpdateModalReact,
-        {
-          username: this.userName, creationNonce: this.creationNonce,
-          passNewEmail: this.updateEmail, update: this.update,
-          closeFunction: this.close
-        }),
-        document.getElementById('account-creation-modal'));
+      component = AccountCreationUpdateModalReact;
+      props['passNewEmail'] = this.updateEmail;
+      props['update'] = this.update;
     }
+    ReactDOM.render(React.createElement(component, props),
+      document.getElementById('account-creation-modal'));
   }
 }
