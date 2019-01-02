@@ -59,7 +59,6 @@ export class ComboChartComponent {
       .valueSeq()
       .sort((a, b) => a.name > b.name ? 1 : -1)
       .toArray();
-
     window.dispatchEvent(new Event('resize'));
   }
 
