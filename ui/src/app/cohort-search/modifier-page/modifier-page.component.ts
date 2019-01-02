@@ -21,6 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
+import {dateValidator, rangeValidator} from '../validators';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -123,17 +124,6 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   dateA = new FormControl();
   dateB = new FormControl();
   errors = new Set();
-  readonly errorMessages = {
-    ageAtEvent: {
-      range: 'Age At Event must be between 1 and 120',
-      integer: 'Age At Event must be a whole number'
-    },
-    hasOccurrences: {
-      range: 'Has Occurrences must be between 1 and 99',
-      integer: 'Has Occurrences must be a whole number'
-    }
-  };
-
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -296,9 +286,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         this.form.get(mod.name).reset();
       } else {
         const validators = [Validators.required];
-        if (mod.modType !== ModifierType.EVENTDATE) {
-          validators.push(Validators.min(mod.min));
-          validators.push(Validators.max(mod.max));
+        if (mod.modType === ModifierType.EVENTDATE) {
+          validators.push(dateValidator());
+        } else {
+          validators.push(rangeValidator(mod.label, mod.min, mod.max));
           validators.push(Validators.maxLength(mod.maxLength));
         }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
@@ -350,20 +341,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           }
           operands.forEach((value, i) => {
             const input = i === 0 ? 'valueA' : 'valueB';
-            if (!value) {
-              if (this.form.get([name, input]).dirty) {
-                this.errors.add({name, type: 'integer'});
-              }
-            } else {
-              if (value.length > maxLength) {
-                value = value.slice(0, maxLength);
-                this.form.get([name, input]).setValue(value, {emitEvent: false});
-              }
-              if (value && !Number.isInteger(parseFloat(value))) {
-                this.errors.add({name, type: 'integer'});
-              } else if (value && (value < min || value > max)) {
-                this.errors.add({name, type: 'range'});
-              }
+            if (value && value.length > maxLength) {
+              value = value.slice(0, maxLength);
+              this.form.get([name, input]).setValue(value, {emitEvent: false});
             }
           });
           return fromJS({name: modType, operator, operands});

@@ -191,6 +191,8 @@ paths:
     post:
       tags:
         - dataBrowser
+      consumes:
+        - application/json
       description: Gets list of matched concepts
       operationId: "searchConcepts"
       parameters:
