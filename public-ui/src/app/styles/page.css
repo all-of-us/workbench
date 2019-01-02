@@ -192,3 +192,9 @@ span.keyword {
     padding-left: 0;
     padding-right: 0;
 }
+
+.page-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}

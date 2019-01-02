@@ -1,9 +1,5 @@
 import {DOCUMENT, Location} from '@angular/common';
 import {Component, ElementRef, HostListener, Inject, OnInit, ViewChild} from '@angular/core';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
-
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -11,12 +7,12 @@ import {
   NavigationEnd, NavigationStart,
   Router,
 } from '@angular/router';
-
-import {Observable} from 'rxjs/Observable';
-
-import {environment} from 'environments/environment';
-
 import {SignInService} from 'app/services/sign-in.service';
+import {environment} from 'environments/environment';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/mergeMap';
+import {Observable} from 'rxjs/Observable';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
