@@ -14,17 +14,22 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
   </head>
-
-  <noscript>
-    For full functionality of this site it is necessary to enable JavaScript.
-    Here are the <a href="https://www.enable-javascript.com/">
-    instructions how to enable JavaScript in your web browser</a>.
-  </noscript>
-
   <!-- Push state routing -->
   <base href="/">
 
   <body id='body' style="width: 100vw; min-width: 1080px">
+  <noscript>
+    <div style="max-width: 500px;">
+      <div><img alt="logo" src="/assets/images/logo-registration-non-signed-in.svg" width="314px"></div>
+      <div style="font-size: large;">
+        <h2>Javascript is Disabled</h2>
+        For full functionality of this site it is necessary to enable JavaScript.
+        Here are the <a href="https://www.enable-javascript.com/">
+        instructions how to enable JavaScript in your web browser</a>.
+      </div>
+    </div>
+  </noscript>
+
     <app-aou></app-aou>
     <app-initial-error></app-initial-error>
     <app-error-handler></app-error-handler>
