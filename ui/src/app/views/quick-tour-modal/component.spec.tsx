@@ -1,7 +1,7 @@
-import {panels, QuickTourReact} from './component';
-
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
+
+import {panels, QuickTourReact} from './component';
 
 
 describe('QuickTourModalComponent', () => {
@@ -20,7 +20,7 @@ describe('QuickTourModalComponent', () => {
     props = {
       learning: true,
       closeFunction: () => {}
-    }
+    };
   });
 
   it('should render, should have a next and close button', () => {
