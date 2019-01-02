@@ -21,8 +21,8 @@
   },
   "jest": {
     "setupFiles": [
-      "<rootDir>/test-shim.js",
-      "<rootDir>/test-setup.js"
+      "./test-shim.js",
+      "./test-setup.js"
     ],
     "moduleFileExtensions": [
       "ts",
@@ -30,12 +30,26 @@
       "js",
       "spec.ts"
     ],
+    "moduleDirectories": [
+      "node_modules"
+    ],
     "transform": {
-      "^.+\\.(ts|tsx)$": "<rootDir>/test-preprocessor.js"
+      "^.+\\.(ts|tsx)$": "ts-jest"
     },
     "testMatch": [
-      "**/src/app/views/quick-tour-modal/*.spec.ts"
-    ]
+      "**/src/app/views/quick-tour-modal/*.spec.tsx"
+    ],
+    "globals": {
+      "ts-jest": {
+        "diagnostics": {
+          "warnOnly": true
+        },
+        "tsConfig": {
+          "module": "commonjs",
+          "jsx": "react"
+        }
+      }
+    }
   },
   "private": true,
   "dependencies": {
@@ -86,6 +100,7 @@
     "rxjs": "^5.5.6",
     "stackdriver-errors-js": "^0.4.0",
     "stacktrace-js": "^2.0.0",
+    "ts-jest": "^23.10.5",
     "tslib": "^1.9.0",
     "yarn": "^1.12.3",
     "zone.js": "0.8.26"
