@@ -186,8 +186,6 @@ class AccountCreationUpdateModalReact extends React.Component<any, any> {
 @Component({
   selector: 'app-account-creation-modals',
   templateUrl: './component.html',
-  styleUrls: ['./component.css',
-    '../../styles/buttons.css'],
 })
 
 export class AccountCreationModalsComponent implements OnInit, DoCheck {
