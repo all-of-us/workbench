@@ -24,11 +24,11 @@ export const styles = {
   }
 };
 
-export const BolderHeader = ({children, style = {}}) =>
-  <h1 style={{...styles.h1, ...style}}>{children}</h1>;
-export const BoldHeader = ({children, style = {}}) =>
-  <h2 style={{...styles.h2, ...style}}>{children}</h2>;
-export const Header = ({children, style = {}}) =>
-  <h3 style={{...styles.h3, ...style}}>{children}</h3>;
-export const SmallHeader = ({children, style = {}}) =>
-  <h4 style={{...styles.h4, ...style}}>{children}</h4>;
+export const BolderHeader = ({style = {}, ...props}) =>
+  <h1 {...props} style={{...styles.h1, ...style}}/>;
+export const BoldHeader = ({style = {}, ...props}) =>
+  <h2 {...props} style={{...styles.h2, ...style}}/>;
+export const Header = ({style = {}, ...props}) =>
+  <h3 {...props} style={{...styles.h3, ...style}}/>;
+export const SmallHeader = ({style = {}, ...props}) =>
+  <h4 {...props} style={{...styles.h4, ...style}}/>;

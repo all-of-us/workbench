@@ -14,24 +14,34 @@ import {AccountCreationModalsComponent} from 'app/views/account-creation-modals/
 import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
 
+const buttonLinkStyling = {
+  border: 'none',
+  cursor: 'pointer',
+  outlineColor: 'transparent',
+  color: '#2691D0',
+  backgroundColor: 'transparent',
+};
+
 export class AccountCreationSuccessReact extends React.Component<any, any> {
   state: {};
   props: {
     contactEmail: string,
     account: AccountCreationComponent,
-    signInService: SignInService,
     accountCreationModalsComponent: AccountCreationModalsComponent,
   };
-  buttonLinkStyling = {
-    border: 'none',
-    cursor: 'pointer',
-    outlineColor: 'transparent',
-    color: '#2691D0',
-    backgroundColor: 'transparent',
-  };
+
   constructor(props: Object) {
     super(props);
   }
+
+  resendInstructions(): void {
+    this.props.accountCreationModalsComponent.resendInstructions();
+  }
+
+  updateAndSendEmail(): void {
+    this.props.accountCreationModalsComponent.updateAndSendEmail();
+  }
+
   render() {
     return <div style={{marginLeft: '-0.5rem', marginRight: '-0.5rem'}}>
       <BolderHeader>
@@ -43,12 +53,12 @@ export class AccountCreationSuccessReact extends React.Component<any, any> {
         </SmallHeader>
       </div>
       <div style={{height: '1.5rem'}}>
-        <Header>
+        <Header style={{fontWeight: 400}}>
           Your new account
         </Header>
       </div>
       <div style={{whiteSpace: 'nowrap'}}>
-        <Header style={{fontWeight: 400}}>
+        <Header style={{fontWeight: 400, marginTop: '0.5rem'}}>
           {this.props.account.profile.username}
         </Header>
       </div>
@@ -68,15 +78,11 @@ export class AccountCreationSuccessReact extends React.Component<any, any> {
         </SmallHeader>
       </div>
       <div style={{paddingTop: '0.5rem'}}>
-        <button style={this.buttonLinkStyling} onClick={
-          () => this.props.accountCreationModalsComponent.resendInstructions()
-        }>
+        <button style={buttonLinkStyling} onClick={this.resendInstructions}>
           Resend Instructions
         </button>
         |
-        <button style={this.buttonLinkStyling} onClick={
-          () => this.props.accountCreationModalsComponent.updateAndSendEmail()
-        }>
+        <button style={buttonLinkStyling} onClick={this.updateAndSendEmail}>
           Change contact email
         </button>
       </div>
@@ -94,33 +100,32 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
   accountCreationModalsComponent: AccountCreationModalsComponent;
   constructor(
     private loginComponent: LoginComponent,
-    private account: AccountCreationComponent,
-    private signInService: SignInService
+    private account: AccountCreationComponent
   ) {
     setTimeout(() => {
       loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
       loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
     }, 0);
   }
+
   ngOnInit(): void {
     this.renderReactComponent();
   }
+
   ngDoCheck(): void {
     this.renderReactComponent();
   }
+
   renderReactComponent(): void {
-    ReactDOM.render(React.createElement(AccountCreationSuccessReact,
-      {
-        contactEmail: this.contactEmail,
-        account: this.account,
-        signInService: this.signInService,
-        accountCreationModalsComponent: this.accountCreationModalsComponent
-      }),
+    ReactDOM.render(<AccountCreationSuccessReact
+        contactEmail={this.contactEmail}
+        account={this.account}
+        accountCreationModalsComponent={this.accountCreationModalsComponent}/>,
       document.getElementById('account-creation-success'));
   }
+
   receiveMessage($event) {
     this.contactEmail = $event;
-    this.renderReactComponent();
   }
 
   get getAccount() {
