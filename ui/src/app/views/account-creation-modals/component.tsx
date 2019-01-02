@@ -208,7 +208,7 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
 
   ngOnInit(): void {
     let component;
-    let props = {username: this.userName, creationNonce: this.creationNonce,
+    const props = {username: this.userName, creationNonce: this.creationNonce,
                  closeFunction: this.close};
     if (this.resend) {
       component = AccountCreationResendModalReact;
@@ -224,7 +224,7 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
 
   ngDoCheck(): void {
     let component;
-    let props = {username: this.userName, creationNonce: this.creationNonce,
+    const props = {username: this.userName, creationNonce: this.creationNonce,
       closeFunction: this.close};
     if (this.resend) {
       component = AccountCreationResendModalReact;
