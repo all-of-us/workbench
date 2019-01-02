@@ -21,11 +21,11 @@ clr-dg-cell.cell {
   background-color: #E2E2EA;
 }
 
-::ng-deep .datagrid-compact .datagrid-foot {
+:host::ng-deep .datagrid-compact .datagrid-foot {
   height: 1.5rem;
   line-height: calc(0.4rem - 1px);
 }
 
-::ng-deep .datagrid-foot-description {
+:host::ng-deep .datagrid-foot-description {
   padding-top: 0.3rem;
 }
