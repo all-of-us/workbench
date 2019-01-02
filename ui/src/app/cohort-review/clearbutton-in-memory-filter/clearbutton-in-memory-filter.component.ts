@@ -16,7 +16,7 @@ export class ClearButtonInMemoryFilterComponent
   selection = new FormControl();
   @Output()
   filterChanges: EventEmitter<any> = new EventEmitter<any>();
-   changes = new Subject<any>();
+  changes = new Subject<any>();
   subscription: Subscription;
 
   ngOnInit() {
@@ -54,6 +54,4 @@ export class ClearButtonInMemoryFilterComponent
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-
 }
-
