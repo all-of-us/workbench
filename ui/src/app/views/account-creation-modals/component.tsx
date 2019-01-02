@@ -3,7 +3,7 @@ import {Component, DoCheck, Input, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import {handleErrors, fullUrl} from 'app/utils/fetch';
+import {fullUrl, handleErrors} from 'app/utils/fetch';
 
 import {
   FetchArgs,
