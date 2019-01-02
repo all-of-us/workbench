@@ -3,12 +3,14 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   OnDestroy,
-  OnInit
+  OnInit,
+  Output
 } from '@angular/core';
-import {FormArray, FormControl, FormGroup} from '@angular/forms';
+import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {CohortBuilderService, ModifierType, TreeType} from 'generated';
+import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
@@ -29,11 +31,12 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   @select(activeCriteriaType) ctype$;
   @select(activeModifierList) modifiers$;
   @select(previewStatus) preview$;
+  @Output() disabled = new EventEmitter<boolean>();
   formChanges = false;
   ctype: string;
   existing = List();
   preview = Map();
-  dateObjs = [new Date(), new Date()];
+  dateObjs = [null , null];
   subscription: Subscription;
   dropdownOption = {
     selected: ['Any', 'Any', 'Any', 'Any']
@@ -44,6 +47,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     name: 'ageAtEvent',
     label: 'Age At Event',
     inputType: 'number',
+    min: 1,
+    max: 120,
+    maxLength: 3,
     modType: ModifierType.AGEATEVENT,
     operators: [{
       name: 'Any',
@@ -57,11 +63,14 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     }, {
       name: 'Between',
       value: 'BETWEEN',
-    }]
+    }],
   }, {
     name: 'eventDate',
     label: 'Shifted Event Date',
     inputType: 'date',
+    min: null,
+    max: null,
+    maxLength: null,
     modType: ModifierType.EVENTDATE,
     operators: [{
       name: 'Any',
@@ -80,6 +89,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     name: 'hasOccurrences',
     label: 'Has Occurrences',
     inputType: 'number',
+    min: 1,
+    max: 99,
+    maxLength: 2,
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
         name: 'Any',
@@ -110,7 +122,18 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
 
   dateA = new FormControl();
   dateB = new FormControl();
-  showError = false;
+  errors = new Set();
+  readonly errorMessages = {
+    ageAtEvent: {
+      range: 'Age At Event must be between 1 and 120',
+      integer: 'Age At Event must be a whole number'
+    },
+    hasOccurrences: {
+      range: 'Has Occurrences must be between 1 and 99',
+      integer: 'Has Occurrences must be a whole number'
+    }
+  };
+
   constructor(
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
@@ -130,6 +153,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             name: 'encounters',
             label: 'During Visit Type',
             inputType: null,
+            min: null,
+            max: null,
+            maxLength: null,
             modType: ModifierType.ENCOUNTERS,
             operators: [{
               name: 'Any',
@@ -168,7 +194,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
             let selected;
             // make sure the encounters options are loaded before setting the value
             Observable.interval(100)
-              .takeWhile((val, index) => !selected && index < 10)
+              .takeWhile((val, index) => !selected && index < 30)
               .subscribe(i => {
                 selected = meta.operators.find(
                   operator => operator.value
@@ -178,6 +204,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
                   this.dropdownOption.selected[3] = selected.name;
                   this.form.get(meta.name).patchValue({
                     operator: mod.getIn(['operands', 0]),
+                    encounterType: mod.get('encounterType')
                   }, {emitEvent: false});
                 }
               });
@@ -262,13 +289,35 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     const valueForm = <FormArray>modForm;
     if (mod.name === 'encounters') {
       valueForm.get('encounterType').patchValue(opt.name);
+    } else {
+      if (opt.name === 'Any') {
+        this.form.get([mod.name, 'valueA']).clearValidators();
+        this.form.get([mod.name, 'valueB']).clearValidators();
+        this.form.get(mod.name).reset();
+      } else {
+        const validators = [Validators.required];
+        if (mod.modType !== ModifierType.EVENTDATE) {
+          validators.push(Validators.min(mod.min));
+          validators.push(Validators.max(mod.max));
+          validators.push(Validators.maxLength(mod.maxLength));
+        }
+        this.form.get([mod.name, 'valueA']).setValidators(validators);
+        if (opt.value === Operator.BETWEEN) {
+          this.form.get([mod.name, 'valueB']).setValidators(validators);
+        } else {
+          this.form.get([mod.name, 'valueB']).clearValidators();
+          this.form.get([mod.name, 'valueB']).reset();
+        }
+      }
     }
     valueForm.get('operator').patchValue(opt.value);
   }
 
   currentMods(vals) {
     this.ngAfterContentChecked();
-    return this.modifiers.map(({name, inputType, modType}) => {
+    this.errors = new Set();
+    return this.modifiers.map(mod => {
+      const {name, inputType, min, max, maxLength, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
           return;
@@ -279,7 +328,11 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
       } else {
         const {operator, valueA, valueB} = vals[name];
         const between = operator === 'BETWEEN';
-        if (!operator || !valueA || (between && !valueB)) {
+        if (!operator || (!valueA && !valueB)) {
+          if (inputType !== 'date'
+            && (this.form.get([name, 'valueA']).dirty || this.form.get([name, 'valueB']).dirty)) {
+            this.errors.add({name, type: 'integer'});
+          }
           return;
         }
         if (inputType === 'date') {
@@ -295,6 +348,24 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           if (between) {
             operands.push(valueB);
           }
+          operands.forEach((value, i) => {
+            const input = i === 0 ? 'valueA' : 'valueB';
+            if (!value) {
+              if (this.form.get([name, input]).dirty) {
+                this.errors.add({name, type: 'integer'});
+              }
+            } else {
+              if (value.length > maxLength) {
+                value = value.slice(0, maxLength);
+                this.form.get([name, input]).setValue(value, {emitEvent: false});
+              }
+              if (value && !Number.isInteger(parseFloat(value))) {
+                this.errors.add({name, type: 'integer'});
+              } else if (value && (value < min || value > max)) {
+                this.errors.add({name, type: 'range'});
+              }
+            }
+          });
           return fromJS({name: modType, operator, operands});
         }
       }
@@ -302,7 +373,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   get addEncounters() {
-    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(this.ctype) === -1
+    return [TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(TreeType[this.ctype]) === -1
       && !this.modifiers.find(modifier => modifier.modType === ModifierType.ENCOUNTERS);
   }
 
@@ -319,22 +390,9 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.dateObjs[index] = new Date(this.form.get(['eventDate', control]).value + 'T08:00:00');
   }
 
-  numberValidation(event) {
-    if (!((event.keyCode > 95 && event.keyCode < 106)
-      || (event.keyCode > 47 && event.keyCode < 58)
-      || event.keyCode === 8)) {
-      return false;
-    }
-  }
-
-  negativeNumber() {
-   this.modifiers$.forEach(item => {
-    const modArr = item.map(modValue => {
-       return modValue.toJS().operands.map( o => {
-          return o < 0;
-        });
-      });
-     this.showError = modArr.toJS().flat().includes(true);
-    });
+  get disableCalculate() {
+    const disable = !!this.preview.get('requesting') || !!this.errors.size || this.form.invalid;
+    this.disabled.emit(disable);
+    return disable;
   }
 }

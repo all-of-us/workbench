@@ -70,7 +70,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
         this.surveyName = this.survey.name;
-
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer

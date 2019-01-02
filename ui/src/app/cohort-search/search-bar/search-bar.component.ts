@@ -90,8 +90,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.noResults = !this.optionSelected
-            && !this.options.length;
+          this.noResults = !this.optionSelected && !this.options.length;
         }
       });
 
@@ -135,7 +134,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         if (value.length >= trigger) {
           this.inputChange();
         } else {
-          this.actions.setCriteriaSearchTerms([]);
+          if (!this.optionSelected) {
+            this.actions.setCriteriaSearchTerms([]);
+          }
           this.options = [];
           this.noResults = false;
         }
@@ -181,6 +182,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   selectOption(option: any) {
     if (option) {
       this.optionSelected = true;
+      this.searchTerm.reset('');
       this.searchTerm.setValue(option.name, {emitEvent: false});
       if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
         this.actions.fetchIngredientsForBrand(option.conceptId);

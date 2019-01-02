@@ -30,6 +30,9 @@ import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
+import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
+import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
+import {QueryReportComponent} from './query-report/query-report.component';
 import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
@@ -39,6 +42,8 @@ import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
+
+
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -64,6 +69,7 @@ import {TablePage} from './table-page/table-page';
     DetailPage,
     OverviewPage,
     PageLayout,
+    QueryReportComponent,
     TablePage,
 
     /* Annotations */
@@ -87,8 +93,9 @@ import {TablePage} from './table-page/table-page';
     DetailTabsComponent,
     DetailTabTableComponent,
     DetailAllEventsComponent,
-    ParticipantsChartsComponent
-
+    ParticipantsChartsComponent,
+    QueryCohortDefinitionComponent,
+    QueryDescriptiveStatsComponent
   ],
   providers: [ReviewStateService,
     {
