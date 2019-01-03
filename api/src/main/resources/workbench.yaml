@@ -264,8 +264,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Request identity verification.
       operationId: submitIdVerification
       responses:
@@ -325,8 +323,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Submits consent to the terms of service for researchers.
       operationId: submitTermsOfService
       responses:
@@ -340,8 +336,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Completes ethics training.
       operationId: completeEthicsTraining
       responses:
@@ -355,8 +349,6 @@ paths:
     post:
       tags:
         - profile
-      consumes:
-        - application/json
       description: Submits demographic survey responses.
       operationId: submitDemographicsSurvey
       responses:
@@ -369,8 +361,6 @@ paths:
     post:
       tags:
         - authDomain
-      consumes:
-        - application/json
       description: This endpoint will create the registered auth domain.
       operationId: "createAuthDomain"
       parameters:
@@ -914,8 +904,6 @@ paths:
     post:
       tags:
         - workspaces
-      consumes:
-        - application/json
       description: Clones specified notebook
       operationId: "cloneNotebook"
       parameters:

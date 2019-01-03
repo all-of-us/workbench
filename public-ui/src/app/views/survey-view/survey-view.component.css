@@ -69,6 +69,10 @@
     height: 100%;
 }
 
+.survey-graph-answer {
+    margin: 0 auto;
+}
+
 /* remove space between list and charts */
 .answer-list {
 
@@ -115,4 +119,10 @@
 
 .answer-text {
     cursor: pointer;
+}
+
+.answer-box {
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 0 0;
+    min-height: 2rem;
 }

@@ -1,5 +1,8 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
+import {
+  find
+} from 'lodash/fp';
 
 import {DataAccessLevel} from 'generated';
 
@@ -47,3 +50,10 @@ export function randomString(len): string {
   }
   return str;
 }
+
+export const DEFAULT = Symbol();
+
+export const switchCase = (value, ...pairs) => {
+  const match = find(([v]) => v === value || v === DEFAULT, pairs);
+  return match && match[1]();
+};

@@ -124,6 +124,9 @@
           "options": {
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
+            "codeCoverageExclude": [
+              "src/app/views/quick-tour-modal/*"
+            ],
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [

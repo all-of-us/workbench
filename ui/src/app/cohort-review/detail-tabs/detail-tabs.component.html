@@ -23,7 +23,7 @@
       {{ allEvents.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
-      <div class="all-events-container">
+      <div>
         <app-detail-all-events
           [tabname]="allEvents.name"
           [columns]="allEvents.columns"
