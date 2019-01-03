@@ -10,6 +10,7 @@
     </div>
   </div>
 </div>
+<app-validator-errors [form]="form"></app-validator-errors>
 <div *ngIf="(error$ | async)" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
@@ -27,7 +28,7 @@
         <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
       </div>
       <div class="radio">
-        <input type="radio" name="labExists" [value]="true" formControlName="EXISTS" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
+        <input type="radio" name="EXISTS" [value]="true" formControlName="EXISTS" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
         <label>Any value (lab exists)</label>
       </div>
       <div *ngIf="!form.value.EXISTS && form.value.NUM !== {}" class="or-circle">OR</div>
