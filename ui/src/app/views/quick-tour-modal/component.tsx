@@ -76,21 +76,25 @@ export const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-export class QuickTourReact extends React.Component<any, any> {
-  state: {
-    selected: number,
-    fullImage: boolean
-  };
-  props: {
-    learning: boolean,
-    closeFunction: Function
-  };
+export interface QuickTourReactState {
+  selected: number,
+  fullImage: boolean
+}
+
+export interface QuickTourReactProps {
+  learning: boolean,
+  closeFunction: Function
+}
+
+export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
+  state: QuickTourReactState;
+  props: QuickTourReactProps;
 
   checkImg = '/assets/images/check.svg';
   expandIcon = '/assets/icons/expand.svg';
   shrinkIcon = '/assets/icons/shrink.svg';
 
-  constructor(props: Object) {
+  constructor(props: QuickTourReactProps) {
     super(props);
     this.state = {selected: 0, fullImage: false};
   }
