@@ -111,7 +111,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     const obj = localStorage.getItem( 'ehrDomain');
     if (obj) {
       this.ehrDomain = JSON.parse(obj);
-      if(this.ehrDomain.name === 'Measurements') {
+      if (this.ehrDomain.name === 'Measurements') {
         this.showMeasurementGenderBins = true;
         this.showAgeGraph = false;
       }
