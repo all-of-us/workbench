@@ -1,22 +1,29 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
-
+import {Subject} from 'rxjs/Subject';
+import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
+
 
 @Component({
   selector: 'app-clearbutton-in-memory-filter',
   templateUrl: './clearbutton-in-memory-filter.component.html',
 })
 export class ClearButtonInMemoryFilterComponent
-  implements ClrDatagridFilterInterface<Participant> {
+  implements OnDestroy, OnInit, ClrDatagridFilterInterface<Participant> {
   @Input() property: string;
-
   selection = new FormControl();
-  changes: EventEmitter<any> = new EventEmitter<any>(false);
   @Output()
   filterChanges: EventEmitter<any> = new EventEmitter<any>();
-  filteredColumns = [];
+  changes = new Subject<any>();
+  subscription: Subscription;
+
+  ngOnInit() {
+    this.subscription = this.selection.valueChanges.subscribe(
+      _ => this.changes.next(true)
+    );
+  }
 
   isActive(): boolean {
     return this.selection.value;
@@ -28,7 +35,6 @@ export class ClearButtonInMemoryFilterComponent
   }
 
   refreshData() {
-    this.changes.emit(true);
     if (this.selection.value) {
       this.filterChanges.emit({column: this.property, action: 'add'});
     } else {
@@ -42,7 +48,10 @@ export class ClearButtonInMemoryFilterComponent
   }
 
   get isDisabled(): boolean {
-    this.changes.emit(true);
     return !this.selection.value;
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 }
