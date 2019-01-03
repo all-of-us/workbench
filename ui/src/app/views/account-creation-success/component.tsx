@@ -75,11 +75,11 @@ export class AccountCreationSuccessReact extends React.Component<AccountCreation
         </SmallHeader>
       </div>
       <div style={{paddingTop: '0.5rem'}}>
-        <button style={buttonLinkStyling} onClick={this.props.resendInstructions}>
+        <button style={styles.buttonLinkStyling} onClick={this.props.resendInstructions}>
           Resend Instructions
         </button>
         |
-        <button style={buttonLinkStyling} onClick={this.props.updateAndSendEmail}>
+        <button style={styles.buttonLinkStyling} onClick={this.props.updateAndSendEmail}>
           Change contact email
         </button>
       </div>
