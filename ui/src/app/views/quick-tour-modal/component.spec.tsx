@@ -10,7 +10,8 @@ describe('QuickTourModalComponent', () => {
   const lastPanel = panels.length - 1;
 
   const component = () => {
-    return shallow<QuickTourReact, QuickTourReactProps, QuickTourReactState>(<QuickTourReact {...props}/>);
+    return shallow<QuickTourReact, QuickTourReactProps, QuickTourReactState>
+    (<QuickTourReact {...props}/>);
   };
 
   beforeEach(() => {

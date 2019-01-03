@@ -77,13 +77,13 @@ export const panels = [
     }];
 
 export interface QuickTourReactState {
-  selected: number,
-  fullImage: boolean
+  selected: number;
+  fullImage: boolean;
 }
 
 export interface QuickTourReactProps {
-  learning: boolean,
-  closeFunction: Function
+  learning: boolean;
+  closeFunction: Function;
 }
 
 export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
