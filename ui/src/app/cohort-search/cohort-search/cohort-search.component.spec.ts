@@ -11,6 +11,7 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
 import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from '../demographics/demographics.component';
@@ -42,9 +43,6 @@ class MockActions {
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
-
-  loadFromJSON(json: string): void {}
-  runAllRequests() {}
 }
 
 describe('CohortSearchComponent', () => {
@@ -81,7 +79,8 @@ describe('CohortSearchComponent', () => {
         SearchGroupListComponent,
         SearchGroupSelectComponent,
         SelectionInfoComponent,
-        TreeComponent
+        TreeComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,

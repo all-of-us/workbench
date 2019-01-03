@@ -9,7 +9,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {
   AnnotationType,
@@ -21,6 +21,8 @@ import {
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {dateValidator} from '../../cohort-search/validators';
+
 interface Annotation {
   definition: CohortAnnotationDefinition;
   value: ParticipantCohortAnnotation;
@@ -41,9 +43,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     new EventEmitter<ParticipantCohortAnnotation>();
   textSpinnerFlag = false;
   successIcon = false;
-  control = new FormControl();
-  formattedDate = new FormControl();
-  private expandText = false;
+  form = new FormGroup({
+    annotation: new FormControl(),
+    formattedDate: new FormControl()
+  });
   defaultAnnotation = false;
   annotationOption: any;
   oldValue: any;
@@ -85,21 +88,41 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     this.ngAfterContentChecked();
     this.successIcon = false;
     this.oldValue = this.annotation.value[this.valuePropertyName];
-    if (this.oldValue !== undefined) {
-      this.control.setValue(this.oldValue);
-      if (this.isDate) {
-        this.formattedDate.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
-        this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
+    this.subscription = this.form.controls.annotation.valueChanges.subscribe(val => {
+      if (this.isInt) {
+        if (val && val.toString().length > 9) {
+          const value = parseFloat(val.toString().slice(0, 9));
+          this.form.controls.annotation.setValue(value, {emitEvent: false});
+        }
       }
-    }
-    if (this.isDate) {
-      this.subscription = this.control.valueChanges.subscribe(val => {
+      if (this.isDate) {
         this.successIcon = false;
-        this.textSpinnerFlag = true;
-        this.formattedDate.setValue(moment(val).format('YYYY-MM-DD'));
-        this.handleInput();
-      });
+        this.form.controls.formattedDate.setValue(
+          moment(val).format('YYYY-MM-DD'),
+          {emitEvent: false}
+        );
+        if (!this.form.controls.formattedDate.errors) {
+          this.textSpinnerFlag = true;
+          this.handleInput();
+        }
+      }
+    });
+    if (this.isDate) {
+      this.form.controls.formattedDate.setValidators(dateValidator());
       this.dateBtns = document.getElementsByClassName('datepicker-trigger');
+    }
+    if (this.isInt) {
+      this.form.controls.annotation.setValidators([Validators.max(999999999)]);
+    }
+    if (this.isText) {
+      this.form.controls.annotation.setValidators([Validators.maxLength(4000)]);
+    }
+    if (this.oldValue !== undefined) {
+      this.form.controls.annotation.setValue(this.oldValue);
+      if (this.isDate) {
+        this.form.controls.formattedDate.setValue(moment(this.oldValue).format('YYYY-MM-DD'));
+        this.dateObj = new Date(this.form.controls.formattedDate.value + 'T08:00:00');
+      }
     }
   }
 
@@ -110,16 +133,10 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   textBlur() {
     this.successIcon = false;
-    this.textSpinnerFlag = true;
-    this.handleInput();
-  }
-
-  integerOnly(event): boolean {
-    const charCode = (event.charCode) ? event.charCode : event.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-      return false;
+    if (!this.form.controls.annotation.errors) {
+      this.textSpinnerFlag = true;
+      this.handleInput();
     }
-    return true;
   }
 
   handleInput() {
@@ -127,7 +144,8 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const pid = this.annotation.value.participantId;
     const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    const newValue = this.isDate ? this.formattedDate.value : this.control.value;
+    const newValue = this.isDate
+      ? this.form.controls.formattedDate.value : this.form.controls.annotation.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
     const annoId = this.annotation.value.annotationId ;
 
@@ -166,10 +184,16 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
       }
     }
     if (apiCall) {
-      apiCall.subscribe((update) => {
-        this.annotationUpdate.emit(update);
-        if (update && !annoId) {
-          this.annotation.value.annotationId = update.annotationId;
+      apiCall.toPromise().then((update) => {
+        if (update) {
+          if (update.annotationId) {
+            this.annotationUpdate.emit(update);
+          } else {
+            this.annotation.value.annotationId = undefined;
+          }
+          if (update && !annoId) {
+            this.annotation.value.annotationId = update.annotationId;
+          }
         }
         setTimeout (() => {
           this.textSpinnerFlag = false;
@@ -182,10 +206,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     } else {
       this.textSpinnerFlag = false;
     }
-  }
-
-  toggleExpandText() {
-    this.expandText = !this.expandText;
   }
 
   get valuePropertyName() {
@@ -202,32 +222,28 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     return this.annotation.definition.columnName.split(' ').join('-');
   }
 
-  get datatypeDisplay() {
-    return this.showDataType
-      ? ` (${this.annotation.definition.annotationType})`
-      : '';
-  }
-
   annotationOptionChange(value) {
     this.successIcon = false;
     this.textSpinnerFlag = true;
     this.annotationOption = value;
     this.defaultAnnotation = true;
-    this.control.patchValue(value);
+    this.form.controls.annotation.patchValue(value);
     this.handleInput();
 
   }
 
   dateBlur() {
     this.successIcon = false;
-    this.textSpinnerFlag = true;
-    this.dateObj = new Date(this.formattedDate.value + 'T08:00:00');
-    this.control.setValue(this.dateObj, {emitEvent: false});
-    this.handleInput();
+    if (!this.form.controls.formattedDate.errors) {
+      this.textSpinnerFlag = true;
+      this.dateObj = new Date(this.form.controls.formattedDate.value + 'T08:00:00');
+      this.form.controls.annotation.setValue(this.dateObj, {emitEvent: false});
+      this.handleInput();
+    }
   }
 
   datepickerPosition() {
-    let datepicker;
+    let datepicker: any;
     Observable.interval()
       .takeWhile((val, index) => !datepicker && index < 1000)
       .subscribe(() => {
@@ -240,6 +256,14 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   get isDate() {
     return this.annotation.definition.annotationType === AnnotationType.DATE;
+  }
+
+  get isInt() {
+    return this.annotation.definition.annotationType === AnnotationType.INTEGER;
+  }
+
+  get isText() {
+    return this.annotation.definition.annotationType === AnnotationType.STRING;
   }
 }
 

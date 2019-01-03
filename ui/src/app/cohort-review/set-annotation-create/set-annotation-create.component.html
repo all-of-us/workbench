@@ -47,7 +47,8 @@
         <ng-container *ngFor="let val of enumValues">
           <input type="text"
                  class="annotation-value-input"
-                 value= {{val}}>
+                 value= {{val}}
+                 maxlength="255">
           <button type="button"
                   class="btn btn-icon btn-link btn-sm text-danger"
                   (click)="removeEnumValue(val)">
@@ -60,7 +61,8 @@
              placeholder="ADD A VALUE"
              name="add-value"
              id="add-value"
-             formControlName="addValue">
+             formControlName="addValue"
+             maxlength="255">
       <button type="button"
               class="btn btn-icon btn-link"
               (click)="addEnumValue()">

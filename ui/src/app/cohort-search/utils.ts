@@ -128,7 +128,7 @@ export function highlightMatches(
           name = name.replace(re, '<span class="' + _class + '">$&</span>');
         });
     } else {
-      const re = new RegExp(term, 'gi');
+      const re = new RegExp(term.replace(/(?=[\[\]()+])/g, '\\'), 'gi');
       name = name.replace(re, '<span class="' + _class + '">$&</span>');
     }
   });

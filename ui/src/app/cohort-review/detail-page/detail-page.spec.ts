@@ -12,6 +12,7 @@ import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {CohortSearchActions} from '../../cohort-search/redux';
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {AnnotationListComponent} from '../annotation-list/annotation-list.component';
@@ -92,6 +93,7 @@ describe('DetailPage', () => {
         SetAnnotationListComponent,
         SetAnnotationModalComponent,
         SidebarContentComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [ClarityModule,
                 NgxPopperModule,

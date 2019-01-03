@@ -8,6 +8,7 @@ import {ClarityModule} from '@clr/angular';
 import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
 import {ModifierPageComponent} from './modifier-page.component';
 
@@ -30,6 +31,7 @@ describe('ModifierPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         ModifierPageComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,

@@ -129,3 +129,10 @@ label.dropdown-header {
   display: inline-grid;
   margin-left: -0.4rem;
 }
+
+@media print {
+  .doNotPrint {
+    display: none !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
