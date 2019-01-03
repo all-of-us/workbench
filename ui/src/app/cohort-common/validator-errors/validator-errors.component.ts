@@ -13,6 +13,7 @@ export class ValidatorErrorsComponent implements OnInit {
     dateFormat: (params) => params.message,
     integer: (params) => params.message,
     negative: (params) => params.message,
+    number: (params) => params.message,
     range: (params) => params.message,
     max: (params) => 'Max input value of ' + params.max + ' exceeded',
     maxlength: (params) => 'Max character limit of ' + params.requiredLength + ' exceeded'

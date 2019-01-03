@@ -1,15 +1,22 @@
 import {AbstractControl, ValidatorFn} from '@angular/forms';
 import * as moment from 'moment';
 
-export function negativeValidator(name: string): ValidatorFn {
+export function numberAndNegativeValidator(name: string): ValidatorFn {
   return (control: AbstractControl): {[key: string]: any} | null => {
-    const value = control.value;
-    const isValid = control.pristine || parseFloat(value) >= 0;
-    const message = {
-      negative: {
+    const value = parseFloat(control.value);
+    const isNum = !isNaN(value);
+    const isNegative = value < 0;
+    const message: any = {};
+    if (!isNum) {
+      message.number = {
+        message: name + ' can only accept valid numbers'
+      };
+    } else if (isNegative) {
+      message.negative = {
         message: name + ' cannot accept negative values'
-      }
-    };
+      };
+    }
+    const isValid = control.pristine || (isNum && !isNegative);
     return isValid ? null : message;
   };
 }
