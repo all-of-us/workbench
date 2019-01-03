@@ -15,7 +15,7 @@ nodeAttributes,
 previewError,
 } from '../redux';
 import {stripHtml} from '../utils';
-import {negativeValidator, rangeValidator} from '../validators';
+import {numberAndNegativeValidator, rangeValidator} from '../validators';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -104,8 +104,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           const NUM = <FormGroup>this.form.controls.NUM;
           NUM.addControl('num0', new FormGroup({
             operator0: new FormControl(),
-            valueA0: new FormControl(null, [negativeValidator('Form')]),
-            valueB0: new FormControl(null, [negativeValidator('Form')]),
+            valueA0: new FormControl(null, [numberAndNegativeValidator('Form')]),
+            valueB0: new FormControl(null, [numberAndNegativeValidator('Form')]),
           }));
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
@@ -115,8 +115,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
             if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
               NUM.addControl('num1', new FormGroup({
                 operator1: new FormControl(),
-                valueA1: new FormControl(null, [negativeValidator('Form')]),
-                valueB1: new FormControl(null, [negativeValidator('Form')]),
+                valueA1: new FormControl(null, [numberAndNegativeValidator('Form')]),
+                valueB1: new FormControl(null, [numberAndNegativeValidator('Form')]),
               }));
               this.dropdowns.labels[i] = attr.name;
             }
