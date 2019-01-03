@@ -1,12 +1,14 @@
 import {AbstractControl, ValidatorFn} from '@angular/forms';
 import * as moment from 'moment';
 
-export function integerValidator(name: string): ValidatorFn {
+export function negativeValidator(name: string): ValidatorFn {
   return (control: AbstractControl): {[key: string]: any} | null => {
     const value = control.value;
-    const isValid = control.pristine || Number.isInteger(parseFloat(value));
+    const isValid = control.pristine || parseFloat(value) >= 0;
     const message = {
-      message : name + ' must be a whole number'
+      negative: {
+        message: name + ' cannot accept negative values'
+      }
     };
     return isValid ? null : message;
   };
@@ -18,7 +20,9 @@ export function rangeValidator(name: string, min: number, max: number): Validato
     const value = control.value;
     const isValid = control.pristine || value >= min && value <= max;
     const message = {
-      message: name + ' must be between ' + min + ' and ' + max
+      range: {
+        message: name + ' must be between ' + min + ' and ' + max
+      }
     };
     return isValid ? null : message;
   };

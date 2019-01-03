@@ -2,21 +2,20 @@ import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, NgForm} from '@angular/forms';
 
+import {Operator, TreeSubType, TreeType} from 'generated';
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  attributesPreviewStatus,
-  CohortSearchActions,
-  isAttributeLoading,
-  nodeAttributes,
-  previewError,
-} from '../redux';
-
-import {Operator, TreeSubType, TreeType} from 'generated';
-
 import {PM_UNITS} from '../constant';
+import {
+attributesPreviewStatus,
+CohortSearchActions,
+isAttributeLoading,
+nodeAttributes,
+previewError,
+} from '../redux';
 import {stripHtml} from '../utils';
+import {negativeValidator, rangeValidator} from '../validators';
 
 @Component({
   selector: 'crit-attributes-page',
@@ -39,7 +38,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   };
   preview = Map();
   subscription: Subscription;
-  rangeAlert = false;
   loading: boolean;
   selectedCode: any;
   sysOption: any;
@@ -70,22 +68,27 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           switch (attr.type) {
             case 'NUM':
               const NUM = <FormGroup>this.form.controls.NUM;
-              NUM.addControl('num0', new FormGroup({
-                operator0: new FormControl(),
-                valueA0: new FormControl(),
-                valueB0: new FormControl(),
-              }));
               if (!this.attrs.NUM.length) {
+                NUM.addControl('num0', new FormGroup({
+                  operator0: new FormControl(),
+                  valueA0: new FormControl(),
+                  valueB0: new FormControl(),
+                }));
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
                   name: 'NUM',
                   operator: null,
                   operands: [null],
-                  conceptId: attr.conceptId
+                  conceptId: attr.conceptId,
+                  [attr.conceptName]: attr.estCount
                 });
+              } else {
+                this.attrs.NUM[0][attr.conceptName] = attr.estCount;
+                const min = parseFloat(this.attrs.NUM[0].MIN);
+                const max = parseFloat(this.attrs.NUM[0].MAX);
+                NUM.controls.num0.get('valueA0').setValidators(rangeValidator('Values', min, max));
+                NUM.controls.num0.get('valueB0').setValidators(rangeValidator('Values', min, max));
               }
-              // this sets the MIN and MAX for MEAS attributes
-              this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               break;
             case 'CAT':
               if (parseInt(attr.estCount, 10) > 0) {
@@ -101,8 +104,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           const NUM = <FormGroup>this.form.controls.NUM;
           NUM.addControl('num0', new FormGroup({
             operator0: new FormControl(),
-            valueA0: new FormControl(),
-            valueB0: new FormControl(),
+            valueA0: new FormControl(null, [negativeValidator('Form')]),
+            valueB0: new FormControl(null, [negativeValidator('Form')]),
           }));
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
@@ -112,8 +115,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
             if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
               NUM.addControl('num1', new FormGroup({
                 operator1: new FormControl(),
-                valueA1: new FormControl(),
-                valueB1: new FormControl(),
+                valueA1: new FormControl(null, [negativeValidator('Form')]),
+                valueB1: new FormControl(null, [negativeValidator('Form')]),
               }));
               this.dropdowns.labels[i] = attr.name;
             }
@@ -129,6 +132,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
+    this.form.controls.NUM.reset();
     this.resetDisable = true;
     this.selectedCode = 'Any';
     this.preview = this.preview.set('count', this.node.get('count'));
@@ -167,23 +171,16 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }
       this.dropdowns.oldVals[index] = option.value;
     } else {
-        this.selectedCode = option.code;
+      if (option.value !== 'BETWEEN') {
+        this.form.controls.NUM.get(['num' + index, 'valueB' + index]).reset();
+      }
+      this.selectedCode = option.code;
     }
     this.preview = option.value === 'ANY'
       ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
   inputChange() {
-    this.rangeAlert = false;
-    this.attrs.NUM.forEach(attr => {
-      attr.operands.filter(operand => !!operand)
-        .forEach(operand => {
-        if (operand < attr.MIN
-          || (this.isPM() ? false : operand > attr.MAX)) {
-          this.rangeAlert = true;
-        }
-      });
-    });
     this.preview = Map();
   }
 
@@ -207,7 +204,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   refresh() {
     this.preview = Map();
-    this.rangeAlert = false;
+    this.form.reset();
     this.attrs.EXISTS = false;
     this.resetDisable = false;
     this.attrs.NUM.forEach(num => {
