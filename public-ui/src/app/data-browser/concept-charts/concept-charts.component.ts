@@ -18,9 +18,9 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
   @Input() showSources = true;
-  @Input() showGender = true;
-  @Input() showGenderIdentity = false;
-  @Input() showAge = true;
+  @Input() showGenderGraph = false;
+  @Input() showAgeGraph = false;
+  @Input() showSourcesGraph = false;
   @Input() showMeasurementGenderBins = false;
   @Input() showRace = false;
   @Input() showEthnicity = false;
@@ -62,18 +62,8 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       this.results = results.items;
       this.analyses = results.items[0];
       this.organizeGenders(this.analyses.genderAnalysis);
+      this.fetchMeasurementGenderResults();
       // Set this var to make template simpler. We can just loop through the results and show bins
-      if (this.showMeasurementGenderBins) {
-        this.genderResults = this.analyses.genderAnalysis.results;
-      }
-      this.unitNames = [];
-      if (this.analyses.measurementValueGenderAnalysis) {
-        this.displayMeasurementGraphs = true;
-        for (const aa of this.analyses.measurementValueGenderAnalysis) {
-          this.unitNames.push(aa.unitName);
-        }
-        this.showMeasurementGenderHistogram(this.unitNames[0]);
-      }
       this.loadingStack.pop();
     }));
 
@@ -86,6 +76,31 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       }
       this.loadingStack.pop();
       }));
+  }
+  
+  public fetchMeasurementGenderResults() {
+    if (this.analyses) {
+      if (this.showMeasurementGenderBins) {
+        this.genderResults = this.analyses.genderAnalysis.results;
+      }
+      this.unitNames = [];
+      if (this.analyses && this.analyses.measurementValueGenderAnalysis && this.showMeasurementGenderBins) {
+        this.displayMeasurementGraphs = true;
+        for (const aa of this.analyses.measurementValueGenderAnalysis) {
+          this.unitNames.push(aa.unitName);
+        }
+        this.showMeasurementGenderHistogram(this.unitNames[0]);
+      }
+    }
+  }
+  
+  ngOnChanges() {
+    if (!this.showMeasurementGenderBins) {
+      this.displayMeasurementGraphs = false;
+    } else {
+      this.displayMeasurementGraphs = true;
+      this.fetchMeasurementGenderResults();
+    }
   }
 
   ngOnDestroy() {
@@ -144,18 +159,5 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
     this.selectedUnit = unit;
     this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
     find(aa => aa.unitName === unit);
-  }
-
-  hasGenderAgeSourcesShowHelpText() {
-    return (this.showGender || this.showGenderIdentity)
-      && this.showAge &&
-      (this.showSources && this.sourceConcepts.length > 0)
-      && !this.showMeasurementGenderBins;
-  }
-
-  hasGenderAgeShowHelpText() {
-    return (this.showGender || this.showGenderIdentity) &&
-      this.showAge && (!this.showSources || this.sourceConcepts.length <= 0)
-      && !this.showMeasurementGenderBins;
   }
 }

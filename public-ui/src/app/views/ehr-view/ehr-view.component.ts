@@ -40,14 +40,24 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private initSearchSubscription: ISubscription = null;
   /* Show more synonyms when toggled */
   showMoreSynonyms = {};
+  ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
+    'distribution for participants at the time the medical concept being queried occurred in their records. \n' +
+    'If an individual’s record contains more than one mention of a concept, \n' +
+    'the age at occurrence is included for each mention. \n' +
+    'As a result, a participant may be counted more than once in the distribution. ';
+  sourcesChartHelpText = 'Individual health records often contain medical information that means the same thing ' +
+    'but may be recorded in many different ways. \n' +
+    'The sources represent the many different ways that the standard medical concept ' +
+    'returned in the search results has been recorded in patient records. \n' +
+    'The sources bar chart provides the top 10 source concepts from the AoU data.';
 
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
-  showAge = true;
-  showGender = true;
-  showGenderIdentity = false;
   showSources = true;
   showMeasurementGenderBins = false;
+  showGenderGraph = false;
+  showAgeGraph = true;
+  showSourcesGraph = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
     'health status of an individual, ' +
     'such as medical diagnoses, are found in the conditions domain.',
@@ -98,6 +108,10 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     const obj = localStorage.getItem('ehrDomain');
     if (obj) {
       this.ehrDomain = JSON.parse(obj);
+      if(this.ehrDomain.name === 'Measurements') {
+        this.showMeasurementGenderBins = true;
+        this.showAgeGraph = false;
+      }
       this.subTitle = 'Keyword: ' + this.searchText;
       this.title = 'Domain Search Results: ' + this.ehrDomain.name;
     } else {
@@ -107,7 +121,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
     if (this.ehrDomain) {
       // Set the graphs we want to show for this domain
-      this.setGraphsToDisplay();
       // Run search initially to filter to domain,
       // a empty search returns top ordered by count_value desc
       // Note, we save this in its own subscription so we can unsubscribe when they start typing
@@ -137,12 +150,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       s.unsubscribe();
     }
     this.initSearchSubscription.unsubscribe();
-  }
-  private setGraphsToDisplay() {
-    if (this.ehrDomain.name === 'Measurements') {
-      this.showGender = false;
-      this.showMeasurementGenderBins = true;
-    }
   }
   private searchCallback(results: any) {
     this.searchResult = results;
@@ -182,16 +189,37 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       row.viewSynonyms = true;
     }
   }
-  public selectGenderGraph(g) {
-    if (g === 'Gender Identity') {
-      this.showGenderIdentity = true;
-      this.showGender = false;
+  public selectGraph(g) {
+    this.showGenderGraph = false;
+    this.showAgeGraph = false;
+    this.showSourcesGraph = false;
+    if (g === 'Gender') {
+      this.showGenderGraph = true;
+    } else if (g === 'Age') {
+      this.showAgeGraph = true;
+      this.showMeasurementGenderBins = false;
+    } else if (g === 'Sources') {
+      this.showSourcesGraph = true;
+      this.showMeasurementGenderBins = false;
     } else {
-      this.showGender = true;
-      this.showGenderIdentity = false;
+      this.showAgeGraph = true;
+      this.showMeasurementGenderBins = false;
+    }
+    if (this.ehrDomain.name === 'Measurements' && this.showGenderGraph) {
+      this.showMeasurementGenderBins = true;
+      this.showGenderGraph = false;
     }
   }
   public toggleSynonyms(conceptId) {
     this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
+  }
+  public showToolTip(g) {
+    if (g === 'Gender') {
+      return 'Gender chart';
+    }else if (g === 'Age') {
+      return this.ageChartHelpText;
+    }else if (g === 'Sources') {
+      return this.sourcesChartHelpText;
+    }
   }
 }

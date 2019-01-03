@@ -115,6 +115,7 @@ label {
 
 .row .chart-wrapper {
     height: 8rem;
+    width: 100%;
     margin-top: .25rem;
     margin-bottom: .25rem;
 }
