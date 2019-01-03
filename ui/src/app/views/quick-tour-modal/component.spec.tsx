@@ -35,24 +35,25 @@ describe('QuickTourModalComponent', () => {
 
   it('should go to the next slide when we click next', () => {
     const wrapper = component();
-    const firstSlide = wrapper.state().selected;
+    expect(wrapper.find('.panel-title').text()).toBe(panels[0].title);
     wrapper.find('#next').simulate('click');
-    expect(wrapper.state().selected).toBe(firstSlide + 1);
+    expect(wrapper.find('.panel-title').text()).toBe(panels[1].title);
   });
 
   it('should go to the panel we select from the breadcrumbs', () => {
     const wrapper = component();
     const panelNum = 2;
     wrapper.find('#breadcrumb' + panelNum).simulate('click');
-    expect(wrapper.state().selected).toBe(panelNum);
+    expect(wrapper.find('.panel-title').text()).toBe(panels[panelNum].title);
   });
 
   it('should go to the previous slide when we click previous', () => {
     const wrapper = component();
-    const firstSlide = wrapper.state().selected;
+    expect(wrapper.find('.panel-title').text()).toBe(panels[0].title);
     wrapper.find('#next').simulate('click');
+    expect(wrapper.find('.panel-title').text()).toBe(panels[1].title);
     wrapper.find('#previous').simulate('click');
-    expect(wrapper.state().selected).toBe(firstSlide);
+    expect(wrapper.find('.panel-title').text()).toBe(panels[0].title);
   });
 
   it('should not show the next button when we are on the last slide', () => {
@@ -66,11 +67,11 @@ describe('QuickTourModalComponent', () => {
     const wrapper = component();
     // You cannot expand the image on the first page of the quick tour
     wrapper.find('#next').simulate('click');
-    expect(wrapper.state().fullImage).toBeFalsy();
+    expect(wrapper.find('.full-image-wrapper').length).toBe(0);
     wrapper.find('#expand-icon').simulate('click');
-    expect(wrapper.state().fullImage).toBeTruthy();
+    expect(wrapper.find('.full-image-wrapper').length).toBe(1);
     wrapper.find('#shrink-icon').simulate('click');
-    expect(wrapper.state().fullImage).toBeFalsy();
+    expect(wrapper.find('.full-image-wrapper').length).toBe(0);
   });
 
 });

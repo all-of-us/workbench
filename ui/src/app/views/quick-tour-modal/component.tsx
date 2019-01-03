@@ -8,7 +8,8 @@ const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-d
 
 export const panels = [
     {
-      title: 'Intro',
+      title: 'Introduction',
+      shortTitle: 'Intro',
       content: <div>Welcome to the All of Us Research Workbench!<br/><br/>All workbench analyses
         happen in a “Workspace.” Within a Workspace you can select participants
         using the “Cohort Builder” tool.  Another tool, the “Concept Set Builder,”
@@ -19,6 +20,7 @@ export const panels = [
     },
     {
       title: 'Workspaces',
+      shortTitle: 'Workspaces',
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
@@ -36,6 +38,7 @@ export const panels = [
     },
     {
       title: 'Cohorts',
+      shortTitle: 'Cohorts',
       content: <div>A “Cohort” is a group of participants you are interested in researching.
         The Cohort Builder allows you to create and review cohorts and annotate
         participants in your study group.
@@ -50,6 +53,7 @@ export const panels = [
     },
     {
       title: 'Concepts',
+      shortTitle: 'Concepts',
       content: <div>Concepts describe information in a patient’s medical record, such as a
           condition they have, a  prescription they are taking or their physical measurements.
           In the Workbench we refer to subject areas such as conditions, drugs, measurements
@@ -64,6 +68,7 @@ export const panels = [
     },
     {
       title: 'Notebooks',
+      shortTitle: 'Notebooks',
       content: <div>A Notebook is a computational environment where you can analyze data with basic
           programming knowledge in R or Python. Several template Notebooks and resources
           are available within your Workspace that will guide you how to import your
@@ -151,7 +156,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                     </div>}
                     {(i ===  this.state.selected) && <div className='current'></div>}
                   </div>
-                  <div className='breadcrumb-title'>{p.title}</div>
+                  <div className='breadcrumb-title'>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
                   <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
                   </div>}
@@ -165,7 +170,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div className='panel'>
             <div className='panel-left'>
               <div className='panel-title'>
-                  {this.state.selected === 0 ? 'Introduction' : panels[this.state.selected].title}
+                  {panels[this.state.selected].title}
               </div>
               <div className='panel-contents'>
                 <div className='panel-text'>{panels[this.state.selected].content}</div>
