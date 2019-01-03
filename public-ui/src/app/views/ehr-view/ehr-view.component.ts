@@ -41,11 +41,14 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   /* Show more synonyms when toggled */
   showMoreSynonyms = {};
   ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
-    'distribution for participants at the time the medical concept being queried occurred in their records. \n' +
+    'distribution for participants at the time the medical concept ' +
+    'being queried occurred in their records. \n' +
     'If an individual’s record contains more than one mention of a concept, \n' +
     'the age at occurrence is included for each mention. \n' +
-    'As a result, a participant may be counted more than once in the distribution. ';
-  sourcesChartHelpText = 'Individual health records often contain medical information that means the same thing ' +
+    'As a result, a participant may be counted more ' +
+    'than once in the distribution. ';
+  sourcesChartHelpText = 'Individual health records often contain medical ' +
+    'information that means the same thing ' +
     'but may be recorded in many different ways. \n' +
     'The sources represent the many different ways that the standard medical concept ' +
     'returned in the search results has been recorded in patient records. \n' +
@@ -105,7 +108,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.prevSearchText = '';
     }
     this.searchText.setValue(this.prevSearchText);
-    const obj = localStorage.getItem('ehrDomain');
+    const obj = localStorage.getItem( 'ehrDomain');
     if (obj) {
       this.ehrDomain = JSON.parse(obj);
       if(this.ehrDomain.name === 'Measurements') {
@@ -216,9 +219,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   public showToolTip(g) {
     if (g === 'Gender') {
       return 'Gender chart';
-    }else if (g === 'Age') {
+    } else if (g === 'Age') {
       return this.ageChartHelpText;
-    }else if (g === 'Sources') {
+    } else if (g === 'Sources') {
       return this.sourcesChartHelpText;
     }
   }

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import {ISubscription} from 'rxjs/Subscription';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {Analysis} from '../../../publicGenerated/model/analysis';
@@ -14,7 +14,7 @@ import {DbConfigService} from '../../utils/db-config.service';
   templateUrl: './concept-charts.component.html',
   styleUrls: ['./concept-charts.component.css']
 })
-export class ConceptChartsComponent implements OnInit, OnDestroy {
+export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
   @Input() showSources = true;
@@ -77,14 +77,14 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       this.loadingStack.pop();
       }));
   }
-  
   public fetchMeasurementGenderResults() {
     if (this.analyses) {
       if (this.showMeasurementGenderBins) {
         this.genderResults = this.analyses.genderAnalysis.results;
       }
       this.unitNames = [];
-      if (this.analyses && this.analyses.measurementValueGenderAnalysis && this.showMeasurementGenderBins) {
+      if (this.analyses && this.analyses.measurementValueGenderAnalysis
+        && this.showMeasurementGenderBins) {
         this.displayMeasurementGraphs = true;
         for (const aa of this.analyses.measurementValueGenderAnalysis) {
           this.unitNames.push(aa.unitName);
@@ -93,7 +93,6 @@ export class ConceptChartsComponent implements OnInit, OnDestroy {
       }
     }
   }
-  
   ngOnChanges() {
     if (!this.showMeasurementGenderBins) {
       this.displayMeasurementGraphs = false;
