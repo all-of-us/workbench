@@ -44,6 +44,7 @@ public abstract class AbstractQueryBuilder {
 
   public static final String WHERE = " where ";
   public static final String AND = " and ";
+  public static final String INTERSECT_DISTINCT = " intersect distinct\n";
   private static final String MODIFIER_SQL_TEMPLATE = "select criteria.person_id from (${innerSql}) criteria\n";
   private static final String AGE_AT_EVENT_JOIN_TEMPLATE =
     "join `${projectId}.${dataSetId}.person` p on (criteria.person_id = p.person_id)\n";
@@ -77,10 +78,19 @@ public abstract class AbstractQueryBuilder {
     String encounterSql = buildEncountersSql(queryParams, getModifier(modifiers, ModifierType.ENCOUNTERS));
     String modifierSql = buildAgeAndEventSql(queryParams, ageAndEventModifiers);
     //Number of Occurrences has to be last because of the group by
-    modifierSql = modifierSql + buildOccurrencesSql(queryParams, getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES));
-    return MODIFIER_SQL_TEMPLATE
+    String occurrencesSql = buildOccurrencesSql(queryParams, getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES));
+    String finalSql = MODIFIER_SQL_TEMPLATE
       .replace("${innerSql}", baseSql)
-      .replace("${encounterSql}", encounterSql) + modifierSql;
+      .replace("${encounterSql}", encounterSql) +
+      modifierSql;
+    if (!occurrencesSql.isEmpty()) {
+      finalSql = finalSql + INTERSECT_DISTINCT +
+        MODIFIER_SQL_TEMPLATE
+          .replace("${innerSql}", baseSql)
+          .replace("${encounterSql}", "") +
+        occurrencesSql;
+    }
+    return finalSql;
   }
 
   protected String addQueryParameterValue(Map<String, QueryParameterValue> queryParameterValueMap,
@@ -111,7 +121,7 @@ public abstract class AbstractQueryBuilder {
         List<String> modifierParamList = new ArrayList<>();
         for (String operand : modifier.getOperands()) {
           String modifierParameter = addQueryParameterValue(queryParams, isAgeAtEvent ?
-              QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
+            QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
           modifierParamList.add("@" + modifierParameter);
         }
         if (isAgeAtEvent) {
