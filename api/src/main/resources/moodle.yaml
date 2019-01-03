@@ -1,0 +1,114 @@
+# A subset of the Moodle API spec that we use to generate Java client libraries. The
+
+swagger: '2.0'
+
+info:
+  title: Moodle
+  description: Badge Tracking
+
+host: "aou.nnlm.gov"
+schemes:
+  - "https"
+basePath: /webservice/reset/server.php
+
+produces:
+  - application/json
+
+##########################################################################################
+## PATHS
+##########################################################################################
+
+paths:
+  /v1/me/compliance:
+    get:
+     tags:
+       - moodle
+     operationId: getMoodleId
+     parameters:
+       - in: query
+         name: username
+         type: string
+         required: true
+       - in: query
+         name: function
+         type: string
+         required: true
+       - in: query
+         name: token
+         type: string
+         required: true
+      responses:
+        200:
+          description: Moodle user returned
+          schema:
+            $ref: '#/definitions/MoodleUser'
+        500:
+          description: There was an error, please see response for details
+
+  /v1/me/compliance/badge:
+    get:
+      tags:
+        - moodle
+      operationId: getMoodleBadge
+      parameters:
+        - in: query
+          name: userId
+          type: string
+          required: true
+        - in: query
+          name: function
+          type: string
+          required: true
+        - in: query
+          name: token
+          type: string
+          required: true
+      response:
+        200:
+          description: Moodle badge returned
+          schema:
+            $ref: '#/defnitions/MoodleBadgeArray'
+        500:
+          description: There was an error, please see response for details
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+  MoodleUser:
+    required:
+      - id
+    type: object
+    properties:
+      id:
+        type: string
+        description: Moodle User Id
+
+  MoodleBadgeArray:
+    required:
+      - badges
+    type: object
+    properties:
+      badges:
+        type: array
+        items:
+          '$ref': '#/definitions/MoodleBadge'
+
+  MoodleBadge:
+    required:
+      - status
+      - dateissued
+      - dateexpire
+    type: object
+    properties:
+      status:
+        type: string
+        description: Status of badge issued
+      dateissued:
+        type: string
+        description: date badge issued
+      dateexpire:
+        type: string
+        description: date badge expires
+
+
