@@ -22,24 +22,19 @@ const buttonLinkStyling = {
   backgroundColor: 'transparent',
 };
 
-export class AccountCreationSuccessReact extends React.Component<any, any> {
+interface AccountCreationSuccessProps {
+  contactEmail: string;
+  account: AccountCreationComponent;
+  updateAndSendEmail: Function;
+  resendInstructions: Function;
+}
+
+export class AccountCreationSuccessReact extends React.Component<AccountCreationSuccessProps, {}> {
   state: {};
-  props: {
-    contactEmail: string,
-    account: AccountCreationComponent,
-    accountCreationModalsComponent: AccountCreationModalsComponent,
-  };
+  props: AccountCreationSuccessProps;
 
   constructor(props: Object) {
     super(props);
-  }
-
-  resendInstructions(): void {
-    this.props.accountCreationModalsComponent.resendInstructions();
-  }
-
-  updateAndSendEmail(): void {
-    this.props.accountCreationModalsComponent.updateAndSendEmail();
   }
 
   render() {
@@ -78,11 +73,11 @@ export class AccountCreationSuccessReact extends React.Component<any, any> {
         </SmallHeader>
       </div>
       <div style={{paddingTop: '0.5rem'}}>
-        <button style={buttonLinkStyling} onClick={this.resendInstructions}>
+        <button style={buttonLinkStyling} onClick={this.props.resendInstructions}>
           Resend Instructions
         </button>
         |
-        <button style={buttonLinkStyling} onClick={this.updateAndSendEmail}>
+        <button style={buttonLinkStyling} onClick={this.props.updateAndSendEmail}>
           Change contact email
         </button>
       </div>
@@ -120,7 +115,8 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
     ReactDOM.render(<AccountCreationSuccessReact
         contactEmail={this.contactEmail}
         account={this.account}
-        accountCreationModalsComponent={this.accountCreationModalsComponent}/>,
+        updateAndSendEmail={this.accountCreationModalsComponent.updateAndSendEmail}
+        resendInstructions={this.accountCreationModalsComponent.resendInstructions}/>,
       document.getElementById('account-creation-success'));
   }
 
