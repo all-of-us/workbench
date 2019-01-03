@@ -3,7 +3,6 @@ import {Component, DoCheck, Input, OnInit, ViewChild} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import {SignInService} from 'app/services/sign-in.service';
 
 import {
   BolderHeader,
@@ -14,12 +13,15 @@ import {AccountCreationModalsComponent} from 'app/views/account-creation-modals/
 import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
 
-const buttonLinkStyling = {
-  border: 'none',
-  cursor: 'pointer',
-  outlineColor: 'transparent',
-  color: '#2691D0',
-  backgroundColor: 'transparent',
+
+const styles = {
+  buttonLinkStyling: {
+    border: 'none',
+    cursor: 'pointer',
+    outlineColor: 'transparent',
+    color: '#2691D0',
+    backgroundColor: 'transparent',
+  }
 };
 
 interface AccountCreationSuccessProps {
