@@ -19,7 +19,7 @@
     </div>
   </div>
 </div>
-<form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
+<form *ngIf="node.size" [formGroup]="form" (ngSubmit)="addAttrs()">
   <section class="form-block">
     <div *ngIf="isMeasurement()">
       <div class="attr-name-color">
@@ -27,15 +27,15 @@
         <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
       </div>
       <div class="radio">
-        <input type="radio" name="labExists" [value]="true" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
+        <input type="radio" name="labExists" [value]="true" formControlName="EXISTS" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
         <label>Any value (lab exists)</label>
       </div>
-      <div *ngIf="!attrs.EXISTS && attrs.NUM.length" class="or-circle">OR</div>
+      <div *ngIf="!form.value.EXISTS && form.value.NUM !== {}" class="or-circle">OR</div>
     </div>
-    <ng-container *ngIf="!attrs.EXISTS">
+    <ng-container *ngIf="!form.value.EXISTS" formGroupName="NUM">
       <div *ngFor="let attr of attrs.NUM; let i = index">
         <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
-          <div class="container">
+          <div class="container" [formGroupName]="'num'+i">
             <div class="dropdown-width">
               <clr-dropdown>
                 <button type="button" class="btn btn-outline" clrDropdownTrigger>
@@ -53,34 +53,32 @@
                   clrDropdownItem>{{option.name}}</button>
                 </clr-dropdown-menu>
               </clr-dropdown>
-              <input type="hidden" [name]="'operator'+i" [ngModel]="attr.operator" [required]="isPM()">
+              <input type="hidden" [name]="'operator'+i" [formControlName]="'operator'+i" [ngModel]="attr.operator">
             </div>
-            <div *ngIf="showInput(i, attrForm)" class="form-group range-container">
+            <div *ngIf="showInput(i)" class="form-group range-container">
               <input class="number-container"
                 type="number"
                 [min]="attr.MIN"
                 [max]="attr.MAX"
                 [name]="'valueA'+i"
-                [(ngModel)]="attr.operands[0]"
-                (ngModelChange)="inputChange()"
-                required>
+                [formControlName]="'valueA'+i"
+                [(ngModel)]="attr.operands[0]">
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
             </div>
-            <div *ngIf="isBetween(i, attrForm)" class="form-group and-text">
+            <div *ngIf="isBetween(i)" class="form-group and-text">
               <div>and</div>
             </div>
-            <div *ngIf="isBetween(i, attrForm)" class="form-group range-container">
+            <div *ngIf="isBetween(i)" class="form-group range-container">
               <input class="number-container"
                 type="number"
                 [min]="attr.MIN"
                 [max]="attr.MAX"
                 [name]="'valueB'+i"
-                [(ngModel)]="attr.operands[1]"
-                (ngModelChange)="inputChange()"
-                required>
+                [formControlName]="'valueB'+i"
+                [(ngModel)]="attr.operands[1]">
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
             </div>
-              <span class="range-padding" *ngIf="isMeasurement() && showInput(i, attrForm)">
+              <span class="range-padding" *ngIf="isMeasurement() && showInput(i)">
               Range: {{attr.MIN}} - {{attr.MAX}}
               </span>
           </div>
@@ -98,14 +96,14 @@
         </div>
       </ng-container>
     </ng-container>
-    <div *ngIf="isValid(attrForm) || attrs.EXISTS" class="count-preview ">
+    <div *ngIf="isValid() || attrs.EXISTS" class="count-preview">
       <div class="row">
         <div *ngIf="showCalc()" class="col-lg-3">
           <button type="button" [ngClass]="[loading ? 'greyed-button': 'calculate-btn']"
             class="btn"
             [disabled]="rangeAlert"
             [clrLoading]="loading"
-            (click)="requestPreview(attrForm)">
+            (click)="requestPreview()">
             Calculate
           </button>
         </div>
@@ -123,7 +121,7 @@
           </div>
         </ng-container>
         <div class="col-lg-3 button-padding" *ngIf="showAdd()">
-          <button class="btn add-button " type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
+          <button class="btn add-button" type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
         </div>
       </div>
     </div>
