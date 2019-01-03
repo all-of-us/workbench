@@ -1,0 +1,20 @@
+.Search {
+  font-size: 16px;
+  text-align: center;
+}
+
+.conceptName {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 500px;
+}
+
+.results {
+  text-align: left;
+}
+
+.results a {
+  color: gray;
+}

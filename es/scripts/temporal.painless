@@ -1,0 +1,51 @@
+/*
+This is a Painless (similar to Groovy) script for performing an ES temporal
+query. This requires a custom encoding of recurring events in ElasticSearch
+as it does not natively support complex JOIN queries like this, and nested data
+has limited availability from within scripts. Finally, parallel arrays with
+conserved order are also not possible in the ES filtering layer, as the doc
+available to the script is a Lucene indexed representation (sorted).
+
+Inputs:
+  a (string): condition concept A
+  b (string): condition concept B
+  diffDays (number): maximum range between the two events, in days
+*/
+
+def sf = new SimpleDateFormat(\"yyyy-MM-dd\");
+
+ArrayList aDates = new ArrayList();
+ArrayList bDates = new ArrayList();
+for (def c : doc.exp_conditions) {
+  int sep = c.indexOf(\":\");
+  def cid = c.substring(0, sep);
+  long dateMillis = sf.parse(c.substring(sep+1)).getTime();
+  if (params.a.equals(cid)) {
+    aDates.add(dateMillis);
+  } else if (params.b.equals(cid)) {
+    bDates.add(dateMillis);
+  }
+}
+
+/* a/b are symmetric - index the shorter one for performance. */
+if (aDates.size() > bDates.size()) {
+  def tmp = aDates;
+  aDates = bDates;
+  bDates = tmp;
+}
+Collections.sort(aDates);
+
+long diff = params.diffDays * 24 * 60 * 60 * 1000;
+for (def t : bDates) {
+  /* Find the nearest candidate to our lower bound and test it. */
+  int left = -Collections.binarySearch(aDates, t-diff) - 1;
+  if (left < 0 || (left < aDates.size() && aDates.get(left)-t <= diff)) {
+    return true;
+  }
+  /* Find the nearest candidate to our upper bound and test it. */
+  int right = -Collections.binarySearch(aDates, t+diff) - 2;
+  if (right < -1 || (right < aDates.size() && t-aDates.get(right) <= diff)) {
+    return true;
+  }
+}
+return false;

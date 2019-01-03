@@ -1,0 +1,7 @@
+.err {
+  border: red solid 3px;
+}
+
+.valid {
+  border: green solid 3px;
+}
