@@ -1,7 +1,30 @@
 import {AbstractControl, ValidatorFn} from '@angular/forms';
 import * as moment from 'moment';
 
+export function integerValidator(name: string): ValidatorFn {
+  return (control: AbstractControl): {[key: string]: any} | null => {
+    const value = control.value;
+    const isValid = control.pristine || Number.isInteger(parseFloat(value));
+    const message = {
+      message : name + ' must be a whole number'
+    };
+    return isValid ? null : message;
+  };
+}
+
+
 export function rangeValidator(name: string, min: number, max: number): ValidatorFn {
+  return (control: AbstractControl): {[key: string]: any} | null => {
+    const value = control.value;
+    const isValid = control.pristine || value >= min && value <= max;
+    const message = {
+      message: name + ' must be between ' + min + ' and ' + max
+    };
+    return isValid ? null : message;
+  };
+}
+
+export function integerAndRangeValidator(name: string, min: number, max: number): ValidatorFn {
   return (control: AbstractControl): {[key: string]: any} | null => {
     const value = control.value;
     const isInt = Number.isInteger(parseFloat(value));

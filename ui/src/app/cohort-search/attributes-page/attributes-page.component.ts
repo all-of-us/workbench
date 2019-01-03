@@ -53,6 +53,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   ];
 
   form = new FormGroup({
+    EXISTS: new FormControl(false),
     NUM: new FormGroup({}),
     CAT: new FormGroup({})
   });
@@ -68,6 +69,12 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
+              const NUM = <FormGroup>this.form.controls.NUM;
+              NUM.addControl('num0', new FormGroup({
+                operator0: new FormControl(),
+                valueA0: new FormControl(),
+                valueB0: new FormControl(),
+              }));
               if (!this.attrs.NUM.length) {
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
@@ -77,6 +84,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                   conceptId: attr.conceptId
                 });
               }
+              // this sets the MIN and MAX for MEAS attributes
               this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               break;
             case 'CAT':
@@ -90,12 +98,23 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.options.unshift({value: 'ANY', name: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
         if (this.attrs.NUM) {
+          const NUM = <FormGroup>this.form.controls.NUM;
+          NUM.addControl('num0', new FormGroup({
+            operator0: new FormControl(),
+            valueA0: new FormControl(),
+            valueB0: new FormControl(),
+          }));
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
             attr.operator = 'ANY';
             this.dropdowns.selected[i] = 'ANY';
             this.dropdowns.oldVals[i] = 'ANY';
             if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
+              NUM.addControl('num1', new FormGroup({
+                operator1: new FormControl(),
+                valueA1: new FormControl(),
+                valueB1: new FormControl(),
+              }));
               this.dropdowns.labels[i] = attr.name;
             }
           });
@@ -168,9 +187,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.preview = Map();
   }
 
-  isValid(form: NgForm) {
-    if (this.isPM() || !form.valid) {
-      return form.valid;
+  isValid() {
+    if (this.isPM() || !this.form.valid) {
+      return this.form.valid;
     }
     let valid = false;
     this.attrs.NUM.forEach(num => {
@@ -289,14 +308,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       .set('attributes', fromJS(attrs));
   }
 
-  requestPreview(attrform: NgForm) {
-    const param = this.getParamWithAttributes(attrform.value);
+  requestPreview() {
+    const param = this.getParamWithAttributes(this.form.value);
     this.actions.addAttributeForPreview(param);
     this.actions.requestAttributePreview();
   }
 
-  addAttrs(attrform: NgForm) {
-    const param = this.getParamWithAttributes(attrform.value);
+  addAttrs() {
+    const param = this.getParamWithAttributes(this.form.value);
     this.actions.addParameter(param);
     this.actions.hideAttributesPage();
   }
@@ -305,12 +324,13 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.actions.hideAttributesPage();
   }
 
-  showInput(index: number, attrform: NgForm) {
-    return this.attrs.NUM[index].operator && attrform.value['operator' + index] !== 'ANY';
+  showInput(index: number) {
+    return this.attrs.NUM[index].operator
+      && this.form.value.NUM['num' + index]['operator' + index] !== 'ANY';
   }
 
-  isBetween(index: number, attrform: NgForm) {
-    return attrform.value['operator' + index] === Operator.BETWEEN;
+  isBetween(index: number) {
+    return this.form.value.NUM['num' + index]['operator' + index] === Operator.BETWEEN;
   }
 
   hasUnits() {
