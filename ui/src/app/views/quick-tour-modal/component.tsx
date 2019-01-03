@@ -6,9 +6,10 @@ const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
     'omop-common-data-model-and-standardized-vocabularies/';
 const OMOPDataSetLink = 'https://www.ohdsi.org/data-standardization/the-common-data-model/';
 
-const panels = [
+export const panels = [
     {
-      title: 'Intro',
+      title: 'Introduction',
+      shortTitle: 'Intro',
       content: <div>Welcome to the All of Us Research Workbench!<br/><br/>All workbench analyses
         happen in a “Workspace.” Within a Workspace you can select participants
         using the “Cohort Builder” tool.  Another tool, the “Concept Set Builder,”
@@ -19,6 +20,7 @@ const panels = [
     },
     {
       title: 'Workspaces',
+      shortTitle: 'Workspaces',
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
@@ -36,6 +38,7 @@ const panels = [
     },
     {
       title: 'Cohorts',
+      shortTitle: 'Cohorts',
       content: <div>A “Cohort” is a group of participants you are interested in researching.
         The Cohort Builder allows you to create and review cohorts and annotate
         participants in your study group.
@@ -50,6 +53,7 @@ const panels = [
     },
     {
       title: 'Concepts',
+      shortTitle: 'Concepts',
       content: <div>Concepts describe information in a patient’s medical record, such as a
           condition they have, a  prescription they are taking or their physical measurements.
           In the Workbench we refer to subject areas such as conditions, drugs, measurements
@@ -64,6 +68,7 @@ const panels = [
     },
     {
       title: 'Notebooks',
+      shortTitle: 'Notebooks',
       content: <div>A Notebook is a computational environment where you can analyze data with basic
           programming knowledge in R or Python. Several template Notebooks and resources
           are available within your Workspace that will guide you how to import your
@@ -76,21 +81,25 @@ const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-export class QuickTourReact extends React.Component<any, any> {
-  state: {
-    selected: number,
-    fullImage: boolean
-  };
-  props: {
-    learning: boolean,
-    closeFunction: Function
-  };
+export interface QuickTourReactState {
+  selected: number;
+  fullImage: boolean;
+}
+
+export interface QuickTourReactProps {
+  learning: boolean;
+  closeFunction: Function;
+}
+
+export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
+  state: QuickTourReactState;
+  props: QuickTourReactProps;
 
   checkImg = '/assets/images/check.svg';
   expandIcon = '/assets/icons/expand.svg';
   shrinkIcon = '/assets/icons/shrink.svg';
 
-  constructor(props: Object) {
+  constructor(props: QuickTourReactProps) {
     super(props);
     this.state = {selected: 0, fullImage: false};
   }
@@ -140,13 +149,14 @@ export class QuickTourReact extends React.Component<any, any> {
               return <React.Fragment key={i}>
                 <div className='breadcrumb-component'>
                   <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
+                       id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
                     {(i < this.state.selected) && <div className='check'>
                         <img src={this.checkImg}/>
                     </div>}
                     {(i ===  this.state.selected) && <div className='current'></div>}
                   </div>
-                  <div className='breadcrumb-title'>{p.title}</div>
+                  <div className='breadcrumb-title'>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
                   <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
                   </div>}
@@ -160,7 +170,7 @@ export class QuickTourReact extends React.Component<any, any> {
           <div className='panel'>
             <div className='panel-left'>
               <div className='panel-title'>
-                  {this.state.selected === 0 ? 'Introduction' : panels[this.state.selected].title}
+                  {panels[this.state.selected].title}
               </div>
               <div className='panel-contents'>
                 <div className='panel-text'>{panels[this.state.selected].content}</div>
@@ -172,6 +182,7 @@ export class QuickTourReact extends React.Component<any, any> {
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
                     <div className='resize-icon' style={{position: 'absolute', zIndex: 2}}
+                         id='expand-icon'
                          onClick={() => this.toggleImage()}>
                         <img src={this.expandIcon}/>
                     </div>
@@ -198,6 +209,7 @@ export class QuickTourReact extends React.Component<any, any> {
         <div className='full-image-wrapper'>
           <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
           <div className='resize-icon' onClick={() => this.toggleImage()}
+               id='shrink-icon'
                style={{position: 'absolute', right: '5%', bottom: '5%'}}>
             <img src={this.shrinkIcon}/>
           </div>
@@ -213,6 +225,7 @@ export class QuickTourReact extends React.Component<any, any> {
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
+
 export class QuickTourModalComponent implements DoCheck, OnInit {
 
   @Input('learning')
