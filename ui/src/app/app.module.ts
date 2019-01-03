@@ -88,7 +88,12 @@ import {ToolTipComponent} from './views/tooltip/component';
 (<any>window).StackTrace = StackTrace;
 
 function getBasePath() {
-  return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+  try {
+    return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+  } catch (err) {
+      console.log('Error accessing local storage: ' + err);
+      return environment.allOfUsApiUrl;
+  }
 }
 
 export function getConfigService(http: Http) {

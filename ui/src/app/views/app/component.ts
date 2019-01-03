@@ -25,6 +25,7 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 export class AppComponent implements OnInit {
   isSignedIn = false;
   initialSpinner = true;
+  localStorageDisabled = false;
   overriddenUrl: string = null;
   private baseTitle: string;
   private overriddenPublicUrl: string = null;
@@ -37,37 +38,43 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
-    this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
-    window['setAllOfUsApiUrl'] = (url: string) => {
-      if (url) {
-        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+    try {
+      this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+      this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
+      window['setAllOfUsApiUrl'] = (url: string) => {
+        if (url) {
+          if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+            throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+          }
+          this.overriddenUrl = url;
+          localStorage.setItem(overriddenUrlKey, url);
+        } else {
+          this.overriddenUrl = null;
+          localStorage.removeItem(overriddenUrlKey);
         }
-        this.overriddenUrl = url;
-        localStorage.setItem(overriddenUrlKey, url);
-      } else {
-        this.overriddenUrl = null;
-        localStorage.removeItem(overriddenUrlKey);
-      }
-      window.location.reload();
-    };
-    window['setPublicApiUrl'] = (url: string) => {
-      if (url) {
-        if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-          throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+        window.location.reload();
+      };
+      window['setPublicApiUrl'] = (url: string) => {
+        if (url) {
+          if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+            throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+          }
+          this.overriddenPublicUrl = url;
+          localStorage.setItem(overriddenPublicUrlKey, url);
+        } else {
+          this.overriddenPublicUrl = null;
+          localStorage.removeItem(overriddenPublicUrlKey);
         }
-        this.overriddenPublicUrl = url;
-        localStorage.setItem(overriddenPublicUrlKey, url);
-      } else {
-        this.overriddenPublicUrl = null;
-        localStorage.removeItem(overriddenPublicUrlKey);
-      }
-      window.location.reload();
-    };
-    console.log('To override the API URLs, try:\n' +
-      'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
-      'setPublicApiUrl(\'https://host.example.com:5678\')');
+        window.location.reload();
+      };
+      console.log('To override the API URLs, try:\n' +
+        'setAllOfUsApiUrl(\'https://host.example.com:1234\')\n' +
+        'setPublicApiUrl(\'https://host.example.com:5678\')');
+    } catch (err) {
+      this.localStorageDisabled = true;
+      this.initialSpinner = false;
+      console.log('Error setting urls: ' + err);
+    }
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
