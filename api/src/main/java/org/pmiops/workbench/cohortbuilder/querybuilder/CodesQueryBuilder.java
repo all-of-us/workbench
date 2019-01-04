@@ -7,7 +7,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.UnmodifiableIterator;
-import org.pmiops.workbench.cdm.SearchTableEnum;
+import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.codeSubtypeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.codeTypeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainBlank;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.paramChild;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.paramParent;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
@@ -31,7 +29,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeICD;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CODE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.DOMAIN;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
@@ -54,13 +51,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   //If the querybuilder will use modifiers then this sql statement has to have
   //the distinct and ${modifierColumns}
   private static final String CODES_SQL_TEMPLATE =
-    "select distinct a.person_id, ${modifierColumns}\n" +
-      "from `${projectId}.${dataSetId}.${tableName}` a\n" +
-      "where a.${tableId}\n";
+    "select a.person_id\n" +
+      "from `${projectId}.${dataSetId}.search_codes` a ${occurrenceSql}\n" +
+      "where a.concept_id_or_source_concept_id\n";
 
   private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
-    "in unnest(${conceptIds})\n" +
-      "${encounterSql}";
+    "in unnest(${conceptIds})\n";
 
   private static final String GROUP_CODE_LIKE_TEMPLATE =
     "in (select concept_id\n" +
@@ -70,8 +66,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "  and REGEXP_CONTAINS(code, ${code})\n" +
       "  and is_selectable = 1\n" +
       "  and concept_id is not null\n" +
-      ")\n" +
-      "${encounterSql}";
+      ")\n";
 
   private static final String UNION_TEMPLATE = " union all\n";
 
@@ -91,7 +86,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomainId(),
+            params.getModifiers(),
             QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class),
             CHILD_CODE_IN_CLAUSE_TEMPLATE);
         } else {
@@ -102,33 +97,26 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             parameter.getSubtype(),
             queryParts,
             queryParams,
-            parameter.getDomainId(),
+            params.getModifiers(),
             QueryParameterValue.string(codeParam),
             GROUP_CODE_LIKE_TEMPLATE);
         }
     }
 
-    String codesSql = String.join(UNION_TEMPLATE, queryParts);
-    String finalSql = buildModifierSql(codesSql, queryParams, params.getModifiers());
-
-    return finalSql;
+    return String.join(UNION_TEMPLATE, queryParts);
   }
 
   private void validateSearchParameter(SearchParameter param) {
     from(typeBlank().or(codeTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
     from(typeICD().and(subtypeBlank().or(codeSubtypeInvalid()))).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, param.getSubtype());
-    from(domainBlank().or(domainInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, param.getDomainId());
     from(paramChild().and(conceptIdNull())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
   private void buildInnerQuery(String type, String subtype, List<String> queryParts,
                                Map<String, QueryParameterValue> queryParams,
-                               String domain, QueryParameterValue codes, String groupOrChildSql) {
-    ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder()
-      .put("${tableName}", SearchTableEnum.getTableName(type))
-      .put("${modifierColumns}", "entry_date, " + SearchTableEnum.getConceptIdOrSourceConceptId(type))
-      .put("${tableId}", SearchTableEnum.getConceptIdOrSourceConceptId(type));
+                               List<Modifier> modifiers, QueryParameterValue codes, String groupOrChildSql) {
+    ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder();
 
     if (codes.getType().equals(StandardSQLTypeName.ARRAY)) {
       String conceptIdsNamedParameter = addQueryParameterValue(queryParams, codes);
@@ -142,7 +130,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       paramNames.put("${subtype}", "@" + subtypeNamedParameter);
     }
 
-    queryParts.add(filterSql(CODES_SQL_TEMPLATE + groupOrChildSql, paramNames.build()));
+    String filteredSql = filterSql(CODES_SQL_TEMPLATE + groupOrChildSql, paramNames.build());
+    String modifiedSql = buildModifierSql(filteredSql, queryParams, modifiers);
+    queryParts.add(modifiedSql);
   }
 
   @Override
@@ -174,16 +164,16 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   public class MultiKey {
     private String group;
     private String type;
-    private String domain;
+    private String subtype;
 
     public MultiKey(SearchParameter searchParameter) {
       this.group = searchParameter.getGroup() ? GROUP : NOT_GROUP;
       this.type = searchParameter.getType();
-      this.domain = searchParameter.getDomainId();
+      this.subtype = searchParameter.getSubtype();
     }
 
     public String getKey() {
-      return this.group + this.type + this.domain;
+      return this.group + this.type + this.subtype;
     }
 
     @Override
@@ -193,12 +183,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       MultiKey multiKey = (MultiKey) o;
       return Objects.equals(group, multiKey.group) &&
         Objects.equals(type, multiKey.type) &&
-        Objects.equals(domain, multiKey.domain);
+        Objects.equals(subtype, multiKey.subtype);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(group, type, domain);
+      return Objects.hash(group, type, subtype);
     }
   }
 }

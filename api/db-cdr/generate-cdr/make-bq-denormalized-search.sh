@@ -106,9 +106,9 @@ from \`$BQ_PROJECT.$BQ_DATASET.person\` p
 join \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id and g.vocabulary_id in ('Gender', 'None'))
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')"
 
-################################################
-#   insert condition data into search_codes    #
-################################################
+##########################################################
+#   insert condition data into search_codes from ICD9    #
+##########################################################
 echo "Inserting conditions data into search_codes"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_codes\`
@@ -157,9 +157,9 @@ join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = o.observation_sou
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = o.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)"
 
-################################################
-#   insert condition data into search_codes    #
-################################################
+#########################################################
+#   insert condition data into search_codes for ICD10   #
+#########################################################
 echo "Inserting conditions data into search_codes"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_codes\`
@@ -196,9 +196,9 @@ join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = o.observation_sou
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = o.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)"
 
-################################################
-#   insert condition data into search_codes    #
-################################################
+#######################################################
+#   insert condition data into search_codes for CPT   #
+#######################################################
 echo "Inserting drug data into search_codes"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_codes\`
@@ -247,9 +247,9 @@ join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = o.observation_sou
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = o.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)"
 
-################################################
-#   insert condition data into search_codes    #
-################################################
+##########################################################
+#   insert condition data into search_codes for SNOMED   #
+##########################################################
 echo "Inserting conditions data into search_codes"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_codes\`
