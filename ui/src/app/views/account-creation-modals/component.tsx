@@ -13,30 +13,34 @@ import {
 } from 'generated/fetch/api';
 
 import {
-  Error,
-  FieldInput,
   Modal,
   ModalBody,
   ModalFooter,
   ModalTitle,
-  styles,
-} from 'app/react-components/modals';
+} from 'app/components/modals';
+
+import {
+  Error,
+  FieldInput,
+  styles as inputStyles,
+} from 'app/components/inputs';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-class AccountCreationResendModalReact extends React.Component<any, any> {
+interface AccountCreationResendModalProps {
+  username: string;
+  creationNonce: string;
+  resend: boolean;
+  closeFunction: Function;
+}
 
+class AccountCreationResendModalReact extends React.Component<AccountCreationResendModalProps, {}> {
   state: {};
-  props: {
-    username: string,
-    creationNonce: string,
-    resend: boolean,
-    closeFunction: Function,
-  };
+  props: AccountCreationResendModalProps;
 
-  constructor(props: Object) {
+  constructor(props: AccountCreationResendModalProps) {
     super(props);
     this.state = {};
   }
@@ -72,24 +76,27 @@ class AccountCreationResendModalReact extends React.Component<any, any> {
       </Modal>}
     </React.Fragment>;
   }
-
 }
 
-class AccountCreationUpdateModalReact extends React.Component<any, any> {
+interface AccountCreationUpdateModalProps {
+  username: string;
+  creationNonce: string;
+  passNewEmail: Function;
+  update: boolean;
+  closeFunction: Function;
+}
 
-  state: {
-    contactEmail: string,
-    emailOffFocus: boolean,
-  };
-  props: {
-    username: string,
-    creationNonce: string,
-    passNewEmail: Function,
-    update: boolean,
-    closeFunction: Function,
-  };
+interface AccountCreationUpdateModalState {
+  contactEmail: string;
+  emailOffFocus: boolean;
+}
 
-  constructor(props: Object) {
+class AccountCreationUpdateModalReact extends
+    React.Component<AccountCreationUpdateModalProps, AccountCreationUpdateModalState> {
+  state: AccountCreationUpdateModalState;
+  props: AccountCreationUpdateModalProps;
+
+  constructor(props: AccountCreationUpdateModalProps) {
     super(props);
     this.state = {
       contactEmail: '',
@@ -151,12 +158,11 @@ class AccountCreationUpdateModalReact extends React.Component<any, any> {
               <td><label>Contact Email:</label></td>
               <td style={{width: '70%'}}><FieldInput
                 id='change-contact-email'
-                style={this.showEmailValidationError() ? styles.unsuccessfulInput : {}}
+                style={this.showEmailValidationError() ? inputStyles.unsuccessfulInput : {}}
                 onChange={(e) => this.setState({contactEmail: e.target.value})}
                 onBlur={() => this.leaveFocusEmail()}
                 onFocus={() => this.enterFocusEmail()}
-              >
-              </FieldInput>
+              />
               </td>
             </tr>
             <tr>

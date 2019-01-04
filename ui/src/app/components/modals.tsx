@@ -39,24 +39,6 @@ export const styles = {
     marginTop: '3%'
   },
 
-  input: {
-    marginLeft: '.5rem',
-    width: '90%'
-  },
-
-  unsuccessfulInput: {
-    backgroundColor: '#FCEFEC',
-    borderColor: '#F68D76'
-  },
-
-  error: {
-    padding: '0 0.5rem',
-    fontWeight: 600,
-    color: '#2F2E7E',
-    marginTop: '0.2rem',
-    width: '90%'
-  },
-
   modalFooter: {
     display: 'flex' as 'flex',
     justifyContent: 'flex-end' as 'flex-end',
@@ -67,17 +49,12 @@ export const styles = {
 };
 
 export const Modal = ({style = {}, ...props}) => {
-  return <div><div style={{...styles.modalBackdrop}}></div>
-    <div {...props} style={{...styles.modalMain, ...style}}>{props.children}</div></div>;
+  return <div><div style={{...styles.modalBackdrop}} />
+    <div {...props} style={{...styles.modalMain, ...style}} /></div>;
 };
 export const ModalTitle = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalTitle, ...style}}>{props.children}</div>;
+  <div {...props} style={{...styles.modalTitle, ...style}} />;
 export const ModalBody = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalBody, ...style}}>{props.children}</div>;
-export const FieldInput = ({style = {}, ...props}) =>
-  <input {...props} style={{...styles.input, ...style}}></input>;
+  <div {...props} style={{...styles.modalBody, ...style}} />;
 export const ModalFooter = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalFooter, ...style}}>{props.children}</div>;
-export const Error = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.error, ...style}}>{props.children}</div>;
-
+  <div {...props} style={{...styles.modalFooter, ...style}} />;
