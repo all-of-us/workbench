@@ -4,6 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
 import {Observable} from 'rxjs/Observable';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AnnotationItemComponent} from '../annotation-item/annotation-item.component';
 import {ReviewStateService} from '../review-state.service';
 import {AnnotationListComponent} from './annotation-list.component';
@@ -15,7 +16,7 @@ describe('AnnotationListComponent', () => {
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
-      declarations: [ AnnotationItemComponent, AnnotationListComponent ],
+      declarations: [AnnotationItemComponent, AnnotationListComponent, ValidatorErrorsComponent],
       imports: [ClarityModule, ReactiveFormsModule],
       providers: [
         {provide: ReviewStateService, useValue: {}},

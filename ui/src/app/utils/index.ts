@@ -1,8 +1,10 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 import {
-  find
+  find,
+  isEqual
 } from 'lodash/fp';
+import * as React from 'react';
 
 import {DataAccessLevel} from 'generated';
 
@@ -58,6 +60,69 @@ export const switchCase = (value, ...pairs) => {
   return match && match[1]();
 };
 
+const throttleAnimation = fn => {
+  let running = false;
+  return (...args) => {
+    if (!running) {
+      running = true;
+      window.requestAnimationFrame(() => {
+        running = false;
+        fn(...args);
+      });
+    }
+  };
+};
+
+window.addEventListener('resize', throttleAnimation(() => {
+  window.dispatchEvent(new CustomEvent('resizeAnimation'));
+}));
+
+const getWindowSize = () => {
+  return { height: window.innerHeight, width: window.innerWidth };
+};
+
+export const withWindowSize = () => WrappedComponent => {
+  class Wrapper extends React.Component<
+    any,
+    { windowSize: { width: number, height: number } }
+  > {
+    constructor(props) {
+      super(props);
+      this.state = { windowSize: getWindowSize() };
+    }
+
+    static displayName = 'withWindowSize()';
+
+    resize = () => {
+      const { windowSize } = this.state;
+      const newSize = getWindowSize();
+      if (!isEqual(windowSize, newSize)) {
+        this.setState({ windowSize: newSize });
+      }
+    }
+
+    componentDidMount() {
+      window.addEventListener('resizeAnimation', this.resize);
+    }
+
+    componentWillUnmount() {
+      window.removeEventListener('resizeAnimation', this.resize);
+    }
+
+    render() {
+      const { windowSize } = this.state;
+      return React.createElement(WrappedComponent, { windowSize, ...this.props });
+    }
+  }
+  return Wrapper as any;
+};
+
+export const nextSort = ({ field, direction }, newField) => {
+  return newField === field ?
+    { field, direction: direction === 'asc' ? 'desc' : 'asc' } :
+    { field: newField, direction: 'asc' };
+};
+
 /**
  * See feature-detects/cookies.js in https://github.com/Modernizr
  *
@@ -72,14 +137,15 @@ export const switchCase = (value, ...pairs) => {
  * or in sandboxed iframes (depending on flags/context)
  */
 export function cookiesEnabled(): boolean {
-  try {
-    // Create cookie
-    document.cookie = 'cookietest=1';
-    const ret = document.cookie.indexOf('cookietest=') !== -1;
-    // Delete cookie
-    document.cookie = 'cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT';
-    return ret;
-  } catch (e) {
-    return false;
-  }
+    try {
+        // Create cookie
+        document.cookie = 'cookietest=1';
+        const ret = document.cookie.indexOf('cookietest=') !== -1;
+        // Delete cookie
+        document.cookie = 'cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT';
+        return ret;
+    } catch (e) {
+        return false;
+    }
 }
+

@@ -16,7 +16,7 @@ public class CommonTestDialect extends MySQL57InnoDBDialect {
                 "LOCATE(REPLACE(?2, '+'), ?1)"));
 
         registerFunction("matchConcept", new SQLFunctionTemplate(StandardBasicTypes.DOUBLE,
-            "LOCATE(REPLACE(?5, '+'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
+            "LOCATE(REPLACE(REPLACE(?5, '+'),'*'), CONCAT_WS(' ', ?1, ?2, ?3, ?4))"));
     }
 
     @Override

@@ -6,6 +6,7 @@ import {ClarityModule} from '@clr/angular';
 import {fromJS, Map} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
 import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from '../demographics/demographics.component';
@@ -62,6 +63,7 @@ describe('ModalComponent', () => {
         SearchBarComponent,
         SelectionInfoComponent,
         TreeComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,
