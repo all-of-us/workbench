@@ -681,10 +681,6 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
-angular-2-local-storage@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/angular-2-local-storage/-/angular-2-local-storage-1.0.2.tgz#f8ea9334cc8578bee9273f260c57107e17a01e05"
-
 angular2-highcharts@^0.5.5:
   version "0.5.5"
   resolved "https://registry.yarnpkg.com/angular2-highcharts/-/angular2-highcharts-0.5.5.tgz#f4a19ea96d63524420fd5c65136ac027b05266fd"
