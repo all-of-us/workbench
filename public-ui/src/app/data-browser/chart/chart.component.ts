@@ -114,6 +114,7 @@ export class ChartComponent implements OnChanges {
           borderColor: null,
           colorByPoint: true,
           groupPadding: 0,
+          pointPadding: 0,
           dataLabels: {
             enabled: false,
           },
@@ -124,6 +125,7 @@ export class ChartComponent implements OnChanges {
           borderColor: null,
           colorByPoint: true,
           groupPadding: 0,
+          pointPadding: 0,
           dataLabels: {
             enabled: false,
           },
@@ -147,7 +149,7 @@ export class ChartComponent implements OnChanges {
         labels: {
           style: {
             whiteSpace: 'nowrap',
-          }
+          },
         },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR
@@ -345,7 +347,7 @@ export class ChartComponent implements OnChanges {
         name: a.analysisStratumName
         , y: a.countValue, color: color, sliced: true
       });
-      cats.push(a.stratum4);
+      cats.push(a.analysisStratumName);
     }
     data = data.sort((a, b) => {
       if (a.name > b.name) {
@@ -368,12 +370,12 @@ export class ChartComponent implements OnChanges {
     });
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
-      chart: {type: 'pie', backgroundColor: this.backgroundColor}, // '#D9E4EA'
+      chart: {type: 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
       title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: null,
-      xAxisTitle: null
+      pointWidth: this.pointWidth,
+      xAxisTitle: null,
     };
 
   }

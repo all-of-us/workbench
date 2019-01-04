@@ -115,6 +115,7 @@ label {
 
 .row .chart-wrapper {
     height: 8rem;
+    width: 100%;
     margin-top: .25rem;
     margin-bottom: .25rem;
 }
@@ -191,4 +192,10 @@ span.keyword {
 {
     padding-left: 0;
     padding-right: 0;
+}
+
+.page-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }
