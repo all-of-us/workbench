@@ -63,18 +63,17 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
-      const numControls = new FormGroup({
-        operator: new FormControl(),
-        valueA: new FormControl(),
-        valueB: new FormControl(),
-      })
       if (this.isMeasurement) {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
               const NUM = <FormGroup>this.form.controls.NUM;
               if (!this.attrs.NUM.length) {
-                NUM.addControl('num0', numControls);
+                NUM.addControl('num0', new FormGroup({
+                  operator: new FormControl(),
+                  valueA: new FormControl(),
+                  valueB: new FormControl(),
+                }));
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
                   name: 'NUM',
@@ -99,16 +98,17 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.attrs.NUM = this.node.get('attributes');
         if (this.attrs.NUM) {
           const NUM = <FormGroup>this.form.controls.NUM;
-          NUM.addControl('num0', numControls);
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
             attr.operator = 'ANY';
             this.dropdowns.selected[i] = 'ANY';
             this.dropdowns.oldVals[i] = 'ANY';
-            if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-              NUM.addControl('num1', numControls);
-              this.dropdowns.labels[i] = attr.name;
-            }
+            NUM.addControl('num' + i, new FormGroup({
+              operator: new FormControl(),
+              valueA: new FormControl(),
+              valueB: new FormControl(),
+            }));
+            this.dropdowns.labels[i] = attr.name;
           });
           this.preview = this.preview.set('count', this.node.get('count'));
         }
