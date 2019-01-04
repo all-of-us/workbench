@@ -11,7 +11,7 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
+import {AccountCreationModalsComponent} from './component';
 
 describe('AccountCreationModalsComponent', () => {
   let fixture: ComponentFixture<AccountCreationModalsComponent>;
