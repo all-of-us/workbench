@@ -35,7 +35,7 @@ export class AccountCreationSuccessReact extends React.Component<AccountCreation
   state: {};
   props: AccountCreationSuccessProps;
 
-  constructor(props: Object) {
+  constructor(props: AccountCreationSuccessProps) {
     super(props);
   }
 
