@@ -37,7 +37,7 @@
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
     "testMatch": [
-      "**/src/app/views/quick-tour-modal/*.spec.tsx"
+      "**/*.spec.tsx"
     ],
     "globals": {
       "ts-jest": {
