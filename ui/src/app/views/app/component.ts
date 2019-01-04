@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.cookiesEnabled = cookiesEnabled();
-   // Local storage breaks if cookies are not enabled
+    // Local storage breaks if cookies are not enabled
     if (!this.cookiesEnabled) {
       try {
         this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
