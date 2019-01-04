@@ -116,3 +116,9 @@ export const withWindowSize = () => WrappedComponent => {
   }
   return Wrapper as any;
 };
+
+export const nextSort = ({ field, direction }, newField) => {
+  return newField === field ?
+    { field, direction: direction === 'asc' ? 'desc' : 'asc' } :
+    { field: newField, direction: 'asc' };
+};

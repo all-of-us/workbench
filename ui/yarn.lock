@@ -6571,6 +6571,11 @@ react-onclickoutside@^6.7.1:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.7.1.tgz#6a5b5b8b4eae6b776259712c89c8a2b36b17be93"
 
+react-paginating@^1.0.3-react16.0:
+  version "1.0.3-react16.0"
+  resolved "https://registry.yarnpkg.com/react-paginating/-/react-paginating-1.0.3-react16.0.tgz#a49579e6963e8ec1f307da46dd3929c480837762"
+  integrity sha512-Kr/IBfTdAyudzRAOBrKcmhpdKMD4C5nHaJFCU/nz3k9AJhsHI1KWEpm/DweDgZp1j9g5ig9dmqCEkkSelHe+iA==
+
 react-test-renderer@^16.0.0-0, react-test-renderer@^16.6.3:
   version "16.7.0"
   resolved "https://registry.yarnpkg.com/react-test-renderer/-/react-test-renderer-16.7.0.tgz#1ca96c2b450ab47c36ba92cd8c03fcefc52ea01c"

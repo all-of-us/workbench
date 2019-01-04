@@ -97,6 +97,7 @@
     "react-addons-test-utils": "^15.6.2",
     "react-dom": "^16.6.3",
     "react-onclickoutside": "^6.7.1",
+    "react-paginating": "^1.0.3-react16.0",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.6",
