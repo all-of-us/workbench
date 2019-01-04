@@ -57,7 +57,7 @@ export const SimpleTable = ({ columns, rowCount, rowProps }) => {
 const PageButton = ({ active = false, onClick, children }) => {
   return <div
     style={{
-      cursor: 'pointer', padding: 4,
+      cursor: 'pointer', padding: '0.1666rem',
       fontWeight: active ? 'bold' : undefined,
       textDecoration: active ? 'underline' : undefined
     }}
@@ -69,7 +69,7 @@ export const SimplePagination = ({ total, limit, currentPage, onPageChange }) =>
   return <Pagination {...{ total, limit, currentPage }} pageCount={5}>
     {({ pages, hasPreviousPage, previousPage, hasNextPage, nextPage, totalPages }) => {
       return <div style={styles.paginationRow}>
-        <div style={{ marginLeft: 'auto', marginRight: 24 }}>
+        <div style={{ marginLeft: 'auto', marginRight: '1rem' }}>
           {(currentPage - 1) * limit + 1} - {min([total, currentPage * limit])} of {total}
         </div>
         <PageButton onClick={hasPreviousPage ? (() => onPageChange(1)) : undefined}>
