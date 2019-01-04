@@ -66,8 +66,6 @@ public class CohortQueryBuilder {
       params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
           participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
     } else {
-      domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-      domainLookupService.findCodesForEmptyDomains(request.getExcludes());
 
       if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
         throw new BadRequestException(
