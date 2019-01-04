@@ -44,10 +44,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   diaOption: any;
   resetDisable = false;
   options = [
-    {value: 'EQUAL', name: 'Equals', code: '01'},
-    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
-    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to', code: '03'},
-    {value: 'BETWEEN', name: 'Between', code: '04'},
+    {value: 'EQUAL', name: 'Equals', display: '= ', code: '01'},
+    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', display: '>= ', code: '02'},
+    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to', display: '<= ', code: '03'},
+    {value: 'BETWEEN', name: 'Between', display: '', code: '04'},
   ];
 
   form = new FormGroup({
@@ -63,7 +63,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
-      if (this.isMeasurement()) {
+      if (this.isMeasurement) {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
@@ -98,7 +98,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           }
         });
       } else {
-        this.options.unshift({value: 'ANY', name: 'Any', code: 'Any'});
+        this.options.unshift({value: 'ANY', name: 'Any', display: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
         if (this.attrs.NUM) {
           const NUM = <FormGroup>this.form.controls.NUM;
@@ -184,8 +184,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.preview = Map();
   }
 
-  isValid() {
-    if (this.isPM() || !this.form.valid) {
+  get isValid() {
+    if (this.isPM || !this.form.valid) {
       return this.form.valid;
     }
     let valid = false;
@@ -226,7 +226,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return stripHtml(this.node.get('name'));
   }
 
-  getParamWithAttributes(values: any) {
+  getParamWithAttributes() {
     let name = this.node.get('name', '') + ' (';
     let attrs = [];
     if (this.attrs.EXISTS) {
@@ -245,58 +245,38 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           operands: attr.operands,
           conceptId: attr.conceptId
         };
-        if (i > 0) {
-          name += ' / ';
-        }
-        const numGroup = values.NUM['num' + i];
-        name += (this.node.get('subtype') === TreeSubType[TreeSubType.BP]
-          && numGroup.operator !== 'ANY')
-          ? attr.name + ' ' : '';
-        switch (numGroup.operator) {
-          case 'ANY':
-            paramAttr.operands = [];
-            paramAttr.name = 'ANY';
-            name += 'Any';
-            break;
-          case 'BETWEEN':
-            paramAttr.operator = Operator.BETWEEN;
-            paramAttr.operands = [numGroup.valueA, numGroup.valueB];
-            name += numGroup.valueA + '-' + numGroup.valueB;
-            break;
-          case 'EQUAL':
-            paramAttr.operator = Operator.EQUAL;
-            paramAttr.operands = [numGroup.valueA];
-            name += '= ' + numGroup.valueA;
-            break;
-          case 'LESS_THAN_OR_EQUAL_TO':
-            paramAttr.operator = Operator.LESSTHANOREQUALTO;
-            paramAttr.operands = [numGroup.valueA];
-            name += '<= ' + numGroup.valueA;
-            break;
-          case 'GREATER_THAN_OR_EQUAL_TO':
-            paramAttr.operator = Operator.GREATERTHANOREQUALTO;
-            paramAttr.operands = [numGroup.valueA];
-            name += '>= ' + numGroup.valueA;
-            break;
+        if (this.form.value.NUM['num' + i].operator === 'ANY') {
+          paramAttr.name = 'ANY';
+          name += 'Any';
+        } else {
+          if (i > 0) {
+            name += ' / ';
+          }
+          if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
+            name += attr.name + ' ';
+          }
+          name += this.options.find(option => option.value === attr.operator).display
+            + attr.operands.join('-');
         }
         attrs.push(paramAttr);
       });
-      const catAttr = {name: 'CAT', operator: Operator.IN, operands: []};
-      this.attrs.CAT.forEach(attr => {
-        if (attr.checked) {
-          catAttr.operands.push(attr.valueAsConceptId);
+
+      const catOperands = this.attrs.CAT.reduce((checked, current) => {
+        if (current.checked) {
+          checked.push(current.valueAsConceptId);
         }
-      });
-      if (catAttr.operands.length) {
-        attrs.push(catAttr);
+        return checked;
+      }, []);
+      if (catOperands.length) {
+        attrs.push({name: 'CAT', operator: Operator.IN, operands: catOperands});
       }
-      if (this.attrs.NUM.length && this.attrs.CAT.length) {
+      if (this.attrs.NUM.length && catOperands.length) {
         attrs = attrs.map(attr => {
           attr.name = 'BOTH';
           return attr;
         });
       }
-      name += (this.isPM() && attrs[0].name !== 'ANY'
+      name += (this.isPM && attrs[0].name !== 'ANY'
         ? this.units[this.node.get('subtype')]
         : '') + ')';
     }
@@ -307,13 +287,12 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   requestPreview() {
-    const param = this.getParamWithAttributes(this.form.value);
-    this.actions.addAttributeForPreview(param);
-    this.actions.requestAttributePreview();
+    const param = this.getParamWithAttributes();
+    this.actions.requestAttributePreview(param);
   }
 
   addAttrs() {
-    const param = this.getParamWithAttributes(this.form.value);
+    const param = this.getParamWithAttributes();
     this.actions.addParameter(param);
     this.actions.hideAttributesPage();
   }
@@ -331,29 +310,29 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return this.form.value.NUM['num' + index].operator === Operator.BETWEEN;
   }
 
-  hasUnits() {
+  get hasUnits() {
     return typeof PM_UNITS[this.node.get('subtype')] !== 'undefined';
   }
 
-  isMeasurement() {
+  get isMeasurement() {
     return this.node.get('type') === TreeType[TreeType.MEAS];
   }
 
-  isPM() {
+  get isPM() {
     return this.node.get('type') === TreeType[TreeType.PM];
   }
 
-  showCalc() {
+  get showCalc() {
     let notAny = true;
-    if (this.isPM()) {
+    if (this.isPM) {
       notAny = this.attrs.NUM[0].operator !== 'ANY';
     }
     return !this.attrs.EXISTS && notAny;
   }
 
-  showAdd() {
+  get showAdd() {
     let any = false;
-    if (this.isPM()) {
+    if (this.isPM) {
       any = this.attrs.NUM[0].operator === 'ANY';
     }
     return (this.preview.get('count') && !this.preview.get('requesting')) || any;
