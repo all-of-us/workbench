@@ -27,8 +27,8 @@ const styles = {
 interface AccountCreationSuccessProps {
   contactEmail: string;
   account: AccountCreationComponent;
-  updateAndSendEmail: Function;
-  resendInstructions: Function;
+  updateAndSendEmail: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  resendInstructions: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export class AccountCreationSuccessReact extends React.Component<AccountCreationSuccessProps, {}> {
