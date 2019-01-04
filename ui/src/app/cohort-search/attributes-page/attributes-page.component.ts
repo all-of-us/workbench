@@ -70,9 +70,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
               const NUM = <FormGroup>this.form.controls.NUM;
               if (!this.attrs.NUM.length) {
                 NUM.addControl('num0', new FormGroup({
-                  operator0: new FormControl(),
-                  valueA0: new FormControl(),
-                  valueB0: new FormControl(),
+                  operator: new FormControl(),
+                  valueA: new FormControl(),
+                  valueB: new FormControl(),
                 }));
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
@@ -103,9 +103,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         if (this.attrs.NUM) {
           const NUM = <FormGroup>this.form.controls.NUM;
           NUM.addControl('num0', new FormGroup({
-            operator0: new FormControl(),
-            valueA0: new FormControl(null, [numberAndNegativeValidator('Form')]),
-            valueB0: new FormControl(null, [numberAndNegativeValidator('Form')]),
+            operator: new FormControl(),
+            valueA: new FormControl(null, [numberAndNegativeValidator('Form')]),
+            valueB: new FormControl(null, [numberAndNegativeValidator('Form')]),
           }));
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
@@ -114,9 +114,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
             this.dropdowns.oldVals[i] = 'ANY';
             if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
               NUM.addControl('num1', new FormGroup({
-                operator1: new FormControl(),
-                valueA1: new FormControl(null, [numberAndNegativeValidator('Form')]),
-                valueB1: new FormControl(null, [numberAndNegativeValidator('Form')]),
+                operator: new FormControl(),
+                valueA: new FormControl(null, [numberAndNegativeValidator('Form')]),
+                valueB: new FormControl(null, [numberAndNegativeValidator('Form')]),
               }));
               this.dropdowns.labels[i] = attr.name;
             }
@@ -172,7 +172,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       this.dropdowns.oldVals[index] = option.value;
     } else {
       if (option.value !== 'BETWEEN') {
-        this.form.controls.NUM.get(['num' + index, 'valueB' + index]).reset();
+        this.form.controls.NUM.get(['num' + index, 'valueB']).reset();
       }
       this.selectedCode = option.code;
     }
@@ -248,10 +248,11 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         if (i > 0) {
           name += ' / ';
         }
+        const numGroup = values.NUM['num' + i];
         name += (this.node.get('subtype') === TreeSubType[TreeSubType.BP]
-          && values['operator' + i] !== 'ANY')
+          && numGroup.operator !== 'ANY')
           ? attr.name + ' ' : '';
-        switch (values['operator' + i]) {
+        switch (numGroup.operator) {
           case 'ANY':
             paramAttr.operands = [];
             paramAttr.name = 'ANY';
@@ -259,23 +260,23 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
             break;
           case 'BETWEEN':
             paramAttr.operator = Operator.BETWEEN;
-            paramAttr.operands = [values['valueA' + i], values['valueB' + i]];
-            name += values['valueA' + i] + '-' + values['valueB' + i];
+            paramAttr.operands = [numGroup.valueA, numGroup.valueB];
+            name += numGroup.valueA + '-' + numGroup.valueB;
             break;
           case 'EQUAL':
             paramAttr.operator = Operator.EQUAL;
-            paramAttr.operands = [values['valueA' + i]];
-            name += '= ' + values['valueA' + i];
+            paramAttr.operands = [numGroup.valueA];
+            name += '= ' + numGroup.valueA;
             break;
           case 'LESS_THAN_OR_EQUAL_TO':
             paramAttr.operator = Operator.LESSTHANOREQUALTO;
-            paramAttr.operands = [values['valueA' + i]];
-            name += '<= ' + values['valueA' + i];
+            paramAttr.operands = [numGroup.valueA];
+            name += '<= ' + numGroup.valueA;
             break;
           case 'GREATER_THAN_OR_EQUAL_TO':
             paramAttr.operator = Operator.GREATERTHANOREQUALTO;
-            paramAttr.operands = [values['valueA' + i]];
-            name += '>= ' + values['valueA' + i];
+            paramAttr.operands = [numGroup.valueA];
+            name += '>= ' + numGroup.valueA;
             break;
         }
         attrs.push(paramAttr);
@@ -323,11 +324,11 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   showInput(index: number) {
     return this.attrs.NUM[index].operator
-      && this.form.value.NUM['num' + index]['operator' + index] !== 'ANY';
+      && this.form.value.NUM['num' + index].operator !== 'ANY';
   }
 
   isBetween(index: number) {
-    return this.form.value.NUM['num' + index]['operator' + index] === Operator.BETWEEN;
+    return this.form.value.NUM['num' + index].operator === Operator.BETWEEN;
   }
 
   hasUnits() {

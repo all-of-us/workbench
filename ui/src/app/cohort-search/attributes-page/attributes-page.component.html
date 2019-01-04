@@ -47,22 +47,22 @@
                 <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
                   <button
                   *ngFor="let option of options"
-                  [name]="'operator'+i"
+                  name="operator"
                   (click)="selectChange(i, option)"
                   class="dropdown-item"
                   type="button"
                   clrDropdownItem>{{option.name}}</button>
                 </clr-dropdown-menu>
               </clr-dropdown>
-              <input type="hidden" [name]="'operator'+i" [formControlName]="'operator'+i" [ngModel]="attr.operator">
+              <input type="hidden" name="operator" formControlName="operator" [ngModel]="attr.operator">
             </div>
             <div *ngIf="showInput(i)" class="form-group range-container">
               <input class="number-container"
                 type="number"
                 [min]="attr.MIN"
                 [max]="attr.MAX"
-                [name]="'valueA'+i"
-                [formControlName]="'valueA'+i"
+                name="valueA"
+                formControlName="valueA"
                 [(ngModel)]="attr.operands[0]">
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
             </div>
@@ -74,8 +74,8 @@
                 type="number"
                 [min]="attr.MIN"
                 [max]="attr.MAX"
-                [name]="'valueB'+i"
-                [formControlName]="'valueB'+i"
+                     name="valueB"
+                     formControlName="valueB"
                 [(ngModel)]="attr.operands[1]">
               <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
             </div>
