@@ -2,9 +2,9 @@ import {Component, DoCheck, Input, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-// import {
-//   PrimaryButton
-// } from 'app/common/common';
+import {
+  PrimaryButton
+} from 'app/components/buttons';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
     'omop-common-data-model-and-standardized-vocabularies/';
@@ -289,6 +289,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   }
 
   close(): void {
+    console.log('here');
     this.setState({selected: 0});
     this.props.closeFunction();
   }
@@ -366,8 +367,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {this.state.selected !== (panels.length - 1) &&
-              <button type='button' className='btn btn-close' id='close'
-                      onClick={() => this.close()}>Close</button>}
+             <PrimaryButton onClick={() => this.close()} text='Close' styles={{marginLeft: '10%'}} />}
               <button type='button' className='btn btn-primary' id='next'
                       onClick={() => this.next()}>{this.lastButtonText()}</button>
             </div>
