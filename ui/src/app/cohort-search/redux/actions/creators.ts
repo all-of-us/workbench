@@ -28,7 +28,6 @@ import {
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
   LOAD_ATTR_PREVIEW_RESULTS,
-  ADD_ATTR_FOR_PREVIEW,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
@@ -206,11 +205,6 @@ export const requestAttributePreview =
 export const loadAttributePreviewRequestResults =
   (count: number): ActionTypes[typeof LOAD_ATTR_PREVIEW_RESULTS] =>
   ({type: LOAD_ATTR_PREVIEW_RESULTS, count});
-
-export const addAttributeForPreview =
-  (parameter: any
-  ): ActionTypes[typeof ADD_ATTR_FOR_PREVIEW] =>
-  ({type: ADD_ATTR_FOR_PREVIEW, parameter});
 
 export const loadCountRequestResults =
   (entityType: string, entityId: string, count: number

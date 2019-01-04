@@ -1,10 +1,10 @@
 <div *ngIf="rangeAlert" class="alert alert-danger alert-sm">
   <div class="alert-items">
     <div class="alert-item static">
-      <div *ngIf="isMeasurement()" class="alert-text">
+      <div *ngIf="isMeasurement" class="alert-text">
         Form cannot accept values outside range {{attrs.NUM[0].MIN}} - {{attrs.NUM[0].MAX}}
       </div>
-      <div *ngIf="isPM()" class="alert-text">
+      <div *ngIf="isPM" class="alert-text">
         Form cannot accept negative values
       </div>
     </div>
@@ -22,7 +22,7 @@
 </div>
 <form *ngIf="node.size" [formGroup]="form" (ngSubmit)="addAttrs()">
   <section class="form-block">
-    <div *ngIf="isMeasurement()">
+    <div *ngIf="isMeasurement">
       <div class="attr-name-color">
         {{displayName}}
         <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
@@ -64,7 +64,7 @@
                 name="valueA"
                 formControlName="valueA"
                 [(ngModel)]="attr.operands[0]">
-              <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="hasUnits">{{units[node.get('subtype')]}}</span>
             </div>
             <div *ngIf="isBetween(i)" class="form-group and-text">
               <div>and</div>
@@ -77,9 +77,9 @@
                      name="valueB"
                      formControlName="valueB"
                 [(ngModel)]="attr.operands[1]">
-              <span *ngIf="hasUnits()">{{units[node.get('subtype')]}}</span>
+              <span *ngIf="hasUnits">{{units[node.get('subtype')]}}</span>
             </div>
-              <span class="range-padding" *ngIf="isMeasurement() && showInput(i)">
+              <span class="range-padding" *ngIf="isMeasurement && showInput(i)">
               Range: {{attr.MIN}} - {{attr.MAX}}
               </span>
           </div>
@@ -97,9 +97,9 @@
         </div>
       </ng-container>
     </ng-container>
-    <div *ngIf="isValid() || attrs.EXISTS" class="count-preview">
+    <div *ngIf="isValid || attrs.EXISTS" class="count-preview">
       <div class="row">
-        <div *ngIf="showCalc()" class="col-lg-3">
+        <div *ngIf="showCalc" class="col-lg-3">
           <button type="button" [ngClass]="[loading ? 'greyed-button': 'calculate-btn']"
             class="btn"
             [disabled]="rangeAlert"
@@ -121,7 +121,7 @@
             </div>
           </div>
         </ng-container>
-        <div class="col-lg-3 button-padding" *ngIf="showAdd()">
+        <div class="col-lg-3 button-padding" *ngIf="showAdd">
           <button class="btn add-button" type="submit" [disabled]="rangeAlert"> ADD THIS RESULT</button>
         </div>
       </div>

@@ -42,7 +42,6 @@ import {
   BEGIN_COUNT_REQUEST,
   BEGIN_ATTR_PREVIEW_REQUEST,
   LOAD_ATTR_PREVIEW_RESULTS,
-  ADD_ATTR_FOR_PREVIEW,
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
@@ -271,9 +270,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(['wizard', 'calculate', 'count'], action.count)
           .setIn(['wizard', 'preview', 'requesting'], false);
-
-      case ADD_ATTR_FOR_PREVIEW:
-        return state.setIn(['wizard', 'count', 'parameters'], fromJS([action.parameter]));
 
       case CANCEL_CHARTS_REQUEST:
       case CANCEL_COUNT_REQUEST:
