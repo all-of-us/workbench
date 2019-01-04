@@ -1,8 +1,10 @@
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 import {
-  find
+  find,
+  isEqual
 } from 'lodash/fp';
+import * as React from 'react';
 
 import {DataAccessLevel} from 'generated';
 
@@ -56,4 +58,61 @@ export const DEFAULT = Symbol();
 export const switchCase = (value, ...pairs) => {
   const match = find(([v]) => v === value || v === DEFAULT, pairs);
   return match && match[1]();
+};
+
+const throttleAnimation = fn => {
+  let running = false;
+  return (...args) => {
+    if (!running) {
+      running = true;
+      window.requestAnimationFrame(() => {
+        running = false;
+        fn(...args);
+      });
+    }
+  };
+};
+
+window.addEventListener('resize', throttleAnimation(() => {
+  window.dispatchEvent(new CustomEvent('resizeAnimation'));
+}));
+
+const getWindowSize = () => {
+  return { height: window.innerHeight, width: window.innerWidth };
+};
+
+export const withWindowSize = () => WrappedComponent => {
+  class Wrapper extends React.Component<
+    any,
+    { windowSize: { width: number, height: number } }
+  > {
+    constructor(props) {
+      super(props);
+      this.state = { windowSize: getWindowSize() };
+    }
+
+    static displayName = 'withWindowSize()';
+
+    resize = () => {
+      const { windowSize } = this.state;
+      const newSize = getWindowSize();
+      if (!isEqual(windowSize, newSize)) {
+        this.setState({ windowSize: newSize });
+      }
+    }
+
+    componentDidMount() {
+      window.addEventListener('resizeAnimation', this.resize);
+    }
+
+    componentWillUnmount() {
+      window.removeEventListener('resizeAnimation', this.resize);
+    }
+
+    render() {
+      const { windowSize } = this.state;
+      return React.createElement(WrappedComponent, { windowSize, ...this.props });
+    }
+  }
+  return Wrapper as any;
 };
