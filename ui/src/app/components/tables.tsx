@@ -4,7 +4,7 @@ import Pagination from 'react-paginating';
 import { nextSort } from '../utils/index';
 import { ClrIcon } from './icons';
 
-const rowHeight = 36;
+const rowHeight = '1.5rem';
 
 const styles = {
   flexCell: ({ basis = 0, grow = 1, shrink = 1, min: minWidth = 0, max } = {} as any) => ({
@@ -24,10 +24,10 @@ const styles = {
   },
   cell: {
     display: 'flex', alignItems: 'center',
-    paddingLeft: 12, paddingRight: 12
+    paddingLeft: '0.5rem', paddingRight: '0.5rem'
   },
   paginationRow: {
-    display: 'flex', alignItems: 'center', height: 36,
+    display: 'flex', alignItems: 'center', height: rowHeight,
     border: '1px solid #ccc', backgroundColor: '#fafafa', fontSize: 13
   }
 };
