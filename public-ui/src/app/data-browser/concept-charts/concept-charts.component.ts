@@ -78,19 +78,20 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
       }));
   }
   public fetchMeasurementGenderResults() {
-    if (this.analyses) {
-      if (this.showMeasurementGenderBins) {
-        this.genderResults = this.analyses.genderAnalysis.results;
+    if (!this.analyses) {
+      return;
+    }
+    if (this.showMeasurementGenderBins) {
+      this.genderResults = this.analyses.genderAnalysis.results;
+    }
+    this.unitNames = [];
+    if (this.analyses && this.analyses.measurementValueGenderAnalysis
+      && this.showMeasurementGenderBins) {
+      this.displayMeasurementGraphs = true;
+      for (const aa of this.analyses.measurementValueGenderAnalysis) {
+        this.unitNames.push(aa.unitName);
       }
-      this.unitNames = [];
-      if (this.analyses && this.analyses.measurementValueGenderAnalysis
-        && this.showMeasurementGenderBins) {
-        this.displayMeasurementGraphs = true;
-        for (const aa of this.analyses.measurementValueGenderAnalysis) {
-          this.unitNames.push(aa.unitName);
-        }
-        this.showMeasurementGenderHistogram(this.unitNames[0]);
-      }
+      this.showMeasurementGenderHistogram(this.unitNames[0]);
     }
   }
   ngOnChanges() {

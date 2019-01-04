@@ -108,13 +108,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.prevSearchText = '';
     }
     this.searchText.setValue(this.prevSearchText);
-    const obj = localStorage.getItem( 'ehrDomain');
+    const obj = localStorage.getItem('ehrDomain');
     if (obj) {
       this.ehrDomain = JSON.parse(obj);
-      if (this.ehrDomain.name === 'Measurements') {
-        this.showMeasurementGenderBins = true;
-        this.showAgeGraph = false;
-      }
       this.subTitle = 'Keyword: ' + this.searchText;
       this.title = 'Domain Search Results: ' + this.ehrDomain.name;
     } else {
@@ -196,17 +192,15 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.showGenderGraph = false;
     this.showAgeGraph = false;
     this.showSourcesGraph = false;
+    this.showMeasurementGenderBins = false;
     if (g === 'Gender') {
       this.showGenderGraph = true;
     } else if (g === 'Age') {
       this.showAgeGraph = true;
-      this.showMeasurementGenderBins = false;
     } else if (g === 'Sources') {
       this.showSourcesGraph = true;
-      this.showMeasurementGenderBins = false;
     } else {
       this.showAgeGraph = true;
-      this.showMeasurementGenderBins = false;
     }
     if (this.ehrDomain.name === 'Measurements' && this.showGenderGraph) {
       this.showMeasurementGenderBins = true;
