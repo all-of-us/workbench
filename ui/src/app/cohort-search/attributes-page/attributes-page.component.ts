@@ -1,6 +1,6 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, FormGroup, NgForm} from '@angular/forms';
+import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormGroup, NgForm, Validators} from '@angular/forms';
 
 import {Operator, TreeSubType, TreeType} from 'generated';
 import {fromJS, Map} from 'immutable';
@@ -56,24 +56,25 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     CAT: new FormGroup({})
   });
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions, private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.subscription = this.preview$.subscribe(prev => this.preview = prev);
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
+      const numControls = new FormGroup({
+        operator: new FormControl(),
+        valueA: new FormControl(),
+        valueB: new FormControl(),
+      })
       if (this.isMeasurement) {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
             case 'NUM':
               const NUM = <FormGroup>this.form.controls.NUM;
               if (!this.attrs.NUM.length) {
-                NUM.addControl('num0', new FormGroup({
-                  operator: new FormControl(),
-                  valueA: new FormControl(),
-                  valueB: new FormControl(),
-                }));
+                NUM.addControl('num0', numControls);
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
                   name: 'NUM',
@@ -84,10 +85,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                 });
               } else {
                 this.attrs.NUM[0][attr.conceptName] = attr.estCount;
-                const min = parseFloat(this.attrs.NUM[0].MIN);
-                const max = parseFloat(this.attrs.NUM[0].MAX);
-                NUM.controls.num0.get('valueA0').setValidators(rangeValidator('Values', min, max));
-                NUM.controls.num0.get('valueB0').setValidators(rangeValidator('Values', min, max));
               }
               break;
             case 'CAT':
@@ -102,22 +99,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         this.attrs.NUM = this.node.get('attributes');
         if (this.attrs.NUM) {
           const NUM = <FormGroup>this.form.controls.NUM;
-          NUM.addControl('num0', new FormGroup({
-            operator: new FormControl(),
-            valueA: new FormControl(null, [numberAndNegativeValidator('Form')]),
-            valueB: new FormControl(null, [numberAndNegativeValidator('Form')]),
-          }));
+          NUM.addControl('num0', numControls);
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
             attr.operator = 'ANY';
             this.dropdowns.selected[i] = 'ANY';
             this.dropdowns.oldVals[i] = 'ANY';
             if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-              NUM.addControl('num1', new FormGroup({
-                operator: new FormControl(),
-                valueA: new FormControl(null, [numberAndNegativeValidator('Form')]),
-                valueB: new FormControl(null, [numberAndNegativeValidator('Form')]),
-              }));
+              NUM.addControl('num1', numControls);
               this.dropdowns.labels[i] = attr.name;
             }
           });
@@ -145,23 +134,23 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
       const other = index === 0 ? 1 : 0;
       if (other === 0) {
-          if (this.diaOption === undefined) {
-              this.diaOption = option.code;
-              this.sysOption = option.code;
-          } else {
-              this.sysOption = option.code;
-          }
+        if (this.diaOption === undefined) {
+          this.diaOption = option.code;
+          this.sysOption = option.code;
+        } else {
+          this.sysOption = option.code;
+        }
       } else if (other === 1) {
-          if (this.sysOption === undefined) {
-              this.sysOption = option.code;
-              this.diaOption = option.code;
-          } else {
-              this.diaOption = option.code;
-          }
+        if (this.sysOption === undefined) {
+          this.sysOption = option.code;
+          this.diaOption = option.code;
+        } else {
+          this.diaOption = option.code;
+        }
       }
       if (this.sysOption && this.diaOption) {
-            this.selectedCode = (this.sysOption + this.diaOption);
-        }
+        this.selectedCode = (this.sysOption + this.diaOption);
+      }
       if (option.value === 'ANY') {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
         this.dropdowns.selected[other] = 'Any';
@@ -176,8 +165,34 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }
       this.selectedCode = option.code;
     }
+    this.setValidation(index, option.name);
     this.preview = option.value === 'ANY'
       ? this.preview.set('count', this.node.get('count')) : Map();
+  }
+
+  setValidation(index: number, option: string) {
+    if (option === 'Any') {
+      this.form.controls.NUM.get(['num' + index, 'valueA']).clearValidators();
+      this.form.controls.NUM.get(['num' + index, 'valueB']).clearValidators();
+      this.form.controls.NUM.reset();
+    } else {
+      const validators = [Validators.required];
+      if (this.isMeasurement) {
+        const min = parseFloat(this.attrs.NUM[0].MIN);
+        const max = parseFloat(this.attrs.NUM[0].MAX);
+        validators.push(rangeValidator('Values', min, max));
+      } else {
+        validators.push(numberAndNegativeValidator('Form'));
+      }
+      this.form.controls.NUM.get(['num' + index, 'valueA']).setValidators(validators);
+      if (option === 'Between') {
+        this.form.controls.NUM.get(['num' + index, 'valueB']).setValidators(validators);
+      } else {
+        this.form.controls.NUM.get(['num' + index, 'valueB']).clearValidators();
+        this.form.controls.NUM.get(['num' + index, 'valueB']).reset();
+      }
+      this.cdref.detectChanges();
+    }
   }
 
   inputChange() {
