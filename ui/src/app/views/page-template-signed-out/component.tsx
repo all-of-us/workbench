@@ -9,14 +9,15 @@ import {
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {withWindowSize} from '../../utils';
-import InvitationKeyReactComponent from '../invitation-key/component';
+import InvitationKeyReactComponent, {InvitationKeyReact} from '../invitation-key/component';
 import {LoginReactComponent} from '../login/component';
 import {Header, Signedin, Template} from './image';
 
 @withWindowSize()
-export class PageTemplateSignedOutReactComponent extends React.Component<any, any> {
+export class PageTemplateSignedOutReact extends React.Component<any, {currentStep: number }> {
   headerImg = '/assets/images/logo-registration-non-signed-in.svg';
   state: { currentStep: number };
+  invitationKey: string;
   stepsImages: [
    {
      backgroundImgSrc: '/assets/images/login-group.png',
@@ -41,12 +42,18 @@ export class PageTemplateSignedOutReactComponent extends React.Component<any, an
         smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
       }];
     this.updateNext = this.updateNext.bind(this);
+    this.setInvitationKey = this.setInvitationKey.bind(this);
+    this.invitationKey = '';
   }
 
   nextDirective(index) {
     switch (index) {
       case 0: return <LoginReactComponent updateNext={this.updateNext}/>;
-      case 1: return <InvitationKeyReactComponent updateNext={this.updateNext}/>;
+      case 1: return <InvitationKeyReact updateNext={this.updateNext}
+                                         setInvitationKey={this.setInvitationKey}/>;
+      // case 2: return <AccountCreationReact updateNext={this.updateNext}
+      //                                      invitationKey={this.invitationKey}>
+      //                </AccountCreationReact>;
     }
   }
 
@@ -54,6 +61,10 @@ export class PageTemplateSignedOutReactComponent extends React.Component<any, an
     this.setState({
       currentStep: nextStep
     });
+  }
+
+  setInvitationKey(invitationKey) {
+    this.invitationKey = this.invitationKey;
   }
 
   render() {
@@ -71,7 +82,7 @@ export class PageTemplateSignedOutReactComponent extends React.Component<any, an
   }
 }
 
-export default PageTemplateSignedOutReactComponent;
+export default PageTemplateSignedOutReact;
 
 @Component({
   templateUrl: './component.html'
@@ -80,12 +91,12 @@ export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
   constructor() {}
 
   ngOnInit() {
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReactComponent),
+    ReactDOM.render(React.createElement(PageTemplateSignedOutReact),
         document.getElementById('reactcomp'));
   }
 
   ngOnChanges() {
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReactComponent),
+    ReactDOM.render(React.createElement(PageTemplateSignedOutReact),
         document.getElementById('reactcomp'));
   }
 }
