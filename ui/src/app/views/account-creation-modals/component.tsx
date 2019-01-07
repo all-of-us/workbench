@@ -36,7 +36,8 @@ interface AccountCreationResendModalProps {
   closeFunction: Function;
 }
 
-export class AccountCreationResendModalReact extends React.Component<AccountCreationResendModalProps, {}> {
+export class AccountCreationResendModalReact extends
+    React.Component<AccountCreationResendModalProps, {}> {
   state: {};
   props: AccountCreationResendModalProps;
 

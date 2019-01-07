@@ -8,11 +8,11 @@ import {
   Header,
   SmallHeader
 } from 'app/components/headers';
-import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {
   AccountCreationResendModalReact,
   AccountCreationUpdateModalReact
 } from 'app/views/account-creation-modals/component';
+import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
 
 
