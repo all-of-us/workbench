@@ -12,7 +12,6 @@ import {
 import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
@@ -40,12 +39,11 @@ export class ResourceCardComponent implements OnInit {
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
+  // deleting = false;
+  confirmDeleting = false;
 
   @ViewChild(RenameModalComponent)
   renameModal: RenameModalComponent;
-
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
 
   @ViewChild(EditModalComponent)
   editModal: EditModalComponent;
@@ -79,6 +77,10 @@ export class ResourceCardComponent implements OnInit {
 
   renameNotebook(): void {
     this.renameModal.open();
+  }
+
+  toggleConfirmDelete(): void {
+    this.confirmDeleting = !this.confirmDeleting;
   }
 
   receiveNotebookRename(rename: NotebookRename): void {
@@ -147,7 +149,8 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
     }
-    this.deleteModal.open();
+    console.log(this.resource);
+    this.toggleConfirmDelete();
   }
 
   receiveDelete($event): void {
@@ -156,7 +159,7 @@ export class ResourceCardComponent implements OnInit {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.deleteModal.close();
+            this.toggleConfirmDelete();
           });
         break;
       }
@@ -164,7 +167,7 @@ export class ResourceCardComponent implements OnInit {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.deleteModal.close();
+            this.toggleConfirmDelete();
           });
         break;
       }
@@ -172,7 +175,7 @@ export class ResourceCardComponent implements OnInit {
         this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.deleteModal.close();
+            this.toggleConfirmDelete();
           });
       }
     }

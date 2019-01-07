@@ -36,6 +36,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   workspaceDeletionError = false;
   tabPath: string;
   display = true;
+  confirmDeleting = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -115,7 +116,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   }
 
   confirmDelete(): void {
-    this.deleteModal.open();
+    this.confirmDeleting = true;
   }
 
   share(): void {

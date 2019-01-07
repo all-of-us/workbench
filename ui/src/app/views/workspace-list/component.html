@@ -78,7 +78,7 @@
                   <button class="action-item delete-item"
                           [disabled]="!workspacePermissions.isOwner"
                           [class.disabled]="!workspacePermissions.isOwner"
-                          (click)="confirmDelete(workspacePermissions.workspace)">
+                          (click)="confirmDeleting(workspacePermissions.workspace)">
                     <clr-icon shape="trash"></clr-icon>
                     Delete
                   </button>
@@ -128,4 +128,4 @@
     <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
   </div>
 </clr-modal>
-<app-confirm-delete-modal [resourceType]="'workspace'" [resource]="resource" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-confirm-delete-modal [resourceType]="'workspace'" [resource]="resource" (receiveDelete)="receiveDelete($event)" [deleting]="confirmDeleting"></app-confirm-delete-modal>

@@ -49,13 +49,14 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   accessLevel: WorkspaceAccessLevel;
 
   // All the things related to deleting a workspace
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
+  // @ViewChild(ConfirmDeleteModalComponent)
+  // deleteModal: ConfirmDeleteModalComponent;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
   deleting = false;
+  confirmDeleting = false;
   workspaceDeletionError = false;
   resource: Workspace;
   // TODO This is necessary to placate the delete error template - figure out how to remove it
@@ -134,11 +135,12 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   delete(workspace: Workspace): void {
+    console.log('here');
     this.workspaceDeletionError = false;
     this.deleting = true;
     this.workspaceList = [];
     this.workspacesLoading = true;
-    this.deleteModal.close();
+    this.confirmDeleting = false;
     this.workspacesService.deleteWorkspace(workspace.namespace, workspace.id).subscribe(() => {
       this.reloadWorkspaces();
     }, (error) => {
@@ -151,8 +153,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   confirmDelete(workspace: Workspace): void {
+    console.log('workspace list confirmDeleting');
     this.resource = workspace;
-    this.deleteModal.open();
+    this.confirmDeleting = true;
+    //this.deleteModal.open();
   }
 
   share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
