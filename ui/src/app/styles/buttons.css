@@ -3,7 +3,7 @@
   font-size: 12px;
 }
 
-.btn.btn-primary {
+:host::ng-deep .btn.btn-primary {
   background-color: #262262;
   border: none;
   padding: 0rem 0.77rem;
@@ -16,12 +16,12 @@
   line-height: 0.77rem;
 }
 
-.btn.btn-primary:hover {
+:host::ng-deep .btn.btn-primary:hover {
   background-color: #4356A7;
   color: #fff;
 }
 
-.btn.btn-primary:disabled {
+:host::ng-deep .btn.btn-primary:disabled {
   background-color: #c3c3c3;
   color: #fff;
   cursor: auto;

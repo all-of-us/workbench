@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
-import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 
 import {DataAccessLevel} from 'generated';
@@ -46,7 +45,6 @@ export class AccountCreationComponent implements AfterViewInit {
   // interactions.
   constructor(
     private profileService: ProfileService,
-    private invitationKeyService: InvitationKeyComponent,
     private loginComponent: LoginComponent
   ) {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
@@ -82,7 +80,6 @@ export class AccountCreationComponent implements AfterViewInit {
 
     const request: CreateAccountRequest = {
       profile: this.profile,
-      invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe((profile) => {
