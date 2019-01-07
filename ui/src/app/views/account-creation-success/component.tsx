@@ -7,7 +7,7 @@ import {
   BolderHeader,
   Header,
   SmallHeader
-} from 'app/common/common';
+} from 'app/components/headers';
 import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {
   AccountCreationResendModalReact,
@@ -98,11 +98,13 @@ export class AccountCreationSuccessReact
           </SmallHeader>
         </div>
         <div style={{paddingTop: '0.5rem'}}>
-          <button style={styles.buttonLinkStyling} onClick={() => this.setState({resendModal: true})}>
+          <button style={styles.buttonLinkStyling}
+                  onClick={() => this.setState({resendModal: true})}>
             Resend Instructions
           </button>
           |
-          <button style={styles.buttonLinkStyling} onClick={() => this.setState({updateModal: true})}>
+          <button style={styles.buttonLinkStyling}
+                  onClick={() => this.setState({updateModal: true})}>
             Change contact email
           </button>
         </div>
