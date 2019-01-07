@@ -116,7 +116,6 @@ export class AccountCreationSuccessReact
 }
 @Component({
   selector : 'app-account-creation-success',
-  styleUrls: ['../../styles/template.css'],
   templateUrl: './component.html'
 })
 export class AccountCreationSuccessComponent implements DoCheck, OnInit {
