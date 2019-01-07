@@ -1,18 +1,28 @@
 <form [formGroup]="form">
   <section class="form-block">
     <div class="modifier-header">
-      The Following Modifiers are Optional
+      The following modifiers are optional and apply to all selected criteria
     </div>
+    <div *ngIf="preview.get('error')" class="alert alert-danger alert-sm">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-text">
+            A problem occurred and we were not able to retrieve the requested data
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-validator-errors [form]="form"></app-validator-errors>
     <div *ngFor="let mod of modifiers; let i = index" [formGroupName]="mod.name">
       <div class="label-flex">
         <label class="modifier-event-header" [for]="mod.name">{{ mod.label }}</label>
-        <ng-container *ngIf = "mod.label === 'Shifted Event Date'">
+        <ng-container *ngIf="mod.label === 'Shifted Event Date'">
           <small class="name"
                  [popper]="codesPopper"
                  [popperTrigger]="'hover'"
                  [popperPlacement]="'top'">
             <div class="label-info">
-              <clr-icon  class=" is-solid" shape="info-standard"></clr-icon>
+              <clr-icon  class="is-solid" shape="info-standard"></clr-icon>
             </div>
           </small>
           <popper-content #codesPopper>
@@ -49,27 +59,41 @@
           <ng-container *ngIf="dropdownOption.selected[i] !== 'Any'">
             <ng-container *ngIf="mod.inputType">
               <div>
-                <input *ngIf="mod.inputType !== 'date'" class="modifier-event-indicator" formControlName="valueA" [type]="mod.inputType">
+                <input *ngIf="mod.inputType !== 'date'"
+                  [min]="mod.min"
+                  [max]="mod.max"
+                  step="1"
+                  class="modifier-event-indicator"
+                  formControlName="valueA"
+                  [type]="mod.inputType"
+                  appIntegerValidator>
               </div>
-              <div *ngIf="mod.inputType === 'date'" >
-                <input class="modifier-calender" [ngModel]="myDate | date:'yyyy-MM-dd'"
-                       (ngModelChange)="myDate = $event" formControlName="valueA" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
+              <div *ngIf="mod.inputType === 'date'">
+                <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(0)" formControlName="valueA">
+                <input class="hidden-input" type="date" [formControl]="dateA" [(clrDate)]="dateObjs[0]">
               </div>
               <ng-container  *ngIf="dropdownOption.selected[i] === 'Between'">
                 <div class="and-text">
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf="mod.inputType !== 'date'"  class="modifier-event-indicator" formControlName="valueB" [type]="mod.inputType">
+                  <input *ngIf="mod.inputType !== 'date'"
+                    [min]="mod.min"
+                    [max]="mod.max"
+                    step="1"
+                    class="modifier-event-indicator"
+                    formControlName="valueB"
+                    [type]="mod.inputType"
+                    appIntegerValidator>
                 </div>
               </ng-container>
               <ng-container *ngIf="dropdownOption.selected[i] === 'Is Between'">
-                <div class="and-text" >
+                <div class="and-text">
                   <div>and</div>
                 </div>
                 <div>
-                  <input *ngIf = "mod.inputType === 'date'" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
-                         (ngModelChange)="selectedDate = $event"  class="modifier-calender" formControlName="valueB" placeholder="YYYY-MM-DD" [type]="mod.inputType" type="date" clrDate>
+                  <input class="modifier-calender" type="text" placeholder="YYYY-MM-DD" (blur)="dateBlur(1)" formControlName="valueB">
+                  <input class="hidden-input" type="date" [formControl]="dateB" [(clrDate)]="dateObjs[1]">
                 </div>
               </ng-container>
             </ng-container>
@@ -80,16 +104,16 @@
 </form>
 <div class="container count-preview">
   <div class="row">
-    <div class="col-lg-2 ">
-      <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
-        class="btn "
+    <div class="col-lg-3">
+      <button type="button"
+        class="btn calculate-btn"
         [clrLoading]="preview.get('requesting')"
         (click)="requestPreview()"
-        [disabled] = "!formChanges">
+        [disabled]="disableCalculate || !formChanges">
         Calculate
       </button>
     </div>
-    <ng-container *ngIf="!preview.get('requesting')" >
+    <ng-container *ngIf="!preview.get('requesting')">
       <div class="col-lg-8 text-padding" *ngIf="preview.get('count') >= 0">
         <div class="result-text">
           Results

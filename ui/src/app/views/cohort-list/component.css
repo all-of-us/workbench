@@ -16,7 +16,6 @@
 
 .card-area {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-start;
 }
 
@@ -24,7 +23,9 @@
   color: #2F2E7E;
   font-size: 20px;
   line-height: 24px;
-  font-weight: 500;
+  font-weight: 600;
+  margin-top: 0;
+  padding-top: 0.5rem;
 }
 
 .header-area {

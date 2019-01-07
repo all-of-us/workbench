@@ -1,4 +1,4 @@
-import {NgRedux} from '@angular-redux/store';
+import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -7,6 +7,7 @@ import {
   CohortSearchActions,
   CohortSearchState,
   getItem,
+  itemError,
   parameterList
 } from '../redux';
 
@@ -31,9 +32,10 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() itemId: string;
   @Input() itemIndex: number;
 
+  error: boolean;
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
-  private subscriptions: Subscription[];
+  private subscription: Subscription;
 
   constructor(
     private ngRedux: NgRedux<CohortSearchState>,
@@ -41,15 +43,18 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const select = this.ngRedux.select;
-    this.subscriptions = [
-      select(getItem(this.itemId)).subscribe(item => this.item = item),
-      select(parameterList(this.itemId)).subscribe(rawCodes => this.rawCodes = rawCodes),
-    ];
+    this.subscription = this.ngRedux.select(getItem(this.itemId))
+      .subscribe(item => this.item = item);
+
+    this.subscription.add(this.ngRedux.select(parameterList(this.itemId))
+      .subscribe(rawCodes => this.rawCodes = rawCodes));
+
+    this.subscription.add(this.ngRedux.select(itemError(this.itemId))
+      .subscribe(error => this.error = error));
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscription.unsubscribe();
   }
 
   get codeType() {
@@ -77,7 +82,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
       } else if (_type === TreeType[TreeType.PM]
         || _type === TreeType[TreeType.VISIT]
         || _type === TreeType[TreeType.DRUG]
-        || _type === TreeType[TreeType.MEAS]) {
+        || _type === TreeType[TreeType.MEAS]
+        || _type === TreeType[TreeType.PPI]) {
         funcs = [nameDisplay];
       }
       return funcs.map(f => f(param)).join(' ').trim();

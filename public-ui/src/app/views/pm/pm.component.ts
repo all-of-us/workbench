@@ -92,6 +92,4 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     this.selectedGroup = group;
     this.selectedConcept = concept;
   }
-
-
 }

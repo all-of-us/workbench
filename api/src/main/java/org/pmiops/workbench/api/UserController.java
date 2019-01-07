@@ -60,11 +60,20 @@ public class UserController implements UserApiDelegate {
         .ofNullable(Sort.Direction.fromStringOrNull(sortOrder))
         .orElse(Sort.Direction.ASC);
     Sort sort = new Sort(new Sort.Order(direction, DEFAULT_SORT_FIELD));
-    List<User> users = userService.findUsersBySearchString(term, sort);
+    // We want to filter out users not initialized in firecloud yet to avoid sharing with a not yet existent user.
+    List<User> users = userService.findUsersBySearchString(term, sort)
+        .stream()
+        .filter(user -> user.getFreeTierBillingProjectName() != null)
+        .collect(Collectors.toList());
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
     List<List<User>> pagedUsers = Lists.partition(users, pageSize);
 
     int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
+
+    if (pagedUsers.size() == 0) {
+      return ResponseEntity.ok(response);
+    }
+
     if (pageOffset < pagedUsers.size()) {
       boolean hasNext = pageOffset < pagedUsers.size() - 1;
       if (hasNext) {

@@ -13,7 +13,7 @@ p {
     line-height: 20px;
 }
 
-.title, .view-title, .box-title, .box-heading  {
+.title, .view-title, .box-title, .box-heading, .survey-graph-answer {
     color: #302C71;
 }
 
@@ -28,9 +28,6 @@ p {
     font-weight: 300;
     line-height: 20px;
 }
-
-
-
 
 .white-box {
     padding: 1rem;
@@ -118,6 +115,7 @@ label {
 
 .row .chart-wrapper {
     height: 8rem;
+    width: 100%;
     margin-top: .25rem;
     margin-bottom: .25rem;
 }
@@ -149,7 +147,6 @@ label {
 }
 .expanded-grid-row, .row-expansion {
     background-color: #ECF1F4;
-
 }
 
 .row-expansion {
@@ -195,4 +192,10 @@ span.keyword {
 {
     padding-left: 0;
     padding-right: 0;
+}
+
+.page-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }

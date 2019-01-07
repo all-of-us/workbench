@@ -1,10 +1,12 @@
-import {Component, Input} from '@angular/core';
+import {NgRedux} from '@angular-redux/store';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {environment} from 'environments/environment';
 import {List} from 'immutable';
-
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {CohortSearchActions} from '../redux';
+import {CohortSearchActions, CohortSearchState, groupError} from '../redux';
 
 import {SearchRequest} from 'generated';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-search-group',
@@ -14,14 +16,34 @@ import {SearchRequest} from 'generated';
     '../../styles/buttons.css',
   ]
 })
-export class SearchGroupComponent {
+export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
 
+  error: boolean;
+  temporalDropdown = false;
+  whichMention = ['Any mention', 'First mention', 'Last mention'];
+  timeDropDown = ['During same encounter as',
+                  'X Days before', 'X Days after', 'Within X days of',
+    'On or X days before', 'On or X days after'];
+  dropdownOption: any;
+  timeDropdownOption: any;
+  subscription: Subscription;
+
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
+  readonly envFlag = environment.enableTemporal;
 
-  constructor(private actions: CohortSearchActions) {}
+  constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
+
+  ngOnInit() {
+    this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
+      .subscribe(error => this.error = error);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
   get isRequesting() {
     return this.group.get('isRequesting', false);
@@ -48,5 +70,21 @@ export class SearchGroupComponent {
     const {role, groupId} = this;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
+  }
+
+  getTemporal(e) {
+    if (e.target.checked === true) {
+      this.temporalDropdown = true;
+    } else {
+      this.temporalDropdown = false;
+    }
+
+  }
+
+  getMentionTitle(mention) {
+    this.dropdownOption = mention;
+  }
+  getTimeTitle(time) {
+    this.timeDropdownOption = time;
   }
 }

@@ -55,6 +55,20 @@ export class ProfilePageComponent implements OnInit {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
+  static validLength(val: string, len: number): boolean {
+    if (val) {
+      return val.length <= len;
+    }
+    return true;
+  }
+
+  static notEmpty(val: string): boolean {
+    if (val) {
+      return val.length > 0;
+    }
+    return false;
+  }
+
   constructor(
       private profileService: ProfileService,
       private profileStorageService: ProfileStorageService,
@@ -75,6 +89,82 @@ export class ProfilePageComponent implements OnInit {
     });
 
     this.profileStorageService.reload();
+  }
+
+  get isGivenNameValidationError(): boolean {
+    if (this.workingProfile && this.workingProfile.givenName) {
+      return this.workingProfile.givenName.length > 80;
+    }
+    return false;
+  }
+
+  get givenNameValid(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.validLength(this.workingProfile.givenName, 80);
+    }
+    return false;
+  }
+
+  get givenNameNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.givenName);
+    }
+    return false;
+  }
+
+  get familyNameValid(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.validLength(this.workingProfile.familyName, 80);
+    }
+    return false;
+  }
+
+  get familyNameNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.familyName);
+    }
+    return false;
+  }
+
+  get currentPositionValid(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.validLength(this.workingProfile.currentPosition, 255);
+    }
+    return false;
+  }
+
+  get currentPositionNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return (ProfilePageComponent.notEmpty(this.workingProfile.currentPosition));
+    }
+    return false;
+  }
+
+  get organizationValid(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.validLength(this.workingProfile.organization, 255);
+    }
+    return false;
+  }
+
+  get organizationNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.organization);
+    }
+    return false;
+  }
+
+  get currentResearchNotEmpty(): boolean {
+    if (this.workingProfile) {
+      return ProfilePageComponent.notEmpty(this.workingProfile.areaOfResearch);
+    }
+    return false;
+  }
+
+  get allFieldsValid(): boolean {
+    return this.givenNameValid && this.givenNameNotEmpty && this.familyNameValid
+        && this.familyNameNotEmpty && this.currentPositionValid && this.currentPositionNotEmpty
+        && this.organizationValid && this.organizationNotEmpty && this.currentResearchNotEmpty;
   }
 
   submitChanges(): void {

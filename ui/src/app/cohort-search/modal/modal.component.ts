@@ -1,10 +1,11 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DomainType, TreeType} from 'generated';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
+import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -13,6 +14,7 @@ import {
   activeParameterList,
   CohortSearchActions,
   nodeAttributes,
+  previewStatus,
   subtreeSelected,
   wizardOpen,
 } from '../redux';
@@ -36,6 +38,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
   @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(previewStatus) preview$;
+  @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -46,14 +50,19 @@ export class ModalComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
   selections = {};
-  objectKey = Object.keys;
+  objectKeys = Object.keys;
   open = false;
   noSelection = true;
   title = '';
-  mode: 'tree' | 'modifiers' | 'attributes' = 'tree'; // default to criteria tree
+  mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
   demoItemsType: string;
   demoParam: string;
   count = 0;
+  originalNode: any;
+  disableCursor = false;
+  modifiersDisabled = false;
+  preview = Map();
+
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
@@ -64,6 +73,8 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.mode = 'tree';
         this.open = true;
       });
+
+    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 
     this.subscription.add(this.criteriaType$
       .filter(ctype => !!ctype)
@@ -83,8 +94,8 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
       this.subscription.add(this.selection$
-          .map(sel => sel.size === 0)
-          .subscribe(sel => this.noSelection = sel)
+        .map(sel => sel.size === 0)
+        .subscribe(sel => this.noSelection = sel)
       );
     this.subscription.add(this.attributes$
       .subscribe(node => {
@@ -98,11 +109,9 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
-      .filter(nodeId => !!nodeId)
-      .subscribe(nodeId => {
-        if (nodeId) {
-          this.setScroll(nodeId);
-        }
+      .filter(nodeIds => !!nodeIds)
+      .subscribe(nodeIds => {
+        this.setScroll(nodeIds[0]);
       })
     );
 
@@ -128,6 +137,7 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.subtype = subtype;
       })
     );
+    this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
     const key = selection.get('type') === TreeType[TreeType.DEMO]
@@ -140,12 +150,18 @@ export class ModalComponent implements OnInit, OnDestroy {
   }
   setScroll(nodeId: string) {
     let node: any;
+    this.disableCursor = true;
     Observable.interval(100)
-      .takeWhile(() => !node)
+      .takeWhile((val, index) => !node && index < 30)
       .subscribe(i => {
         node = document.getElementById('node' + nodeId.toString());
-        if (node && i < 100) {
-          node.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (node) {
+          setTimeout(() => {
+            node.scrollIntoView({behavior: 'smooth'});
+            this.disableCursor = false;
+          }, 200);
+        } else if (i === 29) {
+          this.disableCursor = false;
         }
       });
   }
@@ -157,11 +173,16 @@ export class ModalComponent implements OnInit, OnDestroy {
   cancel() {
     this.selections = {};
     this.open = false;
-    this.actions.cancelWizard();
+    this.actions.cancelWizard(this.ctype, 0);
   }
 
   back() {
-    this.actions.hideAttributesPage();
+    if (this.attributesNode.size > 0) {
+      this.actions.hideAttributesPage();
+    }
+    if (this.mode === 'snomed') {
+      this.setMode('tree');
+    }
   }
 
   finish() {
@@ -180,16 +201,14 @@ export class ModalComponent implements OnInit, OnDestroy {
     });
   }
 
-  get selectionTitle() {
-    const _type = [
-      TreeType[TreeType.CONDITION],
-      TreeType[TreeType.PROCEDURE]
-    ].includes(this.itemType)
-      ? this.itemType : this.ctype;
-    const title = typeToTitle(_type);
-    return title
-      ? `Add Selected ${title} Criteria to Cohort`
-      : 'No Selection';
+  get snomedNode() {
+    return Map({
+      type: TreeType.SNOMED,
+      subtype: this.subtype === TreeSubType[TreeSubType.CM]
+        ? TreeSubType.CM : TreeSubType.PCS,
+      fullTree: this.fullTree,
+      id: 0,    // root parent ID is always 0
+    });
   }
 
   get attributeTitle() {
@@ -198,10 +217,44 @@ export class ModalComponent implements OnInit, OnDestroy {
       : typeToTitle(this.ctype) + ' Detail';
   }
 
+  get showModifiers() {
+    return this.itemType !== TreeType[TreeType.PM] &&
+      this.itemType !== TreeType[TreeType.DEMO] &&
+      this.itemType !== TreeType[TreeType.PPI];
+  }
+
   get showHeader() {
     return this.itemType === TreeType[TreeType.CONDITION]
     || this.itemType === TreeType[TreeType.PROCEDURE]
     || this.itemType === TreeType[TreeType.DEMO];
+  }
+
+  get showSnomed() {
+    return this.itemType === TreeType[TreeType.CONDITION]
+    || this.itemType === TreeType[TreeType.PROCEDURE];
+  }
+
+  setMode(mode: any) {
+    if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
+      this.originalNode = Map({
+        type: this.ctype,
+        subtype: this.subtype,
+        fullTree: this.fullTree,
+        id: 0,
+      });
+    }
+    if (mode !== 'modifiers') {
+      const node = mode === 'tree' ? this.originalNode : this.snomedNode;
+      const criteriaType = node.get('type');
+      const criteriaSubtype = node.get('subtype');
+      const context = {criteriaType, criteriaSubtype};
+      this.actions.setWizardContext(context);
+    }
+    this.mode = mode;
+  }
+
+  get altTab() {
+    return this.attributesNode.size > 0;
   }
 
   selectionHeader(_type: string) {
@@ -210,9 +263,16 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   getDemoParams(e) {
     if (e) {
-        this.demoItemsType = e.type;
-        this.demoParam = e.paramId;
+      this.demoItemsType = e.type;
+      this.demoParam = e.paramId;
     }
+  }
+
+  get disableFlag() {
+    return this.noSelection
+      || this.preview.get('requesting')
+      || this.preview.get('count') === 0
+      || this.modifiersDisabled;
   }
 }
 

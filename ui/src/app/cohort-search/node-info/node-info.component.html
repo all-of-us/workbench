@@ -13,8 +13,7 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold"
-    [innerHTML]="displayCode | safeHtml">
+  <div class="code font-weight-bold">
     {{ displayCode }}
   </div>
 
@@ -22,7 +21,7 @@
   <div #name
     [popper]="popperName"
     [popperTrigger]="'hover'"
-    [popperPlacement]="'bottom'"
+    [popperModifiers]="{preventOverflow: {boundariesElement: 'viewport'}}"
     [popperDisabled]="!isTruncated"
     class="name text-muted"
     [innerHTML]="displayName | safeHtml"></div>

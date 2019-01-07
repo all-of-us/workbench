@@ -15,6 +15,7 @@ import {
   criteriaSubtree,
   ingredientsForBrand,
   isCriteriaLoading,
+  isEmpty,
   subtreeSelected,
 } from '../redux';
 
@@ -54,6 +55,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   numMatches = 0;
   subMatches = 0;
   loading = false;
+  empty: boolean;
   error = false;
   fullTree: boolean;
   codes: any;
@@ -77,6 +79,10 @@ export class NodeComponent implements OnInit, OnDestroy {
         .select(criteriaError(_type, parentId))
         .map(err => !(err === null || err === undefined))
         .subscribe(err => this.error = err);
+
+      const emptySub = this.ngRedux
+        .select(isEmpty(_type, parentId))
+        .subscribe(empty => this.empty = empty);
 
       const loadingSub = this.ngRedux
         .select(isCriteriaLoading(_type, parentId))
@@ -125,7 +131,7 @@ export class NodeComponent implements OnInit, OnDestroy {
           this.subMatches = selectedIds.length;
           if (parentId !== 0) {
             const displayName = selectedIds.includes(parentId)
-              ? highlightMatches(this.searchTerms, this.node.get('name'))
+              ? highlightMatches(this.searchTerms, this.node.get('name'), false)
               : stripHtml(this.node.get('name'));
             this.node = this.node.set('name', displayName);
           }
@@ -144,6 +150,7 @@ export class NodeComponent implements OnInit, OnDestroy {
 
       this.subscription = errorSub;
       this.subscription.add(loadingSub);
+      this.subscription.add(emptySub);
       this.subscription.add(childSub);
       this.subscription.add(searchSub);
       this.subscription.add(subtreeSub);
@@ -152,6 +159,9 @@ export class NodeComponent implements OnInit, OnDestroy {
     }
     if (this.fullTree) {
       this.expanded = this.node.get('expanded', false);
+    }
+    if (this.secondLevel) {
+      setTimeout(() => this.loadChildren(true));
     }
   }
 
@@ -200,10 +210,6 @@ export class NodeComponent implements OnInit, OnDestroy {
     } else {
       this.actions.fetchCriteria(_type, parentId);
     }
-    // Load options for Encounters modifier
-    if ([TreeType[TreeType.PM], TreeType[TreeType.VISIT]].indexOf(_type) === -1) {
-      this.actions.fetchAllCriteria(TreeType[TreeType.VISIT], 0);
-    }
   }
 
   toggleExpanded() {
@@ -232,7 +238,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       path.push(i);
       const matches = this.matchFound(item);
       if (matches.length) {
-        item.name = highlightMatches(matches, item.name);
+        item.name = highlightMatches(matches, item.name, false);
         if (path.length > 1) {
           this.setExpanded(path, 0);
         }
@@ -279,5 +285,12 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   get multipleMatches() {
     return this.ingredients.length > 0 || this.subMatches > 1;
+  }
+
+  get secondLevel() {
+    return this.node.get('parentId') === 0
+      && (this.node.get('type') === TreeType[TreeType.ICD10]
+      || (this.node.get('type') === TreeType[TreeType.ICD9]
+      && this.node.get('subtype') === TreeSubType[TreeSubType.PROC]));
   }
 }

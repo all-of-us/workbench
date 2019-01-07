@@ -1,10 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchParameter;
@@ -13,51 +10,73 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.attrConceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.betweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.nameBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.notBetweenOperator;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotTwo;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.attributesEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainNotMeasurement;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notAnyAttr;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notSystolicAndDiastolic;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notTwoAttributes;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.pmSubtypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.pmTypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.subtypeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.valueNotNumber;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.valueNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ANY;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.BP_TWO_ATTRIBUTE_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.DOMAIN;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NAME;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS_NUMERIC_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERATOR;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PM_TYPES_WITH_ATTR;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.SUBTYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TWO_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
-
-  private static final String CONCEPT_ID = "conceptId";
-  private static final List<String> PM_TYPES_WITH_ATTR =
-    Arrays.asList(TreeSubType.BP.name(),
-      TreeSubType.HR_DETAIL.name(),
-      TreeSubType.HEIGHT.name(),
-      TreeSubType.WEIGHT.name(),
-      TreeSubType.BMI.name(),
-      TreeSubType.WC.name(),
-      TreeSubType.HC.name());
-  ImmutableMap<String, String> exceptionText = ImmutableMap.<String, String>builder()
-    .put(TreeSubType.HR_DETAIL.name(), "Heart Rate")
-    .put(TreeSubType.HEIGHT.name(), "Height")
-    .put(TreeSubType.WEIGHT.name(), "Weight")
-    .put(TreeSubType.BMI.name(), "BMI")
-    .put(TreeSubType.WC.name(), "Waist Circumference")
-    .put(TreeSubType.HC.name(), "Hip Circumference")
-    .put(TreeSubType.HR.name(), "Heart Rate")
-    .put(TreeSubType.PREG.name(), "Pregnancy")
-    .put(TreeSubType.WHEEL.name(), "Wheel Chair User")
-    .build();
 
   private static final String UNION_ALL = " union all\n";
   private static final String INTERSECT_DISTINCT = "intersect distinct\n";
   private static final String VALUE_AS_NUMBER = "and value_as_number ${operator} ${value}\n";
 
   private static final String BP_INNER_SQL_TEMPLATE =
-    "select person_id, measurement_date from `${projectId}.${dataSetId}.measurement`\n" +
-    "   where measurement_source_concept_id = ${conceptId}\n";
+    "select person_id, ${tableDate} from `${projectId}.${dataSetId}.${tableName}`\n" +
+    "   where ${tableConceptId} = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
-    "select person_id from( ${bpInnerSqlTemplate} )";
+    "select person_id from( ${bpInnerSqlTemplate} )\n";
 
   private static final String BASE_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.measurement`\n" +
-      "where measurement_source_concept_id = ${conceptId}\n";
+    "select person_id from `${projectId}.${dataSetId}.${tableName}`\n" +
+      "where ${tableConceptId} = ${conceptId}\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
@@ -66,36 +85,48 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     BASE_SQL_TEMPLATE + "and value_as_concept_id = ${value}\n";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters parameters) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
+    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    Map<String, QueryParameterValue> queryParams = new HashMap<>();
     for (SearchParameter parameter : parameters.getParameters()) {
+      validateSearchParameter(parameter);
       List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
-        validateAttributes(parameter);
         for (Attribute attribute : parameter.getAttributes()) {
-          String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
-          String namedParameter1 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
-          String namedParameter2 = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
+          validateAttribute(attribute);
+          String domain = parameter.getDomainId().toLowerCase();
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
+            String namedParameterConceptId = addQueryParameterValue(queryParams,
+                QueryParameterValue.int64(attribute.getConceptId()));
             tempQueryParts.add(tempSql
-              .replace("${conceptId}", "@" + namedParameterConceptId));
-            queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
+              .replace("${conceptId}", "@" + namedParameterConceptId)
+              .replace("${tableName}", DomainTableEnum.getTableName(domain))
+              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
+              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain)));
           } else {
             boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE + VALUE_AS_NUMBER : VALUE_AS_NUMBER_SQL_TEMPLATE;
+            String namedParameterConceptId = addQueryParameterValue(queryParams,
+                QueryParameterValue.int64(attribute.getConceptId()));
+            String namedParameter1 = addQueryParameterValue(queryParams,
+                QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
+            String valueExpression;
+            if (isBetween) {
+              String namedParameter2 = addQueryParameterValue(queryParams,
+                  QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
+              valueExpression = "@" + namedParameter1 + " and " + "@" + namedParameter2;
+            } else {
+              valueExpression = "@" + namedParameter1;
+            }
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId)
               .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-              .replace("${value}", isBetween ? "@" + namedParameter1 + " and " + "@" + namedParameter2
-                : "@" + namedParameter1));
-            queryParams.put(namedParameterConceptId, QueryParameterValue.int64(attribute.getConceptId()));
-            queryParams.put(namedParameter1, QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
-            if (isBetween) {
-              queryParams.put(namedParameter2, QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
-            }
+              .replace("${tableName}", DomainTableEnum.getTableName(domain))
+              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
+              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain))
+              .replace("${value}", valueExpression));
           }
         }
         if (isBP) {
@@ -104,21 +135,18 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           queryParts.addAll(tempQueryParts);
         }
       } else {
-        validateSearchParameter(parameter);
-        String namedParameterConceptId = CONCEPT_ID + getUniqueNamedParameterPostfix();
-        String namedParameter = getParameterPrefix(parameter.getSubtype()) + getUniqueNamedParameterPostfix();
+        String namedParameterConceptId = addQueryParameterValue(queryParams,
+            QueryParameterValue.int64(parameter.getConceptId()));
+        String namedParameter = addQueryParameterValue(queryParams,
+            QueryParameterValue.int64(new Long(parameter.getValue())));
+        String domain = parameter.getDomainId().toLowerCase();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
-          .replace("${value}","@" + namedParameter));
-        queryParams.put(namedParameterConceptId, QueryParameterValue.int64(parameter.getConceptId()));
-        queryParams.put(namedParameter, QueryParameterValue.int64(new Long(parameter.getValue())));
+          .replace("${value}","@" + namedParameter)
+          .replace("${tableName}", DomainTableEnum.getTableName(domain))
+          .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain)));
       }
     }
-    String finalSql = String.join(UNION_ALL, queryParts);
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return String.join(UNION_ALL, queryParts);
   }
 
   @Override
@@ -130,61 +158,39 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     return subtype.toLowerCase().replace("-", "");
   }
 
-  private void validateAttributes(SearchParameter parameter) {
-    List<Attribute> attrs = parameter.getAttributes();
-    Predicate<Attribute> systolic = nameIsSystolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
-    Predicate<Attribute> diastolic = nameIsDiastolic().and(operatorWithCorrectOperands()).and(conceptIdNotNull());
-    if (parameter.getSubtype().equals(TreeSubType.BP.name())) {
-      boolean systolicAttrs =
-        attrs.stream().filter(systolic::test).collect(Collectors.toList()).size() != 1;
-      boolean diastolicAttrs =
-        attrs.stream().filter(diastolic::test).collect(Collectors.toList()).size() != 1;
-      boolean anyAttrs =
-        attrs.stream().filter(nameIsAny()::test).collect(Collectors.toList()).size() != 2;
-      if ((systolicAttrs || diastolicAttrs) && anyAttrs) {
-        throw new BadRequestException("Please provide valid search attributes" +
-          "(name, operator, operands and conceptId) for Systolic and Diastolic.");
+  private void validateSearchParameter(SearchParameter param) {
+    String type = param.getType();
+    String subtype = param.getSubtype();
+    from(typeBlank().or(pmTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, type);
+    from(subtypeBlank().or(pmSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, subtype);
+    if (PM_TYPES_WITH_ATTR.contains(param.getSubtype())) {
+      from(notAnyAttr().and(attributesEmpty())).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+      if (param.getSubtype().equals(TreeSubType.BP.name())) {
+        from(notAnyAttr().and(notTwoAttributes())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
+        from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
       }
-    } else if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
-      Predicate<Attribute> allTypes = operatorWithCorrectOperands().and(conceptIdNotNull());
-      boolean allAttrs =
-        parameter.getAttributes().stream().filter(allTypes::test).collect(Collectors.toList()).size() != 1;
-      if (allAttrs) {
-        throw new BadRequestException("Please provide valid search attributes(operator, operands) for "
-          + exceptionText.get(parameter.getSubtype()) + ".");
-      }
+    } else {
+      String domain = param.getDomainId();
+      String value = param.getValue();
+      Long conceptId = param.getConceptId();
+      from(domainBlank().or(domainNotMeasurement())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);
+      from(valueNull().or(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, value);
+      from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
     }
   }
 
-  private void validateSearchParameter(SearchParameter parameter) {
-    if (parameter.getConceptId() == null || parameter.getValue() == null) {
-      throw new BadRequestException("Please provide valid conceptId and value for "
-        + exceptionText.get(parameter.getSubtype()) + ".");
-    } else if (!NumberUtils.isNumber(parameter.getValue())) {
-      throw new BadRequestException("Please provide valid value for "
-        + exceptionText.get(parameter.getSubtype()) + ".");
+  private void validateAttribute(Attribute attr) {
+    if (!ANY.equals(attr.getName())) {
+      String name = attr.getName();
+      String oper = operatorText.get(attr.getOperator());
+      Long conceptId = attr.getConceptId();
+      from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(attrConceptIdNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, conceptId);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
     }
-
-  }
-
-  private static Predicate<Attribute> nameIsSystolic() {
-    return attribute -> "Systolic".equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> nameIsDiastolic() {
-    return attribute -> "Diastolic".equals(attribute.getName());
-  }
-
-  private static Predicate<Attribute> conceptIdNotNull() {
-    return attribute -> attribute.getConceptId() != null;
-  }
-
-  private static Predicate<Attribute> nameIsAny() { return attribute -> isNameAny(attribute); }
-
-  private static Predicate<Attribute> operatorWithCorrectOperands() {
-    return attribute -> isNameAny(attribute)
-      || isOperatorBetween(attribute)
-      || isOperatorAnyEquals(attribute)
-      || isOperatorIn(attribute);
   }
 }

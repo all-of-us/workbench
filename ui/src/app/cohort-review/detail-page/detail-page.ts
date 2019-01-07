@@ -1,13 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
+import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
-
-import {CohortReview} from 'generated';
-
 
 @Component({
   templateUrl: './detail-page.html',
@@ -18,10 +14,12 @@ export class DetailPage implements OnInit, OnDestroy {
   sidebarOpen = true;
   participant: Participant;
   subscription: Subscription;
-
-  constructor(private route: ActivatedRoute) {}
+  participantId: number;
+  constructor(private route: ActivatedRoute, private state: ReviewStateService) {}
 
   ngOnInit() {
+    const {annotationDefinitions} = this.route.snapshot.data;
+    this.state.annotationDefinitions.next(annotationDefinitions);
     this.subscription = this.route.data.subscribe(({participant, annotations}) => {
       participant.annotations = annotations;
       this.participant = participant;
@@ -38,5 +36,10 @@ export class DetailPage implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+  getNavigatedParticipantId(id) {
+    if (id) {
+      this.participantId = id;
+    }
   }
 }

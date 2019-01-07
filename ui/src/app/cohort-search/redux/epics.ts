@@ -14,6 +14,7 @@ import {
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   CANCEL_CRITERIA_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
 
   BEGIN_COUNT_REQUEST,
   CANCEL_COUNT_REQUEST,
@@ -59,7 +60,7 @@ import {
 import {CohortSearchState} from './store';
 /* tslint:enable:ordered-imports */
 
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, CohortReviewService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
@@ -87,7 +88,8 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
  */
 @Injectable()
 export class CohortSearchEpics {
-  constructor(private service: CohortBuilderService) {}
+  constructor(private service: CohortBuilderService,
+              private reviewservice: CohortReviewService) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(
@@ -150,12 +152,18 @@ export class CohortSearchEpics {
     action$.ofType(BEGIN_AUTOCOMPLETE_REQUEST).mergeMap(
       ({cdrVersionId, kind, subtype, searchTerms}: AutocompleteRequestAction) => {
         if (kind === DomainType[DomainType.DRUG]) {
-          return this.service.getDrugBrandOrIngredientByValue(cdrVersionId, searchTerms)
+          return this.service.getDrugBrandOrIngredientByValue(cdrVersionId, searchTerms, 100)
             .map(result => loadAutocompleteOptions(result.items))
+            .race(action$
+              .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+              .first())
             .catch(e => Observable.of(autocompleteRequestError(e)));
         } else {
           return this.service.getCriteriaAutoComplete(cdrVersionId, kind, searchTerms, subtype)
             .map(result => loadAutocompleteOptions(result.items))
+            .race(action$
+              .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+              .first())
             .catch(e => Observable.of(autocompleteRequestError(e)));
         }
       }
@@ -167,6 +175,9 @@ export class CohortSearchEpics {
       ({cdrVersionId, conceptId}: IngredientRequestAction) => {
         return this.service.getDrugIngredientByConceptId(cdrVersionId, conceptId)
           .map(result => loadIngredients(result.items))
+          .race(action$
+            .ofType(CANCEL_AUTOCOMPLETE_REQUEST)
+            .first())
           .catch(e => Observable.of(autocompleteRequestError(e)));
       }
     )

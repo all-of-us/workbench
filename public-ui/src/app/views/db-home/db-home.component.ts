@@ -8,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 export class DbHomeComponent implements OnInit {
   pageImage = '/assets/db-images/woman-chair.png';
   dbLogo = '/assets/db-images/Data_Browser_Logo.svg';
-  subTitle = 'Interested in taking a look at the data before signing up to access ' +
-    'the full data set? ' +
-    'Use the tools in the AoU Data Browser platform to explore the data available!';
+  subTitle = 'The Data Browser provides interactive views of the publically available ' +
+    'All of Us (AoU) Research Program participant data. ' +
+    'Currently, participant provided information, including surveys and ' +
+    'physical measurements taken at the time of participant enrollment ' +
+    '(“program physical measurements”), ' +
+    'as well as electronic health record (EHR) data are available.' +
+    ' The AoU Research Program data resource will grow to include more data types over time.';
 
   constructor() { }
 

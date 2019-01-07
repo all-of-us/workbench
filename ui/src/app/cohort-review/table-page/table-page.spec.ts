@@ -1,57 +1,118 @@
+import {NgRedux} from '@angular-redux/store';
+import { APP_BASE_HREF } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {CohortReviewService, DataAccessLevel} from 'generated';
+import {NgxPopperModule} from 'ngx-popper';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
-
-import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
-import {ReviewNavComponent} from '../review-nav/review-nav.component';
+import {CohortBuilderService} from '../../../generated';
+import {CdrVersionStorageServiceStub} from '../../../testing/stubs/cdr-version-storage-service-stub';
+import {CohortBuilderServiceStub} from '../../../testing/stubs/cohort-builder-service-stub';
+import {WorkspacesServiceStub} from '../../../testing/stubs/workspace-service-stub';
+import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
+import {CohortSearchActions} from '../../cohort-search/redux';
+import {CdrVersionStorageService} from '../../services/cdr-version-storage.service';
+import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filter.component';
+import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
+import {OverviewPage} from '../overview-page/overview-page';
+import {ParticipantsChartsComponent} from '../participants-charts/participant-charts';
+import {QueryCohortDefinitionComponent} from '../query-cohort-definition/query-cohort-definition.component';
+import {QueryDescriptiveStatsComponent} from '../query-descriptive-stats/query-descriptive-stats.component';
+import {QueryReportComponent} from '../query-report/query-report.component';
 import {ReviewStateService} from '../review-state.service';
-import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
-import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
-import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-list.component';
-import {SetAnnotationModalComponent} from '../set-annotation-modal/set-annotation-modal.component';
 import {StatusFilterComponent} from '../status-filter/status-filter.component';
 import {TablePage} from './table-page';
+
+
 
 describe('TablePage', () => {
   let component: TablePage;
   let fixture: ComponentFixture<TablePage>;
+
   const activatedRouteStub = {
     snapshot: {
       data: {
+        cohort: {
+          name: '',
+          criteria: '{}'
+        },
         concepts: {
           raceList: [],
           genderList: [],
           ethnicityList: [],
-        }
+        },
+        review: {},
+        workspace: {}
       },
       pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
-    }
+    },
+    parent: {
+      snapshot: {
+        data: {
+          workspace: {
+            cdrVersionId: 1
+          },
+          cohort: {
+            name: ''
+          },
+        },
+        params: {
+          ns: 'workspaceNamespace',
+          wsid: 'workspaceId',
+          cid: 1
+        }
+      },
+      params: {
+        ns: 'workspaceNamespace',
+        wsid: 'workspaceId',
+        cid: 1
+      }
+    },
   };
   let route;
-
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [
-        ChoiceFilterComponent,
-        ReviewNavComponent,
+        ClearButtonFilterComponent,
+        MultiSelectFilterComponent,
         TablePage,
-        SetAnnotationCreateComponent,
-        SetAnnotationItemComponent,
-        SetAnnotationListComponent,
-        SetAnnotationModalComponent,
         StatusFilterComponent,
+        OverviewPage,
+        ComboChartComponent,
+        ParticipantsChartsComponent,
+        QueryReportComponent,
+        QueryCohortDefinitionComponent,
+        QueryDescriptiveStatsComponent
       ],
-      imports: [ClarityModule, ReactiveFormsModule, RouterTestingModule],
+      imports: [ClarityModule,
+                ReactiveFormsModule,
+                RouterTestingModule,
+                NgxPopperModule,
+                NgxChartsModule],
       providers: [
+        {provide: NgRedux},
+        {provide: CohortReviewService},
+        { provide: CdrVersionStorageService,
+          useValue: new CdrVersionStorageServiceStub({
+            defaultCdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+            items: [{
+              name: 'cdr1',
+              cdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
+              dataAccessLevel: DataAccessLevel.Registered,
+              creationTime: 0
+            }]
+          })},
+        {provide: CohortSearchActions},
+        {provide: APP_BASE_HREF, useValue: '/'},
+        {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: CohortAnnotationDefinitionService, useValue: {}},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ],
     })

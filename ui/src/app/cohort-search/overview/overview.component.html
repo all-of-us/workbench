@@ -8,27 +8,30 @@
       <span class="count-header" *ngIf="!(isRequesting$ | async)">
         {{ total$ | async | number }}
       </span>
+      <span *ngIf="(error$ | async)">
+        <clr-icon
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          shape="error-standard"
+          size="18"></clr-icon>
+      </span>
     </h2>
-    <div *ngIf="chartData$ | async as chartData">
+    <div>
       <button
         type="button"
         class="btn btn-primary"
         [style.margin-left]="'0'"
-        [disabled]="!chartData.size || (total$ | async) === 0"
+        [disabled]="(isRequesting$ | async) || !(total$ | async)"
         (click)="saveModal.open()">
         Save Cohort
       </button>
     </div>
   </div>
-
+<ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
   <ng-container *ngIf="chartData$ | async as chartData">
     <div class="card bg-faded">
       <div class="card-header header-text">
         Results by Gender
-        <!--<clr-icon shape="angle"-->
-          <!--[dir]="showGenderChart ? 'up' : 'down'"-->
-          <!--(click)="toggleShowGender()">-->
-        <!--</clr-icon>-->
       </div>
       <div *ngIf="showGenderChart" class="card-block">
         <app-gender-chart *ngIf="chartData.size"
@@ -56,7 +59,12 @@
       </div>
     </div>
   </ng-container>
+</ng-container>
 </div>
+
+<popper-content #errorPopper>
+  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+</popper-content>
 
 <clr-modal #saveModal
   [clrModalSize]="'md'"
@@ -78,6 +86,7 @@
           id="name-control"
           class="control"
           placeholder="Cohort Name"
+          maxlength="80"
           formControlName="name"
           type="text"
           [class.invalid]="(name.dirty || name.touched) && cohortForm.invalid"

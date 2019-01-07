@@ -3,6 +3,7 @@ import {Injectable} from '@angular/core';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
+import {stripHtml} from '../../utils';
 
 import {
   activeGroupId,
@@ -58,7 +59,7 @@ export class CohortSearchActions {
   @dispatch() cancelCriteriaRequest = ActionFuncs.cancelCriteriaRequest;
   @dispatch() setCriteriaSearchTerms = ActionFuncs.setCriteriaSearchTerms;
   @dispatch() requestAutocompleteOptions = ActionFuncs.requestAutocompleteOptions;
-  @dispatch() clearAutocompleteOptions = ActionFuncs.clearAutocompleteOptions;
+  @dispatch() cancelAutocompleteRequest = ActionFuncs.cancelAutocompleteRequest;
   @dispatch() requestIngredientsForBrand = ActionFuncs.requestIngredientsForBrand;
   @dispatch() requestAllChildren = ActionFuncs.requestAllChildren;
   @dispatch() selectChildren = ActionFuncs.selectChildren;
@@ -94,11 +95,12 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
-  @dispatch() cancelWizard = ActionFuncs.cancelWizard;
+  @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
   @dispatch() _resetStore = ActionFuncs.resetStore;
+  @dispatch() clearStore = ActionFuncs.clearStore;
 
   /** Internal tooling */
   idsInUse = Set<string>();
@@ -148,6 +150,18 @@ export class CohortSearchActions {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     }
+  }
+
+  cancelWizard(kind: string, parentId: number): void {
+    const isLoading = isCriteriaLoading(kind, parentId)(this.state);
+    if (isLoading) {
+      this.cancelCriteriaRequest(kind, parentId);
+    }
+    const autocompleteLoading = isAutocompleteLoading()(this.state);
+    if (autocompleteLoading) {
+      this.cancelAutocompleteRequest();
+    }
+    this._cancelWizard();
   }
 
   cancelIfRequesting(kind, id): void {
@@ -203,13 +217,13 @@ export class CohortSearchActions {
     this.removeId(itemId);
 
     if (hasItems && (countIsNonZero || isOnlyChild)) {
-      this.requestTotalCount();
-
       /* If this was the only item in the group, the group no longer has a
        * count, not really. */
       if (isOnlyChild) {
+        this.requestTotalCount(groupId);
         this.removeGroup(role, groupId);
       } else {
+        this.requestTotalCount();
         this.requestGroupCount(role, groupId);
       }
     }
@@ -252,6 +266,10 @@ export class CohortSearchActions {
   }
 
   fetchAutocompleteOptions(kind: string, subtype: string, terms: string): void {
+    const isLoading = isAutocompleteLoading()(this.state);
+    if (isLoading) {
+      this.cancelAutocompleteRequest();
+    }
     this.requestAutocompleteOptions(this.cdrVersionId, kind, subtype, terms);
   }
 
@@ -266,18 +284,15 @@ export class CohortSearchActions {
   fetchAllChildren(node: any): void {
     const kind = node.get('type');
     const id = node.get('id');
-    if (kind === TreeType[TreeType.DRUG]) {
-      this.requestAllChildren(this.cdrVersionId, kind, id);
-    } else {
-      const paramId = `param${node.get('conceptId') ? node.get('conceptId') : id}`;
-      const param = node.set('parameterId', paramId);
-      this.addParameter(param);
-      this.selectChildren(kind, id);
-    }
+    const paramId = `param${node.get('conceptId')
+      ? (node.get('conceptId') + node.get('code')) : id}`;
+    const param = node.set('parameterId', paramId);
+    this.addParameter(param);
+    this.selectChildren(kind, id);
   }
 
   fetchAttributes(node: any): void {
-    const isLoading = isAttributeLoading()(this.state);
+    const isLoading = isAttributeLoading(this.state);
     if (isLoading) {
       return;
     }
@@ -439,14 +454,22 @@ export class CohortSearchActions {
 
   mapGroup = (groupId: string): SearchGroup => {
     const group = getGroup(groupId)(this.state);
-    let items = group.get('items', List()).map(this.mapGroupItem);
+    const temporal = group.get('temporal');
+    let items = group.get('items', List()).map(item => this.mapGroupItem(item, temporal));
     if (isImmutable(items)) {
       items = items.toJS();
     }
-    return <SearchGroup>{id: groupId, items};
+    const searchGroup = <SearchGroup>{id: groupId, items, temporal};
+    if (temporal) {
+      searchGroup.mention = group.get('mention');
+      searchGroup.time = group.get('time');
+      searchGroup.timeValue = group.get('timeValue');
+      searchGroup.timeFrame = group.get('timeFrame');
+    }
+    return searchGroup;
   }
 
-  mapGroupItem = (itemId: string): SearchGroupItem => {
+  mapGroupItem = (itemId: string, temporal?: boolean): SearchGroupItem => {
     const item = getItem(itemId)(this.state);
     const critIds = item.get('searchParameters', List());
 
@@ -457,46 +480,42 @@ export class CohortSearchActions {
       .map(this.mapParameter)
       .toJS();
 
-    return <SearchGroupItem>{
+    const searchGroupItem =  <SearchGroupItem>{
       id: itemId,
       type: item.get('type', '').toUpperCase(),
       searchParameters: params,
       modifiers: item.get('modifiers', List()).toJS(),
     };
+    if (temporal) {
+      searchGroupItem.temporalGroup = item.get('temporalGroup');
+    }
+    return searchGroupItem;
   }
 
   mapParameter = (immParam): SearchParameter => {
     const param = <SearchParameter>{
       parameterId: immParam.get('parameterId'),
-      name: immParam.get('name', ''),
-      value: TreeSubType[TreeSubType.DEC] === immParam.get('subtype')
-          ? immParam.get('name') : immParam.get('code'),
+      name: stripHtml(immParam.get('name', '')),
       type: immParam.get('type', ''),
       subtype: immParam.get('subtype', ''),
       group: immParam.get('group'),
-      attributes: immParam.get('attributes')
+      attributes: immParam.get('attributes'),
     };
 
-    if (param.type === TreeType[TreeType.DEMO]
-      || param.type === TreeType[TreeType.VISIT]
-      || param.type === TreeType[TreeType.PM]
-      || param.type === TreeType[TreeType.MEAS]
-      || param.type === TreeType[TreeType.DRUG]
-      || param.type === TreeType[TreeType.ICD9]
-      || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]
-      || param.type === TreeType[TreeType.CONDITION]) {
-        param.conceptId = immParam.get('conceptId');
+    if (immParam.get('conceptId')) {
+      param.conceptId = immParam.get('conceptId');
     }
-    if (param.type === TreeType[TreeType.ICD9]
-      || param.type === TreeType[TreeType.ICD10]
-      || param.type === TreeType[TreeType.CPT]
-      || param.type === TreeType[TreeType.CONDITION]) {
-        param.domain = immParam.get('domainId');
+    if (immParam.get('domainId')) {
+      param.domainId = immParam.get('domainId');
     }
-
+    if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
+      param.value = immParam.get('name');
+    } else if (immParam.get('code')) {
+      param.value = immParam.get('code');
+    }
     return param;
   }
+
 
   /*
    * Deserializes a JSONified SearchRequest into an entities object
@@ -520,7 +539,9 @@ export class CohortSearchActions {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
             param.code = param.value;
-            param.hasAttributes = param.attributes.length > 0;
+            if (param.attributes) {
+              param.hasAttributes = param.attributes.length > 0;
+            }
             entities.parameters[param.parameterId] = param;
             this.addId(param.parameterId);
             return param.parameterId;

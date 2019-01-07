@@ -3,10 +3,10 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,9 +15,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.model.ConceptSynonym;
+import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
+import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoId;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
@@ -26,14 +26,15 @@ import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
+import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -72,6 +73,7 @@ public class ConceptsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_2 = new Concept()
           .conceptId(456L)
+          .standardConcept(false)
           .conceptName("b concept")
           .conceptCode("conceptB")
           .conceptClassId("classId2")
@@ -83,6 +85,7 @@ public class ConceptsControllerTest {
 
   private static final Concept CLIENT_CONCEPT_3 = new Concept()
           .conceptId(789L)
+          .standardConcept(false)
           .conceptName("multi word concept")
           .conceptCode("conceptC")
           .conceptClassId("classId3")
@@ -98,7 +101,7 @@ public class ConceptsControllerTest {
           .standardConcept(true)
           .conceptCode("conceptD")
           .conceptClassId("classId4")
-          .vocabularyId("V4")
+          .vocabularyId("V456")
           .domainId("Observation")
           .countValue(1250L)
           .prevalence(0.5F)
@@ -122,7 +125,7 @@ public class ConceptsControllerTest {
           .standardConcept(false)
           .conceptCode("conceptD")
           .conceptClassId("classId6")
-          .vocabularyId("V6")
+          .vocabularyId("V5")
           .domainId("Condition")
           .countValue(7891L)
           .prevalence(0.1F)
@@ -185,6 +188,19 @@ public class ConceptsControllerTest {
           .standardConceptCount(3)
           .allConceptCount(4);
 
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V1_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V1"))
+          .standardConceptCount(1).allConceptCount(1);
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V3_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V3"))
+          .allConceptCount(1);
+  private static final org.pmiops.workbench.cdr.model.DomainVocabularyInfo CONDITION_V5_INFO =
+      new org.pmiops.workbench.cdr.model.DomainVocabularyInfo()
+          .id(new DomainVocabularyInfoId("Condition", "V5"))
+          .allConceptCount(2).standardConceptCount(1);
+
   @TestConfiguration
   @Import({
       WorkspaceServiceImpl.class
@@ -202,8 +218,6 @@ public class ConceptsControllerTest {
   @Autowired
   private ConceptDao conceptDao;
   @Autowired
-  private ConceptSynonymDao conceptSynonymDao;
-  @Autowired
   private WorkspaceService workspaceService;
   @Autowired
   private WorkspaceDao workspaceDao;
@@ -211,6 +225,8 @@ public class ConceptsControllerTest {
   private CdrVersionDao cdrVersionDao;
   @Autowired
   private DomainInfoDao domainInfoDao;
+  @Autowired
+  private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired
   FireCloudService fireCloudService;
 
@@ -224,9 +240,9 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService, conceptSynonymDao,
-        domainInfoDao);
+    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    conceptsController = new ConceptsController(conceptService, workspaceService,
+        domainInfoDao, domainVocabularyInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -249,11 +265,140 @@ public class ConceptsControllerTest {
         .thenReturn(fcResponse);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void testSearchConceptsBlankQuery() throws Exception {
     assertResults(
         conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query(" ")));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithResults() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3, CLIENT_CONCEPT_2,
+        CLIENT_CONCEPT_1);
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithVocabAllCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    saveDomainVocabularyInfos();
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeVocabularyCounts(true).domain(Domain.CONDITION));
+    assertResultsWithCounts(response,
+        null,
+        ImmutableList.<VocabularyCount>of(
+            new VocabularyCount().vocabularyId("V1").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V3").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V5").conceptCount(2L)
+        ),
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3,
+            CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithVocabStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    saveDomainVocabularyInfos();
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeVocabularyCounts(true).domain(Domain.CONDITION)
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+    assertResultsWithCounts(response,
+        null,
+        ImmutableList.<VocabularyCount>of(
+            new VocabularyCount().vocabularyId("V1").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V5").conceptCount(1L)
+        ),
+        ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithDomainAllCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    // When no query is provided, domain concept counts come from domain info directly.
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeDomainCounts(true));
+    assertResultsWithCounts(response,
+        ImmutableList.<DomainCount>of(
+            toDomainCount(CONDITION_DOMAIN, false),
+            toDomainCount(DRUG_DOMAIN, false),
+            toDomainCount(MEASUREMENT_DOMAIN, false),
+            toDomainCount(PROCEDURE_DOMAIN, false)),
+        null,
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3,
+            CLIENT_CONCEPT_2, CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithDomainStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    // When no query is provided, domain concept counts come from domain info directly.
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeDomainCounts(true)
+                .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+    assertResultsWithCounts(response,
+        ImmutableList.<DomainCount>of(
+            toDomainCount(CONDITION_DOMAIN, true),
+            toDomainCount(DRUG_DOMAIN, true),
+            toDomainCount(MEASUREMENT_DOMAIN, true),
+            toDomainCount(PROCEDURE_DOMAIN, true)),
+        null,
+        ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_4, CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryWithDomainAndVocabStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    saveDomainVocabularyInfos();
+    // When no query is provided, domain concept counts come from domain info directly.
+    ResponseEntity<ConceptListResponse> response =
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().includeDomainCounts(true).includeVocabularyCounts(true)
+                .domain(Domain.CONDITION).standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
+    assertResultsWithCounts(response,
+        ImmutableList.<DomainCount>of(
+            toDomainCount(CONDITION_DOMAIN, true),
+            toDomainCount(DRUG_DOMAIN, true),
+            toDomainCount(MEASUREMENT_DOMAIN, true),
+            toDomainCount(PROCEDURE_DOMAIN, true)),
+        ImmutableList.<VocabularyCount>of(
+            new VocabularyCount().vocabularyId("V1").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V5").conceptCount(1L)
+        ),
+        ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryInDomain() throws Exception{
+    saveConcepts();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().domain(Domain.CONDITION).query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1);
+  }
+
+  @Test
+  public void testSearchConceptsBlankQueryInDomainWithVocabularyIds() throws Exception{
+    saveConcepts();
+    saveDomainVocabularyInfos();
+    assertResults(
+        conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().domain(Domain.CONDITION).vocabularyIds(
+                ImmutableList.of("V1", "V5")).query(" ")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -274,10 +419,8 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsNameOneMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("xyz"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("xyz")));
   }
 
   @Test
@@ -285,34 +428,142 @@ public class ConceptsControllerTest {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con")), CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
+            new SearchConceptsRequest().query("word")), CLIENT_CONCEPT_4, CLIENT_CONCEPT_3);
   }
 
   @Test
   public void testSearchConceptsCodeMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptA"));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(123);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptA")), CLIENT_CONCEPT_1);
   }
 
   @Test
   public void testSearchConceptsConceptIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("123"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts).contains(CLIENT_CONCEPT_1);
+    // ID matching currently includes substrings.
+    assertResults(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("123")), CLIENT_CONCEPT_4, CLIENT_CONCEPT_1);
+  }
+
+
+  @Test
+  public void testSearchConceptsVocabIdMatch() throws Exception {
+    saveConcepts();
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("V456")), CLIENT_CONCEPT_4);
   }
 
   @Test
   public void testSearchConceptsMatchOrder() throws Exception{
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptD"));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(2);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptD")),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4);
+  }
+
+  @Test
+  public void testSearchConceptsWithDomainAllCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").includeDomainCounts(true)),
+        ImmutableList.of(
+            toDomainCount(CONDITION_DOMAIN, 2),
+            toDomainCount(DRUG_DOMAIN, 0),
+            toDomainCount(MEASUREMENT_DOMAIN, 0),
+            toDomainCount(PROCEDURE_DOMAIN, 0)),null,
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4));
+  }
+
+  @Test
+  public void testSearchConceptsWithDomainStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").includeDomainCounts(true)
+            .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),
+        ImmutableList.of(
+            toDomainCount(CONDITION_DOMAIN, 1),
+            toDomainCount(DRUG_DOMAIN, 0),
+            toDomainCount(MEASUREMENT_DOMAIN, 0),
+            toDomainCount(PROCEDURE_DOMAIN, 0)),null,
+        // There's no domain filtering so we return CLIENT_CONCEPT_4 here even though it doesn't
+        // show up in the counts.
+        ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_4));
+  }
+
+  @Test
+  public void testSearchConceptsWithVocabularyAllCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").domain(Domain.CONDITION).includeVocabularyCounts(true)),
+        null,ImmutableList.of(new VocabularyCount().vocabularyId("V5").conceptCount(2L)),
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
+  }
+
+  @Test
+  public void testSearchConceptsWithVocabularyStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").domain(Domain.CONDITION).includeVocabularyCounts(true)
+            .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),
+        null,ImmutableList.of(new VocabularyCount().vocabularyId("V5").conceptCount(1L)),
+        ImmutableList.of(CLIENT_CONCEPT_5));
+  }
+
+  @Test
+  public void testSearchConceptsWithDomainAndVocabularyStandardCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").domain(Domain.CONDITION).includeVocabularyCounts(true)
+            .includeDomainCounts(true).standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),
+        ImmutableList.of(
+            toDomainCount(CONDITION_DOMAIN, 1),
+            toDomainCount(DRUG_DOMAIN, 0),
+            toDomainCount(MEASUREMENT_DOMAIN, 0),
+            toDomainCount(PROCEDURE_DOMAIN, 0)),
+        ImmutableList.of(new VocabularyCount().vocabularyId("V5").conceptCount(1L)),
+        ImmutableList.of(CLIENT_CONCEPT_5));
+  }
+
+  @Test
+  public void testSearchConceptsWithDomainAndVocabularyAllCounts() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptD").domain(Domain.CONDITION).includeVocabularyCounts(true)
+            .includeDomainCounts(true).standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS)),
+        ImmutableList.of(
+            toDomainCount(CONDITION_DOMAIN, 2),
+            toDomainCount(DRUG_DOMAIN, 0),
+            toDomainCount(MEASUREMENT_DOMAIN, 0),
+            toDomainCount(PROCEDURE_DOMAIN, 0)),
+        ImmutableList.of(new VocabularyCount().vocabularyId("V5").conceptCount(2L)),
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
+  }
+
+  @Test
+  public void testSearchConceptsWithDomainAndVocabularyAllCountsMatchAllConditions() throws Exception{
+    saveConcepts();
+    saveDomains();
+    assertResultsWithCounts(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("con").domain(Domain.CONDITION).includeVocabularyCounts(true)
+            .includeDomainCounts(true).standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS)),
+        ImmutableList.of(
+            toDomainCount(CONDITION_DOMAIN, 4),
+            toDomainCount(DRUG_DOMAIN, 0),
+            // Although it doesn't match the domain filter, we still include the measurement concept
+            // in domain counts
+            toDomainCount(MEASUREMENT_DOMAIN, 1),
+            toDomainCount(PROCEDURE_DOMAIN, 0)),
+        ImmutableList.of(new VocabularyCount().vocabularyId("V1").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V3").conceptCount(1L),
+            new VocabularyCount().vocabularyId("V5").conceptCount(2L)),
+        ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 
   @Test
@@ -328,11 +579,10 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsStandardConcept() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
+    assertResults(conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("conceptA")
-                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(123);
+                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)),
+        CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -348,37 +598,30 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsVocabularyIdNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("x", "v")));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("con").vocabularyIds(ImmutableList.of("x", "v"))));
   }
 
   @Test
   public void testSearchConceptsVocabularyIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptB").vocabularyIds(ImmutableList.of("V3", "V2")));
-    Concept concept = response.getBody().getItems().get(0);
-    assertThat(concept.getConceptId()).isEqualTo(456);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptB").vocabularyIds(ImmutableList.of("V3", "V2"))),
+        CLIENT_CONCEPT_2);
   }
 
   @Test
   public void testSearchConceptsDomainIdNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").domain(Domain.OBSERVATION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("zzz").domain(Domain.OBSERVATION)));
   }
 
   @Test
   public void testSearchConceptsDomainIdMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response = conceptsController.searchConcepts("ns", "name",
-    new SearchConceptsRequest().query("conceptA").domain(Domain.CONDITION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts).contains(CLIENT_CONCEPT_1);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+        new SearchConceptsRequest().query("conceptA").domain(Domain.CONDITION)), CLIENT_CONCEPT_1);
   }
 
   @Test
@@ -395,96 +638,27 @@ public class ConceptsControllerTest {
   @Test
   public void testSearchConceptsMultipleNoMatch() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response =
-        conceptsController.searchConcepts("ns", "name",
+    assertResults(conceptsController.searchConcepts("ns", "name",
             new SearchConceptsRequest().query("con")
                 .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
                 .vocabularyIds(ImmutableList.of("V1"))
-                .domain(Domain.CONDITION));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(0);
+                .domain(Domain.CONDITION)));
   }
 
-  @Test
-  public void testSearchConceptsMultiWordQueryOneResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi word").maxResults(1)),CLIENT_CONCEPT_3);
-  }
-
-  @Test
-  public void testSearchConceptsMatchMultiWordAndDomainId() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi concept").domain(Domain.CONDITION)),CLIENT_CONCEPT_3);
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordQueryNoResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("multi war").maxResults(10)));
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordWithQuotes() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("sample \"to\" test").maxResults(1)),CLIENT_CONCEPT_4);
-  }
-
-  @Test
-  public void testSearchConceptsShortMultiWord() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("to test search")
-                    .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS)
-                    .domain(Domain.OBSERVATION)),CLIENT_CONCEPT_4);
-  }
-
-  @Test
-  public void testSearchConceptsMultiWordNoResult() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("to test")
-            .standardConceptFilter(StandardConceptFilter.NON_STANDARD_CONCEPTS)
-            .domain(Domain.MEASUREMENT)));
-
-  }
-
-  @Test
-  public void testSearchConceptsTooShortWord() throws Exception{
-    saveConcepts();
-    assertResults(conceptsController.searchConcepts("ns","name",
-            new SearchConceptsRequest().query("t")),CLIENT_CONCEPT_1,CLIENT_CONCEPT_2,CLIENT_CONCEPT_3,CLIENT_CONCEPT_4);
-  }
-
-  @Test
   public void testSearchConceptsOneResult() throws Exception {
     saveConcepts();
-    ResponseEntity<ConceptListResponse> response =
-        conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("conceptC").maxResults(1));
-    List<Concept> concepts = response.getBody().getItems();
-    assertThat(concepts.size()).isEqualTo(1);
+    assertResults(conceptsController.searchConcepts("ns", "name",
+            new SearchConceptsRequest().query("conceptC").maxResults(1)),
+        CLIENT_CONCEPT_3);
   }
 
   @Test
-  public void testSearchConceptsOneThousandResults() throws Exception {
+  public void testSearchConceptsSubstring() throws Exception {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").maxResults(1000)),
-        CLIENT_CONCEPT_2, CLIENT_CONCEPT_1);
-  }
-
-  @Test
-  public void testSearchConceptsOneThousandOneResults() throws Exception {
-    saveConcepts();
-    assertResults(
-        conceptsController.searchConcepts("ns", "name",
-            new SearchConceptsRequest().query("con").maxResults(1001)), CLIENT_CONCEPT_2,
-        CLIENT_CONCEPT_1);
+            new SearchConceptsRequest().query("est").maxResults(1000)),
+        CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_4);
   }
 
   @Test
@@ -536,7 +710,9 @@ public class ConceptsControllerTest {
     result.setDomainId(concept.getDomainId());
     result.setCountValue(concept.getCountValue());
     result.setPrevalence(concept.getPrevalence());
-    result.setSynonyms(new ArrayList<ConceptSynonym>());
+    result.setSynonymsStr(
+        String.valueOf(concept.getConceptId()) + '|' +
+            Joiner.on("|").join(concept.getConceptSynonyms()));
     return result;
   }
 
@@ -556,8 +732,35 @@ public class ConceptsControllerTest {
     domainInfoDao.save(DRUG_DOMAIN);
   }
 
+  private void saveDomainVocabularyInfos() {
+    domainVocabularyInfoDao.save(CONDITION_V1_INFO);
+    domainVocabularyInfoDao.save(CONDITION_V3_INFO);
+    domainVocabularyInfoDao.save(CONDITION_V5_INFO);
+  }
+
+  private DomainCount toDomainCount(org.pmiops.workbench.cdr.model.DomainInfo domainInfo, boolean standardCount) {
+    return toDomainCount(domainInfo,
+        standardCount ? domainInfo.getStandardConceptCount() : domainInfo.getAllConceptCount());
+  }
+
+  private DomainCount toDomainCount(org.pmiops.workbench.cdr.model.DomainInfo domainInfo, long conceptCount) {
+    return new DomainCount().name(domainInfo.getName())
+        .conceptCount(conceptCount)
+        .domain(domainInfo.getDomainEnum());
+  }
+
+  private void assertResultsWithCounts(ResponseEntity<ConceptListResponse> response,
+      ImmutableList<DomainCount> domainCounts, ImmutableList<VocabularyCount> vocabularyCounts,
+      ImmutableList<Concept> concepts) {
+    assertThat(response.getBody().getDomainCounts()).isEqualTo(domainCounts);
+    assertThat(response.getBody().getVocabularyCounts()).isEqualTo(vocabularyCounts);
+    assertThat(response.getBody().getItems()).isEqualTo(concepts);
+  }
+
   private void assertResults(ResponseEntity<ConceptListResponse> response,
       Concept... expectedConcepts) {
-    assertThat(response.getBody().getItems().equals(Arrays.asList(expectedConcepts)));
+    assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.copyOf(expectedConcepts));
+    assertThat(response.getBody().getDomainCounts()).isNull();
+    assertThat(response.getBody().getVocabularyCounts()).isNull();
   }
 }

@@ -17,8 +17,10 @@ FROM circleci/openjdk:8-jdk-node-browsers
 
 USER circleci
 
+ENV CLOUD_SDK_VERSION 217.0.0
+
 RUN cd && \
-  wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-162.0.1-linux-x86_64.tar.gz -O gcloud.tgz && \
+  wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
   tar -xf gcloud.tgz && \
   ./google-cloud-sdk/install.sh  --quiet && \
   ~/google-cloud-sdk/bin/gcloud components install app-engine-java && \
@@ -31,11 +33,17 @@ RUN sudo pip install --upgrade pylint
 
 ENV PATH=/home/circleci/node/bin:/home/circleci/google-cloud-sdk/bin:$PATH
 
-# It never makes sense for Gradle to run a daemon within a docker container.
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
-
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 > /tmp/cloud_sql_proxy \
   && sudo mv /tmp/cloud_sql_proxy /usr/local/bin && sudo chmod +x /usr/local/bin/cloud_sql_proxy
 
-RUN sudo apt-get install gradle
+# It never makes sense for Gradle to run a daemon within a docker container.
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
+
+# We're not yet ready to upgrade to gradle 5 (the new default for apt-get).
+ENV GRADLE_VERSION 4.10.2
+
+RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -O /tmp/gradle.zip \
+  && sudo unzip /tmp/gradle.zip -d /opt/gradle
+ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
+
 RUN sudo gem install jira-ruby

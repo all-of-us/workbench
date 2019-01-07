@@ -7,6 +7,10 @@
 }
 .box-sub-title.question {
     font-size: larger;
+    display: inline;
+}
+.box-sub-title.question.question-display{
+    font-size: larger;
 }
 .survey-results {
     padding: .5rem;
@@ -65,6 +69,10 @@
     height: 100%;
 }
 
+.survey-graph-answer {
+    margin: 0 auto;
+}
+
 /* remove space between list and charts */
 .answer-list {
 
@@ -103,4 +111,18 @@
 
 .percent-bar {
     padding-right: 1rem;
+}
+
+.gender-chart-button {
+    text-align: center;
+}
+
+.answer-text {
+    cursor: pointer;
+}
+
+.answer-box {
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 0 0;
+    min-height: 2rem;
 }

@@ -18,7 +18,7 @@ import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
-import {WINDOW_REF} from './utils';
+import {cookiesEnabled, WINDOW_REF} from './utils';
 
 import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
@@ -28,9 +28,15 @@ import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/comp
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
-import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
+import {ConceptAddModalComponent} from './views/concept-add-modal/component';
+import {ConceptHomepageComponent} from './views/concept-homepage/component';
+import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
+import {ConceptSetListComponent} from './views/concept-set-list/component';
+import {ConceptTableComponent} from './views/concept-table/component';
+import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
+import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -41,12 +47,14 @@ import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
 import {ProfilePageComponent} from './views/profile-page/component';
+import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
 import {RenameModalComponent} from './views/rename-modal/component';
 import {ResourceCardComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
+import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {TopBoxComponent} from './views/top-box/component';
 import {UnregisteredComponent} from './views/unregistered/component';
@@ -71,6 +79,8 @@ import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
+import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
+import {ToolTipComponent} from './views/tooltip/component';
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -78,7 +88,11 @@ import {
 (<any>window).StackTrace = StackTrace;
 
 function getBasePath() {
-  return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+  if (cookiesEnabled()) {
+    return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
+  } else {
+    return environment.allOfUsApiUrl;
+  }
 }
 
 export function getConfigService(http: Http) {
@@ -126,11 +140,16 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
-    CohortEditModalComponent,
+    CreateConceptSetModalComponent,
     CohortListComponent,
+    ConceptAddModalComponent,
+    ConceptSetDetailsComponent,
+    ConceptHomepageComponent,
+    ConceptTableComponent,
+    ConceptSetListComponent,
     ConfirmDeleteModalComponent,
+    EditModalComponent,
     ErrorHandlerComponent,
-    WorkspaceListComponent,
     InitialErrorComponent,
     InvitationKeyComponent,
     LoginComponent,
@@ -139,20 +158,25 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
+    QuickTourModalComponent,
     RecentWorkComponent,
     RenameModalComponent,
     ResourceCardComponent,
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SlidingFabComponent,
     StigmatizationPageComponent,
+    ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
+    WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
-    HomepageComponent
+    HomepageComponent,
+    HighlightSearchComponent,
   ],
   providers: [
     {

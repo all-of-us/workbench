@@ -1,16 +1,16 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
-import {FormControl, FormGroup, NgForm} from '@angular/forms';
+import {FormControl, FormGroup} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
-    activeParameterList,
-    CohortSearchActions,
-    CohortSearchState,
-    demoCriteriaChildren,
-    previewStatus, totalCount
+  activeParameterList,
+  CohortSearchActions,
+  CohortSearchState,
+  participantsCount,
+  previewStatus,
 } from '../redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
@@ -46,9 +46,16 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     @Input() selectedTypes: any;
     @Output() itemsAddedFlag = new EventEmitter<boolean>();
     @select(previewStatus) preview$;
+    @select(participantsCount) count$;
     readonly minAge = minAge;
     readonly maxAge = maxAge;
-    loading = false;
+    loading = {
+      'AGE': false,
+      'GEN': false,
+      'RACE': false,
+      'ETH': false,
+      'DEC': false
+    };
     subscription = new Subscription();
     hasSelection = false;
     selectedNode: any;
@@ -84,7 +91,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     noSelection = true;
     isCancelTimerInitiated: any = false;
     showCalculateContainer = false;
-    testFlag: any;
     count: any;
     constructor(
         private route: ActivatedRoute,
@@ -115,8 +121,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     ngOnInit() {
         // Set back to false at the end of loadNodesFromApi (i.e. the end of the
         // initialization routine)
-        this.loading = true;
-
         this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
         this.initAgeControls();
         this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
@@ -143,10 +147,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             .subscribe(sel => this.noSelection = sel)
         );
 
-        this.subscription.add(this.ngRedux
-            .select(totalCount)
-            .subscribe(participantCount => this.count = participantCount)
-        );
+
+      this.subscription.add(this.count$
+        .subscribe(totalCount => {
+            if (totalCount) {
+              this.count = totalCount;
+            }
+        }));
 
         this.subscription.add (this.ngRedux
             .select(activeParameterList)
@@ -184,36 +191,28 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
             TreeSubType[TreeSubType.RACE],
             TreeSubType[TreeSubType.ETH]
         ].map(code => {
-            this.subscription.add(this.ngRedux.select
-                (demoCriteriaChildren(TreeType[TreeType.DEMO], code))
-                    .subscribe(options => {
-                        if (options.size) {
-                            this.loadOptions(options, code);
-                        } else {
-                            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-                                .subscribe(response => {
-                                    const items = response.items
-                                        .filter(item => item.parentId !== 0
-                                            || code === TreeSubType[TreeSubType.DEC]);
-                                    items.sort(sortByCountThenName);
-                                    const nodes = fromJS(items).map(node => {
-                                        if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                                            const paramId =
-                                                `param${node.get('conceptId', node.get('code'))}`;
-                                            node = node.set('parameterId', paramId);
-                                        }
-                                        return node;
-                                    });
-                                    this.actions.loadDemoCriteriaRequestResults
-                                    (TreeType[TreeType.DEMO], code, nodes);
-                                });
+            this.loading[code] = true;
+            this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
+                .subscribe(response => {
+                    const items = response.items
+                        .filter(item => item.parentId !== 0
+                            || code === TreeSubType[TreeSubType.DEC]);
+                    items.sort(sortByCountThenName);
+                    const nodes = fromJS(items).map(node => {
+                        if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+                            const paramId =
+                                `param${node.get('conceptId', node.get('code'))}`;
+                            node = node.set('parameterId', paramId);
                         }
-                    })
-            );
+                        return node;
+                    });
+                    this.loadOptions(nodes, code);
+                });
         });
     }
 
     loadOptions(nodes: any, subtype: string) {
+        this.loading[subtype] = false;
         switch (subtype) {
             /* Age and Deceased are single nodes we use as templates */
             case TreeSubType[TreeSubType.AGE]:
@@ -235,7 +234,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                 this.ethnicityNodes = nodes;
                 break;
         }
-        this.loading = false;
     }
 
     /*
@@ -251,6 +249,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
             min.setValue(lo, {emitEvent: false});
             max.setValue(hi, {emitEvent: false});
+            setTimeout(() => this.centerAgeCount(), 300);
         }));
 
         this.subscription.add(min.valueChanges.subscribe(value => {
@@ -435,10 +434,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         }
         this.isCancelTimerInitiated = setTimeout(() => {
             this.actions.requestPreview();
-            this.testFlag = this.preview.get('count');
             this.showCalculateContainer = false;
-        }, 3000);
-
+        }, 200);
     }
 
     getItems(flag) {

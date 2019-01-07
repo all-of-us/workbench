@@ -113,6 +113,8 @@ paths:
     post:
       tags:
         - bugReport
+      consumes:
+        - application/json
       description: Sends an email to developers about a user reported bug
       operationId: sendBugReport
       parameters:
@@ -172,6 +174,8 @@ paths:
     post:
       tags:
         - profile
+      consumes:
+        - application/json
       description: Only for accounts that have not logged in yet, update contact email.
       operationId: updateContactEmail
       security: []
@@ -214,6 +218,8 @@ paths:
     post:
       tags:
         - profile
+      consumes:
+        - application/json
       description: Verifies invitation key.
       operationId: invitationKeyVerification
       security: []
@@ -234,6 +240,8 @@ paths:
     post:
       tags:
         - profile
+      consumes:
+        - application/json
       description: Creates an account in the researchallofus.org domain.
       operationId: createAccount
       security: []
@@ -243,7 +251,7 @@ paths:
           schema:
             $ref: "#/definitions/CreateAccountRequest"
       responses:
-        201:
+        200:
           description: Account created successfully.
           schema:
             $ref: "#/definitions/Profile"
@@ -268,6 +276,8 @@ paths:
     post:
       tags:
         - profile
+      consumes:
+        - application/json
       description: Updates a users profile
       operationId: updateProfile
       parameters:
@@ -288,6 +298,8 @@ paths:
     post:
       tags:
       - profile
+      consumes:
+        - application/json
       description: Updates a users page visits
       operationId: updatePageVisits
       parameters:
@@ -367,6 +379,8 @@ paths:
     post:
       tags:
         - authDomain
+      consumes:
+        - application/json
       responses:
         204:
           description: Successfully Added User To Group
@@ -520,6 +534,8 @@ paths:
       operationId: localize
       tags:
         - cluster
+      consumes:
+        - application/json
       parameters:
       - in: path
         name: clusterNamespace
@@ -586,6 +602,8 @@ paths:
     post:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: Creates a workspace
       operationId: createWorkspace
       parameters:
@@ -617,6 +635,8 @@ paths:
     patch:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: >
         Modifies the workspace definition with the specified ID and namespace;
         fields that are omitted will not be modified
@@ -717,6 +737,8 @@ paths:
     post:
       tags:
         - profile
+      consumes:
+        - application/json
       description: >
           Manually sets the ID verfication status for a user. Requires
           REVIEW_ID_VERIFICATION authority.
@@ -739,6 +761,8 @@ paths:
     post:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: Sets a research purpose review result.
       operationId: reviewWorkspace
       parameters:
@@ -797,6 +821,8 @@ paths:
     post:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: Shares a workspace with users
       operationId: shareWorkspace
       parameters:
@@ -818,6 +844,8 @@ paths:
     post:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: >
         Clone an existing workspace, with given modifications to workspace metadata. Caller will own
         the newly cloned workspace, and must have read access to the source workspace. In
@@ -846,6 +874,8 @@ paths:
     post:
       tags:
         - workspaces
+      consumes:
+        - application/json
       description: Renames specified notebook
       operationId: "renameNotebook"
       parameters:
@@ -926,6 +956,8 @@ paths:
     post:
       tags:
         - cohorts
+      consumes:
+        - application/json
       description: Creates a cohort definition in a workspace.
       operationId: "createCohort"
       parameters:
@@ -958,6 +990,8 @@ paths:
     patch:
       tags:
         - cohorts
+      consumes:
+        - application/json
       description: >
         Modifies the cohort definition with the specified ID; fields that are omitted
         will not be modified
@@ -991,6 +1025,8 @@ paths:
     post:
       tags:
         - cohorts
+      consumes:
+        - application/json
       description: >
         Materializes a cohort for a given CDR version to specified output.
       operationId: "materializeCohort"
@@ -1026,6 +1062,8 @@ paths:
     post:
       tags:
         - userMetrics
+      consumes:
+        - application/json
       description: Add/update user recent resource
       operationId: updateRecentResource
       parameters:
@@ -1034,6 +1072,9 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
+            # this is currently only ever used by Notebooks because other
+            # resources are stored in our db, and therefore cache ops are
+            # done for them in the backend
             $ref: "#/definitions/RecentResourceRequest"
       responses:
         200:
@@ -1083,14 +1124,16 @@ paths:
     post:
       tags:
         - conceptSets
+      consumes:
+        - application/json
       description: Creates a concept set in a workspace.
       operationId: "createConceptSet"
       parameters:
         - in: body
-          name: conceptSet
-          description: concept set definition
+          name: request
+          description: create concept set request
           schema:
-            $ref: "#/definitions/ConceptSet"
+            $ref: "#/definitions/CreateConceptSetRequest"
       responses:
         200:
           description: The concept set that was created.
@@ -1115,6 +1158,8 @@ paths:
     patch:
       tags:
         - conceptSets
+      consumes:
+        - application/json
       description: >
         Modifies the name or description of the concept set with the specified ID;
         fields that are omitted will not be modified
@@ -1149,6 +1194,8 @@ paths:
     post:
       tags:
         - conceptSets
+      consumes:
+        - application/json
       description: >
         Adds or removes concepts from the concept set.
       operationId: "updateConceptSetConcepts"
@@ -1400,6 +1447,14 @@ definitions:
     required:
      - workspace
     properties:
+      includeUserRoles:
+        type: boolean
+        description: >
+          Whether to clone the user roles (sharing settings) on the workspace.
+          By default, clone follows the behavior of CreateWorkspace - it is
+          shared solely with the creator as an OWNER. If true, all user roles
+          are also copied onto the new workspace in addition to the caller
+          becoming an OWNER.
       workspace:
         $ref: "#/definitions/Workspace"
         description: >
@@ -1409,6 +1464,7 @@ definitions:
             - namespace (required)
             - researchPurpose (required)
             - description: defaults to the cloned workspace description
+            - cdrVersionId defaults to the cloned workspace CDR version
 
           All other fields will be ignored and are generated server-side or are copied from the
           cloned workspace.
@@ -1733,11 +1789,32 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      participantCount:
+        type: integer
+        format: int32
+        description: >
+          Count of participants in the CDR version for the workspace containing this
+          concept set that match the specified concept set
       concepts:
         description: "Concepts in the concept set, in conceptName order."
         type: array
         items:
           $ref: "#/definitions/Concept"
+
+  CreateConceptSetRequest:
+    type: object
+    required:
+      - conceptSet
+    properties:
+      conceptSet:
+        description: Concept set to be created; concepts is ignored
+        $ref: "#/definitions/ConceptSet"
+      addedIds:
+        type: array
+        description: The IDs of concepts to be added to the concept set.
+        items:
+          type: integer
+          format: int64
 
   UpdateConceptSetRequest:
     type: object
@@ -1797,16 +1874,21 @@ definitions:
     type: object
     required:
       - username
+      - creationNonce
     properties:
       username:
         type: string
         description: Username of account to resend welcome email to
+      creationNonce:
+        type: string
+        description: The nonce returned from the account creation API.
 
   UpdateContactEmailRequest:
     type: object
     required:
       - contactEmail
       - username
+      - creationNonce
     properties:
       contactEmail:
         type: string
@@ -1814,6 +1896,9 @@ definitions:
       username:
         type: string
         description: Username for account.
+      creationNonce:
+        type: string
+        description: The nonce returned from the account creation API.
 
   BugReport:
     type: object
@@ -1821,6 +1906,8 @@ definitions:
       - shortDescription
       - contactEmail
     properties:
+      bugType:
+        $ref: "#/definitions/BugReportType"
       shortDescription:
         description: A short description of the bug
         type: string
@@ -1836,6 +1923,11 @@ definitions:
         description: The email with which to contact the bug reporter.
         type: string
 
+  BugReportType:
+    type: string
+    description: Possible value for bug reports
+    enum: [APPLICATION, DATA]
+
   Profile:
     type: object
     required:
@@ -1848,6 +1940,11 @@ definitions:
         format: int64
       username:
         description: researchallofus username
+        type: string
+      creationNonce:
+        description: >
+          A value which can be used to secure API calls during the account
+          creation flow, prior to account login.
         type: string
       contactEmail:
         description: email address that can be used to contact the user
@@ -1878,6 +1975,12 @@ definitions:
         type: string
       phoneNumber:
         description: the user's phone number
+        type: string
+      currentPosition:
+        description: the user's curent position (job title)
+        type: string
+      organization:
+        description: the user's current organization
         type: string
       authorities:
         description: authorities granted to this user
@@ -1918,9 +2021,12 @@ definitions:
           $ref: "#/definitions/InstitutionalAffiliation"
       requestedIdVerification:
         type: boolean
+      idVerificationRequestTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user requests identity verification.
       twoFactorEnabled:
         type: boolean
-
 
   InstitutionalAffiliation:
     type: object
@@ -2024,6 +2130,7 @@ definitions:
       - workspaceNamespace
       - workspaceId
       - notebookNames
+      - playgroundMode
     properties:
       workspaceNamespace:
         type: string
@@ -2039,6 +2146,9 @@ definitions:
           within the provided workspace's Google Cloud Storage bucket.
         items:
           type: string
+      playgroundMode:
+        type: boolean
+        description: Set to true if playgroundMode needed
 
   ClusterLocalizeResponse:
     type: object
@@ -2171,6 +2281,8 @@ definitions:
         $ref: "#/definitions/Cohort"
       notebook:
         $ref: '#/definitions/FileDetail'
+      conceptSet:
+        $ref: '#/definitions/ConceptSet'
       modifiedTime:
         type: string
 

@@ -33,7 +33,22 @@ public class DomainInfo {
   private long standardConceptCount;
   private long participantCount;
 
-  @Id
+  public DomainInfo() {
+  }
+
+  // Used from JQL queries in DomainInfoDao
+  public DomainInfo(short domain, String domainId, String name, String description,
+      long conceptId, long allConceptCount, long standardConceptCount, long participantCount) {
+    this.conceptId = conceptId;
+    this.domain = domain;
+    this.domainId = domainId;
+    this.name = name;
+    this.description = description;
+    this.allConceptCount = allConceptCount;
+    this.standardConceptCount = standardConceptCount;
+    this.participantCount = participantCount;
+  }
+
   @Column(name = "concept_id")
   public Long getConceptId() {
     return conceptId;
@@ -72,6 +87,7 @@ public class DomainInfo {
     return this;
   }
 
+  @Id
   @Column(name = "domain_id")
   public String getDomainId() {
     return domainId;

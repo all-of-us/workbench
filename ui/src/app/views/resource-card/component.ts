@@ -1,18 +1,19 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
 
 import {
-  CohortsService, NotebookRename,
-  RecentResource, WorkspacesService
+  CohortsService, ConceptSetsService,
+  NotebookRename, RecentResource,
+  WorkspacesService
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {environment} from 'environments/environment';
 
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component ({
@@ -23,8 +24,7 @@ import {RenameModalComponent} from 'app/views/rename-modal/component';
     './component.css'],
   templateUrl: './component.html'
 })
-
-export class ResourceCardComponent implements OnInit, OnDestroy {
+export class ResourceCardComponent implements OnInit {
   resourceType: ResourceType;
   @Input('resourceCard')
   resourceCard: RecentResource;
@@ -40,7 +40,6 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
-  notebookAuthListeners: EventListenerOrEventListenerObject[] = [];
 
   @ViewChild(RenameModalComponent)
   renameModal: RenameModalComponent;
@@ -48,12 +47,13 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
 
-  @ViewChild(CohortEditModalComponent)
-  editModal: CohortEditModalComponent;
+  @ViewChild(EditModalComponent)
+  editModal: EditModalComponent;
 
   constructor(
       private cohortsService: CohortsService,
       private workspacesService: WorkspacesService,
+      private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
       private route: Router,
   ) {}
@@ -67,6 +67,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         this.resourceType = ResourceType.NOTEBOOK;
       } else if (this.resourceCard.cohort) {
         this.resourceType = ResourceType.COHORT;
+      } else if (this.resourceCard.conceptSet) {
+        this.resourceType = ResourceType.CONCEPT_SET;
       } else {
         this.resourceType = ResourceType.INVALID;
         this.invalidResourceError = true;
@@ -108,7 +110,7 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     });
   }
 
-  receiveCohortRename(): void {
+  receiveRename(): void {
     this.onUpdate.emit();
   }
 
@@ -122,8 +124,8 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
       }
       case ResourceType.COHORT: {
         const url =
-          '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?criteria=';
-        this.route.navigateByUrl(url + resource.cohort.criteria);
+          '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?cohortId=';
+        this.route.navigateByUrl(url + resource.cohort.id);
         this.onUpdate.emit();
         break;
       }
@@ -140,6 +142,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         this.resource = resource.cohort;
         break;
       }
+      case ResourceType.CONCEPT_SET: {
+        this.resource = resource.conceptSet;
+        break;
+      }
     }
     this.deleteModal.open();
   }
@@ -148,15 +154,28 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
-          .subscribe(() => this.onUpdate.emit());
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
-          .subscribe(() => this.onUpdate.emit());
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
+        break;
+      }
+      case ResourceType.CONCEPT_SET: {
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
+          .subscribe(() => {
+            this.onUpdate.emit();
+            this.deleteModal.close();
+          });
       }
     }
-    this.deleteModal.close();
   }
 
   openResource(resource: RecentResource): void {
@@ -165,37 +184,22 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
         this.reviewCohort(resource);
         break;
       }
+      case ResourceType.CONCEPT_SET: {
+        this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts',
+        'sets', resource.conceptSet.id], {relativeTo: null});
+        break;
+      }
       case ResourceType.NOTEBOOK: {
-        const nbUrl = '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/notebooks/'
-          + encodeURIComponent(this.resourceCard.notebook.name);
-        const notebook = window.open(nbUrl, '_blank');
-
-        // TODO(RW-474): Remove the authHandler integration. This is messy,
-        // non-standard, and currently will break in the following situation:
-        // - User opens a new notebook tab.
-        // - While that tab is loading, user immediately navigates away from this
-        //   page.
-        // This is not easily fixed without leaking listeners outside the lifespan
-        // of the workspace component.
-        const authHandler = (e: MessageEvent) => {
-          if (e.source !== notebook) {
-            return;
-          }
-          if (e.origin !== environment.leoApiUrl) {
-            return;
-          }
-          if (e.data.type !== 'bootstrap-auth.request') {
-            return;
-          }
-          notebook.postMessage({
-            'type': 'bootstrap-auth.response',
-            'body': {
-              'googleClientId': this.signInService.clientId
-            }
-          }, environment.leoApiUrl);
-        };
-        window.addEventListener('message', authHandler);
-        this.notebookAuthListeners.push(authHandler);
+        let queryParams = null;
+        if (this.notebookReadOnly) {
+          queryParams = { playgroundMode: true };
+        }
+        this.route.navigate(
+          ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
+           encodeURIComponent(this.resourceCard.notebook.name)], {
+             queryParams,
+             relativeTo: null,
+           });
       }
     }
   }
@@ -203,6 +207,10 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
     setTimeout(_ => this.editModal.open(), 0);
+  }
+
+  editConceptSet(): void {
+    this.editModal.open();
   }
 
   reviewCohort(resource: RecentResource): void {
@@ -216,10 +224,6 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
     return this.invalidResourceError;
   }
 
-  ngOnDestroy(): void {
-    this.notebookAuthListeners.forEach(f => window.removeEventListener('message', f));
-  }
-
   get actionsDisabled(): boolean {
     return !this.writePermission;
   }
@@ -227,6 +231,17 @@ export class ResourceCardComponent implements OnInit, OnDestroy {
   get writePermission(): boolean {
     return this.resourceCard.permission === 'OWNER'
       || this.resourceCard.permission === 'WRITER';
+  }
+
+  get notebookReadOnly(): boolean {
+    return this.resourceType === ResourceType.NOTEBOOK
+      && this.resourceCard.permission === 'READER';
+  }
+
+  get notebookDisplayName(): string {
+    if (this.resourceType === ResourceType.NOTEBOOK) {
+      return this.resourceCard.notebook.name.replace(/\.ipynb$/, '');
+    }
   }
 
 }

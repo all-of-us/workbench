@@ -39,6 +39,32 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{conceptId}:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a criteria
+      operationId: "getPPICriteriaParent"
+      parameters:
+        - in: path
+          name: type
+          type: string
+          required: true
+          description: the specific type of criteria to get
+        - in: path
+          name: conceptId
+          type: string
+          required: true
+          description: the concept id
+      responses:
+        200:
+          description: A criteria
+          schema:
+            $ref: "#/definitions/Criteria"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -187,6 +213,8 @@ paths:
     post:
       tags:
         - cohortBuilder
+      consumes:
+        - application/json
       description: Searches for participants based on criteria, criteria specific parameters, and modifiers.
       operationId: "countParticipants"
       parameters:
@@ -209,6 +237,8 @@ paths:
     post:
       tags:
         - cohortBuilder
+      consumes:
+        - application/json
       description: Searches for demographic info about subjects.
       operationId: "getDemoChartInfo"
       parameters:
@@ -411,10 +441,10 @@ definitions:
             # SearchGroups
             [
               # SearchGroupItems
-              {type: "ICD9", searchParameters: [{value: "Foo", domain: "Bar"}, {value: "C"}]},
+              {type: "ICD9", searchParameters: [{value: "Foo", domainId: "Bar"}, {value: "C"}]},
               {type: "ICD9", searchParameters: [{value: "Baz"}]}
             ], [
-              {type: "ICD10", searchParameters: [{value: "Baz", domain: "Bar"}], modifiers: []},
+              {type: "ICD10", searchParameters: [{value: "Baz", domainId: "Bar"}], modifiers: []},
             ]
           ],
           exclude: []
@@ -429,10 +459,28 @@ definitions:
       A SearchGroup is a container for groups of criteria which are `AND`ed together.
     type: object
     required:
+      - temporal
       - items
     properties:
       id:
         description: Unique within the cohort definition
+        type: string
+      temporal:
+        description: indicates if this search group relates to time
+        type: boolean
+        default: false
+      mention:
+        description: first, last or any mention(used in temporal realtionships)
+        type: string
+      time:
+        description: time frame between temporal items
+        type: string
+      timeValue:
+        description: time value between temporal items
+        type: integer
+        format: int64
+      timeFrame:
+        description: time increments(Day, Month or Year)
         type: string
       items:
         type: "array"
@@ -457,6 +505,9 @@ definitions:
       type:
         description: type of criteria
         type: string
+      temporalGroup:
+        description: temporal group that this item belongs to
+        type: integer
       searchParameters:
         description: values that help search for subjects
         type: "array"
@@ -471,8 +522,8 @@ definitions:
       {
         type: "ICD9",
         searchParameters: [
-          { value: "E9293", domain: "Condition", conceptId: null },
-          { value: "E979-E979.9", domain: null, conceptId: null }
+          { value: "E9293", domainId: "Condition", conceptId: null },
+          { value: "E979-E979.9", domainId: null, conceptId: null }
         ],
         modifiers: [
           { name: "age_at_event", operator: "GTE >=", operands: [ "Arg1", "Arg2" ] }
@@ -484,7 +535,6 @@ definitions:
     required:
       - parameterId
       - name
-      - value
       - type
       - subtype
       - group
@@ -508,7 +558,7 @@ definitions:
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
-      domain:
+      domainId:
         description: clue to determine which tables to search
         type: string
       conceptId:
@@ -567,6 +617,9 @@ definitions:
       name:
         description: name/type of modifier
         $ref: "#/definitions/ModifierType"
+      encounterType:
+        type: string
+        description: If encounter then this prop will hold the type
       operator:
         description: Machine name of the operator
         $ref: "#/definitions/Operator"
@@ -588,12 +641,14 @@ definitions:
   TreeType:
     type: string
     description: possible types of trees
-    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, SURVEY]
+    enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
 
   TreeSubType:
       type: string
       description: possible subtypes of trees
-      enum: [CM, PROC, ICD10CM, ICD10PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR, HR-DETAIL, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC, BRAND, CLIN, LAB]
+      enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
+      HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
+      BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
 
   DemoChartInfoListResponse:
     type: object

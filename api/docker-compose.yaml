@@ -133,7 +133,27 @@ services:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
       env_file:
         - db-cdr/vars.env
-  db-generate-cdr-counts:
+
+  db-generate-criteria-table:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+        - ~/.config:/.config:cached
+        - ~/.gsutil:/.gsutil:cached
+
+      entrypoint: ["./generate-cdr/generate-criteria-table.sh"]
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+      env_file:
+        - db-cdr/vars.env
+
+  db-generate-private-cdr-counts:
     depends_on:
       - db
     build:
@@ -146,7 +166,25 @@ services:
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
 
-    entrypoint: ["./generate-cdr/generate-cdr-counts.sh"]
+    entrypoint: ["./generate-cdr/generate-private-cdr-counts.sh"]
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+    env_file:
+      - db-cdr/vars.env
+  db-generate-public-cdr-counts:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/db-cdr
+    volumes:
+      - gradle-cache:/.gradle
+      - .:/w:cached
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
+
+    entrypoint: ["./generate-cdr/generate-public-cdr-counts.sh"]
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
     env_file:

@@ -1,9 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
 import {DetailPage} from '../detail-page/detail-page';
-import {OverviewPage} from '../overview-page/overview-page';
 import {PageLayout} from '../page-layout/page-layout';
 import {TablePage} from '../table-page/table-page';
 
@@ -12,8 +10,8 @@ import {ParticipantAnnotationsResolver} from './participant-annotations.resolver
 import {ParticipantResolver} from './participant.resolver';
 
 import {AnnotationDefinitionsResolver} from '../../resolvers/annotation-definitions';
-import {CohortResolver} from '../../resolvers/cohort';
 import {ReviewResolver} from '../../resolvers/review';
+import {QueryReportComponent} from '../query-report/query-report.component';
 
 
 const routes: Routes = [{
@@ -23,45 +21,42 @@ const routes: Routes = [{
     title: 'Review Cohort Participants'
   },
   resolve: {
-    annotationDefinitions: AnnotationDefinitionsResolver,
-    cohort: CohortResolver,
     review: ReviewResolver,
   },
   children: [{
-    path: 'create',
-    component: CreateReviewPage,
-    data: {
-      title: 'Create a New Cohort Review',
-      breadcrumb: 'Create a New Cohort Review',
-    },
-  }, {
-    path: '',
-    redirectTo: 'overview',
-    pathMatch: 'full',
-  }, {
-    path: 'overview',
-    component: OverviewPage,
-    data: {
-      breadcrumb: 'Overview'
-    }
-  }, {
     path: 'participants',
     component: TablePage,
     resolve: {
       concepts: DemographicConceptMapsResolver,
     },
     data: {
-      breadcrumb: 'Participants'
+      breadcrumb: {
+        value: 'Participants',
+        intermediate: true
+      },
     }
   }, {
     path: 'participants/:pid',
     component: DetailPage,
     resolve: {
+      annotationDefinitions: AnnotationDefinitionsResolver,
       participant: ParticipantResolver,
       annotations: ParticipantAnnotationsResolver,
     },
     data: {
-      breadcrumb: 'Participant :pid'
+      breadcrumb: {
+        value: 'Participant :pid',
+        intermediate: false
+      }
+    }
+  }, {
+    path: 'report',
+    component: QueryReportComponent,
+    data: {
+      breadcrumb: {
+        value: 'Query Report',
+        intermediate: false
+      }
     }
   }],
 }];

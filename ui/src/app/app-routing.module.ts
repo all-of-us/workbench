@@ -6,8 +6,10 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
-import {CohortEditModalComponent} from './views/cohort-edit-modal/component';
 import {CohortListComponent} from './views/cohort-list/component';
+import {ConceptHomepageComponent} from './views/concept-homepage/component';
+import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
+import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
 import {LoginComponent} from './views/login/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -23,10 +25,12 @@ import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
+import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
+import {environment} from 'environments/environment';
+
 declare let gtag: Function;
-declare let ga_tracking_id: string;
 
 const routes: Routes = [
   {
@@ -58,7 +62,12 @@ const routes: Routes = [
         }
       }, {
       path: 'workspaces',
-      data: {breadcrumb: 'Workspaces'},
+      data: {
+        breadcrumb: {
+          value: 'Workspaces',
+          intermediate: true
+        }
+      },
       children: [
         {
           path: '',
@@ -73,7 +82,9 @@ const routes: Routes = [
           component: WorkspaceNavBarComponent,
           data: {
             title: 'View Workspace Details',
-            breadcrumb: 'Param: Workspace Name'
+            breadcrumb: {
+              value: 'Param: Workspace Name',
+            }
           },
           runGuardsAndResolvers: 'always',
           resolve: {
@@ -85,7 +96,6 @@ const routes: Routes = [
               component: WorkspaceComponent,
               data: {
                 title: 'View Workspace Details',
-                breadcrumb: 'View Workspace Details'
               }
             }, {
               path: 'edit',
@@ -93,7 +103,9 @@ const routes: Routes = [
               data: {
                 title: 'Edit Workspace',
                 mode: WorkspaceEditMode.Edit,
-                breadcrumb: 'Edit Workspace'
+                breadcrumb: {
+                  value: 'Edit Workspace',
+                }
               }
             }, {
               path: 'clone',
@@ -101,20 +113,46 @@ const routes: Routes = [
               data: {
                 title: 'Clone Workspace',
                 mode: WorkspaceEditMode.Clone,
-                breadcrumb: 'Clone Workspace'
+                breadcrumb: {
+                  value: 'Clone Workspace',
+                }
               }
             },
             {
               path: 'notebooks',
-              component: NotebookListComponent,
               data: {
-                title: 'View Notebooks',
-                breadcrumb: 'Notebooks'
-              }
-            },
-            {
+                breadcrumb: {
+                  value: 'Notebooks',
+                  intermediate: true
+                }
+              },
+              children: [
+                {
+                  path: '',
+                  component: NotebookListComponent,
+                  data: {
+                    title: 'View Notebooks'
+                  }
+                }, {
+                  path: ':nbName',
+                  component: NotebookRedirectComponent,
+                  data: {
+                    title: 'Notebook',
+                    breadcrumb: {
+                        value: 'Param: Notebook Name'
+                    },
+                    minimizeChrome: true
+                  }
+                }
+              ]
+            }, {
               path: 'cohorts',
-              data: { breadcrumb: 'Cohorts' },
+              data: {
+                breadcrumb: {
+                  value: 'Cohorts',
+                  intermediate: true
+                }
+              },
               children: [
                 {
                   path: '',
@@ -127,7 +165,9 @@ const routes: Routes = [
                   path: 'build',
                   loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                   data: {
-                    breadcrumb: 'Add a Cohort'
+                    breadcrumb: {
+                      value: 'Add a Cohort',
+                    }
                   }
                 },
                 {
@@ -135,16 +175,56 @@ const routes: Routes = [
                   loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
                   data: {
                     title: 'Cohort',
-                    breadcrumb: 'Param: Cohort Name'
+                    breadcrumb: {
+                      value: 'Param: Cohort Name',
+                    }
                   },
                   resolve: {
                     cohort: CohortResolver,
                   }
                 }
               ]
+            },
+            {
+              path: 'concepts',
+              component: ConceptHomepageComponent,
+              data: {
+                title: 'Search Concepts',
+                breadcrumb: {
+                  value: 'Concepts',
+                  intermediate: true
+                }
+              }
+            },
+            {
+              path: 'concepts/sets',
+              data: {
+                breadcrumb: {
+                  value: 'Concept Sets',
+                  intermediate: true
+                }
+              },
+              children: [{
+                path: '',
+                component: ConceptSetListComponent,
+                data: {
+                  title: 'View Concept Sets',
+                }
+              }, {
+                path: ':csid',
+                component: ConceptSetDetailsComponent,
+                data: {
+                  title: 'Concept Set',
+                  breadcrumb: {
+                    value: 'Param: Concept Set Name',
+                  }
+                },
+                resolve: {
+                  conceptSet: ConceptSetResolver,
+                }
+              }]
             }]
-          }
-        ]
+        }]
       },
       {
         path: 'admin/review-workspace',
@@ -166,23 +246,6 @@ const routes: Routes = [
         path: 'workspaces/build',
         component: WorkspaceEditComponent,
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
-      }, {
-        // The notebook redirect pages are interstitial pages, so we want to
-        // give them special chrome treatment - we therefore put them outside
-        // the normal /workspaces hierarchy.
-        path: 'workspaces/:ns/:wsid/notebooks/create',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Creating a new Notebook',
-          creating: true
-        }
-      }, {
-        path: 'workspaces/:ns/:wsid/notebooks/:nbName',
-        component: NotebookRedirectComponent,
-        data: {
-          title: 'Opening a Notebook',
-          creating: false
-        }
       }
     ]
   }
@@ -193,6 +256,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    ConceptSetResolver,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
@@ -203,7 +267,7 @@ export class AppRoutingModule {
  constructor(public router: Router) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        gtag('config', ga_tracking_id, { 'page_path': event.urlAfterRedirects });
+        gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
       }
     });
   }

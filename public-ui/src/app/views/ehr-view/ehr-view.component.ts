@@ -26,7 +26,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
   title: string ;
   subTitle: string;
-  dbDomain: any;
+  ehrDomain: any;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
   searchResult: ConceptListResponse;
@@ -38,13 +38,50 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchRequest: SearchConceptsRequest;
   private subscriptions: ISubscription[] = [];
   private initSearchSubscription: ISubscription = null;
+  /* Show more synonyms when toggled */
+  showMoreSynonyms = {};
+  ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
+    'distribution for participants at the time the medical concept ' +
+    'being queried occurred in their records. \n' +
+    'If an individual’s record contains more than one mention of a concept, \n' +
+    'the age at occurrence is included for each mention. \n' +
+    'As a result, a participant may be counted more ' +
+    'than once in the distribution. ';
+  sourcesChartHelpText = 'Individual health records often contain medical ' +
+    'information that means the same thing ' +
+    'but may be recorded in many different ways. \n' +
+    'The sources represent the many different ways that the standard medical concept ' +
+    'returned in the search results has been recorded in patient records. \n' +
+    'The sources bar chart provides the top 10 source concepts from the AoU data.';
 
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
-  showAge = true;
-  showGender = true;
   showSources = true;
   showMeasurementGenderBins = false;
+  showGenderGraph = false;
+  showAgeGraph = true;
+  showSourcesGraph = false;
+  domainHelpText = {'condition': 'Medical concepts that describe the ' +
+    'health status of an individual, ' +
+    'such as medical diagnoses, are found in the conditions domain.',
+    'drug': 'Medical concepts that capture information about the utilization of a ' +
+    'drug when ingested or otherwise introduced into ' +
+    'the body are captured by the drug exposures domain.',
+    'measurement': 'Medical concepts that capture values resulting from ' +
+    'examinations or tests are captured by the measurements domain. ' +
+    'The measurements domain may include vital signs, lab values, ' +
+    'quantitative findings from pathology reports, etc.',
+    'procedure': 'Medical concepts that capture information related to activities or ' +
+    'processes that are ordered or carried out on individuals for ' +
+    'diagnostic or therapeutic purposes are captured by the procedures domain.'};
+  conceptCodeHelpText = 'The concept code is an additional piece of information that\n' +
+    'can be utilized to find medical concepts in the AoU data set. ' +
+    'Concept codes are specific to the\n' +
+    'AoU Research Program data and are assigned to all medical concepts.\n' +
+    'In some instances,\n' +
+    'a medical concept may not be assigned a source or standard vocabulary code.\n' +
+    'In these instances, the concept code can be utilized to\n' +
+    'query the data for the medical concept.';
 
 
   constructor(private route: ActivatedRoute,
@@ -71,20 +108,18 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.prevSearchText = '';
     }
     this.searchText.setValue(this.prevSearchText);
-    const obj = localStorage.getItem('dbDomain');
+    const obj = localStorage.getItem('ehrDomain');
     if (obj) {
-      this.dbDomain = JSON.parse(obj);
+      this.ehrDomain = JSON.parse(obj);
       this.subTitle = 'Keyword: ' + this.searchText;
-      this.title = 'Domain Search Results: ' + this.dbDomain.domainDisplay;
+      this.title = 'Domain Search Results: ' + this.ehrDomain.name;
     } else {
       /* Error. We need a db Domain object. */
       this.title   = 'Keyword: ' + this.searchText;
       this.title = 'Domain Search Results: ' + 'Error - no result for domain selected';
     }
-
-    if (this.dbDomain) {
+    if (this.ehrDomain) {
       // Set the graphs we want to show for this domain
-      this.setGraphsToDisplay();
       // Run search initially to filter to domain,
       // a empty search returns top ordered by count_value desc
       // Note, we save this in its own subscription so we can unsubscribe when they start typing
@@ -109,19 +144,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
         (query) => this.loading = true ));
     }
   }
-
   ngOnDestroy() {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
     this.initSearchSubscription.unsubscribe();
-  }
-
-  private setGraphsToDisplay() {
-    if (this.dbDomain.domainId === 'Measurement') {
-      this.showGender = false;
-      this.showMeasurementGenderBins = true;
-    }
   }
   private searchCallback(results: any) {
     this.searchResult = results;
@@ -143,26 +170,53 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.loading = true;
 
     this.searchRequest = {
-        query: query,
-        domain: this.dbDomain.domainId.toUpperCase(),
-        standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
-        maxResults: maxResults,
-        minCount: 1
+      query: query,
+      domain: this.ehrDomain.domain.toUpperCase(),
+      standardConceptFilter: StandardConceptFilter.STANDARDORCODEIDMATCH,
+      maxResults: maxResults,
+      minCount: 1
     };
     this.prevSearchText = query;
     return this.api.searchConcepts(this.searchRequest);
-
   }
-
-
-
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
     } else {
       row.showSources = true;
       row.expanded = true;
+      row.viewSynonyms = true;
     }
   }
-
+  public selectGraph(g) {
+    this.showGenderGraph = false;
+    this.showAgeGraph = false;
+    this.showSourcesGraph = false;
+    this.showMeasurementGenderBins = false;
+    if (g === 'Gender') {
+      this.showGenderGraph = true;
+    } else if (g === 'Age') {
+      this.showAgeGraph = true;
+    } else if (g === 'Sources') {
+      this.showSourcesGraph = true;
+    } else {
+      this.showAgeGraph = true;
+    }
+    if (this.ehrDomain.name === 'Measurements' && this.showGenderGraph) {
+      this.showMeasurementGenderBins = true;
+      this.showGenderGraph = false;
+    }
+  }
+  public toggleSynonyms(conceptId) {
+    this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
+  }
+  public showToolTip(g) {
+    if (g === 'Gender') {
+      return 'Gender chart';
+    } else if (g === 'Age') {
+      return this.ageChartHelpText;
+    } else if (g === 'Sources') {
+      return this.sourcesChartHelpText;
+    }
+  }
 }

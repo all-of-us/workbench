@@ -7,19 +7,28 @@ import {ClarityModule} from '@clr/angular';
 import {environment} from 'environments/environment';
 import { ResponsiveModule } from 'ngx-responsive';
 import * as StackTrace from 'stacktrace-js';
+import {ErrorReporterService} from './services/error-reporter.service';
 
 import {AppComponent, overriddenUrlKey} from './views/app/app.component';
 
 /* Our Modules */
 import {
   ApiModule,
+  Configuration
 } from 'publicGenerated';
 
 
-import {AppRoutingModule} from './app-routing.module';
-import {DataBrowserModule} from './data-browser/data-browser.module';
+import { AppRoutingModule } from './app-routing.module';
+import { DataBrowserModule } from './data-browser/data-browser.module';
+import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
+import { ServerConfigService } from './services/server-config.service';
+import { SignInService } from './services/sign-in.service';
 import { DbHeaderComponent } from './views/db-header/db-header.component';
 import { DbHomeComponent } from './views/db-home/db-home.component';
+import { LoginComponent } from './views/login/login.component';
+import {
+  PageTemplateSignedOutComponent
+} from './views/page-template-signed-out/page-template-signed-out.component';
 import { SurveyViewComponent } from './views/survey-view/survey-view.component';
 import { SurveysComponent } from './views/surveys/surveys.component';
 
@@ -28,9 +37,8 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
 (<any>window).StackTrace = StackTrace;
 
-import {DataBrowserService} from 'publicGenerated';
+import {ConfigService, DataBrowserService} from 'publicGenerated';
 import {DbConfigService} from './utils/db-config.service';
-import { HighlightSearchPipe } from './utils/highlight-search.pipe';
 import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
@@ -40,9 +48,17 @@ function getPublicBasePath() {
   return localStorage.getItem(overriddenPublicUrlKey) || environment.publicApiUrl;
 }
 
-const DataBrowserServiceFactory = (http: Http) => {
-  return new DataBrowserService(http, getPublicBasePath(), null);
-};
+// "Configuration" means Swagger API Client configuration.
+export function getConfiguration(signInService: SignInService): Configuration {
+  return new Configuration({
+    basePath: getPublicBasePath(),
+    accessToken: () => signInService.currentAccessToken
+  });
+}
+
+export function getConfigService(http: Http) {
+  return new ConfigService(http, getPublicBasePath(), null);
+}
 
 @NgModule({
   imports: [
@@ -63,18 +79,32 @@ const DataBrowserServiceFactory = (http: Http) => {
     DbHeaderComponent,
     SurveyViewComponent,
     DbHomeComponent,
+    HighlightSearchComponent,
+    LoginComponent,
     QuickSearchComponent,
     EhrViewComponent,
-    HighlightSearchPipe,
+    PageTemplateSignedOutComponent,
     PhysicalMeasurementsComponent,
   ],
   providers: [
-    DbConfigService,
     {
-      provide: DataBrowserService,
-      useFactory: DataBrowserServiceFactory,
+      provide: ConfigService,
+      useFactory: getConfigService,
       deps: [Http]
     },
+    {
+      provide: Configuration,
+      deps: [SignInService],
+      useFactory: getConfiguration
+    },
+    DbConfigService,
+    ServerConfigService,
+    {
+      provide: ErrorHandler,
+      deps: [ServerConfigService],
+      useClass: ErrorReporterService,
+    },
+    SignInService,
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent]

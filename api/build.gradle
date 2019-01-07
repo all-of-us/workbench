@@ -1,6 +1,7 @@
 import io.swagger.codegen.config.CodegenConfigurator
 import io.swagger.codegen.DefaultGenerator
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
+import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
@@ -161,6 +162,8 @@ buildscript {    // Configuration for building
   }
 }
 
+ext['hibernate.version'] = '5.2.10.Final'
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -177,6 +180,8 @@ configurations {
   bigquerytestRuntime.extendsFrom testRuntime
 }
 
+// Required for the swagger plugin's `validateSwagger` task
+// See https://github.com/int128/gradle-swagger-generator-plugin
 sourceSets {
   generated {
     compileClasspath = configurations.generatedCompile
@@ -263,14 +268,15 @@ dependencies {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
   compile 'org.springframework.security:spring-security-web:4.2.2.RELEASE'
+  compile 'org.hibernate:hibernate-core:5.2.10.Final'
 
   compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-core:2.9.5'
   compile 'com.fasterxml.jackson.core:jackson-databind:2.9.5'
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
-  compile 'com.google.cloud:google-cloud-bigquery:0.30.0-beta'
-  compile 'com.google.cloud:google-cloud-storage:1.8.0'
+  compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
+  compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
@@ -404,37 +410,6 @@ version = '0.1.0'          // Version in generated output
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-
-// Custom task based on https://docs.gradle.org/2.5/userguide/custom_tasks.html#incremental_tasks
-class IncrementalHotSwapTask extends DefaultTask {
-    @InputDirectory
-    def File inputDir
-
-    @TaskAction
-    void execute(IncrementalTaskInputs inputs) {
-      // Only handle incremental builds---don't hot-swap on initial compile.
-      if (inputs.incremental) {
-
-        inputs.outOfDate { change ->
-          String prefix = inputDir.path + "/"
-          String relativePath = change.file.path.substring(prefix.length())
-          String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
-          printf "Hot swapping $fqClassName from $change.file.path..."
-          def proc = "echo redefine $fqClassName $change.file.path".execute() \
-            | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
-          proc.waitFor()
-          println "done."
-        }
-
-        inputs.removed { change ->
-          println "Class removed (may require restart): ${change.file.path}"
-        }
-      } else {
-        println "Watching ${inputDir}"
-      }
-    }
-}
 
 task incrementalHotSwap(type: IncrementalHotSwapTask) {
     inputDir = sourceSets.main.java.outputDir

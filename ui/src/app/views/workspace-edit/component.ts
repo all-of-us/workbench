@@ -1,5 +1,5 @@
 import {Location} from '@angular/common';
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
@@ -17,6 +17,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
@@ -147,8 +148,8 @@ export class WorkspaceEditComponent implements OnInit {
   genderIdentityList = {
     'Woman': UnderservedPopulationEnum.GENDERIDENTITYWOMAN,
     'Non-Binary': UnderservedPopulationEnum.GENDERIDENTITYNONBINARY,
-    'Transman/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
-    'Transwoman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
+    'Trans man/Transgender Man/FTM': UnderservedPopulationEnum.GENDERIDENTITYTRANSMAN,
+    'Trans woman/Transgender Woman/MTF': UnderservedPopulationEnum.GENDERIDENTITYTRANSWOMAN,
     'Genderqueer': UnderservedPopulationEnum.GENDERIDENTITYGENDERQUEER,
     'Genderfluid': UnderservedPopulationEnum.GENDERIDENTITYGENDERFLUID,
     'Gender Variant': UnderservedPopulationEnum.GENDERIDENTITYGENDERVARIANT,
@@ -189,10 +190,14 @@ export class WorkspaceEditComponent implements OnInit {
   };
 
   researchPurposeItems = ResearchPurposeItems;
+  cloneUserRoles = false;
   fillDetailsLater = false;
-  hideDetailsLaterOption = false;
+  hideDetailsLaterOption = true;
   canEditResearchPurpose = true;
   cdrVersions: CdrVersion[] = [];
+
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
 
   constructor(
       private locationService: Location,
@@ -368,14 +373,19 @@ export class WorkspaceEditComponent implements OnInit {
     this.workspacesService.cloneWorkspace(
       this.oldWorkspaceNamespace,
       this.oldWorkspaceName, {
+        includeUserRoles: this.cloneUserRoles,
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
           this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
-        () => {
-          // Only expected errors are transient, so allow the user to try again.
+        (error) => {
           this.resetWorkspaceEditor();
+          if (error.status === 409) {
+            this.workspaceCreationConflictError = true;
+          } else {
+            this.workspaceUpdateError = true;
+          }
         });
   }
 
@@ -409,9 +419,6 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   switchUnderservedStatus(enumValue: UnderservedPopulationEnum): void {
-    if (this.mode === WorkspaceEditMode.Edit) {
-      return;
-    }
     if (!this.workspacePopulationDetails) {
       this.workspacePopulationDetails = [];
     }
@@ -432,15 +439,23 @@ export class WorkspaceEditComponent implements OnInit {
   }
 
   get isValidWorkspace() {
-    return !isBlank(this.workspace.name) &&
-        (!(isBlank(this.workspace.description) && !this.fillDetailsLater));
+    return !this.missingFields && !this.nameValidationError;
+  }
+
+  get missingFields() {
+    return isBlank(this.workspace.name) ||
+      ((isBlank(this.workspace.description) && !this.fillDetailsLater));
+  }
+
+  get nameValidationError() {
+    return this.workspace.name && this.workspace.name.length > 80;
   }
 
   get allowSave() {
     if (this.savingWorkspace) {
       return false;
     }
-    return this.isValidWorkspace || this.fillDetailsLater;
+    return this.isValidWorkspace;
   }
 
   openStigmatizationLink() {

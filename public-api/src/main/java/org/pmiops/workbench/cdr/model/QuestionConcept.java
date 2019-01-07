@@ -2,9 +2,8 @@ package org.pmiops.workbench.cdr.model;
 
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -20,13 +19,16 @@ public class QuestionConcept {
     private AchillesAnalysis countAnalysis;
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
+    private AchillesAnalysis genderIdentityAnalysis;
 
     public static final long SURVEY_COUNT_ANALYSIS_ID = 3110;
     public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
     public static final long SURVEY_AGE_ANALYSIS_ID = 3112;
+    public static final long SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
 
     public static Map<String, String> ageStratumNameMap  = new HashMap<String, String>();
     public static Map<String, String> genderStratumNameMap = new HashMap<String, String>();
+    public static Map<String, String> genderIdentityStratumNameMap = new HashMap<>();
     public static Map<String, String> raceStratumNameMap = new HashMap<String, String>();
     public static Map<String, String> ethnicityStratumNameMap = new HashMap<String, String>();
 
@@ -41,6 +43,7 @@ public class QuestionConcept {
         ageStratumNameMap.put("7", "70-79");
         ageStratumNameMap.put("8", "80-89");
     }
+
     public static void setGenderStratumNameMap() {
         /* This is to slow to use the db */
         genderStratumNameMap.put("8507", "Male");
@@ -48,6 +51,20 @@ public class QuestionConcept {
         genderStratumNameMap.put("8521", "Other");
         genderStratumNameMap.put("8551", "Unknown");
         genderStratumNameMap.put("8570", "Ambiguous");
+        genderStratumNameMap.put("1585849", "None of these describe me");
+        genderStratumNameMap.put("1585848", "Intersex");
+        genderStratumNameMap.put("0", "Other");
+    }
+
+    public static void setGenderIdentityStratumNameMap() {
+        genderIdentityStratumNameMap.put("1585840", "Woman");
+        genderIdentityStratumNameMap.put("903070", "Other");
+        genderIdentityStratumNameMap.put("903096", "Skip");
+        genderIdentityStratumNameMap.put("903079", "Prefer Not To Answer");
+        genderIdentityStratumNameMap.put("1585841", "Non-binary");
+        genderIdentityStratumNameMap.put("1585839", "Man");
+        genderIdentityStratumNameMap.put("1585842", "Transgender");
+        genderIdentityStratumNameMap.put("1585843", "None of these describe me");
     }
 
     public static void setRaceStratumNameMap(){
@@ -113,9 +130,12 @@ public class QuestionConcept {
 
     }
 
+    public static Set<String> validAgeDeciles = new TreeSet<String>(Arrays.asList(new String[] {"2", "3", "4", "5", "6", "7", "8"}));
+
     static {
         setAgeStratumNameMap();
         setGenderStratumNameMap();
+        setGenderIdentityStratumNameMap();
         setRaceStratumNameMap();
         setEthnicityStratumNameMap();
     }
@@ -135,6 +155,9 @@ public class QuestionConcept {
             // Add stratum5Name to the results for the ui -- ie Male, Female , Age Decile name
             for (AchillesResult r : analysis.getResults()) {
                 // Add analysis to question if need to
+                if(r.getStratum4().contains("PMI")) {
+                    r.setStratum4(r.getStratum4().replace("PMI",""));
+                }
                 Long qid = Long.valueOf(r.getStratum2());
                 QuestionConcept q = questionMap.get(qid);
 
@@ -142,14 +165,25 @@ public class QuestionConcept {
                     q.setAnalysis(new AchillesAnalysis(analysis));
                 }
                 AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
-                questionAnalysis.addResult(r);
+                if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
+                    if (validAgeDeciles.contains(r.getStratum5())) {
+                        questionAnalysis.addResult(r);
+                    }
+                } else {
+                    questionAnalysis.addResult(r);
+                }
                 String rStratum5Name = r.getAnalysisStratumName();
                 if (rStratum5Name == null || rStratum5Name.equals("")) {
                     if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
-                        r.setAnalysisStratumName(ageStratumNameMap.get(r.getStratum5()));
+                        if (validAgeDeciles.contains(r.getStratum5())) {
+                            r.setAnalysisStratumName(ageStratumNameMap.get(r.getStratum5()));
+                        }
                     }
                     if (analysis.getAnalysisId() == SURVEY_GENDER_ANALYSIS_ID) {
                         r.setAnalysisStratumName(genderStratumNameMap.get(r.getStratum5()));
+                    }
+                    if (analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+                        r.setAnalysisStratumName(genderIdentityStratumNameMap.get(r.getStratum5()));
                     }
                 }
             }
@@ -265,6 +299,14 @@ public class QuestionConcept {
         return this;
     }
 
+    @Transient
+    public AchillesAnalysis getGenderIdentityAnalysis() { return this.genderIdentityAnalysis; }
+    public void setGenderIdentityAnalysis(AchillesAnalysis analysis) { this.genderIdentityAnalysis = analysis; }
+    public QuestionConcept genderIdentityAnalysis(AchillesAnalysis analysis) {
+        this.genderIdentityAnalysis = analysis;
+        return this;
+    }
+
     public void setAnalysis(AchillesAnalysis analysis) {
         if (analysis.getAnalysisId() == SURVEY_COUNT_ANALYSIS_ID) {
             this.countAnalysis = analysis;
@@ -274,6 +316,9 @@ public class QuestionConcept {
         }
         else if (analysis.getAnalysisId() == SURVEY_AGE_ANALYSIS_ID) {
             this.ageAnalysis = analysis;
+        }
+        else if(analysis.getAnalysisId() == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            this.genderIdentityAnalysis = analysis;
         }
     }
 
@@ -286,6 +331,9 @@ public class QuestionConcept {
         }
         else if (analysisId == SURVEY_AGE_ANALYSIS_ID) {
             return this.ageAnalysis;
+        }
+        else if (analysisId == SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+            return this.genderIdentityAnalysis;
         }
         return null;
     }

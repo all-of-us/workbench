@@ -11,10 +11,10 @@ import {
   CANCEL_CRITERIA_REQUEST,
   SET_CRITERIA_SEARCH,
   BEGIN_AUTOCOMPLETE_REQUEST,
+  CANCEL_AUTOCOMPLETE_REQUEST,
   BEGIN_INGREDIENT_REQUEST,
   BEGIN_CHILDREN_REQUEST,
   LOAD_AUTOCOMPLETE_OPTIONS,
-  CLEAR_AUTOCOMPLETE_OPTIONS,
   LOAD_INGREDIENT_LIST,
   LOAD_CHILDREN_LIST,
   SELECT_CHILDREN_LIST,
@@ -61,6 +61,7 @@ import {
 
   LOAD_ENTITIES,
   RESET_STORE,
+  CLEAR_STORE,
   ActionTypes,
 } from './types';
 /* tslint:enable:ordered-imports */
@@ -125,6 +126,10 @@ export const requestAutocompleteOptions =
   ): ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST] =>
   ({type: BEGIN_AUTOCOMPLETE_REQUEST, cdrVersionId, kind, subtype, searchTerms});
 
+export const cancelAutocompleteRequest =
+  (): ActionTypes[typeof CANCEL_AUTOCOMPLETE_REQUEST] =>
+  ({type: CANCEL_AUTOCOMPLETE_REQUEST});
+
 export const requestIngredientsForBrand =
   (cdrVersionId: number, conceptId: number
   ): ActionTypes[typeof BEGIN_INGREDIENT_REQUEST] =>
@@ -139,10 +144,6 @@ export const loadAutocompleteOptions =
   (options: any
   ): ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS] =>
   ({type: LOAD_AUTOCOMPLETE_OPTIONS, options});
-
-export const clearAutocompleteOptions =
-  (): ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS] =>
-  ({type: CLEAR_AUTOCOMPLETE_OPTIONS});
 
 export const autocompleteRequestError =
   (error?: any
@@ -345,3 +346,7 @@ export const loadEntities =
 export const resetStore =
   (): ActionTypes[typeof RESET_STORE] =>
   ({type: RESET_STORE});
+
+export const clearStore =
+  (): ActionTypes[typeof CLEAR_STORE] =>
+  ({type: CLEAR_STORE});

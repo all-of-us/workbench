@@ -1,9 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ChoiceFilterComponent} from '../choice-filter/choice-filter.component';
+import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filter.component';
+import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
 import {Participant} from '../participant.model';
 import {ReviewStateService} from '../review-state.service';
 
@@ -21,9 +22,14 @@ import {
   SortOrder,
   Workspace,
 } from 'generated';
+import {ParticipantCohortStatusColumns} from '../../../generated';
 
-function isChoiceFilter(filter): filter is ChoiceFilterComponent {
-  return (filter instanceof ChoiceFilterComponent);
+function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {
+  return (filter instanceof MultiSelectFilterComponent);
+}
+
+function isClearButtonFilter(filter): filter is ClearButtonFilterComponent {
+  return (filter instanceof ClearButtonFilterComponent);
 }
 
 
@@ -54,19 +60,26 @@ export class TablePage implements OnInit, OnDestroy {
   genders: string[] = [];
   races: string[] = [];
   ethnicities: string[] = [];
+  isFiltered = [];
+  cohortName: string;
+  totalParticipantCount: number;
+  tab = 'participants';
+  reportInit = false;
 
   constructor(
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private router: Router,
+    // private router: Router,
   ) {}
 
   ngOnInit() {
     this.loading = false;
+    this.cohortName = this.route.snapshot.data.cohort.name;
     this.subscription = this.state.review$.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
+      this.totalParticipantCount = review.matchedParticipantCount;
     });
 
     const {concepts} = this.route.snapshot.data;
@@ -74,11 +87,14 @@ export class TablePage implements OnInit, OnDestroy {
     this.races = this.extractDemographics(concepts.raceList);
     this.genders = this.extractDemographics(concepts.genderList);
     this.ethnicities = this.extractDemographics(concepts.ethnicityList);
+    // this.subscription.add(this.state.review$.subscribe(review => {
+    //   this.review = review;
+    //
+    //
+    // }));
   }
 
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
+
 
   refresh(state: ClrDatagridStateInterface) {
     setTimeout(() => this.loading = true, 0);
@@ -103,12 +119,24 @@ export class TablePage implements OnInit, OnDestroy {
         : SortOrder.Asc;
     }
 
+    this.isFiltered = [];
     if (state.filters) {
       for (const filter of state.filters) {
-        if (isChoiceFilter(filter)) {
+        if (isMultiSelectFilter(filter)) {
           const property = filter.property;
+          this.isFiltered.push(property);
+
           const operator = Operator.IN;
           query.filters.items.push(<Filter>{property, values: filter.selection.value, operator});
+        } else if (isClearButtonFilter(filter)) {
+          const property = filter.property;
+          this.isFiltered.push(property);
+          let operator = Operator.EQUAL;
+          if (filter.property === ParticipantCohortStatusColumns.PARTICIPANTID ||
+            filter.property === ParticipantCohortStatusColumns.BIRTHDATE) {
+            operator = Operator.LIKE;
+          }
+          query.filters.items.push(<Filter>{property, values: [filter.selection.value], operator});
         } else {
           const {property, value} = <any>filter;
           const operator = Operator.EQUAL;
@@ -125,7 +153,13 @@ export class TablePage implements OnInit, OnDestroy {
     return this.reviewAPI
       .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
       .do(_ => this.loading = false)
-      .subscribe(review => this.state.review.next(review));
+      .subscribe(review => {
+        this.state.review.next(review);
+      });
+  }
+
+  isSelected(column: string) {
+    return this.isFiltered.indexOf(column) > -1;
   }
 
   private get pathParams() {
@@ -144,5 +178,16 @@ export class TablePage implements OnInit, OnDestroy {
     const names = arr.map(item => item.conceptName);
     const vals = new Set<string>(names);
     return Array.from(vals);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  setTab(tab: string) {
+    this.tab = tab;
+    if (tab === 'report' && !this.reportInit) {
+      this.reportInit = true;
+    }
   }
 }

@@ -1,12 +1,13 @@
-import {Component} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {
-    CohortReviewService,
-    DomainType,
-    PageFilterType,
-    ReviewColumns,
+  DomainType,
+  PageFilterType,
 } from 'generated';
+import {Subscription} from 'rxjs/Subscription';
+import {CohortReviewService} from '../../../generated';
+import {typeToTitle} from '../../cohort-search/utils';
+import {ReviewStateService} from '../review-state.service';
 
 /* The most common column types */
 const itemDate = {
@@ -15,9 +16,9 @@ const itemDate = {
   displayName: 'Start Date',
 };
 const endDate = {
-    name: 'endDate',
-    classNames: ['date-col'],
-    displayName: 'End Date',
+  name: 'endDate',
+  classNames: ['date-col'],
+  displayName: 'End Date',
 };
 const domain = {
   name: 'domain',
@@ -46,8 +47,8 @@ const sourceName = {
   displayName: 'Source Name',
 };
 const signature = {
-    name: 'signature',
-    displayName: 'Signature',
+  name: 'signature',
+  displayName: 'Signature',
 };
 const valueConcept = {
   name: 'valueConcept',
@@ -67,7 +68,6 @@ const sourceCode = {
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
-  notField: true,
   displayName: 'Age At Event',
 };
 const visitType = {
@@ -121,19 +121,25 @@ const labRefRange = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent {
-
-  readonly stubs = [
-    'survey',
-  ];
-
+export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
+  subscription: Subscription;
+  data;
+  participantsId: any;
+  chartData = {};
+  domainList = [DomainType[DomainType.CONDITION],
+    DomainType[DomainType.PROCEDURE],
+    DomainType[DomainType.DRUG]];
+  conditionTitle: string;
+  chartLoadedSpinner = false;
+  @Input() clickedParticipantId: number;
+  summaryActive = false;
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
-        firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
+      firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -151,6 +157,7 @@ export class DetailTabsComponent {
     }
   };
 
+  // TODO add Surveys tab when we have data to show
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
@@ -201,8 +208,8 @@ export class DetailTabsComponent {
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
-        lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
-        sourceVocabulary, visitId
+      lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
+      sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -250,7 +257,7 @@ export class DetailTabsComponent {
     filterType: PageFilterType.ReviewFilter,
     columns: [
       itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
-        sourceCode, sourceVocabulary, visitId
+      sourceCode, sourceVocabulary, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -285,7 +292,56 @@ export class DetailTabsComponent {
   }];
 
   constructor(
+    private state: ReviewStateService,
     private route: ActivatedRoute,
-    private reviewApi: CohortReviewService,
+    private router: Router,
+    private reviewAPI: CohortReviewService,
   ) {}
+
+
+  ngOnChanges() {
+    if (this.clickedParticipantId) {
+      this.chartLoadedSpinner = true;
+      this.participantsId = this.clickedParticipantId;
+      if (this.summaryActive) {
+        this.getDomainsParticipantsData();
+      }
+    }
+  }
+
+  ngOnInit() {
+    this.subscription = this.route.data.map(({participant}) => participant)
+      .subscribe(participants => {
+        this.participantsId = participants.participantId;
+      });
+    this.getDomainsParticipantsData();
+  }
+
+
+  getDomainsParticipantsData() {
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    const limit = 10;
+
+    this.domainList.map(domainName => {
+      this.chartData[domainName] = {
+        conditionTitle: '',
+        loading: true
+      };
+      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
+        this.participantsId , domainName, limit)
+        .subscribe(data => {
+          const participantsData = data;
+          this.chartData[domainName] = participantsData.items;
+          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
+          this.chartData[domainName].loading = false;
+        });
+      this.subscription.add(getParticipantsDomainData);
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 }
+

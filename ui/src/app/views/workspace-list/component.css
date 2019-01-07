@@ -4,7 +4,9 @@
   vertical-align: middle;
   color: #262262;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  flex-direction: row;
 }
 
 .table-header {
@@ -80,7 +82,7 @@
 .alert-item * {
   color: #E28327;
   font-size: 10px;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .alert-item *.warning-link {
@@ -96,7 +98,7 @@
 .card .create-workspace-text {
   color: #216FB4;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 28px;
   width: 6rem;
 }
@@ -108,6 +110,29 @@
   color: #216FB4;
 }
 
+.card .permission-box {
+  color: #FFFFFF;
+  height: 1rem;
+  width: 3rem;
+  font-size: 10px;
+  text-align: center;
+  border-radius: 0.2rem;
+  padding: 0;
+  box-shadow: none;
+}
+
+.card .permission-box.owner-permission {
+  background-color: #4996A2;
+}
+
+.card .permission-box.writer-permission {
+  background-color: #92B572;
+}
+
+.card .permission-box.reader-permission {
+  background-color: #8F8E8F;
+}
+
 .header-area {
   display: flex;
   align-items: flex-start;
@@ -116,7 +141,7 @@
 .workspace-name {
   color: #216FB4;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 18px;
   word-break: break-all;
   cursor: pointer;

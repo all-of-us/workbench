@@ -4,7 +4,7 @@ h2 {
 
 h3.profile-header {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
 }
 
@@ -23,6 +23,10 @@ h3.profile-header {
 
 .field-wrapper {
   margin: 0.5rem 0 1.5rem 0;
+}
+
+.field-wrapper-error {
+  margin-bottom: calc(1.5rem - .85rem);
 }
 
 label.long-text-field {
@@ -139,4 +143,30 @@ hr {
 
 .error {
   justify-content: space-between;
+}
+
+.field-wrapper-aligned {
+  display: flex;
+  align-items: flex-start;
+}
+
+.error-message {
+  width: 100%;
+  padding-left: 1rem;
+}
+
+.is-solid.info-icon {
+  color: #302C71;
+  height: 18px;
+  width: 18px;
+  vertical-align: top;
+}
+
+.padding-right {
+  padding-right: 1rem;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
 }

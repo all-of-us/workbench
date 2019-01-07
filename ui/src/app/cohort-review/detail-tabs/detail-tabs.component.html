@@ -1,18 +1,29 @@
 <clr-tabs>
   <clr-tab>
-    <button clrTabLink id="detail-summary-tab">Summary</button>
-    <clr-tab-content id="detail-summary-content" *clrIfActive>
-      <em>Charts go here</em>
-    </clr-tab-content>
+    <button clrTabLink id="detail-summary-tab"(click) = "getDomainsParticipantsData()">Summary</button>
+    <ng-template [(clrIfActive)]="summaryActive">
+      <clr-tab-content id="detail-summary-content" *clrIfActive>
+        <div class="container summary-container">
+          <div class="row">
+            <div class="col-sm-4" *ngFor = "let charts of domainList">
+              <div *ngIf="chartData[charts].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
+                Loading...
+              </div>
+              <app-individual-participants-charts *ngIf="!chartData[charts].loading && chartData[charts] " [chartData] ="chartData[charts]" [chartHeader] = "chartData[charts].conditionTitle" ></app-individual-participants-charts>
+            </div>
+          </div>
+        </div>
+      </clr-tab-content>
+    </ng-template>
   </clr-tab>
 
   <!-- All Events: the "combined tabs" view -->
   <clr-tab>
-    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab" title="{{ allEvents.name | titlecase }}">
       {{ allEvents.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
-      <div class="all-events-container">
+      <div>
         <app-detail-all-events
           [tabname]="allEvents.name"
           [columns]="allEvents.columns"
@@ -43,7 +54,7 @@
 
   <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
-    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab">
+    <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab" title="{{ tab.name | titlecase }}">
       {{ tab.name | titlecase }}
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
@@ -55,18 +66,6 @@
         [reverseEnum]="tab.reverseEnum"
         >
       </app-detail-tab-table>
-    </clr-tab-content>
-  </clr-tab>
-
-  <!-- Stubs: when the endpoint for each of these is available, make it a data
-       entry and put it in the above for loop.  OR if it is too custom, make it
-       a new component. -->
-  <clr-tab *ngFor="let stub of stubs">
-    <button clrTabLink id="detail-{{ stub }}-tab">
-      {{ stub.replace('-', ' ') | titlecase }}
-    </button>
-    <clr-tab-content id="detail-{{ stub }}-content" *clrIfActive>
-      <em>Charts go here</em>
     </clr-tab-content>
   </clr-tab>
 </clr-tabs>

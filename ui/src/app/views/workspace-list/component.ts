@@ -17,11 +17,13 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 
 @Component({
   styleUrls: ['./component.css',
               '../../styles/buttons.css',
+              '../../styles/tooltip.css',
               '../../styles/cards.css'],
   templateUrl: './component.html',
 })
@@ -49,6 +51,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   // All the things related to deleting a workspace
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
+
+  @ViewChild(ToolTipComponent)
+  toolTip: ToolTipComponent;
+
   deleting = false;
   workspaceDeletionError = false;
   resource: Workspace;
@@ -152,6 +158,8 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
     this.selectedWorkspace = workspace;
     this.accessLevel = accessLevel;
+    this.shareModal.workspace = workspace;
+    this.shareModal.accessLevel = accessLevel;
     this.shareModal.open();
   }
 

@@ -7,7 +7,8 @@
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
     "enforceRegistered": true,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-scripts/setup_notebook_cluster.sh",
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-staging-cluster-resources/setup_notebook_cluster.sh",
+    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-staging-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-staging",
     "billingRetryCount": 2
@@ -16,7 +17,6 @@
     "serviceAccountApiUsers": [ "all-of-us-rw-staging@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Test Registered CDR 20180920",
     "debugQueries": true
   },
   "googleCloudStorageService": {
@@ -28,15 +28,15 @@
     "gSuiteDomain": "staging.fake-research-aou.org"
   },
   "server": {
+    "apiBaseUrl": "https:\/\/api-dot-all-of-us-rw-staging.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyAkMIMIzUwv02RBK-A7cE1PbPpDJ2MTNtk",
-    "projectId": "all-of-us-rw-staging"
+    "projectId": "all-of-us-rw-staging",
+    "shortName": "Staging",
+    "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com"
   },
   "admin": {
-    "loginUrl": "http:\/\/all-of-us-rw-staging.appspot.com/login",
+    "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
-  },
-  "jira": {
-    "projectKey": "RW"
   },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",

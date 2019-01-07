@@ -10,7 +10,6 @@ import {
   ViewChild
 } from '@angular/core';
 import {TreeSubType, TreeType} from 'generated';
-import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {PREDEFINED_ATTRIBUTES} from '../constant';
@@ -18,7 +17,6 @@ import {
   CohortSearchActions,
   CohortSearchState,
   isParameterActive,
-  isSelectedParent,
   selectedGroups,
   subtreeSelected
 } from '../redux';
@@ -34,7 +32,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() node;
   private isSelected: boolean;
-  private isSelectedParent: boolean;
   private isSelectedChild: boolean;
   private subscription: Subscription;
   @ViewChild('name') name: ElementRef;
@@ -55,13 +52,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .map(val => noAttr && val)
       .subscribe(val => {
         this.isSelected = val;
-      });
-
-    this.subscription = this.ngRedux
-      .select(isSelectedParent(this.node.get('id')))
-      .map(val => noAttr && val)
-      .subscribe(val => {
-        this.isSelectedParent = val;
       });
 
     this.subscription.add(this.groups$
@@ -108,10 +98,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayName() {
-    const noCode = (this.isDrug && this.node.get('group'))
-      || this.isPM;
-    const nameIsCode = this.node.get('name', '') === this.node.get('code', '');
-    return (noCode || nameIsCode) ? '' : this.node.get('name', '');
+    return this.node.get('name', '');
   }
 
   get popperName() {
@@ -119,9 +106,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get displayCode() {
-    if ((this.isDrug && this.node.get('group'))
-      || this.isPM) {
-      return this.node.get('name', '');
+    if ((this.isDrug && this.node.get('group')) || this.isPM || this.isPPI || this.isSNOMED) {
+      return '';
     }
     return this.node.get('code', '');
   }
@@ -183,7 +169,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       const attributes = this.node.get('subtype') === TreeSubType[TreeSubType.BP]
         ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
         : [{
-          name: '',
+          name: this.node.get('subtype'),
           operator: null,
           operands: [null],
           conceptId: this.node.get('conceptId', null),
@@ -194,24 +180,13 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  selectChildren(node: Map<string, any>) {
-    if (node.get('group')) {
-      node.get('children').forEach(child => {
-        this.selectChildren(child);
-      });
-    } else {
-      const param = node.set('parameterId', `param${(node.get('conceptId')
-        ? node.get('conceptId') : node.get('id'))}`);
-      this.actions.addParameter(param);
-    }
-  }
-
   get showCount() {
-    return this.node.get('count') !== null
+    return this.node.get('count') > -1
       && (this.node.get('selectable')
       || (this.node.get('subtype') === TreeSubType[TreeSubType.LAB]
       && this.node.get('group')
-      && this.node.get('code') !== null ));
+      && this.node.get('code') !== null )
+      || this.node.get('type') === TreeType[TreeType.CPT]);
   }
 
   get isPM() {
@@ -226,11 +201,19 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.get('type') === TreeType[TreeType.MEAS];
   }
 
+  get isPPI() {
+    return this.node.get('type') === TreeType[TreeType.PPI];
+  }
+
+  get isSNOMED() {
+    return this.node.get('type') === TreeType[TreeType.SNOMED];
+  }
+
   get hasAttributes() {
     return this.node.get('hasAttributes') === true;
   }
 
   get isDisabled() {
-    return this.isSelected || this.isSelectedChild || this.isSelectedParent;
+    return this.isSelected || this.isSelectedChild;
   }
 }

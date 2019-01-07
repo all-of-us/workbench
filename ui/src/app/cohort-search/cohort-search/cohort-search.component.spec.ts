@@ -5,12 +5,13 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
-import {CohortBuilderService} from 'generated';
+import {CohortBuilderService, CohortsService} from 'generated';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
 import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
 import {DemographicsComponent} from '../demographics/demographics.component';
@@ -20,6 +21,7 @@ import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
 import {MultiSelectComponent} from '../multi-select/multi-select.component';
 import {NodeInfoComponent} from '../node-info/node-info.component';
 import {NodeComponent} from '../node/node.component';
+import {OptionInfoComponent} from '../option-info/option-info.component';
 import {OverviewComponent} from '../overview/overview.component';
 import {
   cancelWizard,
@@ -41,9 +43,6 @@ class MockActions {
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
-
-  loadFromJSON(json: string): void {}
-  runAllRequests() {}
 }
 
 describe('CohortSearchComponent', () => {
@@ -71,6 +70,7 @@ describe('CohortSearchComponent', () => {
         MultiSelectComponent,
         NodeComponent,
         NodeInfoComponent,
+        OptionInfoComponent,
         OverviewComponent,
         SafeHtmlPipe,
         SearchBarComponent,
@@ -79,7 +79,8 @@ describe('CohortSearchComponent', () => {
         SearchGroupListComponent,
         SearchGroupSelectComponent,
         SelectionInfoComponent,
-        TreeComponent
+        TreeComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,
@@ -92,6 +93,7 @@ describe('CohortSearchComponent', () => {
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: CohortBuilderService, useValue: {}},
+        {provide: CohortsService, useValue: {}},
         {provide: CohortSearchActions, useValue: new MockActions()},
         {
           provide: ActivatedRoute,

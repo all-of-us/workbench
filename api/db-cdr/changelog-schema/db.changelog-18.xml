@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="danrodney" id="changelog-18">
+    <validCheckSum>ANY</validCheckSum>
+    <addColumn tableName="concept">
+      <!-- Contains the concept ID, concept code, concept name, and all concept_synonym_name values
+           from concept_synonym -->
+      <column name="synonyms" type="clob">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+
+    <createTable tableName="domain_vocabulary_info">
+      <column name="domain_id" type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="vocabulary_id" type="VARCHAR(20)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="all_concept_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="standard_concept_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+</databaseChangeLog>

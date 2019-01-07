@@ -11,49 +11,61 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
 
   /**
    * Returns domain metadata and concept counts for domains, matching standard concepts by name
-   * and all concepts by code or concept ID.
+   * and all concepts by code or concept ID. standardConceptCount is populated; allConceptCount
+   * and participantCount are not needed and set to zero.
    * @param matchExpression a boolean full text match expression based on the user's query; see
    *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
    * @param query the exact query that the user entered
+   * @param conceptId the converted ID value for the query, or null
    */
-  @Query(nativeQuery=true,value="select d.domain, d.domain_id, d.name, d.description,\n" +
-      "d.concept_id, COUNT(DISTINCT c.concept_id) as all_concept_count,\n" +
-      "SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count,\n" +
-      // We don't show participant counts when filtering by keyword, and don't have a way of computing them easily; return 0.
-      "0 participant_count\n" +
-      "from domain_info d\n" +
-      "join concept c on d.domain_id = c.domain_id\n" +
-      "left join concept_synonym cs on c.concept_id=cs.concept_id \n" +
-      "where (c.count_value > 0 or c.source_count_value > 0) \n" +
-      "and  ((((match(c.concept_name) against(?1 in boolean mode) ) or\n" +
-      "(match(cs.concept_synonym_name) against(?1 in boolean mode))) and\n" +
-      "c.standard_concept IN ('S', 'C')) or (c.concept_id=?2 or c.concept_code=?2))\n" +
-      "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
-      "order by d.domain_id")
-  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query);
+  @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
+      "d.domain, d.domainId, d.name, d.description,\n" +
+      "d.conceptId, 0L, COUNT(*), 0L)\n" +
+      "from DomainInfo d\n" +
+      "join Concept c ON d.domainId = c.domainId\n" +
+      "where (c.countValue > 0 or c.sourceCountValue > 0) and \n" +
+      "(matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+      "c.standardConcept IN ('S', 'C')) or c.conceptId in (?3) or c.conceptCode = ?2\n" +
+      "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
+      "order by d.domainId")
+  List<DomainInfo> findStandardOrCodeMatchConceptCounts(String matchExpression, String query, List<Long> conceptIds);
 
+  /**
+   * Returns domain metadata and concept counts for domains, matching only standard concepts by name,
+   * code, or concept ID. standardConceptCount is populated; allConceptCount
+   * and participantCount are not needed and set to zero.
+   * @param matchExpression a boolean full text match expression based on the user's query; see
+   *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
+   */
+  @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
+      "d.domain, d.domainId, d.name, d.description,\n" +
+      "d.conceptId, 0L, COUNT(*), 0L)\n" +
+      "from DomainInfo d\n" +
+      "join Concept c ON d.domainId = c.domainId\n" +
+      "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +
+      "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+      "c.standardConcept IN ('S', 'C')\n" +
+      "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
+      "order by d.domainId")
+  List<DomainInfo> findStandardConceptCounts(String matchExpression);
 
   /**
    * Returns domain metadata and concept counts for domains, matching both standard and non-standard
-   * concepts by name, code, or concept ID.
+   * concepts by name, code, or concept ID. allConceptCount is populated; standardConceptCount
+   * and participantCount are not needed and set to zero.
    * @param matchExpression a boolean full text match expression based on the user's query; see
    *                https://dev.mysql.com/doc/refman/5.7/en/fulltext-boolean.html
-   * @param query the exact query that the user entered
    */
-  @Query(nativeQuery=true,value="select d.domain, d.domain_id, d.name, d.description,\n" +
-      "d.concept_id, COUNT(DISTINCT c.concept_id) as all_concept_count,\n" +
-      "SUM(c.standard_concept IN ('S', 'C')) as standard_concept_count,\n" +
-      // We don't show participant counts when filtering by keyword, and don't have a way of computing them easily; return 0.
-      "0 participant_count\n" +
-      "from domain_info d\n" +
-      "join concept c on d.domain_id = c.domain_id\n" +
-      "left join concept_synonym cs on c.concept_id=cs.concept_id \n" +
-      "where (c.count_value > 0 or c.source_count_value > 0) \n" +
-      "and  (((match(c.concept_name) against(?1 in boolean mode) ) or\n" +
-      "(match(cs.concept_synonym_name) against(?1 in boolean mode))) or c.concept_id=?2 or c.concept_code=?2)\n" +
-      "group by d.domain, d.domain_id, d.name, d.description, d.concept_id\n" +
-      "order by d.domain_id")
-  List<DomainInfo> findAllMatchConceptCounts(String matchExpression, String query);
+  @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
+      "d.domain, d.domainId, d.name, d.description,\n" +
+      "d.conceptId, COUNT(*), 0L, 0L)\n" +
+      "from DomainInfo d\n" +
+      "join Concept c ON d.domainId = c.domainId\n" +
+      "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +
+      "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0\n" +
+      "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n" +
+      "order by d.domainId")
+  List<DomainInfo> findAllMatchConceptCounts(String matchExpression);
 
   List<DomainInfo> findByOrderByDomainId();
 }

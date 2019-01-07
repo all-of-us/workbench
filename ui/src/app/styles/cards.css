@@ -27,7 +27,7 @@
   cursor: pointer;
   padding: 0px;
   height: 105px;
-  color: #216FB4;
+  color: #2691D0;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
 }
 
@@ -44,6 +44,7 @@
   position: relative;
   margin-top: 10%;
   margin-left: 12%;
+  min-width: 200px;
 }
 
 .card.add-card .plus-circle {
@@ -55,53 +56,45 @@
 
 .card.item-card .footer {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: -0.75rem;
-  margin-right: -0.75rem;
+  flex-direction: column;
 }
 
 .card.item-card .name {
   font-size: 18px;
   font-weight: 500;
   line-height: 22px;
-  color: #216FB4;
+  color: #2691D0;
 }
 
 .card.item-card .item-type {
-  background-color: #F8C954;
-  height: 42px;
-  width: 42px;
-  box-shadow: 0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12);
-  border-radius: 5px 0 4px 0;
-  box-sizing: border-box;
-  border: 2px solid #DCAE3B;
+  height: 22px;
+  width: max-content;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 4px 4px 0 0;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .card.item-card .item-type.cohort {
   background-color: #F8C954;
-  border: 2px solid #DCAE3B;
 }
 
 .card.item-card .item-type.notebook {
   background-color: #8BC990;
-  border: 2px solid #6EAF73;
+}
+
+.card.item-card .item-type.conceptSet {
+  background-color: #AB87B3;
 }
 
 .item-type * {
-  font-size: 22px;
-  font-weight: bold;
+  color: #FFFFFF;
+  font-family: Montserrat, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.item-type.cohort * {
-  color: #FCE6B0;
-}
-
-.item-type.notebook * {
-  color: #CAECCD;
-}
 
 .card.item-card .last-modified {
   color: #4A4A4A;
@@ -109,7 +102,7 @@
   display: inline-block;
   line-height: 14px;
   font-weight: 300;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
 }
 
 .card.item-card .description {
@@ -118,34 +111,5 @@
   color: #4A4A4A;
   font-weight: 300;
   line-height: 18px;
-}
-
-.help-tip {
-  overflow: auto;
-  padding-bottom: .25rem;
-  border: 1px solid #89CBDF;
-  margin-left: -1rem;
-  margin-right: -1rem;
-  border-radius: 3px;
-  background-color: #E1F1F6;
-  color: #216FB4;
-  padding-left: .9rem;
-  display: flex;
-  position: relative
-}
-
-.help-tip .help-tip-title {
-  border: 0px;
-  /*height: 1.375rem;*/
-  font-weight: 500;
-  padding-top: .2rem;
-}
-
-.help-tip .help-tip-text {
-  border: 0px;
-  /*height: 1.375rem;*/
-  font-weight: 300;
-  padding-top: .2rem;
-  padding-left: .75rem;
 }
 

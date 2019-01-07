@@ -1,13 +1,28 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
+
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cdr.dao.ConceptSynonymDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortService;
@@ -28,6 +43,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -36,6 +52,7 @@ import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -48,19 +65,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -165,17 +169,13 @@ public class ConceptSetsControllerTest {
   @Autowired
   FireCloudService fireCloudService;
 
-
-  @Autowired
-  ConceptSynonymDao conceptSynonymDao;
-
-  @PersistenceContext
-  private EntityManager entityManager;
-
   private ConceptSetsController conceptSetsController;
 
   @Autowired
   UserRecentResourceService userRecentResourceService;
+
+  @Autowired
+  ConceptBigQueryService conceptBigQueryService;
 
   @Mock
   Provider<User> userProvider;
@@ -184,20 +184,29 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class, CohortService.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
-  @MockBean({FireCloudService.class, CloudStorageService.class, ConceptService.class, ConceptSetService.class, UserRecentResourceService.class})
+  @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
+      ConceptSetService.class, UserRecentResourceService.class})
   static class Configuration {
     @Bean
     Clock clock() {
       return CLOCK;
+    }
+
+    @Bean
+    Random random() {
+      return new FakeLongRandom(123);
     }
   }
 
   @Before
   public void setUp() throws Exception {
 
-    ConceptService conceptService = new ConceptService(entityManager,conceptSynonymDao);
-    conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao, conceptSynonymDao, conceptService, userProvider, CLOCK);
-    WorkspacesController workspacesController = new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService, userRecentResourceService);
+    conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
+        conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
+    WorkspacesController workspacesController =
+        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, conceptSetDao, userDao,
+                userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
+                userRecentResourceService);
 
     User user = new User();
     user.setEmail(USER_EMAIL);
@@ -275,7 +284,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
-    conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+    conceptSet = conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        new CreateConceptSetRequest().conceptSet(conceptSet))
         .getBody();
     assertThat(conceptSet.getConcepts()).isNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
@@ -284,6 +294,7 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo("concept set 1");
+    assertThat(conceptSet.getParticipantCount()).isEqualTo(0);
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         conceptSet.getId()).getBody()).isEqualTo(conceptSet);
@@ -328,6 +339,7 @@ public class ConceptSetsControllerTest {
     assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
     assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
     assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
+    assertThat(updatedConceptSet.getParticipantCount()).isEqualTo(0);
     assertThat(conceptSet.getName()).isEqualTo("new name");
 
     assertThat(conceptSetsController.getConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -361,6 +373,8 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId()))).thenReturn(123);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -368,6 +382,7 @@ public class ConceptSetsControllerTest {
                 CLIENT_CONCEPT_1.getConceptId())).getBody();
     assertThat(updated.getConcepts()).contains(CLIENT_CONCEPT_1);
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(updated.getParticipantCount()).isEqualTo(123);
 
     ConceptSet removed =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -376,11 +391,15 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getConcepts()).isNull();
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+    assertThat(removed.getParticipantCount()).isEqualTo(0);
   }
 
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId(),
+            CLIENT_CONCEPT_4.getConceptId()))).thenReturn(456);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
@@ -391,7 +410,10 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
         CLIENT_CONCEPT_3);
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
+    assertThat(updated.getParticipantCount()).isEqualTo(456);
 
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId()))).thenReturn(123);
     ConceptSet removed =
         conceptSetsController.updateConceptSetConcepts(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
             conceptSet.getId(), removeConceptsRequest(updated.getEtag(),
@@ -400,6 +422,21 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getConcepts()).containsExactly(CLIENT_CONCEPT_1);
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
+    assertThat(removed.getParticipantCount()).isEqualTo(123);
+  }
+
+  @Test
+  public void testUpdateConceptSetConceptsAddManyOnCreate() {
+    saveConcepts();
+    when(conceptBigQueryService.getParticipantCountForConcepts("condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId(),
+            CLIENT_CONCEPT_4.getConceptId()))).thenReturn(456);
+    ConceptSet conceptSet = makeConceptSet1(CLIENT_CONCEPT_1.getConceptId(),
+                CLIENT_CONCEPT_3.getConceptId(),
+                CLIENT_CONCEPT_4.getConceptId());
+    assertThat(conceptSet.getConcepts()).containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4,
+        CLIENT_CONCEPT_3);
+    assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
   }
 
   @Test(expected = BadRequestException.class)
@@ -483,14 +520,17 @@ public class ConceptSetsControllerTest {
     return request;
   }
 
-  private ConceptSet makeConceptSet1() {
+  private ConceptSet makeConceptSet1(Long... addedIds) {
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
     conceptSet.setDomain(Domain.CONDITION);
-    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
-        .getBody();
-
+    CreateConceptSetRequest request = new CreateConceptSetRequest().conceptSet(conceptSet);
+    if (addedIds.length > 0) {
+      request = request.addedIds(ImmutableList.copyOf(addedIds));
+    }
+    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        request).getBody();
   }
 
   private ConceptSet makeConceptSet2() {
@@ -498,7 +538,8 @@ public class ConceptSetsControllerTest {
     conceptSet.setDescription("desc 2");
     conceptSet.setName("concept set 2");
     conceptSet.setDomain(Domain.MEASUREMENT);
-    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSet)
+    return conceptSetsController.createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
+        new CreateConceptSetRequest().conceptSet(conceptSet))
         .getBody();
 
   }

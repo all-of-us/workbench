@@ -1,4 +1,4 @@
-import {TreeSubType, TreeType} from 'generated';
+import {DomainType, TreeSubType, TreeType} from 'generated';
 import {List} from 'immutable';
 import {DOMAIN_TYPES} from './constant';
 
@@ -13,7 +13,7 @@ export function typeDisplay(parameter): string {
       'AGE': 'Age',
       'DEC': 'Deceased'
     }[subtype] || '';
-  } else {
+  } else if (!_type.match(/^SNOMED.*/i)) {
     return parameter.get('code', '');
   }
 }
@@ -67,13 +67,16 @@ export function typeToTitle(_type: string): string {
       _type = 'Visit';
       break;
     case TreeType[TreeType.DRUG]:
-      _type = 'Drug';
+      _type = 'Drugs';
       break;
     case TreeType[TreeType.CONDITION]:
       _type = 'Conditions';
       break;
     case TreeType[TreeType.PROCEDURE]:
       _type = 'Procedures';
+      break;
+    case DomainType[DomainType.LAB]:
+      _type = 'Labs';
       break;
   }
   return _type;
@@ -101,18 +104,32 @@ export function subtypeToTitle(subtype: string): string {
   return title;
 }
 
-export function highlightMatches(terms: Array<string>, name: string) {
+export function highlightMatches(
+  terms: Array<string>,
+  name: string,
+  fullText?: boolean,
+  id?: string
+) {
+  id = id || '';
+  const _class = (id !== '' ? 'match' + id + ' ' : '') + 'search-keyword';
   terms.forEach(term => {
-    const start = name.toLowerCase().indexOf(term.toLowerCase());
-    if (start > -1) {
-      const end = start + term.length;
-      name = name.slice(0, start)
-        + '<span style="color: #659F3D;'
-        + 'font-weight: bolder;'
-        + 'background-color: rgba(101,159,61,0.2);'
-        + 'padding: 2px 0;">'
-        + name.slice(start, end) + '</span>'
-        + name.slice(end);
+    name = stripHtml(name);
+    if (fullText) {
+      const searchTerms = term.trim().split(new RegExp(',| '));
+      searchTerms
+        .filter(text => text.length > 2)
+        .forEach((searchTerm, s) => {
+          let re;
+          if (s === (searchTerms.length - 1)) {
+            re = new RegExp(searchTerm, 'gi');
+          } else {
+            re = new RegExp('\\b' + searchTerm + '\\b', 'gi');
+          }
+          name = name.replace(re, '<span class="' + _class + '">$&</span>');
+        });
+    } else {
+      const re = new RegExp(term.replace(/(?=[\[\]()+])/g, '\\'), 'gi');
+      name = name.replace(re, '<span class="' + _class + '">$&</span>');
     }
   });
   return name;
@@ -123,6 +140,6 @@ export function stripHtml(string: string) {
 }
 
 export function getCodeOptions(itemType: string) {
-  const item =  DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
+  const item = DOMAIN_TYPES.find(domain => TreeType[domain.type] === itemType);
   return (item && item['codes']) ? item['codes'] : false;
 }

@@ -15,6 +15,7 @@ public class SearchRequests {
   private static final String DEMO_DOMAIN = "DEMO";
   private static final String GENDER_SUBTYPE = "GEN";
   private static final String DEMO_TYPE = TreeType.DEMO.name();
+  public static final String SEARCHGROUP_ITEM_TYPE = TreeType.CONDITION.name();
   public static final String ICD9_TYPE = TreeType.ICD9.name();
   public static final String ICD9_SUBTYPE = TreeSubType.CM.name();
   public static final String ICD9_GROUP_CODE = "001";
@@ -25,15 +26,18 @@ public class SearchRequests {
   public static SearchRequest genderRequest(long... conceptIds) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(DEMO_TYPE);
     for (long conceptId: conceptIds) {
-      SearchParameter parameter = new SearchParameter().domain(DEMO_DOMAIN).subtype(GENDER_SUBTYPE)
-          .conceptId(conceptId);
+      SearchParameter parameter = new SearchParameter()
+        .type(DEMO_DOMAIN)
+        .subtype(GENDER_SUBTYPE)
+        .domainId(DEMO_DOMAIN)
+        .conceptId(conceptId);
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(String type, String subtype, String... codes) {
-    SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(type);
+  public static SearchRequest codesRequest(String groupType, String type, String subtype, String... codes) {
+    SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     for (String code: codes) {
       SearchParameter parameter = new SearchParameter().type(type).subtype(subtype).group(true).value(code);
       searchGroupItem.addSearchParametersItem(parameter);
@@ -53,7 +57,7 @@ public class SearchRequests {
   }
 
   public static SearchRequest icd9Codes() {
-    return codesRequest(ICD9_TYPE, ICD9_SUBTYPE, ICD9_GROUP_CODE);
+    return codesRequest(SEARCHGROUP_ITEM_TYPE, ICD9_TYPE, ICD9_SUBTYPE, ICD9_GROUP_CODE);
   }
 
   public static SearchRequest males() {

@@ -7,16 +7,16 @@
     "clusterIdleMaxAgeDays": 7,
     "debugEndpoints": false,
     "enforceRegistered": true,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-prod-scripts/setup_notebook_cluster.sh",
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-rw-prod-cluster-resources/setup_notebook_cluster.sh",
+    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-rw-prod-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
-    "billingRetryCount": 2
+    "billingRetryCount": 4
   },
   "auth": {
     "serviceAccountApiUsers": [ "all-of-us-rw-prod@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "Test Registered CDR",
     "debugQueries": false
   },
   "googleCloudStorageService": {
@@ -28,15 +28,15 @@
     "gSuiteDomain": "researchallofus.org"
   },
   "server": {
+    "apiBaseUrl": "https:\/\/api.workbench.researchallofus.org",
     "publicApiKeyForErrorReports": "AIzaSyBSPcQ0FcR99GLXaqX4Ujpoj3JUDSP689g",
-    "projectId": "all-of-us-rw-prod"
+    "projectId": "all-of-us-rw-prod",
+    "shortName": "Prod",
+    "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com"
   },
   "admin": {
-    "adminIdVerification": "workbench-id-verifications@researchallofus.org",
-    "loginUrl": "http:\/\/all-of-us-rw-prod.appspot.com/login"
-  },
-  "jira": {
-    "projectKey": "RW"
+    "adminIdVerification": "support@researchallofus.org",
+    "loginUrl": "https:\/\/workbench.researchallofus.org/login"
   },
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",

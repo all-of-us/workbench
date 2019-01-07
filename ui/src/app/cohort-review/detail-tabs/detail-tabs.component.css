@@ -1,6 +1,3 @@
-.all-events-container {
-  display: flex;
-}
 
 .details {
   border: 1px solid gray;
@@ -8,4 +5,9 @@
   background-color: white;
   padding: 0.2rem;
   min-width: 12rem;
+}
+
+.summary-container {
+  margin: 2rem 0rem;
+  min-width: 100%;
 }

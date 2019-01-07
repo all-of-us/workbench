@@ -2,14 +2,24 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.visitTypeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
  * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -29,23 +39,22 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String VISIT_PARENT_CLAUSE_TEMPLATE =
     "where a.visit_concept_id in (\n" +
-      "select descendant_concept_id\n" +
-      "from `${projectId}.${dataSetId}.concept_ancestor` \n" +
-      "where ancestor_concept_id in unnest(${parentIds}))\n";
+      "select descendant_id\n" +
+      "from `${projectId}.${dataSetId}.criteria_ancestor` \n" +
+      "where ancestor_id in unnest(${parentIds}))\n";
 
   private static final String UNION_TEMPLATE = " union all\n";
 
   @Override
-  public QueryJobConfiguration buildQueryJobConfig(QueryParameters inputParameters) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters inputParameters) {
+    from(parametersEmpty()).test(inputParameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<>();
-    Map<String, QueryParameterValue> queryParams = new HashMap<>();
 
     List<Long> parentList = new ArrayList<>();
     List<Long> childList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getParameters()) {
-      if (parameter.getConceptId() == null) {
-        throw new BadRequestException("Please provide a valid concept Id");
-      }
+      from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
+      from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       if (parameter.getGroup()) {
         parentList.add(parameter.getConceptId());
       } else {
@@ -55,8 +64,8 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
     // Collect all parent type queries to run them together
     if (!parentList.isEmpty()) {
-      String namedParameter = "visit" + getUniqueNamedParameterPostfix();
-      queryParams.put(namedParameter, QueryParameterValue.array(parentList.stream().toArray(Long[]::new), Long.class));
+      String namedParameter = addQueryParameterValue(queryParams,
+          QueryParameterValue.array(parentList.stream().toArray(Long[]::new), Long.class));
       String parentSql = VISIT_SELECT_CLAUSE_TEMPLATE +
         VISIT_PARENT_CLAUSE_TEMPLATE.replace("${parentIds}", "@" + namedParameter);
       queryParts.add(parentSql);
@@ -64,8 +73,8 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
     // Collect all child type queries to run them together
     if (!childList.isEmpty()) {
-      String namedParameter = "visit" + getUniqueNamedParameterPostfix();
-      queryParams.put(namedParameter, QueryParameterValue.array(childList.stream().toArray(Long[]::new), Long.class));
+      String namedParameter = addQueryParameterValue(queryParams,
+          QueryParameterValue.array(childList.stream().toArray(Long[]::new), Long.class));
       String childSql = VISIT_SELECT_CLAUSE_TEMPLATE +
         VISIT_CHILD_CLAUSE_TEMPLATE.replace("${visitConceptIds}", "@" + namedParameter);
       queryParts.add(childSql);
@@ -77,11 +86,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
     String finalSql = buildModifierSql(visitSql, queryParams, inputParameters.getModifiers());
 
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(queryParams)
-      .setUseLegacySql(false)
-      .build();
+    return finalSql;
   }
 
   @Override

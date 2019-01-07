@@ -1,8 +1,11 @@
 import {Location} from '@angular/common';
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
+  ActivatedRoute,
+  NavigationEnd,
   Router,
 } from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
@@ -10,10 +13,8 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
-
 import {environment} from 'environments/environment';
-
-import {Authority} from 'generated';
+import {Authority, BillingProjectStatus} from 'generated';
 
 @Component({
   selector: 'app-signed-in',
@@ -22,7 +23,7 @@ import {Authority} from 'generated';
               '../../styles/errors.css'],
   templateUrl: './component.html'
 })
-export class SignedInComponent implements OnInit {
+export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
@@ -32,6 +33,12 @@ export class SignedInComponent implements OnInit {
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
+  minimizeChrome = false;
+  billingProjectInitialized = false;
+  billingProjectQuery: NodeJS.Timer;
+  private profileLoadingSub: Subscription;
+  private profileBlockingSub: Subscription;
+  private subscriptions = [];
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -48,6 +55,7 @@ export class SignedInComponent implements OnInit {
       this.sidenavToggle = false;
     }
   }
+
   constructor(
     /* Ours */
     public errorHandlingService: ErrorHandlingService,
@@ -57,11 +65,12 @@ export class SignedInComponent implements OnInit {
     /* Angular's */
     private locationService: Location,
     private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
-      this.profileStorageService.profile$.subscribe((profile) => {
+      this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.hasDataAccess =
           !config.enforceRegistered || hasRegisteredAccess(profile.dataAccessLevel);
 
@@ -71,6 +80,7 @@ export class SignedInComponent implements OnInit {
           profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
+        this.minimizeChrome = this.shouldMinimize();
       });
     });
 
@@ -83,11 +93,49 @@ export class SignedInComponent implements OnInit {
         this.navigateSignOut();
       }
     });
+
+    this.profileBlockingSub = this.profileStorageService.profile$.subscribe((profile) => {
+      // This will block workspace creation until the billing project is initialized
+      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+        this.billingProjectInitialized = true;
+      } else {
+        this.billingProjectQuery = setTimeout(() => {
+            this.profileStorageService.reload();
+        }, 10000);
+      }
+    });
+
+    this.subscriptions.push(
+      this.router.events.filter(event => event instanceof NavigationEnd)
+        .subscribe(event => {
+          this.minimizeChrome = this.shouldMinimize();
+        }));
+
+  }
+
+  ngOnDestroy() {
+    if (this.profileLoadingSub) {
+      this.profileLoadingSub.unsubscribe();
+    }
+    if (this.profileBlockingSub) {
+      this.profileBlockingSub.unsubscribe();
+    }
+    for (const s of this.subscriptions) {
+      s.unsubscribe();
+    }
   }
 
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
+  }
+
+  shouldMinimize(): boolean {
+    let leaf = this.route.snapshot;
+    while (leaf.firstChild != null) {
+      leaf = leaf.firstChild;
+    }
+    return leaf.data.minimizeChrome;
   }
 
   private navigateSignOut(): void {
@@ -115,6 +163,10 @@ export class SignedInComponent implements OnInit {
 
   get createWorkspaceActive(): boolean {
     return this.locationService.path() === '/workspaces/build';
+  }
+
+  openDataBrowser(): void {
+    window.open(this.publicUiUrl, '_blank');
   }
 
 }

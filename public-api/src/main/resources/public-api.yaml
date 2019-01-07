@@ -16,6 +16,21 @@ schemes:
   - "https"
 produces:
   - "application/json"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
+    type: oauth2
+    flow: accessCode
+security:
+  - aou_oauth: []
 
 # Throughout, we use integer/int64 in preference to string/date-time because Swagger's
 # date formatting is inconsistent between server and client. Time values are stored as
@@ -29,10 +44,20 @@ produces:
 paths:
 
   # Data Browser #######################################################################
-
+  /v1/config:
+    get:
+      tags:
+      - config
+      description: Returns some server configuration data.
+      operationId: getConfig
+      security: []
+      responses:
+        200:
+          description: Configuration data
+          schema:
+            "$ref": "#/definitions/ConfigResponse"
   /v1/databrowser/survey-results:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -52,7 +77,6 @@ paths:
 
   /v1/databrowser/concept-analysis-results:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -66,6 +90,11 @@ paths:
             type: string
           required: true
           description: concept id
+        - in: query
+          name: domain-id
+          type: string
+          required: false
+          description: domain id
       responses:
         200:
           description: A collection of analysis for concept
@@ -74,7 +103,6 @@ paths:
 
   /v1/databrowser/participant-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -89,7 +117,6 @@ paths:
 
   /v1/databrowser/gender-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -104,7 +131,6 @@ paths:
 
   /v1/databrowser/race-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -119,7 +145,6 @@ paths:
 
   /v1/databrowser/ethnicity-count:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -134,7 +159,6 @@ paths:
 
   /v1/databrowser/domain-search:
     get:
-      security: []
       tags:
         - dataBrowser
       description: Gets the domain filters and survey modules with the count of matched concepts
@@ -152,7 +176,6 @@ paths:
             $ref: "#/definitions/DomainInfosAndSurveyModulesResponse"
   /v1/databrowser/domain-totals:
     get:
-      security: []
       tags:
         - dataBrowser
       description: Gets the domain filters and survey modules with the count of all concepts and questions
@@ -166,9 +189,10 @@ paths:
 
   /v1/databrowser/searchConcepts:
     post:
-      security: []
       tags:
         - dataBrowser
+      consumes:
+        - application/json
       description: Gets list of matched concepts
       operationId: "searchConcepts"
       parameters:
@@ -186,7 +210,6 @@ paths:
 
   /v1/databrowser/source-concepts:
     get:
-      security: []
       tags:
         - dataBrowser
 
@@ -284,7 +307,27 @@ definitions:
           items:
             $ref: "#/definitions/Concept"
           description: standard concepts associated with the matched concept
-
+  ConfigResponse:
+    type: object
+    required:
+    - gsuiteDomain
+    properties:
+      gsuiteDomain:
+        type: string
+        description: G-Suite domain containing user accounts.
+      projectId:
+        type: string
+        description: The cloud project in which this app is running.
+      enforceRegistered:
+        type: boolean
+        description: |
+          Whether the user's data access level should gate other Workbench functionality, namely
+          to functionality requiring CDR access.
+      publicApiKeyForErrorReports:
+        type: string
+        description: |
+          Stackdriver API key for error reporting, scoped to a particular
+          domain. If unset, Stackdriver error reporting should be disabled.
   QuestionConcept:
     type: object
     required:
@@ -324,6 +367,9 @@ definitions:
         $ref: "#/definitions/Analysis"
       ageAnalysis:
         description: age analysis
+        $ref: "#/definitions/Analysis"
+      genderIdentityAnalysis:
+        description: gender identity analysis
         $ref: "#/definitions/Analysis"
 
   QuestionConceptListResponse:
@@ -545,6 +591,10 @@ definitions:
         description: gender analysis
         type: object
         $ref: "#/definitions/Analysis"
+      genderIdentityAnalysis:
+        description: gender identity analysis
+        type: object
+        $ref: "#/definitions/Analysis"
       ageAnalysis:
         description: age analysis
         type: object
@@ -559,16 +609,19 @@ definitions:
         $ref: "#/definitions/Analysis"
       measurementValueGenderAnalysis:
         description: measurement value gender analysis
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
       measurementValueAgeAnalysis:
         description: age analysis for measurement values
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
       measurementDistributionAnalysis:
         description: measurement distribution analysis
-        type: object
-        $ref: "#/definitions/Analysis"
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
 
   ConceptAnalysisListResponse:
     type: object

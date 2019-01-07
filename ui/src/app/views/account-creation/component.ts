@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
-import {ServerConfigService} from '../../services/server-config.service';
 import {InvitationKeyComponent} from '../invitation-key/component';
 import {LoginComponent} from '../login/component';
 
@@ -21,17 +20,21 @@ function isBlank(s: string) {
 })
 export class AccountCreationComponent implements AfterViewInit {
   profile: Profile = {
+    // Note: We abuse the "username" field here by omitting "@domain.org". After
+    // profile creation, this field is populated with the full email address.
     username: '',
     dataAccessLevel: DataAccessLevel.Unregistered,
     givenName: '',
     familyName: '',
-    contactEmail: ''
+    contactEmail: '',
+    currentPosition: '',
+    organization: '',
+    areaOfResearch: ''
   };
   showAllFieldsRequiredError: boolean;
   creatingAccount: boolean;
   accountCreated: boolean;
   usernameConflictError = false;
-  gsuiteDomain: string;
   usernameFocused = false;
   usernameCheckTimeout: NodeJS.Timer;
   usernameCheckInProgress = false;
@@ -44,12 +47,8 @@ export class AccountCreationComponent implements AfterViewInit {
   constructor(
     private profileService: ProfileService,
     private invitationKeyService: InvitationKeyComponent,
-    private loginComponent: LoginComponent,
-    serverConfigService: ServerConfigService
+    private loginComponent: LoginComponent
   ) {
-    serverConfigService.getConfig().subscribe((config) => {
-      this.gsuiteDomain = config.gsuiteDomain;
-    });
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
       this.loginComponent.smallerBackgroundImgSrc =
@@ -71,7 +70,9 @@ export class AccountCreationComponent implements AfterViewInit {
     this.showAllFieldsRequiredError = false;
     const requiredFields =
         [this.profile.givenName, this.profile.familyName,
-         this.profile.username, this.profile.contactEmail];
+         this.profile.username, this.profile.contactEmail,
+         this.profile.currentPosition, this.profile.organization,
+         this.profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.showAllFieldsRequiredError = true;
       return;
@@ -84,7 +85,8 @@ export class AccountCreationComponent implements AfterViewInit {
       invitationKey: this.invitationKeyService.invitationKey
     };
     this.creatingAccount = true;
-    this.profileService.createAccount(request).subscribe(() => {
+    this.profileService.createAccount(request).subscribe((profile) => {
+      this.profile = profile;
       this.creatingAccount = false;
       this.accountCreated = true;
     }, () => {
@@ -151,4 +153,21 @@ export class AccountCreationComponent implements AfterViewInit {
     }
     return !this.isUsernameValidationError;
   }
+
+  get showFirstNameValidationSuccess(): boolean {
+    return this.profile.givenName.length <= 80;
+  }
+
+  get showLastNameValidationSuccess(): boolean {
+    return this.profile.familyName.length <= 80;
+  }
+
+  get showCurrentPositionValidationSuccess(): boolean {
+    return this.profile.currentPosition.length <= 255;
+  }
+
+  get showOrganizationValidationSuccess(): boolean {
+    return this.profile.organization.length <= 255;
+  }
+
 }

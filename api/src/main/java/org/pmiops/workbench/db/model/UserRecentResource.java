@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +9,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user_recent_resource")
@@ -19,6 +19,7 @@ public class UserRecentResource {
   private Long userId;
   private Long workspaceId;
   private Cohort cohort;
+  private ConceptSet conceptSet;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +41,11 @@ public class UserRecentResource {
 
   public void setWorkspaceId(long workspaceId ) {this.workspaceId = workspaceId;}
 
+  /**
+   * TODO: Rename this column to reflect reality.
+   *
+   * @return the full GCS URI for the notebook, not just the notebook name as implied
+   */
   @Column(name = "notebook_name")
   public String getNotebookName() {
     return this.notebookName;
@@ -63,5 +69,28 @@ public class UserRecentResource {
   public Cohort getCohort() { return cohort;}
 
   public void setCohort(Cohort cohort) {this.cohort = cohort;}
-}
 
+  @ManyToOne
+  @JoinColumn(name = "concept_set_id")
+  public ConceptSet getConceptSet() { return conceptSet; }
+
+  public void setConceptSet(ConceptSet conceptSet) {this.conceptSet = conceptSet;}
+
+  public UserRecentResource() {}
+
+  public UserRecentResource(long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
+    this.workspaceId = workspaceId;
+    this.userId = userId;
+    this.notebookName = notebookName;
+    this.lastAccessDate = lastAccessDate;
+    this.cohort = null;
+    this.conceptSet = null;
+  }
+
+  public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
+    this.workspaceId = workspaceId;
+    this.userId = userId;
+    this.notebookName = null;
+    this.lastAccessDate = lastAccessDate;
+  }
+}

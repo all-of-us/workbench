@@ -11,6 +11,7 @@ export const CANCEL_CRITERIA_REQUEST = 'CANCEL_CRITERIA_REQUEST';
 export const LOAD_CRITERIA_SUBTREE = 'LOAD_CRITERIA_SUBTREE';
 export const SET_CRITERIA_SEARCH = 'SET_CRITERIA_SEARCH';
 export const BEGIN_AUTOCOMPLETE_REQUEST = 'BEGIN_AUTOCOMPLETE_REQUEST';
+export const CANCEL_AUTOCOMPLETE_REQUEST = 'CANCEL_AUTOCOMPLETE_REQUEST';
 export const BEGIN_INGREDIENT_REQUEST = 'BEGIN_INGREDIENT_REQUEST';
 export const BEGIN_CHILDREN_REQUEST = 'BEGIN_CHILDREN_REQUEST';
 export const LOAD_INGREDIENT_LIST = 'LOAD_INGREDIENT_LIST';
@@ -18,7 +19,6 @@ export const LOAD_CHILDREN_LIST = 'LOAD_CHILDREN_LIST';
 export const SELECT_CHILDREN_LIST = 'SELECT_CHILDREN_LIST';
 export const LOAD_ATTRIBUTE_LIST = 'LOAD_ATTRIBUTE_LIST';
 export const LOAD_AUTOCOMPLETE_OPTIONS = 'LOAD_AUTOCOMPLETE_OPTIONS';
-export const CLEAR_AUTOCOMPLETE_OPTIONS = 'CLEAR_AUTOCOMPLETE_OPTIONS';
 export const AUTOCOMPLETE_REQUEST_ERROR = 'AUTOCOMPLETE_REQUEST_ERROR';
 export const ATTRIBUTE_REQUEST_ERROR = 'ATTRIBUTE_REQUEST_ERROR';
 export const CRITERIA_REQUEST_ERROR = 'CRITERIA_REQUEST_ERROR';
@@ -62,6 +62,7 @@ export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
 export const LOAD_ENTITIES = 'LOAD_ENTITIES';
 export const RESET_STORE = 'RESET_STORE';
+export const CLEAR_STORE = 'CLEAR_STORE';
 
 export interface ActiveContext {
   criteriaType?: string;
@@ -98,6 +99,7 @@ export interface ActionTypes {
     parentId: number;
     subtype: string;
   };
+
   LOAD_CRITERIA_RESULTS: {
     type: typeof LOAD_CRITERIA_RESULTS;
     kind: string;
@@ -140,6 +142,9 @@ export interface ActionTypes {
     subtype: string;
     searchTerms: string;
   };
+  CANCEL_AUTOCOMPLETE_REQUEST: {
+    type: typeof CANCEL_AUTOCOMPLETE_REQUEST;
+  };
   BEGIN_INGREDIENT_REQUEST: {
     type: typeof BEGIN_INGREDIENT_REQUEST;
     cdrVersionId: number;
@@ -154,9 +159,6 @@ export interface ActionTypes {
   LOAD_AUTOCOMPLETE_OPTIONS: {
     type: typeof LOAD_AUTOCOMPLETE_OPTIONS;
     options: any;
-  };
-  CLEAR_AUTOCOMPLETE_OPTIONS: {
-    type: typeof CLEAR_AUTOCOMPLETE_OPTIONS;
   };
   AUTOCOMPLETE_REQUEST_ERROR: {
     type: typeof AUTOCOMPLETE_REQUEST_ERROR;
@@ -251,7 +253,6 @@ export interface ActionTypes {
     type: typeof PREVIEW_REQUEST_ERROR;
     error?: any;
   };
-
   BEGIN_CHARTS_REQUEST: {
     type: typeof BEGIN_CHARTS_REQUEST;
     cdrVersionId: number;
@@ -357,6 +358,10 @@ export interface ActionTypes {
   RESET_STORE: {
     type: typeof RESET_STORE;
   };
+  CLEAR_STORE: {
+    type: typeof CLEAR_STORE;
+  };
+
 }
 
 export type RootAction =
@@ -371,10 +376,10 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_CRITERIA_REQUEST]
   | ActionTypes[typeof SET_CRITERIA_SEARCH]
   | ActionTypes[typeof BEGIN_AUTOCOMPLETE_REQUEST]
+  | ActionTypes[typeof CANCEL_AUTOCOMPLETE_REQUEST]
   | ActionTypes[typeof BEGIN_INGREDIENT_REQUEST]
   | ActionTypes[typeof BEGIN_CHILDREN_REQUEST]
   | ActionTypes[typeof LOAD_AUTOCOMPLETE_OPTIONS]
-  | ActionTypes[typeof CLEAR_AUTOCOMPLETE_OPTIONS]
   | ActionTypes[typeof LOAD_INGREDIENT_LIST]
   | ActionTypes[typeof LOAD_CHILDREN_LIST]
   | ActionTypes[typeof SELECT_CHILDREN_LIST]
@@ -421,4 +426,5 @@ export type RootAction =
 
   | ActionTypes[typeof LOAD_ENTITIES]
   | ActionTypes[typeof RESET_STORE]
+  | ActionTypes[typeof CLEAR_STORE]
   ;

@@ -17,13 +17,12 @@ export class ComboChartComponent {
   readonly codeMap = {
     'M': 'Male',
     'F': 'Female',
+    'No matching concept': 'Unknown'
   };
 
   readonly axis = {
     x: {
       show: true,
-      label: 'Participant Share By Race',
-      showLabel: true,
       percentFormatter: tick => `${tick}%`
     },
     y: {
@@ -60,7 +59,6 @@ export class ComboChartComponent {
       .valueSeq()
       .sort((a, b) => a.name > b.name ? 1 : -1)
       .toArray();
-
     window.dispatchEvent(new Event('resize'));
   }
 

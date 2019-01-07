@@ -11,12 +11,14 @@ import {IconsModule} from 'app/icons/icons.module';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {CohortEditModalComponent} from 'app/views/cohort-edit-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
+import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -24,7 +26,9 @@ import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {
   BugReportService,
   CohortsService,
+  ConceptSetsService,
   ProfileService,
+  UserMetricsService,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
@@ -32,6 +36,7 @@ import {
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
+import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
@@ -97,21 +102,25 @@ describe('NotebookListComponent', () => {
       ],
       declarations: [
         BugReportComponent,
-        CohortEditModalComponent,
+        EditModalComponent,
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
         NotebookListComponent,
         ResourceCardComponent,
         RenameModalComponent,
+        ToolTipComponent,
+        TopBoxComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: CohortsService },
+        { provide: ConceptSetsService },
         { provide: SignInService, useValue: SignInService },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: UserMetricsService, useValue: new UserMetricsServiceStub()},
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
@@ -145,7 +154,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('button#rename')));
     updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile.ipynb');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
     expect(fixture.componentInstance.resourceList[0].notebook.name)
         .toEqual('testMockFile.ipynb');
   }));
@@ -163,7 +172,7 @@ describe('NotebookListComponent', () => {
     expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
     simulateClick(fixture, de.query(By.css('.close')));
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile.ipynb');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile');
   }));
 
   it('displays correct information when notebook cloned', fakeAsync(() => {
@@ -176,7 +185,7 @@ describe('NotebookListComponent', () => {
     tick();
     updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone.ipynb');
+    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
         .toContain('mockFile Clone.ipynb');
   }));

@@ -10,6 +10,14 @@
               [(ngModel)]="bugReport.shortDescription">
         </div>
         <div class="form-section">
+          <label>Bug Type:</label>
+          <select id="bug-report-type" type="text" class="input" name="bug-type"
+                  [(ngModel)]="bugReport.bugType">
+            <option [value]="BugReportType.APPLICATION">Workbench Application</option>
+            <option [value]="BugReportType.DATA">Data Quality</option>
+          </select>
+        </div>
+        <div class="form-section">
           <label>How to Reproduce:</label>
           <textarea id="bug-report-repro-steps" class="input" name="repro-steps"
               [(ngModel)]="bugReport.reproSteps">
@@ -19,7 +27,9 @@
           <clr-checkbox id="bug-report-notebook-logs" class="notebook-logs" name="notebook-logs"
               [(ngModel)]="bugReport.includeNotebookLogs">
           </clr-checkbox>
-          <label>Attach notebook logs?</label>
+          <div>
+            <label class="notebook-logs-label">Attach notebook logs?</label>
+          </div>
         </div>
         <div class="form-section">
           <label>Contact Email:</label>
@@ -34,7 +44,11 @@
         <clr-icon style="margin-left: 1rem;" shape="times" (click)="sendBugReportError = false"></clr-icon>
       </div>
       <button type="button" class="btn btn-outline" (click)="reporting=false">Cancel</button>
-      <button id="send-bug-report" type="button" class="btn btn-primary" (click)="send()">Send</button>
+      <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
+        <button id="send-bug-report" type="button" class="btn btn-primary"
+            [clrLoading]="submitting" [disabled]="submitting || bugReportFieldsEmpty" (click)="send()">Send</button>
+        <span *ngIf="bugReportFieldsEmpty" class="tooltip-content">Description and Reproduction steps are necessary to submit a bug report.</span>
+      </div>
     </div>
   </clr-modal>
 </div>

@@ -56,8 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.junit.Assert.fail;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class,QueryBuilderFactory.class, BigQueryService.class,
-  ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class})
+@Import({TestJpaConfig.class})
 @ComponentScan(basePackages = {"org.pmiops.workbench.cohortreview.*","org.pmiops.workbench.cohortbuilder.*"})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
@@ -122,14 +121,17 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     BigQueryService.class,
     ReviewQueryBuilder.class,
     CohortService.class,
-    ConceptSetService.class,
     ParticipantCounter.class,
     DomainLookupService.class,
-    CohortQueryBuilder.class
+    CohortQueryBuilder.class,
+    QueryBuilderFactory.class,
+    ParticipantCounter.class,
+    DomainLookupService.class
   })
   @MockBean({
     FireCloudService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    ConceptSetService.class
   })
   static class Configuration {
     @Bean
@@ -1209,7 +1211,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 20.");
+        .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
     }
   }
 
@@ -1231,7 +1233,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 20.");
+        .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
     }
   }
 
@@ -1252,7 +1254,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 20.");
+        .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
     }
   }
 
@@ -1273,7 +1275,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       //Success
       assertThat(bre.getMessage())
-        .isEqualTo("Please provide a chart limit between 1 and 20.");
+        .isEqualTo("Bad Request: Please provide a chart limit between 1 and 20.");
     }
   }
 
@@ -1288,9 +1290,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       DomainType.LAB.name(),
       10).getBody();
     assertEquals(3, response.getItems().size());
-    assertEquals(new CohortChartData().name("name9").conceptId(9L).count(11L), response.getItems().get(0));
-    assertEquals(new CohortChartData().name("name10").conceptId(10L).count(3L), response.getItems().get(1));
-    assertEquals(new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(2));
+    assertEquals(new CohortChartData().name("name10").conceptId(10L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(1));
+    assertEquals(new CohortChartData().name("name9").conceptId(9L).count(1L), response.getItems().get(2));
   }
 
   @Test
@@ -1304,7 +1306,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       DomainType.DRUG.name(),
       10).getBody();
     assertEquals(1, response.getItems().size());
-    assertEquals(new CohortChartData().name("name11").conceptId(11L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name11").conceptId(1L).count(1L), response.getItems().get(0));
   }
 
   @Test

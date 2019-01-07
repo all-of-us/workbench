@@ -15,12 +15,15 @@ import {CodeDropdownComponent} from './code-dropdown/code-dropdown.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
+import { InactiveListComponent } from './inactive-list/inactive-list.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
 import {NodeInfoComponent} from './node-info/node-info.component';
 import {NodeComponent} from './node/node.component';
+import {OptionInfoComponent} from './option-info/option-info.component';
 import {OverviewComponent} from './overview/overview.component';
+import {SearchBarComponent} from './search-bar/search-bar.component';
 import {SearchGroupItemComponent} from './search-group-item/search-group-item.component';
 import {SearchGroupListComponent} from './search-group-list/search-group-list.component';
 import {SearchGroupSelectComponent} from './search-group-select/search-group-select.component';
@@ -31,8 +34,6 @@ import {TreeComponent} from './tree/tree.component';
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
-import {SearchBarComponent} from './search-bar/search-bar.component';
-import { InactiveListComponent } from './inactive-list/inactive-list.component';
 
 
 const routes: Routes = [{
@@ -63,12 +64,15 @@ const routes: Routes = [{
     CodeDropdownComponent,
     DemographicsComponent,
     GenderChartComponent,
+    InactiveListComponent,
     ModalComponent,
     ModifierPageComponent,
     MultiSelectComponent,
     NodeComponent,
     NodeInfoComponent,
+    OptionInfoComponent,
     OverviewComponent,
+    SearchBarComponent,
     SearchGroupComponent,
     SearchGroupItemComponent,
     SearchGroupListComponent,
@@ -77,8 +81,6 @@ const routes: Routes = [{
     TreeComponent,
     AttributesPageComponent,
     SafeHtmlPipe,
-    SearchBarComponent,
-    InactiveListComponent,
   ],
   providers: [
     CohortSearchActions,

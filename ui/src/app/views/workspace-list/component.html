@@ -1,7 +1,9 @@
 <div class="area-block">
   <app-top-box>
     <div class="padding-wrapper">
-      <h3 class="table-header-descriptor">Your Workspaces</h3>
+      <h3 class="table-header-descriptor">
+        Workspaces
+      </h3>
       <div class="alert alert-warning" *ngIf="twoFactorBannerEnabled">
         <div class="alert-items" style="width: 24rem;">
           <div class="alert-item static">
@@ -100,16 +102,15 @@
                 Rejected
               </div>
             </ng-template>
-            <ng-template #permissions>
-              <div style="color: #8bc990" *ngIf="workspacePermissions.isReadOnly">
-                <clr-icon shape="search" style="fill: #8bc990"></clr-icon>
-                Read Only
-              </div>
-            </ng-template>
           </div>
-          <div class="date-text">
-            Last Changed:<br>
-            {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
+          <div style="display:flex; flex-direction:row; justify-content:space-between; align-items:center">
+            <div class="date-text">
+              Last Changed:<br>
+              {{workspacePermissions.workspace.lastModifiedTime | date:'short'}}
+            </div>
+            <div class="permission-box {{workspacePermissions.accessLevel | lowercase}}-permission">
+              {{workspacePermissions.accessLevel}}
+            </div>
           </div>
           <!-- TODO: Add collaborator pictures. -->
           <!-- TODO: Add view of locked workspace when that functionality exists. -->

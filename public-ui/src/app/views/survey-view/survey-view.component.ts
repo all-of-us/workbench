@@ -29,7 +29,12 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   resultsComplete = false;
   private subscriptions: ISubscription[] = [];
   loading = false;
-  surveyPdfUrl = '/assets/surveys/AoU PPI_Basics_version_2018.06.04.docx';
+  surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
+  surveyName: string;
+  conceptCodeTooltip: any;
+  genderGraph: string;
+  binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
+    '1585820', '1585889', '1585890'];
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -53,6 +58,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
+      this.surveyPdfUrl = '/assets/surveys/' + survey.name.replace(' ', '_') + '.pdf';
     }
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
@@ -63,23 +69,22 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
-
+        this.surveyName = this.survey.name;
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
-          let didNotAnswerCount  = this.survey.countValue;
+          let didNotAnswerCount  = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
-
           }
           const result = q.countAnalysis.results[0];
           if (didNotAnswerCount < 0 ) { didNotAnswerCount = 0; }
           const notAnswerPercent = this.countPercentage(didNotAnswerCount);
           const didNotAnswerResult = {
             analysisId : result.analysisId,
-            countValue: didNotAnswerCount ,
+            countValue: didNotAnswerCount,
             countPercent: notAnswerPercent,
             stratum1: result.stratum1,
             stratum2: result.stratum2,
@@ -130,9 +135,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public countPercentage(countValue: number) {
     if (!countValue || countValue <= 0) { return 0; }
-    let percent: number = countValue / this.survey.countValue ;
-    percent = parseFloat(percent.toFixed(2));
-
+    let percent: number = countValue / this.survey.participantCount ;
+    percent = parseFloat(percent.toFixed(4));
     return percent * 100;
   }
 
@@ -202,6 +206,17 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
+  }
+
+  public selectSurveyGenderGraph(g) {
+      if (g === 'Gender Identity') {
+        this.genderGraph = 'GI';
+      } else {
+        this.genderGraph = 'BS';
+      }
+  }
+  public convertToNum(s) {
+    return Number(s);
   }
 
 }

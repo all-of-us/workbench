@@ -19,7 +19,8 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   ngOnChanges() {
     if (this.node.get('type') === TreeType[TreeType.ICD9]
       || this.node.get('type') === TreeType[TreeType.ICD10]
-      || this.node.get('type') === TreeType[TreeType.CPT]) {
+      || this.node.get('type') === TreeType[TreeType.CPT]
+      || this.node.get('type') === TreeType[TreeType.SNOMED]) {
         super.ngOnInit();
     }
   }
@@ -35,11 +36,11 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
   }
 
   get showDropDown() {
-    return !this.isEmpty && this.codes;
+    return !this.isEmpty && this.codes && this.node.get('type') !== TreeType[TreeType.SNOMED];
   }
 
   get isEmpty() {
-    return !this.loading && (!this.children || !this.children.size || this.error);
+    return !this.loading && (this.empty || this.error);
   }
 
   optionChange(flag) {

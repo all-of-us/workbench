@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.List;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.VocabularyCount;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-
-import java.util.List;
 
 public interface ConceptDao extends CrudRepository<Concept, Long> {
 
@@ -29,23 +29,53 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
 
     List<Concept> findByConceptName(String conceptName);
 
-    @Query(value = "select c.concept_id, " +
-      "c.concept_name, " +
-      "c.domain_id, " +
-      "c.vocabulary_id, " +
-      "c.concept_class_id, " +
-      "c.standard_concept, " +
-      "c.concept_code, " +
-      "c.count_value, " +
-      "c.source_count_value, " +
-      "c.prevalence " +
-      "from concept c " +
+    @Query(value = "select c.* from concept c " +
       "where c.vocabulary_id in ('Gender', 'Race', 'Ethnicity')",
       nativeQuery = true)
     List<Concept> findGenderRaceEthnicityFromConcept();
 
-    @Query(value = "select distinct c.conceptId from Concept c left join c.synonyms as cs " +
-            "where match(cs.conceptSynonymName,?1) > 0 or match(c.conceptName,?1) > 0")
-    List<Long> findConceptSynonyms(String query);
+    /**
+     * Return the number of standard concepts in each vocabulary for the specified domain matching the
+     * specified expression, matching concept name, synonym, ID, or code.
+     * @param matchExp SQL MATCH expression to match concept name or synonym
+     * @param domainId domain ID to use when filtering concepts
+     * @return per-vocabulary concept counts
+     */
+    @Query(value = "select c.vocabularyId as vocabularyId, count(distinct c.conceptId) as conceptCount from Concept c\n" +
+        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+        "c.standardConcept IN ('S', 'C') and\n" +
+        "c.domainId = ?2\n" +
+        "group by c.vocabularyId\n" +
+        "order by c.vocabularyId\n")
+    List<VocabularyCount> findVocabularyStandardConceptCounts(String matchExp, String domainId);
 
+    /**
+     * Return the number of concepts (standard or non-standard) in each vocabulary
+     * for the specified domain matching the specified expression, matching concept name, synonym,
+     * ID, or code.
+     * @param matchExp SQL MATCH expression to match concept name or synonym
+     * @param domainId domain ID to use when filtering concepts
+     * @return per-vocabulary concept counts
+     */
+    @Query(value = "select c.vocabularyId as vocabularyId, count(*) as conceptCount from Concept c\n" +
+        "where (c.countValue > 0 or c.sourceCountValue > 0) and\n" +
+        "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n" +
+        "c.domainId = ?2\n" +
+        "group by c.vocabularyId\n" +
+        "order by c.vocabularyId\n")
+    List<VocabularyCount> findVocabularyAllConceptCounts(String matchExp, String domainId);
+
+    @Query(value = "select distinct c1.* from concept_relationship cr " +
+            "join concept c1 on (cr.concept_id_2 = c1.concept_id " +
+            "and cr.concept_id_1 in (" +
+            "select distinct c.concept_id from criteria c\n" +
+            "where c.type = 'DRUG' " +
+            "and c.subtype in ('BRAND') " +
+            "and c.is_selectable = 1 " +
+            "and (upper(c.name) like upper(concat('%',?1,'%')) " +
+            "or upper(c.code) like upper(concat('%',?1,'%'))) " +
+            "order by c.name asc) " +
+            "and c1.concept_class_id = 'Ingredient') ", nativeQuery = true)
+    List<Concept> findDrugIngredientsByBrand(String query);
 }

@@ -1,73 +1,82 @@
-input.share, .sharing-buttons {
-  width: 10rem;
-  color: #565656;
-  border: 1px #565656 solid;
-  border-radius: 0.2rem;
-  font-size: 0.35rem;
-  height: 1.1rem;
-  text-transform: uppercase;
+.search-box {
+  height: 40px;
+  width: 100%;
+  padding: 7px 14px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
 }
 
-.sharing-buttons, .add-button {
-  width: auto;
-  font-size: 0.5rem;
+.search-box input {
+  width: 90%;
 }
 
-.permissions-button {
-  margin-top: 0.5rem;
-  color: #565656;
-  border: 1px solid #565656;
-  font-size: 0.45rem;
-  height: 1.1rem;
-  line-height: 0.5em;
+clr-icon {
+  height: 18px;
+  width: 18px;
 }
 
-.add-by-text-area, .removing-area {
-  display: inline-block;
-  padding-top: 1rem;
-  width: 18rem;
+.no-border {
+  border: none!important;
+  background: none!important;
 }
 
-.removing-area {
-  width: 22rem;
+.dropdown {
+  width: 100%;
+  margin-top: 0;
+  border-bottom: 1px solid gray;
+  padding-bottom: .5rem;
 }
 
-.removing-area .user-name, .user-email, .user-role {
-  font-weight: 300;
-  line-height: 0.8rem;
-  color: rgb(38, 34, 98);
+.dropdown.open {
+  overflow-y: visible;
 }
 
-.removing-area .user-name, .user-email {
+.dropdown-menu {
+  display: block;
+  max-height: 12rem;
+  min-height: 30px;
+  visibility: visible;
+  overflow-y: scroll;
+  max-width: 16rem;
+  width: 100%;
+  margin-top: .25rem;
+}
+
+.dropdown-item {
+  /*padding-top: .5rem;*/
+  height: 60px;
+}
+
+.info-icon {
+  color: #2691D0;
+}
+.user-name .user-email {
   margin-top: 0;
   padding-top: 0;
   font-size: 0.5rem;
+  height: 4.5%;
+  color: #4A4A4A;
+  font-family: Montserrat;
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .user-role {
+  line-height: 0.8rem;
   color: #565656;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 0.4rem
 }
 
-.user {
-  margin-bottom: 0.5rem;
-  overflow: hidden;
-  clear: both;
-}
-
 .collaborator-icon {
-  width: 22px;
-  margin-top: -3px;
+  margin: 0 0 0 4rem;
+  color: #2691D0;
+  cursor: pointer;
 }
 
-.collaborator, .collaborator-icon {
-  display: block;
-}
-
-.collaborator-icon {
-  float: left;
-  padding-right: 0.25rem;
+.roles {
+  width:6rem;
 }
 
 clr-dropdown {
@@ -94,27 +103,6 @@ clr-dropdown > button {
   padding: 0.4rem;
 }
 
-.sharing-area {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.adding-area {
-  flex: 0 0 auto;
-  border-right: 1px solid #979797;
-}
-
-.collaborator-label {
-  font-size: 0.65rem;
-  display: block;
-  margin: 0 0 0.5rem 0;
-  color: rgb(38, 34, 98);
-}
-
-.removing-area {
-  padding-left: 1rem;
-}
-
 .spinner-padded {
   padding-top: 1rem;
 }
@@ -130,3 +118,63 @@ clr-dropdown > button {
 .modal-title-text {
   margin-top: 0;
 }
+
+:host::ng-deep .modal-dialog {
+  width: 18rem;
+}
+
+.user-area {
+  max-height: 12rem;
+  overflow-y: scroll;
+}
+
+.info-icon {
+  cursor: pointer;
+  margin-left: 0.4rem;
+}
+
+.search-icon {
+  color: rgba(48,41,115,1);
+}
+
+.user {
+  display: flow-root;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.bordered {
+  border-bottom: 1px solid lightgray;
+}
+
+.roles select {
+  height: 25px;
+  width: 117px;
+  border: 1px solid #CCCCCC;
+  border-radius: 3px;
+  background-color: #FAFAFA;
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 9rem 0.1rem 0.1rem;
+  grid-gap: 10px;
+  align-items: center;
+  height: 6.38%;
+}
+
+.box {
+  border-radius: 5px;
+  padding-top: 0.2rem;
+  padding-left: 0.2rem;
+}
+
+.box.icon {
+  padding-left: 3rem;
+
+}
+
+.row {
+  margin-left: 0rem;
+}
+

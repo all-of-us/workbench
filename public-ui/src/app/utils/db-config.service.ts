@@ -15,15 +15,21 @@ export class DbConfigService {
   /* CONSTANTS */
   MALE_GENDER_ID = '8507';
   FEMALE_GENDER_ID = '8532';
-  OTHER_GENDER_ID = '8521';
+  // OTHER_GENDER_ID = '8521';
+  // Current data has 0 for other gender.
+  OTHER_GENDER_ID = '0';
+  INTERSEX_GENDER_ID = '1585848';
+  NONE_GENDER_ID = '1585849';
   PREGNANCY_CONCEPT_ID = '903120';
   WHEEL_CHAIR_CONCEPT_ID = '903111';
 
   COUNT_ANALYSIS_ID = 3000;
   GENDER_ANALYSIS_ID = 3101;
+  GENDER_IDENTITY_ANALYSIS_ID = 3107;
   AGE_ANALYSIS_ID = 3102;
   SURVEY_COUNT_ANALYSIS_ID = 3110;
   SURVEY_GENDER_ANALYSIS_ID = 3111;
+  SURVEY_GENDER_IDENTITY_ANALYSIS_ID = 3113;
   SURVEY_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_AGE_ANALYSIS_ID = 3112;
   MEASUREMENT_VALUE_ANALYSIS_ID = 1900;
@@ -34,7 +40,21 @@ export class DbConfigService {
 
   GENDER_COLORS = {
     '8507': '#8DC892',
-    '8532': '#6CAEE3'
+    '8532': '#6CAEE3',
+    '1585848': '#4259A5',
+    '1585849': '#252660',
+    '0': '#4259A5'
+  };
+
+  GENDER_IDENTITY_COLORS = {
+    '1585839': '#8DC892',
+    '1585840': '#6CAEE3',
+    '903070': '#252660',
+    '903096': '#252660',
+    '903079': '#80C4EC',
+    '1585841': '#4259A5',
+    '1585842': '#80C4EC',
+    '1585843': '#8DC892'
   };
 
   /* Age colors -- for now we just use one color pending design */
@@ -66,7 +86,10 @@ export class DbConfigService {
     'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
     'font-weight': '300', 'textOutline': 'none'
   };
-
+  GI_DATA_LABEL_STYLE = {
+    'color': 'black', 'font-family': 'Gotham HTF',	'font-size': '14px',
+      'font-weight': '300', 'textOutline': 'none'
+  };
 
   pmGroups: ConceptGroup[] = [];
   genderAnalysis: Analysis;
@@ -210,8 +233,8 @@ export class DbConfigService {
     const analysis: Analysis = concept.analyses.genderAnalysis;
     let male = null;
     let female = null;
-    const others = [];
-    let otherCount = 0;
+    let intersex = null;
+    let none = null;
 
     // No need to do anything if only one gender
     if (analysis.results.length <= 1) {
@@ -223,25 +246,18 @@ export class DbConfigService {
         male = g;
       } else if (g.stratum2 === this.FEMALE_GENDER_ID) {
         female = g;
-      } else {
-        otherCount += g.countValue;
+      } else if (g.stratum2 === this.INTERSEX_GENDER_ID) {
+        intersex = g;
+      } else if (g.stratum2 === this.NONE_GENDER_ID) {
+        none = g;
       }
     }
 
     // Order genders how we want to display  Male, Female , Others
     if (male) { results.push(male); }
     if (female) { results.push(female); }
-    if (otherCount > 0) {
-      // Make Other results,
-      const otherResult: AchillesResult =  {
-        analysisId: male.analysisId,
-        stratum1: male.stratum1,
-        stratum2: this.OTHER_GENDER_ID,
-        analysisStratumName: 'Other',
-        countValue: otherCount
-      };
-      results.push(otherResult);
-    }
+    if (intersex) { results.push(intersex); }
+    if (none) { results.push(none); }
     analysis.results = results;
   }
 

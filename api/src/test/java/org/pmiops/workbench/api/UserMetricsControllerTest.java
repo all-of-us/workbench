@@ -2,28 +2,36 @@ package org.pmiops.workbench.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.google.cloud.storage.BlobId;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
+import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -31,18 +39,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserMetricsControllerTest {
 
+  @Mock
+  private CloudStorageService cloudStorageService;
   @Mock
   private UserRecentResourceService userRecentResourceService;
   @Mock
@@ -55,71 +59,60 @@ public class UserMetricsControllerTest {
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
   private FakeClock clock = new FakeClock(NOW);
-  private static final long WORKSPACE_1_ID = 1l;
-  private static final long WORKSPACE_2_ID = 2l;
-  private static final long COHORT_ID = 1l;
-  private static final long USER_ID = 123l;
-  private static final String WORKSPACE_NAMESPACE = "workspaceNamespace";
-  private static final String FIRECLOUD_WORKSPACE_ID = "Firecloudname";
+
+  private User user;
+  private UserRecentResource resource1;
+  private UserRecentResource resource2;
+  private Workspace workspace2;
 
   @Before
   public void setUp() {
-    User user = new User();
-    user.setUserId(USER_ID);
-    List<UserRecentResource> userRecentResources = new ArrayList<>();
-
-    UserRecentResource resource1 = new UserRecentResource();
-    resource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
-    resource1.setCohort(null);
-    resource1.setLastAccessDate(new Timestamp(clock.millis()));
-    resource1.setUserId(USER_ID);
-    resource1.setWorkspaceId(WORKSPACE_1_ID);
-
-
-    userRecentResources.add(resource1);
+    user = new User();
+    user.setUserId(123L);
 
     Cohort cohort = new Cohort();
     cohort.setName("Cohort Name");
-    cohort.setCohortId(COHORT_ID);
+    cohort.setCohortId(1L);
     cohort.setDescription("Cohort description");
     cohort.setLastModifiedTime(new Timestamp(clock.millis()));
     cohort.setCreationTime(new Timestamp(clock.millis()));
 
-    UserRecentResource resource2 = new UserRecentResource();
+    Workspace workspace1 = new Workspace();
+    workspace1.setWorkspaceId(1L);
+    workspace1.setWorkspaceNamespace("workspaceNamespace1");
+    workspace1.setFirecloudName("firecloudname1");
+
+    workspace2 = new Workspace();
+    workspace2.setWorkspaceId(2L);
+    workspace2.setWorkspaceNamespace("workspaceNamespace2");
+    workspace2.setFirecloudName("firecloudName2");
+
+    resource1 = new UserRecentResource();
+    resource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
+    resource1.setCohort(null);
+    resource1.setLastAccessDate(new Timestamp(clock.millis()));
+    resource1.setUserId(user.getUserId());
+    resource1.setWorkspaceId(workspace1.getWorkspaceId());
+
+    resource2 = new UserRecentResource();
     resource2.setNotebookName(null);
     resource2.setCohort(cohort);
     resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
-    resource2.setUserId(USER_ID);
-    resource2.setWorkspaceId(WORKSPACE_2_ID);
-
-    userRecentResources.add(resource2);
+    resource2.setUserId(user.getUserId());
+    resource2.setWorkspaceId(workspace2.getWorkspaceId());
 
     UserRecentResource resource3 = new UserRecentResource();
     resource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
     resource3.setCohort(null);
     resource3.setLastAccessDate(new Timestamp(clock.millis() - 10000));
-    resource3.setUserId(USER_ID);
-    resource3.setWorkspaceId(WORKSPACE_2_ID);
-
-    userRecentResources.add(resource3);
-
-    Workspace workspace = new Workspace();
-    workspace.setWorkspaceId(WORKSPACE_1_ID);
-    workspace.setWorkspaceNamespace("workspaceNamespace1");
-    workspace.setFirecloudName("Firecloudname1");
+    resource3.setUserId(user.getUserId());
+    resource3.setWorkspaceId(workspace2.getWorkspaceId());
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace = new org.pmiops.workbench.firecloud.model.Workspace();
-    fcWorkspace.setNamespace("Firecloudname1");
+    fcWorkspace.setNamespace(workspace1.getFirecloudName());
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace2 = new org.pmiops.workbench.firecloud.model.Workspace();
-    fcWorkspace.setNamespace("Firecloudname2");
-
-
-
-    Workspace workspace2 = new Workspace();
-    workspace2.setWorkspaceId(WORKSPACE_2_ID);
-    workspace2.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setFirecloudName(FIRECLOUD_WORKSPACE_ID);
+    fcWorkspace.setNamespace(workspace2.getFirecloudName());
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
     workspaceResponse.setAccessLevel("OWNER");
@@ -130,29 +123,125 @@ public class UserMetricsControllerTest {
     workspaceResponse2.setWorkspace(fcWorkspace2);
 
     when(userProvider.get()).thenReturn(user);
-    when(userRecentResourceService.findAllResourcesByUser(USER_ID))
-        .thenReturn(userRecentResources);
-    when(workspaceService.findByWorkspaceId(WORKSPACE_1_ID)).thenReturn(workspace);
 
-    when(workspaceService.findByWorkspaceId(WORKSPACE_2_ID)).thenReturn(workspace2);
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Arrays.asList(resource1, resource2, resource3));
 
-    when(workspaceService.getRequired(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID))
+    when(workspaceService.findByWorkspaceId(workspace1.getWorkspaceId()))
+        .thenReturn(workspace1);
+
+    when(workspaceService.findByWorkspaceId(workspace2.getWorkspaceId()))
         .thenReturn(workspace2);
 
-    when(fireCloudService.getWorkspace("workspaceNamespace1", "Firecloudname1"))
+    when(workspaceService.getRequired(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
+        .thenReturn(workspace2);
+
+    when(fireCloudService.getWorkspace(workspace1.getWorkspaceNamespace(), workspace1.getFirecloudName()))
         .thenReturn(workspaceResponse);
 
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID))
+    when(fireCloudService.getWorkspace(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspaceResponse2);
+
+    when(cloudStorageService.blobsExist(anyListOf(BlobId.class))).then((i) -> {
+      List<BlobId> ids = i.getArgumentAt(0, List.class);
+      if (ids.contains(null)) {
+        throw new NullPointerException();
+      }
+      return ImmutableSet.copyOf(ids);
+    });
 
     userMetricsController = new UserMetricsController(
         userProvider,
         userRecentResourceService,
         workspaceService,
         fireCloudService,
+        cloudStorageService,
         clock);
     userMetricsController.setDistinctWorkspaceLimit(5);
 
+  }
+
+  @Test
+  public void testGetUserRecentResourceFromRawBucket() {
+    resource1.setNotebookName("gs://bucketFile/notebook.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
+  }
+
+  @Test
+  public void testGetUserRecentResourceWithDuplicatedNameInPath() {
+    resource1.setNotebookName("gs://bucketFile/nb.ipynb/intermediate/nb.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/nb.ipynb/intermediate/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "nb.ipynb");
+  }
+
+  @Test
+  public void testGetUserRecentResourceWithSpacesInPath() {
+    resource1.setNotebookName("gs://bucketFile/note books/My favorite notebook.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/note books/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "My favorite notebook.ipynb");
+  }
+
+  @Test
+  public void testGetUserRecentResourceInvalidURINotebookPath() {
+    resource1.setNotebookName("my local notebook directory: notebook.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.size(), 0);
+  }
+
+  @Test
+  public void testGetUserRecentResourceNotebookPathEndsWithSlash() {
+    resource1.setNotebookName("gs://bucketFile/notebooks/notebook.ipynb/");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(Collections.singletonList(resource1));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertNotNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/notebook.ipynb/");
+    assertEquals(recentResources.get(0).getNotebook().getName(), "");
+  }
+
+  @Test
+  public void testGetUserRecentResourceNonexistentNotebook() {
+    resource1.setNotebookName("gs://bkt/notebooks/notebook.ipynb");
+    resource2.setCohort(null);
+    resource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
+    when(userRecentResourceService.findAllResourcesByUser(user.getUserId()))
+        .thenReturn(ImmutableList.of(resource1, resource2));
+    when(cloudStorageService.blobsExist(anyListOf(BlobId.class))).thenReturn(
+        ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
+
+    RecentResourceResponse recentResources = userMetricsController
+        .getUserRecentResources().getBody();
+    assertNotNull(recentResources);
+    assertEquals(recentResources.size(), 1);
+    assertNotNull(recentResources.get(0).getNotebook());
+    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
   }
 
   @Test
@@ -184,9 +273,9 @@ public class UserMetricsControllerTest {
   @Test
   public void testDeleteResource() {
     RecentResourceRequest request = new RecentResourceRequest();
-    request.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
-    userMetricsController.deleteRecentResource(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID, request);
-    verify(userRecentResourceService).deleteNotebookEntry(WORKSPACE_2_ID, USER_ID, "gs://bucketFile/notebooks/notebook1.ipynb");
+    request.setNotebookName(resource1.getNotebookName());
+    userMetricsController.deleteRecentResource(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName(), request);
+    verify(userRecentResourceService).deleteNotebookEntry(workspace2.getWorkspaceId(), user.getUserId(), resource1.getNotebookName());
   }
 
   @Test
@@ -194,26 +283,25 @@ public class UserMetricsControllerTest {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     UserRecentResource mockUserRecentResource = new UserRecentResource();
     mockUserRecentResource.setCohort(null);
-    mockUserRecentResource.setWorkspaceId(WORKSPACE_2_ID);
-    mockUserRecentResource.setUserId(USER_ID);
+    mockUserRecentResource.setWorkspaceId(workspace2.getWorkspaceId());
+    mockUserRecentResource.setUserId(user.getUserId());
     mockUserRecentResource.setNotebookName("gs://newBucket/notebooks/notebook.ipynb");
     mockUserRecentResource.setLastAccessDate(now);
-    when(userRecentResourceService.updateNotebookEntry(WORKSPACE_2_ID, USER_ID, "gs://newBucket/notebooks/notebook.ipynb", now))
+    when(userRecentResourceService.updateNotebookEntry(workspace2.getWorkspaceId(), user.getUserId(), "gs://newBucket/notebooks/notebook.ipynb", now))
         .thenReturn(mockUserRecentResource);
 
     RecentResourceRequest request = new RecentResourceRequest();
     request.setNotebookName("gs://newBucket/notebooks/notebook.ipynb");
 
     RecentResource addedEntry = userMetricsController
-        .updateRecentResource(WORKSPACE_NAMESPACE, FIRECLOUD_WORKSPACE_ID, request)
+        .updateRecentResource(workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName(), request)
         .getBody();
 
     assertNotNull(addedEntry);
-    assertEquals((long) addedEntry.getWorkspaceId(), WORKSPACE_2_ID);
+    assertEquals((long) addedEntry.getWorkspaceId(), workspace2.getWorkspaceId());
     assertNull(addedEntry.getCohort());
     assertNotNull(addedEntry.getNotebook());
     assertEquals(addedEntry.getNotebook().getName(), "notebook.ipynb");
     assertEquals(addedEntry.getNotebook().getPath(), "gs://newBucket/notebooks/");
   }
 }
-

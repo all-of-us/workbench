@@ -7,3 +7,12 @@
 .white-card-box.top-stat {
     padding: 1rem;
 }
+.card-view {
+    margin-top: .5rem;
+}
+.flex-xs-middle.code-tooltip {
+    display: inline;
+}
+.hand-cursor {
+    cursor: pointer;
+}

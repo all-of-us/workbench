@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -240,6 +241,32 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
+  private Set<Long> getConceptIds(Workspace workspace, TableQuery tableQuery) {
+    String conceptSetName = tableQuery.getConceptSetName();
+    if (conceptSetName != null) {
+      ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
+          workspace.getWorkspaceId());
+      if (conceptSet == null) {
+        throw new NotFoundException(
+            String.format("Couldn't find concept set with name %s in workspace %s/%s",
+                conceptSetName, workspace.getWorkspaceNamespace(), workspace.getWorkspaceId()));
+      }
+      String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
+      if (tableName == null) {
+        throw new ServerErrorException("Couldn't find table for domain: " +
+            conceptSet.getDomainEnum());
+      }
+      if (!tableName.equals(tableQuery.getTableName())) {
+        throw new BadRequestException(
+            String.format("Can't use concept set for domain %s with table %s",
+                conceptSet.getDomainEnum(),
+                tableQuery.getTableName()));
+      }
+      return conceptSet.getConceptIds();
+    }
+    return null;
+  }
+
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
       String workspaceId, MaterializeCohortRequest request) {
@@ -279,28 +306,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     Set<Long> conceptIds = null;
     if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
-      String conceptSetName = request.getFieldSet().getTableQuery().getConceptSetName();
-      if (conceptSetName != null) {
-        ConceptSet conceptSet = conceptSetDao.findConceptSetByNameAndWorkspaceId(conceptSetName,
-            workspace.getWorkspaceId());
-        if (conceptSet == null) {
-          throw new NotFoundException(
-              String.format("Couldn't find concept set with name %s in workspace %s/%s",
-                 conceptSetName, workspaceNamespace, workspaceId));
-        }
-        String tableName = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
-        if (tableName == null) {
-          throw new ServerErrorException("Couldn't find table for domain: " +
-              conceptSet.getDomainEnum());
-        }
-        if (tableName != request.getFieldSet().getTableQuery().getTableName()) {
-          throw new BadRequestException(
-              String.format("Can't use concept set for domain %s with table %s",
-                  conceptSet.getDomainEnum(),
-                  request.getFieldSet().getTableQuery().getTableName()));
-        }
-        conceptIds = conceptSet.getConceptIds();
-      }
+      conceptIds = getConceptIds(workspace, request.getFieldSet().getTableQuery());
     }
 
     Integer pageSize = request.getPageSize();
@@ -322,15 +328,70 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(String workspaceNamespace, String workspaceId,
       DataTableSpecification request) {
-    // TODO: implement this
-    return null;
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+      cdrVersionService.setCdrVersion(cdrVersion);
+    }
+    String cohortSpec;
+    CohortReview cohortReview = null;
+    if (request.getCohortName() != null) {
+      org.pmiops.workbench.db.model.Cohort cohort =
+          cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+      if (cohort == null) {
+        throw new NotFoundException(
+            String.format("Couldn't find cohort with name %s in workspace %s/%s",
+                request.getCohortName(), workspaceNamespace, workspaceId));
+      }
+      cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
+          cdrVersion.getCdrVersionId());
+      cohortSpec = cohort.getCriteria();
+    } else if (request.getCohortSpec() != null) {
+      cohortSpec = request.getCohortSpec();
+      if (request.getStatusFilter() != null) {
+        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+      }
+    } else {
+      throw new BadRequestException("Must specify either cohortName or cohortSpec");
+    }
+    Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());
+    CdrQuery query = cohortMaterializationService.getCdrQuery(cohortSpec, request, cohortReview, conceptIds);
+    return ResponseEntity.ok(query);
   }
 
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(String workspaceNamespace,
       String workspaceId, CohortAnnotationsRequest request) {
-    // TODO: implement this
-    return null;
+    Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CdrVersion cdrVersion = workspace.getCdrVersion();
+    if (request.getCdrVersionName() != null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
+        throw new NotFoundException(String.format("Couldn't find CDR version with name %s",
+            request.getCdrVersionName()));
+      }
+    }
+    org.pmiops.workbench.db.model.Cohort cohort =
+        cohortDao.findCohortByNameAndWorkspaceId(request.getCohortName(), workspace.getWorkspaceId());
+    if (cohort == null) {
+      throw new NotFoundException(
+          String.format("Couldn't find cohort with name %s in workspace %s/%s",
+              request.getCohortName(), workspaceNamespace, workspaceId));
+    }
+    CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohort.getCohortId(),
+          cdrVersion.getCdrVersionId());
+    if (cohortReview == null) {
+      return ResponseEntity.ok(new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
+    }
+    return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(String workspaceNamespace,

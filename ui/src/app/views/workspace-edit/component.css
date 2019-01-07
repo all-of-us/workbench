@@ -1,5 +1,5 @@
 .page-header {
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
   font-size: 20px;
   color: #262262;
@@ -13,10 +13,6 @@
 .cdr-version-dropdown:disabled {
   /* Clarity's dropdown and disabled button styles conflict, override here. */
   cursor: not-allowed;
-}
-
-.cdr-version-item {
-  width: 300px;
 }
 
 .text-label {
@@ -34,8 +30,9 @@
   width: 100%;
 }
 
-.name-area {
+.name-area, .cdr-version-dropdown {
   margin-right: 20px;
+  margin-bottom: 5px;
 }
 
 .checkbox-group {
@@ -62,7 +59,7 @@
   margin-bottom: 0.6rem;
   color: #262262;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 19px;
 }
 
@@ -76,7 +73,7 @@
   padding-bottom: 0.6rem;
   color: #333333;
   font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 30px;
 }
 
@@ -112,7 +109,7 @@
 
 .section-header {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
   color: #262262;
 }
@@ -120,14 +117,14 @@
 .section-sub-header {
   color: #4A4A4A;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
 }
 
 .section-text {
   font-size: 13px;
   color: #4A4A4A;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 24px;
 }
 
@@ -163,14 +160,14 @@ h3 {
 .data-use-label {
   color: #262262;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 24px;
 }
 
 .required-text {
   font-size: 13px;
   font-style: italic;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 16px;
   color: #4A4A4A;
 }
@@ -178,6 +175,7 @@ h3 {
 .tooltip {
   position: relative;
   display: inline-block;
+  width: 12rem;
 }
 
 .tooltip-content-wrapper {
@@ -210,4 +208,8 @@ h3 {
   border-width: 5px;
   border-style: solid;
   border-color: transparent black transparent transparent;
+}
+
+:host ::ng-deep .dropdown-menu {
+  width: 12rem;
 }

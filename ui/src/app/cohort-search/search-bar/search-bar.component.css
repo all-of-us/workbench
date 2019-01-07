@@ -11,7 +11,7 @@ clr-icon {
 }
 input {
     border: 0;
-    width: 70%;
+    width: 90%;
 }
 .btn.btn-outline {
     float: right;
@@ -39,16 +39,23 @@ input {
 }
 .dropdown-menu {
     display: block;
+    width: 100%;
+    max-width: none;
     max-height: 15rem;
     min-height: 30px;
     overflow-y: auto;
 }
-.dropdown-item {
-    height: 25px;
-    line-height: 0px;
+.dropdown-menu.overflow {
+  overflow-y: visible;
 }
-.search-keyword {
+
+::ng-deep .search-keyword {
     color: #659F3D;
     font-weight: bolder;
     background-color: rgba(101,159,61,0.2);
+}
+.match-container {
+    color: #565656;
+    font-weight: bold;
+    padding-top: 0.3rem;
 }

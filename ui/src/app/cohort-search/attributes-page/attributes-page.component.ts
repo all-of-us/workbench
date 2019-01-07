@@ -10,6 +10,7 @@ import {
   CohortSearchActions,
   isAttributeLoading,
   nodeAttributes,
+  previewError,
 } from '../redux';
 
 import {Operator, TreeSubType, TreeType} from 'generated';
@@ -26,6 +27,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   @select(attributesPreviewStatus) preview$;
   @select(isAttributeLoading) loading$;
   @select(nodeAttributes) node$;
+  @select(previewError) error$;
   node: Map<any, any>;
   units = PM_UNITS;
   attrs = {EXISTS: false, NUM: [], CAT: []};
@@ -42,6 +44,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   selectedCode: any;
   sysOption: any;
   diaOption: any;
+  resetDisable = false;
   options = [
     {value: 'EQUAL', name: 'Equals', code: '01'},
     {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', code: '02'},
@@ -104,11 +107,13 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
+    this.resetDisable = true;
     this.selectedCode = 'Any';
     this.preview = this.preview.set('count', this.node.get('count'));
   }
 
   selectChange(index: number, option: any) {
+    this.resetDisable = true;
     this.attrs.NUM[index].operator = option.value;
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -182,6 +187,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.preview = Map();
     this.rangeAlert = false;
     this.attrs.EXISTS = false;
+    this.resetDisable = false;
     this.attrs.NUM.forEach(num => {
       num.operator = null;
       num.operands = [null];

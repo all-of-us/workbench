@@ -1,10 +1,12 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
 import {TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaSubtype,
+  activeCriteriaType,
   autocompleteError,
   autocompleteOptions,
   CohortSearchActions,
@@ -14,7 +16,7 @@ import {
   subtreeSelected,
 } from '../redux';
 
-import {highlightMatches} from '../utils';
+const trigger = 2;
 
 @Component({
   selector: 'app-search-bar',
@@ -23,9 +25,10 @@ import {highlightMatches} from '../utils';
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
   @select(activeCriteriaSubtype) subtype$: Observable<string>;
+  @select(activeCriteriaType) type$: Observable<string>;
   @select(subtreeSelected) selected$: Observable<any>;
   @Input() _type;
-  searchTerm = '';
+  searchTerm: FormControl = new FormControl('');
   typedTerm: string;
   options = [];
   multiples: any;
@@ -68,7 +71,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const optionsSub = this.ngRedux
       .select(autocompleteOptions())
       .subscribe(options => {
-        if (this.searchTerm.length >= 4) {
+        if (this.triggerSearch) {
           this.options = [];
           this.multiples = {};
           const optionNames = [];
@@ -77,7 +80,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               this.highlightedOption = null;
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
-                option.displayName = highlightMatches([this.searchTerm], option.name);
                 this.options.push(option);
               } else {
                 if (this.multiples[option.name]) {
@@ -88,8 +90,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.noResults = !this.optionSelected
-            && !this.options.length;
+          this.noResults = !this.optionSelected && !this.options.length;
         }
       });
 
@@ -116,10 +117,29 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .filter(selectedIds => !!selectedIds)
       .subscribe(selectedIds => this.numMatches = selectedIds.length);
 
+    const typeSub = this.type$
+      .subscribe(subtype => {
+        this.searchTerm.setValue('');
+      });
+
     const subtypeSub = this.subtype$
       .subscribe(subtype => {
-        this.searchTerm = '';
         this.subtype = subtype;
+      });
+
+    const inputSub = this.searchTerm.valueChanges
+      .debounceTime(300)
+      .distinctUntilChanged()
+      .subscribe( value => {
+        if (value.length >= trigger) {
+          this.inputChange();
+        } else {
+          if (!this.optionSelected) {
+            this.actions.setCriteriaSearchTerms([]);
+          }
+          this.options = [];
+          this.noResults = false;
+        }
       });
 
     this.subscription = errorSub;
@@ -127,7 +147,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.subscription.add(optionsSub);
     this.subscription.add(ingredientSub);
     this.subscription.add(subtreeSelectSub);
+    this.subscription.add(typeSub);
     this.subscription.add(subtypeSub);
+    this.subscription.add(inputSub);
   }
 
   ngOnDestroy() {
@@ -135,47 +157,48 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  inputChange(newVal: string) {
-    this.typedTerm = newVal;
+  inputChange() {
+    this.typedTerm = this.searchTerm.value;
     if (this._type === TreeType[TreeType.VISIT] || this._type === TreeType[TreeType.PM]) {
-      if (newVal.length > 2) {
-        this.actions.setCriteriaSearchTerms([newVal]);
-      } else {
-        this.actions.setCriteriaSearchTerms([]);
-      }
+      this.actions.setCriteriaSearchTerms([this.searchTerm.value]);
     } else {
       this.optionSelected = false;
       this.ingredientList = [];
       this.numMatches = 0;
       this.noResults = false;
-      if (newVal.length >= 4) {
-        const subtype = this.codes ? this.subtype : null;
-        this.actions.fetchAutocompleteOptions(this._type, subtype, newVal);
-      } else {
-        this.actions.setCriteriaSearchTerms([]);
-        this.options = [];
-      }
+      const subtype = this.codes ? this.subtype : null;
+      this.actions.fetchAutocompleteOptions(this._type, subtype, this.searchTerm.value);
     }
   }
 
+  get triggerSearch() {
+    return this.searchTerm.value.length >= trigger;
+  }
+
+  get showOverflow() {
+    return this.options && this.options.length <= 10;
+  }
+
   selectOption(option: any) {
-    this.optionSelected = true;
-    this.searchTerm = option.name;
-    if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
-      this.actions.fetchIngredientsForBrand(option.conceptId);
-    } else {
-      this.actions.setCriteriaSearchTerms([option.name]);
-      const ids = [option.id];
-      let path = option.path.split('.');
-      if (this.multiples[option.name]) {
-        this.multiples[option.name].forEach(multiple => {
-          ids.push(multiple.id);
-          path = path.concat(multiple.path.split('.'));
-        });
+    if (option) {
+      this.optionSelected = true;
+      this.searchTerm.reset('');
+      this.searchTerm.setValue(option.name, {emitEvent: false});
+      if (option.subtype === TreeSubType[TreeSubType.BRAND]) {
+        this.actions.fetchIngredientsForBrand(option.conceptId);
+      } else {
+        this.actions.setCriteriaSearchTerms([option.name]);
+        const ids = [option.id];
+        let path = option.path.split('.');
+        if (this.multiples[option.name]) {
+          this.multiples[option.name].forEach(multiple => {
+            ids.push(multiple.id);
+            path = path.concat(multiple.path.split('.'));
+          });
+        }
+        this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
       }
-      this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
     }
-    this.actions.clearAutocompleteOptions();
   }
 
   hideDropdown() {
@@ -185,20 +208,20 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   moveUp() {
     if (this.highlightedOption === 0) {
       this.highlightedOption = null;
-      this.searchTerm = this.typedTerm;
+      this.searchTerm.setValue(this.typedTerm, {emitEvent: false});
     } else if (this.highlightedOption > 0) {
       this.highlightedOption--;
-      this.searchTerm = this.options[this.highlightedOption].name;
+      this.searchTerm.setValue(this.options[this.highlightedOption].name, {emitEvent: false});
     }
   }
 
   moveDown() {
     if (this.highlightedOption === null) {
       this.highlightedOption = 0;
-      this.searchTerm = this.options[this.highlightedOption].name;
+      this.searchTerm.setValue(this.options[this.highlightedOption].name, {emitEvent: false});
     } else if ((this.highlightedOption + 1) < this.options.length) {
       this.highlightedOption++;
-      this.searchTerm = this.options[this.highlightedOption].name;
+      this.searchTerm.setValue(this.options[this.highlightedOption].name, {emitEvent: false});
     }
   }
 

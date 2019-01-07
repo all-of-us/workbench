@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.time.Instant;
@@ -91,7 +91,7 @@ public class AuditControllerTest {
 
   // TODO(RW-350): This stubbing is awful, improve this.
   private void stubBigQueryCalls(String projectId, String email, long total) {
-    QueryResult queryResult = mock(QueryResult.class);
+    TableResult queryResult = mock(TableResult.class);
     Iterable testIterable = new Iterable() {
         @Override
         public Iterator iterator() {

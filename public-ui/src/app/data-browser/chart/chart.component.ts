@@ -31,11 +31,25 @@ export class ChartComponent implements OnChanges {
 
   // Render new chart on changes
   ngOnChanges() {
-    if ((this.analysis && this.analysis.results.length) ||
+    if ((this.analysis && this.analysis.results && this.analysis.results.length) ||
       (this.concepts && this.concepts.length)) {
       // HC automatically redraws when changing chart options
       this.chartOptions = this.hcChartOptions();
     }
+  }
+
+  public isSurveyGenderAnalysis() {
+    return this.analysis ?
+      (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+      : false;
+  }
+
+  public isGenderIdentityAnalysis() {
+    return this.analysis ?
+      (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID)
+      : false;
   }
 
   public hcChartOptions(): any {
@@ -81,11 +95,18 @@ export class ChartComponent implements OnChanges {
         pie: {
           borderColor: null,
           slicedOffset: 4,
+          size: this.isSurveyGenderAnalysis() ? '60%' : '100%',
           dataLabels: {
             enabled: true,
-            style: this.dbc.DATA_LABEL_STYLE,
-            distance: -30,
-            format: '{point.name} {point.percentage:.0f}%'
+            style: this.isGenderIdentityAnalysis()
+                ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
+            distance: this.isGenderIdentityAnalysis() ? 3 : -30,
+            formatter: function () {
+              if (this.percentage < 1) {
+                return this.point.name + ' ' + Number(this.percentage).toFixed(1) + '%';
+              }
+              return this.point.name + ' ' + Number(this.percentage).toFixed(0) + '%';
+            }
           }
         },
         column: {
@@ -93,6 +114,7 @@ export class ChartComponent implements OnChanges {
           borderColor: null,
           colorByPoint: true,
           groupPadding: 0,
+          pointPadding: 0,
           dataLabels: {
             enabled: false,
           },
@@ -103,6 +125,7 @@ export class ChartComponent implements OnChanges {
           borderColor: null,
           colorByPoint: true,
           groupPadding: 0,
+          pointPadding: 0,
           dataLabels: {
             enabled: false,
           },
@@ -126,7 +149,7 @@ export class ChartComponent implements OnChanges {
         labels: {
           style: {
             whiteSpace: 'nowrap',
-          }
+          },
         },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR
@@ -151,6 +174,11 @@ export class ChartComponent implements OnChanges {
 
     if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
+      return this.makeGenderChartOptions();
+    }
+
+    if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
       return this.makeGenderChartOptions();
     }
 
@@ -185,13 +213,13 @@ export class ChartComponent implements OnChanges {
       cats.push(a.stratum4);
     }
     data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0;
       }
     );
     cats = cats.sort((a, b) => {
@@ -239,13 +267,13 @@ export class ChartComponent implements OnChanges {
 
     // Sort by count value
     this.concepts = this.concepts.sort((a, b) => {
-        if (a.countValue < b.countValue) {
-          return 1;
-        }
-        if (a.countValue > b.countValue) {
-          return -1;
-        }
-        return 0;
+      if (a.countValue < b.countValue) {
+        return 1;
+      }
+      if (a.countValue > b.countValue) {
+        return -1;
+      }
+      return 0;
       }
     );
 
@@ -285,7 +313,8 @@ export class ChartComponent implements OnChanges {
     let seriesName = '';
     if (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID ||
       this.analysis.analysisId === this.dbc.ETHNICITY_ANALYSIS_ID ||
-      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID) {
+      this.analysis.analysisId === this.dbc.RACE_ANALYSIS_ID ||
+      this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
       results = this.analysis.results;
       seriesName = this.analysis.analysisName;
     } else {
@@ -307,21 +336,27 @@ export class ChartComponent implements OnChanges {
       if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID) {
         color = this.dbc.GENDER_COLORS[a.stratum5];
       }
+      if (this.analysis.analysisId === this.dbc.SURVEY_GENDER_IDENTITY_ANALYSIS_ID) {
+        color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum5];
+      }
+      if (this.analysis.analysisId === this.dbc.GENDER_IDENTITY_ANALYSIS_ID) {
+        color = this.dbc.GENDER_IDENTITY_COLORS[a.stratum2];
+      }
 
       data.push({
         name: a.analysisStratumName
         , y: a.countValue, color: color, sliced: true
       });
-      cats.push(a.stratum4);
+      cats.push(a.analysisStratumName);
     }
     data = data.sort((a, b) => {
-        if (a.name > b.name) {
-          return 1;
-        }
-        if (a.name < b.name) {
-          return -1;
-        }
-        return 0;
+      if (a.name > b.name) {
+        return 1;
+      }
+      if (a.name < b.name) {
+        return -1;
+      }
+      return 0;
       }
     );
     cats = cats.sort((a, b) => {
@@ -335,12 +370,12 @@ export class ChartComponent implements OnChanges {
     });
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
-      chart: {type: 'pie', backgroundColor: this.backgroundColor}, // '#D9E4EA'
+      chart: {type: 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
       title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: null,
-      xAxisTitle: null
+      pointWidth: this.pointWidth,
+      xAxisTitle: null,
     };
 
   }
@@ -366,15 +401,15 @@ export class ChartComponent implements OnChanges {
     // Age results have two stratum-- 1 is concept, 2 is age decile
     // Sort by age decile (stratum2 or stratum5)
     results = results.sort((a, b) => {
-        const anum = Number(a[ageDecileStratum]);
-        const bnum = Number(b[ageDecileStratum]);
-        if (anum > bnum) {
-          return 1;
-        }
-        if (anum < bnum) {
-          return -1;
-        }
-        return 0;
+      const anum = Number(a[ageDecileStratum]);
+      const bnum = Number(b[ageDecileStratum]);
+      if (anum > bnum) {
+        return 1;
+      }
+      if (anum < bnum) {
+        return -1;
+      }
+      return 0;
       }
     );
     const data = [];
@@ -410,7 +445,7 @@ export class ChartComponent implements OnChanges {
     // Hack to filter gender
     let results = this.analysis.results.concat([]);
     if (this.genderId) {
-      results = results.filter(r => r.stratum2 === this.genderId);
+      results = results.filter(r => r.stratum3 === this.genderId);
     }
     for (const a  of results) {
       data.push({name: a.stratum4, y: a.countValue, thisCtrl: this, result: a});

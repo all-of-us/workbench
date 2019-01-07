@@ -44,14 +44,16 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   private ClusterRequest createFirecloudClusterRequest(String userEmail) {
-    Map<String, String> labels = new HashMap<String, String>();
-    labels.put(CLUSTER_LABEL_AOU, "true");
-    labels.put(CLUSTER_LABEL_CREATED_BY, userEmail);
+    WorkbenchConfig config = workbenchConfigProvider.get();
     return new ClusterRequest()
-        .labels(labels)
-        .jupyterUserScriptUri(workbenchConfigProvider.get().firecloud.jupyterUserScriptUri)
+        .labels(ImmutableMap.of(
+            CLUSTER_LABEL_AOU, "true",
+            CLUSTER_LABEL_CREATED_BY, userEmail))
+        .defaultClientId(config.server.oauthClientId)
+        .jupyterUserScriptUri(config.firecloud.jupyterUserScriptUri)
         .userJupyterExtensionConfig(new UserJupyterExtensionConfig()
-            .nbExtensions(ImmutableMap.<String, String>of())
+            .nbExtensions(ImmutableMap.of(
+                "playground-extension", config.firecloud.jupyterPlaygroundExtensionUri))
             .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
             .combinedExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()
@@ -63,7 +65,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public Cluster createCluster(String googleProject, String clusterName, String userEmail) {
     ClusterApi clusterApi = clusterApiProvider.get();
     return retryHandler.run((context) ->
-        clusterApi.createCluster(googleProject, clusterName, createFirecloudClusterRequest(userEmail)));
+        clusterApi.createClusterV2(googleProject, clusterName, createFirecloudClusterRequest(userEmail)));
   }
 
   @Override

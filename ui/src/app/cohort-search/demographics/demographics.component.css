@@ -1,5 +1,6 @@
 h3 {
   margin-left: 2rem;
+  margin-top:0.2rem;
 }
 
 /* Form grid / layout */
@@ -170,7 +171,7 @@ label[for="deceased"] {
 }
 
 .deceaseNoCursor {
-  opacity: 0.7;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -182,7 +183,7 @@ label[for="deceased"] {
 
 .deceased-title {
   padding-left: 1rem;
-  padding-top: 2rem;
+  padding-top: 1rem;
   font-size: 14px;
   font-weight: 500;
   color: #262262;

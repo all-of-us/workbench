@@ -8,7 +8,8 @@
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
     "enforceRegistered": false,
-    "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-scripts/setup_notebook_cluster.sh",
+    "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/setup_notebook_cluster.sh",
+    "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "billingRetryCount": 2
@@ -17,7 +18,6 @@
     "serviceAccountApiUsers": [ "all-of-us-workbench-test@appspot.gserviceaccount.com" ]
   },
   "cdr": {
-    "defaultCdrVersion": "New Test Registered CDR",
     "debugQueries": true
   },
   "googleCloudStorageService": {
@@ -29,15 +29,15 @@
     "gSuiteDomain": "fake-research-aou.org"
   },
   "server": {
+    "apiBaseUrl": "https:\/\/api-dot-all-of-us-workbench-test.appspot.com",
     "publicApiKeyForErrorReports": "AIzaSyDPoX4Eg7-_FVKi7JFzEKaJpZ4IMRLaER4",
-    "projectId": "all-of-us-workbench-test"
+    "projectId": "all-of-us-workbench-test",
+    "shortName": "Test",
+    "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com"
   },
   "admin": {
-    "loginUrl": "http:\/\/all-of-us-workbench-test.appspot.com/login",
+    "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",
     "adminIdVerification": "manual-id-verification-requests@fake-research-aou.org"
-  },
-  "jira": {
-    "projectKey": "RW"
   },
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",

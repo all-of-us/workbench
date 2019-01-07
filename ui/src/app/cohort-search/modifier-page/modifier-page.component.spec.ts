@@ -2,10 +2,13 @@ import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
+import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
 import {ModifierPageComponent} from './modifier-page.component';
 
@@ -28,6 +31,7 @@ describe('ModifierPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         ModifierPageComponent,
+        ValidatorErrorsComponent,
       ],
       imports: [
         ClarityModule,
@@ -36,7 +40,12 @@ describe('ModifierPageComponent', () => {
       ],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
+        {provide: CohortBuilderService, useValue: {}},
         {provide: CohortSearchActions, useValue: new MockActions()},
+        {
+          provide: ActivatedRoute,
+          useValue: {snapshot: {data: {workspace: {cdrid: 1}}}}
+        },
       ],
     })
       .compileComponents();

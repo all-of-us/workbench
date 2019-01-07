@@ -21,7 +21,7 @@ import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {
   DataAccessLevel,
@@ -29,6 +29,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {ToolTipComponent} from '../tooltip/component';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -74,6 +75,7 @@ describe('WorkspaceEditComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
+        ToolTipComponent,
         WorkspaceEditComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent
@@ -297,6 +299,21 @@ describe('WorkspaceEditComponent', () => {
         expect(workspacesService.workspaces[0].description).toBe('');
       }));
 
+  it('should not create a workspace with name greater than 80 characters', fakeAsync(() => {
+    spyOn(TestBed.get(Router), 'navigate');
+    workspacesService.workspaces = [];
+    setupComponent(WorkspaceEditMode.Create);
+    simulateInput(fixture, fixture.debugElement.query(By.css('.input.name')),
+      'this is more than 80 characters look at how long this is ' +
+      'and why dont I add some more characters and make this really very long');
+    simulateInput(fixture, fixture.debugElement.query(By.css('.input.description')),
+      'foo');
+    testComponent.fillDetailsLater = false;
+    fixture.detectChanges();
+    tick();
+    expect(fixture.debugElement.query(By.css('.add-button')).properties.disabled).toBeTruthy();
+  }));
+
   it('should allow editing unset underserved population on clone', fakeAsync(() => {
     spyOn(TestBed.get(Router), 'navigate');
     setupComponent(WorkspaceEditMode.Clone);
@@ -314,5 +331,25 @@ describe('WorkspaceEditComponent', () => {
     expect(workspacesService.workspaces.length).toBe(2);
     expect(workspacesService.workspaces[1].researchPurpose.underservedPopulationDetails)
       .toContain(UnderservedPopulationEnum.AGEOLDERADULTS);
+  }));
+
+  it('should not allow duplicate workspace name while cloning', fakeAsync(() => {
+    workspacesService.workspaceAccess.set(
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
+    setupComponent(WorkspaceEditMode.Clone);
+    fixture.componentRef.instance.profileStorageService.reload();
+    tick();
+    let de = fixture.debugElement;
+    const workspaceName = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
+    simulateInput(fixture, de.query(By.css('.name')), workspaceName );
+    fixture.debugElement.query(By.css('.add-button'))
+        .triggerEventHandler('click', null);
+    updateAndTick(fixture);
+    updateAndTick(fixture);
+    de = fixture.debugElement;
+    const errorText = de.query(By.css('.modal-body')).childNodes[0].nativeNode.data;
+    expect(errorText).toBe(
+        'You already have a workspace named '
+        + workspaceName + '. Please choose another name.');
   }));
 });

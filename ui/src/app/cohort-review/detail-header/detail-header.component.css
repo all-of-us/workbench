@@ -10,3 +10,12 @@
 .detail-header button:first-of-type {
   margin: 0;
 }
+
+.btn-prev:focus {
+  border: 1px solid;
+}
+
+.btn-next:focus {
+  border: 1px solid;
+  border-left: 0;
+}

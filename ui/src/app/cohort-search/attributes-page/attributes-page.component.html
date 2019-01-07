@@ -10,12 +10,21 @@
     </div>
   </div>
 </div>
+<div *ngIf="(error$ | async)" class="alert alert-danger alert-sm">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-text">
+        A problem occurred and we were not able to retrieve the requested data
+      </div>
+    </div>
+  </div>
+</div>
 <form *ngIf="node.size" #attrForm="ngForm" (ngSubmit)="addAttrs(attrForm)">
   <section class="form-block">
     <div *ngIf="isMeasurement()">
       <div class="attr-name-color">
         {{displayName}}
-        <div class="attr-refresh" (click)="refresh()">RESET FORM</div>
+        <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
       </div>
       <div class="radio">
         <input type="radio" name="labExists" [value]="true" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
@@ -92,22 +101,22 @@
     <div *ngIf="isValid(attrForm) || attrs.EXISTS" class="count-preview ">
       <div class="row">
         <div *ngIf="showCalc()" class="col-lg-3">
-          <button type="button" [ngClass]="[ preview.get('requesting')? 'greyed-button': 'calculate-btn']"
+          <button type="button" [ngClass]="[loading ? 'greyed-button': 'calculate-btn']"
             class="btn"
             [disabled]="rangeAlert"
-            [clrLoading]="preview.get('requesting')"
+            [clrLoading]="loading"
             (click)="requestPreview(attrForm)">
             Calculate
           </button>
         </div>
-        <ng-container *ngIf="!preview.get('requesting')">
+        <ng-container *ngIf="!loading">
           <div class="col-lg-5 text-padding" *ngIf="preview.get('count') >= 0">
             <div class="result-text">
               Results
             </div>
             <div>
               Number Participants:
-              <span class="text-bold" *ngIf="!preview.get('requesting')">
+              <span class="text-bold" *ngIf="!loading">
              {{ preview.get('count', 0)  | number }}
              </span>
             </div>

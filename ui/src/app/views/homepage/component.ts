@@ -3,12 +3,14 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 
 import {
   BillingProjectStatus,
   DataAccessLevel,
   IdVerificationStatus,
+  PageVisit,
   Profile,
   ProfileService
 } from 'generated';
@@ -19,11 +21,15 @@ import {
 })
 
 export class HomepageComponent implements OnInit, OnDestroy {
+  private static pageId = 'homepage';
+  @ViewChild('myVideo') myVideo: any;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
+  open = false;
+  src = '';
   spinnerValues = [
     {
       'name': this.completedTasksName,
@@ -37,19 +43,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   firstSignIn: Date;
-  cardDetails = [
-    {
-      title: 'Browse All of Us Data',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/browse-data.svg'
-    },
-    {
-      title: 'Explore Public Work',
-      text: 'Dolor sit amet consectetuer adipiscing sed diam euismod tincidunt ut laoreet ' +
-      'dolore. Mirum est notare, quam littera gothica quam nunc.',
-      icon: '/assets/icons/explore.svg'
-    }];
+  firstVisit = true;
+  newPageVisit: PageVisit = { page: HomepageComponent.pageId};
   footerLinks = [
     {
       title: 'Working Within Researcher Workbench',
@@ -72,24 +67,38 @@ export class HomepageComponent implements OnInit, OnDestroy {
         'Collaborating with other researchers',
         'Sharing and Publishing Notebooks']
     }];
-  firstTimeUser = false;
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(RecentWorkComponent)
-  recentWorkComponent: RecentWorkComponent;
+  @ViewChild(QuickTourModalComponent)
+  quickTourModal: QuickTourModalComponent;
+  quickTour: boolean;
 
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+    // create bound methods to use as callbacks
+    this.closeQuickTour = this.closeQuickTour.bind(this);
+  }
 
   ngOnInit(): void {
-    this.profileStorageService.profile$.subscribe((profile) => {
-      if (this.firstSignIn === undefined) {
-        this.firstSignIn = new Date(profile.firstSignInTime);
+    this.profileService.getMe().subscribe(profile => {
+      if (profile.pageVisits) {
+        this.firstVisit = !profile.pageVisits.some(v =>
+        v.page === HomepageComponent.pageId);
       }
+    },
+      e => {},
+      () => {
+      if (this.firstVisit) {
+        this.quickTour = true;
+      }
+        this.profileService.updatePageVisits(this.newPageVisit).subscribe();
+      });
+    this.profileStorageService.profile$.subscribe((profile) => {
+      // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.billingProjectInitialized = true;
       } else {
@@ -101,6 +110,18 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.reloadSpinner();
     });
     this.profileStorageService.reload();
+  }
+
+  public closeQuickTour(): void {
+    this.quickTour = false;
+  }
+
+  play(type): void {
+    this.src = '/assets/videos/Workbench Tutorial - Cohorts.mp4';
+    if (type === 'notebook') {
+      this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4';
+    }
+    this.open = true;
   }
 
   public get completedTasks() {
@@ -162,9 +183,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }
     // Don't show the banner after 1 week as their account would
     // have been disabled had they not enabled 2-factor auth.
-    if (new Date().getTime() - this.firstSignIn.getTime() > 1 * 7 * 24 * 60 * 60 * 1000) {
-      return false;
-    }
-    return true;
+    return !(new Date().getTime() - this.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000);
   }
 }

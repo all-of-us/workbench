@@ -24,7 +24,7 @@
         <a routerLink="/profile" clrDropdownItem>Profile</a>
         <a routerLink="/settings" clrDropdownItem>Settings</a>
         <div class="dropdown-divider"></div>
-        <button id="report-bug" class="btn" (click)="bugReportComponent.reportBug();">Report A Bug</button>
+        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportComponent.reportBug();">Report A Bug</button>
         <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -39,18 +39,17 @@
           [class.active]="homeActive"
           routerLink="/"
           (click)="sidenavToggle = false">Home</button>
-      <!--Data browser won't show the sidenav, so active is irrelevant-->
-      <a class="btn btn-primary nav-link"
-          [attr.href]="publicUiUrl">Browse Data</a>
+      <button class="btn btn-primary nav-link"
+          (click)="openDataBrowser()">Browse Data</button>
       <button class="btn btn-primary nav-link"
           [class.active]="createWorkspaceActive"
           routerLink="/workspaces/build"
-          [attr.disabled]="hasDataAccess ? null : true"
+          [disabled]="(hasDataAccess ? null : true) || !billingProjectInitialized"
           (click)="sidenavToggle = false">Create Workspace</button>
       <button class="btn btn-primary nav-link"
           [class.active]="workspacesActive"
           routerLink="/workspaces"
-          [attr.disabled]="hasDataAccess ? null : true"
+          [disabled]="hasDataAccess ? null : true"
           (click)="sidenavToggle = false">My Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="reviewWorkspaceActive"
@@ -66,7 +65,7 @@
           (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
-  <div class="app-container">
+  <div class="app-container" [class.minimize-chrome]="minimizeChrome">
     <!--
       Angular's builtin Router module will attach specific views here
       based on clicking routerLink elements (above) or router.navigate calls.

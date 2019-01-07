@@ -7,12 +7,12 @@
         class="tooltip tooltip-validation tooltip-sm tooltip-bottom-left"
         [class.invalid]="name.invalid && (name.dirty || name.touched)">
         <input id="name"
-               class="annotation-name-input"
+          class="annotation-name-input"
           name="name"
           formControlName="name"
           type="text"
-               placeholder="ANNOTATION NAME"
-          autofocus >
+          placeholder="ANNOTATION NAME"
+          maxlength="255">
         <span class="tooltip-content">
           A Name is required
         </span>
@@ -47,7 +47,8 @@
         <ng-container *ngFor="let val of enumValues">
           <input type="text"
                  class="annotation-value-input"
-                 value= {{val}}>
+                 value= {{val}}
+                 maxlength="255">
           <button type="button"
                   class="btn btn-icon btn-link btn-sm text-danger"
                   (click)="removeEnumValue(val)">
@@ -60,7 +61,8 @@
              placeholder="ADD A VALUE"
              name="add-value"
              id="add-value"
-             formControlName="addValue">
+             formControlName="addValue"
+             maxlength="255">
       <button type="button"
               class="btn btn-icon btn-link"
               (click)="addEnumValue()">

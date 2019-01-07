@@ -11,7 +11,7 @@
   <div class="btn-group btn-sm">
     <button
       type="button"
-      class="btn"
+      class="btn btn-prev"
       title="Go To the Prior Participant"
       [disabled]="isFirstParticipant"
       (click)="previous()">
@@ -20,7 +20,7 @@
     </button>
     <button
       type="button"
-      class="btn"
+      class="btn btn-next"
       title="Go To the Next Participant"
       [disabled]="isLastParticipant"
       (click)="next()">

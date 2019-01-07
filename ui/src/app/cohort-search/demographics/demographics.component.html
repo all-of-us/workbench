@@ -1,37 +1,3 @@
-<h3>
-  Choose Demographics Filters
-  <clr-icon shape="info-circle" class="is-highlight"
-    [popper]="explanation"
-    [popperTrigger]="'hover'"
-    [popperPlacement]="'right'">
-  </clr-icon>
-</h3>
-<popper-content #explanation>
-  <p>
-    The four subcategories of Demographics (Age, Gender, Race, and Deceased
-    Status) are joined together with a Boolean <strong>AND</strong>.  For
-    example, you may wish to search for people who identify as Female
-    <em>and</em> Asian.
-  </p>
-  <p>
-    Values <em>within</em> a subcategory are joined with a Boolean
-    <strong>OR</strong>.  For example, you may wish to search for people
-    classified as White <em>or</em> as African American.
-  </p>
-  <p>
-    The default behavior is to include as many participants as possible.  For
-    example, selecting no gender filters is equivalent to <em>not</em>
-    filtering by gender, which is equivalent to selecting <em>all</em>
-    available filters.
-  </p>
-  <p>
-    Filtering by <strong>Deceased Status</strong> will have the effect of
-    including only deceased participant data.  If you would like to
-    <em>exclude</em> deceased participant data, create a demographic
-    profile in the <strong>Exclude Participants</strong> column.
-  </p>
-</popper-content>
-
 <form class="form-container" [formGroup]="demoForm">
   <!-- Age -->
   <div class="age-label">
@@ -81,7 +47,7 @@
                 [getParamId]="selectedParamId"
                 [includeSearchBox]="false"
                 [initialSelection]="initialGenders"
-                [loading]="loading">
+                [loading]="loading.GEN">
         </crit-multi-select>
       </div>
     </div>
@@ -95,9 +61,10 @@
         <crit-multi-select
                 (addedItems)="getItems($event)"
                 [options]="raceNodes"
+                [includeSearchBox]="false"
                 [getParamId]="selectedParamId"
                 [initialSelection]="initialRaces"
-                [loading]="loading">
+                [loading]="loading.RACE">
         </crit-multi-select>
       </div>
     </div>
@@ -114,7 +81,7 @@
                 [options]="ethnicityNodes"
                 [getParamId]="selectedParamId"
                 [initialSelection]="initialEthnicities"
-                [loading]="loading">
+                [loading]="loading.ETH">
         </crit-multi-select>
       </div>
     </div>

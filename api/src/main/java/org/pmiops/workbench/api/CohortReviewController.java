@@ -2,10 +2,25 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
-import com.google.cloud.bigquery.QueryResult;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -56,22 +71,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.inject.Provider;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RestController
 public class CohortReviewController implements CohortReviewApiDelegate {
@@ -226,7 +225,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                     CreateReviewRequest request) {
     if (request.getSize() <= 0 || request.getSize() > MAX_REVIEW_SIZE) {
       throw new BadRequestException(
-        String.format("Invalid Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
+        String.format("Bad Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
     }
 
     Cohort cohort = cohortReviewService.findCohort(cohortId);
@@ -244,13 +243,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
     if (cohortReview.getReviewSize() > 0) {
       throw new BadRequestException(
-        String.format("Invalid Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
+        String.format("Bad Request: Cohort Review already created for cohortId: %s, cdrVersionId: %s",
           cohortId, cdrVersionId));
     }
 
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -292,16 +291,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                                        ParticipantCohortAnnotation request) {
 
     if (request.getCohortAnnotationDefinitionId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort annotation definition id.");
     }
     if (request.getCohortReviewId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort review id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort review id.");
     }
     if (request.getParticipantId() == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
-    CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
 
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
@@ -321,10 +320,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                                          Long annotationId) {
 
     if (annotationId == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid cohort annotation definition id.");
+      throw new BadRequestException("Bad Request: Please provide a valid cohort annotation definition id.");
     }
     if (participantId == null) {
-      throw new BadRequestException("Invalid Request: Please provide a valid participant id.");
+      throw new BadRequestException("Bad Request: Please provide a valid participant id.");
     }
 
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -349,7 +348,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
-        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+        String.format("Bad Request: Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
     }
     Cohort cohort = cohortReviewService.findCohort(cohortId);
     CohortReview cohortReview = validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
@@ -357,7 +356,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       participantCounter.buildDomainChartInfoCounterQuery(new ParticipantCriteria(searchRequest), DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -384,12 +383,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     int chartLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     if (chartLimit < MIN_LIMIT || chartLimit > MAX_LIMIT) {
       throw new BadRequestException(
-        String.format("Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
+        String.format("Bad Request: Please provide a chart limit between %d and %d.", MIN_LIMIT, MAX_LIMIT));
     }
     validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId,
       cohortId, cdrVersionId, WorkspaceAccessLevel.READER);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       reviewQueryBuilder.buildChartDataQuery(participantId, DomainType.fromValue(domain), chartLimit)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -462,9 +461,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         convertGenderRaceEthnicitySortOrder(pageRequest));
     lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
+    Long queryResultSize = filters.isEmpty() ? cohortReview.getReviewSize() :
+      cohortReviewService.findCount(cohortReview.getCohortReviewId(),
+        convertGenderRaceEthnicityFilters(filters),
+        convertGenderRaceEthnicitySortOrder(pageRequest));
+
     org.pmiops.workbench.model.CohortReview responseReview = TO_CLIENT_COHORTREVIEW.apply(cohortReview, pageRequest);
     responseReview.setParticipantCohortStatuses(
       participantCohortStatuses.stream().map(TO_CLIENT_PARTICIPANT).collect(Collectors.toList()));
+    responseReview.setQueryResultSize(queryResultSize);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     userRecentResourceService.updateCohortEntry(cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId, now );
@@ -487,7 +492,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     DomainType domain = ((ReviewFilter) request).getDomain();
     PageRequest pageRequest = createPageRequest(request);
 
-    QueryResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
       reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -572,7 +577,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
-    QueryResult result = bigQueryService.executeQuery(
+    TableResult result = bigQueryService.executeQuery(
       bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
         new ParticipantCriteria(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
@@ -591,7 +596,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * @return
    */
   private List<ParticipantCohortStatus> createParticipantCohortStatusesList(Long cohortReviewId,
-                                                                            QueryResult result,
+                                                                            TableResult result,
                                                                             Map<String, Integer> rm) {
     List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
     for (List<FieldValue> row : result.iterateAll()) {

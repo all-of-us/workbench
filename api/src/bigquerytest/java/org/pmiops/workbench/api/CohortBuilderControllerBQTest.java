@@ -14,8 +14,6 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
-import org.pmiops.workbench.cohortbuilder.querybuilder.MeasurementQueryBuilder;
-import org.pmiops.workbench.cohortbuilder.querybuilder.PMQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -30,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +36,7 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
@@ -45,10 +45,6 @@ import static org.junit.Assert.fail;
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
-
-  private static final String NUMERICAL = MeasurementQueryBuilder.NUMERICAL;
-  private static final String CATEGORICAL = MeasurementQueryBuilder.CATEGORICAL;
-  private static final String BOTH = MeasurementQueryBuilder.BOTH;
 
   @Autowired
   private CohortBuilderController controller;
@@ -78,10 +74,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "observation",
       "drug_exposure",
       "phecode_criteria_icd",
-      "concept_relationship",
+      "criteria_relationship",
       "death",
       "visit_occurrence",
-      "concept_ancestor",
+      "criteria_ancestor",
       "criteria");
   }
 
@@ -102,11 +98,596 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsEmptyMessageException() throws Exception {
+    //icd9 no search parameters
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //procedure no search parameters
+    searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //demo no search parameters
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //demo no attributes
+    Criteria demoAge =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
+    SearchParameter demo = createSearchParameter(demoAge, null);
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+
+    //demo no attribute operands
+    Attribute attr = new Attribute().operator(Operator.BETWEEN);
+    demo.attributes(Arrays.asList(attr));
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+
+    //drug no search parameters
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //measurement no search parameters
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //measurement no attributes
+    Criteria meas =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
+    SearchParameter measParam = createSearchParameter(meas, null);
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+
+    //measurement no attribute operands
+    measParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+
+    //pm no search parameters
+    searchRequest = createSearchRequests(TreeType.PM.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //pm no attributes
+    Criteria pm =
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null);
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
+
+    //pm no attribute operands
+    pmParam.attributes(Arrays.asList(new Attribute().operator(Operator.IN).name("name")));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, OPERANDS);
+
+    //visit no search parameters
+    searchRequest = createSearchRequests(TreeType.VISIT.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+
+    //ppi no search parameters
+    searchRequest = createSearchRequests(TreeType.PPI.name(), new ArrayList<>(), new ArrayList<>());
+    assertMessageException(searchRequest, EMPTY_MESSAGE, PARAMETERS);
+  }
+
+  @Test
+  public void countSubjectsNotValidMessageException() throws Exception {
+    //icd9 no type
+    Criteria icd9ConditionChild =
+      createCriteriaChild(null, null, 0, "001", null, null);
+    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, icd9.getType());
+
+    //icd9 bad type
+    icd9.type(TreeType.VISIT.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, icd9.getType());
+
+    //icd9 no subtype
+    icd9.type(TreeType.ICD9.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, icd9.getSubtype());
+
+    //icd9 bad subtype
+    icd9.subtype("badsubtype");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, icd9.getSubtype());
+
+    //icd9 no domain
+    icd9.subtype(TreeSubType.CM.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, icd9.getDomainId());
+
+    //icd9 bad domain
+    icd9.domainId("baddomain");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, icd9.getDomainId());
+
+    //icd9 child no concept id
+    icd9.domainId(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, icd9.getConceptId());
+
+    //icd9 parent no code
+    icd9.group(true).value(null);
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CODE, icd9.getValue());
+
+    //icd9 parent empty code
+    icd9.group(true).value("");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CODE, icd9.getValue());
+
+    //snomed no type
+    Criteria snomedCrtieria =
+      createCriteriaChild(null, null, 0, "", null, null);
+    SearchParameter snomed = createSearchParameter(snomedCrtieria, "");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, snomed.getType());
+
+    //snomed bad type
+    snomed.type(TreeType.VISIT.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, snomed.getType());
+
+    //snomed no domain
+    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, snomed.getDomainId());
+
+    //snomed bad domain
+    snomed.domainId("baddomain");
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, snomed.getDomainId());
+
+    //snomed child no concept id
+    snomed.domainId(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, snomed.getConceptId());
+
+    //demo no type
+    Criteria demo =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter demoParam = createSearchParameter(demo, null);
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, demoParam.getType());
+
+    //demo bad type
+    demoParam.type(TreeType.VISIT.name());
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, demoParam.getType());
+
+    //demo no subtype
+    demoParam.type(TreeType.DEMO.name());
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, demoParam.getSubtype());
+
+    //demo bad subtype
+    demoParam.subtype(TreeSubType.HEIGHT.name());
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, demoParam.getSubtype());
+
+    //demo no concept id for gender
+    demoParam.subtype(TreeSubType.GEN.name());
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, demoParam.getConceptId());
+
+    //demo no concept id for gender
+    Attribute age = new Attribute().name("Age");
+    demoParam.subtype(TreeSubType.AGE.name()).attributes(Arrays.asList(age));
+    searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, age.getOperator());
+
+    //drug no type
+    Criteria drug =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, drugParam.getType());
+
+    //drug bad type
+    drugParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, drugParam.getType());
+
+    //drug no concept id
+    drugParam.type(TreeType.DRUG.name());
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, drugParam.getConceptId());
+
+    //meas no type
+    Criteria meas =
+      createCriteriaChild(null, null, 0, null, null, null);
+    Attribute measAttr = new Attribute();
+    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, measParam.getType());
+
+    //meas bad type
+    measParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, measParam.getType());
+
+    //meas no concept id
+    measParam.type(TreeType.MEAS.name());
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, measParam.getConceptId());
+
+    //meas no attr name
+    measParam.conceptId(1L);
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, NAME, measAttr.getName());
+
+    //meas no operator
+    measParam.attributes(Arrays.asList(measAttr.name("name")));
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, measAttr.getOperator());
+
+    //pm no type
+    Criteria pm =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null);
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, pmParam.getType());
+
+    //pm bad type
+    pmParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, pmParam.getType());
+
+    //pm no subtype
+    pmParam.type(TreeType.PM.name());
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, pmParam.getSubtype());
+
+    //pm bad subtype
+    pmParam.subtype("blah");
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, SUBTYPE, pmParam.getSubtype());
+
+    //pm no domain
+    pmParam.subtype(TreeSubType.PREG.name());
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, pmParam.getDomainId());
+
+    //pm bad domain
+    pmParam.domainId("blah");
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, pmParam.getDomainId());
+
+    //pm no value
+    pmParam.domainId(DomainType.MEASUREMENT.toString());
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, pmParam.getValue());
+
+    //pm value not a number
+    pmParam.value("z");
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, pmParam.getValue());
+
+    //pm no concept id
+    pmParam.value("10");
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
+
+    //pm no attribute name
+    Attribute pmAttr = new Attribute();
+    pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, NAME, pmAttr.getName());
+
+    //pm no operator
+    pmAttr.name("HEIGHT");
+    pmParam.attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, OPERATOR, pmAttr.getOperator());
+
+    //pm no attr concept id
+    pmAttr.name("HEIGHT").operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    pmParam.attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      ATTRIBUTE, CONCEPT_ID, pmAttr.getConceptId());
+
+    //visit no type
+    Criteria visit =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter visitParam = createSearchParameter(visit, null);
+    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, visitParam.getType());
+
+    //visit bad type
+    visitParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, visitParam.getType());
+
+    //visit no concept id
+    visitParam.type(TreeType.VISIT.name());
+    searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, visitParam.getConceptId());
+
+    //ppi no type
+    Criteria ppi =
+      createCriteriaChild(null, null, 0, null, null, null);
+    SearchParameter ppiParam = createSearchParameter(ppi, null);
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi bad type
+    ppiParam.type("blah");
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, TYPE, ppiParam.getType());
+
+    //ppi no domain
+    ppiParam.type(TreeType.PPI.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomainId());
+
+    //ppi bad domain
+    ppiParam.domainId(DomainType.CONDITION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, DOMAIN, ppiParam.getDomainId());
+
+    //ppi no concept id
+    ppiParam.domainId(DomainType.OBSERVATION.name());
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
+
+    //ppi no value as number
+    ppiParam.conceptId(1L);
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, NAME, ppiParam.getName());
+
+    //ppi value not a number
+    ppiParam.value("name");
+    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      PARAMETER, VALUE, ppiParam.getValue());
+  }
+
+  @Test
+  public void countSubjectsOneOperandMessageException() throws Exception {
+    //demo operands not one
+    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
+    Criteria demo =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
+    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, demoAttr.getName(),
+      operatorText.get(demoAttr.getOperator()));
+
+    //pm operands not one
+    Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("1", "2")).conceptId(1L);
+    Criteria pm =
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, pmAttr.getName(),
+      operatorText.get(pmAttr.getOperator()));
+
+    //modifier operands not one
+    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1", "2"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()),
+      operatorText.get(pmAttr.getOperator()));
+  }
+
+  @Test
+  public void countSubjectsTwoOperandMessageException() throws Exception {
+    //demo operands not two
+    Attribute demoAttr = new Attribute().name("Age").operator(Operator.BETWEEN).operands(Arrays.asList("1"));
+    Criteria demo =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
+    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      demoAttr.getName(), operatorText.get(demoAttr.getOperator()));
+
+    //pm operands not two
+    Attribute pmAttr = new Attribute().name("Height").operator(Operator.BETWEEN).operands(Arrays.asList("1")).conceptId(1L);
+    Criteria pm =
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      pmAttr.getName(), operatorText.get(pmAttr.getOperator()));
+
+    //meas operands not two
+    Attribute measAttr = new Attribute().name("Meas").operator(Operator.BETWEEN).operands(Arrays.asList("1"));
+    Criteria meas =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
+    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
+      measAttr.getName(), operatorText.get(measAttr.getOperator()));
+
+    //modifier operands not two
+    Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.BETWEEN).operands(Arrays.asList("1"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()), operatorText.get(modifier.getOperator()));
+  }
+
+  @Test
+  public void countSubjectsOperandsNumericMessageException() throws Exception {
+    //demo operands not a number
+    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("z"));
+    Criteria demo =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
+    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
+      demoAttr.getName());
+
+    //pm operands not a number
+    Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("z")).conceptId(1L);
+    Criteria pm =
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
+      pmAttr.getName());
+
+    //meas operands not a number
+    Attribute measAttr = new Attribute().name("Meas").operator(Operator.EQUAL).operands(Arrays.asList("z"));
+    Criteria meas =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
+    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
+    searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
+      measAttr.getName());
+
+    //encounters operands not a number
+    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("z"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
+
+    //age at event operands not a number
+    modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("z"));
+    searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
+  }
+
+  @Test
+  public void countSubjectsOneModifierMessageException() throws Exception {
+    Modifier modifier1 = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Modifier modifier2 = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier1, modifier2));
+    assertMessageException(searchRequest, ONE_MODIFIER_MESSAGE, modifierText.get(modifier1.getName()));
+  }
+
+  @Test
+  public void countSubjectsDateModifierMessageException() throws Exception {
+    Modifier modifier = new Modifier().name(ModifierType.EVENT_DATE).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, DATE_MODIFIER_MESSAGE, MODIFIER,
+      modifierText.get(modifier.getName()));
+  }
+
+  @Test
+  public void countSubjectsNotInModifierMessageException() throws Exception {
+    Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Criteria drug =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, null, null, "1");
+    SearchParameter drugParam = createSearchParameter(drug, null);
+    SearchRequest searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), Arrays.asList(modifier));
+    assertMessageException(searchRequest, NOT_IN_MODIFIER_MESSAGE, modifierText.get(modifier.getName()),
+      operatorText.get(Operator.IN));
+  }
+
+  @Test
+  public void countSubjectsAgeAndDecMessageException() throws Exception {
+    Attribute demoAttr = new Attribute().name("Age").operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Criteria demo =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.AGE.name(), 0, null, null, null);
+    Criteria dec =
+      createCriteriaChild(TreeType.DEMO.name(), TreeSubType.DEC.name(), 0, null, null, null);
+    SearchParameter demoParam = createSearchParameter(demo, null).attributes(Arrays.asList(demoAttr));
+    SearchParameter decParam = createSearchParameter(dec, null);
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam, decParam), new ArrayList<>());
+    assertMessageException(searchRequest, AGE_DEC_MESSAGE);
+  }
+
+  @Test
+  public void countSubjectsCategoricalMessageException() throws Exception {
+    Attribute measAttr = new Attribute().name(CATEGORICAL).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    Criteria meas =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, null, null, "1");
+    SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
+    SearchRequest searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
+    assertMessageException(searchRequest, CATEGORICAL_MESSAGE);
+  }
+
+  @Test
+  public void countSubjectsBPMessageException() throws Exception {
+    Attribute sysAttr = new Attribute().name("Systolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
+    Attribute nonDiaAttr = new Attribute().name("NotDiastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
+
+    //only 1 attribute
+    Criteria pm =
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.BP.name(), 0, null, null, null);
+    SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(sysAttr));
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
+
+    //2 but not systolic and diastolic
+    pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
+  }
+
+  @Test
   public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
     Criteria icd9ConditionChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -122,7 +703,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -139,55 +720,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.ENCOUNTERS)
       .operator(Operator.IN)
       .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9, icd9Proc), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventInvalidLong() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand = "zz";
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList(operand));
-    SearchRequest searchRequest =
-      createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
-
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(
-        "Please provide valid number for age at event.");
-    }
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventTooManyOperands() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = "1";
-    String operand2 = "2";
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList(operand1, operand2));
-    SearchRequest searchRequest =
-      createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
-
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: age at event can only have 1 operand when using the %s operator",
-        modifier.getOperator().name()));
-    }
   }
 
   @Test
@@ -208,102 +743,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .operator(Operator.BETWEEN)
       .operands(Arrays.asList(operand1, operand2));
     SearchRequest searchRequest =
-      createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
+      createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier));
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetweenTooManyOperands() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = "24";
-    String operand2 = "26";
-    String operand3 = "27";
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.BETWEEN)
-      .operands(Arrays.asList(operand1, operand2, operand3));
-    SearchRequest searchRequest =
-      createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
-
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: age at event can only have 2 operands when using the %s operator",
-        modifier.getOperator().name()));
-    }
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetweenNotEnoughOperands() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = "24";
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.BETWEEN)
-      .operands(Arrays.asList(operand1));
-    SearchRequest searchRequest =
-      createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9), Arrays.asList(modifier));
-
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(String.format(
-        "Modifier: age at event can only have 2 operands when using the %s operator",
-        modifier.getOperator().name()));
-    }
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildNumOfOccurrencesMoreThanOne() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    Modifier modifier1 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.EQUAL)
-      .operands(Arrays.asList("1"));
-    Modifier modifier2 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.EQUAL)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
-      Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(
-        "Please provide one number of occurrences modifier.");
-    }
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildNumOfOccurrencesInvalidLong() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand = "c";
-    Modifier modifier1 = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.EQUAL)
-      .operands(Arrays.asList(operand));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
-      Arrays.asList(icd9), Arrays.asList(modifier1));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      assertThat(bre.getMessage()).isEqualTo(
-        "Please provide valid number for number of occurrences.");
-    }
   }
 
   @Test
@@ -319,7 +761,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.EQUAL)
       .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -344,7 +786,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.EVENT_DATE)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("2009-12-03"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9,icd9Proc), Arrays.asList(modifier1, modifier2, modifier3));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -358,30 +800,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.EVENT_DATE)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("2009-12-03"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditionOccurrenceChildEventDateInvalidDate() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.EVENT_DATE)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("c"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
-      Arrays.asList(icd9), Arrays.asList(modifier));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException bre) {
-      //success
-      assertThat(bre.getMessage()).isEqualTo(
-        "Please provide valid date for event date.");
-    }
   }
 
   @Test
@@ -393,7 +814,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(),
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier2));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -405,7 +826,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ConditionChild =
       criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
     SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionParent.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd9ConditionChild);
     criteriaDao.delete(icd9ConditionParent);
@@ -416,7 +837,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ProcedureChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "002", DomainType.PROCEDURE.name(), "2");
     SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
-    SearchRequest searchRequest = createSearchRequests(icd9ProcedureChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -427,7 +848,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ProcedureChild =
       criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name(), "2"));
     SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
-    SearchRequest searchRequest = createSearchRequests(icd9ProcedureParent.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd9ProcedureChild);
     criteriaDao.delete(icd9ProcedureParent);
@@ -438,7 +859,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9MeasurementChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
     SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-    SearchRequest searchRequest = createSearchRequests(icd9MeasurementChild.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -449,7 +870,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9MeasurementChild =
       criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name(), "3"));
     SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
-    SearchRequest searchRequest = createSearchRequests(icd9MeasurementParent.getType(), Arrays.asList(icd9), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd9MeasurementChild);
     criteriaDao.delete(icd9MeasurementParent);
@@ -457,7 +878,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demo = createSearchParameter(demoGender, null);
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -465,7 +886,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoEthnicity() throws Exception {
-    Criteria demoEthnicity = createDemoCriteria("DEMO", "ETH", "9898");
+    Criteria demoEthnicity = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.ETH.name(), "9898");
     SearchParameter demo = createSearchParameter(demoEthnicity, null);
     SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -473,24 +894,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoDec() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
     SearchParameter demo = createSearchParameter(demoGender, "Deceased");
     SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsDemoDecNoValue() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "DEC", null);
-    SearchParameter demo = createSearchParameter(demoGender, "");
-    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals(bre.getMessage(), "Dec must provide a value of: Deceased");
-    }
   }
 
   @Test
@@ -499,7 +906,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
@@ -507,58 +914,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoAgeAndDeceased() throws Exception {
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
-    DateTime now = new DateTime();
-    Period period = new Period(birthDate, now);
-    Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
-    Criteria demoDec = createDemoCriteria("DEMO", "DEC", null);
-    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
-    SearchParameter demoDecParameter = createSearchParameter(demoDec, null);
-    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter, demoDecParameter), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals(bre.getMessage(), "Cannot select age and deceased in the same context.");
-    }
-  }
-
-  @Test
-  public void countSubjectsDemoAgeNoAttribute() throws Exception {
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
-    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
-    }
-  }
-
-  @Test
-  public void countSubjectsDemoAgeNoAttributeOperands() throws Exception {
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
-    SearchParameter demoAgeParameter = createSearchParameter(demoAge, null);
-    demoAgeParameter.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL)));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoAgeParameter), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals(bre.getMessage(), "Age must provide an operator and operands.");
-    }
-  }
-
-  @Test
   public void countSubjectsDemoAgeBetween() throws Exception {
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demo = createSearchParameter(demoAge, null);
     demo.attributes(Arrays.asList(
       new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15","99"))
@@ -569,14 +926,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoGenderAndAge() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
@@ -588,21 +945,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9AndDemo() throws Exception {
     Criteria icd9MeasurementChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "003", DomainType.MEASUREMENT.name(), "3");
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria("DEMO", "AGE", null);
+    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
     SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
     SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
 
     SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
-    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(icd9.getType()).searchParameters(Arrays.asList(icd9)).modifiers(new ArrayList<>());
+    SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.CONDITION.name()).searchParameters(Arrays.asList(icd9)).modifiers(new ArrayList<>());
 
     searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
@@ -611,7 +968,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoExcluded() throws Exception {
-    Criteria demoGender = createDemoCriteria("DEMO", "GEN", "8507");
+    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
     SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
 
     SearchParameter demoGenderSearchParamExclude = createSearchParameter(demoGender, null);
@@ -629,19 +986,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ConditionOccurrenceChildEncounter() throws Exception {
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), Arrays.asList(modifier));
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD10ConditionOccurrenceChild() throws Exception {
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-    SearchRequest searchRequest = createSearchRequests(icd10ConditionChild.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -652,10 +1009,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd9ConditionChild =
       criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
     Criteria icd10ConditionChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
-    SearchRequest searchRequest = createSearchRequests(icd9ConditionChild.getType(), Arrays.asList(icd9P, icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9P, icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
     criteriaDao.delete(icd9ConditionChild);
     criteriaDao.delete(icd9ConditionParent);
@@ -664,11 +1021,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
     Criteria icd10ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "A"));
+      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "A"));
     Criteria icd10ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name(), "6"));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name(), "6"));
     SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
-    SearchRequest searchRequest = createSearchRequests(icd10ConditionParent.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd10ConditionChild);
     criteriaDao.delete(icd10ConditionParent);
@@ -677,20 +1034,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10ProcedureOccurrenceChild() throws Exception {
     Criteria icd10ProcedureChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), 0, "16070", DomainType.PROCEDURE.name(), "8");
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.PCS.name(), 0, "16070", DomainType.PROCEDURE.name(), "8");
     SearchParameter icd10 = createSearchParameter(icd10ProcedureChild, "16070");
-    SearchRequest searchRequest = createSearchRequests(icd10ProcedureChild.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
     Criteria icd10ProcedureParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), "16"));
+      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.PCS.name(), "16"));
     Criteria icd10ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name(), "8"));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name(), "8"));
     SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
-    SearchRequest searchRequest = createSearchRequests(icd10ProcedureParent.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd10ProcedureChild);
     criteriaDao.delete(icd10ProcedureParent);
@@ -699,20 +1056,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD10MeasurementChild() throws Exception {
     Criteria icd10MeasurementChild =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), 0, "R92.2", DomainType.MEASUREMENT.name(), "9");
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "R92.2", DomainType.MEASUREMENT.name(), "9");
     SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
-    SearchRequest searchRequest = createSearchRequests(icd10MeasurementChild.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD10MeasurementParent() throws Exception {
     Criteria icd10MeasurementParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), "R92"));
+      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "R92"));
     Criteria icd10MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.ICD10CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name(), "9"));
+      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name(), "9"));
     SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
-    SearchRequest searchRequest = createSearchRequests(icd10MeasurementParent.getType(), Arrays.asList(icd10), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     criteriaDao.delete(icd10MeasurementChild);
     criteriaDao.delete(icd10MeasurementParent);
@@ -723,7 +1080,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria cptProcedure =
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
     SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
-    SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -733,7 +1090,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001T", DomainType.PROCEDURE.name(), "4");
     SearchParameter cpt = createSearchParameter(cptProcedure, "0001T");
     Modifier modifier = new Modifier().name(ModifierType.ENCOUNTERS).operator(Operator.IN).operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(cptProcedure.getType(), Arrays.asList(cpt), Arrays.asList(modifier));
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -742,7 +1099,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria cptObservation =
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Z", DomainType.OBSERVATION.name(), "5");
     SearchParameter cpt = createSearchParameter(cptObservation, "0001Z");
-    SearchRequest searchRequest = createSearchRequests(cptObservation.getType(), Arrays.asList(cpt), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -751,7 +1108,25 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria cptMeasurement =
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "0001Q", DomainType.MEASUREMENT.name(), "10");
     SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
-    SearchRequest searchRequest = createSearchRequests(cptMeasurement.getType(), Arrays.asList(cpt), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsConditionsSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "", DomainType.CONDITION.name(), "6");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsProceduresSnomed() throws Exception {
+    Criteria snomedCriteria =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.PCS.name(), 0, "", DomainType.PROCEDURE.name(), "4");
+    SearchParameter snomed = createSearchParameter(snomedCriteria, "");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -760,7 +1135,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria cptDrug =
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "90703", DomainType.DRUG.name(), "11");
     SearchParameter cpt = createSearchParameter(cptDrug, "90703");
-    SearchRequest searchRequest = createSearchRequests(cptDrug.getType(), Arrays.asList(cpt), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -791,20 +1166,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsVisitChildNullConceptId() throws Exception {
-    Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false);
-    SearchParameter visit = createSearchParameter(visitCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException e) {
-      // success
-      assertEquals("Please provide a valid concept Id", e.getMessage());
-    }
-  }
-
-  @Test
   public void countSubjectsVisitChildModifiers() throws Exception {
     Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
@@ -817,36 +1178,28 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugNoSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), new ArrayList<>(), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals("Please provide a valid search parameter.", bre.getMessage());
-    }
-  }
-
-  @Test
-  public void countSubjectsDrugNoConceptIdOnSearchParameter() throws Exception {
-    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false);
-    SearchParameter drug = createSearchParameter(drugCriteria, null);
-    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals("Please provide a search parameter with a valid conceptId.", bre.getMessage());
-    }
-  }
-
-  @Test
   public void countSubjectsDrugChild() throws Exception {
     Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
     SearchParameter drug = createSearchParameter(drugCriteria, null);
     SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugParent() throws Exception {
+    Criteria drugCriteria = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drug = createSearchParameter(drugCriteria, null);
+    SearchRequest searchRequest = createSearchRequests(drug.getType(), Arrays.asList(drug), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsDrugParentAndChild() throws Exception {
+    Criteria drugCriteriaChild = new Criteria().type(TreeType.DRUG.name()).group(false).conceptId("11");
+    Criteria drugCriteriaParent = new Criteria().type(TreeType.DRUG.name()).group(true).conceptId("21600932");
+    SearchParameter drugParent = createSearchParameter(drugCriteriaParent, null);
+    SearchParameter drugChild = createSearchParameter(drugCriteriaChild, null);
+    SearchRequest searchRequest = createSearchRequests(drugParent.getType(), Arrays.asList(drugParent,drugChild), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -878,7 +1231,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabTextAnyEncounter() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     Modifier modifier = new Modifier()
       .name(ModifierType.ENCOUNTERS)
       .operator(Operator.IN)
@@ -888,48 +1241,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabTextAnyEncounterNoInOperator() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
-    Modifier modifier = new Modifier()
-      .name(ModifierType.ENCOUNTERS)
-      .operator(Operator.EQUAL)
-      .operands(Arrays.asList("1"));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals("Please provide IN operator for visit type.", bre.getMessage());
-    }
-  }
-
-  @Test
-  public void countSubjectsLabTextAnyEncounterConceptIdNotANumber() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
-    Modifier modifier = new Modifier()
-      .name(ModifierType.ENCOUNTERS)
-      .operator(Operator.IN)
-      .operands(Arrays.asList("x"));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals("Please provide valid conceptId for visit type.", bre.getMessage());
-    }
-  }
-
-  @Test
   public void countSubjectsLabTextAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -938,7 +1253,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -956,7 +1271,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabCategoricalAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -974,7 +1289,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabBothAny() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1025,7 +1340,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
-    lab.attributes(Arrays.asList(new Attribute().name(MeasurementQueryBuilder.ANY)));
+    lab.attributes(Arrays.asList(new Attribute().name(ANY)));
     Modifier modifier = new Modifier().name(ModifierType.AGE_AT_EVENT).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("25"));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), Arrays.asList(modifier));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1039,14 +1354,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter lab1 = createSearchParameter(labCriteria1, null);
     SearchParameter lab2 = createSearchParameter(labCriteria2, null);
     SearchParameter lab3 = createSearchParameter(labCriteria3, null);
-    Attribute labText = new Attribute().name(MeasurementQueryBuilder.ANY);
-    Attribute labNumerical = new Attribute().name(MeasurementQueryBuilder.ANY);
+    Attribute labText = new Attribute().name(ANY);
+    Attribute labNumerical = new Attribute().name(ANY);
     Attribute labCategorical = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("77"));
     lab1.attributes(Arrays.asList(labText));
     lab2.attributes(Arrays.asList(labNumerical));
     lab3.attributes(Arrays.asList(labCategorical));
     SearchRequest searchRequest = createSearchRequests(lab1.getType(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1063,8 +1378,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBloodPressureAny() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903118L),
-      new Attribute().name(PMQueryBuilder.ANY).operands(new ArrayList<>()).conceptId(903115L)
+      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903118L),
+      new Attribute().name(ANY).operands(new ArrayList<>()).conceptId(903115L)
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BP.name(), "BP Name", attributes);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
@@ -1083,7 +1398,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     List<Attribute> hrAttributes = Arrays.asList(
       new Attribute().name("Heart Rate").operator(Operator.EQUAL).operands(Arrays.asList("71")).conceptId(903126L)
     );
-    SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate Detail", hrAttributes);
+    SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), "Heart Rate Detail", hrAttributes);
     SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(hrSearchParameter)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
@@ -1172,6 +1487,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", "4023190");
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectsPPI() throws Exception {
+    //value as concept id
+    Criteria ppiCriteria =
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "7", DomainType.OBSERVATION.name(), "5").name(null);
+    SearchParameter ppi = createSearchParameter(ppiCriteria, "7");
+    SearchRequest searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //value as number
+    ppiCriteria =
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, null, DomainType.OBSERVATION.name(), "5").name("7");
+    ppi = createSearchParameter(ppiCriteria, null);
+    searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -1181,282 +1513,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(response.getItems().size(), 1);
-    assertEquals(response.getItems().get(0), new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L));
-  }
-
-  @Test
-  public void countSubjectWheelChairUserBadValue() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "Wheel Chair User", "903111", null);
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
-
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      //Success
-      assertEquals(bre.getMessage(), "Please provide valid conceptId and value for Wheel Chair User.");
-    }
-  }
-
-  @Test
-  public void countSubjectsBadOperand() throws Exception {
-    Attribute attribute = new Attribute().name("Heart Rate Detail").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903126L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate", "Measurement");
-
-    attribute = new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903124L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", "Measurement");
-
-    attribute = new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903133L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", "Measurement");
-
-    attribute = new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903121L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", "Measurement");
-
-    attribute = new Attribute().name("Waist").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903135L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WC.name(), "Waist Circumference", "Measurement");
-
-    attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HC.name(), "Hip Circumference", "Measurement");
-
-    attribute = new Attribute().name(NUMERICAL).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(CATEGORICAL).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(BOTH).operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-  }
-
-  @Test
-  public void countSubjectsNoOperator() throws Exception {
-    Attribute attribute = new Attribute().name("Heart Rate Detail").operands(Arrays.asList("10")).conceptId(903126L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate", "Measurement");
-
-    attribute = new Attribute().name("BMI").operands(Arrays.asList("10")).conceptId(903124L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", "Measurement");
-
-    attribute = new Attribute().name("Height").operands(Arrays.asList("10")).conceptId(903133L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", "Measurement");
-
-    attribute = new Attribute().name("Weight").operands(Arrays.asList("10")).conceptId(903121L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", "Measurement");
-
-    attribute = new Attribute().name("Waist").operands(Arrays.asList("10")).conceptId(903135L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WC.name(), "Waist Circumference", "Measurement");
-
-    attribute = new Attribute().name("Hip").operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HC.name(), "Hip Circumference", "Measurement");
-
-    attribute = new Attribute().name(NUMERICAL).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(CATEGORICAL).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(BOTH).operands(Arrays.asList("10")).conceptId(903136L);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-  }
-
-  @Test
-  public void countSubjectsNoConceptId() throws Exception {
-    Attribute attribute = new Attribute().name("Heart Rate Detail").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate", "Measurement");
-
-    attribute = new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", "Measurement");
-
-    attribute = new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", "Measurement");
-
-    attribute = new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", "Measurement");
-
-    attribute = new Attribute().name("Waist").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WC.name(), "Waist Circumference", "Measurement");
-
-    attribute = new Attribute().name("Hip").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("10"));
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HC.name(), "Hip Circumference", "Measurement");
-
-    attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-
-    attribute = new Attribute().name(MeasurementQueryBuilder.ANY);
-    assertBadRequestExceptionAttributes(attribute, TreeType.MEAS.name(), TreeSubType.LAB.name(), "Measurements", "Measurement");
-  }
-
-  @Test
-  public void countSubjectsEmptyAttribute() throws Exception {
-    Attribute attribute = new Attribute();
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.WC.name(), "Waist Circumference", "Measurement");
-    assertBadRequestExceptionAttributes(attribute, TreeType.PM.name(), TreeSubType.HC.name(), "Hip Circumference", "Measurement");
-  }
-
-  @Test
-  public void countSubjectsNoAttribute() throws Exception {
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.HR_DETAIL.name(), "Heart Rate", "Measurement");
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.BMI.name(), "BMI", "Measurement");
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.HEIGHT.name(), "Height", "Measurement");
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.WEIGHT.name(), "Weight", "Measurement");
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.WC.name(), "Waist Circumference", "Measurement");
-    assertBadRequestExceptionAttributes(null, TreeType.PM.name(), TreeSubType.HC.name(), "Hip Circumference", "Measurement");
-  }
-
-  @Test
-  public void countSubjectsValidateNonAttribute() throws Exception {
-    assertBadRequestExceptionNoAttributes(TreeSubType.HR.name(), "Heart Rate", null, null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.HR.name(), "Heart Rate", "12", null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.HR.name(), "Heart Rate", null, "val");
-    assertBadRequestExceptionNoAttributes(TreeSubType.PREG.name(), "Pregnancy", null, null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.PREG.name(), "Pregnancy", "12", null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.PREG.name(), "Pregnancy", null, "val");
-    assertBadRequestExceptionNoAttributes(TreeSubType.WHEEL.name(), "Wheel Chair User", null, null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.WHEEL.name(), "Wheel Chair User", "12", null);
-    assertBadRequestExceptionNoAttributes(TreeSubType.WHEEL.name(), "Wheel Chair User", null, "val");
-  }
-
-  @Test
-  public void countSubjectsBloodPressureBadSystolicOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureBadDiastolicOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("zz")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureBadSystolicName() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Other").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureBadDiastolicName() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Other").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoSystolicOperator() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoDiastolicOperator() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoSystolicOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoDiastolicOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoSystolicConceptId() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90"));
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoDiastolicConceptId() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60"));
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureSystolicBetweenOneOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.BETWEEN).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureDiastolicBetweenOneOperand() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureSysstolicBetweenThreeOperands() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.BETWEEN).operands(Arrays.asList("90","122","200")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureDiasstolicBetweenThreeOperands() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903118L);
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.BETWEEN).operands(Arrays.asList("90","122","200")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoSystolicAttribute() throws Exception {
-    Attribute diastolicAttr = new Attribute().name("Diastolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("90")).conceptId(903115L);
-    assertBadRequestExceptionBloodPressure(null, diastolicAttr);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoDiastolicAttribute() throws Exception {
-    Attribute systolicAttr = new Attribute().name("Systolic").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("60")).conceptId(903118L);
-    assertBadRequestExceptionBloodPressure(systolicAttr, null);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureNoSystolicOrDiastolicAttribute() throws Exception {
-    assertBadRequestExceptionBloodPressure(null, null);
-  }
-
-  @Test
-  public void countSubjectsBloodPressureEmptyAttributes() throws Exception {
-    assertBadRequestExceptionBloodPressure(new Attribute(), new Attribute());
-  }
-
-  @Test
-  public void countSubjects_EmptyIcludesAndExcludes() throws Exception {
-    try {
-      controller.countParticipants(1L, new SearchRequest());
-      fail("Should have thrown BadRequestException!");
-    } catch (BadRequestException e) {
-      assertEquals("Invalid SearchRequest: includes[] and excludes[] cannot both be empty", e.getMessage());
-    }
+    assertEquals(2, response.getItems().size());
+    assertEquals(new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L), response.getItems().get(0));
+    assertEquals(new DemoChartInfo().gender("No matching concept").race("Unknown").ageRange("> 65").count(1L), response.getItems().get(1));
   }
 
   @Test
@@ -1472,66 +1531,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
-  private void assertBadRequestExceptionBloodPressure(Attribute systolicAttr, Attribute diastolicAttr) {
-    List<Attribute> attributes = new ArrayList<>();
-    if (systolicAttr != null) {
-      attributes.add(systolicAttr);
-    }
-    if (diastolicAttr != null) {
-      attributes.add(diastolicAttr);
-    }
-    Criteria hypotensive = new Criteria().type(TreeType.PM.name()).subtype(TreeSubType.BP.name())
-      .name("Hypotensive (Systolic <= 90 / Diastolic <= 60)").group(false).selectable(true)
-      .count("16").domainId("Measurement");
-    SearchParameter hypotensiveSP = createSearchParameter(hypotensive, null);
-    hypotensiveSP.attributes(attributes);
-    SearchRequest searchRequest = createSearchRequests(hypotensive.getType(), Arrays.asList(hypotensiveSP), new ArrayList<>());
+  private void assertMessageException(SearchRequest searchRequest, String message, Object... messageParams) {
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestExeption!");
-    } catch (BadRequestException e) {
-      //success
-      assertThat(e.getMessage()).isEqualTo("Please provide valid search attributes(name, operator, " +
-        "operands and conceptId) for Systolic and Diastolic.");
-    }
-  }
-
-  private void assertBadRequestExceptionAttributes(Attribute attribute, String type, String subtype, String exceptionType, String domain) {
-    List<Attribute> attributes = new ArrayList<>();
-    if (attribute != null) {
-      attributes.add(attribute);
-    }
-    Criteria criteria = new Criteria().type(type).subtype(subtype)
-      .name("Name").group(false).selectable(true)
-      .count("16").domainId(domain);
-    SearchParameter searchParameter = createSearchParameter(criteria, null);
-    searchParameter.attributes(attributes);
-    SearchRequest searchRequest = createSearchRequests(criteria.getType(), Arrays.asList(searchParameter), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestExeption!");
-    } catch (BadRequestException e) {
-      //success
-      boolean isMeasurementConceptIdNull = attribute != null && attribute.getConceptId() == null && TreeType.MEAS.name().equals(type);
-      String message = isMeasurementConceptIdNull ? "Please provide valid concept id for %s."
-        : "Please provide valid search attributes(operator, operands) for %s.";
-      assertThat(e.getMessage()).isEqualTo(String.format(message, exceptionType));
-    }
-  }
-
-  private void assertBadRequestExceptionNoAttributes(String subtype, String exceptionType, String conceptId, String value) {
-    Criteria criteria = new Criteria().type(TreeType.PM.name()).subtype(subtype)
-      .name("Name").group(false).selectable(true)
-      .count("16").domainId("Measurement").conceptId(conceptId);
-    SearchParameter searchParameter = createSearchParameter(criteria, value);
-    SearchRequest searchRequest = createSearchRequests(criteria.getType(), Arrays.asList(searchParameter), new ArrayList<>());
-    try {
-      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-      fail("Should have thrown a BadRequestExeption!");
-    } catch (BadRequestException e) {
-      //success
-      assertThat(e.getMessage())
-        .isEqualTo(String.format("Please provide valid conceptId and value for %s.", exceptionType));
+      fail("Should have thrown a BadRequestException!");
+    } catch (BadRequestException bre) {
+      //Success
+      String expected = new MessageFormat(message).format(messageParams);
+      assertEquals(expected, bre.getMessage());
     }
   }
 
@@ -1554,7 +1561,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private SearchParameter createPMSearchCriteriaWithAttributes(String type, String subtype, String criteriaName, List<Attribute> attributes) {
     Criteria criteria = new Criteria().type(type).subtype(subtype)
       .name(criteriaName).group(false).selectable(true)
-      .count("16").domainId("Measurement");
+      .count("16").domainId(DomainType.MEASUREMENT.name());
     SearchParameter searchParameter = createSearchParameter(criteria, null);
     searchParameter.attributes(attributes);
     return searchParameter;
@@ -1563,18 +1570,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private SearchParameter createPMSearchCriteria(String type, String subtype, String criteriaName, String conceptId, String code) {
     Criteria criteria = new Criteria().type(type).subtype(subtype)
       .name(criteriaName).group(false).selectable(true)
-      .count("16").domainId("Measurement").conceptId(conceptId);
+      .count("16").domainId(DomainType.MEASUREMENT.name()).conceptId(conceptId);
     SearchParameter searchParameter = createSearchParameter(criteria, code);
     return searchParameter;
   }
 
   private SearchParameter createSearchParameter(Criteria criteria, String code) {
     return new SearchParameter()
+      .name(criteria.getName())
       .type(criteria.getType())
       .subtype(criteria.getSubtype())
       .group(criteria.getGroup())
       .value(code)
-      .domain(criteria.getDomainId())
+      .domainId(criteria.getDomainId())
       .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
   }
 

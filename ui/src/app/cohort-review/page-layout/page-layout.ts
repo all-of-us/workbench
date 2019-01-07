@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
 
 import {ReviewStatus} from 'generated';
 import {ReviewStateService} from '../review-state.service';
@@ -10,6 +9,8 @@ import {ReviewStateService} from '../review-state.service';
   styleUrls: ['./page-layout.css']
 })
 export class PageLayout implements OnInit {
+
+  create = false;
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
@@ -17,13 +18,18 @@ export class PageLayout implements OnInit {
   ) {}
 
   ngOnInit() {
-    const {annotationDefinitions, cohort, review} = this.route.snapshot.data;
-    this.state.annotationDefinitions.next(annotationDefinitions);
+    const {cohort, review} = this.route.snapshot.data;
     this.state.cohort.next(cohort);
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {
-      this.router.navigate(['create'], {relativeTo: this.route});
+      this.create = true;
+    } else {
+      this.router.navigate(['participants'], {relativeTo: this.route});
     }
+  }
+
+  reviewCreated(created: boolean) {
+    this.create = !created;
   }
 }

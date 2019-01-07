@@ -1,6 +1,8 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -12,10 +14,12 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -31,6 +35,7 @@ import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -153,6 +158,30 @@ public class ProfileController implements ProfileApiDelegate {
     fireCloudService.registerUser(user.getContactEmail(),
         user.getGivenName(), user.getFamilyName());
     return createFirecloudBillingProject(user);
+  }
+
+  private void validateStringLength(String field, String fieldName, int max, int min) {
+    if (field == null) {
+      throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
+    }
+    if (field.length() > max) {
+      throw new BadRequestException(String.format("%s length exceeds character limit. (%d)", fieldName, max));
+    }
+    if (field.length() < min) {
+      if (min == 1) {
+        throw new BadRequestException(String.format("%s cannot be left blank.", fieldName));
+      } else {
+        throw new BadRequestException(String.format("%s is under character minimum. (%d)", fieldName, min));
+      }
+    }
+  }
+
+  private void validateProfileFields(Profile profile) {
+    validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
+    validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
+    validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
+    validateStringLength(profile.getOrganization(), "Organization", 255, 1);
+    validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
   }
 
   private User saveUserWithConflictHandling(User user) {
@@ -384,9 +413,16 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    userService.createUser(request.getProfile().getGivenName(),
+    validateProfileFields(request.getProfile());
+    User user = userService.createUser(
+        request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
-        googleUser.getPrimaryEmail(), request.getProfile().getContactEmail());
+        googleUser.getPrimaryEmail(),
+        request.getProfile().getContactEmail(),
+        request.getProfile().getCurrentPosition(),
+        request.getProfile().getOrganization(),
+        request.getProfile().getAreaOfResearch()
+    );
 
     try {
       mailServiceProvider.get().sendWelcomeEmail(request.getProfile().getContactEmail(), googleUser.getPassword(), googleUser);
@@ -394,21 +430,22 @@ public class ProfileController implements ProfileApiDelegate {
       throw new WorkbenchException(e);
     }
 
-    // TODO(dmohs): This should be 201 Created with no body, but the UI's swagger-generated code
-    // doesn't allow this. Fix.
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return getProfileResponse(user);
   }
 
   @Override
   public ResponseEntity<Profile> submitIdVerification() {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     User user = userProvider.get();
     if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
+      log.log(Level.INFO, "Sending id verification request email.");
       try {
         mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting id verification", e);
       }
       user.setRequestedIdVerification(true);
+      user.setIdVerificationRequestTime(now);
       user = saveUserWithConflictHandling(user);
     }
 
@@ -446,6 +483,15 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
+  private void checkUserCreationNonce(User user, String nonce) {
+    if (Strings.isNullOrEmpty(nonce)) {
+      throw new BadRequestException("missing required creationNonce");
+    }
+    if (user.getCreationNonce() == null || !nonce.equals(user.getCreationNonce().toString())) {
+      throw new UnauthorizedException("invalid creationNonce provided");
+    }
+  }
+
   /*
    * This un-authed API method is limited such that we only allow contact email updates before the user has signed in
    * with the newly created gsuite account. Once the user has logged in, they can change their contact email through
@@ -457,10 +503,11 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
-    String newEmail = updateContactEmailRequest.getContactEmail();
+    checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
+    String newEmail = updateContactEmailRequest.getContactEmail();
     try {
       new InternetAddress(newEmail).validate();
     } catch (AddressException e) {
@@ -477,6 +524,7 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
+    checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
@@ -517,15 +565,19 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
+    validateProfileFields(updatedProfile);
     User user = userProvider.get();
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
+    user.setOrganization(updatedProfile.getOrganization());
+    user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
 
     if (updatedProfile.getContactEmail() != null &&
         !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-      user.setContactEmail(updatedProfile.getContactEmail());
+      // See RW-1588.
+      throw new BadRequestException("Changing email is not currently supported");
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations()
@@ -584,7 +636,8 @@ public class ProfileController implements ProfileApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     IdVerificationStatus status = review.getNewStatus();
-    Boolean oldVerification = userDao.findUserByUserId(userId).getIdVerificationIsValid();
+    User user = userDao.findUserByUserId(userId);
+    Boolean oldVerification = user.getIdVerificationIsValid();
     String newValue;
 
     if (status == IdVerificationStatus.VERIFIED) {
@@ -594,7 +647,11 @@ public class ProfileController implements ProfileApiDelegate {
       userService.setIdVerificationApproved(userId, false);
       newValue = "false";
     }
-
+    try {
+      mailServiceProvider.get().sendIdVerificationCompleteEmail(user.getContactEmail(), status, user.getEmail());
+    } catch (MessagingException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
     userService.logAdminUserAction(
         userId,
         "manual ID verification",

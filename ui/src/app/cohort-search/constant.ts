@@ -1,27 +1,28 @@
 import { Operator, TreeSubType, TreeType } from 'generated';
 
 export const PROGRAM_TYPES = [
-  { name: 'Surveys',    type: TreeType.SURVEY, children: [], disabled: true },
+  { name: 'Surveys',    type: TreeType.PPI },
   { name: 'Physical Measurements',    type: TreeType.PM, fullTree: true },
 ];
 
 export const DOMAIN_TYPES = [
-    { name: 'Demographics', type: TreeType.DEMO },
-    { name: 'Conditions',    type: TreeType.CONDITION, codes: [
-        { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.CM },
-        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10CM}
-      ]
-    },
-    { name: 'Procedures',    type: TreeType.PROCEDURE, codes: [
-        { name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC },
-        { name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.ICD10PCS},
-        { name: 'CPT Codes', type: TreeType.CPT, subtype: null}
-      ] },
-    { name: 'Drugs',    type: TreeType.DRUG },
-    { name: 'Measurements',    type: TreeType.MEAS },
-    { name: 'Visits',    type: TreeType.VISIT, fullTree: true },
-    // { name: 'PheCodes',     type: 'phecode' },
-    // { name: 'Temporal',     type: 'temporal' }
+  {name: 'Demographics', type: TreeType.DEMO},
+  {
+    name: 'Conditions', type: TreeType.CONDITION, codes: [
+      {name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.CM},
+      {name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.CM}
+    ]
+  },
+  {
+    name: 'Procedures', type: TreeType.PROCEDURE, codes: [
+      {name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.PROC},
+      {name: 'ICD10 Codes', type: TreeType.ICD10, subtype: TreeSubType.PCS},
+      {name: 'CPT Codes', type: TreeType.CPT, subtype: null}
+    ]
+  },
+  {name: 'Drugs', type: TreeType.DRUG},
+  {name: 'Measurements', type: TreeType.MEAS},
+  {name: 'Visits', type: TreeType.VISIT, fullTree: true}
 ];
 
 export const PM_UNITS = {

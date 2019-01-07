@@ -491,7 +491,7 @@ def docker_clean()
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
-  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
 end
 
 Common.register_command({
@@ -658,31 +658,130 @@ Common.register_command({
 Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
 })
-def generate_cdr_counts(*args)
+
+def generate_criteria_table(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
 end
 
 Common.register_command({
-  :invocation => "generate-cdr-counts",
-  :description => "generate-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
---public-project <PROJECT> --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with data from a cdr that will be imported to mysql/cloudsql to be used by workbench and databrowser.",
-  :fn => ->(*args) { generate_cdr_counts(*args) }
+  :invocation => "generate-criteria-table",
+  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { generate_criteria_table(*args) }
 })
 
-def generate_cloudsql_db(*args)
+def generate_private_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-cloudsql-db} + args
+  common.run_inline %W{docker-compose run db-generate-private-cdr-counts} + args
 end
 
+def generate_public_cdr_counts(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-public-cdr-counts} + args
+end
+
+Common.register_command({
+  :invocation => "generate-private-cdr-counts",
+  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
+ --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
+  :fn => ->(*args) { generate_private_cdr_counts(*args) }
+})
+
+Common.register_command({
+  :invocation => "generate-public-cdr-counts",
+  :description => "generate-public-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --public-project <PROJECT> \
+ --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+Generates databases in bigquery with non de-identified data from a cdr that will be imported to mysql/cloudsql to be used by databrowser.",
+  :fn => ->(*args) { generate_public_cdr_counts(*args) }
+})
+
+def generate_cloudsql_db(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project the Cloud Sql instance is in"
+  )
+  op.add_option(
+    "--instance [instance]",
+    ->(opts, v) { opts.instance = v},
+    "Cloud SQL instance"
+  )
+  op.add_option(
+      "--database [database]",
+      ->(opts, v) { opts.database = v},
+      "Database name"
+  )
+  op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "Name of the GCS bucket containing the SQL dump"
+  )
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    common.run_inline %W{docker-compose run db-generate-cloudsql-db
+          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
+          --bucket #{op.opts.bucket}}
+  end
+end
 Common.register_command({
   :invocation => "generate-cloudsql-db",
-  :description => "./generate-cdr/generate-cloudsql-db.sh --project <PROJECT> --instance <INSTANCE> \
+  :description => "generate-cloudsql-db  --project <PROJECT> --instance <INSTANCE> \
 --database <cdrYYYYMMDD> --bucket <BUCKET>
 Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
-  :fn => ->(*args) { generate_cloudsql_db(*args) }
+  :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
+
+def cloudsql_import(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Project the Cloud Sql instance is in"
+  )
+  op.add_option(
+      "--instance [instance]",
+      ->(opts, v) { opts.instance = v},
+      "Cloud SQL instance"
+  )
+  op.add_option(
+      "--database [database]",
+      ->(opts, v) { opts.database = v},
+      "Database name"
+  )
+  op.add_option(
+      "--bucket [bucket]",
+      ->(opts, v) { opts.bucket = v},
+      "Name of the GCS bucket containing the SQL dump"
+  )
+  op.add_option(
+      "--file [file]",
+      ->(opts, v) { opts.file = v},
+      "File name to import"
+    )
+  op.parse.validate
+
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
+    common.run_inline %W{docker-compose run db-cloudsql-import
+          --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
+          --bucket #{op.opts.bucket} --file #{op.opts.file}}
+  end
+end
+
+
+Common.register_command({
+  :invocation => "cloudsql-import",
+  :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
+   --database <DATABASE> --bucket <BUCKET> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
+Import bucket of files or a single file in a bucket to a cloudsql database",
+                            :fn => ->(*args) { cloudsql_import("cloud-sql-import", *args) }
+                        })
 
 def generate_local_cdr_db(*args)
   common = Common.new
@@ -692,7 +791,7 @@ end
 Common.register_command({
   :invocation => "generate-local-cdr-db",
   :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-cdr-counts.",
+Creates and populates local mysql database from data in bucket made by generate-private/public-cdr-counts.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
 
@@ -705,7 +804,7 @@ end
 Common.register_command({
   :invocation => "generate-local-count-dbs",
   :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-cdr-counts.",
+Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-private/public-cdr-counts.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 
@@ -723,23 +822,8 @@ Dumps the local mysql db and uploads the .sql file to bucket",
   :fn => ->(*args) { mysqldump_db(*args) }
 })
 
-
-def cloudsql_import(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cloudsql-import} + args
-end
-
-Common.register_command({
-                            :invocation => "cloudsql-import",
-                            :description => "cloudsql-import --project <PROJECT> --instance <CLOUDSQL_INSTANCE>
-                            --bucket <BUCKET> --database <DATABASE> [--create-db-sql-file <SQL.sql>] [--file <ONLY_IMPORT_ME>]
-Import bucket of files or a single file in a bucket to a cloudsql database",
-                            :fn => ->(*args) { cloudsql_import(*args) }
-                        })
-
 def local_mysql_import(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-
   op.add_option(
     "--sql-dump-file [filename]",
     ->(opts, v) { opts.file = v},
@@ -1137,14 +1221,18 @@ def deploy_gcs_artifacts(cmd_name, args)
   op.parse.validate
   gcc.validate
   run_inline_or_log(op.opts.dry_run, %W{
-    gsutil cp scripts/setup_notebook_cluster.sh
-    gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+    gsutil cp
+    cluster-resources/setup_notebook_cluster.sh
+    cluster-resources/playground-extension.js
+    gs://#{gcc.project}-cluster-resources/
   })
   # This file must be readable by all AoU researchers and the Leonardo service
-  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make it
-  # public since the script's source is public anyways.
+  # account (https://github.com/DataBiosphere/leonardo/issues/220). Just make
+  # these public since these assets are public in GitHub anyways.
   run_inline_or_log(op.opts.dry_run, %W{
-    gsutil acl ch -u AllUsers:R gs://#{gcc.project}-scripts/setup_notebook_cluster.sh
+    gsutil acl ch -u AllUsers:R
+    gs://#{gcc.project}-cluster-resources/setup_notebook_cluster.sh
+    gs://#{gcc.project}-cluster-resources/playground-extension.js
   })
 end
 
@@ -1511,10 +1599,10 @@ def create_project_resources(gcc)
   common.status "Creating GCS bucket to store credentials..."
   common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-credentials/}
   common.status "Creating GCS bucket to store scripts..."
-  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-scripts/}
+  common.run_inline %W{gsutil mb -p #{gcc.project} -c regional -l us-central1 gs://#{gcc.project}-cluster-resources/}
   common.status "Creating Cloud SQL instances..."
   common.run_inline %W{gcloud sql instances create #{INSTANCE_NAME} --tier=db-n1-standard-2
-                       --activation-policy=ALWAYS --backup-start-time 00:00
+                       --activation-policy=ALWAYS --backup-start-time 00:00 --require-ssl
                        --failover-replica-name #{FAILOVER_INSTANCE_NAME} --enable-bin-log
                        --database-version MYSQL_5_7 --project #{gcc.project} --storage-auto-increase --async --maintenance-release-channel preview --maintenance-window-day SAT --maintenance-window-hour 5}
   common.status "Waiting for database instance to become ready..."

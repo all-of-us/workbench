@@ -286,13 +286,20 @@ Description of arguments these scripts take are as follows.
 `./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
 ##### Result is
 1. The BigQuery dataset has new denormalized tables for cohort builder to work.
-#### Generate count data in BigQuery from a cdr release
-`./project.rb generate-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 --workbench-project all-of-us-workbench-test --public-project all-of-us-workbench-test --cdr-version 20180206 --bin-size 20 --bucket all-of-us-workbench-private-cloudsql`
+#### Generate cdr count data for use by workbench in BigQuery from a deidentified cdr release
+`./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version 20181107 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
-1. BigQuery datasets:  all-of-us-workbench-test:cdr20180206 and all-of-us-workbench-test:public20180206
-2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20180206/*.csv.gz and public20180206/*.csv.gz with public counts in multiples of bin-size
+1. Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
+2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 
 3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
-3. Note cdr-version can be '' to make datasets named cdr and public
+3. Note cdr-version can be '' to make dataset named cdr
+#### Generate public count data for use by databrowser in BigQuery from a non de-identified cdr release
+`./project.rb generate-public-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --public-project all-of-us-workbench-test --cdr-version 20181107 --bin-size 20 --bucket all-of-us-workbench-public-cloudsql`
+##### Result is
+1. Public BigQuery dataset:  all-of-us-workbench-test:public20181107
+2. CSV dumps of tables in bucket all-of-us-workbench-public-cloudsql: public20181107/*.csv.gz 
+3. Browse csvs in browser like here :https://console.cloud.google.com/storage/browser?project=all-of-us-workbench-test&organizationId=394551486437
+3. Note cdr-version can be '' to make dataset named public
 #### Generate cloudsql databases from a bucket without downloading the data
 ##### * NOTE The cloudsql instance is set in code for each environment in /api/libproject/devstart.rb. Thus each cdr release will be on the same cloudsql instance for an environment.  
 `# Once for private cdr`
@@ -432,3 +439,36 @@ create and delete BigQuery datasets), run:
 ```
 
 By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
+
+## Manual Testing
+
+### Backend Swagger Portals
+
+These are easiest if you need to authenticate as one of your researcher accounts.
+
+- Firecloud
+  - dev: https://firecloud-orchestration.dsde-dev.broadinstitute.org/
+  - prod: https://api.firecloud.org
+- Leo (notebook clusters)
+  - dev: https://leonardo.dsde-dev.broadinstitute.org
+  - prod: https://notebooks.firecloud.org
+
+### Authenticated Backend Requests (CLI)
+
+This approach is required if you want to issue a request to a backend as a service account. This may be necessary in some cases as the Workbench service is an owner on all AoU billing projects.
+
+This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed:
+```
+go get github.com/google/oauth2l
+go install github.com/google/oauth2l
+```
+
+The following shows how to make an authenticated backend request as the shared  workbench test service account against Firecloud dev (assumes you have run dev-up at least once):
+
+```
+# From the "api" directory.
+curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+
+# If you get 401 errors, you may need to clear your token cache.
+oauth2l reset
+```
