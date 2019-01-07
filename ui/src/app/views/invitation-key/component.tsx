@@ -18,7 +18,7 @@ function isBlank(s: string) {
 export class InvitationKeyReactComponent extends React.Component<any, any> {
   state: {
     invitationKey: string,
-     invitationKeyReq: boolean,
+    invitationKeyReq: boolean,
     invitationKeyInvalid: boolean
   }
 
