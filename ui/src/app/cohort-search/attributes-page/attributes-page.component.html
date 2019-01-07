@@ -1,15 +1,3 @@
-<div *ngIf="rangeAlert" class="alert alert-danger alert-sm">
-  <div class="alert-items">
-    <div class="alert-item static">
-      <div *ngIf="isMeasurement" class="alert-text">
-        Form cannot accept values outside range {{attrs.NUM[0].MIN}} - {{attrs.NUM[0].MAX}}
-      </div>
-      <div *ngIf="isPM" class="alert-text">
-        Form cannot accept negative values
-      </div>
-    </div>
-  </div>
-</div>
 <app-validator-errors [form]="form"></app-validator-errors>
 <div *ngIf="(error$ | async)" class="alert alert-danger alert-sm">
   <div class="alert-items">
