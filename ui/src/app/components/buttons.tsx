@@ -24,6 +24,11 @@ const styles = {
   })
 };
 
+/*
+ * Uses the function-as-child technique. The children function is called with:
+ *   hover: the current hover state
+ *   trackHover: transforms an element, adds hooks to track hover state
+ */
 class HoverContainer extends React.Component<
   { children: ({ hover: boolean, trackHover: Function }) => React.ReactNode },
   { hover: boolean }
