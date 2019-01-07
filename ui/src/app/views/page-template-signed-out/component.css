@@ -1,4 +1,8 @@
-.template {
+:root {
+  --larger-image: '';
+  --smaller-image: '';
+}
+:host::ng-deep .template {
   background-color: #dedfe1;
   background-repeat: no-repeat;
   width: 100%;
@@ -8,25 +12,25 @@
   background-image: var(--larger-image);
 }
 
-.headerImage {
+:host::ng-deep .headerImage {
   height:1.75rem;
   margin-left: 1rem;
   margin-top: 1rem;
 }
 
-.logoImage {
+:host::ng-deep .logoImage {
   width:33rem;
   height:auto;
 }
 
-@media all and (max-width: 900px) {
-  .template {
+:host::ng-deep @media all and (max-width: 900px) {
+   .template {
     background-size: 0% 0%;
   }
 }
 
-@media all and (max-width: 1300px) and (min-width: 900px) {
-  .template {
+:host::ng-deep @media all and (max-width: 1300px) and (min-width: 900px) {
+   .template {
     background-image: var(--smaller-image);
     background-position: bottom right;
 
@@ -34,12 +38,12 @@
 }
 
 
-.signed-out-content {
+:host::ng-deep .signed-out-content {
   flex: 0 0 41.66667%;
   max-width: 41.66667%;
   min-width: 25rem;
 }
 
-.row {
+:host::ng-deep .row {
   margin: 0;
 }
