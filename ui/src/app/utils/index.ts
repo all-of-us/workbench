@@ -1,10 +1,13 @@
+import {Component, DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
 import {fromJS} from 'immutable';
 import {
   find,
+  fromPairs,
   isEqual
 } from 'lodash/fp';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import {DataAccessLevel} from 'generated';
 
@@ -149,3 +152,39 @@ export function cookiesEnabled(): boolean {
     }
 }
 
+export const ReactComponent = ({ propNames = [], ...options }) => WrappedComponent => {
+  class WrapperComponent implements DoCheck, OnInit, OnDestroy {
+    @ViewChild('root')
+    rootElement: ElementRef;
+
+    ngOnInit(): void {
+      this.renderComponent();
+    }
+
+    ngDoCheck(): void {
+      this.renderComponent();
+    }
+
+    ngOnDestroy(): void {
+      ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
+    }
+
+    renderComponent(): void {
+      ReactDOM.render(
+        React.createElement(
+          WrappedComponent,
+          fromPairs(propNames.map(name => [name, this[name]]))
+        ),
+        this.rootElement.nativeElement
+      );
+    }
+  }
+  propNames.forEach(name => {
+    Input()(WrapperComponent.prototype, name, undefined);
+  });
+
+  return Component({
+    ...options,
+    template: '<div #root></div>'
+  })(WrapperComponent) as any;
+};
