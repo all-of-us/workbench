@@ -113,14 +113,14 @@
                       class="btn btn-link">
                       Cancel
                     </button>
-                    <button  *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode !== 'modifiers'"
+                    <button  *ngIf="showNext"
                       type="button"
                       [disabled]="noSelection"
                       (click)="setMode('modifiers')"
                       class="btn btn-primary">
                       Next
                     </button>
-                    <button *ngIf="ctype !== treeType[treeType.PM] && ctype !== treeType[treeType.DEMO] && mode === 'modifiers'"
+                    <button *ngIf="showBack"
                       type="button"
                       (click)="setMode('tree')"
                       class="btn btn-primary">

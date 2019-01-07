@@ -234,6 +234,14 @@ export class ModalComponent implements OnInit, OnDestroy {
     || this.itemType === TreeType[TreeType.PROCEDURE];
   }
 
+  get showNext() {
+    return this.showModifiers && this.mode !== 'modifiers';
+  }
+
+  get showBack() {
+    return this.showModifiers && this.mode === 'modifiers';
+  }
+
   setMode(mode: any) {
     if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
       this.originalNode = Map({
