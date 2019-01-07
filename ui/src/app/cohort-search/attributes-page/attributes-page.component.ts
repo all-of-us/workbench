@@ -1,6 +1,6 @@
 import {select} from '@angular-redux/store';
-import {AfterContentChecked, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {FormControl, FormGroup, NgForm, Validators} from '@angular/forms';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {Operator, TreeSubType, TreeType} from 'generated';
 import {fromJS, Map} from 'immutable';
@@ -32,22 +32,41 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   attrs = {EXISTS: false, NUM: [], CAT: []};
   attributes: any;
   dropdowns = {
-      selected: ['', ''],
-      oldVals: ['', ''],
-      labels: ['', '']
+    selected: ['', ''],
+    oldVals: ['', ''],
+    labels: ['', ''],
+    codes: ['', '']
   };
   preview = Map();
   subscription: Subscription;
   loading: boolean;
   selectedCode: any;
-  sysOption: any;
-  diaOption: any;
   resetDisable = false;
   options = [
-    {value: 'EQUAL', name: 'Equals', display: '= ', code: '01'},
-    {value: 'GREATER_THAN_OR_EQUAL_TO', name: 'Greater than or Equal to', display: '>= ', code: '02'},
-    {value: 'LESS_THAN_OR_EQUAL_TO', name: 'Less than or Equal to', display: '<= ', code: '03'},
-    {value: 'BETWEEN', name: 'Between', display: '', code: '04'},
+    {
+      value: 'EQUAL',
+      name: 'Equals',
+      display: '= ',
+      code: '01'
+    },
+    {
+      value: 'GREATER_THAN_OR_EQUAL_TO',
+      name: 'Greater than or Equal to',
+      display: '>= ',
+      code: '02'
+    },
+    {
+      value: 'LESS_THAN_OR_EQUAL_TO',
+      name: 'Less than or Equal to',
+      display: '<= ',
+      code: '03'
+    },
+    {
+      value: 'BETWEEN',
+      name: 'Between',
+      display: '',
+      code: '04'
+    },
   ];
 
   form = new FormGroup({
@@ -59,7 +78,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   constructor(private actions: CohortSearchActions, private cdref: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.subscription = this.preview$.subscribe(prev => this.preview = prev);
+    this.subscription = this.preview$.subscribe(prev => {
+      this.preview = prev;
+    });
     this.subscription.add(this.loading$.subscribe(loading => this.loading = loading));
     this.subscription.add(this.node$.subscribe(node => {
       this.node = node;
@@ -133,23 +154,13 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     this.dropdowns.selected[index] = option.name;
     if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
       const other = index === 0 ? 1 : 0;
-      if (other === 0) {
-        if (this.diaOption === undefined) {
-          this.diaOption = option.code;
-          this.sysOption = option.code;
-        } else {
-          this.sysOption = option.code;
-        }
-      } else if (other === 1) {
-        if (this.sysOption === undefined) {
-          this.sysOption = option.code;
-          this.diaOption = option.code;
-        } else {
-          this.diaOption = option.code;
-        }
+      if (this.dropdowns.codes[other] === '') {
+        this.dropdowns.codes = [option.code, option.code];
+      } else {
+        this.dropdowns.codes[index] = option.code;
       }
-      if (this.sysOption && this.diaOption) {
-        this.selectedCode = (this.sysOption + this.diaOption);
+      if (!this.dropdowns.codes.includes('')) {
+        this.selectedCode = (this.dropdowns.codes.join(''));
       }
       if (option.value === 'ANY') {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
@@ -172,8 +183,12 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   setValidation(index: number, option: string) {
     if (option === 'Any') {
-      this.form.controls.NUM.get(['num' + index, 'valueA']).clearValidators();
-      this.form.controls.NUM.get(['num' + index, 'valueB']).clearValidators();
+      this.form.controls.NUM.get(['num0', 'valueA']).clearValidators();
+      this.form.controls.NUM.get(['num0', 'valueB']).clearValidators();
+      if (this.attrs.NUM.length === 2) {
+        this.form.controls.NUM.get(['num1', 'valueA']).clearValidators();
+        this.form.controls.NUM.get(['num1', 'valueB']).clearValidators();
+      }
       this.form.controls.NUM.reset();
     } else {
       const validators = [Validators.required];
@@ -257,12 +272,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         const paramAttr = {
           name: attr.name,
           operator: attr.operator,
-          operands: attr.operands,
+          operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
           conceptId: attr.conceptId
         };
         if (this.form.value.NUM['num' + i].operator === 'ANY') {
           paramAttr.name = 'ANY';
-          name += 'Any';
+          if (i === 0) {
+            name += 'Any';
+          }
         } else {
           if (i > 0) {
             name += ' / ';
