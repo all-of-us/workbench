@@ -38,9 +38,6 @@ interface AccountCreationResendModalProps {
 
 export class AccountCreationResendModalReact extends
     React.Component<AccountCreationResendModalProps, {}> {
-  state: {};
-  props: AccountCreationResendModalProps;
-
   constructor(props: AccountCreationResendModalProps) {
     super(props);
     this.state = {};

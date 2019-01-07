@@ -40,8 +40,6 @@ interface AccountCreationSuccessState {
 
 export class AccountCreationSuccessReact
     extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
-  state: AccountCreationSuccessState;
-  props: AccountCreationSuccessProps;
 
   constructor(props: AccountCreationSuccessProps) {
     super(props);
@@ -50,15 +48,6 @@ export class AccountCreationSuccessReact
       resendModal: false,
       updateModal: false,
     };
-  }
-
-  public closeModals(): void {
-    this.setState({resendModal: false});
-    this.setState({updateModal: false});
-  }
-
-  updateEmail(newEmail: string): void {
-    this.setState({contactEmail: newEmail});
   }
 
   render() {
@@ -113,14 +102,14 @@ export class AccountCreationSuccessReact
         username={this.props.username}
         creationNonce={this.props.creationNonce}
         resend={this.state.resendModal}
-        closeFunction={() => this.closeModals()}
+        closeFunction={() => this.setState({resendModal: false})}
       />
       <AccountCreationUpdateModalReact
         username={this.props.username}
         creationNonce={this.props.creationNonce}
-        passNewEmail={(newEmail: string) => this.updateEmail(newEmail)}
+        passNewEmail={(newEmail: string) => this.setState({contactEmail: newEmail})}
         update={this.state.updateModal}
-        closeFunction={() => this.closeModals()}
+        closeFunction={() => this.setState({updateModal: false})}
       />
     </React.Fragment>;
   }
