@@ -317,7 +317,7 @@ export const rootReducer: Reducer<CohortSearchState> =
               timeValue: 0,
               timeFrame: '',
               isRequesting: false,
-              active: true
+              status: 'active'
             })
           )
           .updateIn(
@@ -329,7 +329,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['wizard', 'selections', action.parameter.get('parameterId')],
-            action.parameter.set('active', true)
+            action.parameter.set('status', 'active')
           )
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
@@ -395,7 +395,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           )
           .updateIn(['entities', 'items', action.itemId],
             List(),
-            item => item.set('active', false));
+            item => item.set('status', 'deleted'));
 
         const paramsInUse = state
           .getIn(['entities', 'items'], Map())
@@ -419,7 +419,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           )
           .updateIn(['entities', 'groups', action.groupId],
             List(),
-            item => item.set('active', false));
+            item => item.set('status', 'deleted'));
 
       case OPEN_WIZARD:
         return state.mergeIn(['wizard'], fromJS({
@@ -433,7 +433,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             count: null,
             temporalGroup: 0,
             isRequesting: false,
-            active: true
+            status: 'active'
           },
           selections: {},
           ...action.context

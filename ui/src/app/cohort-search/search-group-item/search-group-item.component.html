@@ -1,12 +1,30 @@
-<div class="flex-container">
+<div *ngIf="status !== 'deleted'" class="flex-container">
 
-  <div class="line-item">
-    <button
-      type="button"
-      class="btn btn-link btn-sm"
-      (click)="launchWizard()">
-      <clr-icon shape="pencil"></clr-icon>
-    </button>
+  <div *ngIf="status === 'active'" class="line-item">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          type="button"
+          (click)="launchWizard()"
+          clrDropdownItem>
+          Edit criteria
+        </button>
+        <button
+          type="button"
+          clrDropdownItem>
+          Hide criteria from total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete criteria
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
 
     <small
       [popper]="codesPopper"
@@ -34,17 +52,18 @@
         size="16"></clr-icon>
     </span>
   </div>
-
-  <div>
-    <button
-      type="button"
-      type="button"
-      class="btn btn-link btn-sm"
-      id="close-button"
-      (click)="remove()">
-      <clr-icon shape="close" size="24"></clr-icon>
-    </button>
+  <div *ngIf="status === 'pending'" class="undo-container">
+    <clr-icon shape="exclamation-triangle" class="is-solid" size="32"></clr-icon>
+    <span class="undo-text">
+      Your criteria have been deleted
+      <button class="btn btn-link" (click)="undo()">UNDO</button>
+    </span>
   </div>
+</div>
+
+<div *ngIf="item.status === 'deleted'">
+  <clr-icon shape="close" size="24"></clr-icon>
+
 </div>
 
 <popper-content #codesPopper>

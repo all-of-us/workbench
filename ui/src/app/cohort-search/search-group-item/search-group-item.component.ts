@@ -21,6 +21,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() itemIndex: number;
 
   error: boolean;
+  status: string;
+  undoTimer: any;
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
   private subscription: Subscription;
@@ -32,7 +34,10 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.ngRedux.select(getItem(this.itemId))
-      .subscribe(item => this.item = item);
+      .subscribe(item => {
+        this.item = item;
+        this.status = item.get('status');
+      });
 
     this.subscription.add(this.ngRedux.select(parameterList(this.itemId))
       .subscribe(rawCodes => this.rawCodes = rawCodes));
@@ -81,7 +86,16 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
+    this.status = 'pending';
+    this.undoTimer = setTimeout(() => {
+      this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
+      this.status = 'deleted';
+    }, 3000);
+  }
+
+  undo() {
+    clearTimeout(this.undoTimer);
+    this.status = 'active';
   }
 
   launchWizard() {
