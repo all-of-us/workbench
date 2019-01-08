@@ -6,7 +6,7 @@
       </button>
       <clr-dropdown-menu *clrIfOpen>
         <div *ngFor="let action of actions">
-          <button
+          <button clrDropdownItem
                   class="action-item {{action.class}}"
                   (click)=this[action.link](this.resourceCard)
                   [class.disabled]="actionsDisabled"
@@ -43,9 +43,11 @@
                           (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
 
 
-<app-rename-modal [resource]="resourceCard.notebook"
+<app-rename-modal *ngIf="renaming && resourceCard.notebook"
+                  [resource]="resourceCard.notebook"
                   [resourceType]="'Notebook'"
-                  (receiveRename)="receiveNotebookRename($event)"></app-rename-modal>
+                  [onCancel]="cancelRename.bind(this)"
+                  [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 
 <app-edit-modal [resource]="resourceCard"
                         (updateFinished)="receiveRename()"></app-edit-modal>
