@@ -15,16 +15,14 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-export class InvitationKeyReact extends React.Component<any, {
-  invitationKey: string,
-  invitationKeyReq: boolean,
-  invitationKeyInvalid: boolean
-}> {
-  state: {
-    invitationKey: string,
-    invitationKeyReq: boolean,
-    invitationKeyInvalid: boolean
-  }
+interface InvitationKeyState {
+  invitationKey: string;
+  invitationKeyReq: boolean;
+  invitationKeyInvalid: boolean;
+}
+export class InvitationKeyReact extends React.Component<any, InvitationKeyState> {
+
+  state: InvitationKeyState
 
   constructor(props: Object) {
     super(props);
@@ -37,9 +35,9 @@ export class InvitationKeyReact extends React.Component<any, {
   }
 
 
-  updateInvitationKey(evt) {
+  updateInvitationKey(input) {
     this.setState({
-      invitationKey: evt.target.value
+      invitationKey: input.target.value
     });
   }
 

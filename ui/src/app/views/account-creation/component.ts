@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
-import {LoginComponent} from '../login/component';
 
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
@@ -44,14 +43,13 @@ export class AccountCreationComponent implements AfterViewInit {
   // well as injecting LoginComponent. Should look at refactoring these
   // interactions.
   constructor(
-    private profileService: ProfileService,
-    private loginComponent: LoginComponent
+    private profileService: ProfileService
   ) {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
-      this.loginComponent.smallerBackgroundImgSrc =
+      /*this.loginComponent.smallerBackgroundImgSrc =
           '/assets/images/create-account-male-standing.png';
-      this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
+      this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';*/
     }, 0);
   }
 

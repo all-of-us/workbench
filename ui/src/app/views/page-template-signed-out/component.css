@@ -11,6 +11,15 @@
   background-position: bottom right -1rem;
   background-image: var(--larger-image);
 }
+:host::ng-deep .sign {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: auto;
+}
 
 :host::ng-deep .headerImage {
   height:1.75rem;

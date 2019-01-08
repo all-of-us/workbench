@@ -41,7 +41,6 @@ import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
-import {LoginComponent} from './views/login/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
@@ -157,7 +156,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     EditModalComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
-    LoginComponent,
     NewNotebookModalComponent,
     NotebookListComponent,
     NotebookRedirectComponent,

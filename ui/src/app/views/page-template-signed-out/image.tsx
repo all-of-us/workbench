@@ -23,6 +23,15 @@ export const styles = {
     flex: '0 0 41.66667%',
     maxWidth: '41.66667%',
     minWidth: '25rem'
+  },
+  signedInContainer: {
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
+    width: 'auto'
   }
 };
 
@@ -32,5 +41,8 @@ export const Template = ({style = {}, ...props}) =>
 export const Header = ({style = {}, ...props}) =>
   <img {...props} style={{...styles.headerImage, ...style}}/>;
 
-export const Signedin = ({style = {}, ...props}) =>
+export const Content = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.content, ...style}}/>;
+
+export const SignedIn = ({style = {}, ...props}) =>
+    <div {...props} style={{...styles.signedInContainer, ...style}}/>;
