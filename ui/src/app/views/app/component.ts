@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
-    if (!this.cookiesEnabled) {
+    if (this.cookiesEnabled) {
       try {
         this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
         this.overriddenPublicUrl = localStorage.getItem(overriddenPublicUrlKey);
@@ -96,7 +96,10 @@ export class AppComponent implements OnInit {
     });
 
     this.setGTagManager();
-    this.setTCellAgent();
+    // tcell uses local storage - don't load if not supported
+    if (this.cookiesEnabled) {
+      this.setTCellAgent();
+    }
   }
 
   /**
