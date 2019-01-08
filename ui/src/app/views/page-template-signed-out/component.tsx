@@ -1,58 +1,68 @@
 import {
   Component,
-  ElementRef,
-  Input,
   OnChanges,
   OnInit,
-  ViewChild
 } from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {withWindowSize} from '../../utils';
-import InvitationKeyReactComponent, {InvitationKeyReact} from '../invitation-key/component';
+import {InvitationKeyReact} from '../invitation-key/component';
 import {LoginReactComponent} from '../login/component';
-import {Header, Signedin, Template} from './image';
+import {Content, Header, SignedIn, Template} from './image';
+import {SignInService} from '../../services/sign-in.service';
+import {Router} from '@angular/router';
+
+interface ImagesInformation {
+  backgroundImgSrc: string;
+  smallerBackgroundImgSrc: string;
+}
+
+interface PageTemplateState {
+  currentStep: number;
+  invitationKey: string;
+}
 
 @withWindowSize()
-export class PageTemplateSignedOutReact extends React.Component<any, {currentStep: number }> {
+export class PageTemplateSignedOutReact extends React.Component<any, PageTemplateState> {
+  state: PageTemplateState;
+  stepsImages: Array<ImagesInformation>;
   headerImg = '/assets/images/logo-registration-non-signed-in.svg';
-  state: { currentStep: number };
-  invitationKey: string;
-  stepsImages: [
-   {
-     backgroundImgSrc: '/assets/images/login-group.png',
-     smallerBackgroundImgSrc: '/assets/images/login-standing.png'
-   },
-   {
-     backgroundImgSrc: '/assets/images/invitation-female.png',
-     smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
-   }];
 
   constructor(props: object) {
     super(props);
     this.state = {
-      currentStep: 0
+      currentStep: 0,
+      invitationKey: ''
     };
-    this.stepsImages = [{
-      backgroundImgSrc: '/assets/images/login-group.png',
-      smallerBackgroundImgSrc: '/assets/images/login-standing.png'
-    },
+    this.stepsImages = [
+      {
+        backgroundImgSrc: '/assets/images/login-group.png',
+        smallerBackgroundImgSrc: '/assets/images/login-standing.png'
+      },
       {
         backgroundImgSrc: '/assets/images/invitation-female.png',
         smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
+      },
+      {
+        backgroundImgSrc: '/assets/images/create-account-male.png',
+        smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
+      },
+      {
+        backgroundImgSrc: '/assets/images/congrats-female.png',
+        smallerBackgroundImgSrc: '/assets/images/congrats-female-standing.png'
       }];
     this.updateNext = this.updateNext.bind(this);
     this.setInvitationKey = this.setInvitationKey.bind(this);
-    this.invitationKey = '';
   }
 
   nextDirective(index) {
     switch (index) {
-      case 0: return <LoginReactComponent updateNext={this.updateNext}/>;
+      case 0: return <LoginReactComponent updateNext={this.updateNext}
+                                          signIn={this.props.signIn}/>;
       case 1: return <InvitationKeyReact updateNext={this.updateNext}
                                          setInvitationKey={this.setInvitationKey}/>;
       // case 2: return <AccountCreationReact updateNext={this.updateNext}
-      //                                      invitationKey={this.invitationKey}>
+      //                                      invitationKey={this.state.invitationKey}>
       //                </AccountCreationReact>;
     }
   }
@@ -64,21 +74,21 @@ export class PageTemplateSignedOutReact extends React.Component<any, {currentSte
   }
 
   setInvitationKey(invitationKey) {
-    this.invitationKey = this.invitationKey;
+    this.state.invitationKey = invitationKey;
   }
 
   render() {
-    return <Template images={this.stepsImages[this.state.currentStep]}
-      windowsize={this.props.windowSize}>
-        <div className='row'>
-          <Header src={this.headerImg}/>
-        </div>
-        <div className='row'>
-          <Signedin>
-            {this.nextDirective(this.state.currentStep)}
-          </Signedin>
-        </div>
-      </Template>;
+    return <SignedIn>
+      <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+        <Template images={this.stepsImages[this.state.currentStep]}
+          windowsize={this.props.windowSize}>
+            <Header src={this.headerImg}/>
+            <Content>
+              {this.nextDirective(this.state.currentStep)}
+            </Content>
+          </Template>
+      </div>
+    </SignedIn>;
   }
 }
 
@@ -88,15 +98,29 @@ export default PageTemplateSignedOutReact;
   templateUrl: './component.html'
 })
 export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
-  constructor() {}
+  constructor(
+    private signInService: SignInService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReact),
+    document.body.style.backgroundColor = '#e2e3e5';
+
+    this.signInService.isSignedIn$.subscribe((signedIn) => {
+      if (signedIn) {
+        this.router.navigateByUrl('/');
+      }
+    });
+    ReactDOM.render(React.createElement(PageTemplateSignedOutReact, {signIn: () => this.signIn()}),
         document.getElementById('reactcomp'));
   }
 
   ngOnChanges() {
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReact),
+    ReactDOM.render(React.createElement(PageTemplateSignedOutReact, {signIn: () => this.signIn()}),
         document.getElementById('reactcomp'));
+  }
+
+  signIn(): void {
+    this.signInService.signIn();
   }
 }

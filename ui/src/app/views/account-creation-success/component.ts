@@ -5,8 +5,6 @@ import {SignInService} from '../../services/sign-in.service';
 import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationComponent} from '../account-creation/component';
 
-import {LoginComponent} from '../login/component';
-
 @Component({
   selector : 'app-account-creation-success',
   styleUrls: ['../../styles/template.css',
@@ -22,15 +20,14 @@ export class AccountCreationSuccessComponent {
   accountCreationModalsComponent: AccountCreationModalsComponent;
 
   constructor(
-    private loginComponent: LoginComponent,
     private account: AccountCreationComponent,
     private router: Router,
     private signInService: SignInService
   ) {
     // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
     setTimeout(() => {
-      loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
-      loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
+     /* loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
+      loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';*/
     }, 0);
     this.username = account.profile.username;
     this.creationNonce = account.profile.creationNonce;
