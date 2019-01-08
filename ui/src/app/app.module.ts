@@ -44,7 +44,7 @@ import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
-import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
+import {SignInTemplateComponent} from './views/sign-in-flow-template/component';
 import {ProfilePageComponent} from './views/profile-page/component';
 import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
@@ -159,7 +159,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NewNotebookModalComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
-    PageTemplateSignedOutComponent,
     ProfilePageComponent,
     QuickTourModalComponent,
     RecentWorkComponent,
@@ -168,6 +167,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SignInTemplateComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
     ToolTipComponent,

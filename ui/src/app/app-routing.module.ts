@@ -28,14 +28,14 @@ import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
 import {environment} from 'environments/environment';
-import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
+import {SignInTemplateComponent} from './views/sign-in-flow-template/component';
 
 declare let gtag: Function;
 
 const routes: Routes = [
   {
     path: 'login',
-    component: PageTemplateSignedOutComponent,
+    component: SignInTemplateComponent,
     data: {title: 'Sign In'}
   }, {
     path: '',

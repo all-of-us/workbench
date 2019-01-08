@@ -1,18 +1,30 @@
 import * as React from 'react';
-import {withWindowSize} from '../../utils';
 
 export const styles = {
   template: (props) => {
     return {
-      backgroundImage: 'url(\'' + props.images.smallerBackgroundImgSrc + '\')',
+      backgroundImage:  calculateImage(),
       backgroundColor: '#dedfe1',
       backgroundRepeat: 'no-repeat',
       width: '100%',
       minHeight: '100vh',
       backgroundSize: props.windowsize.width <= 900 ? '0% 0%' : 'contain',
-      backgroundPosition: (props.windowsize.width > 900 && props.windowsize.width <= 1300)
-          ? 'bottom' : 'bottom right -1rem'
+      backgroundPosition: calculateBackgroundPosition()
     };
+
+    function calculateImage() {
+      if (props.windowsize.width > 900 && props.windowsize.width <= 1300) {
+        return 'url(\'' + props.images.smallerBackgroundImgSrc + '\')';
+      }
+      return 'url(\'' + props.images.backgroundImgSrc + '\')';
+    }
+
+    function calculateBackgroundPosition() {
+      if (props.windowsize.width > 900 && props.windowsize.width <= 1300) {
+         return 'bottom right' ;
+      }
+      return 'bottom right -1rem';
+    }
   },
   headerImage: {
     height: '1.75rem',
@@ -32,8 +44,10 @@ export const styles = {
     justifyContent: 'space-around',
     alignItems: 'flex-start',
     width: 'auto'
-  }
+  },
+
 };
+
 
 export const Template = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.template(props), ...style}}/>;

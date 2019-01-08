@@ -10,17 +10,17 @@ import {
 
 import {ServerConfigService} from '../../services/server-config.service';
 
-import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
+import {SignInTemplateComponent} from './/component';
 
 describe('PageTemplateSignedOutComponent', () => {
-  let fixture: ComponentFixture<PageTemplateSignedOutComponent>;
+  let fixture: ComponentFixture<SignInTemplateComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ClarityModule.forRoot()
       ],
       declarations: [
-        PageTemplateSignedOutComponent,
+        SignInTemplateComponent,
       ],
       providers: [
         {
@@ -31,7 +31,7 @@ describe('PageTemplateSignedOutComponent', () => {
         },
       ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(PageTemplateSignedOutComponent);
+      fixture = TestBed.createComponent(SignInTemplateComponent);
       tick();
     });
   }));
