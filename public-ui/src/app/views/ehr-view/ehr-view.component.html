@@ -1,5 +1,3 @@
-
-
 <div class="row flex-items-xs-middle">
   <div class="col-xs-12 col-no-gutter">
     <h2 class="title">  {{title}} </h2>
@@ -183,9 +181,13 @@
         <div class="col-md flex-xs-middle hand-cursor" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
           <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.slice(0,2).join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
           <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2"> See more
-            <clr-icon shape="ellipsis-horizontal"></clr-icon>
+          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
           </a>
+          <ng-template #seeMore>
+            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2"> See More
+              <clr-icon shape="ellipsis-horizontal"></clr-icon>
+            </a>
+          </ng-template>
         </div>
         <ng-template #noConceptSynonyms><div class="col-md flex-xs-middle"></div></ng-template>
         <div class="col-md-1 flex-items-xs-right card-view">
@@ -203,21 +205,15 @@
           </button>
         </div>
         <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded">
-          <ng-container *ngIf="!showMeasurementGenderBins">
-            <div class="col-md-4">
-              <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectGenderGraph(g)" class="btn btn-link">{{g}}
-              </button>
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=right
+          <button *ngFor="let g of ['Gender','Age','Sources']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}} <clr-tooltip>
+            <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition=right
                                  clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
-            </div>
-          </ng-container>
-          <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAge]="showAge" [showGender]="showGender" [showGenderIdentity]="showGenderIdentity"
-                            [showSources]="showSources" [backgroundColor]="'#ECF1F4'">
+              <div class="tooltip-label">{{showToolTip(g)}}</div>
+            </clr-tooltip-content>
+          </clr-tooltip></button>
+          <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAgeGraph]="showAgeGraph" [showGenderGraph]="showGenderGraph"
+                            [showSourcesGraph]="showSourcesGraph" [backgroundColor]="'#ECF1F4'">
           </app-concept-charts>
         </div>
         </div>

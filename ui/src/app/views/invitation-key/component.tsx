@@ -1,9 +1,8 @@
-import {Component, ViewChildren} from '@angular/core';
 
 import {fullUrl} from 'app/utils/fetch';
 
-import {BoldHeader, Input} from 'app/common/common';
-import { ProfileService} from 'generated';
+import {BoldHeader} from 'app/components/headers';
+import {FormInput} from 'app/components/inputs';
 import {
   FetchArgs,
   InvitationVerificationRequest,
@@ -76,7 +75,7 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
       <div className='form-area'>
         <div className='form-section'>
           <BoldHeader>Enter your Invitation Key:</BoldHeader>
-          <Input type='text' id='invitationKey' value={this.state.invitationKey}
+          <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
                  placeholder='Invitation Key' onChange={this.updateInvitationKey} autoFocus/>
           {this.state.invitationKeyReq &&
           <div className='alert alert-danger'>

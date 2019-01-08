@@ -1,5 +1,5 @@
+import {Header, SmallHeader} from 'app/components/headers';
 import * as React from 'react';
-import {Header, SmallHeader} from '../../common/common';
 import {Button, Google} from './css';
 
 export class LoginReactComponent extends React.Component<any, any> {
