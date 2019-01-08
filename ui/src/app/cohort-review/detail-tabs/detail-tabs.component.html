@@ -5,11 +5,11 @@
       <clr-tab-content id="detail-summary-content" *clrIfActive>
         <div class="container summary-container">
           <div class="row">
-            <div class="col-sm-4" *ngFor = "let charts of domainList">
+            <div class="col-sm-4" *ngFor = "let charts of domainList; let i=index">
               <div *ngIf="chartData[charts].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
                 Loading...
               </div>
-              <app-individual-participants-charts *ngIf="!chartData[charts].loading && chartData[charts] " [chartData] ="chartData[charts]" [chartHeader] = "chartData[charts].conditionTitle" ></app-individual-participants-charts>
+              <app-individual-participants-charts *ngIf="!chartData[charts].loading && chartData[charts] " [chartData] ="chartData[charts]" [chartHeader] = "chartData[charts].conditionTitle"  [chartKey]="i"></app-individual-participants-charts>
             </div>
           </div>
         </div>
