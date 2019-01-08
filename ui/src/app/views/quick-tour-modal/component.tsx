@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
 import {
-  PrimaryButton
+  Button
 } from 'app/components/buttons';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
@@ -28,9 +28,9 @@ export const panels = [
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
-        <a className='link' href={OMOPDataSetLink} target='_blank'> OMOP common data model</a>
+        <a className='link' href={OMOPDataSetLink} target='_blank'> OMOP common data model </a>
           format. Here are some
-        <a className='link' href={OMOPTutorialsLink} target='_blank'> tutorials</a>
+        <a className='link' href={OMOPTutorialsLink} target='_blank'> tutorials </a>
         to understand OMOP data model.
         <br/><br/>
         When you create your Workspace, you will be prompted
@@ -362,14 +362,15 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div style={styles.controls}>
             <div style={{width: '50%'}}>
               {this.state.selected !== 0 &&
-              <button type='button' className='btn btn-close' id='previous'
-                      onClick={() => this.previous()}>Previous</button>}
+              <Button type='darklingPrimary' id='previous' style={{marginLeft: '10%'}}
+                      onClick={() => this.previous()}>Previous</Button>}
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {this.state.selected !== (panels.length - 1) &&
-             <PrimaryButton onClick={() => this.close()} text='Close' styles={{marginLeft: '10%'}} />}
-              <button type='button' className='btn btn-primary' id='next'
-                      onClick={() => this.next()}>{this.lastButtonText()}</button>
+              <Button type='darklingPrimary' onClick={() => this.close()}
+                      style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
+              <Button type='darklingSecondary' id='next' style={{marginRight: '10%'}}
+                      onClick={() => this.next()}>{this.lastButtonText()}</Button>
             </div>
           </div>
         </div>
