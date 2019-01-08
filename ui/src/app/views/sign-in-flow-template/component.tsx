@@ -1,18 +1,17 @@
-import {
-  Component,
-  OnChanges,
-  OnInit,
-} from '@angular/core';
+import {Component, OnChanges, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
+
+import {SignInService} from 'app/services/sign-in.service';
+import {withWindowSize} from 'app/utils';
+import {InvitationKeyReact} from 'app/views/invitation-key/component';
+import {LoginReactComponent} from 'app/views/login/component';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {SignInService} from '../../services/sign-in.service';
-import {withWindowSize} from '../../utils';
-import {InvitationKeyReact} from '../invitation-key/component';
-import {LoginReactComponent} from '../login/component';
-import {Content, Header, SignedIn, Template} from './image';
 
-interface ImagesInformation {
+import {Content, Header, SignedIn, Template} from './style';
+
+interface ImagesSource {
   backgroundImgSrc: string;
   smallerBackgroundImgSrc: string;
 }
@@ -23,9 +22,9 @@ interface PageTemplateState {
 }
 
 @withWindowSize()
-export class PageTemplateSignedOutReact extends React.Component<any, PageTemplateState> {
+export class SignPageTemplateReact extends React.Component<any, PageTemplateState> {
   state: PageTemplateState;
-  stepsImages: Array<ImagesInformation>;
+  pageImages: Array<ImagesSource>;
   headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
   constructor(props: object) {
@@ -34,7 +33,7 @@ export class PageTemplateSignedOutReact extends React.Component<any, PageTemplat
       currentStep: 0,
       invitationKey: ''
     };
-    this.stepsImages = [
+    this.pageImages = [
       {
         backgroundImgSrc: '/assets/images/login-group.png',
         smallerBackgroundImgSrc: '/assets/images/login-standing.png'
@@ -81,8 +80,8 @@ export class PageTemplateSignedOutReact extends React.Component<any, PageTemplat
   render() {
     return <SignedIn>
       <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-        <Template images={this.stepsImages[this.state.currentStep]}
-          windowsize={this.props.windowSize}>
+        <Template images={this.pageImages[this.state.currentStep]}
+                  windowsize={this.props.windowSize}>
             <Header src={this.headerImg}/>
             <Content>
               {this.nextDirective(this.state.currentStep)}
@@ -93,12 +92,12 @@ export class PageTemplateSignedOutReact extends React.Component<any, PageTemplat
   }
 }
 
-export default PageTemplateSignedOutReact;
+export default SignPageTemplateReact;
 
 @Component({
   templateUrl: './component.html'
 })
-export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
+export class SignInTemplateComponent implements OnChanges, OnInit {
   constructor(
     private signInService: SignInService,
     private router: Router,
@@ -112,13 +111,16 @@ export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
         this.router.navigateByUrl('/');
       }
     });
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReact, {signIn: () => this.signIn()}),
-        document.getElementById('reactcomp'));
+    this.renderReact();
   }
 
   ngOnChanges() {
-    ReactDOM.render(React.createElement(PageTemplateSignedOutReact, {signIn: () => this.signIn()}),
-        document.getElementById('reactcomp'));
+    this.renderReact();
+  }
+
+  renderReact() {
+    ReactDOM.render(React.createElement(SignPageTemplateReact, {signIn: () => this.signIn()}),
+        document.getElementById('pagetemplate'));
   }
 
   signIn(): void {
