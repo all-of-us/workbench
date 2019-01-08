@@ -55,6 +55,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   noSelection = true;
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
+  backMode: string;
   demoItemsType: string;
   demoParam: string;
   count = 0;
@@ -257,6 +258,8 @@ export class ModalComponent implements OnInit, OnDestroy {
       const criteriaSubtype = node.get('subtype');
       const context = {criteriaType, criteriaSubtype};
       this.actions.setWizardContext(context);
+    } else {
+      this.backMode = this.mode;
     }
     this.mode = mode;
   }
