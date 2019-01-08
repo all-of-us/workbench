@@ -5,13 +5,12 @@ import {ReactComponent} from '../utils/index';
 const styles = {
   modal: {
     borderRadius: 8, position: 'relative',
-    padding: '1rem', outline: 'none',
+    padding: '1rem', margin: 'auto', outline: 'none',
     backgroundColor: 'white', boxShadow: '0 1px 2px 2px rgba(0,0,0,.2)'
   },
 
   overlay: {
-    backgroundColor: 'rgba(49, 49, 49, 0.85)', padding: '2rem 1rem',
-    display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+    backgroundColor: 'rgba(49, 49, 49, 0.85)', padding: '1rem', display: 'flex',
     position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
   },
 
