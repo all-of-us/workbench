@@ -176,12 +176,12 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }
       this.selectedCode = option.code;
     }
-    this.setValidation(index, option.name);
+    this.setValidation(option.name);
     this.preview = option.value === 'ANY'
       ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
-  setValidation(index: number, option: string) {
+  setValidation(option: string) {
     if (option === 'Any') {
       this.form.controls.NUM.get(['num0', 'valueA']).clearValidators();
       this.form.controls.NUM.get(['num0', 'valueB']).clearValidators();
@@ -199,13 +199,15 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       } else {
         validators.push(numberAndNegativeValidator('Form'));
       }
-      this.form.controls.NUM.get(['num' + index, 'valueA']).setValidators(validators);
-      if (option === 'Between') {
-        this.form.controls.NUM.get(['num' + index, 'valueB']).setValidators(validators);
-      } else {
-        this.form.controls.NUM.get(['num' + index, 'valueB']).clearValidators();
-        this.form.controls.NUM.get(['num' + index, 'valueB']).reset();
-      }
+      this.attrs.NUM.forEach((attr, i) => {
+        this.form.controls.NUM.get(['num' + i, 'valueA']).setValidators(validators);
+        if (option === 'Between') {
+          this.form.controls.NUM.get(['num' + i, 'valueB']).setValidators(validators);
+        } else {
+          this.form.controls.NUM.get(['num' + i, 'valueB']).clearValidators();
+          this.form.controls.NUM.get(['num' + i, 'valueB']).reset();
+        }
+      });
       this.cdref.detectChanges();
     }
   }
