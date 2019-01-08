@@ -45,7 +45,6 @@
 
 <app-rename-modal *ngIf="renaming && resourceCard.notebook"
                   [resource]="resourceCard.notebook"
-                  [resourceType]="'Notebook'"
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 

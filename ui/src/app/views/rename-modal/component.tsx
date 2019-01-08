@@ -13,8 +13,7 @@ import {ReactComponent} from 'app/utils';
 
 
 interface RenameModalProps {
-  resource: any;
-  resourceType: string;
+  resource: {name: string};
   onRename: Function;
   onCancel: Function;
 }
@@ -25,7 +24,7 @@ interface RenameModalState {
 
 @ReactComponent({
   selector: 'app-rename-modal',
-  propNames: ['resource', 'resourceType', 'onRename', 'onCancel']
+  propNames: ['resource', 'onRename', 'onCancel']
 })
 export class RenameModalComponent extends React.Component<RenameModalProps, RenameModalState> {
   constructor(props: RenameModalProps) {
@@ -36,10 +35,7 @@ export class RenameModalComponent extends React.Component<RenameModalProps, Rena
     };
   }
 
-  private emitRename(): void {
-    if (this.state.loading) {
-      return;
-    }
+  private rename(): void {
     this.setState({
       loading: true
     });
@@ -65,7 +61,7 @@ export class RenameModalComponent extends React.Component<RenameModalProps, Rena
           <Button id='rename-button'
                   disabled={this.state.loading}
                   style={{marginLeft: '.5rem'}}
-                  onClick={() => this.emitRename()}>Rename Notebook</Button>
+                  onClick={() => this.rename()}>Rename Notebook</Button>
         </ModalFooter>
       </Modal>
     </React.Fragment>;
