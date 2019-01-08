@@ -3,15 +3,14 @@ import {
   OnChanges,
   OnInit,
 } from '@angular/core';
+import {Router} from '@angular/router';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {SignInService} from '../../services/sign-in.service';
 import {withWindowSize} from '../../utils';
 import {InvitationKeyReact} from '../invitation-key/component';
 import {LoginReactComponent} from '../login/component';
 import {Content, Header, SignedIn, Template} from './image';
-import {SignInService} from '../../services/sign-in.service';
-import {Router} from '@angular/router';
-import {AccountCreationSuccessReact} from '../account-creation-success/component';
 
 interface ImagesInformation {
   backgroundImgSrc: string;
@@ -65,7 +64,6 @@ export class PageTemplateSignedOutReact extends React.Component<any, PageTemplat
       // case 2: return <AccountCreationReact updateNext={this.updateNext}
       //                                      invitationKey={this.state.invitationKey}>
       //                </AccountCreationReact>;
-      case 3: return <AccountCreationSuccessReact></AccountCreationSuccessReact>;
       default: return;
     }
   }
