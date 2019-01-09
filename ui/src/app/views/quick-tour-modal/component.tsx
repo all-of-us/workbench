@@ -326,7 +326,8 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                   </div>
                   <div style={styles.breadcrumbTitle}>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
-                  <div style={i < this.state.selected ? completedStyles.connectorCompleted : styles.connector}>
+                  <div style={i < this.state.selected ?
+                      completedStyles.connectorCompleted : styles.connector}>
                   </div>}
                 </div>
               </React.Fragment>;
