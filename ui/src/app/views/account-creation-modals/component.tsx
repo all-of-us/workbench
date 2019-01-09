@@ -60,9 +60,10 @@ export class AccountCreationResendModalReact extends
   }
 
   render() {
+    const { closeFunction } = this.props;
     return <React.Fragment>
       {this.props.resend &&
-      <Modal id='resend-instructions'>
+      <Modal onRequestClose={closeFunction}>
         <ModalTitle>Resend Instructions</ModalTitle>
         <ModalFooter>
           <button type='button' className='btn btn-outline'
@@ -145,9 +146,10 @@ export class AccountCreationUpdateModalReact extends
   }
 
   render() {
+    const { closeFunction } = this.props;
     return <React.Fragment>
       {this.props.update &&
-      <Modal>
+      <Modal onRequestClose={closeFunction}>
         <ModalTitle>Change contact email</ModalTitle>
         <ModalBody>
           <table style={{width: '100%'}}>
@@ -165,7 +167,7 @@ export class AccountCreationUpdateModalReact extends
             </tr>
             <tr>
               <td></td>
-              <td style={{width: '76%'}}>
+              <td style={{width: '70%'}}>
                 {this.showEmailValidationError() &&
                 <Error>Email is not valid.</Error>
                 }
