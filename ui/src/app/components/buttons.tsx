@@ -18,9 +18,14 @@ const styles = {
   secondary: ({ hover, disabled }) => ({
     border: '2px solid',
     borderColor: disabled ? '#c3c3c3' : '#262262',
-    backgroundColor: disabled ? '#f1f2f2' : (hover ? '#262262' : '#ffffff'),
+    backgroundColor: disabled ? '#f1f2f2' : (hover ? '#262262' : 'transparent'),
     borderRadius: '0.2rem',
     color: disabled ? '#c3c3c3' : (hover ? '#ffffff' : '#262262'),
+    padding: '0.5rem 0.77rem',
+    cursor: 'pointer',
+    textTransform: 'uppercase',
+    letterSpacing: '0.02rem',
+    lineHeight: '0.77rem'
   })
 };
 
@@ -75,6 +80,17 @@ export const Button = ({ type = 'primary', style = {}, disabled = false, ...prop
       return trackHover(<Clickable
         {...{ disabled, ...props }}
         style={{ ...styles.base({ disabled }), ...styles[type]({ hover, disabled }), ...style }}
+      />);
+    }}
+  </HoverContainer>;
+};
+
+export const Secondarybutton = ({ type = 'secondary', style = {}, disabled = false, ...props }) => {
+  return <HoverContainer>
+    {({ hover, trackHover }) => {
+      return trackHover(<Clickable
+          {...{ disabled, ...props }}
+          style={{ ...styles.base({ disabled }), ...styles[type]({ hover, disabled }), ...style }}
       />);
     }}
   </HoverContainer>;
