@@ -1,5 +1,4 @@
-import {Component, DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import {DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromJS} from 'immutable';
 import {
   find,
@@ -164,7 +163,8 @@ export function cookiesEnabled(): boolean {
 export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
   @ViewChild('root') rootElement: ElementRef;
 
-  constructor(private wrapped: any, private propNames: string[]) {}
+  constructor(private wrapped: new (...args: any[]) => React.Component,
+              private propNames: string[]) {}
 
   ngOnInit(): void {
     this.renderComponent();
