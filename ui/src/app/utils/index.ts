@@ -152,39 +152,39 @@ export function cookiesEnabled(): boolean {
     }
 }
 
-export const ReactComponent = ({ propNames = [], ...options }) => WrappedComponent => {
-  class WrapperComponent implements DoCheck, OnInit, OnDestroy {
-    @ViewChild('root')
-    rootElement: ElementRef;
+/**
+ * Helper base class for defining an Angular-wrapped React component. This is a
+ * stop-gap for React migration.
+ *
+ * Requirements:
+ *  - Component template must contain a div labeled "#root".
+ *  - React propNames must exactly match instance property names on the subclass
+ *    (usually these are also annotated as Angular @Inputs)
+ */
+export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
+  @ViewChild('root') rootElement: ElementRef;
 
-    ngOnInit(): void {
-      this.renderComponent();
-    }
+  constructor(private wrapped: any, private propNames: string[]) {}
 
-    ngDoCheck(): void {
-      this.renderComponent();
-    }
-
-    ngOnDestroy(): void {
-      ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
-    }
-
-    renderComponent(): void {
-      ReactDOM.render(
-        React.createElement(
-          WrappedComponent,
-          fromPairs(propNames.map(name => [name, this[name]]))
-        ),
-        this.rootElement.nativeElement
-      );
-    }
+  ngOnInit(): void {
+    this.renderComponent();
   }
-  propNames.forEach(name => {
-    Input()(WrapperComponent.prototype, name, undefined);
-  });
 
-  return Component({
-    ...options,
-    template: '<div #root></div>'
-  })(WrapperComponent) as any;
-};
+  ngDoCheck(): void {
+    this.renderComponent();
+  }
+
+  ngOnDestroy(): void {
+    ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
+  }
+
+  renderComponent(): void {
+    ReactDOM.render(
+      React.createElement(
+        this.wrapped,
+        fromPairs(this.propNames.map(name => [name, this[name]]))
+      ),
+      this.rootElement.nativeElement
+    );
+  }
+}
