@@ -3,12 +3,11 @@ import {Component, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-interface EditComponentProps {}
-interface EditComponentState { style: object }
+interface EditComponentState { style: object; }
 
-class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
+class EditComponentReact extends React.Component<{}, EditComponentState> {
 
-  constructor(props: EditComponentProps) {
+  constructor(props) {
     super(props);
     this.state = {
       style: {}
@@ -16,7 +15,7 @@ class EditComponentReact extends React.Component<EditComponentProps, EditCompone
   }
 
   mouseOver(): void {
-    this.setState({style: {fill: "#4D4CA5"}});
+    this.setState({style: {fill: '#4D4CA5'}});
   }
 
   mouseLeave(): void {
