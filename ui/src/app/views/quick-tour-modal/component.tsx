@@ -28,9 +28,13 @@ export const panels = [
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
-        {' '}<a className='link' href={OMOPDataSetLink} target='_blank'>OMOP common data model</a>{' '}
+        {' '}<a className='link' href={OMOPDataSetLink} target='_blank'>
+          OMOP common data model
+        </a>{' '}
           format. Here are some
-        {' '}<a className='link' href={OMOPTutorialsLink} target='_blank'>tutorials</a>{' '}
+        {' '}<a className='link' href={OMOPTutorialsLink} target='_blank'>
+          tutorials
+        </a>{' '}
         to understand OMOP data model.
         <br/><br/>
         When you create your Workspace, you will be prompted
