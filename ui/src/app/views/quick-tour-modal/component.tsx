@@ -313,7 +313,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
     return <React.Fragment>
       <div style={this.props.learning ? styles.modalBackdrop : undefined}/>
       {this.props.learning && !this.state.fullImage &&
-        <div style={styles.mainStyling} id='quick-tour-react'>
+        <div style={styles.mainStyling} id='quick-tour-react' className='quickTourReact'>
           <div style={styles.title}>All of Us Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
           <div style={styles.breadcrumbs}>
