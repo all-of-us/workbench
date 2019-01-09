@@ -9,8 +9,13 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
+import {
+  Button
+} from 'app/components/buttons';
+
 interface ConfirmDeleteModalProps {
   deleting: boolean,
+  closeFunction: Function,
   resourceType: string,
   receiveDelete: EventEmitter<any>,
   resource: {name: string}
@@ -29,10 +34,6 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
     this.state = {loading: false};
   }
 
-  // close(): void {
-  //   this.setState({deleting: false});
-  // }
-
   emitDelete(resource: any): void {
     if (!this.state.loading) {
       this.setState({loading: true});
@@ -43,14 +44,18 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
   render() {
     return <React.Fragment>
       {this.props.deleting &&
-      <Modal>
-
+      <Modal style={{borderRadius: '8px'}}>
         <ModalTitle>Are you sure you want to
-          delete {this.props.resourceType.toUpperCase()}: {this.props.resource.name}?
+          delete {this.props.resourceType}: {this.props.resource.name}?
         </ModalTitle>
 
         <ModalBody>This will permanently delete the {this.props.resourceType}.</ModalBody>
-        <ModalFooter/>
+        <ModalFooter style={{paddingTop: '1rem'}}>
+          <Button type='secondary' onClick={() => this.props.closeFunction()}>Cancel</Button>
+          <Button disabled={this.state.loading}
+                  style={{paddingLeft: '0.77rem'}}
+                  onClick={() => this.emitDelete(this.props.resource)}>Delete {this.props.resourceType}</Button>
+        </ModalFooter>
       </Modal>}
     </React.Fragment>;
 
@@ -78,6 +83,7 @@ export class ConfirmDeleteModalComponent {
   @Input() resource: {name: string};
 
   @Input() deleting: boolean;
+  @Input() closeFunction: Function;
 
   componentId = 'confirm-delete-modal';
 
@@ -98,18 +104,15 @@ export class ConfirmDeleteModalComponent {
   // }
 
   ngOnInit(): void {
-    console.log("init " + this.deleting);
     ReactDOM.render(React.createElement(ConfirmDeleteModal,
-        {deleting: this.deleting, resourceType: this.resourceType,
+        {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
           receiveDelete: this.receiveDelete, resource: this.resource}),
         document.getElementById(this.componentId));
   }
 
   ngDoCheck(): void {
-     console.log("docheck " + this.deleting);
-
     ReactDOM.render(React.createElement(ConfirmDeleteModal,
-        {deleting: this.deleting, resourceType: this.resourceType,
+        {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
           receiveDelete: this.receiveDelete, resource: this.resource}),
         document.getElementById(this.componentId));
   }

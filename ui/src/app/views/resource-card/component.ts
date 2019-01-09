@@ -54,7 +54,9 @@ export class ResourceCardComponent implements OnInit {
       private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
       private route: Router,
-  ) {}
+  ) {
+    this.toggleConfirmDelete = this.toggleConfirmDelete.bind(this);
+  }
 
   ngOnInit() {
     this.wsNamespace = this.resourceCard.workspaceNamespace;

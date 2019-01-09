@@ -41,7 +41,8 @@
 <app-confirm-delete-modal [resourceType]="resourceType"
                           [resource]="resource"
                           (receiveDelete)="receiveDelete($event)"
-                          [deleting]="confirmDeleting"></app-confirm-delete-modal>
+                          [deleting]="confirmDeleting"
+                          [closeFunction]="toggleConfirmDelete"></app-confirm-delete-modal>
 
 
 <app-rename-modal [resource]="resourceCard.notebook"

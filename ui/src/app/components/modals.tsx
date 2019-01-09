@@ -29,14 +29,16 @@ export const styles = {
     marginTop: '4%',
     marginLeft: '5%',
     fontSize: '20px',
-    color: '#302973'
+    color: '#302973',
+    fontWeight: 600
   },
 
   modalBody: {
     fontSize: '14px',
     lineHeight: '.8rem',
     marginLeft: '5%',
-    marginTop: '3%'
+    marginTop: '3%',
+    fontWeight: 400
   },
 
   modalFooter: {
