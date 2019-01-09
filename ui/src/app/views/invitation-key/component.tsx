@@ -1,13 +1,16 @@
-
 import {fullUrl} from 'app/utils/fetch';
 
+import {AlertDanger} from 'app/components/alert';
 import {BoldHeader} from 'app/components/headers';
 import {FormInput} from 'app/components/inputs';
-import {
-  FetchArgs,
+
+import {NextButton} from './style';
+
+import {FetchArgs,
   InvitationVerificationRequest,
   ProfileApiFetchParamCreator
 } from 'generated/fetch/api';
+
 import * as React from 'react';
 
 function isBlank(s: string) {
@@ -19,9 +22,10 @@ interface InvitationKeyState {
   invitationKeyReq: boolean;
   invitationKeyInvalid: boolean;
 }
+
 export class InvitationKeyReact extends React.Component<any, InvitationKeyState> {
 
-  state: InvitationKeyState
+  state: InvitationKeyState;
 
   constructor(props: Object) {
     super(props);
@@ -33,7 +37,6 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
     this.updateInvitationKey = this.updateInvitationKey.bind(this);
   }
 
-
   updateInvitationKey(input) {
     this.setState({
       invitationKey: input.target.value
@@ -41,55 +44,63 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
   }
 
   next() {
+    this.setState({
+      invitationKeyReq: false,
+      invitationKeyInvalid: false
+    });
+
     if (isBlank(this.state.invitationKey)) {
       this.setState({
         invitationKeyReq: true
       });
       return;
     }
-    this.setState({
-      invitationKeyReq: false,
-      invitationKeyInvalid: false
-    });
+
     const request: InvitationVerificationRequest = {
       invitationKey: this.state.invitationKey
     };
 
     const args: FetchArgs = ProfileApiFetchParamCreator().invitationKeyVerification(request);
+
     fetch(fullUrl(args.url), args.options)
-        .then(response => {
-          if (response.status === 400 ) {
-            this.setState({
-              invitationKeyInvalid: true
-            });
-          } else {
-            this.props.updateNext(2);
-            return;
-          }
-        })
-        .catch(error => {});
+      .then(response => {
+        if (response.status === 400 ) {
+          this.setState({
+            invitationKeyInvalid: true
+          });
+        } else {
+          this.props.updateNext(2);
+          return;
+        }})
+      .catch(error => console.log(error));
   }
 
   render() {
     return <div style={{padding: '3rem 3rem 0 3rem'}}>
-      <div className='form-area'>
-        <div className='form-section'>
-          <BoldHeader>Enter your Invitation Key:</BoldHeader>
-          <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
-                 placeholder='Invitation Key' onChange={this.updateInvitationKey} autoFocus/>
-          {this.state.invitationKeyReq &&
-          <div className='alert alert-danger'>
+      <div style={{marginTop: '0', paddingTop: '.5rem'}}>
+        <BoldHeader>
+          Enter your Invitation Key:
+        </BoldHeader>
+        <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
+                   placeholder='Invitation Key' onChange={this.updateInvitationKey} autoFocus/>
+        {
+          this.state.invitationKeyReq &&
+          <AlertDanger>
             <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
-          </div>}
-          {this.state.invitationKeyInvalid &&
-           <div className='alert alert-danger'>
-            <div style={{fontWeight: 'bolder'}}> Invitation Key is not Valid.</div>
-            </div>}
-          <div>
-            <button className='btn btn-primary' onClick={() => this.next()}>
-              Next
-            </button>
-          </div>
+          </AlertDanger>
+        }
+        {
+          this.state.invitationKeyInvalid &&
+          <AlertDanger>
+            <div style={{fontWeight: 'bolder'}}>
+              Invitation Key is not Valid.
+            </div>
+          </AlertDanger>
+        }
+        <div>
+          <NextButton onClick={() => this.next()}>
+            Next
+          </NextButton>
         </div>
       </div>
     </div>;
@@ -97,4 +108,3 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
 }
 
 export default InvitationKeyReact;
-
