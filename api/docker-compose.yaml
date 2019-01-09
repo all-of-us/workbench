@@ -138,7 +138,7 @@ services:
       depends_on:
         - db
       build:
-      context: ./src/dev/server
+        context: ./src/dev/server
       user: ${UID}
       working_dir: /w/db-cdr
       volumes:

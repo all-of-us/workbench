@@ -36,10 +36,8 @@ interface AccountCreationResendModalProps {
   closeFunction: Function;
 }
 
-class AccountCreationResendModalReact extends React.Component<AccountCreationResendModalProps, {}> {
-  state: {};
-  props: AccountCreationResendModalProps;
-
+export class AccountCreationResendModalReact extends
+    React.Component<AccountCreationResendModalProps, {}> {
   constructor(props: AccountCreationResendModalProps) {
     super(props);
     this.state = {};
@@ -91,7 +89,7 @@ interface AccountCreationUpdateModalState {
   emailOffFocus: boolean;
 }
 
-class AccountCreationUpdateModalReact extends
+export class AccountCreationUpdateModalReact extends
     React.Component<AccountCreationUpdateModalProps, AccountCreationUpdateModalState> {
   state: AccountCreationUpdateModalState;
   props: AccountCreationUpdateModalProps;
