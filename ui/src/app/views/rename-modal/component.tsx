@@ -1,4 +1,6 @@
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import {
   Button
@@ -9,7 +11,8 @@ import {
   ModalFooter,
   ModalTitle,
 } from 'app/components/modals';
-import {ReactComponent} from 'app/utils';
+
+import {ReactWrapperBase} from 'app/utils';
 
 
 interface RenameModalProps {
@@ -22,11 +25,7 @@ interface RenameModalState {
   newName: string;
 }
 
-@ReactComponent({
-  selector: 'app-rename-modal',
-  propNames: ['resource', 'onRename', 'onCancel']
-})
-export class RenameModalComponent extends React.Component<RenameModalProps, RenameModalState> {
+export class RenameModal extends React.Component<RenameModalProps, RenameModalState> {
   constructor(props: RenameModalProps) {
     super(props);
     this.state = {
@@ -65,5 +64,19 @@ export class RenameModalComponent extends React.Component<RenameModalProps, Rena
         </ModalFooter>
       </Modal>
     </React.Fragment>;
+  }
+}
+
+@Component({
+  selector: 'app-rename-modal',
+  template: '<div #root></div>'
+})
+export class RenameModalComponent extends ReactWrapperBase {
+  @Input('resource') resource: RenameModalProps['resource'];
+  @Input('onRename') onRename: RenameModalProps['onRename'];
+  @Input('onCancel') onCancel: RenameModalProps['onCancel'];
+
+  constructor() {
+    super(RenameModal, ['resource', 'onRename', 'onCancel']);
   }
 }
