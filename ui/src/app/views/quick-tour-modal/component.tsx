@@ -371,7 +371,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {this.state.selected !== (panels.length - 1) &&
-              <Button type='darklingPrimary' onClick={() => this.close()}
+              <Button type='darklingPrimary' id='close' onClick={() => this.close()}
                       style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
               <Button type='darklingSecondary' id='next' style={{marginRight: '10%'}}
                       onClick={() => this.next()}>{this.lastButtonText()}</Button>

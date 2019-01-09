@@ -3,7 +3,6 @@ import * as React from 'react';
 
 import {panels, QuickTourReact, QuickTourReactProps, QuickTourReactState} from './component';
 
-
 describe('QuickTourModalComponent', () => {
 
   let props: QuickTourReactProps;
@@ -60,7 +59,7 @@ describe('QuickTourModalComponent', () => {
     const wrapper = component();
     wrapper.find('#breadcrumb' + lastPanel).simulate('click');
     expect(wrapper.exists('#close')).toBeFalsy();
-    expect(wrapper.find('#next').text()).toBe('Close');
+    expect(wrapper.find('#next').childAt(0).text()).toBe('Close');
   });
 
   it('should expand and retract the image when the resize icon is clicked', () => {
