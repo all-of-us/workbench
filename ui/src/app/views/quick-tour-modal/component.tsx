@@ -289,7 +289,6 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   }
 
   close(): void {
-    console.log('here');
     this.setState({selected: 0});
     this.props.closeFunction();
   }
@@ -308,7 +307,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
 
   render() {
     return <React.Fragment>
-      <div style={this.props.learning ? styles.modalBackdrop : undefined}></div>
+      <div style={this.props.learning ? styles.modalBackdrop : undefined}/>
       {this.props.learning && !this.state.fullImage &&
         <div style={styles.mainStyling} id='quick-tour-react'>
           <div style={styles.title}>All of Us Researcher Workbench</div>
@@ -323,7 +322,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                     {(i < this.state.selected) && <div style={styles.check}>
                         <img src={this.checkImg}/>
                     </div>}
-                    {(i ===  this.state.selected) && <div style={styles.current}></div>}
+                    {(i ===  this.state.selected) && <div style={styles.current}/>}
                   </div>
                   <div style={styles.breadcrumbTitle}>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
@@ -334,7 +333,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-          <div style={styles.divider}></div>
+          <div style={styles.divider}/>
           </div>
           <div style={styles.panel}>
             <div style={{width: '75%'}}>
