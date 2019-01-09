@@ -65,13 +65,9 @@ export class EditComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.renderComponent();
-  }
-
-  renderComponent() {
     ReactDOM.render(
-      React.createElement(EditComponentReact, {}),
-      document.getElementById('app-edit-icon'));
+        React.createElement(EditComponentReact, {}),
+        document.getElementById('app-edit-icon'));
   }
 
 }
