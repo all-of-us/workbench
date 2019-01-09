@@ -1,9 +1,9 @@
-:host::ng-deep .btn {
+.btn {
   font-weight: 500;
   font-size: 12px;
 }
 
-:host::ng-deep .btn.btn-primary {
+.btn.btn-primary {
   background-color: #262262;
   border: none;
   padding: 0rem 0.77rem;
@@ -16,18 +16,18 @@
   line-height: 0.77rem;
 }
 
-:host::ng-deep .btn.btn-primary:hover {
+.btn.btn-primary:hover {
   background-color: #4356A7;
   color: #fff;
 }
 
-:host::ng-deep .btn.btn-primary:disabled {
+.btn.btn-primary:disabled {
   background-color: #c3c3c3;
   color: #fff;
   cursor: auto;
 }
 
-:host::ng-deep .btn.btn-secondary,
+.btn.btn-secondary,
 .btn.btn-outline {
   border: 2px solid #262262;
   padding: 0rem 0.77rem;
@@ -40,15 +40,15 @@
   line-height: 0.77rem;
 }
 
-:host::ng-deep .btn.btn-secondary:active {
+.btn.btn-secondary:active {
   box-shadow: inset 0 2px 0 0 #4356a7;
 }
 
-:host::ng-deep .btn.btn-secondary {
+.btn.btn-secondary {
   font-size: 10px;
 }
 
-:host::ng-deep .btn.btn-secondary:hover,
+.btn.btn-secondary:hover,
 .btn.btn-outline:hover {
   background-color: #262262;
   color: #fff;
@@ -62,7 +62,7 @@
   cursor: auto;
 }
 
-:host::ng-deep .btn.btn-lg {
+.btn.btn-lg {
   height: 2.5rem;
 }
 
