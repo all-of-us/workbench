@@ -212,7 +212,14 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     }
   }
 
-  inputChange() {
+  inputChange(input: number, index: number, name: string) {
+    if (input) {
+      let value = input.toString();
+      if (value && value.length > 3) {
+        value = value.slice(0, 3);
+        this.form.controls.NUM.get(['num' + index, name]).setValue(value, {emitEvent: false});
+      }
+    }
     this.preview = Map();
   }
 
