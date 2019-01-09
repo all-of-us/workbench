@@ -60,3 +60,4 @@ export const Content = ({style = {}, ...props}) =>
 
 export const SignedIn = ({style = {}, ...props}) =>
     <div {...props} style={{...styles.signedInContainer, ...style}}/>;
+    
