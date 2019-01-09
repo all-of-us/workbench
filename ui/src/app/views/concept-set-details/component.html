@@ -27,8 +27,8 @@
         <h2 *ngIf="!editing">{{conceptSet.name}}</h2>
         <input *ngIf="editing" class="edit-name" type="text" autofocus [(ngModel)]="editName">
         <button *ngIf="!editing" class="btn btn-icon edit-button" [disabled]="!canEdit"
-            (mouseover)="editHover=true" (mouseleave)="editHover=false" (click)="editing=true">
-          <app-edit-icon [editHover]="editHover"></app-edit-icon>
+            (click)="editing=true">
+          <app-edit-icon></app-edit-icon>
         </button>
       </div>
       <p *ngIf="!editing">{{conceptSet.description}}</p>
