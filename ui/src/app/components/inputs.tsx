@@ -22,6 +22,8 @@ export const styles = {
 
 export const FieldInput = ({style = {}, ...props}) =>
   <input {...props} style={{...styles.input, ...style}} />;
+export const FormInput = ({style = {}, ...props}) =>
+    <input {...props} style={{...styles.formInput, ...style}} ref={props.inputref}/>;
 export const Error = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.error, ...style}} />;
 

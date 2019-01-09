@@ -26,6 +26,7 @@ interface InvitationKeyState {
 export class InvitationKeyReact extends React.Component<any, InvitationKeyState> {
 
   state: InvitationKeyState;
+  inputElement: any;
 
   constructor(props: Object) {
     super(props);
@@ -34,7 +35,12 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
       invitationKeyReq: false,
       invitationKeyInvalid: false
     };
+    this.inputElement = React.createRef();
     this.updateInvitationKey = this.updateInvitationKey.bind(this);
+  }
+
+  componentDidUpdate() {
+    this.inputElement.current.focus();
   }
 
   updateInvitationKey(input) {
@@ -61,7 +67,6 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
     };
 
     const args: FetchArgs = ProfileApiFetchParamCreator().invitationKeyVerification(request);
-
     fetch(fullUrl(args.url), args.options)
       .then(response => {
         if (response.status === 400 ) {
@@ -82,20 +87,20 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
           Enter your Invitation Key:
         </BoldHeader>
         <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
-                   placeholder='Invitation Key' onChange={this.updateInvitationKey} autoFocus/>
-        {
-          this.state.invitationKeyReq &&
-          <AlertDanger>
-            <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
-          </AlertDanger>
+                   placeholder='Invitation Key' onChange={this.updateInvitationKey}
+                   inputref={this.inputElement}
+                   autoFocus/>
+        {this.state.invitationKeyReq &&
+         <AlertDanger>
+           <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
+         </AlertDanger>
         }
-        {
-          this.state.invitationKeyInvalid &&
-          <AlertDanger>
-            <div style={{fontWeight: 'bolder'}}>
-              Invitation Key is not Valid.
-            </div>
-          </AlertDanger>
+        {this.state.invitationKeyInvalid &&
+         <AlertDanger>
+           <div style={{fontWeight: 'bolder'}}>
+             Invitation Key is not Valid.
+           </div>
+         </AlertDanger>
         }
         <div>
           <NextButton onClick={() => this.next()}>
