@@ -1,6 +1,8 @@
+import {Header, SmallHeader} from 'app/components/headers';
+
 import * as React from 'react';
-import {Header, SmallHeader} from '../../common/common';
-import {Button, Google} from './css';
+
+import {GoogleIcon, LoginButton, SecondaryLoginbutton} from './style';
 
 export class LoginReactComponent extends React.Component<any, any> {
   googleIcon = '/assets/icons/google-icon.png';
@@ -16,30 +18,33 @@ export class LoginReactComponent extends React.Component<any, any> {
   signIn() {
     this.props.signIn();
   }
+
   render() {
     return <div style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
       <React.Fragment>
         <div>
-          <Header>Already have an account?</Header>
+          <Header>
+            Already have an account?
+          </Header>
           <div>
-            <Button onClick={() => this.signIn()}>
-              <Google src={this.googleIcon}/>
-              <div>Sign In with Google</div>
-            </Button>
+            <LoginButton onClick={() => this.signIn()}>
+              <GoogleIcon src={this.googleIcon}/>
+              <div>
+                Sign In with Google
+              </div>
+            </LoginButton>
           </div>
         </div>
-        <div style={{paddingTop: '1rem'}}>
-          <SmallHeader>Don't have an account?</SmallHeader>
-          <button onClick={() => this.showCreateAccountState()} className='btn btn-secondary'>
+        <div style={{paddingTop: '1.25rem'}}>
+          <SmallHeader>
+            Don't have an account?
+          </SmallHeader>
+          <SecondaryLoginbutton onClick={() => this.showCreateAccountState()}>
             Create Account
-          </button>
+          </SecondaryLoginbutton>
         </div>
       </React.Fragment>
     </div>;
   }
 }
 export default LoginReactComponent;
-
-
-
-
