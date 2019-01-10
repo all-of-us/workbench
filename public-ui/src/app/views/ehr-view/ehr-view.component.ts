@@ -188,7 +188,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
   public selectGraph(g) {
-    document.getElementById('chartElement').scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    document.getElementById('chartElement').scrollIntoView(
+      { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.showGenderGraph = false;
     this.showAgeGraph = false;
     this.showSourcesGraph = false;
