@@ -5,10 +5,12 @@ import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
 
+import {AccountCreationReact} from 'app/views/account-creation/component';
+import LoginReactComponent from 'app/views/login/component';
+
+import {DataAccessLevel, Profile} from 'generated/fetch';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {DataAccessLevel, Profile} from 'generated/fetch';
-import {AccountCreationReact} from 'app/views/account-creation/component';
 
 import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
@@ -52,7 +54,19 @@ const SignPageTemplateReact = withWindowSize()(
       super(props);
       this.state = {
         currentStep: 'login',
-        invitationKey: ''
+        invitationKey: '',
+        profile: {
+          // Note: We abuse the "username" field here by omitting "@domain.org". After
+          // profile creation, this field is populated with the full email address.
+          username: '',
+          dataAccessLevel: DataAccessLevel.Unregistered,
+          givenName: '',
+          familyName: '',
+          contactEmail: '',
+          currentPosition: '',
+          organization: '',
+          areaOfResearch: ''
+        }
       };
       this.setCurrentStep = this.setCurrentStep.bind(this);
       this.onKeyVerified = this.onKeyVerified.bind(this);
@@ -65,7 +79,8 @@ const SignPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
+        case 'accountCreation': return <AccountCreationReact
+                          onAccountCreate={() => this.setCurrentStep('accountCreationSuccess')}/>;
         default:
           return;
         }

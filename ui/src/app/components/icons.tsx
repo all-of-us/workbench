@@ -26,7 +26,7 @@ export const ClrIcon = props => {
 };
 
 export const InfoIcon = ({style = {}, ...props}) =>
-  <ClrIcon shape='info-standard' {...props} class="is-solid"
+  <ClrIcon shape='info-standard' {...props} class='is-solid'
            style={{...styles.infoIcon, ...style}}/>;
 
 export const ValidationIcon = props => {

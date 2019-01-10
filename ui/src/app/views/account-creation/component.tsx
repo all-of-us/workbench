@@ -267,7 +267,10 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
                   onChange={this.updateField}/>
                 <TooltipTrigger content='You are required to describe your current research in
                 order to help All of Us improve the Researcher Workbench.'>
-                  <InfoIcon style={{'height': '22px', 'marginTop': '2.2rem', 'paddingLeft': '2px'}}/>
+                  <InfoIcon style={{
+                    'height': '22px',
+                    'marginTop': '2.2rem',
+                    'paddingLeft': '2px'}}/>
                 </TooltipTrigger>
           </FormSection>
           <FormSection>
@@ -296,8 +299,8 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
             </div>
           </FormSection>
           <FormSection>
-            <button type="submit"
-                    className="btn btn-primary short-button"
+            <button type='submit'
+                    className='btn btn-primary short-button'
                     disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
                     this.isUsernameValidationError()}
                     onClick={this.createAccount}>
