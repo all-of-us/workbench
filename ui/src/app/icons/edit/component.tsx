@@ -5,27 +5,35 @@ import * as ReactDOM from 'react-dom';
 
 interface EditComponentState { style: object; }
 
+const style = {
+  height: 14,
+  width: 14,
+};
+
+const fillStyle = {
+  fill: '#4D4CA5'
+};
+
 class EditComponentReact extends React.Component<{}, EditComponentState> {
 
   constructor(props) {
     super(props);
     this.state = {
-      style: {}
-    };
+        style: style
+    }
   }
 
   mouseOver(): void {
-    this.setState({style: {fill: '#4D4CA5'}});
+    this.setState({style: {...style, ...fillStyle}});
   }
 
   mouseLeave(): void {
-    this.setState({style: {}});
+    this.setState({style: style});
   }
 
   render() {
     return (
-      <svg className='icon'
-           style={{width: '14px', height: '14px', ...this.state.style}}
+      <svg style={this.state.style}
            viewBox='0 0 14 14'
            version='1.1'
            xmlns='http://www.w3.org/2000/svg'
