@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -57,17 +57,19 @@ class EditComponentReact extends React.Component<{}, EditComponentState> {
 
 @Component({
   selector: 'app-edit-icon',
-  templateUrl: './component.html',
+  template: '<div #editIcon></div>',
 })
-
-export class EditComponent implements OnInit {
+export class EditComponent implements AfterViewInit {
 
   constructor() {}
 
-  ngOnInit(): void {
+  @ViewChild('editIcon')
+  editIcon: ElementRef;
+
+  ngAfterViewInit(): void {
     ReactDOM.render(
         React.createElement(EditComponentReact, {}),
-        document.getElementById('app-edit-icon'));
+        this.editIcon.nativeElement);
   }
 
 }
