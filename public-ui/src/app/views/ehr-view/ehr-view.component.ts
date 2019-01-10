@@ -190,10 +190,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   public selectGraph(g) {
     document.getElementById('chartElement').scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
-    this.showGenderGraph = false;
-    this.showAgeGraph = false;
-    this.showSourcesGraph = false;
-    this.showMeasurementGenderBins = false;
+    this.resetSelectedGraphs();
     if (g === 'Gender') {
       this.showGenderGraph = true;
     } else if (g === 'Age') {
@@ -220,6 +217,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       return this.sourcesChartHelpText;
     }
   }
+  public resetSelectedGraphs() {
+    this.showGenderGraph = false;
+    this.showAgeGraph = false;
+    this.showSourcesGraph = false;
+    this.showMeasurementGenderBins = false;
+  }
   public expandRow(concepts, r) {
     const index = concepts.findIndex(x => x.conceptId === r.conceptId);
     const prevConcepts = concepts.slice(0, index);
@@ -230,6 +233,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     for (const concept of nextConcepts.filter(x => x.expanded === true)) {
       concept.expanded = false;
     }
+    this.resetSelectedGraphs();
+    this.showGenderGraph = true;
     r.expanded = !r.expanded;
   }
 }
