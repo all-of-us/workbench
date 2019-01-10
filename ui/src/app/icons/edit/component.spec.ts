@@ -1,9 +1,9 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import * as ReactTestUtils from 'react-dom/test-utils';
 import {
   updateAndTick
 } from 'testing/test-helpers';
 import {EditComponent} from './component';
-import * as ReactTestUtils from 'react-dom/test-utils';
 
 // Note that the description is slightly different from the component for easier test filtering.
 describe('EditIconComponent', () => {
