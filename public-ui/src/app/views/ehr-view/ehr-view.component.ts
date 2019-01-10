@@ -222,7 +222,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   public expandRow(concepts, r) {
     const index = concepts.findIndex(x => x.conceptId === r.conceptId);
     const prevConcepts = concepts.slice(0, index);
-    const nextConcepts = concepts.slice(index+1);
+    const nextConcepts = concepts.slice(index + 1);
     for (const concept of prevConcepts) {
       if (concept.expanded) {
         concept.expanded = false;
