@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
+import {Button} from '../../components/buttons';
 
 export const styles = {
   button: {

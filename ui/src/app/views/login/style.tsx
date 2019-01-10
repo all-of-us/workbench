@@ -1,4 +1,4 @@
-import {Button, Secondarybutton} from 'app/components/buttons';
+import {Button, Secondarybutton} from '../../components/buttons';
 
 import * as React from 'react';
 
