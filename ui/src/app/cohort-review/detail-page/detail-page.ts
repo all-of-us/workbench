@@ -15,6 +15,7 @@ export class DetailPage implements OnInit, OnDestroy {
   participant: Participant;
   subscription: Subscription;
   participantId: number;
+  sidebarTransition: boolean;
   constructor(private route: ActivatedRoute, private state: ReviewStateService) {}
 
   ngOnInit() {
@@ -24,10 +25,18 @@ export class DetailPage implements OnInit, OnDestroy {
       participant.annotations = annotations;
       this.participant = participant;
     });
+    const element = document.getElementById('review-sidebar-content');
+    element.addEventListener("transitionend", () => {
+      this.sidebarTransition = !this.sidebarTransition;
+    }, false);
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    const element = document.getElementById('review-sidebar-content');
+    element.removeEventListener("transitionend", () => {
+      this.sidebarTransition = !this.sidebarTransition;
+    }, false);
   }
 
   get angleDir() {

@@ -9,7 +9,11 @@
               <div *ngIf="chartData[charts].loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
                 Loading...
               </div>
-              <app-individual-participants-charts *ngIf="!chartData[charts].loading && chartData[charts] " [chartData] ="chartData[charts]" [chartHeader] = "chartData[charts].conditionTitle"  [chartKey]="i"></app-individual-participants-charts>
+              <app-individual-participants-charts [chartData] ="chartData[charts]"
+                                                  [chartKey]="i"
+                                                  [shouldReRender]="chartData[charts].loading"
+                                                  [sidebarTransitionFlag] ="sidebarTransition">
+              </app-individual-participants-charts>
             </div>
           </div>
         </div>
