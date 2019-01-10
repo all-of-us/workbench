@@ -82,6 +82,8 @@ export class ResourceCardComponent implements OnInit {
   }
 
   toggleConfirmDelete(): void {
+    console.log("toggling confirm delete");
+    console.log(this.confirmDeleting);
     this.confirmDeleting = !this.confirmDeleting;
   }
 

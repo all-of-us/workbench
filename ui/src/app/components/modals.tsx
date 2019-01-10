@@ -11,7 +11,8 @@ export const styles = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%,-50%)',
-    zIndex: 1050
+    zIndex: 1050,
+    padding: '1rem'
   },
 
   modalBackdrop: {
@@ -26,8 +27,6 @@ export const styles = {
   },
 
   modalTitle: {
-    marginTop: '4%',
-    marginLeft: '5%',
     fontSize: '20px',
     color: '#302973',
     fontWeight: 600
@@ -36,7 +35,6 @@ export const styles = {
   modalBody: {
     fontSize: '14px',
     lineHeight: '.8rem',
-    marginLeft: '5%',
     marginTop: '3%',
     fontWeight: 400
   },
