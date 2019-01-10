@@ -5,7 +5,8 @@ import {Button} from 'app/components/buttons';
 import {BoldHeader} from 'app/components/headers';
 import {FormInput} from 'app/components/inputs';
 
-import {FetchArgs,
+import {
+  FetchArgs,
   InvitationVerificationRequest,
   ProfileApiFetchParamCreator
 } from 'generated/fetch/api';

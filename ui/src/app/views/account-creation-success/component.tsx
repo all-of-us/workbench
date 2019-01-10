@@ -12,7 +12,7 @@ import {
   AccountCreationResendModalReact,
   AccountCreationUpdateModalReact
 } from 'app/views/account-creation-modals/component';
-import {AccountCreationComponent} from 'app/views/account-creation/component';
+import {AccountCreationReact} from 'app/views/account-creation/component';
 
 
 const styles = {
@@ -113,35 +113,36 @@ export class AccountCreationSuccessReact
     </React.Fragment>;
   }
 }
-@Component({
-  selector : 'app-account-creation-success',
-  templateUrl: './component.html'
-})
-export class AccountCreationSuccessComponent implements DoCheck, OnInit {
-  username: string;
-  @Input('contactEmail')
-  contactEmail: string;
-  constructor(
-    private account: AccountCreationComponent
-  ) {}
 
-  ngOnInit(): void {
-    this.renderReactComponent();
-  }
-
-  ngDoCheck(): void {
-    this.renderReactComponent();
-  }
-
-  renderReactComponent(): void {
-    ReactDOM.render(<AccountCreationSuccessReact
-        contactEmailOnCreation={this.contactEmail}
-        username={this.account.profile.username}
-        creationNonce = {this.account.profile.creationNonce}/>,
-      document.getElementById('account-creation-success'));
-  }
-
-  public getEmail(contactEmail: string) {
-    this.contactEmail = contactEmail;
-  }
-}
+// @Component({
+//   selector : 'app-account-creation-success',
+//   templateUrl: './component.html'
+// })
+// export class AccountCreationSuccessComponent implements DoCheck, OnInit {
+//   username: string;
+//   @Input('contactEmail')
+//   contactEmail: string;
+//   constructor(
+//     private account: AccountCreationComponent
+//   ) {}
+//
+//   ngOnInit(): void {
+//     this.renderReactComponent();
+//   }
+//
+//   ngDoCheck(): void {
+//     this.renderReactComponent();
+//   }
+//
+//   renderReactComponent(): void {
+//     ReactDOM.render(<AccountCreationSuccessReact
+//         contactEmailOnCreation={this.contactEmail}
+//         username={this.account.profile.username}
+//         creationNonce = {this.account.profile.creationNonce}/>,
+//       document.getElementById('account-creation-success'));
+//   }
+//
+//   public getEmail(contactEmail: string) {
+//     this.contactEmail = contactEmail;
+//   }
+// }

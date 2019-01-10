@@ -7,6 +7,14 @@ import {InvitationKeyReact} from 'app/views/invitation-key/component';
 import {LoginReactComponent} from 'app/views/login/component';
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {SignInService} from '../../services/sign-in.service';
+import {withWindowSize} from '../../utils';
+import {InvitationKeyReact} from '../invitation-key/component';
+import {LoginReactComponent} from '../login/component';
+import {Content, Header, SignedIn, Template} from './image';
+import {DataAccessLevel, Profile} from "../../../generated/fetch";
+import {AccountCreationReact} from "../account-creation/component";
 
 import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
@@ -24,6 +32,7 @@ interface PageTemplateProps {
 interface PageTemplateState {
   currentStep: string;
   invitationKey: string;
+  profile: Profile;
 }
 
 const pageImages = {
