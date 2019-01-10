@@ -1,4 +1,7 @@
 import {Component, DoCheck, Input, OnInit} from '@angular/core';
+
+import {reactStyles} from 'app/utils';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -89,9 +92,7 @@ export const panels = [
       image: '/assets/images/notebooks.png'
     }];
 
-
-/** @type {{search: React.CSSProperties}} */
-const styles = {
+const styles = reactStyles({
   modalBackdrop: {
     position: 'fixed',
     top: 0,
@@ -101,7 +102,7 @@ const styles = {
     backgroundColor: '#313131',
     opacity: .8,
     zIndex: 1040,
-  } as React.CSSProperties,
+  },
   mainStyling: {
     height: '79.23%',
     width: '80%',
@@ -112,7 +113,7 @@ const styles = {
     left: '10%',
     top: '1%',
     zIndex: 1050,
-  } as React.CSSProperties,
+  },
   title: {
     color: '#FFFFFF',
     marginTop: '2%',
@@ -120,7 +121,7 @@ const styles = {
     fontSize: '21px',
     width: '100%',
     fontWeight: 500
-  } as React.CSSProperties,
+  },
   mainTitle: {
     color: '#FFFFFF',
     fontSize: '48px',
@@ -128,27 +129,27 @@ const styles = {
     marginTop: '3%',
     marginLeft: '3%',
     fontWeight: 'bold'
-  } as React.CSSProperties,
+  },
   breadcrumbs: {
     width: '100%',
     marginTop: '5%',
     justifyContent: 'center',
     display: 'flex',
     flexDirection: 'row'
-  } as React.CSSProperties,
+  },
   circle: {
     border: '2px solid #8C9BA5',
     borderRadius: '50%',
     height: '21.92px',
     width: '21.92px',
     left: '21.92px'
-  } as React.CSSProperties,
+  },
   check: {
     minHeight: '10px',
     minWidth: '10px',
     marginLeft: '2px',
     marginTop: '-3px'
-  } as React.CSSProperties,
+  },
   current: {
     minHeight: '12px',
     minWidth: '12px',
@@ -157,7 +158,7 @@ const styles = {
     backgroundColor: '#2691D0',
     borderRadius: '50%',
     display: 'inline-block'
-  } as React.CSSProperties,
+  },
   connector: {
     border: '2px solid #8C9BA5',
     boxSizing: 'border-box',
@@ -166,12 +167,12 @@ const styles = {
     position: 'relative',
     left: '21.92px',
     top: '-36px'
-  } as React.CSSProperties,
+  },
   breadcrumbTitle: {
     transform: 'translate(-40%)',
     textAlign: 'center',
     color: '#2691D0'
-  } as React.CSSProperties,
+  },
 
   divider: {
     boxSizing: 'border-box',
@@ -180,27 +181,27 @@ const styles = {
     border: '0.5px solid #FFFFFF',
     boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
     margin: 'auto'
-  } as React.CSSProperties,
+  },
   panel: {
     marginTop: '5%',
     width: '100%',
     height: '30%',
     display: 'flex'
-  } as React.CSSProperties,
+  },
   panelTitle: {
     width: '100%',
     marginLeft: '5%',
     color: '#FFFFFF',
     fontSize: '28px',
     fontWeight: 'bold'
-  } as React.CSSProperties,
+  },
   panelContents: {
     paddingLeft: '5%',
     marginTop: '1%',
     color: '#FFFFFF',
     fontSize: '14px',
     textAlign: 'left'
-  } as React.CSSProperties,
+  },
   panelText: {
     marginRight: '2%',
     paddingTop: '.5%',
@@ -208,7 +209,7 @@ const styles = {
     lineHeight: '24px',
     whiteSpace: 'pre-line',
     textAlign: 'left'
-  } as React.CSSProperties,
+  },
   panelRight: {
     marginRight: '5%',
     marginBottom: '5%',
@@ -217,7 +218,7 @@ const styles = {
     position: 'relative',
     display: 'flex',
     justifyContent: 'flex-end'
-  } as React.CSSProperties,
+  },
   panelImage: {
     width: '78%',
     height: '95%',
@@ -226,29 +227,30 @@ const styles = {
     position: 'relative',
     zIndex: 1,
     display: 'inline'
-  } as React.CSSProperties,
+  },
   controls: {
     width: '100%',
     position: 'absolute',
     bottom: '8%',
     display: 'flex',
     justifyContent: 'space-between'
-  } as React.CSSProperties
-};
+  }
+});
+
 
 const completedStyles = {
   circleCompleted: Object.assign(
-      styles.circle,
-      {
-        left: '0px',
-        border: '2px solid #2691D0',
-      }
+    styles.circle,
+    {
+      left: '0px',
+      border: '2px solid #2691D0',
+    }
   ),
   connectorCompleted: Object.assign(
-      styles.connector,
-      {
-        border: '2px solid #2691D0'
-      }
+    styles.connector,
+    {
+      border: '2px solid #2691D0'
+    }
   )
 };
 
