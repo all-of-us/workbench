@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
