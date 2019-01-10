@@ -44,7 +44,7 @@ interface AccountCreationState {
 export class AccountCreationReact extends React.Component<any, AccountCreationState> {
   usernameCheckTimeout: NodeJS.Timer;
   errorMap: Map<string, boolean> = new Map<string, boolean>();
-  accountCreated: boolean = false;
+  accountCreated = false;
 
   constructor(props: Object) {
     super(props);
@@ -165,7 +165,8 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
         this.setState({usernameCheckInProgress: false});
         return;
       }
-      const args: FetchArgs = ProfileApiFetchParamCreator().isUsernameTaken(this.state.profile.username);
+      const args: FetchArgs = ProfileApiFetchParamCreator()
+        .isUsernameTaken(this.state.profile.username);
       fetch(fullUrl(args.url), args.options)
         .then(handleErrors)
         .then((response) => response.json())
@@ -180,14 +181,15 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
     }, 300);
   }
 
-  updateField(event: React.FormEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>): void {
+  updateField(
+    event: React.FormEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>): void {
     const value  = event.currentTarget.value;
     const attribute = event.currentTarget.id;
     this.updateProfile(attribute, value);
     if (['givenName', 'familyName'].includes(attribute)) {
-      this.errorMap[attribute] = value.length > 80
+      this.errorMap[attribute] = value.length > 80;
     } else if (['currentPosition', 'organization'].includes(attribute)) {
-      this.errorMap[attribute] = value.length > 255
+      this.errorMap[attribute] = value.length > 255;
     }
   }
 
@@ -200,13 +202,16 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
   render() {
     return <React.Fragment>
       {!this.accountCreated &&
-        <div id='account-creation' style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
+        <div id='account-creation'
+             style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
           <BoldHeader>Create your account</BoldHeader>
         <div>
           <FormSection>
-            <LongInput type='text' id='givenName' name='givenName' autoFocus placeholder='First Name'
+            <LongInput type='text' id='givenName' name='givenName' autoFocus
+                    placeholder='First Name'
                     value={this.state.profile.givenName}
-                    style={this.errorMap['givenName'] ? inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                    style={this.errorMap['givenName'] ?
+                      inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                     onChange={this.updateField}/>
               {this.errorMap['givenName'] &&
                 <ErrorMessage>
@@ -216,7 +221,8 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
           <FormSection>
             <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
                    value={this.state.profile.familyName}
-                   style={this.errorMap['familyName'] ? inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                   style={this.errorMap['familyName'] ?
+                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                    onChange={this.updateField}/>
               {this.errorMap['familyName'] &&
                 <ErrorMessage>
@@ -224,13 +230,16 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='contactEmail' name='contactEmail' placeholder='Email Address'
+            <LongInput type='text' id='contactEmail' name='contactEmail'
+                      placeholder='Email Address'
                       onChange={this.updateField}/>
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='currentPosition' name='currentPosition' placeholder='You Current Position'
+            <LongInput type='text' id='currentPosition' name='currentPosition'
+                       placeholder='You Current Position'
                    value={this.state.profile.currentPosition}
-                   style={this.errorMap['currentPosition'] ? inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                   style={this.errorMap['currentPosition'] ?
+                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                    onChange={this.updateField}/>
               {this.errorMap['currentPosition'] &&
                 <ErrorMessage>
@@ -238,9 +247,11 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='organization' name='organization' placeholder='Your Organziation'
+            <LongInput type='text' id='organization' name='organization'
+                       placeholder='Your Organziation'
                    value={this.state.profile.organization}
-                   style={this.errorMap['organization'] ? inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                   style={this.errorMap['organization'] ?
+                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                    onChange={this.updateField}/>
               {this.errorMap['currentPosition'] &&
                 <ErrorMessage>
@@ -248,23 +259,29 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
                 </ErrorMessage>}
           </FormSection>
           <FormSection style={{'display': 'flex', 'flexDirection': 'row'}}>
-              <textarea style={{...inputStyles.formInput, ...inputStyles.longInput, 'height': '10em', 'resize': 'none', 'width': '16rem'}} id='areaOfResearch' name='areaOfResearch' placeholder='Describe Your Current Research'
+              <textarea style={{...inputStyles.formInput, ...inputStyles.longInput,
+                'height': '10em', 'resize': 'none', 'width': '16rem'}}
+                        id='areaOfResearch'
+                        name='areaOfResearch'
+                         placeholder='Describe Your Current Research'
                   onChange={this.updateField}/>
-                <TooltipTrigger content='You are required to describe your current research in order to help All of Us improve the Researcher Workbench.'>
+                <TooltipTrigger content='You are required to describe your current research in
+                order to help All of Us improve the Researcher Workbench.'>
                   <InfoIcon style={{'height': '22px', 'marginTop': '2.2rem', 'paddingLeft': '2px'}}/>
                 </TooltipTrigger>
           </FormSection>
           <FormSection>
             <LongInput type='text' id='username' name='username' placeholder='New Username'
                        onChange={this.usernameChanged.bind(this)}
-                       style={this.errorMap['username'] ? inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
+                       style={this.errorMap['username'] ?
+                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
             <div style={inputStyles.iconArea}>
               <ValidationIcon validSuccess={this.usernameValid} notValid={this.usernameNotValid}/>
             </div>
-            <TooltipTrigger content={<div>Usernames can contain only letters (a-z), numbers (0-9), dashes (-),
-              underscores (_), apostrophes ('), and periods (.) (maximum of 64 characters).<br/>
-              Usernames cannot begin or end with a period (.) and may not contain more than one
-              period (.) in a row.</div>}>
+            <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
+              numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
+              (maximum of 64 characters).<br/>Usernames cannot begin or end with a period (.)
+              and may not contain more than one period (.) in a row.</div>}>
               <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
             </TooltipTrigger>
             <div style={{height: '1.5rem'}}>
@@ -281,7 +298,8 @@ export class AccountCreationReact extends React.Component<any, AccountCreationSt
           <FormSection>
             <button type="submit"
                     className="btn btn-primary short-button"
-                    disabled={this.state.creatingAccount || this.state.usernameCheckInProgress || this.isUsernameValidationError()}
+                    disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
+                    this.isUsernameValidationError()}
                     onClick={this.createAccount}>
               Next
             </button>

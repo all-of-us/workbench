@@ -26,13 +26,16 @@ export const ClrIcon = props => {
 };
 
 export const InfoIcon = ({style = {}, ...props}) =>
-  <ClrIcon shape='info-standard' {...props} class="is-solid" style={{...styles.infoIcon, ...style}}/>;
+  <ClrIcon shape='info-standard' {...props} class="is-solid"
+           style={{...styles.infoIcon, ...style}}/>;
 
 export const ValidationIcon = props => {
   if (props.notValid()) {
-    return <ClrIcon shape='warning-standard' class='is-solid' style={{...styles.warningIcon, ...props.style}}/>;
+    return <ClrIcon shape='warning-standard' class='is-solid'
+                    style={{...styles.warningIcon, ...props.style}}/>;
   } else if (props.validSuccess()) {
-    return <ClrIcon shape='success-standard' class='is-solid' style={{...styles.successIcon, ...props.style}}/>;
+    return <ClrIcon shape='success-standard' class='is-solid'
+                    style={{...styles.successIcon, ...props.style}}/>;
   } else {
     return <div/>;
   }
