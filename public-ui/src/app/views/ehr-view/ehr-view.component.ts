@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
@@ -93,7 +93,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.domainId = params.id;
     });
   }
-
   ngOnInit() {
     // Get total participants
     this.subscriptions.push(
@@ -189,6 +188,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
   public selectGraph(g) {
+    document.getElementById('chartElement').scrollIntoView({ behavior: 'smooth' });
     this.showGenderGraph = false;
     this.showAgeGraph = false;
     this.showSourcesGraph = false;
@@ -218,5 +218,21 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     } else if (g === 'Sources') {
       return this.sourcesChartHelpText;
     }
+  }
+  public expandRow(concepts, r) {
+    const index = concepts.findIndex(x => x.conceptId === r.conceptId);
+    const prevConcepts = concepts.slice(0, index);
+    const nextConcepts = concepts.slice(index+1);
+    for (const concept of prevConcepts) {
+      if (concept.expanded) {
+        concept.expanded = false;
+      }
+    }
+    for (const concept of nextConcepts) {
+      if (concept.expanded) {
+        concept.expanded = false;
+      }
+    }
+    r.expanded = !r.expanded;
   }
 }
