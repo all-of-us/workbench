@@ -163,7 +163,7 @@ export function cookiesEnabled(): boolean {
 export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
   @ViewChild('root') rootElement: ElementRef;
 
-  constructor(private wrapped: new (...args: any[]) => React.Component,
+  constructor(private wrapped: (new (...args: any[]) => React.Component)|React.FunctionComponent,
               private propNames: string[]) {}
 
   ngOnInit(): void {
@@ -188,3 +188,4 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     );
   }
 }
+
