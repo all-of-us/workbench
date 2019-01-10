@@ -68,7 +68,7 @@ export class EditComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     ReactDOM.render(
-        React.createElement(EditComponentReact, {}),
+        React.createElement(EditComponentReact),
         this.editIcon.nativeElement);
   }
 
