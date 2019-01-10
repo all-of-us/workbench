@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
@@ -82,6 +82,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'a medical concept may not be assigned a source or standard vocabulary code.\n' +
     'In these instances, the concept code can be utilized to\n' +
     'query the data for the medical concept.';
+  @ViewChild('chartElement') chartEl: ElementRef;
 
 
   constructor(private route: ActivatedRoute,
@@ -93,6 +94,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.domainId = params.id;
     });
   }
+  
   ngOnInit() {
     // Get total participants
     this.subscriptions.push(
@@ -188,7 +190,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
   public selectGraph(g) {
-    document.getElementById('chartElement').scrollIntoView(
+    this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
     if (g === 'Gender') {
@@ -223,18 +225,14 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.showSourcesGraph = false;
     this.showMeasurementGenderBins = false;
   }
-  public expandRow(concepts, r) {
-    const index = concepts.findIndex(x => x.conceptId === r.conceptId);
-    const prevConcepts = concepts.slice(0, index);
-    const nextConcepts = concepts.slice(index + 1);
-    for (const concept of prevConcepts.filter(x => x.expanded === true)) {
-      concept.expanded = false;
-    }
-    for (const concept of nextConcepts.filter(x => x.expanded === true)) {
-      concept.expanded = false;
+  public expandRow(concepts: any[], r: any) {
+    if (r.expanded) {
+      r.expanded = false;
+      return;
     }
     this.resetSelectedGraphs();
     this.showGenderGraph = true;
-    r.expanded = !r.expanded;
+    concepts.forEach(concept => concept.expanded = false);
+    r.expanded = true;
   }
 }
