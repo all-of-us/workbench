@@ -1,15 +1,15 @@
-import {fullUrl} from 'app/utils/fetch';
+import {fullUrl} from '../../utils/fetch';
 
-import {AlertDanger} from 'app/components/alert';
-import {BoldHeader} from 'app/components/headers';
-import {FormInput} from 'app/components/inputs';
+import {AlertDanger} from '../../components/alert';
+import {BoldHeader} from '../../components/headers';
+import {FormInput} from '../../components/inputs';
 
 import {NextButton} from './style';
 
 import {FetchArgs,
   InvitationVerificationRequest,
   ProfileApiFetchParamCreator
-} from 'generated/fetch/api';
+} from '../../../generated/fetch/api';
 
 import * as React from 'react';
 
@@ -74,6 +74,7 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
             invitationKeyInvalid: true
           });
         } else {
+          this.props.setInvitationKey(this.state.invitationKey);
           this.props.updateNext(2);
           return;
         }})

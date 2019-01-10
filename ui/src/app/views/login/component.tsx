@@ -1,6 +1,6 @@
-import {Header, SmallHeader} from 'app/components/headers';
-
 import * as React from 'react';
+
+import {Header, SmallHeader} from '../../components/headers';
 
 import {GoogleIcon, LoginButton, SecondaryLoginbutton} from './style';
 

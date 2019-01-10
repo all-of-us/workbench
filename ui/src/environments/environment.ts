@@ -1,4 +1,4 @@
-import {testEnvironmentBase} from 'environments/test-env-base';
+import {testEnvironmentBase} from './test-env-base';
 
 export const environment = {
   ...testEnvironmentBase,
