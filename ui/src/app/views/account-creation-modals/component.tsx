@@ -38,11 +38,6 @@ interface AccountCreationResendModalProps {
 
 export class AccountCreationResendModalReact extends
     React.Component<AccountCreationResendModalProps, {}> {
-  constructor(props: AccountCreationResendModalProps) {
-    super(props);
-    this.state = {};
-  }
-
   send() {
     const request: ResendWelcomeEmailRequest = {
       username: this.props.username,
@@ -185,53 +180,5 @@ export class AccountCreationUpdateModalReact extends
         </ModalFooter>
       </Modal>}
     </React.Fragment>;
-  }
-
-}
-
-@Component({
-  selector: 'app-account-creation-modals',
-  templateUrl: './component.html',
-})
-
-export class AccountCreationModalsComponent implements OnInit, DoCheck {
-  @Input('updateEmail')
-  public updateEmail: Function;
-  @Input('close')
-  public close: Function;
-  @Input('username')
-  public userName: string;
-  @Input('creationNonce')
-  public creationNonce: string;
-  @Input('update')
-  public update: boolean;
-  @Input('resend')
-  public resend: boolean;
-
-  constructor(
-  ) {}
-
-  renderModal(): void {
-    let component;
-    const props = {username: this.userName, creationNonce: this.creationNonce,
-                   closeFunction: this.close};
-    if (this.resend) {
-      component = AccountCreationResendModalReact;
-      props['resend'] = this.resend;
-    } else {
-      component = AccountCreationUpdateModalReact;
-      props['passNewEmail'] = this.updateEmail;
-      props['update'] = this.update;
-    }
-    ReactDOM.render(React.createElement(component, props),
-      document.getElementById('account-creation-modal'));
-  }
-
-  ngOnInit(): void {
-    this.renderModal();
-  }
-
-  ngDoCheck(): void {
-    this.renderModal();
   }
 }
