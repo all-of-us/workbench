@@ -188,4 +188,3 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     );
   }
 }
-
