@@ -224,15 +224,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     const index = concepts.findIndex(x => x.conceptId === r.conceptId);
     const prevConcepts = concepts.slice(0, index);
     const nextConcepts = concepts.slice(index + 1);
-    for (const concept of prevConcepts) {
-      if (concept.expanded) {
-        concept.expanded = false;
-      }
+    for (const concept of prevConcepts.filter(x => x.expanded === true)) {
+      concept.expanded = false;
     }
-    for (const concept of nextConcepts) {
-      if (concept.expanded) {
-        concept.expanded = false;
-      }
+    for (const concept of nextConcepts.filter(x => x.expanded === true)) {
+      concept.expanded = false;
     }
     r.expanded = !r.expanded;
   }
