@@ -154,7 +154,7 @@ export function cookiesEnabled(): boolean {
 
 type ReactStyles<T> = {
   readonly [P in keyof T]: React.CSSProperties;
-}
+};
 
 /**
  * Helper to assert the React.CSSProperties type for all properties in a tuple,
