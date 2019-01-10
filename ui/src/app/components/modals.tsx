@@ -1,6 +1,5 @@
 import * as React from 'react';
 import ReactModal from 'react-modal';
-import {ReactComponent} from '../utils/index';
 
 const styles = {
   modal: {
