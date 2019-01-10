@@ -29,7 +29,7 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-interface AccountCreationResendModalProps {
+export interface AccountCreationResendModalProps {
   username: string;
   creationNonce: string;
   resend: boolean;
@@ -72,7 +72,7 @@ export class AccountCreationResendModalReact extends
   }
 }
 
-interface AccountCreationUpdateModalProps {
+export interface AccountCreationUpdateModalProps {
   username: string;
   creationNonce: string;
   passNewEmail: Function;
@@ -80,7 +80,7 @@ interface AccountCreationUpdateModalProps {
   closeFunction: Function;
 }
 
-interface AccountCreationUpdateModalState {
+export interface AccountCreationUpdateModalState {
   contactEmail: string;
   emailOffFocus: boolean;
 }
