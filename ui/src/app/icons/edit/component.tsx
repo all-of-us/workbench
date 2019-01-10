@@ -20,7 +20,7 @@ class EditComponentReact extends React.Component<{}, EditComponentState> {
     super(props);
     this.state = {
         style: style
-    }
+    };
   }
 
   mouseOver(): void {
