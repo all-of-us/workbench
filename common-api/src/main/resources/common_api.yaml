@@ -46,7 +46,7 @@ definitions:
   SearchType:
     type: string
     description: type of search
-    enum: &SEARCHTYPE [SURVEY_COUNTS, DOMAIN_COUNTS, CONCEPT_SEARCH]
+    enum: &SEARCH_TYPE [SURVEY_COUNTS, DOMAIN_COUNTS, CONCEPT_SEARCH]
 
   CdrVersionListResponse:
     type: object
