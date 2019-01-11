@@ -16,6 +16,7 @@ import {
 import {fullUrl, handleErrors} from 'app/utils/fetch';
 import {ReactWrapperBase} from 'app/utils/index';
 
+
 const styles = {
   notebookSettings: {
     marginTop: '1rem'
@@ -34,7 +35,6 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     ClusterStatus.Deleting, ClusterStatus.Creating,
     ClusterStatus.Starting, ClusterStatus.Stopping
   ]);
-
 
   private pollClusterTimer: NodeJS.Timer;
 
@@ -57,7 +57,6 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
       clearTimeout(this.pollClusterTimer);
     }
   }
-
 
   render() {
     return <React.Fragment>
