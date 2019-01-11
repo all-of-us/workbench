@@ -32,7 +32,8 @@ export interface ConfirmDeleteModalState {
   loading: boolean;
 }
 
-export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
+export class ConfirmDeleteModal
+    extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
   state: ConfirmDeleteModalState;
   props: ConfirmDeleteModalProps;
   resourceTypeName = ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType);
