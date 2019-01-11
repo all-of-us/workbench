@@ -69,7 +69,6 @@ export class CohortSearchActions {
 
   @dispatch() requestCounts = ActionFuncs.requestCounts;
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
-  @dispatch() addAttributeForPreview = ActionFuncs.addAttributeForPreview;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
 
@@ -319,14 +318,10 @@ export class CohortSearchActions {
     });
   }
 
-  requestAttributePreview(): void {
+  requestAttributePreview(param: any): void {
     const role = activeRole(this.state);
     const itemId = activeItem(this.state).get('id');
-    const searchParam = this.state
-        .getIn(['wizard', 'count', 'parameters'], Map())
-        .valueSeq()
-        .map(this.mapParameter)
-        .toJS();
+    const searchParam = [this.mapParameter(param)];
     const groupItem = <SearchGroupItem>{
       id: itemId,
       type: searchParam[0].type,
