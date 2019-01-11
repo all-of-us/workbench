@@ -1,6 +1,13 @@
 import {Component, DoCheck, Input, OnInit} from '@angular/core';
+
+import {reactStyles} from 'app/utils';
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+
+import {
+  Button
+} from 'app/components/buttons';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
     'omop-common-data-model-and-standardized-vocabularies/';
@@ -24,9 +31,13 @@ export const panels = [
       content: <div>A Workspace is your place to store and analyze data for a specific project.
        You can share this Workspace with other users, allowing them to view or edit
        your work. The dataset referenced by a workspace is in
-        <a className='link' href={OMOPDataSetLink} target='_blank'> OMOP common data model</a>
+        {' '}<a className='link' href={OMOPDataSetLink} target='_blank'>
+          OMOP common data model
+        </a>{' '}
           format. Here are some
-        <a className='link' href={OMOPTutorialsLink} target='_blank'> tutorials</a>
+        {' '}<a className='link' href={OMOPTutorialsLink} target='_blank'>
+          tutorials
+        </a>{' '}
         to understand OMOP data model.
         <br/><br/>
         When you create your Workspace, you will be prompted
@@ -80,6 +91,165 @@ export const panels = [
           study correlation between hypertension and diabetes.</div>,
       image: '/assets/images/notebooks.png'
     }];
+
+const styles = reactStyles({
+  modalBackdrop: {
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    backgroundColor: '#313131',
+    opacity: .8,
+    zIndex: 1040,
+  },
+  mainStyling: {
+    height: '79.23%',
+    width: '80%',
+    borderRadius: '8px',
+    backgroundColor: '#262262',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    position: 'absolute',
+    left: '10%',
+    top: '1%',
+    zIndex: 1050,
+  },
+  title: {
+    color: '#FFFFFF',
+    marginTop: '2%',
+    marginLeft: '3%',
+    fontSize: 21,
+    width: '100%',
+    fontWeight: 500
+  },
+  mainTitle: {
+    color: '#FFFFFF',
+    fontSize: 48,
+    width: '100%',
+    marginTop: '3%',
+    marginLeft: '3%',
+    fontWeight: 'bold'
+  },
+  breadcrumbs: {
+    width: '100%',
+    marginTop: '5%',
+    justifyContent: 'center',
+    display: 'flex',
+    flexDirection: 'row'
+  },
+  circle: {
+    border: '2px solid #8C9BA5',
+    borderRadius: '50%',
+    height: '21.92px',
+    width: '21.92px',
+    left: '21.92px'
+  },
+  check: {
+    minHeight: '10px',
+    minWidth: '10px',
+    marginLeft: '2px',
+    marginTop: '-3px'
+  },
+  current: {
+    minHeight: '12px',
+    minWidth: '12px',
+    marginLeft: '3px',
+    marginBottom: '2px',
+    backgroundColor: '#2691D0',
+    borderRadius: '50%',
+    display: 'inline-block'
+  },
+  connector: {
+    border: '2px solid #8C9BA5',
+    boxSizing: 'border-box',
+    height: '3px',
+    width: '107px',
+    position: 'relative',
+    left: '21.92px',
+    top: '-36px'
+  },
+  breadcrumbTitle: {
+    transform: 'translate(-40%)',
+    textAlign: 'center',
+    color: '#2691D0'
+  },
+
+  divider: {
+    boxSizing: 'border-box',
+    height: '2px',
+    width: '90%',
+    border: '0.5px solid #FFFFFF',
+    boxShadow: '0 2px 5px 0 rgba(0,0,0,0.26), 0 2px 10px 0 rgba(0,0,0,0.16)',
+    margin: 'auto'
+  },
+  panel: {
+    marginTop: '5%',
+    width: '100%',
+    height: '30%',
+    display: 'flex'
+  },
+  panelTitle: {
+    width: '100%',
+    marginLeft: '5%',
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: 'bold'
+  },
+  panelContents: {
+    paddingLeft: '5%',
+    marginTop: '1%',
+    color: '#FFFFFF',
+    fontSize: 14,
+    textAlign: 'left'
+  },
+  panelText: {
+    marginRight: '2%',
+    paddingTop: '.5%',
+    fontSize: 16,
+    lineHeight: '24px',
+    whiteSpace: 'pre-line',
+    textAlign: 'left'
+  },
+  panelRight: {
+    marginRight: '5%',
+    marginBottom: '5%',
+    width: '40%',
+    height: '90%',
+    position: 'relative',
+    display: 'flex',
+    justifyContent: 'flex-end'
+  },
+  panelImage: {
+    width: '78%',
+    height: '95%',
+    marginTop: '5%',
+    marginLeft: '20%',
+    position: 'relative',
+    zIndex: 1,
+    display: 'inline'
+  },
+  controls: {
+    width: '100%',
+    position: 'absolute',
+    bottom: '8%',
+    display: 'flex',
+    justifyContent: 'space-between'
+  }
+});
+
+
+const completedStyles = {
+  circleCompleted: {
+    ...styles.circle,
+    left: '0px',
+    border: '2px solid #2691D0',
+  },
+  connectorCompleted: {
+    ...styles.connector,
+    border: '2px solid #2691D0'
+  }
+};
+
 
 export interface QuickTourReactState {
   selected: number;
@@ -139,49 +309,51 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
 
   render() {
     return <React.Fragment>
-      <div className={this.props.learning ? 'modal-backdrop' : undefined}></div>
+      <div style={this.props.learning ? styles.modalBackdrop : undefined}/>
       {this.props.learning && !this.state.fullImage &&
-        <div className='main' id='quick-tour-react'>
-          <div className='title'>All of Us Researcher Workbench</div>
-          <div className='intro'>Quick Tour</div>
-          <div className='breadcrumbs'>
+        <div style={styles.mainStyling} id='quick-tour-react' className='quickTourReact'>
+          <div style={styles.title}>All of Us Researcher Workbench</div>
+          <div style={styles.mainTitle}>Quick Tour</div>
+          <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {
               return <React.Fragment key={i}>
-                <div className='breadcrumb-component'>
-                  <div className={'circle' + (i <= this.state.selected ? ' completed' : '')}
+                <div style={{width: '128px'}}>
+                  <div style={this.state.selected ? completedStyles.circleCompleted : styles.circle}
                        id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
-                    {(i < this.state.selected) && <div className='check'>
+                    {(i < this.state.selected) && <div style={styles.check}>
                         <img src={this.checkImg}/>
                     </div>}
-                    {(i ===  this.state.selected) && <div className='current'></div>}
+                    {(i ===  this.state.selected) && <div style={styles.current}/>}
                   </div>
-                  <div className='breadcrumb-title'>{p.shortTitle}</div>
+                  <div style={styles.breadcrumbTitle}>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
-                  <div className={'connector' + ((i < this.state.selected) ? ' completed' : '')}>
+                  <div style={i < this.state.selected ?
+                      completedStyles.connectorCompleted : styles.connector}>
                   </div>}
                 </div>
               </React.Fragment>;
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-             <div className='divider'></div>
+          <div style={styles.divider}/>
           </div>
-          <div className='panel'>
-            <div className='panel-left'>
-              <div className='panel-title'>
+          <div style={styles.panel}>
+            <div style={{width: '75%'}}>
+              <div style={styles.panelTitle}
+                   id='panel-title'>
                   {panels[this.state.selected].title}
               </div>
-              <div className='panel-contents'>
-                <div className='panel-text'>{panels[this.state.selected].content}</div>
+              <div style={styles.panelContents}>
+                <div style={styles.panelText}>{panels[this.state.selected].content}</div>
               </div>
             </div>
-            <div className='panel-right'>
-              <img src={panels[this.state.selected].image} className='panel-image'/>
+            <div style={styles.panelRight}>
+              <img src={panels[this.state.selected].image} style={styles.panelImage}/>
                 {(this.state.selected !== 0) &&
                 <div style={{position: 'absolute', right: '5%',
                     bottom: '5%', height: '1rem', width: '1rem'}}>
-                    <div className='resize-icon' style={{position: 'absolute', zIndex: 2}}
+                    <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer'}}
                          id='expand-icon'
                          onClick={() => this.toggleImage()}>
                         <img src={this.expandIcon}/>
@@ -189,28 +361,29 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                 </div>}
             </div>
           </div>
-          <div className='controls'>
-            <div className='left'>
+          <div style={styles.controls}>
+            <div style={{width: '50%'}}>
               {this.state.selected !== 0 &&
-              <button type='button' className='btn btn-close' id='previous'
-                      onClick={() => this.previous()}>Previous</button>}
+              <Button type='darklingPrimary' id='previous' style={{marginLeft: '10%'}}
+                      onClick={() => this.previous()}>Previous</Button>}
             </div>
-            <div className='right'>
+            <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
               {this.state.selected !== (panels.length - 1) &&
-              <button type='button' className='btn btn-close' id='close'
-                      onClick={() => this.close()}>Close</button>}
-              <button type='button' className='btn btn-primary' id='next'
-                      onClick={() => this.next()}>{this.lastButtonText()}</button>
+              <Button type='darklingPrimary' id='close' onClick={() => this.close()}
+                      style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
+              <Button type='darklingSecondary' id='next' style={{marginRight: '10%'}}
+                      onClick={() => this.next()}>{this.lastButtonText()}</Button>
             </div>
           </div>
         </div>
       }
-      {this.props.learning && this.state.fullImage && <div className='main full-image'>
-        <div className='full-image-wrapper'>
+      {this.props.learning && this.state.fullImage && <div style={{height: '50%'}}>
+        <div style={{position: 'relative', display: 'inline-block'}}
+             id='full-image-wrapper'>
           <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
-          <div className='resize-icon' onClick={() => this.toggleImage()}
+          <div onClick={() => this.toggleImage()}
                id='shrink-icon'
-               style={{position: 'absolute', right: '5%', bottom: '5%'}}>
+               style={{position: 'absolute', right: '5%', bottom: '5%', cursor: 'pointer'}}>
             <img src={this.shrinkIcon}/>
           </div>
         </div>
@@ -225,7 +398,6 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   styleUrls: ['./component.css'],
   templateUrl: './component.html'
 })
-
 export class QuickTourModalComponent implements DoCheck, OnInit {
 
   @Input('learning')
