@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
@@ -21,6 +21,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
 
   error: boolean;
+  status: string;
+  undoTimer: any;
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
   timeDropDown = ['During same encounter as',
@@ -57,8 +59,27 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     return this.group.get('items', List());
   }
 
-  remove(event) {
-    this.actions.removeGroup(this.role, this.groupId);
+  remove() {
+    const groupCard = document.getElementById('groupCard');
+    const width = groupCard.offsetWidth;
+    const height = groupCard.offsetHeight;
+    const styles = window.getComputedStyle(groupCard);
+    const margin = styles.marginBottom;
+    this.status = 'pending';
+    const overlay = document.getElementById('overlay');
+    overlay.style.width = width + 'px';
+    overlay.style.height = height + 'px';
+    overlay.style.marginBottom = margin + 'px';
+    overlay.style.marginTop = '-' + (height + parseFloat(margin)) + 'px';
+    this.undoTimer = setTimeout(() => {
+      this.actions.removeGroup(this.role, this.groupId);
+      this.status = 'deleted';
+    }, 3000);
+  }
+
+  undo() {
+    clearTimeout(this.undoTimer);
+    this.status = 'active';
   }
 
   launchWizard(criteria: any) {
