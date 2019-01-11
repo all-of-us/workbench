@@ -5,7 +5,6 @@ import {Subscription} from 'rxjs/Subscription';
 import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -24,9 +23,6 @@ import {
 export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
 
   workspace: Workspace;
   wsId: string;
@@ -111,12 +107,16 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     });
   }
 
-  receiveDelete($event): void {
-    this.delete($event);
+  receiveDelete(): void {
+    this.delete(this.workspace);
   }
 
-  confirmDelete(): void {
+  openConfirmDelete(): void {
     this.confirmDeleting = true;
+  }
+
+  closeConfirmDelete(): void {
+    this.confirmDeleting = false;
   }
 
   share(): void {
