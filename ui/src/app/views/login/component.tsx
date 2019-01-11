@@ -1,8 +1,9 @@
 import * as React from 'react';
 
+import {Button, Secondarybutton} from '../../components/buttons';
 import {Header, SmallHeader} from '../../components/headers';
 
-import {GoogleIcon, LoginButton, SecondaryLoginbutton} from './style';
+import {styles} from './style';
 
 export class LoginReactComponent extends React.Component<any, any> {
   googleIcon = '/assets/icons/google-icon.png';
@@ -11,8 +12,8 @@ export class LoginReactComponent extends React.Component<any, any> {
     super(props);
   }
 
-  showCreateAccountState() {
-    this.props.updateNext(1);
+  showCreateAccount() {
+    this.props.onCreateAccount();
   }
 
   signIn() {
@@ -27,21 +28,22 @@ export class LoginReactComponent extends React.Component<any, any> {
             Already have an account?
           </Header>
           <div>
-            <LoginButton onClick={() => this.signIn()}>
-              <GoogleIcon src={this.googleIcon}/>
+            <Button style={styles.button} onClick={() => this.signIn()}>
+              <img src={this.googleIcon}
+                   style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
               <div>
                 Sign In with Google
               </div>
-            </LoginButton>
+            </Button>
           </div>
         </div>
         <div style={{paddingTop: '1.25rem'}}>
           <SmallHeader>
             Don't have an account?
           </SmallHeader>
-          <SecondaryLoginbutton onClick={() => this.showCreateAccountState()}>
+          <Secondarybutton style={styles.secondaryButton} onClick={() => this.showCreateAccount()}>
             Create Account
-          </SecondaryLoginbutton>
+          </Secondarybutton>
         </div>
       </React.Fragment>
     </div>;

@@ -1,10 +1,9 @@
 import {fullUrl} from '../../utils/fetch';
 
 import {AlertDanger} from '../../components/alert';
+import {Button} from '../../components/buttons';
 import {BoldHeader} from '../../components/headers';
 import {FormInput} from '../../components/inputs';
-
-import {NextButton} from './style';
 
 import {FetchArgs,
   InvitationVerificationRequest,
@@ -75,7 +74,7 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
           });
         } else {
           this.props.setInvitationKey(this.state.invitationKey);
-          this.props.updateNext(2);
+          this.props.onInvitationkeyVerify();
           return;
         }})
       .catch(error => console.log(error));
@@ -104,9 +103,10 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
          </AlertDanger>
         }
         <div>
-          <NextButton onClick={() => this.next()}>
+          <Button style={{width: '10rem', height: '2rem', margin: '.25rem .5rem .25rem 0'}}
+                  onClick={() => this.next()}>
             Next
-          </NextButton>
+          </Button>
         </div>
       </div>
     </div>;

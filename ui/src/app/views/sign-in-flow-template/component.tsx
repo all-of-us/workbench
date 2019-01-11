@@ -16,7 +16,7 @@ import {Content, Header, SignedIn, Template} from './image';
 import {SignInService} from '../../services/sign-in.service';
 import {Router} from '@angular/router';
 
-import {Content, Header, SignedIn, Template} from './style';
+import {styles} from './style';
 
 interface ImagesSource {
   backgroundImgSrc: string;
@@ -52,26 +52,26 @@ export class SignPageTemplateReact extends React.Component<any, PageTemplateStat
       currentStep: 'login',
       invitationKey: ''
     };
-    this.updateNext = this.updateNext.bind(this);
+    this.setCurrentStep = this.setCurrentStep.bind(this);
     this.setInvitationKey = this.setInvitationKey.bind(this);
   }
 
   nextDirective(index) {
     switch (index) {
-      case 'login': return <LoginReactComponent updateNext={() =>
-                                                          this.updateNext('invitationKey')}
+      case 'login': return <LoginReactComponent onCreateAccount={() =>
+                                                          this.setCurrentStep('invitationKey')}
                                           signIn={this.props.signIn}/>;
-      case 'invitationKey': return <InvitationKeyReact updateNext={() =>
-                                                          this.updateNext('accountCreation')}
+      case 'invitationKey': return <InvitationKeyReact onInvitationkeyVerify={() =>
+                                                          this.setCurrentStep('accountCreation')}
                                          setInvitationKey={this.setInvitationKey}/>;
-      // case 'accountCreation': return <AccountCreationReact updateNext={this.updateNext}
+      // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
       //                                      invitationKey={this.state.invitationKey}>
       //                </AccountCreationReact>;
       default: return;
     }
   }
 
-  updateNext(nextStep) {
+  setCurrentStep(nextStep) {
     this.setState({
       currentStep: nextStep
     });
@@ -84,17 +84,16 @@ export class SignPageTemplateReact extends React.Component<any, PageTemplateStat
   }
 
   render() {
-    return <SignedIn>
+    return <div style={styles.signedInContainer}>
       <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-        <Template images={pageImages[this.state.currentStep]}
-                  windowsize={this.props.windowSize}>
-            <Header src={this.headerImg}/>
-            <Content>
-              {this.nextDirective(this.state.currentStep)}
-            </Content>
-          </Template>
+        <div style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+          <img style={styles.headerImage} src={this.headerImg}/>
+          <div style={styles.content}>
+            {this.nextDirective(this.state.currentStep)}
+          </div>
+        </div>
       </div>
-    </SignedIn>;
+    </div>;
   }
 }
 
