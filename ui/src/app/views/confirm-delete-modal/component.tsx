@@ -1,4 +1,7 @@
-import {Component, DoCheck, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  Component, DoCheck, ElementRef, EventEmitter, Input, OnInit, Output,
+  ViewChild
+} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -12,6 +15,13 @@ import {
 import {
   Button
 } from 'app/components/buttons';
+
+class CurrId {
+  static currId = 0;
+  static getUniqueId = () => {
+    return CurrId.currId += 1;
+  }
+}
 
 interface ConfirmDeleteModalProps {
   deleting: boolean,
@@ -35,7 +45,6 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
   }
 
   emitDelete(resource: any): void {
-    console.log('clicking delete button');
     if (!this.state.loading) {
       this.setState({loading: true});
       this.props.receiveDelete.emit(resource);
@@ -45,7 +54,7 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
   render() {
     return <React.Fragment>
       {this.props.deleting &&
-      <Modal style={{borderRadius: '8px'}}>
+      <Modal>
         <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
           delete {this.props.resourceType}: {this.props.resource.name}?
         </ModalTitle>
@@ -79,11 +88,14 @@ export class ConfirmDeleteModalComponent implements DoCheck, OnInit {
   @Input() deleting: boolean;
   @Input() closeFunction: Function;
 
-  componentId = 'confirm-delete-modal';
+  @ViewChild('defaultId') templateValue: ElementRef;
+  componentId = 'confirm-delete-modal-' + CurrId.getUniqueId();
 
   constructor() {}
 
   ngOnInit(): void {
+    console.log(this.templateValue);
+    this.templateValue.nativeElement.id = this.componentId;
     ReactDOM.render(React.createElement(ConfirmDeleteModal,
         {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
           receiveDelete: this.receiveDelete, resource: this.resource}),
@@ -91,7 +103,6 @@ export class ConfirmDeleteModalComponent implements DoCheck, OnInit {
   }
 
   ngDoCheck(): void {
-    console.log("state of deleting: " + this.deleting);
     ReactDOM.render(React.createElement(ConfirmDeleteModal,
         {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
           receiveDelete: this.receiveDelete, resource: this.resource}),

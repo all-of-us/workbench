@@ -10,8 +10,6 @@ import {
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {environment} from 'environments/environment';
-
 import {EditModalComponent} from 'app/views/edit-modal/component';
 
 @Component ({
@@ -53,7 +51,6 @@ export class ResourceCardComponent implements OnInit {
       private signInService: SignInService,
       private route: Router,
   ) {
-    this.toggleConfirmDelete = this.toggleConfirmDelete.bind(this);
   }
 
   ngOnInit() {
@@ -83,10 +80,13 @@ export class ResourceCardComponent implements OnInit {
     this.renaming = false;
   }
 
-  toggleConfirmDelete(): void {
-    console.log("toggling confirm delete");
-    console.log(this.confirmDeleting);
-    this.confirmDeleting = !this.confirmDeleting;
+  openConfirmDelete(): void {
+    this.confirmDeleting = true;
+  }
+
+  closeConfirmDelete(): void {
+    console.log('closing modal');
+    this.confirmDeleting = false;
   }
 
   receiveNotebookRename(rename: NotebookRename): void {
@@ -155,8 +155,7 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
     }
-    console.log(this.resource);
-    this.toggleConfirmDelete();
+    this.openConfirmDelete();
   }
 
   receiveDelete($event): void {
@@ -165,7 +164,7 @@ export class ResourceCardComponent implements OnInit {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.toggleConfirmDelete();
+            this.closeConfirmDelete();
           });
         break;
       }
@@ -173,7 +172,7 @@ export class ResourceCardComponent implements OnInit {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.toggleConfirmDelete();
+            this.closeConfirmDelete();
           });
         break;
       }
@@ -181,7 +180,7 @@ export class ResourceCardComponent implements OnInit {
         this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
             this.onUpdate.emit();
-            this.toggleConfirmDelete();
+            this.closeConfirmDelete();
           });
       }
     }
