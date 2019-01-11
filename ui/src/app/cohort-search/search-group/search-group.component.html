@@ -1,4 +1,4 @@
-<div id="groupCard" class="card bg-faded">
+<div [id]="group.get('id')" class="card bg-faded">
   <!--********************************Temporal changes start***************************************-->
 
   <div class="card-header" *ngIf="temporalDropdown && envFlag">
@@ -173,7 +173,7 @@
   </div>
 </div>
 
-<div id="overlay" class="undo-overlay" [class.pending]="status === 'pending'">
+<div [id]="'overlay_' + group.get('id')" class="undo-overlay" [class.pending]="status === 'pending'">
   <div class="undo-inner-text">
     <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
     <span class="undo-text">
