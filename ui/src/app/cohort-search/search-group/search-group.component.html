@@ -1,12 +1,4 @@
-<button
-  type="button"
-  class="btn btn-info-outline btn-sm"
-  id="close-button"
-  (click)="remove($event)">
-  DELETE GROUP
-</button>
-
-<div class="card bg-faded">
+<div id="groupCard" class="card bg-faded">
   <!--********************************Temporal changes start***************************************-->
 
   <div class="card-header" *ngIf="temporalDropdown && envFlag">
@@ -144,7 +136,24 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="!envFlag">
+  <div class="card-footer text-right" *ngIf="!envFlag"><clr-dropdown>
+    <button type="button" clrDropdownTrigger>
+      <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+    </button>
+    <clr-dropdown-menu *clrIfOpen>
+      <button
+        type="button"
+        clrDropdownItem>
+        Hide group from total count
+      </button>
+      <button
+        type="button"
+        (click)="remove()"
+        clrDropdownItem>
+        Delete group
+      </button>
+    </clr-dropdown-menu>
+  </clr-dropdown>
     Group Count:
     <span *ngIf="isRequesting"
           class="spinner spinner-inline"
@@ -160,6 +169,16 @@
         [popperTrigger]="'hover'"
         shape="error-standard"
         size="18"></clr-icon>
+    </span>
+  </div>
+</div>
+
+<div id="overlay" class="undo-overlay" [class.pending]="status === 'pending'">
+  <div class="undo-inner-text">
+    <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
+    <span class="undo-text">
+      Your group has been deleted
+      <button class="btn btn-link" (click)="undo()">UNDO</button>
     </span>
   </div>
 </div>

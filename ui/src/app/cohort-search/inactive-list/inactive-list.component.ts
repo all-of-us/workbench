@@ -20,7 +20,7 @@ export class InactiveListComponent implements OnInit {
       .subscribe(groups => {
         console.log(groups.toJS());
         this.groups = groups
-          .filter(group => !group.get('active'))
+          .filter(group => group.get('status') === 'deleted')
           .map(group => {
             return group.set('items', itemList(group.get('id'))(this.ngRedux.getState()));
           });
