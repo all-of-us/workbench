@@ -1,5 +1,4 @@
-import {Component, DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import {DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromJS} from 'immutable';
 import {
   find,
@@ -152,39 +151,69 @@ export function cookiesEnabled(): boolean {
     }
 }
 
-export const ReactComponent = ({ propNames = [], ...options }) => WrappedComponent => {
-  class WrapperComponent implements DoCheck, OnInit, OnDestroy {
-    @ViewChild('root')
-    rootElement: ElementRef;
-
-    ngOnInit(): void {
-      this.renderComponent();
-    }
-
-    ngDoCheck(): void {
-      this.renderComponent();
-    }
-
-    ngOnDestroy(): void {
-      ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
-    }
-
-    renderComponent(): void {
-      ReactDOM.render(
-        React.createElement(
-          WrappedComponent,
-          fromPairs(propNames.map(name => [name, this[name]]))
-        ),
-        this.rootElement.nativeElement
-      );
-    }
-  }
-  propNames.forEach(name => {
-    Input()(WrapperComponent.prototype, name, undefined);
-  });
-
-  return Component({
-    ...options,
-    template: '<div #root></div>'
-  })(WrapperComponent) as any;
+type ReactStyles<T> = {
+  readonly [P in keyof T]: React.CSSProperties;
 };
+
+/**
+ * Helper to assert the React.CSSProperties type for all properties in a tuple,
+ * while maintaining property names. This will fail compilation if input CSS
+ * properties are invalid and will avoid the need for a type assertion on the
+ * output. Also makes the properties readonly.
+ *
+ * This is a workaround to an issue in the Typescript compiler which should
+ * eventually be fixed: https://github.com/Microsoft/TypeScript/issues/11152.
+ *
+ * This approach works only with a single-level nested tuples currently:
+ * const styles = reactStyles({
+ *   style1: {color: 'red'},
+ *   style2: {color: 'blue', position: 'relative'}
+ * });
+ *
+ * Alternatively, style tuples can be cast individually (with arbitrary nesting):
+ * const styles = {
+ *   style1: {color: 'red'} as React.CssProperties,
+ *   style2: {color: 'blue', position: 'relative'} as React.CssProperties
+ * };
+ */
+export function reactStyles<T extends {[key: string]: React.CSSProperties}>(t: T): ReactStyles<T> {
+  return t;
+}
+
+/**
+ * Helper base class for defining an Angular-wrapped React component. This is a
+ * stop-gap for React migration.
+ *
+ * Requirements:
+ *  - Component template must contain a div labeled "#root".
+ *  - React propNames must exactly match instance property names on the subclass
+ *    (usually these are also annotated as Angular @Inputs)
+ */
+export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
+  @ViewChild('root') rootElement: ElementRef;
+
+  constructor(private wrapped: (new (...args: any[]) => React.Component)|React.FunctionComponent,
+              private propNames: string[]) {}
+
+  ngOnInit(): void {
+    this.renderComponent();
+  }
+
+  ngDoCheck(): void {
+    this.renderComponent();
+  }
+
+  ngOnDestroy(): void {
+    ReactDOM.unmountComponentAtNode(this.rootElement.nativeElement);
+  }
+
+  renderComponent(): void {
+    ReactDOM.render(
+      React.createElement(
+        this.wrapped,
+        fromPairs(this.propNames.map(name => [name, this[name]]))
+      ),
+      this.rootElement.nativeElement
+    );
+  }
+}
