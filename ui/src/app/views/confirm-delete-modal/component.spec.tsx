@@ -26,4 +26,4 @@ describe('ConfirmDeleteModalComponent', () => {
     expect(wrapper).toBeTruthy();
   });
 
-};
+});
