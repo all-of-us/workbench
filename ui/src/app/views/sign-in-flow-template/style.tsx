@@ -1,26 +1,26 @@
 import * as React from 'react';
 
 export const styles = {
-  template: (props) => {
+  template: (windowsize, images) => {
     return {
       backgroundImage:  calculateImage(),
       backgroundColor: '#dedfe1',
       backgroundRepeat: 'no-repeat',
       width: '100%',
       minHeight: '100vh',
-      backgroundSize: props.windowsize.width <= 900 ? '0% 0%' : 'contain',
+      backgroundSize: windowsize.width <= 900 ? '0% 0%' : 'contain',
       backgroundPosition: calculateBackgroundPosition()
     };
 
     function calculateImage() {
-      if (props.windowsize.width > 900 && props.windowsize.width <= 1300) {
-        return 'url(\'' + props.images.smallerBackgroundImgSrc + '\')';
+      if (windowsize.width > 900 && windowsize.width <= 1300) {
+        return 'url(\'' + images.smallerBackgroundImgSrc + '\')';
       }
-      return 'url(\'' + props.images.backgroundImgSrc + '\')';
+      return 'url(\'' + images.backgroundImgSrc + '\')';
     }
 
     function calculateBackgroundPosition() {
-      if (props.windowsize.width > 900 && props.windowsize.width <= 1300) {
+      if (windowsize.width > 900 && windowsize.width <= 1300) {
          return 'bottom right' ;
       }
       return 'bottom right -1rem';
@@ -47,16 +47,3 @@ export const styles = {
   },
 
 };
-
-
-export const Template = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.template(props), ...style}}/>;
-
-export const Header = ({style = {}, ...props}) =>
-  <img {...props} style={{...styles.headerImage, ...style}}/>;
-
-export const Content = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.content, ...style}}/>;
-
-export const SignedIn = ({style = {}, ...props}) =>
-    <div {...props} style={{...styles.signedInContainer, ...style}}/>;
