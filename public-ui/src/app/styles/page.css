@@ -115,6 +115,7 @@ label {
 
 .row .chart-wrapper {
     height: 8rem;
+    width: 100%;
     margin-top: .25rem;
     margin-bottom: .25rem;
 }
@@ -133,7 +134,6 @@ label {
     border: 1px solid #CCCCCC;
     border-radius: 3px 3px 0 0;
     min-height: 2rem;
-
 }
 
 /* This is a column in our grid */
@@ -191,4 +191,10 @@ span.keyword {
 {
     padding-left: 0;
     padding-right: 0;
+}
+
+.page-image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }

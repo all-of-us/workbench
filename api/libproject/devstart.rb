@@ -671,6 +671,18 @@ Generates big query denormalized search. Used by cohort builder. Must be run onc
   :fn => ->(*args) { make_bq_denormalized_search(*args) }
 })
 
+def generate_criteria_table(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
+end
+
+Common.register_command({
+  :invocation => "generate-criteria-table",
+  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { generate_criteria_table(*args) }
+})
+
 def generate_private_cdr_counts(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-generate-private-cdr-counts} + args

@@ -404,7 +404,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public ResponseEntity<DomainInfosAndSurveyModulesResponse> getDomainTotals(){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
         List<DomainInfo> domainInfos = ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
-        List<SurveyModule> surveyModules = ImmutableList.copyOf(surveyModuleDao.findByOrderByName());
+        List<SurveyModule> surveyModules = ImmutableList.copyOf(surveyModuleDao.findByOrderByOrderNumberAsc());
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domainInfos.stream()
             .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
@@ -533,7 +533,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 //aa.setUnitName(unitName);
-                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !domainId.isEmpty()) {
+                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !Strings.isNullOrEmpty(domainId)) {
                     aa.setResults(aa.getResults().stream().filter(ar -> ar.getStratum3().equalsIgnoreCase(domainId)).collect(Collectors.toList()));
                 }
                 if(analysisId == GENDER_ANALYSIS_ID){

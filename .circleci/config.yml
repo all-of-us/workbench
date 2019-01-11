@@ -223,6 +223,11 @@ jobs:
           command: |
             yarn test --no-watch --no-progress --browsers=ChromeHeadless
       - run:
+          name: Run React tests (Jest)
+          working_directory: ~/workbench/ui
+          command: |
+            npx jest
+      - run:
           name: Build with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
