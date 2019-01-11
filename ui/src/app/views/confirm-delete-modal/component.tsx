@@ -20,7 +20,7 @@ import {
   Button
 } from 'app/components/buttons';
 
-interface ConfirmDeleteModalProps {
+export interface ConfirmDeleteModalProps {
   deleting: boolean,
   closeFunction: Function,
   resourceType: string,
@@ -28,7 +28,7 @@ interface ConfirmDeleteModalProps {
   resource: {name: string}
 }
 
-interface ConfirmDeleteModalState {
+export interface ConfirmDeleteModalState {
   loading: boolean
 }
 
