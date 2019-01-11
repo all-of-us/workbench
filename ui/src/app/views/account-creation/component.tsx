@@ -52,7 +52,6 @@ export interface AccountCreationState {
 export class AccountCreationReact extends
     React.Component<AccountCreationProps, AccountCreationState> {
   usernameCheckTimeout: NodeJS.Timer;
-  errorMap: Map<string, boolean> = new Map<string, boolean>();
   accountCreated = false;
 
   constructor(props: AccountCreationProps) {
@@ -75,12 +74,6 @@ export class AccountCreationReact extends
       creatingAccount: false,
       showAllFieldsRequiredError: false
     };
-    this.errorMap.set('givenName', false);
-    this.errorMap.set('familyName', false);
-    this.errorMap.set('position', false);
-    this.errorMap.set('organization', false);
-    this.errorMap.set('username', false);
-    this.updateField = this.updateField.bind(this);
     this.createAccount = this.createAccount.bind(this);
     this.usernameChanged = this.usernameChanged.bind(this);
     this.usernameValid = this.usernameValid.bind(this);
@@ -165,7 +158,6 @@ export class AccountCreationReact extends
     if (this.state.profile.username === '') {
       return;
     }
-    this.errorMap['username'] = false;
     this.setState({usernameConflictError: false});
     // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
@@ -181,7 +173,6 @@ export class AccountCreationReact extends
         .then(handleErrors)
         .then((response) => response.json())
         .then((body) => {
-          this.errorMap['username'] = (body.isTaken || this.usernameInvalidError());
           this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
         })
         .catch((error) => {
@@ -189,18 +180,6 @@ export class AccountCreationReact extends
           this.setState({usernameCheckInProgress: false});
         });
     }, 300);
-  }
-
-  updateField(
-    event: React.FormEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>): void {
-    const value  = event.currentTarget.value;
-    const attribute = event.currentTarget.id;
-    this.updateProfile(attribute, value);
-    if (['givenName', 'familyName'].includes(attribute)) {
-      this.errorMap[attribute] = value.length > 80;
-    } else if (['currentPosition', 'organization'].includes(attribute)) {
-      this.errorMap[attribute] = value.length > 255;
-    }
   }
 
   updateProfile(attribute: string, value: string) {
@@ -220,51 +199,51 @@ export class AccountCreationReact extends
             <LongInput type='text' id='givenName' name='givenName' autoFocus
                     placeholder='First Name'
                     value={this.state.profile.givenName}
-                    style={this.errorMap['givenName'] ?
+                    style={(this.state.profile.givenName.length > 80) ?
                       inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                    onChange={this.updateField}/>
-              {this.errorMap['givenName'] &&
-                <ErrorMessage>
+                    onChange={e => this.updateProfile('givenName', e.target.value)}/>
+              {this.state.profile.givenName.length > 80 &&
+                <ErrorMessage id='givenNameError'>
                   First Name must be 80 characters or less.
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
                    value={this.state.profile.familyName}
-                   style={this.errorMap['familyName'] ?
+                   style={(this.state.profile.familyName.length > 80) ?
                      inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                   onChange={this.updateField}/>
-              {this.errorMap['familyName'] &&
-                <ErrorMessage>
+                   onChange={e => this.updateProfile('givenName', e.target.value)}/>
+              {this.state.profile.familyName.length > 80 &&
+                <ErrorMessage id='familyNameError'>
                   Last Name must be 80 character or less.
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='contactEmail' name='contactEmail'
                       placeholder='Email Address'
-                      onChange={this.updateField}/>
+                      onChange={e => this.updateProfile('contactEmail', e.target.value)}/>
           </FormSection>
           <FormSection>
             <LongInput type='text' id='currentPosition' name='currentPosition'
                      placeholder='You Current Position'
                      value={this.state.profile.currentPosition}
-                     style={this.errorMap['currentPosition'] ?
+                     style={(this.state.profile.currentPosition.length > 255) ?
                        inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                     onChange={this.updateField}/>
-              {this.errorMap['currentPosition'] &&
-                <ErrorMessage>
+                     onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
+              {this.state.profile.currentPosition.length > 255 &&
+                <ErrorMessage id='currentPositionError'>
                   Current Position must be 255 characters or less.
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='organization' name='organization'
-                     placeholder='Your Organziation'
+                     placeholder='Your Organization'
                      value={this.state.profile.organization}
-                     style={this.errorMap['organization'] ?
+                     style={(this.state.profile.organization.length > 255) ?
                        inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                     onChange={this.updateField}/>
-              {this.errorMap['currentPosition'] &&
-                <ErrorMessage>
+                     onChange={e => this.updateProfile('organization', e.target.value)}/>
+              {this.state.profile.organization.length > 255 &&
+                <ErrorMessage id='organizationError'>
                   Organization must be 255 characters of less.
                 </ErrorMessage>}
           </FormSection>
@@ -279,7 +258,7 @@ export class AccountCreationReact extends
                         id='areaOfResearch'
                         name='areaOfResearch'
                         placeholder='Describe Your Current Research'
-                        onChange={this.updateField}/>
+                        onChange={e => this.updateProfile('areaOfResearch', e.target.value)}/>
                 <TooltipTrigger content='You are required to describe your current research in
                       order to help All of Us improve the Researcher Workbench.'>
                   <InfoIcon style={{
@@ -292,7 +271,7 @@ export class AccountCreationReact extends
           <FormSection>
             <LongInput type='text' id='username' name='username' placeholder='New Username'
                        onChange={this.usernameChanged.bind(this)}
-                       style={this.errorMap['username'] ?
+                       style={(this.state.usernameConflictError || this.usernameInvalidError()) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
             <div style={inputStyles.iconArea}>
               <ValidationIcon validSuccess={this.usernameValid} notValid={this.usernameNotValid}/>
@@ -305,11 +284,11 @@ export class AccountCreationReact extends
             </TooltipTrigger>
             <div style={{height: '1.5rem'}}>
               {this.state.usernameConflictError &&
-                <Error>
+                <Error id='usernameConflictError'>
                   Username is already taken.
                 </Error>}
               {this.usernameInvalidError() &&
-                <Error>
+                <Error id='usernameError'>
                   Username is not a valid username.
                 </Error>}
             </div>
