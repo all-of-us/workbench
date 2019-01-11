@@ -424,7 +424,7 @@ definitions:
 
   SearchType:
     type: string
-    descrption: search type
+    description: search type
     enum: &SEARCH_TYPE [SURVEY_COUNTS, DOMAIN_COUNTS, CONCEPT_SEARCH]
 
   Concept:
