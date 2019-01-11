@@ -1,8 +1,8 @@
 import {Component, DoCheck, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
+import {ParticipantChartData} from 'generated';
 import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {ParticipantChartData} from 'generated';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
@@ -172,18 +172,18 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   }
 
   render() {
-    // const chartData = this.props.chartData;
-    if (!this.props.chartData.loading && this.props.chartData) {
+     const chartData = this.props.chartData;
+    if (!chartData.loading && chartData) {
       this.setYaxisValue();
       const ScatterChart = () => <div>
         <HighchartsReact
           highcharts={highCharts}
           options={this.chartOptions}
         />
-      </div>
+      </div>;
       return <ScatterChart/>;
     }
-    return <div />;
+    return <div/>;
   }
 }
 
@@ -195,24 +195,26 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
 export class IndividualParticipantsChartsComponent implements OnChanges, OnInit {
   @ViewChild('chartRef') chartRef;
   @Input() chartData: ChartData;
-  @Input() chartKey: number = 0;
+  @Input() chartKey = 0;
   @Input() shouldReRender: boolean;
   @Input() sidebarTransitionFlag: boolean;
   chart: any;
   componentClass = 'react-chart';
-  constructor() {};
+  constructor() {}
 
   ngOnChanges (): void {
     this.triggerReRender();
   }
 
-  ngOnInit() : void {
+  ngOnInit (): void {
     this.triggerReRender();
   }
 
   triggerReRender(): void {
     ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
-      {chartData: this.chartData, chartKey: this.chartKey, sidebarTransitionFlag: this.sidebarTransitionFlag}),
+      {chartData: this.chartData,
+        chartKey: this.chartKey,
+        sidebarTransitionFlag: this.sidebarTransitionFlag}),
       document.getElementsByClassName(this.componentClass)[this.chartKey]);
   }
 }
