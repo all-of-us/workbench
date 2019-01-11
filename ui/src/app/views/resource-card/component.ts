@@ -36,7 +36,6 @@ export class ResourceCardComponent implements OnInit {
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
-  // deleting = false;
   confirmDeleting = false;
 
   renaming = false;
@@ -85,7 +84,6 @@ export class ResourceCardComponent implements OnInit {
   }
 
   closeConfirmDelete(): void {
-    console.log('closing modal');
     this.confirmDeleting = false;
   }
 
@@ -163,24 +161,24 @@ export class ResourceCardComponent implements OnInit {
       case ResourceType.NOTEBOOK: {
         this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
           .subscribe(() => {
-            this.onUpdate.emit();
             this.closeConfirmDelete();
+            this.onUpdate.emit();
           });
         break;
       }
       case ResourceType.COHORT: {
         this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
-            this.onUpdate.emit();
             this.closeConfirmDelete();
+            this.onUpdate.emit();
           });
         break;
       }
       case ResourceType.CONCEPT_SET: {
         this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
           .subscribe(() => {
-            this.onUpdate.emit();
             this.closeConfirmDelete();
+            this.onUpdate.emit();
           });
       }
     }

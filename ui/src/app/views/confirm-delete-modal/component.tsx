@@ -5,7 +5,7 @@ import {
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import {ReactWrapperBase} from 'app/utils';
+import {capitalize, decamelize} from 'app/utils';
 
 import {
   Modal,
@@ -40,6 +40,7 @@ interface ConfirmDeleteModalState {
 export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
   state: ConfirmDeleteModalState;
   props: ConfirmDeleteModalProps;
+  resourceTypeName = this.transformResourceTypeName(this.props.resourceType);
 
   constructor(props: ConfirmDeleteModalProps) {
     super(props);
@@ -53,15 +54,19 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
     }
   }
 
+  transformResourceTypeName(resourceType: string): string {
+    return capitalize(decamelize(resourceType, ' '));
+  }
+
   render() {
     return <React.Fragment>
       {this.props.deleting &&
       <Modal>
         <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
-          delete {this.props.resourceType}: {this.props.resource.name}?
+          delete {this.resourceTypeName}: {this.props.resource.name}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
-          This will permanently delete the {this.props.resourceType}.
+          This will permanently delete the {this.resourceTypeName}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button type='secondary'
@@ -69,7 +74,7 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
           <Button disabled={this.state.loading}
                   style={{marginLeft: '0.5rem'}}
                   onClick={() => this.emitDelete(this.props.resource)}>
-            Delete {this.props.resourceType}
+            Delete {this.resourceTypeName}
           </Button>
         </ModalFooter>
       </Modal>}
