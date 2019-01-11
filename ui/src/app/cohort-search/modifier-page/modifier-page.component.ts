@@ -21,7 +21,7 @@ import {
   CohortSearchActions,
   previewStatus,
 } from '../redux';
-import {dateValidator, rangeValidator} from '../validators';
+import {dateValidator, integerAndRangeValidator} from '../validators';
 
 @Component({
     selector: 'crit-modifier-page',
@@ -289,7 +289,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
         if (mod.modType === ModifierType.EVENTDATE) {
           validators.push(dateValidator());
         } else {
-          validators.push(rangeValidator(mod.label, mod.min, mod.max));
+          validators.push(integerAndRangeValidator(mod.label, mod.min, mod.max));
           validators.push(Validators.maxLength(mod.maxLength));
         }
         this.form.get([mod.name, 'valueA']).setValidators(validators);
