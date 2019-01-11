@@ -118,13 +118,13 @@ const styles = reactStyles({
     color: '#FFFFFF',
     marginTop: '2%',
     marginLeft: '3%',
-    fontSize: '21px',
+    fontSize: 21,
     width: '100%',
     fontWeight: 500
   },
   mainTitle: {
     color: '#FFFFFF',
-    fontSize: '48px',
+    fontSize: 48,
     width: '100%',
     marginTop: '3%',
     marginLeft: '3%',
@@ -192,20 +192,20 @@ const styles = reactStyles({
     width: '100%',
     marginLeft: '5%',
     color: '#FFFFFF',
-    fontSize: '28px',
+    fontSize: 28,
     fontWeight: 'bold'
   },
   panelContents: {
     paddingLeft: '5%',
     marginTop: '1%',
     color: '#FFFFFF',
-    fontSize: '14px',
+    fontSize: 14,
     textAlign: 'left'
   },
   panelText: {
     marginRight: '2%',
     paddingTop: '.5%',
-    fontSize: '16px',
+    fontSize: 16,
     lineHeight: '24px',
     whiteSpace: 'pre-line',
     textAlign: 'left'
@@ -239,19 +239,15 @@ const styles = reactStyles({
 
 
 const completedStyles = {
-  circleCompleted: Object.assign(
-    styles.circle,
-    {
-      left: '0px',
-      border: '2px solid #2691D0',
-    }
-  ),
-  connectorCompleted: Object.assign(
-    styles.connector,
-    {
-      border: '2px solid #2691D0'
-    }
-  )
+  circleCompleted: {
+    ...styles.circle,
+    left: '0px',
+    border: '2px solid #2691D0',
+  },
+  connectorCompleted: {
+    ...styles.connector,
+    border: '2px solid #2691D0'
+  }
 };
 
 
