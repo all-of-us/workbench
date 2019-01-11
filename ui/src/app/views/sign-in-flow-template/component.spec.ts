@@ -15,7 +15,7 @@ import {SignInService} from '../../services/sign-in.service';
 import {SignInTemplateComponent} from './/component';
 
 describe('PageTemplateSignedOutComponent', () => {
-  //let fixture: ComponentFixture<SignInTemplateComponent>;
+  // let fixture: ComponentFixture<SignInTemplateComponent>;
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
@@ -35,7 +35,7 @@ describe('PageTemplateSignedOutComponent', () => {
       ]
     }).compileComponents().then(() => {
      // fixture = TestBed.createComponent(SignInTemplateComponent);
-      //tick();
+      // tick();
     });
   }));
 
