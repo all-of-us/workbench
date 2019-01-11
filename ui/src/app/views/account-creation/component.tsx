@@ -20,7 +20,7 @@ import {
 } from 'app/components/inputs';
 
 import {
-  ClrIcon, InfoIcon, ValidationIcon
+  InfoIcon, ValidationIcon
 } from 'app/components/icons';
 
 import {
@@ -33,7 +33,13 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-interface AccountCreationState {
+export interface AccountCreationProps {
+  invitationKey: string;
+  setProfile: Function;
+  updateNext: Function;
+}
+
+export interface AccountCreationState {
   profile: Profile;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
@@ -41,7 +47,8 @@ interface AccountCreationState {
   showAllFieldsRequiredError: boolean;
 }
 
-export class AccountCreationReact extends React.Component<any, AccountCreationState> {
+export class AccountCreationReact extends
+    React.Component<AccountCreationProps, AccountCreationState> {
   usernameCheckTimeout: NodeJS.Timer;
   errorMap: Map<string, boolean> = new Map<string, boolean>();
   accountCreated = false;
