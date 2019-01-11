@@ -5,6 +5,8 @@ import {
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
+import {ReactWrapperBase} from 'app/utils';
+
 import {
   Modal,
   ModalBody,
@@ -77,9 +79,7 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
 
 @Component({
   selector: 'app-confirm-delete-modal',
-  styleUrls: ['./component.css',
-    '../../styles/buttons.css'],
-  templateUrl: './component.html',
+  template: '<div #defaultId></div>',
 })
 export class ConfirmDeleteModalComponent implements DoCheck, OnInit {
   @Input() resourceType: string;
