@@ -29,7 +29,6 @@ public class SearchRequests {
       SearchParameter parameter = new SearchParameter()
         .type(DEMO_DOMAIN)
         .subtype(GENDER_SUBTYPE)
-        .domainId(DEMO_DOMAIN)
         .conceptId(conceptId);
       searchGroupItem.addSearchParametersItem(parameter);
     }

@@ -53,7 +53,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private static final String CODES_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id_or_source_concept_id\n" +
       "from `${projectId}.${dataSetId}.search_codes` a\n" +
-      "where concept_id_or_source_concept_id\n";
+      "where concept_id_or_source_concept_id ";
 
   private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
     "in unnest(${conceptIds})\n" +

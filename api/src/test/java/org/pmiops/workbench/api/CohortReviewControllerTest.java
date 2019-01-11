@@ -178,7 +178,6 @@ public class CohortReviewControllerTest {
     CohortReviewServiceImpl.class,
     ParticipantCounter.class,
     CohortQueryBuilder.class,
-    DomainLookupService.class,
     ReviewQueryBuilder.class,
     QueryBuilderFactory.class
   })

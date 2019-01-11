@@ -502,9 +502,6 @@ export class CohortSearchActions {
     if (immParam.get('conceptId')) {
       param.conceptId = immParam.get('conceptId');
     }
-    if (immParam.get('domainId')) {
-      param.domainId = immParam.get('domainId');
-    }
     if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
     } else if (immParam.get('code')) {

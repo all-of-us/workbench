@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -36,13 +35,6 @@ public class CohortQueryBuilder {
   private static final String EXCLUDE_SQL_TEMPLATE =
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
-
-  private final DomainLookupService domainLookupService;
-
-  @Autowired
-  public CohortQueryBuilder(DomainLookupService domainLookupService) {
-    this.domainLookupService = domainLookupService;
-  }
 
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
       String sqlTemplate, String endSql, String mainTable,

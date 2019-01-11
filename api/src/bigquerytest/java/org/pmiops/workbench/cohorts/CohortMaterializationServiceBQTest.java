@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -70,9 +69,9 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({DemoQueryBuilder.class, QueryBuilderFactory.class,
-        BigQueryService.class, ParticipantCounter.class, DomainLookupService.class,
-        CohortQueryBuilder.class, FieldSetQueryBuilder.class, QueryBuilderFactory.class,
-        TestJpaConfig.class, ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
+        BigQueryService.class, ParticipantCounter.class, CohortQueryBuilder.class,
+        FieldSetQueryBuilder.class, QueryBuilderFactory.class, TestJpaConfig.class,
+        ConceptCacheConfiguration.class, TestBigQueryCdrSchemaConfig.class,
         AnnotationQueryBuilder.class, CdrBigQuerySchemaConfigService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {

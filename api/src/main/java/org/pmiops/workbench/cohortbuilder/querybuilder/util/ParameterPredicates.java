@@ -100,22 +100,6 @@ public class ParameterPredicates {
     return sp -> StringUtils.isBlank(sp.getValue());
   }
 
-  public static Predicate<SearchParameter> domainInvalid() {
-    return sp -> !VALID_DOMAINS.stream().anyMatch(sp.getDomainId()::equalsIgnoreCase);
-  }
-
-  public static Predicate<SearchParameter> domainNotMeasurement() {
-    return sp -> !DomainType.MEASUREMENT.toString().equalsIgnoreCase(sp.getDomainId());
-  }
-
-  public static Predicate<SearchParameter> domainNotObservation() {
-    return sp -> !DomainType.OBSERVATION.toString().equalsIgnoreCase(sp.getDomainId());
-  }
-
-  public static Predicate<SearchParameter> domainBlank() {
-    return sp -> StringUtils.isBlank(sp.getDomainId());
-  }
-
   public static Predicate<SearchParameter> typeBlank() {
     return sp -> StringUtils.isBlank(sp.getType());
   }

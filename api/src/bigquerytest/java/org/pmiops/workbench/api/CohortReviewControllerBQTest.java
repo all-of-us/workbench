@@ -122,11 +122,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortService.class,
     ParticipantCounter.class,
-    DomainLookupService.class,
     CohortQueryBuilder.class,
     QueryBuilderFactory.class,
-    ParticipantCounter.class,
-    DomainLookupService.class
+    ParticipantCounter.class
   })
   @MockBean({
     FireCloudService.class,
