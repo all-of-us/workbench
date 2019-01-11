@@ -14,7 +14,6 @@ import {environment} from 'environments/environment';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component ({
   selector : 'app-resource-card',
@@ -41,8 +40,7 @@ export class ResourceCardComponent implements OnInit {
   actionList = resourceActionList;
   invalidResourceError = false;
 
-  @ViewChild(RenameModalComponent)
-  renameModal: RenameModalComponent;
+  renaming = false;
 
   @ViewChild(ConfirmDeleteModalComponent)
   deleteModal: ConfirmDeleteModalComponent;
@@ -78,7 +76,11 @@ export class ResourceCardComponent implements OnInit {
   }
 
   renameNotebook(): void {
-    this.renameModal.open();
+    this.renaming = true;
+  }
+
+  cancelRename(): void {
+    this.renaming = false;
   }
 
   receiveNotebookRename(rename: NotebookRename): void {
@@ -88,7 +90,7 @@ export class ResourceCardComponent implements OnInit {
       rename.newName = newName;
     }
     if (new RegExp('.*\/.*').test(newName)) {
-      this.renameModal.close();
+      this.renaming = false;
       this.invalidNameError.emit(newName);
       return;
     }
@@ -101,12 +103,12 @@ export class ResourceCardComponent implements OnInit {
         }
       })
       .subscribe(() => {
-          this.renameModal.close();
+          this.renaming = false;
           this.onUpdate.emit(rename);
         },
         (dupName) => {
           this.duplicateNameError.emit(dupName);
-          this.renameModal.close();
+          this.renaming = false;
     });
   }
 
