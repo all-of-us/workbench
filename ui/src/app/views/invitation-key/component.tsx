@@ -24,7 +24,6 @@ interface InvitationKeyState {
 
 export class InvitationKeyReact extends React.Component<any, InvitationKeyState> {
 
-  state: InvitationKeyState;
   inputElement: any;
 
   constructor(props: Object) {
