@@ -75,7 +75,6 @@ export class AccountCreationReact extends
       showAllFieldsRequiredError: false
     };
     this.createAccount = this.createAccount.bind(this);
-    this.usernameChanged = this.usernameChanged.bind(this);
     this.usernameValid = this.usernameValid.bind(this);
     this.usernameNotValid = this.usernameNotValid.bind(this);
   }
@@ -153,8 +152,8 @@ export class AccountCreationReact extends
     return !(new RegExp(/^[\w'-][\w.'-]*$/).test(username));
   }
 
-  usernameChanged(event: React.FormEvent<HTMLInputElement>): void {
-    this.updateProfile(event.currentTarget.id, event.currentTarget.value);
+  usernameChanged(value: string): void {
+    this.updateProfile('username', value);
     if (this.state.profile.username === '') {
       return;
     }
@@ -270,7 +269,7 @@ export class AccountCreationReact extends
           </FormSection>
           <FormSection>
             <LongInput type='text' id='username' name='username' placeholder='New Username'
-                       onChange={this.usernameChanged.bind(this)}
+                       onChange={e => this.usernameChanged(e.target.value)}
                        style={(this.state.usernameConflictError || this.usernameInvalidError()) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
             <div style={inputStyles.iconArea}>

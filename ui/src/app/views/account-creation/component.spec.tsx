@@ -51,6 +51,48 @@ it ('should handle organization validity', () => {
   expect(wrapper.exists('#organizationError')).toBeTruthy();
 });
 
+it ('should handle current position validity', () => {
+  const wrapper = component();
+  let testInput = createInput(300);
+  expect(wrapper.exists('#currentPosition')).toBeTruthy();
+  expect(wrapper.exists('#currentPositionError')).toBeFalsy();
+  wrapper.find('#currentPosition').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#currentPositionError')).toBeTruthy();
+});
+
+it ('should handle username validity', () => {
+  const wrapper = component();
+  expect(wrapper.exists('#username')).toBeTruthy();
+  expect(wrapper.exists('#usernameError')).toBeFalsy();
+  expect(wrapper.exists('#usernameConflictError')).toBeFalsy();
+
+  // if username starts with .
+  let testInput = '.startswith';
+  wrapper.find('#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeTruthy();
+
+  // if username ends with .
+  testInput = 'endswith.';
+  wrapper.find('#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeTruthy();
+
+  // if username contains special chars
+  testInput = 'user@name';
+  wrapper.find('#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeTruthy();
+
+  // if username is long (not too long) but has a mismatch at end
+  testInput = createInput(50);
+  testInput = testInput + ' a';
+  wrapper.find('#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeTruthy();
+
+  // if username is valid
+  testInput = 'username';
+  wrapper.find('#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeFalsy();
+});
+
 function createInput(lengthWanted: number): string {
   let stringToReturn = '';
   while (lengthWanted > 0) {
