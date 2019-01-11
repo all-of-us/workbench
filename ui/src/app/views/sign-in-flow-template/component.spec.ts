@@ -32,7 +32,7 @@ describe('PageTemplateSignedOutComponent', () => {
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
-        },{ provide: SignInService, useValue: new SignInServiceStub() }
+        }, { provide: SignInService, useValue: new SignInServiceStub() }
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(SignInTemplateComponent);
