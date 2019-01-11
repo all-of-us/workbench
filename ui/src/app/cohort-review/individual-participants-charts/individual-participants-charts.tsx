@@ -164,7 +164,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         type: 'scatter',
         name: 'Details',
         data: this.trimmedData,
-        turboThreshold: 8000,
+        turboThreshold: 0,
         showInLegend: false,
       }],
     };

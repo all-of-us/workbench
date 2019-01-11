@@ -305,12 +305,12 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       this.chartLoadedSpinner = true;
       this.participantsId = this.clickedParticipantId;
       if (this.summaryActive) {
-        this.subscribe();
+        this.getSubscribedData();
       }
     }
   }
 
-  subscribe() {
+  getSubscribedData() {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -322,7 +322,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscribe();
+    this.getSubscribedData();
   }
 
 
