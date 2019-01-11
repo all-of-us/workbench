@@ -19,7 +19,7 @@ class EditComponentReact extends React.Component<{}, EditComponentState> {
   constructor(props) {
     super(props);
     this.state = {
-        style: style
+      style: style
     };
   }
 
