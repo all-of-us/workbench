@@ -2,10 +2,10 @@ import * as React from 'react';
 
 export const styles = {
   infoIcon: {
-    color: '#302C71',
+    color: '#2691D0',
     height: '22px',
     width: '22px',
-    fill: '#302C71'
+    fill: '#2691D0'
   },
 
   successIcon: {
