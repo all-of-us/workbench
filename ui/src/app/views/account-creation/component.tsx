@@ -30,6 +30,7 @@ import {
 } from 'app/components/popups';
 
 import {BoldHeader} from 'app/components/headers';
+import {Button} from "../../components/buttons";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -315,13 +316,12 @@ export class AccountCreationReact extends
             </div>
           </FormSection>
           <FormSection>
-            <button type='submit'
-                    className='btn btn-primary short-button'
-                    disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
+            <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
                     this.isUsernameValidationError()}
+                    style={{'height': '2rem', 'width': '10rem'}}
                     onClick={this.createAccount}>
               Next
-            </button>
+            </Button>
           </FormSection>
         </div>
         {this.state.showAllFieldsRequiredError &&
