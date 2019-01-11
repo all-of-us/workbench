@@ -14,10 +14,11 @@ import {
 import {
   Error,
   ErrorMessage,
-  FormSection,
   LongInput,
   styles as inputStyles
 } from 'app/components/inputs';
+
+import { FormSection } from 'app/components/forms';
 
 import {
   InfoIcon, ValidationIcon
@@ -36,7 +37,7 @@ function isBlank(s: string) {
 export interface AccountCreationProps {
   invitationKey: string;
   setProfile: Function;
-  updateNext: Function;
+  onAccountCreation: Function;
 }
 
 export interface AccountCreationState {
@@ -53,7 +54,7 @@ export class AccountCreationReact extends
   errorMap: Map<string, boolean> = new Map<string, boolean>();
   accountCreated = false;
 
-  constructor(props: Object) {
+  constructor(props: AccountCreationProps) {
     super(props);
     this.state = {
       profile: {
@@ -87,6 +88,7 @@ export class AccountCreationReact extends
 
 
   createAccount(): void {
+    const {invitationKey, setProfile, onAccountCreation} = this.props;
     if (this.state.usernameConflictError || this.usernameInvalidError()) {
       return;
     }
@@ -104,7 +106,7 @@ export class AccountCreationReact extends
     }
     const request: CreateAccountRequest = {
       profile: this.state.profile,
-      invitationKey: this.props.invitationKey
+      invitationKey: invitationKey
     };
     this.setState({creatingAccount: true});
     const args: FetchArgs = ProfileApiFetchParamCreator().createAccount(request);
@@ -114,8 +116,8 @@ export class AccountCreationReact extends
       .then((profile) => {
           this.setState({profile: profile, creatingAccount: false});
           this.accountCreated = true;
-          this.props.setProfile(profile);
-          this.props.updateNext(3);
+          setProfile(profile);
+          onAccountCreation;
         }
       )
       .catch(error => {

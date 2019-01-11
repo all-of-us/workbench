@@ -14,11 +14,6 @@ export const styles = {
     borderColor: '#7AC79B'
   },
 
-  formSection: {
-    marginTop: '1rem',
-    minWidth: '29rem'
-  },
-
   longInput: {
     width: '16rem'
   },
@@ -67,7 +62,5 @@ export const LongInput = ({style = {}, ...props}) =>
   <input {...props} style={{...styles.formInput, ...styles.longInput, ...style}} />;
 export const Error = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.error, ...style}} />;
-export const FormSection = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.formSection, ...style}} />;
 export const ErrorMessage = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.errorMessage, ...style}} />;
