@@ -156,10 +156,10 @@ export class ResourceCardComponent implements OnInit {
     this.openConfirmDelete();
   }
 
-  receiveDelete($event): void {
+  receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
+        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, this.resource.name)
           .subscribe(() => {
             this.closeConfirmDelete();
             this.onUpdate.emit();
@@ -167,7 +167,7 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.COHORT: {
-        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
+        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
             this.closeConfirmDelete();
             this.onUpdate.emit();
@@ -175,7 +175,7 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
             this.closeConfirmDelete();
             this.onUpdate.emit();

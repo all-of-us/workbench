@@ -40,7 +40,7 @@
 
 <app-confirm-delete-modal [resourceType]="resourceType"
                           [resource]="resource"
-                          (receiveDelete)="receiveDelete($event)"
+                          [receiveDelete]="receiveDelete.bind(this)"
                           [deleting]="confirmDeleting"
                           [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
 

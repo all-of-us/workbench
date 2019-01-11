@@ -1,11 +1,13 @@
 import {
-  Component, DoCheck, ElementRef, EventEmitter, Input, OnInit, Output,
-  ViewChild
+  Component, Input,
 } from '@angular/core';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
-import {capitalize, decamelize} from 'app/utils';
+import {
+  capitalize,
+  decamelize,
+  ReactWrapperBase
+} from 'app/utils';
 
 import {
   Modal,
@@ -18,18 +20,11 @@ import {
   Button
 } from 'app/components/buttons';
 
-class CurrId {
-  static currId = 0;
-  static getUniqueId = () => {
-    return CurrId.currId += 1;
-  }
-}
-
 interface ConfirmDeleteModalProps {
   deleting: boolean,
   closeFunction: Function,
   resourceType: string,
-  receiveDelete: EventEmitter<any>,
+  receiveDelete: Function,
   resource: {name: string}
 }
 
@@ -40,21 +35,21 @@ interface ConfirmDeleteModalState {
 export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
   state: ConfirmDeleteModalState;
   props: ConfirmDeleteModalProps;
-  resourceTypeName = this.transformResourceTypeName(this.props.resourceType);
+  resourceTypeName = ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType);
 
   constructor(props: ConfirmDeleteModalProps) {
     super(props);
     this.state = {loading: false};
   }
 
-  emitDelete(resource: any): void {
+  emitDelete(): void {
     if (!this.state.loading) {
       this.setState({loading: true});
-      this.props.receiveDelete.emit(resource);
+      this.props.receiveDelete();
     }
   }
 
-  transformResourceTypeName(resourceType: string): string {
+  static transformResourceTypeName(resourceType: string): string {
     return capitalize(decamelize(resourceType, ' '));
   }
 
@@ -73,7 +68,7 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
                   onClick={() => this.props.closeFunction()}>Cancel</Button>
           <Button disabled={this.state.loading}
                   style={{marginLeft: '0.5rem'}}
-                  onClick={() => this.emitDelete(this.props.resource)}>
+                  onClick={() => this.emitDelete()}>
             Delete {this.resourceTypeName}
           </Button>
         </ModalFooter>
@@ -84,33 +79,17 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
 
 @Component({
   selector: 'app-confirm-delete-modal',
-  template: '<div #defaultId></div>',
+  template: '<div #root></div>',
 })
-export class ConfirmDeleteModalComponent implements DoCheck, OnInit {
-  @Input() resourceType: string;
-  @Output() receiveDelete = new EventEmitter<any>();
-  @Input() resource: {name: string};
-  @Input() deleting: boolean;
-  @Input() closeFunction: Function;
+export class ConfirmDeleteModalComponent extends ReactWrapperBase {
+  @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
+  @Input('resource') resource: ConfirmDeleteModalProps['resource'];
+  @Input('deleting') deleting: ConfirmDeleteModalProps['deleting'];
+  @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
+  @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
-  @ViewChild('defaultId') templateValue: ElementRef;
-  componentId = 'confirm-delete-modal-' + CurrId.getUniqueId();
-
-  constructor() {}
-
-  ngOnInit(): void {
-    console.log(this.templateValue);
-    this.templateValue.nativeElement.id = this.componentId;
-    ReactDOM.render(React.createElement(ConfirmDeleteModal,
-        {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
-          receiveDelete: this.receiveDelete, resource: this.resource}),
-        document.getElementById(this.componentId));
-  }
-
-  ngDoCheck(): void {
-    ReactDOM.render(React.createElement(ConfirmDeleteModal,
-        {deleting: this.deleting, closeFunction: this.closeFunction, resourceType: this.resourceType,
-          receiveDelete: this.receiveDelete, resource: this.resource}),
-        document.getElementById(this.componentId));
+  constructor() {
+    super(ConfirmDeleteModal, ['resourceType', 'resource', 'deleting',
+      'closeFunction', 'receiveDelete'])
   }
 }
