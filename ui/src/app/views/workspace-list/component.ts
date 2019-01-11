@@ -8,7 +8,6 @@ import {Workspace} from 'generated';
 
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -47,10 +46,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   // TODO This is necessary to placate the sharing template - figure out how to remove it
   selectedWorkspace: Workspace = {name: ''};
   accessLevel: WorkspaceAccessLevel;
-
-  // All the things related to deleting a workspace
-  // @ViewChild(ConfirmDeleteModalComponent)
-  // deleteModal: ConfirmDeleteModalComponent;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
@@ -135,12 +130,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   delete(workspace: Workspace): void {
-    console.log('here');
     this.workspaceDeletionError = false;
     this.deleting = true;
     this.workspaceList = [];
     this.workspacesLoading = true;
-    this.confirmDeleting = false;
+    this.closeConfirmDelete();
     this.workspacesService.deleteWorkspace(workspace.namespace, workspace.id).subscribe(() => {
       this.reloadWorkspaces();
     }, (error) => {
@@ -148,15 +142,17 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  receiveDelete(workspace: Workspace): void {
-    this.delete(workspace);
+  receiveDelete(): void {
+    this.delete(this.resource);
   }
 
-  confirmDelete(workspace: Workspace): void {
-    console.log('workspace list confirmDeleting');
+  openConfirmDelete(workspace: Workspace): void {
     this.resource = workspace;
     this.confirmDeleting = true;
-    //this.deleteModal.open();
+  }
+
+  closeConfirmDelete(): void {
+    this.confirmDeleting = false;
   }
 
   share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
