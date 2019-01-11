@@ -55,9 +55,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private BigQueryService bigQueryService;
 
   @Autowired
-  private CriteriaDao criteriaDao;
-
-  @Autowired
   private CdrVersionDao cdrVersionDao;
 
   @Autowired
@@ -67,18 +64,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public List<String> getTableNames() {
     return Arrays.asList(
       "person",
-      "concept",
-      "condition_occurrence",
-      "procedure_occurrence",
-      "measurement",
-      "observation",
-      "drug_exposure",
-      "phecode_criteria_icd",
-      "criteria_relationship",
       "death",
-      "visit_occurrence",
-      "criteria_ancestor",
-      "criteria");
+      "criteria",
+      "search_codes",
+      "search_drug",
+      "search_measurement",
+      "search_person",
+      "search_pm",
+      "search_ppi",
+      "search_visit");
   }
 
   @Override
@@ -197,20 +191,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, SUBTYPE, icd9.getSubtype());
 
-    //icd9 no domain
-    icd9.subtype(TreeSubType.CM.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomainId());
-
-    //icd9 bad domain
-    icd9.domainId("baddomain");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, icd9.getDomainId());
-
     //icd9 child no concept id
-    icd9.domainId(DomainType.CONDITION.name());
+    icd9.domainId(DomainType.CONDITION.name()).subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, icd9.getConceptId());
@@ -241,20 +223,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, TYPE, snomed.getType());
 
-    //snomed no domain
-    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, snomed.getDomainId());
-
-    //snomed bad domain
-    snomed.domainId("baddomain");
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, snomed.getDomainId());
-
     //snomed child no concept id
-    snomed.domainId(DomainType.CONDITION.name());
+    snomed.domainId(DomainType.CONDITION.name()).type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, snomed.getConceptId());
@@ -462,20 +432,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, TYPE, ppiParam.getType());
 
-    //ppi no domain
-    ppiParam.type(TreeType.PPI.name());
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomainId());
-
-    //ppi bad domain
-    ppiParam.domainId(DomainType.CONDITION.name());
-    searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, ppiParam.getDomainId());
-
     //ppi no concept id
-    ppiParam.domainId(DomainType.OBSERVATION.name());
+    ppiParam.domainId(DomainType.OBSERVATION.name()).type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
@@ -729,19 +687,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventBetween() throws Exception {
     Criteria icd9ConditionChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
-    DateTime birthDate = new DateTime(1980, 2, 17, 0, 0, 0, 0);
-    DateTime eventDate = new DateTime(2008, 7, 22, 0, 0, 0, 0);
-
-    Period period = new Period(birthDate, eventDate);
-    period.getYears();
 
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
-    String operand1 = Integer.toString(period.getYears() - 1);
-    String operand2 = Integer.toString(period.getYears() + 1);
     Modifier modifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.BETWEEN)
-      .operands(Arrays.asList(operand1, operand2));
+      .operands(Arrays.asList("37", "39"));
     SearchRequest searchRequest =
       createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), Arrays.asList(modifier));
 
@@ -760,7 +711,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.EQUAL)
-      .operands(Arrays.asList("1"));
+      .operands(Arrays.asList("2"));
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -821,15 +772,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
-    Criteria icd9ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
-    Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
+    Criteria icd9ConditionParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001");
     SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9ConditionChild);
-    criteriaDao.delete(icd9ConditionParent);
   }
 
   @Test
@@ -843,15 +789,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
-    Criteria icd9ProcedureParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.PROC.name(), "002"));
-    Criteria icd9ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), icd9ProcedureParent.getId(), "002", DomainType.PROCEDURE.name(), "2"));
+    Criteria icd9ProcedureParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.PROC.name(), "002");
     SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
     SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9ProcedureChild);
-    criteriaDao.delete(icd9ProcedureParent);
   }
 
   @Test
@@ -865,15 +806,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9MeasurementParent() throws Exception {
-    Criteria icd9MeasurementParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "003"));
-    Criteria icd9MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9MeasurementParent.getId(), "003", DomainType.MEASUREMENT.name(), "3"));
+    Criteria icd9MeasurementParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "003");
     SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd9MeasurementChild);
-    criteriaDao.delete(icd9MeasurementParent);
   }
 
   @Test
@@ -1004,31 +940,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceChildICD10ConditionOccurrenceChild() throws Exception {
-    Criteria icd9ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001"));
-    Criteria icd9ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), icd9ConditionParent.getId(), "001", DomainType.CONDITION.name(), "1"));
+    Criteria icd9ConditionParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name(), "001");
     Criteria icd10ConditionChild =
       createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "6");
     SearchParameter icd9P = createSearchParameter(icd9ConditionParent, "001");
     SearchParameter icd10 = createSearchParameter(icd10ConditionChild, "A09");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9P, icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-    criteriaDao.delete(icd9ConditionChild);
-    criteriaDao.delete(icd9ConditionParent);
   }
 
   @Test
   public void countSubjectsICD10ConditionOccurrenceParent() throws Exception {
-    Criteria icd10ConditionParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "A"));
-    Criteria icd10ConditionChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10ConditionParent.getId(), "A09", DomainType.CONDITION.name(), "6"));
+    Criteria icd10ConditionParent = createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "A");
     SearchParameter icd10 = createSearchParameter(icd10ConditionParent, "A");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10ConditionChild);
-    criteriaDao.delete(icd10ConditionParent);
   }
 
   @Test
@@ -1042,15 +968,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD10ProcedureOccurrenceParent() throws Exception {
-    Criteria icd10ProcedureParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.PCS.name(), "16"));
-    Criteria icd10ProcedureChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.PCS.name(), icd10ProcedureParent.getId(), "16070", DomainType.PROCEDURE.name(), "8"));
+    Criteria icd10ProcedureParent = createCriteriaParent(TreeType.ICD10.name(), TreeSubType.PCS.name(), "16");
     SearchParameter icd10 = createSearchParameter(icd10ProcedureParent, "16");
     SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10ProcedureChild);
-    criteriaDao.delete(icd10ProcedureParent);
   }
 
   @Test
@@ -1064,15 +985,10 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD10MeasurementParent() throws Exception {
-    Criteria icd10MeasurementParent =
-      criteriaDao.save(createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "R92"));
-    Criteria icd10MeasurementChild =
-      criteriaDao.save(createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), icd10MeasurementParent.getId(), "R92.2", DomainType.MEASUREMENT.name(), "9"));
+    Criteria icd10MeasurementParent = createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name(), "R92");
     SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    criteriaDao.delete(icd10MeasurementChild);
-    criteriaDao.delete(icd10MeasurementParent);
   }
 
   @Test
@@ -1152,7 +1068,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(true).conceptId("1");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1162,7 +1078,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter visitChild = createSearchParameter(visitChildCriteria, null);
     SearchParameter visitParent = createSearchParameter(visitParentCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visitChild.getType(), Arrays.asList(visitChild, visitParent), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1514,8 +1430,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
     assertEquals(2, response.getItems().size());
-    assertEquals(new DemoChartInfo().gender("M").race("Unknown").ageRange("19-44").count(1L), response.getItems().get(0));
-    assertEquals(new DemoChartInfo().gender("No matching concept").race("Unknown").ageRange("> 65").count(1L), response.getItems().get(1));
+    assertEquals(new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L), response.getItems().get(0));
+    assertEquals(new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L), response.getItems().get(1));
   }
 
   @Test

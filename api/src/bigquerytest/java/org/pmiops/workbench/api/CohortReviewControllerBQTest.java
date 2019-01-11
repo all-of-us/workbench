@@ -160,11 +160,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       "p_drug",
       "p_physical_measure",
       "person",
-      "measurement",
-      "condition_occurrence",
-      "procedure_occurrence",
-      "drug_exposure",
-      "concept",
       "criteria"
     );
   }

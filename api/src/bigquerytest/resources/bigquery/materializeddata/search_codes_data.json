@@ -1,0 +1,11 @@
+[
+  {
+    "person_id":1,
+    "entry_date":"2009-12-03",
+    "concept_id_or_source_concept_id":1,
+    "type":"ICD9",
+    "subtype":"CM",
+    "age_at_event":38,
+    "visit_concept_id":12
+  }
+]

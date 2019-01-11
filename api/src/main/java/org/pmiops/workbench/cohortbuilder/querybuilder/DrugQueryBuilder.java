@@ -26,17 +26,19 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   private static final String DRUG_CHILD_SQL_TEMPLATE =
-    "select distinct person_id, drug_exposure_start_date as entry_date, drug_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.drug_exposure`\n" +
-      "where drug_concept_id in unnest(${childConceptIds})\n";
+    "select distinct person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}.search_drug`\n" +
+      "where concept_id in unnest(${childConceptIds})\n";
 
   private static final String DRUG_PARENT_SQL_TEMPLATE =
-    "select distinct person_id, drug_exposure_start_date as entry_date, drug_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.drug_exposure`\n" +
-      "where drug_concept_id in (\n" +
+    "select distinct person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}.search_drug`\n" +
+      "where concept_id in (\n" +
       "   select a.concept_id from\n" +
       "   `${projectId}.${dataSetId}.criteria` a\n" +
-      "    join (select CONCAT( '%.', CAST(id as STRING), '%') as path from `${projectId}.${dataSetId}.criteria` where concept_id in unnest(${parentConceptIds})) b \n" +
+      "    join (select CONCAT( '%.', CAST(id as STRING), '%') as path " +
+      "    from `${projectId}.${dataSetId}.criteria` " +
+      "    where concept_id in unnest(${parentConceptIds})) b \n" +
       "    on a.path like b.path\n" +
       "    and is_group = 0\n" +
       "    and is_selectable = 1\n" +
@@ -44,8 +46,6 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       "    and subtype = 'ATC')\n";
 
   private static final String UNION_TEMPLATE = " union all\n";
-
-  private static final String ENCOUNTERS_SQL_TEMPLATE = "${encounterSql}";
 
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
@@ -62,7 +62,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       }
     }
 
-    String drugSql = String.join(UNION_TEMPLATE, queryParts) + ENCOUNTERS_SQL_TEMPLATE;
+    String drugSql = String.join(UNION_TEMPLATE, queryParts);
     return buildModifierSql(drugSql, queryParams, parameters.getModifiers());
   }
 

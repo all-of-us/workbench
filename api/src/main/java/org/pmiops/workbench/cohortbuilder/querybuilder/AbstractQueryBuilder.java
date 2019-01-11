@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.utils.OperatorUtils;
 
 import java.util.ArrayList;
@@ -42,11 +43,12 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public abstract class AbstractQueryBuilder {
 
   public static final String AND = " and ";
-  private static final String AGE_AT_EVENT_SQL_TEMPLATE = "age_at_event ";
-  private static final String EVENT_DATE_SQL_TEMPLATE = "entry_date ";
-  private static final String OCCURRENCES_SQL_TEMPLATE = "join `${projectId}.${dataSetId}.search_enc` e\n" +
-    "on (a.person_id = e.person_id and a.concept_id_or_source_concept_id = a.concept_id_or_source_concept_id)\n";
-  private static final String ENCOUNTERS_SQL_TEMPLATE = "visit_concept_id ";
+  private static final String MODIFIER_SQL_TEMPLATE = "select criteria.person_id from (${innerSql}) criteria\n";
+  private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
+    "having count(criteria.person_id) ";
+  private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
+  private static final String EVENT_DATE_SQL_TEMPLATE = "and entry_date ";
+  private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_concept_id ";
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified
@@ -60,13 +62,17 @@ public abstract class AbstractQueryBuilder {
   public abstract FactoryKey getType();
 
   public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
-    List<Modifier> ageEventAndEncounterModifiers = new ArrayList<>();
-    ageEventAndEncounterModifiers.add(getModifier(modifiers, ModifierType.AGE_AT_EVENT));
-    ageEventAndEncounterModifiers.add(getModifier(modifiers, ModifierType.EVENT_DATE));
-    ageEventAndEncounterModifiers.add(getModifier(modifiers, ModifierType.ENCOUNTERS));
-    String ageEventAndEncounterSql = buildAgeEventAndEncounterSql(baseSql, queryParams, ageEventAndEncounterModifiers);
-    String finalSql = buildOccurrencesSql(ageEventAndEncounterSql, queryParams, getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES));
-    return finalSql;
+    List<Modifier> ageDateAndEncounterModifiers = new ArrayList<>();
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.AGE_AT_EVENT));
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.EVENT_DATE));
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.ENCOUNTERS));
+    String ageDateAndEncounterSql = buildAgeDateAndEncounterSql(queryParams, ageDateAndEncounterModifiers);
+    //Number of Occurrences has to be last because of the group by
+    String occurrenceSql = buildOccurrencesSql(queryParams, getModifier(modifiers, ModifierType.NUM_OF_OCCURRENCES));
+    return MODIFIER_SQL_TEMPLATE
+      .replace("${innerSql}",
+        baseSql.replace("${ageDateAndEncounterSql}", ageDateAndEncounterSql)) +
+      occurrenceSql;
   }
 
   protected String addQueryParameterValue(Map<String, QueryParameterValue> queryParameterValueMap,
@@ -88,39 +94,41 @@ public abstract class AbstractQueryBuilder {
     return modifierList.get(0);
   }
 
-  private String buildAgeEventAndEncounterSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
-    String modifierSql = baseSql;
+  private String buildAgeDateAndEncounterSql(Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
+    StringBuffer modifierSql = new StringBuffer();
     for (Modifier modifier : modifiers) {
       if (modifier != null) {
         validateModifier(modifier);
-        boolean isAgeAtEvent = modifier.getName().equals(ModifierType.AGE_AT_EVENT);
-        boolean isEncounters = modifier.getName().equals(ModifierType.ENCOUNTERS);
         List<String> modifierParamList = new ArrayList<>();
         for (String operand : modifier.getOperands()) {
-          String modifierParameter = addQueryParameterValue(queryParams, (isAgeAtEvent || isEncounters) ?
-            QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
+          String modifierParameter =
+            addQueryParameterValue(queryParams, (isAgeAtEvent(modifier) || isEncounters(modifier)) ?
+              QueryParameterValue.int64(new Long(operand)) : QueryParameterValue.date(operand));
           modifierParamList.add("@" + modifierParameter);
         }
-        if (isAgeAtEvent) {
-          modifierSql = modifierSql + AND + AGE_AT_EVENT_SQL_TEMPLATE +
+        if (isAgeAtEvent(modifier)) {
+          modifierSql.append(AGE_AT_EVENT_SQL_TEMPLATE);
+          modifierSql.append(
             OperatorUtils.getSqlOperator(modifier.getOperator()) + " " +
-            String.join(AND, modifierParamList) + "\n";
-        } else if (isEncounters) {
-          modifierSql = modifierSql + AND + ENCOUNTERS_SQL_TEMPLATE +
+              String.join(AND, modifierParamList) + "\n");
+        } else if (isEncounters(modifier)) {
+          modifierSql.append(ENCOUNTERS_SQL_TEMPLATE);
+          modifierSql.append(
             OperatorUtils.getSqlOperator(modifier.getOperator()) + " (" +
-            String.join(AND, modifierParamList) + ")\n";
+              modifierParamList.get(0) + ")\n");
         } else {
-          modifierSql = modifierSql + AND + EVENT_DATE_SQL_TEMPLATE +
+          modifierSql.append(EVENT_DATE_SQL_TEMPLATE);
+          modifierSql.append(
             OperatorUtils.getSqlOperator(modifier.getOperator()) + " " +
-            String.join(AND, modifierParamList) + "\n";
+              String.join(AND, modifierParamList) + "\n");
         }
       }
     }
-    return modifierSql;
+    return modifierSql.toString();
   }
 
-  private  String buildOccurrencesSql(String baseSql, Map<String, QueryParameterValue> queryParams, Modifier occurrences) {
-    String modifierSql = baseSql;
+  private String buildOccurrencesSql(Map<String, QueryParameterValue> queryParams, Modifier occurrences) {
+    StringBuffer modifierSql = new StringBuffer();
     if (occurrences != null) {
       List<String> modifierParamList = new ArrayList<>();
       validateModifier(occurrences);
@@ -128,13 +136,11 @@ public abstract class AbstractQueryBuilder {
         String modifierParameter = addQueryParameterValue(queryParams, QueryParameterValue.int64(new Long(operand)));
         modifierParamList.add("@" + modifierParameter);
       }
-      modifierSql = modifierSql.replace("${occurrenceSql}", "\n" + OCCURRENCES_SQL_TEMPLATE);
-      modifierSql = modifierSql + "and e.count " + OperatorUtils.getSqlOperator(occurrences.getOperator()) + " " +
-        String.join(AND, modifierParamList) + "\n";
-    } else {
-      modifierSql = modifierSql.replace("${occurrenceSql}", "");
+      modifierSql.append(OCCURRENCES_SQL_TEMPLATE +
+        OperatorUtils.getSqlOperator(occurrences.getOperator()) + " " +
+        String.join(AND, modifierParamList) + "\n");
     }
-    return modifierSql;
+    return modifierSql.toString();
   }
 
   private void validateModifier(Modifier modifier) {
@@ -151,9 +157,17 @@ public abstract class AbstractQueryBuilder {
       from(operandsNotDates()).test(modifier).throwException(DATE_MODIFIER_MESSAGE, MODIFIER, name);
     }
     if (ModifierType.ENCOUNTERS.equals(modifier.getName())) {
-      from(operatorNotIn()).test(modifier).throwException(NOT_IN_MODIFIER_MESSAGE, name, oper);
+      from(operatorNotIn()).test(modifier).throwException(NOT_IN_MODIFIER_MESSAGE, name, operatorText.get(Operator.IN));
       from(operandsNotNumbers()).test(modifier).throwException(OPERANDS_NUMERIC_MESSAGE, MODIFIER, name);
     }
+  }
+
+  private boolean isAgeAtEvent(Modifier modifier) {
+    return modifier.getName().equals(ModifierType.AGE_AT_EVENT);
+  }
+
+  private boolean isEncounters(Modifier modifier) {
+    return modifier.getName().equals(ModifierType.ENCOUNTERS);
   }
 
 }
