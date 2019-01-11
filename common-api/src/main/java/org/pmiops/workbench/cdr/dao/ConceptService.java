@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.pmiops.workbench.model.SearchType;
 
 @Service
 public class ConceptService {
@@ -64,7 +65,7 @@ public class ConceptService {
         this.conceptDao = conceptDao;
     }
 
-    public static String modifyMultipleMatchKeyword(String query, String purpose) {
+    public static String modifyMultipleMatchKeyword(String query, SearchType searchType) {
         // This function modifies the keyword to match all the words if multiple words are present(by adding + before each word to indicate match that matching each word is essential)
         if (query == null || query.trim().isEmpty()) {
             return null;
@@ -72,20 +73,27 @@ public class ConceptService {
         String[] keywords = query.split("[,+\\s+]");
         List<String> temp = new ArrayList<>();
         for (String key: keywords) {
-            if (!key.isEmpty()) {
-                if (key.contains("-") && !temp.contains(key)) {
-                    temp.add(key);
-                } else if (key.contains("*") && key.length() > 1) {
-                    temp.add(new String("+" + key));
+            String tempKey;
+            if (key.contains(".")) {
+                tempKey = "\"" + key + "\"";
+            } else {
+                tempKey = key;
+            }
+            if (!tempKey.isEmpty()) {
+                String toAdd = new String("+" + tempKey);
+                if (tempKey.contains("-") && !temp.contains(tempKey)) {
+                    temp.add(tempKey);
+                } else if (tempKey.contains("*") && tempKey.length() > 1) {
+                    temp.add(toAdd);
                 }
                 else {
                     if (key.length() < 3) {
                         temp.add(key);
                     } else {
-                        if (purpose.equalsIgnoreCase("survey_counts")) {
+                        if (searchType == SearchType.SURVEY_COUNTS) {
                             temp.add(new String("+" + key + "*"));
                         } else {
-                            temp.add(new String("+" + key));
+                            temp.add(toAdd);
                         }
                     }
                 }
@@ -122,7 +130,7 @@ public class ConceptService {
                     nonStandardConceptPredicates.add(criteriaBuilder.notEqual(root.get("standardConcept"),
                             criteriaBuilder.literal(CLASSIFICATION_CONCEPT_CODE)));
 
-                    final String keyword = modifyMultipleMatchKeyword(query, "concept_search");
+                    final String keyword = modifyMultipleMatchKeyword(query, SearchType.CONCEPT_SEARCH);
 
                     if (keyword != null) {
                       Expression<Double> matchExp = criteriaBuilder.function("matchConcept", Double.class,

@@ -37,6 +37,7 @@ import org.pmiops.workbench.model.ConceptAnalysis;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.SearchType;
 import org.pmiops.workbench.model.MatchType;
 import org.pmiops.workbench.model.QuestionConceptListResponse;
 import org.pmiops.workbench.model.ConceptAnalysisListResponse;
@@ -306,8 +307,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     @Override
     public ResponseEntity<DomainInfosAndSurveyModulesResponse> getDomainSearchResults(String query){
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(defaultCdrVersionProvider.get());
-        String domainKeyword = ConceptService.modifyMultipleMatchKeyword(query, "domain_counts");
-        String surveyKeyword = ConceptService.modifyMultipleMatchKeyword(query, "survey_counts");
+        String domainKeyword = ConceptService.modifyMultipleMatchKeyword(query, SearchType.DOMAIN_COUNTS);
+        String surveyKeyword = ConceptService.modifyMultipleMatchKeyword(query, SearchType.SURVEY_COUNTS);
         Long conceptId = 0L;
         try {
             conceptId = Long.parseLong(query);
@@ -380,6 +381,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
                 List<Concept> stdConcepts = conceptDao.findStandardConcepts(con.getConceptId());
                 response.setStandardConcepts(stdConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+
+                List<Concept> tempSourceConcepts = new ArrayList<>();
+                tempSourceConcepts.add(con);
+                response.setItems(tempSourceConcepts.stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+                return ResponseEntity.ok(response);
             }
 
         }

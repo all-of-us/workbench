@@ -43,6 +43,11 @@ definitions:
     description: a domain for concepts corresponding to a table in the OMOP schema
     enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT]
 
+  SearchType:
+    type: string
+    description: type of search
+    enum: &SEARCHTYPE [SURVEY_COUNTS, DOMAIN_COUNTS, CONCEPT_SEARCH]
+
   CdrVersionListResponse:
     type: object
     required:
