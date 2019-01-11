@@ -31,7 +31,8 @@
       "spec.ts"
     ],
     "moduleDirectories": [
-      "node_modules"
+      "node_modules",
+      "src"
     ],
     "transform": {
       "^.+\\.(ts|tsx)$": "ts-jest"
