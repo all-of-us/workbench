@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
@@ -40,7 +39,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
-  ParticipantCounter.class, DomainLookupService.class, CohortQueryBuilder.class,
+  ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
@@ -192,7 +191,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       PARAMETER, SUBTYPE, icd9.getSubtype());
 
     //icd9 child no concept id
-    icd9.domainId(DomainType.CONDITION.name()).subtype(TreeSubType.CM.name());
+    icd9.subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, icd9.getConceptId());
@@ -224,7 +223,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       PARAMETER, TYPE, snomed.getType());
 
     //snomed child no concept id
-    snomed.domainId(DomainType.CONDITION.name()).type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
+    snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, snomed.getConceptId());
@@ -347,20 +346,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, SUBTYPE, pmParam.getSubtype());
 
-    //pm no domain
-    pmParam.subtype(TreeSubType.PREG.name());
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomainId());
-
-    //pm bad domain
-    pmParam.domainId("blah");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, DOMAIN, pmParam.getDomainId());
-
     //pm no value
-    pmParam.domainId(DomainType.MEASUREMENT.toString());
+    pmParam.subtype(TreeSubType.PREG.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, VALUE, pmParam.getValue());
@@ -433,7 +420,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       PARAMETER, TYPE, ppiParam.getType());
 
     //ppi no concept id
-    ppiParam.domainId(DomainType.OBSERVATION.name()).type(TreeType.PPI.name());
+    ppiParam.type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
@@ -1498,7 +1485,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .subtype(criteria.getSubtype())
       .group(criteria.getGroup())
       .value(code)
-      .domainId(criteria.getDomainId())
       .conceptId(criteria.getConceptId() == null ? null : new Long(criteria.getConceptId()));
   }
 

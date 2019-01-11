@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -72,8 +71,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({LiquibaseAutoConfiguration.class, FieldSetQueryBuilder.class, AnnotationQueryBuilder.class,
-    TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class,
-    CdrBigQuerySchemaConfigService.class, DomainLookupService.class,
+    TestBigQueryCdrSchemaConfig.class, CohortQueryBuilder.class, CdrBigQuerySchemaConfigService.class,
     DemoQueryBuilder.class, QueryBuilderFactory.class, BigQueryService.class,
     CohortMaterializationService.class, ConceptService.class, TestJpaConfig.class, CdrJpaConfig.class})
 @MockBean({BigQuery.class})

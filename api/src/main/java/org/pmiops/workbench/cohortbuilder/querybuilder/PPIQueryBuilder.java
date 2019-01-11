@@ -51,7 +51,6 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
       String value = isValueAsNum ? parameter.getName() : parameter.getValue();
       String namedParameter = addQueryParameterValue(queryParams,
           QueryParameterValue.int64(new Long(value)));
-      String domain = parameter.getDomainId().toLowerCase();
       String sqlTemplate = isValueAsNum ?
         PPI_SQL_TEMPLATE + VALUE_AS_NUMBER_SQL_TEMPLATE :
         PPI_SQL_TEMPLATE + VALUE_AS_CONCEPT_ID_SQL_TEMPLATE;
