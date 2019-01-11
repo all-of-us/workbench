@@ -18,8 +18,6 @@ import {
   styles as inputStyles
 } from 'app/components/inputs';
 
-import { FormSection } from 'app/components/forms';
-
 import {
   InfoIcon,
   ValidationIcon
@@ -29,8 +27,9 @@ import {
   TooltipTrigger
 } from 'app/components/popups';
 
+import {Button} from 'app/components/buttons';
+import { FormSection } from 'app/components/forms';
 import {BoldHeader} from 'app/components/headers';
-import {Button} from "../../components/buttons";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
