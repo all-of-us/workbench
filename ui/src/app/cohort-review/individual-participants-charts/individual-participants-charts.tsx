@@ -2,9 +2,9 @@ import {Component, DoCheck, Input, OnChanges, OnInit, ViewChild} from '@angular/
 import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {ParticipantChartData} from 'generated'
+import {ParticipantChartData} from 'generated';
 import * as highCharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official'
+import HighchartsReact from 'highcharts-react-official';
 
 
 interface DisplayParticipantChartData extends ParticipantChartData {
@@ -43,7 +43,8 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
       if (duplicateFound) {
         Object.assign(items, {
           yAxisValue: duplicateFound.yAxisValue,
-          newStartDate: moment(items.startDate, 'YYYY-MM-DD').unix() // format date to unix timestamp
+          // format date to unix timestamp
+          newStartDate: moment(items.startDate, 'YYYY-MM-DD').unix()
         });
         return true;
       }
@@ -77,7 +78,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
     }
   }
 
-  getChartsData(){
+  getChartsData() {
     const names = this.yAxisNames;
     const header = this.props.chartData.conditionTitle;
 
@@ -170,15 +171,6 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
     };
   }
 
-  options = {
-    title: {
-      text: 'My chart'
-    },
-    series: [{
-      data: [1, 2, 3]
-    }]
-  };
-
   render() {
     // const chartData = this.props.chartData;
     if (!this.props.chartData.loading && this.props.chartData) {
@@ -189,7 +181,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
           options={this.chartOptions}
         />
       </div>
-      return <ScatterChart/>
+      return <ScatterChart/>;
     }
     return <div />;
   }

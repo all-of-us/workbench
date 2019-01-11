@@ -1,6 +1,6 @@
-import {ChartReactProps, IndividualParticipantsChartsComponent, IndividualParticipantsReactCharts} from '../individual-participants-charts/individual-participants-charts';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import {ChartReactProps, IndividualParticipantsChartsComponent, IndividualParticipantsReactCharts} from '../individual-participants-charts/individual-participants-charts';
 
 describe('IndividualParticipantsChartsComponent', () => {
 
