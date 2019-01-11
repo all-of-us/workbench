@@ -1,0 +1,22 @@
+[
+  {
+    "type": "integer",
+    "name": "person_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "date",
+    "name": "entry_date",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "concept_id",
+    "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "age_at_event",
+    "mode": "nullable"
+  }
+]

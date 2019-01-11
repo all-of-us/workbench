@@ -93,9 +93,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   private CohortDao cohortDao;
 
   @Autowired
-  private CriteriaDao criteriaDao;
-
-  @Autowired
   private CohortReviewDao cohortReviewDao;
 
   @Autowired
@@ -176,7 +173,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary", "criteria");
+    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary", "criteria", "search_codes");
   }
 
   @Override
@@ -220,29 +217,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortICD9Group() {
-    //removed these inserts from setUp() because setUp
-    //get run for every test case and it was creating duplicate data.
-    Criteria icd9CriteriaGroup =
-      new Criteria().group(true)
-        .name("group")
-        .selectable(true)
-        .code(SearchRequests.ICD9_GROUP_CODE)
-        .type(SearchRequests.ICD9_TYPE)
-        .subtype(SearchRequests.ICD9_SUBTYPE)
-        .parentId(0)
-        .path("1.5");
-    criteriaDao.save(icd9CriteriaGroup);
-    Criteria icd9CriteriaChild =
-      new Criteria().group(false)
-        .name("child")
-        .selectable(true)
-        .code(SearchRequests.ICD9_GROUP_CODE + ".1")
-        .type(SearchRequests.ICD9_TYPE)
-        .subtype(SearchRequests.ICD9_SUBTYPE)
-        .domainId("Condition")
-        .parentId(icd9CriteriaGroup.getId())
-        .path("1.5." + icd9CriteriaGroup.getId());
-    criteriaDao.save(icd9CriteriaChild);
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
             SearchRequests.icd9Codes(), null, 0, makeRequest(1000));
     assertPersonIds(response, 1L);
