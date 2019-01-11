@@ -422,11 +422,6 @@ definitions:
     description: match column type on concept search
     enum: [CONCEPT_CODE, CONCEPT_ID, CONCEPT_NAME]
 
-  SearchType:
-    type: string
-    description: search type
-    enum: &SEARCH_TYPE [SURVEY_COUNTS, DOMAIN_COUNTS, CONCEPT_SEARCH]
-
   Concept:
     description: A concept describing a type of entity (e.g. measurement, observation, procedure.)
     type: object
