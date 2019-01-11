@@ -28,7 +28,6 @@ export const SET_SCROLL_ID = 'SET_SCROLL_ID';
 export const BEGIN_COUNT_REQUEST = 'BEGIN_COUNT_REQUEST';
 export const BEGIN_ATTR_PREVIEW_REQUEST = 'BEGIN_ATTR_PREVIEW_REQUEST';
 export const LOAD_ATTR_PREVIEW_RESULTS = 'LOAD_ATTR_PREVIEW_RESULTS';
-export const ADD_ATTR_FOR_PREVIEW = 'ADD_ATTR_FOR_PREVIEW';
 export const LOAD_COUNT_RESULTS = 'LOAD_COUNT_RESULTS';
 export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
@@ -218,10 +217,6 @@ export interface ActionTypes {
     type: typeof LOAD_ATTR_PREVIEW_RESULTS;
     count: number;
   };
-  ADD_ATTR_FOR_PREVIEW: {
-    type: typeof ADD_ATTR_FOR_PREVIEW;
-    parameter: any;
-  };
   LOAD_COUNT_RESULTS: {
     type: typeof LOAD_COUNT_RESULTS;
     entityType: string;
@@ -393,7 +388,6 @@ export type RootAction =
   | ActionTypes[typeof BEGIN_COUNT_REQUEST]
   | ActionTypes[typeof BEGIN_ATTR_PREVIEW_REQUEST]
   | ActionTypes[typeof LOAD_ATTR_PREVIEW_RESULTS]
-  | ActionTypes[typeof ADD_ATTR_FOR_PREVIEW]
   | ActionTypes[typeof LOAD_COUNT_RESULTS]
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
