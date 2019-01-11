@@ -21,7 +21,8 @@ import {
 import { FormSection } from 'app/components/forms';
 
 import {
-  InfoIcon, ValidationIcon
+  InfoIcon,
+  ValidationIcon
 } from 'app/components/icons';
 
 import {
@@ -117,7 +118,7 @@ export class AccountCreationReact extends
           this.setState({profile: profile, creatingAccount: false});
           this.accountCreated = true;
           setProfile(profile);
-          onAccountCreation;
+          onAccountCreation();
         }
       )
       .catch(error => {
@@ -224,7 +225,7 @@ export class AccountCreationReact extends
                     onChange={this.updateField}/>
               {this.errorMap['givenName'] &&
                 <ErrorMessage>
-                First Name must be 80 characters or less.
+                  First Name must be 80 characters or less.
                 </ErrorMessage>}
           </FormSection>
           <FormSection>
@@ -245,11 +246,11 @@ export class AccountCreationReact extends
           </FormSection>
           <FormSection>
             <LongInput type='text' id='currentPosition' name='currentPosition'
-                       placeholder='You Current Position'
-                   value={this.state.profile.currentPosition}
-                   style={this.errorMap['currentPosition'] ?
-                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                   onChange={this.updateField}/>
+                     placeholder='You Current Position'
+                     value={this.state.profile.currentPosition}
+                     style={this.errorMap['currentPosition'] ?
+                       inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                     onChange={this.updateField}/>
               {this.errorMap['currentPosition'] &&
                 <ErrorMessage>
                   Current Position must be 255 characters or less.
@@ -257,29 +258,35 @@ export class AccountCreationReact extends
           </FormSection>
           <FormSection>
             <LongInput type='text' id='organization' name='organization'
-                       placeholder='Your Organziation'
-                   value={this.state.profile.organization}
-                   style={this.errorMap['organization'] ?
-                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                   onChange={this.updateField}/>
+                     placeholder='Your Organziation'
+                     value={this.state.profile.organization}
+                     style={this.errorMap['organization'] ?
+                       inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                     onChange={this.updateField}/>
               {this.errorMap['currentPosition'] &&
                 <ErrorMessage>
                   Organization must be 255 characters of less.
                 </ErrorMessage>}
           </FormSection>
           <FormSection style={{'display': 'flex', 'flexDirection': 'row'}}>
-              <textarea style={{...inputStyles.formInput, ...inputStyles.longInput,
-                'height': '10em', 'resize': 'none', 'width': '16rem'}}
+              <textarea style={{
+                        ...inputStyles.formInput,
+                        ...inputStyles.longInput,
+                        'height': '10em',
+                        'resize': 'none',
+                        'width': '16rem'
+                      }}
                         id='areaOfResearch'
                         name='areaOfResearch'
-                         placeholder='Describe Your Current Research'
-                  onChange={this.updateField}/>
+                        placeholder='Describe Your Current Research'
+                        onChange={this.updateField}/>
                 <TooltipTrigger content='You are required to describe your current research in
-                order to help All of Us improve the Researcher Workbench.'>
+                      order to help All of Us improve the Researcher Workbench.'>
                   <InfoIcon style={{
                     'height': '22px',
                     'marginTop': '2.2rem',
-                    'paddingLeft': '2px'}}/>
+                    'paddingLeft': '2px'
+                    }}/>
                 </TooltipTrigger>
           </FormSection>
           <FormSection>
@@ -299,11 +306,11 @@ export class AccountCreationReact extends
             <div style={{height: '1.5rem'}}>
               {this.state.usernameConflictError &&
                 <Error>
-                Username is already taken.
+                  Username is already taken.
                 </Error>}
               {this.usernameInvalidError() &&
                 <Error>
-                Username is not a valid username.
+                  Username is not a valid username.
                 </Error>}
             </div>
           </FormSection>
