@@ -1,7 +1,8 @@
-import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+
+import {ReactWrapperBase} from 'app/utils';
 
 interface EditComponentState { style: object; }
 
@@ -65,19 +66,12 @@ class EditComponentReact extends React.Component<{}, EditComponentState> {
 
 @Component({
   selector: 'app-edit-icon',
-  template: '<div #editIcon></div>',
+  template: '<div #root></div>',
 })
-export class EditComponent implements AfterViewInit {
+export class EditComponent extends ReactWrapperBase {
 
-  constructor() {}
-
-  @ViewChild('editIcon')
-  editIcon: ElementRef;
-
-  ngAfterViewInit(): void {
-    ReactDOM.render(
-        React.createElement(EditComponentReact),
-        this.editIcon.nativeElement);
+  constructor() {
+    super(EditComponentReact, []);
   }
 
 }
