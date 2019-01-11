@@ -36,6 +36,13 @@ public class CohortQueryBuilder {
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
 
+  private final TemporalQueryBuilder temporalQueryBuilder;
+
+  @Autowired
+  public CohortQueryBuilder(TemporalQueryBuilder temporalQueryBuilder) {
+    this.temporalQueryBuilder = temporalQueryBuilder;
+  }
+
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
       String sqlTemplate, String endSql, String mainTable,
       Map<String, QueryParameterValue> params) {
@@ -86,26 +93,39 @@ public class CohortQueryBuilder {
   private StringJoiner buildQuery(List<SearchGroup> groups, String mainTable,
       Map<String, QueryParameterValue> params, Boolean excludeSQL) {
     StringJoiner joiner = new StringJoiner("and ");
-    List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      for (SearchGroupItem includeItem : includeGroup.getItems()) {
-        String query = QueryBuilderFactory
-            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQuery(params, new QueryParameters()
-                .type(includeItem.getType())
-                .parameters(includeItem.getSearchParameters())
-                .modifiers(includeItem.getModifiers()));
-        queryParts.add(query);
-      }
+      String groupSql = includeGroup.getTemporal() ?
+        buildTemporalQuery(params, includeGroup) :
+        buildNonTemporalQuery(params,includeGroup);
+
       if (excludeSQL) {
         joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
+            .replace("${excludeSql}", groupSql));
       } else {
         joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
+            .replace("${includeSql}", groupSql));
       }
-      queryParts = new ArrayList<>();
     }
     return joiner;
+  }
+
+  private String buildTemporalQuery(Map<String, QueryParameterValue> params,
+                                  SearchGroup includeGroup) {
+    return temporalQueryBuilder.buildQuery(params, includeGroup);
+  }
+
+  private String buildNonTemporalQuery(Map<String, QueryParameterValue> params,
+                                     SearchGroup includeGroup) {
+    List<String> nonTemporalQueryParts = new ArrayList<>();
+    for (SearchGroupItem includeItem : includeGroup.getItems()) {
+      String query = QueryBuilderFactory
+          .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+          .buildQuery(params, new QueryParameters()
+              .type(includeItem.getType())
+              .parameters(includeItem.getSearchParameters())
+              .modifiers(includeItem.getModifiers()));
+      nonTemporalQueryParts.add(query);
+    }
+    return String.join(UNION_TEMPLATE, nonTemporalQueryParts);
   }
 }
