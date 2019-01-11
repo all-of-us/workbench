@@ -26,6 +26,18 @@ const styles = {
     textTransform: 'uppercase',
     letterSpacing: '0.02rem',
     lineHeight: '0.77rem'
+  }),
+  darklingPrimary: ({ hover, disabled }) => ({
+    backgroundColor: disabled ? '#c3c3c3' : (hover ? 'rgba(255,255,255,0.3)' : '#262262'),
+    color: '#ffffff',
+    border: '0px',
+    borderRadius: '0.2rem'
+  }),
+  darklingSecondary: ({ hover, disabled }) => ({
+    backgroundColor: disabled ? '#c3c3c3' : (hover ? '#50ACE1' : '#0079b8'),
+    color: '#ffffff',
+    border: '0px',
+    borderRadius: '0.2rem'
   })
 };
 

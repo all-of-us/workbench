@@ -112,7 +112,7 @@ describe('HomepageComponent', () => {
     expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
         renderIntoDocument(React.createElement(
             QuickTourReact, {learning: fixture.componentInstance.quickTour,
-              closeFunction: undefined})), 'main').length).toBe(0);
+              closeFunction: undefined})), 'quickTourReact').length).toBe(0);
     simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
     tick(1000);
     // must check the inner piece of the react element here because the quick-tour element
@@ -120,7 +120,7 @@ describe('HomepageComponent', () => {
     expect(ReactTestUtils.findRenderedDOMComponentWithClass(
         renderIntoDocument(React.createElement(
             QuickTourReact, {learning: fixture.componentInstance.quickTour,
-          closeFunction: undefined})), 'main')).toBeTruthy();
+          closeFunction: undefined})), 'quickTourReact')).toBeTruthy();
   }));
 
   it('should display quick tour on first visit', fakeAsync(() => {
@@ -130,7 +130,7 @@ describe('HomepageComponent', () => {
     expect(ReactTestUtils.findRenderedDOMComponentWithClass(
         renderIntoDocument(React.createElement(
             QuickTourReact, {learning: fixture.componentInstance.quickTour,
-              closeFunction: undefined})), 'main')).toBeTruthy();
+              closeFunction: undefined})), 'quickTourReact')).toBeTruthy();
   }));
 
   it('should not auto display quick tour if not first visit', fakeAsync(() => {
@@ -140,7 +140,7 @@ describe('HomepageComponent', () => {
     expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
         renderIntoDocument(React.createElement(
             QuickTourReact, {learning: fixture.componentInstance.quickTour,
-              closeFunction: undefined})), 'main').length).toBe(0);
+              closeFunction: undefined})), 'quickTourReact').length).toBe(0);
   }));
 
 });
