@@ -60,17 +60,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    const groupCard = document.getElementById('groupCard');
-    const width = groupCard.offsetWidth;
-    const height = groupCard.offsetHeight;
-    const styles = window.getComputedStyle(groupCard);
-    const margin = styles.marginBottom;
+    const groupCard = document.getElementById(this.group.get('id'));
+    const {marginBottom, width, height} = window.getComputedStyle(groupCard);
+    const overlay = document.getElementById('overlay_' + this.group.get('id'));
+    const styles = 'width:' + width + '; height:' + height + '; margin: -'
+      + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
+    overlay.setAttribute('style', styles);
     this.status = 'pending';
-    const overlay = document.getElementById('overlay');
-    overlay.style.width = width + 'px';
-    overlay.style.height = height + 'px';
-    overlay.style.marginBottom = margin + 'px';
-    overlay.style.marginTop = '-' + (height + parseFloat(margin)) + 'px';
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroup(this.role, this.groupId);
       this.status = 'deleted';

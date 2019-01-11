@@ -549,12 +549,14 @@ export class CohortSearchActions {
           });
           item.count = 0;
           item.isRequesting = false;
+          item.status = 'active';
           entities.items[item.id] = item;
           this.addId(item.id);
           return item.id;
         });
         group.count = 0;
         group.isRequesting = false;
+        group.status = 'active';
         entities.groups[group.id] = group;
         this.addId(group.id);
         return group.id;
