@@ -15,7 +15,7 @@
             Create a <br/> New Workspace <br/>
             <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
           </div>
-        <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
+          <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
         </div>
         <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
       </div>
@@ -80,9 +80,8 @@
 <app-quick-tour-modal [learning]="quickTour" [onClose]="closeQuickTour"></app-quick-tour-modal>
 <clr-modal [(clrModalOpen)]="open" [clrModalSize]="'md'">
   <div class="modal-body">
-  <video *ngIf="open" controls #myVideo style="width: 100%" autoplay>
-    <source [src]=src type="video/mp4" />
-  </video>
+    <video *ngIf="open" controls #myVideo style="width: 100%" autoplay>
+      <source [src]=src type="video/mp4" />
+    </video>
   </div>
 </clr-modal>
-
