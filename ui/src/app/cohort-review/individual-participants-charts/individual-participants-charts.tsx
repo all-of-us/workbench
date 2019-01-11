@@ -1,11 +1,10 @@
 import {Component, DoCheck, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {ParticipantChartData} from 'generated';
+import * as highCharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
 import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as highCharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
-
 
 interface DisplayParticipantChartData extends ParticipantChartData {
   yAxisValue?: number;
