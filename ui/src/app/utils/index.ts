@@ -218,7 +218,7 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
   }
 }
 
-export function decamelize(str: string, separator: string){
+export function decamelize(str: string, separator: string) {
   separator = typeof separator === 'undefined' ? '_' : separator;
 
   return str
@@ -227,6 +227,7 @@ export function decamelize(str: string, separator: string){
       .toLowerCase();
 }
 
-export function capitalize(s: string){
-  return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
-};
+export function capitalize(s: string) {
+  return s.toLowerCase().replace( /\b./g,
+      function(a) { return a.toUpperCase(); } );
+}

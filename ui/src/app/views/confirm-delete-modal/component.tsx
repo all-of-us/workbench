@@ -21,21 +21,25 @@ import {
 } from 'app/components/buttons';
 
 export interface ConfirmDeleteModalProps {
-  deleting: boolean,
-  closeFunction: Function,
-  resourceType: string,
-  receiveDelete: Function,
-  resource: {name: string}
+  deleting: boolean;
+  closeFunction: Function;
+  resourceType: string;
+  receiveDelete: Function;
+  resource: {name: string};
 }
 
 export interface ConfirmDeleteModalState {
-  loading: boolean
+  loading: boolean;
 }
 
 export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
   state: ConfirmDeleteModalState;
   props: ConfirmDeleteModalProps;
   resourceTypeName = ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType);
+
+  static transformResourceTypeName(resourceType: string): string {
+    return capitalize(decamelize(resourceType, ' '));
+  }
 
   constructor(props: ConfirmDeleteModalProps) {
     super(props);
@@ -47,10 +51,6 @@ export class ConfirmDeleteModal extends React.Component<ConfirmDeleteModalProps,
       this.setState({loading: true});
       this.props.receiveDelete();
     }
-  }
-
-  static transformResourceTypeName(resourceType: string): string {
-    return capitalize(decamelize(resourceType, ' '));
   }
 
   render() {
@@ -90,6 +90,6 @@ export class ConfirmDeleteModalComponent extends ReactWrapperBase {
 
   constructor() {
     super(ConfirmDeleteModal, ['resourceType', 'resource', 'deleting',
-      'closeFunction', 'receiveDelete'])
+      'closeFunction', 'receiveDelete']);
   }
 }
