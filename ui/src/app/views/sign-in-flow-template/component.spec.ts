@@ -10,10 +10,14 @@ import {
 
 import {ServerConfigService} from '../../services/server-config.service';
 
+import {SignInServiceStub} from '../../../testing/stubs/sign-in-service-stub';
+import {SignInService} from '../../services/sign-in.service';
 import {SignInTemplateComponent} from './/component';
 
 describe('PageTemplateSignedOutComponent', () => {
   let fixture: ComponentFixture<SignInTemplateComponent>;
+  let signInService: SignInService;
+  
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -28,7 +32,7 @@ describe('PageTemplateSignedOutComponent', () => {
           useValue: new ServerConfigServiceStub({
             gsuiteDomain: 'fake-research-aou.org'
           })
-        },
+        },{ provide: SignInService, useValue: new SignInServiceStub() }
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(SignInTemplateComponent);
