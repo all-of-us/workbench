@@ -305,9 +305,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       this.chartLoadedSpinner = true;
       this.participantsId = this.clickedParticipantId;
       if (this.summaryActive) {
-        // this.subscription.unsubscribe();
-        // this.getDomainsParticipantsData();
-        this.subscribe()
+        this.subscribe();
       }
     }
   }
@@ -324,12 +322,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.subscribe()
-    // this.subscription = this.route.data.map(({participant}) => participant)
-    //   .subscribe(participants => {
-    //     this.participantsId = participants.participantId;
-    //   });
-    //  this.getDomainsParticipantsData();
+    this.subscribe();
   }
 
 
@@ -347,7 +340,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
         this.participantsId , domainName, limit)
         .subscribe(data => {
-          console.log(domainName);
           const participantsData = data;
           this.chartData[domainName].items = participantsData.items;
           this.chartData[domainName].conditionTitle = typeToTitle(domainName);
