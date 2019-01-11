@@ -26,7 +26,7 @@ export class DetailPage implements OnInit, OnDestroy {
       this.participant = participant;
     });
     const element = document.getElementById('review-sidebar-content');
-    element.addEventListener("transitionend", () => {
+    element.addEventListener('transitionend', () => {
       this.sidebarTransition = !this.sidebarTransition;
     }, false);
   }
@@ -34,7 +34,7 @@ export class DetailPage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
     const element = document.getElementById('review-sidebar-content');
-    element.removeEventListener("transitionend", () => {
+    element.removeEventListener('transitionend', () => {
       this.sidebarTransition = !this.sidebarTransition;
     }, false);
   }

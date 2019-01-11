@@ -2,9 +2,10 @@ import {Component, DoCheck, Input, OnChanges, OnInit, ViewChild} from '@angular/
 import * as moment from 'moment';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {ParticipantChartData} from 'generated'
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official'
-import {ParticipantChartData} from 'generated'
+
 
 interface DisplayParticipantChartData extends ParticipantChartData {
   yAxisValue?: number;
@@ -23,9 +24,6 @@ export interface ChartReactProps {
   sidebarTransitionFlag: boolean;
 }
 
-// export interface ChartReactState {
-//
-// }
 export class IndividualParticipantsReactCharts extends React.Component<ChartReactProps> {
   props: ChartReactProps;
   chartOptions = {};
@@ -33,10 +31,6 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   duplicateItems = [];
   yAxisNames = [''];
 
-  //
-  // componentDidMount() {
-  //   chartRef
-  // }
   setYaxisValue() {
     let yAxisValue = 1;
     this.props.chartData.items.reverse().map(items => { // find standardName in duplicate items
@@ -186,8 +180,8 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   };
 
   render() {
-    const chartData = this.props.chartData;
-    if (!chartData.loading && chartData) {
+    // const chartData = this.props.chartData;
+    if (!this.props.chartData.loading && this.props.chartData) {
       this.setYaxisValue();
       const ScatterChart = () => <div>
         <HighchartsReact
@@ -228,21 +222,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
     ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
       {chartData: this.chartData, chartKey: this.chartKey, sidebarTransitionFlag: this.sidebarTransitionFlag}),
       document.getElementsByClassName(this.componentClass)[this.chartKey]);
-  }
-
-
-  getChartObj(chartObj: any) {
-    this.chart = chartObj;
-    // check that ResizeObserver is supported
-    if (this.chart && typeof ResizeObserver === 'function') {
-      // Unbind window.onresize handler so we don't do double redraws
-      if (this.chart.unbindReflow) {
-        this.chart.unbindReflow();
-      }
-      // create observer to redraw charts on div resize
-      const ro = new ResizeObserver(() => this.chart.reflow());
-      ro.observe(this.chartRef.element.nativeElement);
-    }
   }
 }
 
