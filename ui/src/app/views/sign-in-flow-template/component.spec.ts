@@ -16,8 +16,8 @@ import {SignInTemplateComponent} from './/component';
 
 describe('PageTemplateSignedOutComponent', () => {
   let fixture: ComponentFixture<SignInTemplateComponent>;
-  let signInService: SignInService;
-  
+  const signInService: SignInService;
+
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
