@@ -14,7 +14,7 @@ beforeEach(() => {
   props = {
     invitationKey: 'd4cd81',
     setProfile: () => {},
-    updateNext: () => {},
+    onAccountCreation: () => {},
   };
 });
 
