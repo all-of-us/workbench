@@ -66,7 +66,7 @@
                 name="valueB"
                 formControlName="valueB"
                 [(ngModel)]="attr.operands[1]"
-                (ngModelChange)="inputChange($event, i, 'valueA')">
+                (ngModelChange)="inputChange($event, i, 'valueB')">
               <span *ngIf="hasUnits">{{units[node.get('subtype')]}}</span>
             </div>
               <span class="range-padding" *ngIf="isMeasurement && showInput(i)">
