@@ -1273,7 +1273,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
     Attribute numerical = new Attribute().name(BOTH).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
-    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1"));
+    Attribute categorical = new Attribute().name(BOTH).operator(Operator.IN).operands(Arrays.asList("1", "2"));
     lab.attributes(Arrays.asList(numerical, categorical));
     SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);

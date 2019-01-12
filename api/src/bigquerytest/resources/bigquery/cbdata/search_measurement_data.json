@@ -6,7 +6,7 @@
     "subtype":"LAB",
     "age_at_event":38,
     "visit_concept_id":1,
-    "value_as_number":0.1,
+    "value_as_number":1.0,
     "value_as_concept_id":1
   },
   {
