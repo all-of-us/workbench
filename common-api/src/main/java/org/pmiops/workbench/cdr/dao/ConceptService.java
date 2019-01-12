@@ -22,8 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptService {
 
-    public static enum SearchType
-    {
+    public static enum SearchType {
         CONCEPT_SEARCH, SURVEY_COUNTS, DOMAIN_COUNTS;
     }
 
