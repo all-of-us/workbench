@@ -67,7 +67,8 @@ public class TemporalQueryBuilder {
     } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.toString())) {
       conditions = X_DAYS_AFTER.replace("${timeValue}", includeGroup.getTimeValue().toString());
     }
-    return TEMPORAL_TEMPLATE.replace("${query1}", query1)
+    return TEMPORAL_TEMPLATE
+      .replace("${query1}", query1)
       .replace("${query2}", query2)
       .replace("${conditions}", conditions);
   }
