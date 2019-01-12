@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
-import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -93,39 +92,29 @@ public class CohortQueryBuilder {
   private StringJoiner buildQuery(List<SearchGroup> groups, String mainTable,
       Map<String, QueryParameterValue> params, Boolean excludeSQL) {
     StringJoiner joiner = new StringJoiner("and ");
+    List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      String groupSql = includeGroup.getTemporal() ?
-        buildTemporalQuery(params, includeGroup) :
-        buildNonTemporalQuery(params,includeGroup);
+      if (includeGroup.getTemporal()) {
+        String query = temporalQueryBuilder.buildQuery(params, includeGroup);
+        queryParts.add(query);
+      } else {
+        for (SearchGroupItem includeItem : includeGroup.getItems()) {
+          String query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+            .buildQuery(params, includeItem, false);
+          queryParts.add(query);
+        }
+      }
 
       if (excludeSQL) {
         joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${excludeSql}", groupSql));
+            .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));
       } else {
         joiner.add(INCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
-            .replace("${includeSql}", groupSql));
+            .replace("${includeSql}", String.join(UNION_TEMPLATE, queryParts)));
       }
+      queryParts = new ArrayList<>();
     }
     return joiner;
-  }
-
-  private String buildTemporalQuery(Map<String, QueryParameterValue> params,
-                                  SearchGroup includeGroup) {
-    return temporalQueryBuilder.buildQuery(params, includeGroup);
-  }
-
-  private String buildNonTemporalQuery(Map<String, QueryParameterValue> params,
-                                     SearchGroup includeGroup) {
-    List<String> nonTemporalQueryParts = new ArrayList<>();
-    for (SearchGroupItem includeItem : includeGroup.getItems()) {
-      String query = QueryBuilderFactory
-          .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-          .buildQuery(params, new QueryParameters()
-              .type(includeItem.getType())
-              .parameters(includeItem.getSearchParameters())
-              .modifiers(includeItem.getModifiers()));
-      nonTemporalQueryParts.add(query);
-    }
-    return String.join(UNION_TEMPLATE, nonTemporalQueryParts);
   }
 }

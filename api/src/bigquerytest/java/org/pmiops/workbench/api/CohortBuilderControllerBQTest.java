@@ -13,6 +13,7 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -40,7 +41,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
-  TestJpaConfig.class, CdrVersionService.class})
+  TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
@@ -354,7 +355,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     //pm value not a number
     pmParam.value("z");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>()
+    );
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, VALUE, pmParam.getValue());
 
@@ -618,7 +620,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria pm =
       createCriteriaChild(TreeType.PM.name(), TreeSubType.BP.name(), 0, null, null, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(sysAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>()
+    );
     assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
 
     //2 but not systolic and diastolic
@@ -633,6 +636,40 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsAnyMentionOfICD9XDaysAfterICD10() throws Exception {
+    Criteria icd9ConditionChild =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "001", DomainType.CONDITION.name(), "1");
+    Criteria snomedConditionChild =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "002", DomainType.CONDITION.name(), "4");
+    Criteria icd10ConditionChild =
+      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "A09", DomainType.CONDITION.name(), "9");
+    Modifier modifier = new Modifier()
+      .name(ModifierType.AGE_AT_EVENT)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("25"));
+    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(icd9ConditionChild, "001"), createSearchParameter(snomedConditionChild, "002")))
+      .modifiers(Arrays.asList(modifier))
+      .temporalGroup(0);
+    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(icd10ConditionChild, "A09")))
+      .modifiers(Arrays.asList(modifier))
+      .temporalGroup(1);
+    SearchGroup searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
+      .temporal(true)
+      .mention(TemporalMention.ANY_MENTION.toString())
+      .time(TemporalTime.X_DAYS_AFTER.toString())
+      .timeValue(5L);
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(searchGroup);
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -1496,7 +1533,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .searchParameters(parameters)
       .modifiers(modifiers);
 
-    final SearchGroup searchGroup = new SearchGroup().addItemsItem(searchGroupItem);
+    final SearchGroup searchGroup = new SearchGroup()
+      .addItemsItem(searchGroupItem);
 
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(searchGroup);

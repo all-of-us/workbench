@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   private static final String DRUG_CHILD_SQL_TEMPLATE =
     "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}.search_drug`\n" +
-      "where concept_id in unnest(${childConceptIds})\n";
+      "where concept_id in unnest(${childConceptIds})\n${ageDateAndEncounterSql}";
 
   private static final String DRUG_PARENT_SQL_TEMPLATE =
     "select distinct person_id, entry_date, concept_id\n" +
@@ -43,14 +44,16 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       "    and is_group = 0\n" +
       "    and is_selectable = 1\n" +
       "    and type = 'DRUG'\n" +
-      "    and subtype = 'ATC')\n";
+      "    and subtype = 'ATC')\n${ageDateAndEncounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    ListMultimap<String, Long> paramMap = getMappedParameters(parameters.getParameters());
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           boolean temporal) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    ListMultimap<String, Long> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
     List<String> queryParts = new ArrayList<>();
     for (String key : paramMap.keySet()) {
       Long[] conceptIds = paramMap.get(key).stream().toArray(Long[]::new);
@@ -63,7 +66,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     }
 
     String drugSql = String.join(UNION_TEMPLATE, queryParts);
-    return buildModifierSql(drugSql, queryParams, parameters.getModifiers());
+    return buildModifierSql(drugSql, queryParams, searchGroupItem.getModifiers());
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {

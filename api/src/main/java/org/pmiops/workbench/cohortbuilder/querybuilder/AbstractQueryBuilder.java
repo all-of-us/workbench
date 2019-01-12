@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.utils.OperatorUtils;
 
 import java.util.ArrayList;
@@ -44,6 +45,11 @@ public abstract class AbstractQueryBuilder {
 
   public static final String AND = " and ";
   private static final String MODIFIER_SQL_TEMPLATE = "select criteria.person_id from (${innerSql}) criteria\n";
+
+  private static final String TEMPORAL_SQL_TEMPLATE = "select person_id, visit_concept_id, entry_date\n" +
+      "from `${projectId}.${dataSetId}.${tableId}`\n" +
+      "where ${conceptIdSql}" +
+      "and person_id in (${innerSql})";
   private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
     "having count(criteria.person_id) ";
   private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
@@ -52,12 +58,15 @@ public abstract class AbstractQueryBuilder {
 
   /**
    * Build a {@link QueryJobConfiguration} from the specified
-   * {@link QueryParameters} provided.
+   * parameters provided.
    *
-   * @param parameters
+   * @param searchGroupItem
+   * @param temporal
    * @return
    */
-  public abstract String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters);
+  public abstract String buildQuery(Map<String, QueryParameterValue> queryParams,
+                                    SearchGroupItem searchGroupItem,
+                                    boolean temporal);
 
   public abstract FactoryKey getType();
 
@@ -73,6 +82,23 @@ public abstract class AbstractQueryBuilder {
       .replace("${innerSql}",
         baseSql.replace("${ageDateAndEncounterSql}", ageDateAndEncounterSql)) +
       occurrenceSql;
+  }
+
+  public String buildTemporalSql(String conceptIdsSql,
+                                 String tableId,
+                                 String innerSql,
+                                 Map<String, QueryParameterValue> queryParams,
+                                 List<Modifier> modifiers) {
+    List<Modifier> ageDateAndEncounterModifiers = new ArrayList<>();
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.AGE_AT_EVENT));
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.EVENT_DATE));
+    ageDateAndEncounterModifiers.add(getModifier(modifiers, ModifierType.ENCOUNTERS));
+    String ageDateAndEncounterSql = buildAgeDateAndEncounterSql(queryParams, ageDateAndEncounterModifiers);
+    return TEMPORAL_SQL_TEMPLATE
+      .replace("${tableId}", tableId)
+      .replace("${innerSql}", innerSql)
+      .replace("${conceptIdSql}", conceptIdsSql)
+      .replace("${ageDateAndEncounterSql}", ageDateAndEncounterSql);
   }
 
   protected String addQueryParameterValue(Map<String, QueryParameterValue> queryParameterValueMap,

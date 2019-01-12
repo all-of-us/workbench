@@ -647,6 +647,16 @@ definitions:
       HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
       BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
 
+  TemporalMention:
+    type: string
+    description: possible types of mentions
+    enum: [ANY_MENTION, FIRST_MENTION, LAST_MENTION]
+
+  TemporalTime:
+    type: string
+    description: possible types of times
+    enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
+
   DemoChartInfoListResponse:
     type: object
     required:
