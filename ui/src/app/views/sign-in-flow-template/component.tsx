@@ -1,4 +1,4 @@
-import {Component, OnChanges, OnInit} from '@angular/core';
+import {Component, Inject, OnChanges, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -16,11 +16,17 @@ import {Content, Header, SignedIn, Template} from './image';
 import {SignInService} from '../../services/sign-in.service';
 import {Router} from '@angular/router';
 
+import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
 
 interface ImagesSource {
   backgroundImgSrc: string;
   smallerBackgroundImgSrc: string;
+}
+
+interface PageTemplateProps {
+  signIn: any;
+  windowSize: { width: number, height: number };
 }
 
 interface PageTemplateState {
@@ -37,76 +43,78 @@ const pageImages = {
     backgroundImgSrc: '/assets/images/invitation-female.png',
     smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
   },
-  'accountCreation': {
+  'createAccount': {
     backgroundImgSrc: '/assets/images/create-account-male.png',
     smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
   }};
 
-@withWindowSize()
-export class SignPageTemplateReact extends React.Component<any, PageTemplateState> {
-  headerImg = '/assets/images/logo-registration-non-signed-in.svg';
+const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
-  constructor(props: object) {
-    super(props);
-    this.state = {
-      currentStep: 'login',
-      invitationKey: ''
-    };
-    this.setCurrentStep = this.setCurrentStep.bind(this);
-    this.setInvitationKey = this.setInvitationKey.bind(this);
-  }
+const SignPageTemplateReact = withWindowSize()(
+  class extends React.Component<PageTemplateProps, PageTemplateState> {
 
-  nextDirective(index) {
-    switch (index) {
-      case 'login': return <LoginReactComponent onCreateAccount={() =>
-                                                          this.setCurrentStep('invitationKey')}
-                                          signIn={this.props.signIn}/>;
-      case 'invitationKey': return <InvitationKeyReact onInvitationkeyVerify={() =>
-                                                          this.setCurrentStep('accountCreation')}
-                                         setInvitationKey={this.setInvitationKey}/>;
-      // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
-      //                                      invitationKey={this.state.invitationKey}>
-      //                </AccountCreationReact>;
-      default: return;
+    constructor(props: PageTemplateProps) {
+      super(props);
+      this.state = {
+        currentStep: 'login',
+        invitationKey: ''
+      };
+      this.setCurrentStep = this.setCurrentStep.bind(this);
+      this.onKeyVerified = this.onKeyVerified.bind(this);
     }
-  }
 
-  setCurrentStep(nextStep) {
-    this.setState({
-      currentStep: nextStep
-    });
-  }
+    nextDirective(index) {
+      switch (index) {
+        case 'login':
+          return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
+                                     this.setCurrentStep('invitationKey')}/>;
+        case 'invitationKey':
+          return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
+        // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
+        default:
+          return;
+        }
+      }
 
-  setInvitationKey(invitationKey) {
-    this.setState({
-      invitationKey: invitationKey
-    });
-  }
+    setCurrentStep(nextStep) {
+      this.setState({
+        currentStep: nextStep
+      });
+    }
 
-  render() {
-    return <div style={styles.signedInContainer}>
-      <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-        <div style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
-          <img style={styles.headerImage} src={this.headerImg}/>
-          <div style={styles.content}>
-            {this.nextDirective(this.state.currentStep)}
+    onKeyVerified(invitationKey) {
+      this.setState({
+        invitationKey: invitationKey,
+        currentStep: 'createAccount'
+      });
+    }
+
+    render() {
+      return <div style={styles.signedInContainer}>
+        <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+          <div style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+            <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
+                 src={headerImg}/>
+            <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>
+              {this.nextDirective(this.state.currentStep)}
+            </div>
           </div>
         </div>
-      </div>
-    </div>;
-  }
-}
+      </div>;
+    }
+});
 
 export default SignPageTemplateReact;
 
 @Component({
-  templateUrl: './component.html'
+  template: '<div #root></div>'
 })
-export class SignInTemplateComponent implements OnChanges, OnInit {
-  constructor(
-    private signInService: SignInService,
-    private router: Router,
-  ) {}
+export class SignInTemplateComponent extends ReactWrapperBase {
+
+  constructor(private signInService: SignInService, private router: Router) {
+    super(SignPageTemplateReact, ['signIn']);
+    this.signIn = this.signIn.bind(this);
+  }
 
   ngOnInit() {
     document.body.style.backgroundColor = '#e2e3e5';
@@ -116,19 +124,11 @@ export class SignInTemplateComponent implements OnChanges, OnInit {
         this.router.navigateByUrl('/');
       }
     });
-    this.renderReact();
-  }
-
-  ngOnChanges() {
-    this.renderReact();
-  }
-
-  renderReact() {
-    ReactDOM.render(React.createElement(SignPageTemplateReact, {signIn: () => this.signIn()}),
-        document.getElementById('pagetemplate'));
+    super.ngOnInit();
   }
 
   signIn(): void {
     this.signInService.signIn();
   }
+
 }

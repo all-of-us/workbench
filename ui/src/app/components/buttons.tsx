@@ -108,14 +108,3 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
     {...merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
 };
-
-export const Secondarybutton = ({ type = 'secondary', style = {}, disabled = false, ...props }) => {
-  return <HoverContainer>
-    {({ hover, trackHover }) => {
-      return trackHover(<Clickable
-          {...{ disabled, ...props }}
-          style={{ ...styles.base({ disabled }), ...styles[type]({ hover, disabled }), ...style }}
-      />);
-    }}
-  </HoverContainer>;
-};

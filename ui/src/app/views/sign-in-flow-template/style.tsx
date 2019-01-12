@@ -13,28 +13,20 @@ export const styles = {
     };
 
     function calculateImage() {
+      let imageUrl = 'url(\'' + images.backgroundImgSrc + '\')';
       if (windowsize.width > 900 && windowsize.width <= 1300) {
-        return 'url(\'' + images.smallerBackgroundImgSrc + '\')';
+        imageUrl = 'url(\'' + images.smallerBackgroundImgSrc + '\')';
       }
-      return 'url(\'' + images.backgroundImgSrc + '\')';
+      return imageUrl;
     }
 
     function calculateBackgroundPosition() {
+      let position = 'bottom right -1rem';
       if (windowsize.width > 900 && windowsize.width <= 1300) {
-         return 'bottom right' ;
+        position = 'bottom right' ;
       }
-      return 'bottom right -1rem';
+      return position;
     }
-  },
-  headerImage: {
-    height: '1.75rem',
-    marginLeft: '1rem',
-    marginTop: '1rem'
-  },
-  content: {
-    flex: '0 0 41.66667%',
-    maxWidth: '41.66667%',
-    minWidth: '25rem'
   },
   signedInContainer: {
     backgroundSize: 'contain',

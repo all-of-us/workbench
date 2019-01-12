@@ -1,19 +1,23 @@
 import {fullUrl} from '../../utils/fetch';
 
-import {AlertDanger} from '../../components/alert';
-import {Button} from '../../components/buttons';
-import {BoldHeader} from '../../components/headers';
-import {FormInput} from '../../components/inputs';
+import {AlertDanger} from 'app/components/alert';
+import {Button} from 'app/components/buttons';
+import {BoldHeader} from 'app/components/headers';
+import {FormInput} from 'app/components/inputs';
 
 import {FetchArgs,
   InvitationVerificationRequest,
   ProfileApiFetchParamCreator
-} from '../../../generated/fetch/api';
+} from 'generated/fetch/api';
 
 import * as React from 'react';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
+}
+
+interface InvitationKeyProps {
+  onInvitationKeyVerify: (invitationKey: any) => void;
 }
 
 interface InvitationKeyState {
@@ -22,11 +26,11 @@ interface InvitationKeyState {
   invitationKeyInvalid: boolean;
 }
 
-export class InvitationKeyReact extends React.Component<any, InvitationKeyState> {
+export class InvitationKeyReact extends React.Component<InvitationKeyProps, InvitationKeyState> {
 
   inputElement: any;
 
-  constructor(props: Object) {
+  constructor(props: InvitationKeyProps) {
     super(props);
     this.state = {
       invitationKey: '',
@@ -34,17 +38,6 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
       invitationKeyInvalid: false
     };
     this.inputElement = React.createRef();
-    this.updateInvitationKey = this.updateInvitationKey.bind(this);
-  }
-
-  componentDidUpdate() {
-    this.inputElement.current.focus();
-  }
-
-  updateInvitationKey(input) {
-    this.setState({
-      invitationKey: input.target.value
-    });
   }
 
   next() {
@@ -57,6 +50,7 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
       this.setState({
         invitationKeyReq: true
       });
+      this.inputElement.current.focus();
       return;
     }
 
@@ -71,9 +65,9 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
           this.setState({
             invitationKeyInvalid: true
           });
+          this.inputElement.current.focus();
         } else {
-          this.props.setInvitationKey(this.state.invitationKey);
-          this.props.onInvitationkeyVerify();
+          this.props.onInvitationKeyVerify(this.state.invitationKey);
           return;
         }})
       .catch(error => console.log(error));
@@ -86,9 +80,9 @@ export class InvitationKeyReact extends React.Component<any, InvitationKeyState>
           Enter your Invitation Key:
         </BoldHeader>
         <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
-                   placeholder='Invitation Key' onChange={this.updateInvitationKey}
-                   inputref={this.inputElement}
-                   autoFocus/>
+                   placeholder='Invitation Key' onChange={input =>
+                                                 this.setState({invitationKey: input.target.value})}
+                   inputref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
          <AlertDanger>
            <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
