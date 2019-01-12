@@ -26,25 +26,27 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String DRUG_CHILD_SQL_TEMPLATE =
+  private static final String DRUG_SQL_TEMPLATE =
     "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}.search_drug`\n" +
-      "where concept_id in unnest(${childConceptIds})\n${ageDateAndEncounterSql}";
+      "where ";
 
-  private static final String DRUG_PARENT_SQL_TEMPLATE =
-    "select distinct person_id, entry_date, concept_id\n" +
-      "from `${projectId}.${dataSetId}.search_drug`\n" +
-      "where concept_id in (\n" +
-      "   select a.concept_id from\n" +
-      "   `${projectId}.${dataSetId}.criteria` a\n" +
-      "    join (select CONCAT( '%.', CAST(id as STRING), '%') as path " +
-      "    from `${projectId}.${dataSetId}.criteria` " +
-      "    where concept_id in unnest(${parentConceptIds})) b \n" +
-      "    on a.path like b.path\n" +
-      "    and is_group = 0\n" +
-      "    and is_selectable = 1\n" +
-      "    and type = 'DRUG'\n" +
-      "    and subtype = 'ATC')\n${ageDateAndEncounterSql}";
+  private static final String CHILD_IN_CLAUSE_TEMPLATE =
+    "concept_id in unnest(${childConceptIds})\n" +
+      "${ageDateAndEncounterSql}";
+
+  private static final String GROUP_CODE_LIKE_TEMPLATE =
+    "concept_id in (\n" +
+    "   select a.concept_id from\n" +
+    "   `${projectId}.${dataSetId}.criteria` a\n" +
+    "    join (select CONCAT( '%.', CAST(id as STRING), '%') as path " +
+    "    from `${projectId}.${dataSetId}.criteria` " +
+    "    where concept_id in unnest(${parentConceptIds})) b \n" +
+    "    on a.path like b.path\n" +
+    "    and is_group = 0\n" +
+    "    and is_selectable = 1\n" +
+    "    and type = 'DRUG'\n" +
+    "    and subtype = 'ATC')\n${ageDateAndEncounterSql}";
 
   private static final String UNION_TEMPLATE = " union all\n";
 
@@ -59,14 +61,29 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       Long[] conceptIds = paramMap.get(key).stream().toArray(Long[]::new);
       String namedParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
       if ("Children".equals(key)) {
-        queryParts.add(DRUG_CHILD_SQL_TEMPLATE.replace("${childConceptIds}", "@" + namedParameter));
+        String drugSql = buildModifierSql(DRUG_SQL_TEMPLATE + CHILD_IN_CLAUSE_TEMPLATE
+            .replace("${childConceptIds}", "@" + namedParameter),
+          queryParams, searchGroupItem.getModifiers());
+        if (temporal) {
+          String temporalSql = buildTemporalSql(CHILD_IN_CLAUSE_TEMPLATE, "search_drug", drugSql, queryParams, searchGroupItem.getModifiers());
+          queryParts.add(temporalSql.replace("${childConceptIds}", "@" + namedParameter));
+        } else {
+          queryParts.add(drugSql);
+        }
       } else {
-        queryParts.add(DRUG_PARENT_SQL_TEMPLATE.replace("${parentConceptIds}", "@" + namedParameter));
+        String drugSql = buildModifierSql(DRUG_SQL_TEMPLATE + GROUP_CODE_LIKE_TEMPLATE
+            .replace("${parentConceptIds}", "@" + namedParameter),
+          queryParams, searchGroupItem.getModifiers());
+        if (temporal) {
+          String temporalSql = buildTemporalSql(GROUP_CODE_LIKE_TEMPLATE, "search_drug", drugSql, queryParams, searchGroupItem.getModifiers());
+          queryParts.add(temporalSql.replace("${childConceptIds}", "@" + namedParameter));
+        } else {
+          queryParts.add(drugSql);
+        }
       }
     }
 
-    String drugSql = String.join(UNION_TEMPLATE, queryParts);
-    return buildModifierSql(drugSql, queryParams, searchGroupItem.getModifiers());
+    return String.join(UNION_TEMPLATE, queryParts);
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {
