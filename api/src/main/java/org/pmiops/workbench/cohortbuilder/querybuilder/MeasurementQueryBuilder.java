@@ -71,29 +71,25 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       String namedParameter = addQueryParameterValue(queryParams,
         QueryParameterValue.int64(parameter.getConceptId()));
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
-      List<String> tempQueryParts = new ArrayList<String>();
+      String measurementSql = baseSql;
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        if (attribute.getName().equals(ANY)) {
-          queryParts.add(baseSql);
-        } else {
+        if (!attribute.getName().equals(ANY)) {
           if (attribute.getName().equals(NUMERICAL)) {
-            processNumericalSql(queryParts, queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
+            baseSql = processNumericalSql(queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
           } else if (attribute.getName().equals(CATEGORICAL)) {
-            processCategoricalSql(queryParts, queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
+            baseSql = processCategoricalSql(queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
           } else if (attribute.getName().equals(BOTH) && attribute.getOperator().equals(Operator.IN)) {
-            processCategoricalSql(tempQueryParts, queryParams, VALUE_AS_CONCEPT_ID, attribute);
+            baseSql = baseSql + AND + "(" + String.join(OR, processCategoricalSql(queryParams, VALUE_AS_CONCEPT_ID, attribute)) + ")";
           } else {
-            processNumericalSql(tempQueryParts, queryParams, VALUE_AS_NUMBER, attribute);
+            baseSql = baseSql + AND + "(" + String.join(OR,processNumericalSql(queryParams, VALUE_AS_NUMBER, attribute)) + ")";
           }
         }
       }
-      if (!tempQueryParts.isEmpty()) {
-        queryParts.add(baseSql + AND + "(" + String.join(OR, tempQueryParts) + ")");
-      }
+      String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
+      queryParts.add(modifiedSql);
     }
-    String measurementSql = String.join(UNION_ALL, queryParts);
-    return buildModifierSql(measurementSql, queryParams, searchGroupItem.getModifiers());
+    return String.join(UNION_ALL, queryParts);
   }
 
   @Override
@@ -120,10 +116,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     }
   }
 
-  private void processNumericalSql(List<String> queryParts,
-                                   Map<String, QueryParameterValue> queryParams,
-                                   String baseSql,
-                                   Attribute attribute) {
+  private String processNumericalSql(Map<String, QueryParameterValue> queryParams,
+                                     String baseSql,
+                                     Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
         QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
     String valueExpression;
@@ -135,20 +130,19 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       valueExpression = "@" + namedParameter1;
     }
 
-    queryParts.add(baseSql
+    return baseSql
       .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-      .replace("${value}", valueExpression));
+      .replace("${value}", valueExpression);
   }
 
-  private void processCategoricalSql(List<String> queryParts,
-                                     Map<String, QueryParameterValue> queryParams,
-                                     String baseSql,
-                                     Attribute attribute) {
+  private String processCategoricalSql(Map<String, QueryParameterValue> queryParams,
+                                       String baseSql,
+                                       Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
         QueryParameterValue.array(attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
             Long.class));
-    queryParts.add(baseSql
+    return baseSql
       .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-      .replace("${values}", "@" + namedParameter1));
+      .replace("${values}", "@" + namedParameter1);
   }
 }
