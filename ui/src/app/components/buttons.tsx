@@ -96,14 +96,3 @@ export const Button = ({ type = 'primary', style = {}, disabled = false, ...prop
     }}
   </HoverContainer>;
 };
-
-export const Secondarybutton = ({ type = 'secondary', style = {}, disabled = false, ...props }) => {
-  return <HoverContainer>
-    {({ hover, trackHover }) => {
-      return trackHover(<Clickable
-          {...{ disabled, ...props }}
-          style={{ ...styles.base({ disabled }), ...styles[type]({ hover, disabled }), ...style }}
-      />);
-    }}
-  </HoverContainer>;
-};
