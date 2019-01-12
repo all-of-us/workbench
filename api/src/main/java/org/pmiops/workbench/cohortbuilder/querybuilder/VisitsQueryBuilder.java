@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +34,15 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
     "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}.search_visit` a\n" +
-      "where a.concept_id in unnest(${visitConceptIds})\n";
+      "where a.concept_id in unnest(${visitConceptIds})\n${ageDateAndEncounterSql}";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters inputParameters) {
-    from(parametersEmpty()).test(inputParameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem inputParameters,
+                           boolean temporal) {
+    from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<Long> conceptIdList = new ArrayList<>();
-    for (SearchParameter parameter : inputParameters.getParameters()) {
+    for (SearchParameter parameter : inputParameters.getSearchParameters()) {
       from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
       from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
       conceptIdList.add(parameter.getConceptId());

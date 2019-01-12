@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
@@ -53,17 +54,19 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   private static final String MEASUREMENT_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}.search_measurement`\n" +
-      "where concept_id = ${conceptId}\n";
+      "where concept_id = ${conceptId}\n${ageDateAndEncounterSql}";
   private static final String VALUE_AS_NUMBER =
     "value_as_number ${operator} ${value}\n";
   private static final String VALUE_AS_CONCEPT_ID =
     "value_as_concept_id ${operator} unnest(${values})\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           boolean temporal) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    for (SearchParameter parameter : parameters.getParameters()) {
+    for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
       List<String> tempQueryParts = new ArrayList<String>();
@@ -88,7 +91,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       }
     }
     String measurementSql = String.join(UNION_ALL, queryParts);
-    return buildModifierSql(measurementSql, queryParams, parameters.getModifiers());
+    return buildModifierSql(measurementSql, queryParams, searchGroupItem.getModifiers());
   }
 
   @Override

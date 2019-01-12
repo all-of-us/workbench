@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -85,10 +86,12 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   private static final String AND_TEMPLATE = "and\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    from(containsAgeAndDec()).test(parameters.getParameters()).throwException(AGE_DEC_MESSAGE);
-    ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(parameters.getParameters());
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           boolean temporal) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    from(containsAgeAndDec()).test(searchGroupItem.getSearchParameters()).throwException(AGE_DEC_MESSAGE);
+    ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
     List<String> queryParts = new ArrayList<>();
 
     for (TreeSubType key : paramMap.keySet()) {

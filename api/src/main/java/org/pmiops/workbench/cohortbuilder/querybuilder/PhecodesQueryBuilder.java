@@ -1,11 +1,10 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -37,11 +36,13 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
                     "where o.observation_source_concept_id in (${innerSql})\n";
 
     @Override
-    public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
+    public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                             SearchGroupItem searchGroupItem,
+                             boolean temporal) {
         String namedParameter = addQueryParameterValue(queryParams,
                 QueryParameterValue.array(
-                        parameters
-                                .getParameters()
+                        searchGroupItem
+                                .getSearchParameters()
                                 .stream()
                                 .map(SearchParameter::getValue)
                                 .toArray(String[]::new), String.class));

@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -40,10 +41,12 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     "and value_as_concept_id = ${value}\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           boolean temporal) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    for (SearchParameter parameter : parameters.getParameters()) {
+    for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
       String namedParameterConceptId = addQueryParameterValue(queryParams,
           QueryParameterValue.int64(parameter.getConceptId()));
