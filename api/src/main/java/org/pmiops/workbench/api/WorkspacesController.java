@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -52,6 +53,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
+  private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
+
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
   private static final int NUM_RANDOM_CHARS = 20;
   private static final int MAX_FC_CREATION_ATTEMPT_VALUES = 6;
@@ -531,8 +534,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           fcWorkspace = filteredFcWorkspaces.get(0);
         }
         if (fcWorkspace == null) {
-          //  remove from our database
-          workspaceService.getDao().delete(dbWorkspace);
+          log.warning(String.format(
+              "workspace '%s' workbench ACLs are out of sync with Firecloud, " +
+              "omitting this workspace for current user", dbWorkspace.getFirecloudName()));
         } else {
           if (dbWorkspace.getFirecloudUuid() == null) {
             // populate UUID

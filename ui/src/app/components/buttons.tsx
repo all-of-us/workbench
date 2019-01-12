@@ -21,6 +21,18 @@ const styles = {
     backgroundColor: disabled ? '#f1f2f2' : (hover ? '#262262' : '#ffffff'),
     borderRadius: '0.2rem',
     color: disabled ? '#c3c3c3' : (hover ? '#ffffff' : '#262262'),
+  }),
+  darklingPrimary: ({ hover, disabled }) => ({
+    backgroundColor: disabled ? '#c3c3c3' : (hover ? 'rgba(255,255,255,0.3)' : '#262262'),
+    color: '#ffffff',
+    border: '0px',
+    borderRadius: '0.2rem'
+  }),
+  darklingSecondary: ({ hover, disabled }) => ({
+    backgroundColor: disabled ? '#c3c3c3' : (hover ? '#50ACE1' : '#0079b8'),
+    color: '#ffffff',
+    border: '0px',
+    borderRadius: '0.2rem'
   })
 };
 
