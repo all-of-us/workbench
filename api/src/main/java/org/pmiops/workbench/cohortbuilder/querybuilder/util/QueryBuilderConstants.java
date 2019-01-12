@@ -34,7 +34,6 @@ public final class QueryBuilderConstants {
   public static final String OPERATOR = "Operator";
   public static final String TYPE = "Type";
   public static final String SUBTYPE = "Subtype";
-  public static final String DOMAIN = "Domain";
   public static final String CONCEPT_ID = "Concept Id";
   public static final String CODE = "Code";
   public static final String NAME = "Name";
@@ -43,6 +42,7 @@ public final class QueryBuilderConstants {
   public static final String CATEGORICAL = "CAT";
   public static final String BOTH = "BOTH";
   public static final String LAB = "LAB";
+  public static final String ANY = "ANY";
 
   //Display text for modifiers
   public static ImmutableMap<ModifierType, String> modifierText = ImmutableMap.<ModifierType, String>builder()
@@ -75,7 +75,6 @@ public final class QueryBuilderConstants {
       TreeSubType.WC.name(),
       TreeSubType.HC.name());
 
-  public static final String ANY = "ANY";
 
   private QueryBuilderConstants(){}
 }

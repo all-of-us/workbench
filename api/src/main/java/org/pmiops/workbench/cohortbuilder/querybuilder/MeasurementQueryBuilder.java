@@ -71,23 +71,25 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       String namedParameter = addQueryParameterValue(queryParams,
         QueryParameterValue.int64(parameter.getConceptId()));
       String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
-      String measurementSql = baseSql;
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        if (!attribute.getName().equals(ANY)) {
+        String measurementSql = "";
+        if (attribute.getName().equals(ANY)) {
+          measurementSql = baseSql;
+        } else {
           if (attribute.getName().equals(NUMERICAL)) {
-            baseSql = processNumericalSql(queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
+            measurementSql = processNumericalSql(queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
           } else if (attribute.getName().equals(CATEGORICAL)) {
-            baseSql = processCategoricalSql(queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
+            measurementSql = processCategoricalSql(queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
           } else if (attribute.getName().equals(BOTH) && attribute.getOperator().equals(Operator.IN)) {
-            baseSql = baseSql + AND + "(" + String.join(OR, processCategoricalSql(queryParams, VALUE_AS_CONCEPT_ID, attribute)) + ")";
+            measurementSql = baseSql + AND + processCategoricalSql(queryParams, VALUE_AS_CONCEPT_ID, attribute);
           } else {
-            baseSql = baseSql + AND + "(" + String.join(OR,processNumericalSql(queryParams, VALUE_AS_NUMBER, attribute)) + ")";
+            measurementSql = baseSql + AND + processNumericalSql(queryParams, VALUE_AS_NUMBER, attribute);
           }
         }
+        String modifiedSql = buildModifierSql(measurementSql, queryParams, searchGroupItem.getModifiers());
+        queryParts.add(modifiedSql);
       }
-      String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
-      queryParts.add(modifiedSql);
     }
     return String.join(UNION_ALL, queryParts);
   }
