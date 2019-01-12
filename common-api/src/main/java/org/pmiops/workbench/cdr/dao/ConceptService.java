@@ -18,10 +18,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.pmiops.workbench.model.SearchType;
 
 @Service
 public class ConceptService {
+
+    public static enum SearchType
+    {
+        CONCEPT_SEARCH, SURVEY_COUNTS, DOMAIN_COUNTS;
+    }
 
     public static class ConceptIds {
 

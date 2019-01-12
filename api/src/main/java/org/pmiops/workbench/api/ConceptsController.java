@@ -19,7 +19,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.SearchType;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
@@ -187,7 +186,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       standardConceptFilter = StandardConceptFilter.ALL_CONCEPTS;
     }
 
-    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery(), SearchType.CONCEPT_SEARCH);
+    String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery(), ConceptService.SearchType.CONCEPT_SEARCH);
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
     addDomainCounts(request, response, matchExp, standardConceptFilter);
