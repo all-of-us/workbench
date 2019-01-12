@@ -60,26 +60,22 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     for (String key : paramMap.keySet()) {
       Long[] conceptIds = paramMap.get(key).stream().toArray(Long[]::new);
       String namedParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
+      String baseSql = DRUG_SQL_TEMPLATE + GROUP_CODE_LIKE_TEMPLATE;
+      String conceptIdSql = GROUP_CODE_LIKE_TEMPLATE;
+      String sqlVar = "${parentConceptIds}";
       if ("Children".equals(key)) {
-        String drugSql = buildModifierSql(DRUG_SQL_TEMPLATE + CHILD_IN_CLAUSE_TEMPLATE
-            .replace("${childConceptIds}", "@" + namedParameter),
-          queryParams, searchGroupItem.getModifiers());
-        if (temporal) {
-          String temporalSql = buildTemporalSql(CHILD_IN_CLAUSE_TEMPLATE, "search_drug", drugSql, queryParams, searchGroupItem.getModifiers());
-          queryParts.add(temporalSql.replace("${childConceptIds}", "@" + namedParameter));
-        } else {
-          queryParts.add(drugSql);
-        }
+        baseSql = DRUG_SQL_TEMPLATE + CHILD_IN_CLAUSE_TEMPLATE;
+        conceptIdSql = CHILD_IN_CLAUSE_TEMPLATE;
+        sqlVar = "${childConceptIds}";
+      }
+      String drugSql = buildModifierSql(baseSql.replace(sqlVar, "@" + namedParameter),
+        queryParams, searchGroupItem.getModifiers());
+      if (temporal) {
+        String temporalSql =
+          buildTemporalSql(conceptIdSql, "search_drug", drugSql, queryParams, searchGroupItem.getModifiers());
+        queryParts.add(temporalSql.replace(sqlVar, "@" + namedParameter));
       } else {
-        String drugSql = buildModifierSql(DRUG_SQL_TEMPLATE + GROUP_CODE_LIKE_TEMPLATE
-            .replace("${parentConceptIds}", "@" + namedParameter),
-          queryParams, searchGroupItem.getModifiers());
-        if (temporal) {
-          String temporalSql = buildTemporalSql(GROUP_CODE_LIKE_TEMPLATE, "search_drug", drugSql, queryParams, searchGroupItem.getModifiers());
-          queryParts.add(temporalSql.replace("${childConceptIds}", "@" + namedParameter));
-        } else {
-          queryParts.add(drugSql);
-        }
+        queryParts.add(drugSql);
       }
     }
 
