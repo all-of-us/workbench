@@ -68,7 +68,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     List<String> queryParts = new ArrayList<String>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
-      String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
+      String namedParameter = addQueryParameterValue(queryParams,
+        QueryParameterValue.int64(parameter.getConceptId()));
+      String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
       List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
