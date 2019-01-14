@@ -399,9 +399,9 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
 })
 export class QuickTourModalComponent extends ReactWrapperBase {
   @Input('learning') learning: QuickTourReactProps['learning'];
-  @Input('onClose') onClose: QuickTourReactProps['closeFunction'];
+  @Input('closeFunction') closeFunction: QuickTourReactProps['closeFunction'];
 
   constructor() {
-    super(QuickTourReact, ['learning', 'onClose']);
+    super(QuickTourReact, ['learning', 'closeFunction']);
   }
 }
