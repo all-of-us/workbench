@@ -1,6 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {merge} from 'lodash/fp';
-
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
@@ -378,7 +376,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
         </div>
       }
       {this.props.learning && this.state.fullImage &&
-      <div style={{...merge(styles.mainStyling, {height: '35%'})}}>
+      <div style={{...styles.mainStyling, height: '35%'}}>
         <div style={{position: 'relative', display: 'inline-block'}}
              id='full-image-wrapper'>
           <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
