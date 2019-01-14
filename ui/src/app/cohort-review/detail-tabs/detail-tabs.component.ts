@@ -132,7 +132,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   conditionTitle: string;
   chartLoadedSpinner = false;
   @Input() clickedParticipantId: number;
-  @Input() sidebarTransition: boolean;
   summaryActive = false;
   readonly allEvents = {
     name: 'All Events',
