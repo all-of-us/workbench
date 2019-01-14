@@ -1,3 +1,4 @@
+require('mutationobserver-shim');
 /**
  * Get rids of the missing requestAnimationFrame polyfill warning.
  *
