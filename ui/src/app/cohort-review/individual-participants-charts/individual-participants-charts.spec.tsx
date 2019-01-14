@@ -18,7 +18,6 @@ describe('IndividualParticipantsChartsComponent', () => {
     items: [],
       },
       chartKey: 0,
-      sidebarTransitionFlag: true
     };
   });
 
