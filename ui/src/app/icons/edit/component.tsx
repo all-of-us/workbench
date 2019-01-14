@@ -1,64 +1,67 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 import * as React from 'react';
 
 import {ReactWrapperBase} from 'app/utils';
 
-interface EditComponentState { style: object; }
+interface EditComponentProps {
+  disabled: boolean;
+  style: object;
+}
+interface EditComponentState {
+  style: object;
+}
 
-const style = {
-  height: 14,
-  width: 14,
+const defaultStyle = {
+    height: 19,
+    width: 19,
+    marginLeft: '.5rem',
+    marginTop: '1.1rem',
+    fill: '#2691D0',
+    cursor: 'pointer'
 };
 
-const fillStyle = {
-  fill: '#4D4CA5'
-};
+const hoverStyle = {...defaultStyle, fill: '#83C3EC'};
 
-class EditComponentReact extends React.Component<{}, EditComponentState> {
+const disabledStyle = {...defaultStyle, fill: '#c3c3c3'};
 
-  constructor(props) {
+export class EditComponentReact extends React.Component<EditComponentProps, EditComponentState> {
+
+  constructor(props: EditComponentProps) {
     super(props);
     this.state = {
-      style: style
+      style: {...defaultStyle, ...this.props.style}
     };
   }
 
   mouseOver(): void {
-    this.setState({style: {...style, ...fillStyle}});
+    this.setState({style: {...hoverStyle, ...this.props.style}});
   }
 
   mouseLeave(): void {
-    this.setState({style: style});
+    this.setState({style: {...defaultStyle, ...this.props.style}});
   }
 
   render() {
     return (
-      <svg style={this.state.style}
-           viewBox='0 0 14 14'
-           version='1.1'
-           xmlns='http://www.w3.org/2000/svg'
-           xmlnsXlink='http://www.w3.org/1999/xlink'
-           onMouseOver={() => this.mouseOver()}
-           onMouseLeave={() => this.mouseLeave()}>
-        <title>Edit</title>
-        <desc>Created with Sketch.</desc>
-        <defs></defs>
-        <g id='Brand-styles' stroke='none' strokeWidth='1' fill='none' fillRule='evenodd'
-           transform='translate(-764.000000, -3219.000000)'>
-          <g id='Edit' transform='translate(764.000000, 3219.000000)' fill='#302C71'
-             fillRule='nonzero'>
-            <rect id='Rectangle-path' x='0.5' y='12.95' width='13' height='1'></rect>
-            <path id='Shape'
-                d='M12.52,3.47 C12.8955541,3.09486349 13.1065733,2.5858185 13.1065733,2.055
-                   C13.1065733,1.5241815 12.8955541,1.01513651 12.52,0.64 C12.1448635,0.264445914
-                   11.6358185,0.0534266872 11.105,0.0534266872 C10.5741815,0.0534266872
-                   10.0651365,0.264445914 9.69,0.64 L2.62,7.71 L1.91,11.25 L5.45,10.54 L12.52,3.47
-                   Z M3.19,10 L3.54,8.23 L10.4,1.35 C10.7900375,0.962276405 11.4199625,0.962276405
-                   11.81,1.35 C12.1977236,1.74003745 12.1977236,2.36996255 11.81,2.76 L5,9.62
-                   L3.19,10 Z'></path>
-          </g>
-        </g>
+      <svg
+        style={this.props.disabled ? {...this.state.style, ...disabledStyle} : this.state.style}
+        version='1.1'
+        viewBox='0 0 36 36'
+        preserveAspectRatio='xMidYMid meet'
+        xmlns='http://www.w3.org/2000/svg'
+        xmlnsXlink='http://www.w3.org/1999/xlink'
+        onMouseOver={() => this.mouseOver()}
+        onMouseLeave={() => this.mouseLeave()}>
+      <title>Edit</title>
+        <path d="M4.22,23.2l-1.9,8.2a2.06,2.06,0,0,0,2,2.5,2.14,2.14,0,0,0,.43,0L13,32,28.84,16.22,
+                 20,7.4Z"/>
+        <path d="M33.82,8.32l-5.9-5.9a2.07,2.07,0,0,0-2.92,0L21.72,5.7l8.83,8.83,3.28-3.28A2.07,
+                 2.07,0,0,0,33.82,8.32Z"/>
+        <rect x='0' y='0'
+              width={this.state.style['width']}
+              height={this.state.style['height']}
+              fillOpacity='0'/>
       </svg>
     );
   }
@@ -70,8 +73,14 @@ class EditComponentReact extends React.Component<{}, EditComponentState> {
 })
 export class EditComponent extends ReactWrapperBase {
 
+  @Input('disabled')
+  disabled: EditComponentProps['disabled'];
+
+  @Input('style')
+  style: EditComponentProps['style'];
+
   constructor() {
-    super(EditComponentReact, []);
+    super(EditComponentReact, ['disabled', 'style']);
   }
 
 }

@@ -1,8 +1,7 @@
-<h2>Profile</h2>
-<button
-    (click)="editing = true" [disabled]="!profileLoaded" class="btn btn-icon">
-  <app-edit-icon></app-edit-icon>
-</button>
+<div style="display: flex; flex-direction: row; margin-bottom: 1rem;">
+  <h3>Profile</h3>
+  <app-edit-icon (click)="editing = true" [disabled]="!profileLoaded"></app-edit-icon>
+</div>
 <span *ngIf="!profileLoaded" class="spinner spinner-sm"></span>
 <div class="alert alert-danger" *ngIf="errorText">
   <div class="alert-items">
