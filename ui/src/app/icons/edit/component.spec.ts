@@ -25,6 +25,17 @@ describe('EditIconComponent', () => {
     expect(fixture).toBeTruthy();
   }));
 
+  it('should change style if disabled', fakeAsync(() => {
+    updateAndTick(fixture);
+    const icon = fixture.debugElement.nativeElement.querySelector('svg');
+    const style = icon.getAttribute(styleAttribute);
+    fixture.componentInstance.disabled = true;
+    updateAndTick(fixture);
+    const disabledStyle = icon.getAttribute(styleAttribute);
+
+    expect(style).not.toEqual(disabledStyle);
+  }));
+
   it('should change style on mouse over', fakeAsync(() => {
     updateAndTick(fixture);
     const icon = fixture.debugElement.nativeElement.querySelector('svg');
@@ -34,7 +45,6 @@ describe('EditIconComponent', () => {
     const hoverStyle = icon.getAttribute(styleAttribute);
 
     expect(style).not.toEqual(hoverStyle);
-    expect(hoverStyle).toContain('fill');
   }));
 
   it('should change style on mouse out', fakeAsync(() => {
@@ -49,7 +59,6 @@ describe('EditIconComponent', () => {
     const mouseOutStyle = icon.getAttribute(styleAttribute);
 
     expect(mouseOutStyle).not.toEqual(hoverStyle);
-    expect(mouseOutStyle).not.toContain('fill');
   }));
 
 });
