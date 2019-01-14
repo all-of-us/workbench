@@ -20,7 +20,8 @@ interface ChartData {
 export interface ChartReactProps {
   chartData: ChartData;
   chartKey: number;
-  sidebarTransitionFlag: boolean;
+  componentClass: string;
+  // sidebarTransitionFlag: boolean;
 }
 
 export class IndividualParticipantsReactCharts extends React.Component<ChartReactProps> {
@@ -29,6 +30,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   trimmedData = [];
   duplicateItems = [];
   yAxisNames = [''];
+  chart: any;
 
   setYaxisValue() {
     let yAxisValue = 1;
@@ -170,6 +172,24 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
     };
   }
 
+  getChartObj(chartObj: any) {
+    this.chart = chartObj;
+    const chartRef = this.chart.container.parentElement;
+    if (this.chart && typeof ResizeObserver === 'function') {
+      // Unbind window.onresize handler so we don't do double redraws
+      if (this.chart.unbindReflow) {
+        this.chart.unbindReflow();
+      }
+      // create observer to redraw charts on div resize
+      const ro = new ResizeObserver(() => {
+        if(this.chart) {
+          this.chart.reflow()
+        }
+      });
+      ro.observe(chartRef);
+    }
+  }
+
   render() {
      const chartData = this.props.chartData;
     if (!chartData.loading && chartData) {
@@ -178,6 +198,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         <HighchartsReact
           highcharts={highCharts}
           options={this.chartOptions}
+          callback={this.getChartObj}
         />
       </div>;
       return <ScatterChart/>;
@@ -196,7 +217,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
   @Input() chartData: ChartData;
   @Input() chartKey = 0;
   @Input() shouldReRender: boolean;
-  @Input() sidebarTransitionFlag: boolean;
   chart: any;
   componentClass = 'react-chart';
   constructor() {}
@@ -213,9 +233,11 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
     ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
       {chartData: this.chartData,
         chartKey: this.chartKey,
-        sidebarTransitionFlag: this.sidebarTransitionFlag}),
+        componentClass: this.componentClass
+      }),
       document.getElementsByClassName(this.componentClass)[this.chartKey]);
   }
+
 }
 
 
