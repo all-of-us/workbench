@@ -85,12 +85,24 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     return this.rawCodes.map(formatter).join(sep);
   }
 
+  get showItem() {
+    return this.status === 'active' || this.status === 'hidden';
+  }
+
   remove() {
     this.status = 'pending';
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
       this.status = 'deleted';
     }, 3000);
+  }
+
+  hide() {
+    this.status = 'hidden';
+  }
+
+  enable() {
+    this.status = 'active';
   }
 
   undo() {
