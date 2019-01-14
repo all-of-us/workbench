@@ -171,14 +171,16 @@ public class DataBrowserControllerTest {
             .description("The Lifestyle module provides information on smoking, alcohol and recreational drug use")
             .conceptId(1585855L)
             .questionCount(568120L)
-            .participantCount(4L);
+            .participantCount(4L)
+            .orderNumber(0);
 
     private static final SurveyModule CLIENT_SURVEY_MODULE_2 = new SurveyModule()
             .name("The Basics")
             .description("The Basics module provides demographics and economic information for participants")
             .conceptId(1586134L)
             .questionCount(567437L)
-            .participantCount(5L);
+            .participantCount(5L)
+            .orderNumber(0);
 
     private static final AchillesAnalysis CLIENT_ANALYSIS_1 = new AchillesAnalysis()
             .analysisId(1900L)
