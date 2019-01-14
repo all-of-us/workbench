@@ -1,6 +1,6 @@
 <div *ngIf="status !== 'deleted'" class="flex-container">
 
-  <div *ngIf="status === 'active'" class="line-item">
+  <div *ngIf="showItem" class="line-item" [class.hide]="status === 'hidden'">
     <clr-dropdown>
       <button type="button" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
@@ -13,9 +13,18 @@
           Edit criteria
         </button>
         <button
+          *ngIf="status === 'active'"
           type="button"
+          (click)="hide()"
           clrDropdownItem>
           Hide criteria from total count
+        </button>
+        <button
+          *ngIf="status === 'hidden'"
+          type="button"
+          (click)="enable()"
+          clrDropdownItem>
+          Include criteria in total count
         </button>
         <button
           type="button"
