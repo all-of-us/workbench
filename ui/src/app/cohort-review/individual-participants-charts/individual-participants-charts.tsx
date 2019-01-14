@@ -181,8 +181,8 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
       }
       // create observer to redraw charts on div resize
       const ro = new ResizeObserver(() => {
-        if(this.chart) {
-          this.chart.reflow()
+        if (this.chart) {
+          this.chart.reflow();
         }
       });
       ro.observe(chartRef);
