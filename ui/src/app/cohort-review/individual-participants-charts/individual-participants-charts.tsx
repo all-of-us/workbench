@@ -211,11 +211,9 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   styleUrls: ['./individual-participants-charts.css']
 })
 export class IndividualParticipantsChartsComponent implements OnChanges, OnInit {
-  @ViewChild('chartRef') chartRef;
   @Input() chartData: ChartData;
   @Input() chartKey = 0;
   @Input() shouldReRender: boolean;
-  chart: any;
   componentClass = 'react-chart';
   constructor() {}
 
