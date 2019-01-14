@@ -16,7 +16,6 @@ import {
 import {fullUrl, handleErrors} from 'app/utils/fetch';
 import {ReactWrapperBase} from 'app/utils/index';
 
-
 const styles = {
   notebookSettings: {
     marginTop: '1rem'
