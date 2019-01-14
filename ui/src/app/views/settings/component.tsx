@@ -1,7 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -9,9 +8,13 @@ import {TooltipTrigger} from 'app/components/popups';
 
 import {
   Cluster,
-  ClusterService,
+  ClusterApiFetchParamCreator,
   ClusterStatus,
-} from 'generated';
+  FetchArgs,
+} from 'generated/fetch/api';
+
+import {fullUrl, handleErrors} from 'app/utils/fetch';
+import {ReactWrapperBase} from 'app/utils/index';
 
 const styles = {
   notebookSettings: {
@@ -19,18 +22,42 @@ const styles = {
   },
 };
 
-export class SettingsReact extends React.Component<{}, {}> {
+interface SettingsState {
+  cluster: Cluster;
+  resetClusterPending: boolean;
+  resetClusterModal: boolean;
+  clusterDeletionFailure: boolean;
+}
+
+export class SettingsReact extends React.Component<{}, SettingsState> {
   private static readonly TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
     ClusterStatus.Deleting, ClusterStatus.Creating,
     ClusterStatus.Starting, ClusterStatus.Stopping
   ]);
 
-  cluster: Cluster;
-  resetClusterPending = false;
-  resetClusterModal = false;
-  clusterDeletionFailure = true;
 
   private pollClusterTimer: NodeJS.Timer;
+
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      cluster: null,
+      resetClusterPending: false,
+      resetClusterModal: false,
+      clusterDeletionFailure: true
+    };
+  }
+
+  componentDidMount() {
+    this.pollCluster();
+  }
+
+  componentWillUnmount() {
+    if (this.pollClusterTimer) {
+      clearTimeout(this.pollClusterTimer);
+    }
+  }
+
 
   render() {
     return <React.Fragment>
@@ -38,16 +65,17 @@ export class SettingsReact extends React.Component<{}, {}> {
       <h3>Notebooks</h3>
       <div style={styles.notebookSettings}>
         <TooltipTrigger content={
-                          (!this.cluster) ?
+                          (!this.state.cluster) ?
                             'Your notebook server is still being created' : undefined}
                         side='right'>
-          <Button disabled={!this.cluster} onClick={this.openResetClusterModal()}
+          <Button disabled={!this.state.cluster} onClick={this.openResetClusterModal}
                   type='secondary'>
             Reset Notebook Server
           </Button>
         </TooltipTrigger>
       </div>
-      <Modal onRequestClose={this.closeResetClusterModal()}>
+      {this.state.resetClusterModal &&
+      <Modal>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
           <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
@@ -58,42 +86,36 @@ export class SettingsReact extends React.Component<{}, {}> {
           to describe the reason for this reset.
         </ModalBody>
         <ModalFooter>
-          {this.clusterDeletionFailure ?
+          {this.state.clusterDeletionFailure ?
             <div className='error'>Could not reset your notebook server.</div> : undefined}
           <Button type='secondary'
-                  onClick={() => this.closeResetClusterModal()}>Cancel</Button>
-          <Button disabled={this.resetClusterPending}
+                  onClick={() => this.setState({resetClusterModal: false})}>Cancel</Button>
+          <Button disabled={this.state.resetClusterPending}
                   onClick={() => this.resetCluster()}>Send</Button>
         </ModalFooter>
-      </Modal>
+      </Modal>}
     </React.Fragment>;
   }
 
   openResetClusterModal(): void {
-    this.resetClusterPending = false;
-    this.resetClusterModal = true;
-    this.clusterDeletionFailure = false;
-  }
-
-  closeResetClusterModal(): void {
-    this.resetClusterModal = false;
+    this.setState({
+      resetClusterPending: false,
+      resetClusterModal: true,
+      clusterDeletionFailure: false
+    });
   }
 
   resetCluster(): void {
-    this.clusterService.deleteCluster(
-      this.cluster.clusterNamespace, this.cluster.clusterName).subscribe(
-      () => {
-        this.cluster = null;
-        this.resetClusterPending = false;
-        this.closeResetClusterModal();
+    const args: FetchArgs = ClusterApiFetchParamCreator()
+      .deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName);
+    fetch(fullUrl(args.url), args.options)
+      .then(handleErrors)
+      .then(() => {
+        this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
         this.pollCluster();
-      },
-      /* onError */ () => {
-        this.resetClusterPending = false;
-        this.clusterDeletionFailure = true;
-      },
-      /* onCompleted */ () => {
-        this.resetClusterPending = false;
+      })
+      .catch((error) => {
+        this.setState({resetClusterPending: false, clusterDeletionFailure: true});
       });
   }
 
@@ -101,98 +123,32 @@ export class SettingsReact extends React.Component<{}, {}> {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
     };
-    this.clusterService.listClusters()
-      .subscribe((resp) => {
-        const cluster = resp.defaultCluster;
+    const args: FetchArgs = ClusterApiFetchParamCreator()
+      .listClusters();
+    console.log(args);
+    fetch(fullUrl(args.url), args.options)
+      .then(handleErrors)
+      .then((response) => response.json)
+      .then((body) => {
+        const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {
           repoll();
           return;
         }
-        this.cluster = cluster;
-      }, () => {
-        // Also retry on errors.
+        this.setState({cluster: cluster});
+      })
+      .catch(() => {
+        // Also retry on errors
         repoll();
       });
   }
 }
 
 @Component({
-  styleUrls: ['../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/headers.css',
-              '../../styles/inputs.css',
-              '../../styles/errors.css',
-              './component.css'],
-  templateUrl: './component.html',
+  template: '<div #root></div>'
 })
-export class SettingsComponent implements OnInit, OnDestroy {
-  private static readonly TRANSITIONAL_STATUSES = new Set<ClusterStatus>([
-    ClusterStatus.Deleting, ClusterStatus.Creating,
-    ClusterStatus.Starting, ClusterStatus.Stopping
-  ]);
-
-  private pollClusterTimer: NodeJS.Timer;
-  cluster: Cluster;
-  clusterDeletionFailure = true;
-  resetClusterModal = false;
-  resetClusterPending = false;
-
-  constructor(private clusterService: ClusterService) {}
-
-  ngOnInit(): void {
-    ReactDOM.render(<SettingsReact/>, document.getElementById('settings-page'));
-    // this.pollCluster();
-  }
-
-  ngOnDestroy(): void {
-    if (this.pollClusterTimer) {
-      clearTimeout(this.pollClusterTimer);
-    }
-  }
-
-  private pollCluster(): void {
-    const repoll = () => {
-      this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
-    };
-    this.clusterService.listClusters()
-      .subscribe((resp) => {
-        const cluster = resp.defaultCluster;
-        if (SettingsComponent.TRANSITIONAL_STATUSES.has(cluster.status)) {
-          repoll();
-          return;
-        }
-        this.cluster = cluster;
-      }, () => {
-        // Also retry on errors.
-        repoll();
-      });
-  }
-
-  openResetClusterModal(): void {
-    this.resetClusterPending = false;
-    this.resetClusterModal = true;
-    this.clusterDeletionFailure = false;
-  }
-
-  closeResetClusterModal(): void {
-    this.resetClusterModal = false;
-  }
-
-  resetCluster(): void {
-    this.clusterService.deleteCluster(
-      this.cluster.clusterNamespace, this.cluster.clusterName).subscribe(
-        () => {
-          this.cluster = null;
-          this.resetClusterPending = false;
-          this.closeResetClusterModal();
-          this.pollCluster();
-        },
-        /* onError */ () => {
-        this.resetClusterPending = false;
-        this.clusterDeletionFailure = true;
-        },
-        /* onCompleted */ () => {
-          this.resetClusterPending = false;
-        });
+export class SettingsComponent extends ReactWrapperBase {
+  constructor() {
+    super(SettingsReact, []);
   }
 }
