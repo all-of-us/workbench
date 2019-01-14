@@ -21,7 +21,6 @@ export interface ChartReactProps {
   chartData: ChartData;
   chartKey: number;
   componentClass: string;
-  // sidebarTransitionFlag: boolean;
 }
 
 export class IndividualParticipantsReactCharts extends React.Component<ChartReactProps> {
