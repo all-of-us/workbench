@@ -57,7 +57,7 @@ export class ConfirmDeleteModal
   render() {
     return <React.Fragment>
       {this.props.deleting &&
-      <Modal>
+      <Modal className='confirmDeleteModal'>
         <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
           delete {this.resourceTypeName}: {this.props.resource.name}?
         </ModalTitle>
@@ -69,6 +69,7 @@ export class ConfirmDeleteModal
                   onClick={() => this.props.closeFunction()}>Cancel</Button>
           <Button disabled={this.state.loading}
                   style={{marginLeft: '0.5rem'}}
+                  id='confirm-delete'
                   onClick={() => this.emitDelete()}>
             Delete {this.resourceTypeName}
           </Button>
