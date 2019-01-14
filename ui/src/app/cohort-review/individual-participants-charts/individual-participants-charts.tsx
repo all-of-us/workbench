@@ -20,7 +20,6 @@ interface ChartData {
 export interface ChartReactProps {
   chartData: ChartData;
   chartKey: number;
-  componentClass: string;
 }
 
 export class IndividualParticipantsReactCharts extends React.Component<ChartReactProps> {
@@ -232,7 +231,6 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
     ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
       {chartData: this.chartData,
         chartKey: this.chartKey,
-        componentClass: this.componentClass
       }),
       document.getElementsByClassName(this.componentClass)[this.chartKey]);
   }
