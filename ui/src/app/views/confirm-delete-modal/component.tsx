@@ -1,9 +1,8 @@
 import {
   Component, Input,
 } from '@angular/core';
-import * as React from 'react';
 import * as ld from 'lodash/fp';
-
+import * as React from 'react';
 
 import {
   decamelize,
