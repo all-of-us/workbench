@@ -227,7 +227,3 @@ export function decamelize(str: string, separator: string) {
       .toLowerCase();
 }
 
-export function capitalize(s: string) {
-  return s.toLowerCase().replace( /\b./g,
-      function(a) { return a.toUpperCase(); } );
-}
