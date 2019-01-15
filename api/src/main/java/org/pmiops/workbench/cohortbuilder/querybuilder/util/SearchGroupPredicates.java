@@ -35,6 +35,10 @@ public class SearchGroupPredicates {
     return itemMap -> itemMap.size() != 2;
   }
 
+  public static Predicate<ListMultimap<Integer, SearchGroupItem>> secondGroupContainsMoreThanOne() {
+    return itemMap -> itemMap.get(1).size() != 1;
+  }
+
   public static Predicate<SearchGroup> mentionNull() {
     return sg -> sg.getMention() == null;
   }
