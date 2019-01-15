@@ -25,12 +25,8 @@ import {
   setupModals,
   simulateClick,
   simulateClickReact,
-  simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
-
-import * as React from 'react';
-import * as ReactTestUtils from 'react-dom/test-utils';
 
 import {
   BugReportService,
@@ -143,7 +139,8 @@ describe('WorkspaceListComponent', () => {
         '/' + firstWorkspace.id + '/edit');
   }));
 
-  fit('enables deleting workspaces', fakeAsync(() => {
+  it('enables deleting workspaces', fakeAsync(() => {
+    const de = workspaceListPage.fixture.debugElement;
     const deleteSpy = spyOn(TestBed.get(WorkspacesService), 'deleteWorkspace')
       .and.callThrough();
     const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
@@ -151,22 +148,15 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture,
       workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
     updateAndTick(workspaceListPage.fixture);
-    simulateClickReact(workspaceListPage.fixture, '.delete-item');
+    simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
     updateAndTick(workspaceListPage.fixture);
-    console.log(workspaceListPage.fixture.componentInstance.confirmDeleting);
-
-    //expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
     expect(workspaceListPage.fixture.componentInstance.resource)
       .toEqual(firstWorkspace);
     simulateClickReact(workspaceListPage.fixture, '#confirm-delete');
-    console.log('done with test');
-
-
-    // simulateClick(workspaceListPage.fixture, deleteModal.query(By.css('#confirm-delete')));
-    // updateAndTick(workspaceListPage.fixture);
-    // expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
-    // const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
-    // expect(numNewWorkspaces).toEqual(numWorkspaces - 1);
+    expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
+    const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
+    expect(numNewWorkspaces).toEqual(numWorkspaces - 1);
 
   }));
 

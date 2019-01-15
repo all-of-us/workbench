@@ -28,7 +28,12 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  simulateInput,
+  updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {ToolTipComponent} from '../tooltip/component';
@@ -87,6 +92,7 @@ describe('ConceptSetListComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(ConceptSetListComponent);
+      setupModals(fixture);
       // This tick initializes the component.
       tick();
       // This finishes the API calls.
@@ -128,7 +134,7 @@ describe('ConceptSetListComponent', () => {
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
+    simulateClickReact(fixture, '#confirm-delete');
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
     expect(conceptCards.length).toBe(2);
