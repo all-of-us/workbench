@@ -50,7 +50,7 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
 import {RenameModalComponent} from './views/rename-modal/component';
-import {ResourceCardComponent} from './views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
@@ -167,6 +167,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RecentWorkComponent,
     RenameModalComponent,
     ResourceCardComponent,
+    ResourceCardMenuComponent,
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
