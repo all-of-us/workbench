@@ -4,6 +4,12 @@ import * as React from 'react';
 
 import {ReactWrapperBase} from 'app/utils';
 
+interface RightScrollProps {
+  style: object;
+  opacity: number;
+  fill: string;
+}
+
 interface RightScrollState {
   style: object;
 }
@@ -15,24 +21,25 @@ const defaultStyle = {
 
 const hoverStyle = {fill: '#72B9E2'};
 
-export class RightScrollReact extends React.Component<{}, RightScrollState> {
+export class RightScrollReact extends React.Component<RightScrollProps, RightScrollState> {
 
   constructor(props) {
     super(props);
     this.state = {
-        style: defaultStyle
+        style: {...defaultStyle, ...this.props.style}
     };
   }
 
   mouseOver(): void {
-    this.setState({style: {...defaultStyle, ...hoverStyle}});
+    this.setState({style: {...defaultStyle, ...hoverStyle, ...this.props.style}});
   }
 
   mouseLeave(): void {
-    this.setState({style: defaultStyle});
+    this.setState({style: {...defaultStyle, ...this.props.style}});
   }
 
   render() {
+    const opacity = this.props.opacity ? this.props.opacity : 1;
     return (
       <svg
         style={this.state.style}
@@ -73,11 +80,11 @@ export class RightScrollReact extends React.Component<{}, RightScrollState> {
             </feMerge>
           </filter>
         </defs>
-        <g id='Homepage' stroke='none' strokeWidth='1' fill='none' fillRule='evenodd'>
+        <g id='Scroll' stroke='none' strokeWidth='1' fill='none' fillRule='evenodd'>
           <g transform='translate(-1131.000000, -667.000000)' id='scroll'>
             <g transform='translate(1133.000000, 668.000000)'>
               <g id='Oval-3'>
-                <use fill='black' fillOpacity='1' filter='url(#filter-2)' xlinkHref='#path-1'>
+                <use fill='black' fillOpacity={opacity} filter='url(#filter-2)' xlinkHref='#path-1'>
                 </use>
                 <use fill='#2691D0' fillRule='evenodd' xlinkHref='#path-1'>
                 </use>
@@ -102,7 +109,13 @@ export class RightScrollReact extends React.Component<{}, RightScrollState> {
   template: '<div #root></div>'
 })
 export class RightScrollComponent extends ReactWrapperBase {
+
+  @Input('style') style: RightScrollProps['style'];
+  @Input('opacity') opacity: RightScrollProps['opacity'];
+  @Input('fill') fill: RightScrollProps['fill'];
+
   constructor() {
-    super(RightScrollReact, []);
+    super(RightScrollReact, ['style', 'opacity', 'fill']);
   }
+
 }
