@@ -64,6 +64,7 @@ import {
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
   HIDE_ITEM,
+  HIDE_GROUP,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -402,6 +403,9 @@ export const rootReducer: Reducer<CohortSearchState> =
           item => item.set('status', 'hidden'));
       }
 
+      case HIDE_GROUP:
+        return state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
+
       case REMOVE_ITEM: {
         state = state
           .updateIn(
@@ -431,9 +435,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             List(),
             groupList => groupList.filterNot(id => id === action.groupId)
           )
-          .updateIn(['entities', 'groups', action.groupId],
-            List(),
-            item => item.set('status', 'deleted'));
+          .setIn(['entities', 'groups', action.groupId, 'status'], 'deleted');
 
       case OPEN_WIZARD:
         return state.mergeIn(['wizard'], fromJS({
