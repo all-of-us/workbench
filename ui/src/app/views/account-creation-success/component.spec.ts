@@ -16,7 +16,6 @@ import {
 } from '../../../testing/test-helpers';
 import {SignInService} from '../../services/sign-in.service';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {LoginComponent} from '../login/component';
@@ -31,7 +30,6 @@ describe('AccountCreationSuccessComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationModalsComponent,
         AccountCreationSuccessComponent
       ],
       providers: [
