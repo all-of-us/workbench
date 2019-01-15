@@ -1,9 +1,7 @@
-import {Component, DoCheck, Input, OnInit} from '@angular/core';
-
-import {reactStyles} from 'app/utils';
+import {Component, Input} from '@angular/core';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 import {
   Button
@@ -377,7 +375,8 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           </div>
         </div>
       }
-      {this.props.learning && this.state.fullImage && <div style={{height: '50%'}}>
+      {this.props.learning && this.state.fullImage &&
+      <div style={{...styles.mainStyling, height: '35%'}}>
         <div style={{position: 'relative', display: 'inline-block'}}
              id='full-image-wrapper'>
           <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
@@ -396,28 +395,13 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
 @Component({
   selector: 'app-quick-tour-modal',
   styleUrls: ['./component.css'],
-  templateUrl: './component.html'
+  template: '<div #root></div>',
 })
-export class QuickTourModalComponent implements DoCheck, OnInit {
+export class QuickTourModalComponent extends ReactWrapperBase {
+  @Input('learning') learning: QuickTourReactProps['learning'];
+  @Input('closeFunction') closeFunction: QuickTourReactProps['closeFunction'];
 
-  @Input('learning')
-  learning: boolean;
-  @Input('onClose')
-  public onClose: Function;
-
-  componentId = 'quick-tour';
-
-  constructor() {}
-
-  ngOnInit(): void {
-    ReactDOM.render(React.createElement(QuickTourReact,
-        {learning: this.learning, closeFunction: this.onClose}),
-        document.getElementById(this.componentId));
-  }
-
-  ngDoCheck(): void {
-    ReactDOM.render(React.createElement(QuickTourReact,
-        {learning: this.learning, closeFunction: this.onClose}),
-        document.getElementById(this.componentId));
+  constructor() {
+    super(QuickTourReact, ['learning', 'closeFunction']);
   }
 }
