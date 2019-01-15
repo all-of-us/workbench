@@ -2,7 +2,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -18,12 +17,6 @@ public class ParameterPredicates {
 
   private static final String SYSTOLIC = "Systolic";
   private static final String DIASTOLIC = "Diastolic";
-
-  private static final List<String> VALID_DOMAINS =
-    Arrays
-      .stream(DomainType.values())
-      .map(dt -> dt.toString())
-      .collect(Collectors.toList());
 
   private static final List<String> ICD_TYPES =
     Arrays.asList(TreeType.ICD9.toString(),

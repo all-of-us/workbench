@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
  * TemporalQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -43,6 +46,7 @@ public class TemporalQueryBuilder {
 
   public String buildQuery(Map<String, QueryParameterValue> params,
                            SearchGroup includeGroup) {
+    validateSearchGroup(includeGroup);
     List<String> temporalQueryParts1 = new ArrayList<>();
     List<String> temporalQueryParts2 = new ArrayList<>();
     ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(includeGroup);
@@ -80,11 +84,18 @@ public class TemporalQueryBuilder {
   private ListMultimap<Integer, SearchGroupItem> getTemporalGroups(SearchGroup searchGroup) {
     ListMultimap<Integer, SearchGroupItem> itemMap = ArrayListMultimap.create();
     searchGroup.getItems()
-      .forEach(item -> itemMap.put(item.getTemporalGroup(), item));
+      .forEach(item -> {
+        from(temporalGroupNull()).test(item)
+          .throwException(NOT_VALID_MESSAGE, SEARCH_GROUP_ITEM, TEMPORAL_GROUP, item.getTemporalGroup());
+        itemMap.put(item.getTemporalGroup(), item);
+      });
+    from(notContainsTwoGroups()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
     return itemMap;
   }
 
-  private void validateSearchGroupItem() {
-
+  private void validateSearchGroup(SearchGroup searchGroup) {
+    from(mentionNull().or(mentionInvalid())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, searchGroup.getMention());
+    from(timeNull().or(timeInvalid())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, searchGroup.getTime());
+    from(timeValueNull().and(timeValueRequired())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, searchGroup.getTimeValue());
   }
 }

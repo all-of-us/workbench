@@ -23,11 +23,19 @@ public final class QueryBuilderConstants {
   public static final String CATEGORICAL_MESSAGE = "Bad Request: Attribute Categorical must provide In operator.";
   public static final String BP_TWO_ATTRIBUTE_MESSAGE =
     "Bad Request: Attribute Blood Pressure must provide two attributes(systolic and diastolic).";
+  public static final String TEMPORAL_GROUP_MESSAGE =
+    "Bad Request: Search Group Items must provided for 2 different temporal groups.";
 
   //Exception Message parameters
   public static final String PARAMETERS = "Parameters";
   public static final String ATTRIBUTES = "Attributes";
   public static final String PARAMETER = "Search Parameter";
+  public static final String SEARCH_GROUP_ITEM = "Search Group Item";
+  public static final String SEARCH_GROUP = "Search Group";
+  public static final String TEMPORAL_GROUP = "Temporal Group";
+  public static final String MENTION = "Which Mention";
+  public static final String TIME = "Define Time";
+  public static final String TIME_VALUE = "Time Value";
   public static final String ATTRIBUTE = "Attribute";
   public static final String MODIFIER = "Modifier";
   public static final String OPERANDS = "Operands";
