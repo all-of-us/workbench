@@ -438,6 +438,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, VALUE, ppiParam.getValue());
+
+    //temporal mention null
+    Criteria temporal =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
+    SearchParameter temporalParam = createSearchParameter(temporal, null);
+    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(temporalParam), new ArrayList<>());
+    SearchGroup temporalGroup = searchRequest.getIncludes().get(0);
+    temporalGroup.setTemporal(true);
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP, MENTION, temporalParam.getValue());
+
+    //temporal time null
+    temporalGroup.setMention(TemporalMention.ANY_MENTION.name());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP, TIME, temporalGroup.getTime());
+
+    //temporal timeValue null
+    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER.name());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
+
+    //temporal group is null
+    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    SearchGroupItem temporalItem = temporalGroup.getItems().get(0);
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP_ITEM, TEMPORAL_GROUP, temporalItem.getTemporalGroup());
+
+    //only one temporal group
+    temporalItem.setTemporalGroup(0);
+    assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
   }
 
   @Test
