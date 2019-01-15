@@ -24,7 +24,7 @@ beforeEach(() => {
 
 it('should handle given name validity', () => {
   const wrapper = component();
-  let testInput = createInput(101);
+  const testInput = createInput(101);
   expect(wrapper.exists('#givenName')).toBeTruthy();
   expect(wrapper.exists('#givenNameError')).toBeFalsy();
   wrapper.find('#givenName')
@@ -35,7 +35,7 @@ it('should handle given name validity', () => {
 
 it ('should handle family name validity', () => {
   const wrapper = component();
-  let testInput = createInput(101);
+  const testInput = createInput(101);
   expect(wrapper.exists('#familyName')).toBeTruthy();
   expect(wrapper.exists('#familyNameError')).toBeFalsy();
   wrapper.find('#familyName').simulate('change', {target: {value: testInput}});
@@ -44,7 +44,7 @@ it ('should handle family name validity', () => {
 
 it ('should handle organization validity', () => {
   const wrapper = component();
-  let testInput = createInput(300);
+  const testInput = createInput(300);
   expect(wrapper.exists('#organization')).toBeTruthy();
   expect(wrapper.exists('#organizationError')).toBeFalsy();
   wrapper.find('#organization').simulate('change', {target: {value: testInput}});
@@ -53,7 +53,7 @@ it ('should handle organization validity', () => {
 
 it ('should handle current position validity', () => {
   const wrapper = component();
-  let testInput = createInput(300);
+  const testInput = createInput(300);
   expect(wrapper.exists('#currentPosition')).toBeTruthy();
   expect(wrapper.exists('#currentPositionError')).toBeFalsy();
   wrapper.find('#currentPosition').simulate('change', {target: {value: testInput}});
