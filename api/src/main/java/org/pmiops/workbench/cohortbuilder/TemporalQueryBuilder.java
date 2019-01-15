@@ -7,12 +7,14 @@ import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * TemporalQueryBuilder is an object that builds {@link QueryJobConfiguration}
@@ -23,7 +25,7 @@ public class TemporalQueryBuilder {
 
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String SAME_ENC =
-    "temp1.person_id = temp2.person_id and temp1.enc_id = temp2.enc_id\n";
+    "temp1.person_id = temp2.person_id and temp1.visit_concept_id = temp2.visit_concept_id\n";
   private static final String X_DAYS_BEFORE =
     "temp1.person_id = temp2.person_id and temp1.entry_date < DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String X_DAYS_AFTER =
@@ -49,7 +51,8 @@ public class TemporalQueryBuilder {
       for (SearchGroupItem tempGroup : tempGroups) {
         String query = QueryBuilderFactory
           .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
-          .buildQuery(params, tempGroup, true);
+          .buildQuery(params, tempGroup,
+            key == 0 ? includeGroup.getMention() : TemporalMention.ANY_MENTION.name());
         if (key == 0) {
           temporalQueryParts1.add(query);
         } else {

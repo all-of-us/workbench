@@ -48,15 +48,16 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   private static final String GROUP = "group";
   private static final String NOT_GROUP = "notGroup";
+  private static final String TABLE_ID = "search_codes";
 
   private static final String CODES_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id_or_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.search_codes` a\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
       "where ";
 
   private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
     "concept_id_or_source_concept_id in unnest(${conceptIds})\n" +
-    "${ageDateAndEncounterSql}";
+      AGE_DATE_AND_ENCOUNTER_VAR;
 
   private static final String GROUP_CODE_LIKE_TEMPLATE =
     "concept_id_or_source_concept_id in (select concept_id\n" +
@@ -66,14 +67,14 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       "  and REGEXP_CONTAINS(code, ${code})\n" +
       "  and is_selectable = 1\n" +
       "  and concept_id is not null\n" +
-      ")\n${ageDateAndEncounterSql}";
+      ")\n" + AGE_DATE_AND_ENCOUNTER_VAR;
 
   private static final String UNION_TEMPLATE = " union all\n";
 
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           boolean temporal) {
+                           String mention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
     List<String> queryParts = new ArrayList<String>();
@@ -91,7 +92,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             searchGroupItem.getModifiers(),
             QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class),
             CHILD_CODE_IN_CLAUSE_TEMPLATE,
-            temporal);
+            mention);
         } else {
           List<String> codes =
             paramList.stream().map(SearchParameter::getValue).collect(Collectors.toList());
@@ -103,7 +104,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
             searchGroupItem.getModifiers(),
             QueryParameterValue.string(codeParam),
             GROUP_CODE_LIKE_TEMPLATE,
-            temporal);
+            mention);
         }
     }
 
@@ -122,7 +123,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
                                List<Modifier> modifiers,
                                QueryParameterValue codes,
                                String groupOrChildSql,
-                               boolean temporal) {
+                               String mention) {
     ImmutableMap.Builder<String, String> paramNames = ImmutableMap.<String, String>builder();
 
     if (codes.getType().equals(StandardSQLTypeName.ARRAY)) {
@@ -137,13 +138,10 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       paramNames.put("${subtype}", "@" + subtypeNamedParameter);
     }
 
-    String modifiedSql = buildModifierSql(CODES_SQL_TEMPLATE + groupOrChildSql, queryParams, modifiers);
-    if (temporal) {
-      String temporalSql = buildTemporalSql(groupOrChildSql, "search_codes", modifiedSql, queryParams, modifiers);
-      queryParts.add(filterSql(temporalSql, paramNames.build()));
-    } else {
-      queryParts.add(filterSql(modifiedSql, paramNames.build()));
-    }
+    String baseSql = CODES_SQL_TEMPLATE + groupOrChildSql;
+    String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
+    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, groupOrChildSql, queryParams, modifiers, mention);
+    queryParts.add(filterSql(finalSql, paramNames.build()));
   }
 
   @Override

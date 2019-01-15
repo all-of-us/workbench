@@ -88,7 +88,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           boolean temporal) {
+                           String temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     from(containsAgeAndDec()).test(searchGroupItem.getSearchParameters()).throwException(AGE_DEC_MESSAGE);
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());

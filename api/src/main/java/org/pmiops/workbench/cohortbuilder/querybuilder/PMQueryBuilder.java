@@ -83,7 +83,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           boolean temporal) {
+                           String temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {

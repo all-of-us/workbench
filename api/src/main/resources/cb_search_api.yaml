@@ -650,12 +650,12 @@ definitions:
   TemporalMention:
     type: string
     description: possible types of mentions
-    enum: [ANY_MENTION, FIRST_MENTION, LAST_MENTION]
+    enum: [Any Mention, First Mention, Last Mention]
 
   TemporalTime:
     type: string
     description: possible types of times
-    enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
+    enum: [During Same Encounter As, X Days Before, X Days After, Within X Days Of]
 
   DemoChartInfoListResponse:
     type: object

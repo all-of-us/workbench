@@ -2,9 +2,11 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
@@ -49,12 +51,14 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private static final String UNION_ALL = " union all\n";
-  private static final String AND = " and ";
-  private static final String OR = " or ";
+  private static final String TABLE_ID = "search_measurement";
   private static final String MEASUREMENT_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
-      "from `${projectId}.${dataSetId}.search_measurement`\n" +
-      "where concept_id = ${conceptId}\n${ageDateAndEncounterSql}";
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where ";
+  private static final String CONCEPT_ID_TEMPLATE =
+    "concept_id = ${conceptId}\n" +
+      AGE_DATE_AND_ENCOUNTER_VAR;
   private static final String VALUE_AS_NUMBER =
     "value_as_number ${operator} ${value}\n";
   private static final String VALUE_AS_CONCEPT_ID =
@@ -63,20 +67,18 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           boolean temporal) {
+                           String mention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
       String namedParameter = addQueryParameterValue(queryParams,
         QueryParameterValue.int64(parameter.getConceptId()));
-      String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
+      String baseSql = MEASUREMENT_SQL_TEMPLATE + CONCEPT_ID_TEMPLATE;
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        String measurementSql = "";
-        if (attribute.getName().equals(ANY)) {
-          measurementSql = baseSql;
-        } else {
+        String measurementSql = baseSql;
+        if (!attribute.getName().equals(ANY)) {
           if (attribute.getName().equals(NUMERICAL)) {
             measurementSql = processNumericalSql(queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
           } else if (attribute.getName().equals(CATEGORICAL)) {
@@ -87,8 +89,10 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
             measurementSql = baseSql + AND + processNumericalSql(queryParams, VALUE_AS_NUMBER, attribute);
           }
         }
-        String modifiedSql = buildModifierSql(measurementSql, queryParams, searchGroupItem.getModifiers());
-        queryParts.add(modifiedSql);
+        List<Modifier> modifiers = searchGroupItem.getModifiers();
+        String modifiedSql = buildModifierSql(measurementSql, queryParams, modifiers);
+        String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+        queryParts.add(finalSql.replace("${conceptId}", "@" + namedParameter));
       }
     }
     return String.join(UNION_ALL, queryParts);
@@ -127,7 +131,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     if (attribute.getOperator().equals(Operator.BETWEEN)) {
       String namedParameter2 = addQueryParameterValue(queryParams,
           QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
-      valueExpression =  "@" + namedParameter1 + " and " + "@" + namedParameter2;
+      valueExpression =  "@" + namedParameter1 + AND + "@" + namedParameter2;
     } else {
       valueExpression = "@" + namedParameter1;
     }
