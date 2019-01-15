@@ -90,6 +90,14 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     this.props.onEdit(this.state.resource);
   };
 
+  canSave(): boolean {
+    if (this.props.editing) {
+      return this.state.resourceName.length > 0;
+    } else {
+      return false;
+    }
+  }
+
   render() {
     return <React.Fragment>
       {this.props.editing &&
@@ -101,7 +109,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
           <div style={{marginTop: '1rem'}}>
             <label className='required'
                    style={styles.fieldHeader}>{this.state.resourceType} Name: </label>
-            <ModalInput ref='name' value={this.state.resourceName}
+            <ModalInput value={this.state.resourceName}
                         onChange={(e) => this.setState({resourceName: e.target.value})}/>
           </div>
           <div style={{marginTop: '1rem'}}>
@@ -113,7 +121,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
         <ModalFooter>
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
-          <Button disabled={this.state.loading}
+          <Button disabled={!this.canSave()}
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>
         </ModalFooter>
@@ -138,13 +146,4 @@ export class EditModalComponent extends ReactWrapperBase {
     super(EditModal, ['editing', 'resource', 'cohort', 'onEdit', 'onCancel']);
   }
 
-  // get canSave(): boolean {
-  //   if (this.editing) {
-  //     const nameHasChanged = this.name.value !== this.rName;
-  //     const descHasChanged = this.description.value !== this.rDescription;
-  //     return this.form.valid && (nameHasChanged || descHasChanged) && !this.loading;
-  //   } else {
-  //     return false;
-  //   }
-  // }
 }
