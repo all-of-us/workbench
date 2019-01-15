@@ -109,14 +109,14 @@ export default SignPageTemplateReact;
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase {
+export class SignInTemplateComponent extends ReactWrapperBase implements OnInit{
 
   constructor(private signInService: SignInService, private router: Router) {
     super(SignPageTemplateReact, ['signIn']);
     this.signIn = this.signIn.bind(this);
   }
 
-  ngOnInit() {
+  ngOnInit(): void  {
     document.body.style.backgroundColor = '#e2e3e5';
 
     this.signInService.isSignedIn$.subscribe((signedIn) => {
