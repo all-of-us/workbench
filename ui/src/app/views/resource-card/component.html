@@ -50,8 +50,10 @@
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 
-<app-edit-modal [resource]="resourceCard"
-                        (updateFinished)="receiveRename()"></app-edit-modal>
+<app-edit-modal [editing]="editing"
+                [resource]="resourceCard"
+                [onCancel]="closeEditModal.bind(this)"
+                [onEdit]="receiveEdit.bind(this)"></app-edit-modal>
 
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>
