@@ -138,7 +138,7 @@ describe('ConceptSetDetailsComponent', () => {
   it('should allow validLength edits', fakeAsync(() => {
     setUpComponent();
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     const newName = 'cool new name';
     const newDesc = 'cool new description';
@@ -162,7 +162,7 @@ describe('ConceptSetDetailsComponent', () => {
     const originalName = cs.name;
 
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     simulateInput(fixture, de.query(By.css('.edit-name')), '');
     simulateClick(fixture, de.query(By.css('.submit-edit-button')));
@@ -183,7 +183,7 @@ describe('ConceptSetDetailsComponent', () => {
     const originalDesc = cs.description;
 
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     simulateInput(fixture, de.query(By.css('.edit-name')), 'falco');
     simulateInput(fixture, de.query(By.css('.edit-description')), 'lombardi');
