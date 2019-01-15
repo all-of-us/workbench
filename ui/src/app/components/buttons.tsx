@@ -102,9 +102,10 @@ export const Clickable = ({as = 'div', disabled = false, onClick = null, ...prop
   />;
 };
 
+
 export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
   return <Clickable
-      disabled={disabled} {...props}
-      {...merge(computeStyle(buttonVariants[type], {disabled}), {style})}
+    disabled={disabled} {...props}
+    {...merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
 };
