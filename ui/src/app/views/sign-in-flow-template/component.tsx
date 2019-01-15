@@ -132,7 +132,7 @@ export class SignInTemplateComponent extends ReactWrapperBase implements OnInit 
     this.signIn = this.signIn.bind(this);
   }
 
-  ngOnInit() {
+  ngOnInit(): void  {
     document.body.style.backgroundColor = '#e2e3e5';
 
     this.signInService.isSignedIn$.subscribe((signedIn) => {
