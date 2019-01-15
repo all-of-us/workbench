@@ -22,6 +22,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   error: boolean;
   status: string;
+  prevStatus: string;
   undoTimer: any;
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
@@ -90,6 +91,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   remove() {
+    this.prevStatus = this.status;
     this.status = 'pending';
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
@@ -98,7 +100,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   hide() {
-    this.status = 'hidden';
+    this.actions.removeGroupItem(this.role, this.groupId, this.itemId, true);
+    // this.status = 'hidden';
   }
 
   enable() {
@@ -107,7 +110,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   undo() {
     clearTimeout(this.undoTimer);
-    this.status = 'active';
+    this.status = this.prevStatus;
   }
 
   launchWizard() {

@@ -9,6 +9,7 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
+  getItem,
   initialState,
   SR_ID,
 } from './store';
@@ -62,6 +63,7 @@ import {
   REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
+  HIDE_ITEM,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -386,6 +388,20 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'item', 'attributes', 'node'], Map())
           .deleteIn(['wizard', 'calculate', 'count']);
 
+      case HIDE_ITEM: {
+        const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
+          .filter(itemId => {
+            const item = getItem(itemId)(state);
+            return item.get('id') !== action.itemId && item.get('status') === 'active';
+          });
+        if (!activeItems.size) {
+          state = state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
+        }
+        return state.updateIn(['entities', 'items', action.itemId],
+          List(),
+          item => item.set('status', 'hidden'));
+      }
+
       case REMOVE_ITEM: {
         state = state
           .updateIn(
@@ -393,9 +409,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             List(),
             itemList => itemList.filterNot(id => id === action.itemId)
           )
-          .updateIn(['entities', 'items', action.itemId],
-            List(),
-            item => item.set('status', 'deleted'));
+          .setIn(['entities', 'items', action.itemId, 'status'], 'deleted');
 
         const paramsInUse = state
           .getIn(['entities', 'items'], Map())

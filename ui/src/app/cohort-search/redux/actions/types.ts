@@ -48,6 +48,7 @@ export const ADD_MODIFIER = 'ADD_MODIFIER';
 export const REMOVE_MODIFIER = 'REMOVE_MODIFIER';
 export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
 export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
+export const HIDE_ITEM = 'HIDE_ITEM';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
 export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
@@ -312,7 +313,11 @@ export interface ActionTypes {
   HIDE_ATTRIBUTES_PAGE: {
     type: typeof HIDE_ATTRIBUTES_PAGE;
   };
-
+  HIDE_ITEM: {
+    type: typeof HIDE_ITEM;
+    itemId: string;
+    groupId: string
+  };
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
     itemId: string;
@@ -323,7 +328,6 @@ export interface ActionTypes {
     groupId: string;
     role: keyof SearchRequest;
   };
-
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
     itemId: string;
@@ -408,6 +412,7 @@ export type RootAction =
   | ActionTypes[typeof REMOVE_MODIFIER]
   | ActionTypes[typeof SET_WIZARD_FOCUS]
   | ActionTypes[typeof CLEAR_WIZARD_FOCUS]
+  | ActionTypes[typeof HIDE_ITEM]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
   | ActionTypes[typeof OPEN_WIZARD]
