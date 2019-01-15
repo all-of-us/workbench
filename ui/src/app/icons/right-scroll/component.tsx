@@ -21,7 +21,7 @@ export class RightScrollReact extends React.Component<{}, RightScrollState> {
     super(props);
     this.state = {
         style: defaultStyle
-    }
+    };
   }
 
   mouseOver(): void {
@@ -37,8 +37,8 @@ export class RightScrollReact extends React.Component<{}, RightScrollState> {
       <svg
         style={this.state.style}
         viewBox='0 0 47 48'
-        version='1.1' 
-        xmlns='http://www.w3.org/2000/svg' 
+        version='1.1'
+        xmlns='http://www.w3.org/2000/svg'
         xmlnsXlink='http://www.w3.org/1999/xlink'
         onMouseOver={() => this.mouseOver()}
         onMouseLeave={() => this.mouseLeave()}>
@@ -103,6 +103,6 @@ export class RightScrollReact extends React.Component<{}, RightScrollState> {
 })
 export class RightScrollComponent extends ReactWrapperBase {
   constructor() {
-    super(RightScrollReact, [])
+    super(RightScrollReact, []);
   }
 }
