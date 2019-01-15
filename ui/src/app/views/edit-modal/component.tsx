@@ -1,15 +1,9 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
+import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {
   Cohort,
-  CohortsService,
-  ConceptSet,
-  ConceptSetsService,
   RecentResource,
-  Workspace
 } from 'generated';
 
 import {
@@ -110,6 +104,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
             <label className='required'
                    style={styles.fieldHeader}>{this.state.resourceType} Name: </label>
             <ModalInput value={this.state.resourceName}
+                        id='edit-name'
                         onChange={(e) => this.setState({resourceName: e.target.value})}/>
           </div>
           <div style={{marginTop: '1rem'}}>
@@ -122,6 +117,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
           <Button disabled={!this.canSave()}
+                  id='save-edit'
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>
         </ModalFooter>

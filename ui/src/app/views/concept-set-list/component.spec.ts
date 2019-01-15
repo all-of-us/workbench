@@ -32,7 +32,7 @@ import {
   setupModals,
   simulateClick,
   simulateClickReact,
-  simulateInput,
+  simulateInputReact,
   updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -121,8 +121,8 @@ describe('ConceptSetListComponent', () => {
     tick();
     simulateClick(fixture, de.query(By.css('.pencil')));
     updateAndTick(fixture);
-    simulateInput(fixture, de.query(By.css('.name-input')), 'testMockConcept');
-    simulateClick(fixture, de.query(By.css('.btn-save')));
+    simulateInputReact(fixture, '#edit-name', 'testMockConcept');
+    simulateClickReact(fixture, '#save-edit');
     tick();
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
