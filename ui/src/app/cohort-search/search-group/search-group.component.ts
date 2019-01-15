@@ -41,6 +41,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => this.error = error);
+    this.status = this.group.get('status');
   }
 
   ngOnDestroy() {
@@ -60,12 +61,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    const groupCard = document.getElementById(this.group.get('id'));
-    const {marginBottom, width, height} = window.getComputedStyle(groupCard);
-    const overlay = document.getElementById('overlay_' + this.group.get('id'));
-    const styles = 'width:' + width + '; height:' + height + '; margin: -'
-      + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
-    overlay.setAttribute('style', styles);
+    this.setOverlayPosition();
     this.status = 'pending';
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroup(this.role, this.groupId);
@@ -73,9 +69,27 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     }, 3000);
   }
 
+  hide() {
+    this.status = 'hidden';
+    this.actions.removeGroup(this.role, this.groupId, true);
+  }
+
+  enable() {
+    this.status = 'active';
+  }
+
   undo() {
     clearTimeout(this.undoTimer);
     this.status = 'active';
+  }
+
+  setOverlayPosition() {
+    const groupCard = document.getElementById(this.group.get('id'));
+    const {marginBottom, width, height} = window.getComputedStyle(groupCard);
+    const overlay = document.getElementById('overlay_' + this.group.get('id'));
+    const styles = 'width:' + width + '; height:' + height + '; margin: -'
+      + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
+    overlay.setAttribute('style', styles);
   }
 
   launchWizard(criteria: any) {

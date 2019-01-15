@@ -5,6 +5,10 @@
   margin: 0.6rem 0;
 }
 
+.card.hide {
+  border-color: red;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;

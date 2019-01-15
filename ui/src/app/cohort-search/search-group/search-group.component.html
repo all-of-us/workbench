@@ -1,4 +1,4 @@
-<div [id]="group.get('id')" class="card bg-faded">
+<div [id]="group.get('id')" class="card bg-faded" [class.hide]="status === 'hidden'">
   <!--********************************Temporal changes start***************************************-->
 
   <div class="card-header" *ngIf="temporalDropdown && envFlag">
@@ -136,40 +136,52 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="!envFlag"><clr-dropdown>
-    <button type="button" clrDropdownTrigger>
-      <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
-    </button>
-    <clr-dropdown-menu *clrIfOpen>
-      <button
-        type="button"
-        clrDropdownItem>
-        Hide group from total count
+  <div class="card-footer text-right" *ngIf="!envFlag">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
       </button>
-      <button
-        type="button"
-        (click)="remove()"
-        clrDropdownItem>
-        Delete group
-      </button>
-    </clr-dropdown-menu>
-  </clr-dropdown>
-    Group Count:
-    <span *ngIf="isRequesting"
-          class="spinner spinner-inline"
-          [style.vertical-align]="'middle'">
-      Loading...
-    </span>
-    <span *ngIf="!isRequesting">
-      {{ group.get('count') | number }}
-    </span>
-    <span *ngIf="error">
-      <clr-icon
-        [popper]="errorPopper"
-        [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="18"></clr-icon>
-    </span>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          *ngIf="status === 'active'"
+          type="button"
+          (click)="hide()"
+          clrDropdownItem>
+          Hide group from total count
+        </button>
+        <button
+          *ngIf="status === 'hidden'"
+          type="button"
+          (click)="enable()"
+          clrDropdownItem>
+          Include group in total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete group
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    <ng-container *ngIf="status === 'active'">
+      Group Count:
+      <span *ngIf="isRequesting"
+            class="spinner spinner-inline"
+            [style.vertical-align]="'middle'">
+        Loading...
+      </span>
+      <span *ngIf="!isRequesting">
+        {{ group.get('count') | number }}
+      </span>
+      <span *ngIf="error">
+        <clr-icon
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          shape="error-standard"
+          size="18"></clr-icon>
+      </span>
+    </ng-container>
   </div>
 </div>
 

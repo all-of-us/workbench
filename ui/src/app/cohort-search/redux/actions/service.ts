@@ -85,6 +85,7 @@ export class CohortSearchActions {
   @dispatch() removeModifier = ActionFuncs.removeModifier;
   @dispatch() setWizardFocus = ActionFuncs.setWizardFocus;
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
+  @dispatch() hideGroup = ActionFuncs.hideGroup;
   @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
@@ -166,24 +167,32 @@ export class CohortSearchActions {
     }
   }
 
-  removeGroup(role: keyof SearchRequest, groupId: string): void {
+  removeGroup(role: keyof SearchRequest, groupId: string, hide?: boolean): void {
     const group = getGroup(groupId)(this.state);
 
     this.cancelIfRequesting('groups', groupId);
 
-    this._removeGroup(role, groupId);
-    this.removeId(groupId);
+    if (hide) {
+      this.hideGroup(role, groupId);
+    } else {
+      this._removeGroup(role, groupId);
+      this.removeId(groupId);
+    }
 
     group.get('items', List()).forEach(itemId => {
       this.cancelIfRequesting('items', itemId);
-      this._removeGroupItem(groupId, itemId);
-      this.removeId(itemId);
+      if (!hide) {
+        this._removeGroupItem(groupId, itemId);
+        this.removeId(itemId);
+      }
     });
 
-    const hasItems = !group
+    const activeItems = group
       .get('items', List())
-      .isEmpty();
-    if (hasItems) {
+      .map(id => getItem(id)(this.state))
+      .filter(it => it.get('status') === 'active');
+    const hasActiveItems = !activeItems.isEmpty();
+    if (hasActiveItems) {
       this.requestTotalCount();
     }
   }
@@ -195,11 +204,11 @@ export class CohortSearchActions {
     // The optimization wherein we only fire the request if the item
     // has a non-zero count (i.e. it affects its group and hence the total
     // counts) ONLY WORKS if the item is NOT an only child.
-    const activeItems = (getGroup(groupId)(this.state))
+    const isOnlyActiveChild = (getGroup(groupId)(this.state))
       .get('items', List())
       .map(id => getItem(id)(this.state))
-      .filter(it => it.get('status') === 'active');
-    const isOnlyActiveChild = activeItems.equals(List([item]));
+      .filter(it => it.get('status') === 'active')
+      .equals(List([item]));
 
     this.cancelIfRequesting('items', itemId);
     if (hide) {
@@ -214,11 +223,7 @@ export class CohortSearchActions {
        * count, not really. */
       if (isOnlyActiveChild) {
         this.requestTotalCount(groupId);
-        if (hide) {
-          // hide group
-        } else {
-          this.removeGroup(role, groupId);
-        }
+        this.removeGroup(role, groupId, hide);
       } else {
         this.requestTotalCount();
         this.requestGroupCount(role, groupId);
@@ -378,9 +383,13 @@ export class CohortSearchActions {
     /* If there are no members of an intersection, the intersection is the null
      * set
      */
-    const noGroups = included.size === 0;
-    const noGroupsWithItems = included.every(group => group.get('items').size === 0);
-    const emptyIntersection = noGroups || noGroupsWithItems;
+    const noActiveGroups = included.filter(group => group.get('status') === 'active').size === 0;
+    const noGroupsWithActiveItems = included.every(group => {
+      return group.get('items')
+        .filter(itemId => (getItem(itemId)(this.state)).get('status') === 'active')
+        .size === 0;
+    });
+    const emptyIntersection = noActiveGroups || noGroupsWithActiveItems;
 
     /* If any member of an intersection is the null set, the intersection is
      * the null set - unless the member in question is itself outdated (i.e.
