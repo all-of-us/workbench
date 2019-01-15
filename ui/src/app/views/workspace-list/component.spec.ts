@@ -11,7 +11,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent, ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';

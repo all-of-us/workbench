@@ -2,9 +2,10 @@ import {
   Component, Input,
 } from '@angular/core';
 import * as React from 'react';
+import * as ld from 'lodash/fp';
+
 
 import {
-  capitalize,
   decamelize,
   ReactWrapperBase
 } from 'app/utils';
@@ -34,12 +35,9 @@ export interface ConfirmDeleteModalState {
 
 export class ConfirmDeleteModal
     extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
-  state: ConfirmDeleteModalState;
-  props: ConfirmDeleteModalProps;
-  resourceTypeName = ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType);
 
   static transformResourceTypeName(resourceType: string): string {
-    return capitalize(decamelize(resourceType, ' '));
+    return ld.startCase(decamelize(resourceType, ' '));
   }
 
   constructor(props: ConfirmDeleteModalProps) {
@@ -48,10 +46,8 @@ export class ConfirmDeleteModal
   }
 
   emitDelete(): void {
-    if (!this.state.loading) {
-      this.setState({loading: true});
-      this.props.receiveDelete();
-    }
+    this.setState({loading: true});
+    this.props.receiveDelete();
   }
 
   render() {
@@ -59,10 +55,12 @@ export class ConfirmDeleteModal
       {this.props.deleting &&
       <Modal className='confirmDeleteModal'>
         <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
-          delete {this.resourceTypeName}: {this.props.resource.name}?
+          delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          : {this.props.resource.name}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
-          This will permanently delete the {this.resourceTypeName}.
+          This will permanently delete
+          the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button type='secondary'
@@ -71,7 +69,7 @@ export class ConfirmDeleteModal
                   style={{marginLeft: '0.5rem'}}
                   id='confirm-delete'
                   onClick={() => this.emitDelete()}>
-            Delete {this.resourceTypeName}
+            Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>
         </ModalFooter>
       </Modal>}
