@@ -48,31 +48,32 @@ public class TemporalQueryBuilder {
     ListMultimap<Integer, SearchGroupItem> temporalGroups = getTemporalGroups(includeGroup);
     for (Integer key : temporalGroups.keySet()) {
       List<SearchGroupItem> tempGroups = temporalGroups.get(key);
+      //key of zero indicates belonging to the first temporal group
+      //key of one indicates belonging to the seconn temporal group
+      boolean isFirstGroup = key == 0;
       for (SearchGroupItem tempGroup : tempGroups) {
         String query = QueryBuilderFactory
           .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
           .buildQuery(params, tempGroup,
-            key == 0 ? includeGroup.getMention() : TemporalMention.ANY_MENTION.name());
-        if (key == 0) {
+            isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION.name());
+        if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {
           temporalQueryParts2.add(query);
         }
       }
     }
-    String query1 = String.join(UNION_TEMPLATE, temporalQueryParts1);
-    String query2 = String.join(UNION_TEMPLATE, temporalQueryParts2);
     String conditions = SAME_ENC;
-    if (includeGroup.getTime().equals(TemporalTime.DURING_SAME_ENCOUNTER_AS.toString())) {
+    if (includeGroup.getTime().equals(TemporalTime.DURING_SAME_ENCOUNTER_AS.name())) {
       conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", includeGroup.getTimeValue().toString());
-    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_BEFORE.toString())) {
+    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_BEFORE.name())) {
       conditions = X_DAYS_BEFORE.replace("${timeValue}", includeGroup.getTimeValue().toString());
-    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.toString())) {
+    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.name())) {
       conditions = X_DAYS_AFTER.replace("${timeValue}", includeGroup.getTimeValue().toString());
     }
     return TEMPORAL_TEMPLATE
-      .replace("${query1}", query1)
-      .replace("${query2}", query2)
+      .replace("${query1}", String.join(UNION_TEMPLATE, temporalQueryParts1))
+      .replace("${query2}", String.join(UNION_TEMPLATE, temporalQueryParts2))
       .replace("${conditions}", conditions);
   }
 
@@ -81,5 +82,9 @@ public class TemporalQueryBuilder {
     searchGroup.getItems()
       .forEach(item -> itemMap.put(item.getTemporalGroup(), item));
     return itemMap;
+  }
+
+  private void validateSearchGroupItem() {
+
   }
 }
