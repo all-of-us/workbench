@@ -10,51 +10,6 @@ const styles = {
     overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
     userSelect: 'none',
     margin: 0, padding: '0rem 0.77rem',
-  }),
-  primary: ({ hover, disabled }) => ({
-    border: 'none',
-    backgroundColor: disabled ? '#c3c3c3' : (hover ? '#4356A7' : '#262262'),
-    borderRadius: '0.3rem',
-    color: '#fff',
-  }),
-  secondary: ({ hover, disabled }) => ({
-    border: '2px solid',
-    borderColor: disabled ? '#c3c3c3' : '#262262',
-    backgroundColor: disabled ? '#f1f2f2' : (hover ? '#262262' : 'transparent'),
-    borderRadius: '0.2rem',
-    color: disabled ? '#c3c3c3' : (hover ? '#ffffff' : '#262262'),
-    padding: '0.5rem 0.77rem',
-    cursor: 'pointer',
-    textTransform: 'uppercase',
-    letterSpacing: '0.02rem',
-    lineHeight: '0.77rem'
-  }),
-  darklingPrimary: ({ hover, disabled }) => ({
-    backgroundColor: disabled ? '#c3c3c3' : (hover ? 'rgba(255,255,255,0.3)' : '#262262'),
-    color: '#ffffff',
-    border: '0px',
-    borderRadius: '0.2rem'
-  }),
-  darklingSecondary: ({ hover, disabled }) => ({
-    backgroundColor: disabled ? '#c3c3c3' : (hover ? '#50ACE1' : '#0079b8'),
-    color: '#ffffff',
-    border: '0px',
-    borderRadius: '0.2rem'
-  })
-};
-
-/*
- * Uses the function-as-child technique. The children function is called with:
- *   hover: the current hover state
- *   trackHover: transforms an element, adds hooks to track hover state
- */
-class HoverContainer extends React.Component<
-  { children: ({ hover: boolean, trackHover: Function }) => React.ReactNode },
-  { hover: boolean }
-> {
-  constructor(props) {
-    super(props);
-    this.state = { hover: false };
   }
 };
 
@@ -72,7 +27,8 @@ const buttonVariants = {
     style: {
       ...styles.base,
       border: '2px solid', borderRadius: '0.2rem', borderColor: '#262262',
-      backgroundColor: '#ffffff', color: '#262262',
+      backgroundColor: 'transparent',
+      color: '#262262',
     },
     disabledStyle: {
       borderColor: '#c3c3c3',
@@ -109,14 +65,14 @@ const computeStyle = ({style, hover, disabledStyle}, {disabled}) => {
 
 export const Clickable = ({as = 'div', disabled = false, onClick = null, ...props}) => {
   return <Interactive
-    as={as} {...props}
-    onClick={(...args) => onClick && !disabled && onClick(...args)}
+      as={as} {...props}
+      onClick={(...args) => onClick && !disabled && onClick(...args)}
   />;
 };
 
 export const Button = ({type = 'primary', style = {}, disabled = false, ...props}) => {
   return <Clickable
-    disabled={disabled} {...props}
-    {...merge(computeStyle(buttonVariants[type], {disabled}), {style})}
+      disabled={disabled} {...props}
+      {...merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
 };
