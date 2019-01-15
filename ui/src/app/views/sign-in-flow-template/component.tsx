@@ -125,7 +125,7 @@ export default SignPageTemplateReact;
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase {
+export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
 
   constructor(private signInService: SignInService, private router: Router) {
     super(SignPageTemplateReact, ['signIn']);
