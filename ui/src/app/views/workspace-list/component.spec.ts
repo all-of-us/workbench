@@ -22,7 +22,11 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
-  simulateClick, updateAndTick
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  simulateInputReact,
+  updateAndTick
 } from 'testing/test-helpers';
 
 import * as React from 'react';
@@ -44,6 +48,7 @@ class WorkspaceListPage {
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceListComponent);
+    setupModals(this.fixture);
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.routerStub = this.fixture.debugElement.injector.get(Router);
     this.readPageData();
@@ -112,12 +117,6 @@ describe('WorkspaceListComponent', () => {
       tick();
   }));
 
-  // From https://stackoverflow.com/questions/36434002/
-  //        new-compilation-errors-with-react-addons-test-utils
-  function renderIntoDocument(reactEl: React.ReactElement<{}>) {
-    return ReactTestUtils.renderIntoDocument(reactEl) as React.Component<{}, {}>;
-  }
-
 
   it('displays correct number of workspaces in home-page', fakeAsync(() => {
     let expectedWorkspaces: number;
@@ -152,30 +151,17 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture,
       workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
     updateAndTick(workspaceListPage.fixture);
-    console.log(workspaceListPage.workspaceCards[0]);
+    simulateClickReact(workspaceListPage.fixture, '.delete-item');
+    updateAndTick(workspaceListPage.fixture);
+    console.log(workspaceListPage.fixture.componentInstance.confirmDeleting);
 
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.delete-item')));
-    // updateAndTick(workspaceListPage.fixture);
-    expect(1).toBe(1);
-    // expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
-    // expect(workspaceListPage.fixture.componentInstance.resource)
-    //   .toEqual(firstWorkspace);
-
-    // const deleteModal = ReactTestUtils.findRenderedDOMComponentWithClass(
-    //     renderIntoDocument(React.createElement(
-    //         ConfirmDeleteModal, {
-    //           deleting: workspaceListPage.fixture.componentInstance.confirmDeleting,
-    //           closeFunction: undefined,
-    //           resourceType: 'workspace',
-    //           resource: workspaceListPage.fixture.componentInstance.resource,
-    //           receiveDelete: undefined
-    //         })), 'confirmDeleteModal');
+    //expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.resource)
+      .toEqual(firstWorkspace);
+    simulateClickReact(workspaceListPage.fixture, '#confirm-delete');
+    console.log('done with test');
 
 
-    //
-    // const deleteModal =
-    //   workspaceListPage.fixture.debugElement.query(By.css('app-confirm-delete-modal'));
     // simulateClick(workspaceListPage.fixture, deleteModal.query(By.css('#confirm-delete')));
     // updateAndTick(workspaceListPage.fixture);
     // expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
