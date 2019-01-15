@@ -2,6 +2,8 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,21 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
+  private static final String TABLE_ID = "search_visit";
   //If the querybuilder will use modifiers then this sql statement has to have
-  //the distinct and visit_start_date as entry_date
+  //the distinct and entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
     "select distinct person_id, entry_date, concept_id\n" +
-      "from `${projectId}.${dataSetId}.search_visit` a\n" +
-      "where a.concept_id in unnest(${visitConceptIds})\n${ageDateAndEncounterSql}";
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
+      "where ";
+  private static final String CONCEPT_ID_TEMPLATE =
+    "concept_id in unnest(${visitConceptIds})\n" +
+      AGE_DATE_AND_ENCOUNTER_VAR;
 
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem inputParameters,
-                           boolean temporal) {
+                           String mention) {
     from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<Long> conceptIdList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getSearchParameters()) {
@@ -48,14 +54,17 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
       conceptIdList.add(parameter.getConceptId());
     }
 
-    String visitSql = "";
-    if (!conceptIdList.isEmpty()) {
-      String namedParameter = addQueryParameterValue(queryParams,
-          QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
-      visitSql = VISIT_SELECT_CLAUSE_TEMPLATE.replace("${visitConceptIds}", "@" + namedParameter);
+    if (conceptIdList.isEmpty()) {
+      throw new BadRequestException(
+        "Bad Request: please provide valid concept ids with search parameters ");
     }
-
-    return buildModifierSql(visitSql, queryParams, inputParameters.getModifiers());
+    String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
+    List<Modifier> modifiers = inputParameters.getModifiers();
+    String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
+    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+    String namedParameter = addQueryParameterValue(queryParams,
+      QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
+    return finalSql.replace("${visitConceptIds}", "@" + namedParameter);
   }
 
   @Override

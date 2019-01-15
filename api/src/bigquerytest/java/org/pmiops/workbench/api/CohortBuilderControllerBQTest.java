@@ -664,8 +664,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup searchGroup = new SearchGroup()
       .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.toString())
-      .time(TemporalTime.X_DAYS_AFTER.toString())
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(searchGroup);
@@ -698,8 +698,40 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup searchGroup = new SearchGroup()
       .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.toString())
-      .time(TemporalTime.X_DAYS_AFTER.toString())
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
+      .timeValue(5L);
+    List<SearchGroup> groups = new ArrayList<>();
+    groups.add(searchGroup);
+    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsAnyMentionOfMeasurementXDaysAfterDrug() throws Exception {
+    Criteria measurementLab =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, "3");
+    Criteria drugChild =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
+    Modifier modifier = new Modifier()
+      .name(ModifierType.AGE_AT_EVENT)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("25"));
+    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .searchParameters(Arrays.asList(createSearchParameter(measurementLab, "33386-4").attributes(Arrays.asList(new Attribute().name(ANY)))))
+      .modifiers(Arrays.asList(modifier))
+      .temporalGroup(0);
+    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .searchParameters(Arrays.asList(createSearchParameter(drugChild, "A09")))
+      .modifiers(Arrays.asList(modifier))
+      .temporalGroup(1);
+    SearchGroup searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
+      .temporal(true)
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
     List<SearchGroup> groups = new ArrayList<>();
     groups.add(searchGroup);

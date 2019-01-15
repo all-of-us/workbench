@@ -38,7 +38,7 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
     @Override
     public String buildQuery(Map<String, QueryParameterValue> queryParams,
                              SearchGroupItem searchGroupItem,
-                             boolean temporal) {
+                             String temporalMention) {
         String namedParameter = addQueryParameterValue(queryParams,
                 QueryParameterValue.array(
                         searchGroupItem
