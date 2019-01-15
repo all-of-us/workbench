@@ -7,6 +7,7 @@
       </button>
       <clr-dropdown-menu *clrIfOpen>
         <button
+          *ngIf="status === 'active'"
           type="button"
           (click)="launchWizard()"
           clrDropdownItem>
@@ -45,12 +46,12 @@
       <span class="code-text">{{ codeTypeDisplay }}</span>
     </small>
 
-    <small class="code-text padding-right">|</small>
+    <small *ngIf="status !== 'hidden'" class="code-text padding-right">|</small>
 
     <span *ngIf="isRequesting" class="spinner spinner-inline">
       Loading...
     </span>
-    <small *ngIf="!isRequesting" class="code-text">
+    <small *ngIf="!isRequesting && status !== 'hidden'" class="code-text">
       {{ item.get('count') | number }}
     </small>
     <span *ngIf="error">

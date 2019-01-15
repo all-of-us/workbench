@@ -18,7 +18,6 @@ export class InactiveListComponent implements OnInit {
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupList('includes'))
       .subscribe(groups => {
-        console.log(groups.toJS());
         this.groups = groups
           .filter(group => group.get('status') === 'deleted')
           .map(group => {

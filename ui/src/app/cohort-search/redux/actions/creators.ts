@@ -48,6 +48,7 @@ import {
   REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
+  HIDE_ITEM,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -290,6 +291,11 @@ export const setWizardFocus =
 export const clearWizardFocus =
   (): ActionTypes[typeof CLEAR_WIZARD_FOCUS] =>
   ({type: CLEAR_WIZARD_FOCUS});
+
+export const hideGroupItem =
+  (groupId: string, itemId: string
+  ): ActionTypes[typeof HIDE_ITEM] =>
+    ({type: HIDE_ITEM, groupId, itemId});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string

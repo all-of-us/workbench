@@ -85,6 +85,7 @@ export class CohortSearchActions {
   @dispatch() removeModifier = ActionFuncs.removeModifier;
   @dispatch() setWizardFocus = ActionFuncs.setWizardFocus;
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
+  @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
   @dispatch() requestAttributes = ActionFuncs.requestAttributes;
@@ -130,10 +131,6 @@ export class CohortSearchActions {
     return this.ngRedux.getState();
   }
 
-  debugDir(obj) {if (environment.debug) { console.dir(obj); }}
-  debugLog(msg) {if (environment.debug) { console.log(msg); }}
-
-
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
    */
@@ -171,8 +168,6 @@ export class CohortSearchActions {
 
   removeGroup(role: keyof SearchRequest, groupId: string): void {
     const group = getGroup(groupId)(this.state);
-    this.debugLog(`Removing ${groupId} of ${role}:`);
-    this.debugDir(group);
 
     this.cancelIfRequesting('groups', groupId);
 
@@ -187,40 +182,43 @@ export class CohortSearchActions {
 
     const hasItems = !group
       .get('items', List())
-      // .filter(item => item.get('active') === true)
       .isEmpty();
     if (hasItems) {
       this.requestTotalCount();
     }
   }
 
-  removeGroupItem(role: keyof SearchRequest, groupId: string, itemId: string): void {
+  removeGroupItem(role: keyof SearchRequest, groupId: string, itemId: string, hide?: boolean): void {
     const item = getItem(itemId)(this.state);
     const hasItems = !item.get('searchParameters', List()).isEmpty();
     const countIsNonZero = item.get('count') !== 0;
     // The optimization wherein we only fire the request if the item
     // has a non-zero count (i.e. it affects its group and hence the total
     // counts) ONLY WORKS if the item is NOT an only child.
-    const isOnlyChild = (getGroup(groupId)(this.state))
+    const activeItems = (getGroup(groupId)(this.state))
       .get('items', List())
-      .equals(List([itemId]));
-
-    this.debugLog(`Removing ${itemId} of ${groupId}:`);
-    this.debugDir(item);
-    this.debugLog(
-      `hasItems: ${hasItems}, countIsNonZero: ${countIsNonZero}, isOnlyChild: ${isOnlyChild}`
-    );
+      .map(id => getItem(id)(this.state))
+      .filter(it => it.get('status') === 'active');
+    const isOnlyActiveChild = activeItems.equals(List([item]));
 
     this.cancelIfRequesting('items', itemId);
-    this._removeGroupItem(groupId, itemId);
-    this.removeId(itemId);
+    if (hide) {
+      this.hideGroupItem(groupId, itemId);
+    } else {
+      this._removeGroupItem(groupId, itemId);
+      this.removeId(itemId);
+    }
 
-    if (hasItems && (countIsNonZero || isOnlyChild)) {
+    if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
       /* If this was the only item in the group, the group no longer has a
        * count, not really. */
-      if (isOnlyChild) {
+      if (isOnlyActiveChild) {
         this.requestTotalCount(groupId);
-        this.removeGroup(role, groupId);
+        if (hide) {
+          // hide group
+        } else {
+          this.removeGroup(role, groupId);
+        }
       } else {
         this.requestTotalCount();
         this.requestGroupCount(role, groupId);
@@ -376,8 +374,6 @@ export class CohortSearchActions {
     }
 
     const included = includeGroups(this.state);
-    this.debugLog('Making a request for Total with included groups: ');
-    this.debugDir(included);
 
     /* If there are no members of an intersection, the intersection is the null
      * set
@@ -399,7 +395,6 @@ export class CohortSearchActions {
      * the API
      */
     if (nullIntersection || emptyIntersection) {
-      this.debugLog('Not making request');
       this.setChartData('searchRequests', SR_ID, []);
       return ;
     }
@@ -438,7 +433,7 @@ export class CohortSearchActions {
         .get(kind, List())
         .map(this.mapGroup)
         // By this point, unlike almost everywhere else, we're back in vanilla JS land
-        .filterNot(grp => grp.items.length === 0)
+        .filterNot(grp => !grp || grp.items.length === 0)
         .toJS();
 
     const includes = getGroups('includes');
@@ -449,8 +444,13 @@ export class CohortSearchActions {
 
   mapGroup = (groupId: string): SearchGroup => {
     const group = getGroup(groupId)(this.state);
+    if (group.get('status') !== 'active') {
+      return;
+    }
     const temporal = group.get('temporal');
-    let items = group.get('items', List()).map(item => this.mapGroupItem(item, temporal));
+    let items = group.get('items', List())
+      .map(item => this.mapGroupItem(item, temporal))
+      .filter(item => !!item);
     if (isImmutable(items)) {
       items = items.toJS();
     }
@@ -466,6 +466,9 @@ export class CohortSearchActions {
 
   mapGroupItem = (itemId: string, temporal?: boolean): SearchGroupItem => {
     const item = getItem(itemId)(this.state);
+    if (item.get('status') !== 'active') {
+      return;
+    }
     const critIds = item.get('searchParameters', List());
 
     const params = this.state
