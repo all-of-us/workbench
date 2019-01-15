@@ -22,7 +22,7 @@ const styles = {
   },
 };
 
-interface SettingsState {
+export interface SettingsState {
   cluster: Cluster;
   resetClusterPending: boolean;
   resetClusterModal: boolean;
@@ -68,14 +68,14 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                           (!this.state.cluster) ?
                             'Your notebook server is still being created' : undefined}
                         side='right'>
-          <Button disabled={!this.state.cluster} onClick={this.openResetClusterModal}
-                  type='secondary'>
+          <Button disabled={!this.state.cluster} onClick={this.openResetClusterModal.bind(this)}
+                  data-test-id='reset-notebook-button' type='secondary'>
             Reset Notebook Server
           </Button>
         </TooltipTrigger>
       </div>
       {this.state.resetClusterModal &&
-      <Modal>
+      <Modal data-test-id='reset-notebook-modal'>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
           <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
