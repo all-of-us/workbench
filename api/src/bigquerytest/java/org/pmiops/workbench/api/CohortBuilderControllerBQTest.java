@@ -468,6 +468,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //only one temporal group
     temporalItem.setTemporalGroup(0);
     assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
+
+    //more than one temporal in second group
+    SearchGroupItem sgi1 = new SearchGroupItem().temporalGroup(1);
+    SearchGroupItem sgi2 = new SearchGroupItem().temporalGroup(1);
+    temporalGroup.addItemsItem(sgi1).addItemsItem(sgi2);
+    assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
   }
 
   @Test

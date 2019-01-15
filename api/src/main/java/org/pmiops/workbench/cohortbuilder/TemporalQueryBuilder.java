@@ -53,7 +53,7 @@ public class TemporalQueryBuilder {
     for (Integer key : temporalGroups.keySet()) {
       List<SearchGroupItem> tempGroups = temporalGroups.get(key);
       //key of zero indicates belonging to the first temporal group
-      //key of one indicates belonging to the seconn temporal group
+      //key of one indicates belonging to the second temporal group
       boolean isFirstGroup = key == 0;
       for (SearchGroupItem tempGroup : tempGroups) {
         String query = QueryBuilderFactory
@@ -90,6 +90,7 @@ public class TemporalQueryBuilder {
         itemMap.put(item.getTemporalGroup(), item);
       });
     from(notContainsTwoGroups()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
+    from(secondGroupContainsMoreThanOne()).test(itemMap).throwException(TEMPORAL_SECOND_GROUP_MESSAGE);
     return itemMap;
   }
 
