@@ -19,7 +19,7 @@ const defaultStyle = {
   height: 48
 };
 
-const hoverStyle = {fill: '#72B9E2'};
+const hoverStyle = {...defaultStyle, fill: '#72B9E2'};
 
 export class RightScrollReact extends React.Component<RightScrollProps, RightScrollState> {
 
@@ -31,7 +31,7 @@ export class RightScrollReact extends React.Component<RightScrollProps, RightScr
   }
 
   mouseOver(): void {
-    this.setState({style: {...defaultStyle, ...hoverStyle, ...this.props.style}});
+    this.setState({style: {...hoverStyle, ...this.props.style}});
   }
 
   mouseLeave(): void {
@@ -40,6 +40,8 @@ export class RightScrollReact extends React.Component<RightScrollProps, RightScr
 
   render() {
     const opacity = this.props.opacity ? this.props.opacity : 1;
+    const fill = this.props.fill ? this.props.fill : '#2691D0';
+
     return (
       <svg
         style={this.state.style}
@@ -86,7 +88,7 @@ export class RightScrollReact extends React.Component<RightScrollProps, RightScr
               <g id='Oval-3'>
                 <use fill='black' fillOpacity={opacity} filter='url(#filter-2)' xlinkHref='#path-1'>
                 </use>
-                <use fill='#2691D0' fillRule='evenodd' xlinkHref='#path-1'>
+                <use fill={fill} fillRule='evenodd' xlinkHref='#path-1'>
                 </use>
               </g>
               <g id='ic_chevron_right_24px-copy'
@@ -110,8 +112,13 @@ export class RightScrollReact extends React.Component<RightScrollProps, RightScr
 })
 export class RightScrollComponent extends ReactWrapperBase {
 
+  // Override default styles here
   @Input('style') style: RightScrollProps['style'];
+
+  // Opacity defaults to 1
   @Input('opacity') opacity: RightScrollProps['opacity'];
+
+  // Default fill color for the svg background is '#2691D0'
   @Input('fill') fill: RightScrollProps['fill'];
 
   constructor() {
