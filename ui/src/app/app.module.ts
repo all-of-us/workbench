@@ -21,7 +21,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -140,7 +139,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AccountCreationComponent,
-    AccountCreationModalsComponent,
     AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,

@@ -14,7 +14,6 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {AccountCreationModalsComponent} from '../account-creation-modals/component';
 import {AccountCreationSuccessComponent} from '../account-creation-success/component';
 import {AccountCreationComponent} from '../account-creation/component';
 import {InvitationKeyComponent} from '../invitation-key/component';
@@ -32,7 +31,6 @@ describe('AccountCreationComponent', () => {
       declarations: [
         LoginComponent,
         AccountCreationComponent,
-        AccountCreationModalsComponent,
         AccountCreationSuccessComponent,
         InvitationKeyComponent,
         PageTemplateSignedOutComponent
