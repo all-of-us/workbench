@@ -211,7 +211,7 @@ export class AccountCreationReact extends
                    value={this.state.profile.familyName}
                    style={(this.state.profile.familyName.length > 80) ?
                      inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                   onChange={e => this.updateProfile('givenName', e.target.value)}/>
+                   onChange={e => this.updateProfile('familyName', e.target.value)}/>
               {this.state.profile.familyName.length > 80 &&
                 <ErrorMessage id='familyNameError'>
                   Last Name must be 80 character or less.
