@@ -676,45 +676,148 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsAnyMentionOfICD9XDaysAfterICD10() throws Exception {
-    Criteria icd9ConditionChild =
+  public void countSubjectsTemporalTests() throws Exception {
+    Criteria icd9Child =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
-    Criteria snomedConditionChild =
-      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "4");
-    Criteria icd10ConditionChild =
+    Criteria icd9Parent =
+      createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
+    Criteria icd10Child =
       createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "9");
-    Modifier modifier = new Modifier()
+    Criteria icd10Parent =
+      createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name());
+    Criteria cptChild =
+      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "10");
+    Criteria snomedChild =
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "4");
+    Criteria visitCriteria = createCriteriaChild(TreeType.VISIT.name(), null, 0, "1");
+    Criteria drugChild =
+      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
+    Criteria drugParent = createCriteriaParent(TreeType.DRUG.name(), TreeSubType.ATC.name()).conceptId("21600932");
+    Criteria measurementLab =
+      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, "3");
+
+    Modifier ageModifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
-    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
+    Modifier eventDateModifier = new Modifier()
+      .name(ModifierType.EVENT_DATE)
+      .operator(Operator.LESS_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("2019-01-15"));
+    Modifier visitsModifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+    Modifier occurrencesModifier = new Modifier()
+      .name(ModifierType.NUM_OF_OCCURRENCES)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("1"));
+
+    SearchGroupItem searchGroupIcd9Child = new SearchGroupItem()
       .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd9ConditionChild, "001"), createSearchParameter(snomedConditionChild, "002")))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(0);
-    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
+      .searchParameters(Arrays.asList(createSearchParameter(icd9Child,"001")))
+      .modifiers(Arrays.asList(ageModifier));
+    SearchGroupItem searchGroupIcd9Parent = new SearchGroupItem()
       .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd10ConditionChild, "A09")))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(1);
+      .searchParameters(Arrays.asList(createSearchParameter(icd9Parent,"001")))
+      .modifiers(Arrays.asList(eventDateModifier));
+    SearchGroupItem searchGroupIcd10Child = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(icd10Child,"100")))
+      .modifiers(Arrays.asList(visitsModifier));
+    SearchGroupItem searchGroupIcd10Parent = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(icd10Parent,"100")))
+      .modifiers(Arrays.asList(occurrencesModifier));
+    SearchGroupItem searchGroupCpt = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(cptChild,"1234")));
+    SearchGroupItem searchGroupSnomed = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .searchParameters(Arrays.asList(createSearchParameter(snomedChild,"423902002")));
+    SearchGroupItem searchGroupVisit = new SearchGroupItem()
+      .type(TreeType.VISIT.name())
+      .searchParameters(Arrays.asList(createSearchParameter(visitCriteria,"")));
+    SearchGroupItem searchGroupDrugChild = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .searchParameters(Arrays.asList(createSearchParameter(drugChild,"Rxnorm")));
+    SearchGroupItem searchGroupDrugParent = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .searchParameters(Arrays.asList(createSearchParameter(drugParent,"Rxnorm")));
+    SearchGroupItem searchGroupMeasurement = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .searchParameters(Arrays.asList(
+        createSearchParameter(measurementLab,"Lab").attributes(Arrays.asList(new Attribute().name(ANY)))));
+
+    //Any Mention Of (ICD9Child or Snomed with modifiers) 5 Days After ICD10
+    //First temporal group
+    searchGroupIcd9Child.temporalGroup(0);
+    searchGroupSnomed.temporalGroup(0);
+    //Second temporal group
+    searchGroupIcd10Child.temporalGroup(1);
     SearchGroup searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
+      .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
       .temporal(true)
       .mention(TemporalMention.ANY_MENTION.name())
       .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
-    List<SearchGroup> groups = new ArrayList<>();
-    groups.add(searchGroup);
-    SearchRequest searchRequest = new SearchRequest().includes(groups);
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupIcd9Child and searchGroupIcd10Child
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //Any Mention Of (ICD9Parent or Snomed with modifiers) 5 Days before ICD10
+    //First temporal group
+    searchGroupIcd9Parent.temporalGroup(0);
+    searchGroupSnomed.temporalGroup(0);
+    //Second temporal group
+    searchGroupIcd10Child.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
+      .temporal(true)
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.X_DAYS_BEFORE.name())
+      .timeValue(5L);
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupSnomed and searchGroupIcd10Child
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //Any Mention Of (ICD10Parent(modifier) or CPT) within 5 Days of visit
+    //First temporal group
+    searchGroupIcd10Parent.temporalGroup(0);
+    searchGroupCpt.temporalGroup(0);
+    //Second temporal group
+    searchGroupVisit.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupIcd10Parent, searchGroupCpt, searchGroupVisit))
+      .temporal(true)
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.WITHIN_X_DAYS_OF.name())
+      .timeValue(5L);
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupCpt and searchGroupVisit
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //Any Mention Of DrugChild during same encounter as Measurement
+    //First temporal group
+    searchGroupDrugChild.temporalGroup(0);
+    //Second temporal group
+    searchGroupMeasurement.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupDrugChild, searchGroupMeasurement))
+      .temporal(true)
+      .mention(TemporalMention.ANY_MENTION.name())
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupDrugChild and searchGroupMeasurement
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsAnyMentionOfICD9XDaysAfterDrug() throws Exception {
+  public void countSubjectsAnyMentionOfICD9WithModifierXDaysAfterDrug() throws Exception {
     Criteria icd9ConditionChild =
       createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
     Criteria icd9ConditionChild1 =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "4");
+      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "4");
     Criteria drugChild =
       createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
     Modifier modifier = new Modifier()
@@ -893,6 +996,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .operands(Arrays.asList("1"));
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier2));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ParentAndChild() throws Exception {
+    Criteria icd9ConditionChild =
+      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
+    Criteria icd9ConditionParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
+    SearchParameter icd9Child = createSearchParameter(icd9ConditionChild, "001");
+    SearchParameter icd9Parent = createSearchParameter(icd9ConditionParent, "001");
+    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9Child, icd9Parent), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
