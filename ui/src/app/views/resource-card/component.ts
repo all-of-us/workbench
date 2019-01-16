@@ -10,11 +10,7 @@ import {
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {environment} from 'environments/environment';
-
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component ({
   selector : 'app-resource-card',
@@ -40,12 +36,9 @@ export class ResourceCardComponent implements OnInit {
   router: Router;
   actionList = resourceActionList;
   invalidResourceError = false;
+  confirmDeleting = false;
 
-  @ViewChild(RenameModalComponent)
-  renameModal: RenameModalComponent;
-
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
+  renaming = false;
 
   @ViewChild(EditModalComponent)
   editModal: EditModalComponent;
@@ -56,7 +49,8 @@ export class ResourceCardComponent implements OnInit {
       private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
       private route: Router,
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     this.wsNamespace = this.resourceCard.workspaceNamespace;
@@ -78,7 +72,19 @@ export class ResourceCardComponent implements OnInit {
   }
 
   renameNotebook(): void {
-    this.renameModal.open();
+    this.renaming = true;
+  }
+
+  cancelRename(): void {
+    this.renaming = false;
+  }
+
+  openConfirmDelete(): void {
+    this.confirmDeleting = true;
+  }
+
+  closeConfirmDelete(): void {
+    this.confirmDeleting = false;
   }
 
   receiveNotebookRename(rename: NotebookRename): void {
@@ -88,7 +94,7 @@ export class ResourceCardComponent implements OnInit {
       rename.newName = newName;
     }
     if (new RegExp('.*\/.*').test(newName)) {
-      this.renameModal.close();
+      this.renaming = false;
       this.invalidNameError.emit(newName);
       return;
     }
@@ -101,12 +107,12 @@ export class ResourceCardComponent implements OnInit {
         }
       })
       .subscribe(() => {
-          this.renameModal.close();
+          this.renaming = false;
           this.onUpdate.emit(rename);
         },
         (dupName) => {
           this.duplicateNameError.emit(dupName);
-          this.renameModal.close();
+          this.renaming = false;
     });
   }
 
@@ -147,32 +153,32 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
     }
-    this.deleteModal.open();
+    this.openConfirmDelete();
   }
 
-  receiveDelete($event): void {
+  receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
+        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, this.resource.name)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
         break;
       }
       case ResourceType.COHORT: {
-        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
+        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
       }
     }

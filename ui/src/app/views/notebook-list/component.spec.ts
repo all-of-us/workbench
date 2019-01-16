@@ -39,7 +39,14 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  simulateInputReact,
+  updateAndTick
+} from 'testing/test-helpers';
+
 
 class NotebookListPage {
   fixture: ComponentFixture<NotebookListComponent>;
@@ -52,6 +59,7 @@ class NotebookListPage {
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(NotebookListComponent);
+    setupModals(this.fixture);
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.readPageData();
@@ -150,9 +158,11 @@ describe('NotebookListComponent', () => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.pencil')));
-    simulateInput(fixture, de.query(By.css('#new-name')), 'testMockFile');
-    simulateClick(fixture, de.query(By.css('button#rename')));
+
+    simulateInputReact(fixture, '#new-name', 'testMockFile');
+    simulateClickReact(fixture, '#rename-button');
     updateAndTick(fixture);
+
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
     expect(fixture.componentInstance.resourceList[0].notebook.name)
@@ -164,10 +174,11 @@ describe('NotebookListComponent', () => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.pencil')));
-    simulateInput(fixture, de.query(By.css('#new-name')), 'mockFile');
-    simulateClick(fixture, de.query(By.css('button#rename')));
+
+    simulateInputReact(fixture, '#new-name', 'mockFile');
+    simulateClickReact(fixture, '#rename-button');
     updateAndTick(fixture);
-    tick();
+
     const errorMessage = de.queryAll(By.css('.modal-title'));
     expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
     simulateClick(fixture, de.query(By.css('.close')));
@@ -196,8 +207,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
-    updateAndTick(fixture);
+    simulateClickReact(fixture, '#confirm-delete');
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.length).toBe(0);
   }));
