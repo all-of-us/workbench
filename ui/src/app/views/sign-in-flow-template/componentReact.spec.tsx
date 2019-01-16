@@ -5,14 +5,13 @@ import * as React from 'react';
 
 import RegistrationPageTemplateReact, {pageImages, PageTemplateProps} from './component';
 
-describe('RegistrationPageTemplateReact', () => {
+describe('SignPageTemplateReact', () => {
   let props: PageTemplateProps;
 
   const signIn = jest.fn();
 
   const component = () => {
-    return mount<RegistrationPageTemplateReact>
-    (<RegistrationPageTemplateReact {...props}/>);
+    return mount(<RegistrationPageTemplateReact {...props}/>);
   };
 
   beforeEach(() => {
