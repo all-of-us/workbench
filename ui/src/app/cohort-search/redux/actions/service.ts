@@ -87,6 +87,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() hideGroup = ActionFuncs.hideGroup;
   @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
+  @dispatch() _enableGroupItem = ActionFuncs.enableGroupItem;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
   @dispatch() requestAttributes = ActionFuncs.requestAttributes;
@@ -229,6 +230,12 @@ export class CohortSearchActions {
         this.requestGroupCount(role, groupId);
       }
     }
+  }
+
+  enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
+    this._enableGroupItem(groupId, itemId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
   fetchCriteria(kind: string, parentId: number): void {

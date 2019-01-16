@@ -105,7 +105,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   enable() {
-    this.status = 'active';
+    this.actions.enableGroupItem(this.role, this.groupId, this.itemId);
+    // this.status = 'active';
   }
 
   undo() {
