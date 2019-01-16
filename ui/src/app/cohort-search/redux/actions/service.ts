@@ -87,6 +87,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() hideGroup = ActionFuncs.hideGroup;
   @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
+  @dispatch() _enableGroup = ActionFuncs.enableGroup;
   @dispatch() _enableGroupItem = ActionFuncs.enableGroupItem;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
@@ -224,12 +225,19 @@ export class CohortSearchActions {
        * count, not really. */
       if (isOnlyActiveChild) {
         this.requestTotalCount(groupId);
-        this.removeGroup(role, groupId, hide);
+        if (!hide) {
+          this.removeGroup(role, groupId);
+        }
       } else {
         this.requestTotalCount();
         this.requestGroupCount(role, groupId);
       }
     }
+  }
+
+  enableGroup(role: keyof SearchRequest, groupId: string) {
+    this._enableGroup(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
