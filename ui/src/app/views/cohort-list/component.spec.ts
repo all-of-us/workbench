@@ -12,7 +12,9 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
+  setupModals,
   simulateClick,
+  simulateClickReact,
   simulateInput,
   updateAndTick
 } from 'testing/test-helpers';
@@ -107,6 +109,7 @@ describe('CohortListComponent', () => {
 
   it('should delete the correct cohort', fakeAsync(() => {
     const fixture = TestBed.createComponent(CohortListComponent);
+    setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
     updateAndTick(fixture);
     updateAndTick(fixture);
@@ -119,8 +122,7 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-delete-btn')));
-    updateAndTick(fixture);
+    simulateClickReact(fixture, '#confirm-delete');
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(1);
     expect(app.resourceList).not.toContain(deletedResource);

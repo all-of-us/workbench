@@ -10,18 +10,23 @@ const styles = {
 
   overlay: {
     backgroundColor: 'rgba(49, 49, 49, 0.85)', padding: '1rem', display: 'flex',
-    position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
+    position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto',
+    zIndex: 1040
   },
 
   modalTitle: {
     fontSize: '20px',
     color: '#302973',
+    fontWeight: 600,
     marginBottom: '1rem'
   },
 
   modalBody: {
     fontSize: '14px',
     lineHeight: '.8rem',
+    marginTop: '3%',
+    fontWeight: 400
+
   },
 
   modalFooter: {
