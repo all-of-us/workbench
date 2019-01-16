@@ -80,7 +80,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     }
 
     this.props.onEdit(this.state.resource);
-  };
+  }
 
   render() {
     return <React.Fragment>
