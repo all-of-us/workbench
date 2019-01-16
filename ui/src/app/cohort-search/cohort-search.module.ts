@@ -15,7 +15,6 @@ import {CodeDropdownComponent} from './code-dropdown/code-dropdown.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
-import { InactiveListComponent } from './inactive-list/inactive-list.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
@@ -64,7 +63,6 @@ const routes: Routes = [{
     CodeDropdownComponent,
     DemographicsComponent,
     GenderChartComponent,
-    InactiveListComponent,
     ModalComponent,
     ModifierPageComponent,
     MultiSelectComponent,
