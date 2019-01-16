@@ -16,7 +16,7 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
   @Query(nativeQuery=true,value="select m.name, m.description,\n" +
       "m.concept_id, COUNT(DISTINCT c.concept_id) as question_count,\n" +
       // We don't show participant counts when filtering by keyword, and don't have a way of computing them easily; return 0.
-      "0 participant_count\n" +
+      "0 participant_count, m.order_number\n" +
       "from survey_module m\n" +
       "join achilles_results r on m.concept_id = r.stratum_1\n" +
       "join concept c on r.stratum_2 = c.concept_id\n" +
