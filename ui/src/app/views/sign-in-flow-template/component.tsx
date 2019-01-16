@@ -50,7 +50,7 @@ const pageImages = {
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
-const SignPageTemplateReact = withWindowSize()(
+const RegistrationPageTemplateReact = withWindowSize()(
   class extends React.Component<PageTemplateProps, PageTemplateState> {
 
     constructor(props: PageTemplateProps) {
@@ -104,7 +104,7 @@ const SignPageTemplateReact = withWindowSize()(
     }
 });
 
-export default SignPageTemplateReact;
+export default RegistrationPageTemplateReact;
 
 @Component({
   template: '<div #root></div>'
@@ -112,7 +112,7 @@ export default SignPageTemplateReact;
 export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(SignPageTemplateReact, ['signIn']);
+    super(RegistrationPageTemplateReact, ['signIn']);
     this.signIn = this.signIn.bind(this);
   }
 
