@@ -80,7 +80,6 @@ const SignPageTemplateReact = withWindowSize()(
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
         case 'createAccount': return <AccountCreationReact
-                          onAccountCreation={() => this.setCurrentStep('accountCreationSuccess')}
                           invitationKey={this.state.invitationKey}
                           setProfile={this.setProfile}/>;
         default:
@@ -95,7 +94,10 @@ const SignPageTemplateReact = withWindowSize()(
     }
 
     setProfile(profile) {
-      this.setState({profile: profile});
+      this.setState({
+        profile: profile,
+        currentStep: 'accountCreationSuccess'
+      });
     }
 
     onKeyVerified(invitationKey) {

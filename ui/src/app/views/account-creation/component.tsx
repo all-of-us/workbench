@@ -38,7 +38,6 @@ function isBlank(s: string) {
 export interface AccountCreationProps {
   invitationKey: string;
   setProfile: Function;
-  onAccountCreation: Function;
 }
 
 export interface AccountCreationState {
@@ -52,7 +51,6 @@ export interface AccountCreationState {
 export class AccountCreationReact extends
     React.Component<AccountCreationProps, AccountCreationState> {
   usernameCheckTimeout: NodeJS.Timer;
-  accountCreated = false;
 
   constructor(props: AccountCreationProps) {
     super(props);
@@ -75,16 +73,11 @@ export class AccountCreationReact extends
       showAllFieldsRequiredError: false
     };
     this.createAccount = this.createAccount.bind(this);
-    this.usernameValid = this.usernameValid.bind(this);
-    this.usernameNotValid = this.usernameNotValid.bind(this);
   }
 
 
   createAccount(): void {
-    const {invitationKey, setProfile, onAccountCreation} = this.props;
-    if (this.state.usernameConflictError || this.usernameInvalidError()) {
-      return;
-    }
+    const {invitationKey, setProfile} = this.props;
     this.setState({showAllFieldsRequiredError: false});
     const requiredFields =
       [this.state.profile.givenName, this.state.profile.familyName,
@@ -108,9 +101,7 @@ export class AccountCreationReact extends
       .then((response) => response.json)
       .then((profile) => {
           this.setState({profile: profile, creatingAccount: false});
-          this.accountCreated = true;
           setProfile(profile);
-          onAccountCreation();
         }
       )
       .catch(error => {
@@ -119,16 +110,9 @@ export class AccountCreationReact extends
       });
   }
 
-  usernameNotValid(): boolean {
-    if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
-      return false;
-    }
-    return this.isUsernameValidationError();
-  }
-
   usernameValid(): boolean {
     if (isBlank(this.state.profile.username) || this.state.usernameCheckInProgress) {
-      return false;
+      return undefined;
     }
     return !this.isUsernameValidationError();
   }
@@ -189,83 +173,82 @@ export class AccountCreationReact extends
 
   render() {
     return <React.Fragment>
-      {!this.accountCreated &&
-        <div id='account-creation'
-             style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
-          <BoldHeader>Create your account</BoldHeader>
+      <div id='account-creation'
+           style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
+        <BoldHeader>Create your account</BoldHeader>
         <div>
           <FormSection>
             <LongInput type='text' id='givenName' name='givenName' autoFocus
-                    placeholder='First Name'
-                    value={this.state.profile.givenName}
-                    style={(this.state.profile.givenName.length > 80) ?
-                      inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                    onChange={e => this.updateProfile('givenName', e.target.value)}/>
-              {this.state.profile.givenName.length > 80 &&
-                <ErrorMessage id='givenNameError'>
-                  First Name must be 80 characters or less.
-                </ErrorMessage>}
+                       placeholder='First Name'
+                       value={this.state.profile.givenName}
+                       style={(this.state.profile.givenName.length > 80) ?
+                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                       onChange={e => this.updateProfile('givenName', e.target.value)}/>
+            {this.state.profile.givenName.length > 80 &&
+            <ErrorMessage id='givenNameError'>
+              First Name must be 80 characters or less.
+            </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
-                   value={this.state.profile.familyName}
-                   style={(this.state.profile.familyName.length > 80) ?
-                     inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                   onChange={e => this.updateProfile('familyName', e.target.value)}/>
-              {this.state.profile.familyName.length > 80 &&
-                <ErrorMessage id='familyNameError'>
-                  Last Name must be 80 character or less.
-                </ErrorMessage>}
+                       value={this.state.profile.familyName}
+                       style={(this.state.profile.familyName.length > 80) ?
+                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                       onChange={e => this.updateProfile('familyName', e.target.value)}/>
+            {this.state.profile.familyName.length > 80 &&
+            <ErrorMessage id='familyNameError'>
+              Last Name must be 80 character or less.
+            </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='contactEmail' name='contactEmail'
-                      placeholder='Email Address'
-                      onChange={e => this.updateProfile('contactEmail', e.target.value)}/>
+                       placeholder='Email Address'
+                       onChange={e => this.updateProfile('contactEmail', e.target.value)}/>
           </FormSection>
           <FormSection>
             <LongInput type='text' id='currentPosition' name='currentPosition'
-                     placeholder='You Current Position'
-                     value={this.state.profile.currentPosition}
-                     style={(this.state.profile.currentPosition.length > 255) ?
-                       inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                     onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
-              {this.state.profile.currentPosition.length > 255 &&
-                <ErrorMessage id='currentPositionError'>
-                  Current Position must be 255 characters or less.
-                </ErrorMessage>}
+                       placeholder='You Current Position'
+                       value={this.state.profile.currentPosition}
+                       style={(this.state.profile.currentPosition.length > 255) ?
+                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                       onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
+            {this.state.profile.currentPosition.length > 255 &&
+            <ErrorMessage id='currentPositionError'>
+              Current Position must be 255 characters or less.
+            </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='organization' name='organization'
-                     placeholder='Your Organization'
-                     value={this.state.profile.organization}
-                     style={(this.state.profile.organization.length > 255) ?
-                       inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                     onChange={e => this.updateProfile('organization', e.target.value)}/>
-              {this.state.profile.organization.length > 255 &&
-                <ErrorMessage id='organizationError'>
-                  Organization must be 255 characters of less.
-                </ErrorMessage>}
+                       placeholder='Your Organization'
+                       value={this.state.profile.organization}
+                       style={(this.state.profile.organization.length > 255) ?
+                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
+                       onChange={e => this.updateProfile('organization', e.target.value)}/>
+            {this.state.profile.organization.length > 255 &&
+            <ErrorMessage id='organizationError'>
+              Organization must be 255 characters of less.
+            </ErrorMessage>}
           </FormSection>
           <FormSection style={{'display': 'flex', 'flexDirection': 'row'}}>
               <textarea style={{
-                        ...inputStyles.formInput,
-                        ...inputStyles.longInput,
-                        'height': '10em',
-                        'resize': 'none',
-                        'width': '16rem'
-                      }}
+                ...inputStyles.formInput,
+                ...inputStyles.longInput,
+                'height': '10em',
+                'resize': 'none',
+                'width': '16rem'
+              }}
                         id='areaOfResearch'
                         name='areaOfResearch'
                         placeholder='Describe Your Current Research'
                         onChange={e => this.updateProfile('areaOfResearch', e.target.value)}/>
-                <TooltipTrigger content='You are required to describe your current research in
+            <TooltipTrigger content='You are required to describe your current research in
                       order to help All of Us improve the Researcher Workbench.'>
-                  <InfoIcon style={{
-                    'height': '22px',
-                    'marginTop': '2.2rem',
-                    'paddingLeft': '2px'
-                    }}/>
-                </TooltipTrigger>
+              <InfoIcon style={{
+                'height': '22px',
+                'marginTop': '2.2rem',
+                'paddingLeft': '2px'
+              }}/>
+            </TooltipTrigger>
           </FormSection>
           <FormSection>
             <LongInput type='text' id='username' name='username' placeholder='New Username'
@@ -273,7 +256,7 @@ export class AccountCreationReact extends
                        style={(this.state.usernameConflictError || this.usernameInvalidError()) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
             <div style={inputStyles.iconArea}>
-              <ValidationIcon validSuccess={this.usernameValid} notValid={this.usernameNotValid}/>
+              <ValidationIcon validSuccess={this.usernameValid()}/>
             </div>
             <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
               numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
@@ -283,18 +266,18 @@ export class AccountCreationReact extends
             </TooltipTrigger>
             <div style={{height: '1.5rem'}}>
               {this.state.usernameConflictError &&
-                <Error id='usernameConflictError'>
-                  Username is already taken.
-                </Error>}
+              <Error id='usernameConflictError'>
+                Username is already taken.
+              </Error>}
               {this.usernameInvalidError() &&
-                <Error id='usernameError'>
-                  Username is not a valid username.
-                </Error>}
+              <Error id='usernameError'>
+                Username is not a valid username.
+              </Error>}
             </div>
           </FormSection>
           <FormSection>
             <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
-                    this.isUsernameValidationError()}
+            this.isUsernameValidationError()}
                     style={{'height': '2rem', 'width': '10rem'}}
                     onClick={this.createAccount}>
               Next
@@ -302,10 +285,10 @@ export class AccountCreationReact extends
           </FormSection>
         </div>
         {this.state.showAllFieldsRequiredError &&
-          <Error>
-            All fields are required.
-          </Error>}
-        </div>}
+        <Error>
+          All fields are required.
+        </Error>}
+      </div>
     </React.Fragment>;
   }
 

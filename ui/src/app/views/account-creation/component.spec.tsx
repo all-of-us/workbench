@@ -1,5 +1,6 @@
 import {shallow} from 'enzyme';
 import * as React from 'react';
+import * as fp from 'lodash';
 
 import {
   AccountCreationProps,
@@ -24,7 +25,7 @@ beforeEach(() => {
 
 it('should handle given name validity', () => {
   const wrapper = component();
-  const testInput = createInput(101);
+  const testInput = fp.repeat('a', 101);
   expect(wrapper.exists('#givenName')).toBeTruthy();
   expect(wrapper.exists('#givenNameError')).toBeFalsy();
   wrapper.find('#givenName')
@@ -35,7 +36,7 @@ it('should handle given name validity', () => {
 
 it ('should handle family name validity', () => {
   const wrapper = component();
-  const testInput = createInput(101);
+  const testInput = fp.repeat('a', 101);
   expect(wrapper.exists('#familyName')).toBeTruthy();
   expect(wrapper.exists('#familyNameError')).toBeFalsy();
   wrapper.find('#familyName').simulate('change', {target: {value: testInput}});
@@ -44,7 +45,7 @@ it ('should handle family name validity', () => {
 
 it ('should handle organization validity', () => {
   const wrapper = component();
-  const testInput = createInput(300);
+  const testInput = fp.repeat('a', 300);
   expect(wrapper.exists('#organization')).toBeTruthy();
   expect(wrapper.exists('#organizationError')).toBeFalsy();
   wrapper.find('#organization').simulate('change', {target: {value: testInput}});
@@ -53,7 +54,7 @@ it ('should handle organization validity', () => {
 
 it ('should handle current position validity', () => {
   const wrapper = component();
-  const testInput = createInput(300);
+  const testInput = fp.repeat('a', 300);
   expect(wrapper.exists('#currentPosition')).toBeTruthy();
   expect(wrapper.exists('#currentPositionError')).toBeFalsy();
   wrapper.find('#currentPosition').simulate('change', {target: {value: testInput}});
@@ -82,7 +83,7 @@ it ('should handle username validity', () => {
   expect(wrapper.exists('#usernameError')).toBeTruthy();
 
   // if username is long (not too long) but has a mismatch at end
-  testInput = createInput(50);
+  testInput = fp.repeat('a', 50);
   testInput = testInput + ' a';
   wrapper.find('#username').simulate('change', {target: {value: testInput}});
   expect(wrapper.exists('#usernameError')).toBeTruthy();
@@ -92,12 +93,3 @@ it ('should handle username validity', () => {
   wrapper.find('#username').simulate('change', {target: {value: testInput}});
   expect(wrapper.exists('#usernameError')).toBeFalsy();
 });
-
-function createInput(lengthWanted: number): string {
-  let stringToReturn = '';
-  while (lengthWanted > 0) {
-    stringToReturn = stringToReturn.concat('a');
-    lengthWanted--;
-  }
-  return stringToReturn;
-}

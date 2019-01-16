@@ -30,13 +30,13 @@ export const InfoIcon = ({style = {}, ...props}) =>
            style={{...styles.infoIcon, ...style}}/>;
 
 export const ValidationIcon = props => {
-  if (props.notValid()) {
-    return <ClrIcon shape='warning-standard' class='is-solid'
-                    style={{...styles.warningIcon, ...props.style}}/>;
-  } else if (props.validSuccess()) {
+  if (props.validSuccess === undefined) {
+    return null;
+  } else if (props.validSuccess) {
     return <ClrIcon shape='success-standard' class='is-solid'
                     style={{...styles.successIcon, ...props.style}}/>;
   } else {
-    return <div/>;
+    return <ClrIcon shape='warning-standard' class='is-solid'
+                    style={{...styles.warningIcon, ...props.style}}/>;
   }
 };
