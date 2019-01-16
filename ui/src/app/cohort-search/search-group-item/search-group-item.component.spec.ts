@@ -81,6 +81,7 @@ describe('SearchGroupItemComponent', () => {
     comp.itemIndex = 0;
 
     comp.itemId = 'item001';
+    comp.status = 'active';
 
     itemStub = MockNgRedux
       .getSelectorStub<CohortSearchState, any>(
@@ -97,6 +98,7 @@ describe('SearchGroupItemComponent', () => {
     expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
+    comp.status = 'active';
     fixture.detectChanges();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
@@ -125,6 +127,7 @@ describe('SearchGroupItemComponent', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
+    comp.status = 'active';
     fixture.detectChanges();
 
     const expectedContext = {
@@ -137,7 +140,10 @@ describe('SearchGroupItemComponent', () => {
       codes: false
     };
 
-    const editButton = fixture.debugElement.query(By.css('clr-icon[shape=pencil]')).parent;
+    const dropdown = fixture.debugElement.query(By.css('.dropdown-toggle'));
+    dropdown.triggerEventHandler('click', null);
+
+    const editButton = fixture.debugElement.query(By.css('button[clrdropdownitem]:first-of-type'));
     editButton.triggerEventHandler('click', null);
 
     expect(spy).toHaveBeenCalledWith({
@@ -151,6 +157,7 @@ describe('SearchGroupItemComponent', () => {
     comp.itemIndex = 1;
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
+    comp.status = 'active';
     fixture.detectChanges();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
