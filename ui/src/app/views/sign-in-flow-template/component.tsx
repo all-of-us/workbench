@@ -21,7 +21,8 @@ interface ImagesSource {
 }
 
 interface PageTemplateProps {
-  signIn: any;
+  onInit: () => void;
+  signIn: () => void;
   windowSize: { width: number, height: number };
 }
 
@@ -47,7 +48,7 @@ const pageImages = {
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
-const SignPageTemplateReact = withWindowSize()(
+const RegistrationPageTemplateReact = withWindowSize()(
   class extends React.Component<PageTemplateProps, PageTemplateState> {
 
     constructor(props: PageTemplateProps) {
@@ -70,6 +71,11 @@ const SignPageTemplateReact = withWindowSize()(
       };
       this.setCurrentStep = this.setCurrentStep.bind(this);
       this.onKeyVerified = this.onKeyVerified.bind(this);
+    }
+
+    componentDidMount() {
+      document.body.style.backgroundColor = '#e2e3e5';
+      this.props.onInit();
     }
 
     nextDirective(index) {
@@ -121,30 +127,28 @@ const SignPageTemplateReact = withWindowSize()(
     }
 });
 
-export default SignPageTemplateReact;
+export default RegistrationPageTemplateReact;
 
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
+export class SignInTemplateComponent extends ReactWrapperBase {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(SignPageTemplateReact, ['signIn']);
+    super(RegistrationPageTemplateReact, ['onInit', 'signIn']);
+    this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
   }
 
-  ngOnInit() {
-    document.body.style.backgroundColor = '#e2e3e5';
-
+  onInit(): void  {
     this.signInService.isSignedIn$.subscribe((signedIn) => {
       if (signedIn) {
         this.router.navigateByUrl('/');
       }
     });
-    super.ngOnInit();
   }
 
-  signIn(): void {
+ signIn(): void {
     this.signInService.signIn();
   }
 

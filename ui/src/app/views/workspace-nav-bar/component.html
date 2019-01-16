@@ -50,7 +50,7 @@
           <span *ngIf="!ownerPermission" class="tooltip-content">Requires Owner Permission</span>
         </span>
         <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-left">
-          <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="confirmDelete()">
+          <button clrDropdownItem class="btn" [disabled]="!ownerPermission" (click)="openConfirmDelete()">
            <clr-icon shape="trash" class="icons"></clr-icon>
             Delete
           </button>
@@ -69,6 +69,10 @@
 </clr-modal>
 
 <app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
-<app-confirm-delete-modal [resourceType]="'workspace'" [resource]="workspace" (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+<app-confirm-delete-modal [resourceType]="'workspace'"
+                          [resource]="workspace"
+                          [receiveDelete]="receiveDelete.bind(this)"
+                          [closeFunction]="closeConfirmDelete.bind(this)"
+                          [deleting]="confirmDeleting"></app-confirm-delete-modal>
 <app-bug-report></app-bug-report>
 <router-outlet></router-outlet>

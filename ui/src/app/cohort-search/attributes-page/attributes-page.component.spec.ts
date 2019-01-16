@@ -1,13 +1,12 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {fromJS, List, Map} from 'immutable';
+import {fromJS} from 'immutable';
 
+import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {
-  addAttributeForPreview,
   addParameter,
   CohortSearchActions,
   hideAttributesPage,
@@ -18,7 +17,6 @@ import {CohortBuilderService} from 'generated';
 import {AttributesPageComponent} from './attributes-page.component';
 
 class MockActions {
-  @dispatch() addAttributeForPreview = addAttributeForPreview;
   @dispatch() addParameter = addParameter;
   @dispatch() hideAttributesPage = hideAttributesPage;
   @dispatch() requestAttributePreview = requestAttributePreview;
@@ -36,8 +34,8 @@ describe('AttributesPageComponent', () => {
     mockReduxInst.getState = _wrapped;
 
     TestBed.configureTestingModule({
-      declarations: [ AttributesPageComponent ],
-      imports: [ClarityModule, FormsModule],
+      declarations: [AttributesPageComponent, ValidatorErrorsComponent],
+      imports: [ClarityModule, ReactiveFormsModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: CohortBuilderService, useValue: {}},
@@ -64,6 +62,15 @@ describe('AttributesPageComponent', () => {
       selectable: true,
       subtype: 'HEIGHT',
       type: 'PM'
+    });
+    component.form = new FormGroup({
+      NUM: new FormGroup({
+        num0: new FormGroup({
+          operator: new FormControl(),
+          valueA: new FormControl(),
+          valueB: new FormControl(),
+        })
+      })
     });
     fixture.detectChanges();
   });
