@@ -143,7 +143,7 @@ class CommonUiDevStart
     Common.register_command({
                                 :invocation => "build",
                                 :description => "Builds the UI for the given environment.",
-                                :fn => ->(*args) { build("build", args) }
+                                :fn => ->(*args) { build("build", @ui_name, args) }
                             })
     Common.register_command({
                                 :invocation => "dev-up",
