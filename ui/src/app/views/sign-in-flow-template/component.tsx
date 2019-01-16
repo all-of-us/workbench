@@ -102,7 +102,7 @@ export default RegistrationPageTemplateReact;
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase implements OnInit{
+export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
 
   constructor(private signInService: SignInService, private router: Router) {
     super(RegistrationPageTemplateReact, ['signIn']);
