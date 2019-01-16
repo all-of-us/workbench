@@ -15,7 +15,6 @@ describe('ConfirmDeleteModalComponent', () => {
     props = {
       editing: true,
       resource: {},
-      cohort: {},
       onEdit: () => {},
       onCancel: () => {}
     };

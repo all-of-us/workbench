@@ -44,7 +44,6 @@ export interface EditModalState {
 export interface EditModalProps {
   editing: boolean;
   resource: RecentResource;
-  cohort: any;
   onEdit: Function;
   onCancel: Function;
 }
@@ -134,12 +133,11 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
 export class EditModalComponent extends ReactWrapperBase {
   @Input('editing') editing: EditModalProps['editing'];
   @Input('resource') resource: EditModalProps['resource'];
-  @Input('cohort') cohort: EditModalProps['cohort'];
   @Input('onEdit') onEdit: EditModalProps['onEdit'];
   @Input('onCancel') onCancel: EditModalProps['onCancel'];
 
   constructor() {
-    super(EditModal, ['editing', 'resource', 'cohort', 'onEdit', 'onCancel']);
+    super(EditModal, ['editing', 'resource', 'onEdit', 'onCancel']);
   }
 
 }
