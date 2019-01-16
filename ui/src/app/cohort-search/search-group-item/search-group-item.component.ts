@@ -98,10 +98,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     return this.rawCodes.map(formatter).join(sep);
   }
 
-  get showItem() {
-    return this.status === 'active' || this.status === 'hidden';
-  }
-
   remove() {
     this.prevStatus = this.status;
     this.status = 'pending';

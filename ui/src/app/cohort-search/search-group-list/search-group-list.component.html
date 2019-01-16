@@ -4,18 +4,12 @@
   </div>
 
   <!-- .size, not .length => this is an immutable.js list -->
-  <div *ngFor="let group of (groups$ | async)">
-    <app-search-group [group]="group" [role]="role">
+  <div *ngFor="let group of (groups$ | async); let i = index;">
+    <app-search-group [group]="group" [index]="i" [role]="role">
     </app-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>
     </div>
   </div>
-  <button
-    *ngIf="(initShowChart$ | async)"
-    type="button"
-    class="btn btn-info-outline btn-sm">
-    DELETE GROUP
-  </button>
   <app-search-group-select [role]="role"></app-search-group-select>
 </div>

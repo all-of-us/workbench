@@ -1,7 +1,29 @@
-<div [id]="group.get('id')" class="card bg-faded" [class.hide]="status === 'hidden'">
+<div [id]="group.get('id')" class="card bg-faded">
+  <div class="card-header">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          type="button"
+          (click)="hide()"
+          clrDropdownItem>
+          Hide group from total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete group
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    Group {{index + 1}}
+  </div>
   <!--********************************Temporal changes start***************************************-->
 
-  <div class="card-header" *ngIf="temporalDropdown && envFlag">
+  <div class="card-block search-select" *ngIf="temporalDropdown && envFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
@@ -31,7 +53,7 @@
     </app-search-group-item>
   </div>
 
-  <div class="card-header">
+  <div class="card-block search-select">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -137,33 +159,6 @@
 
 
   <div class="card-footer text-right" *ngIf="!envFlag">
-    <clr-dropdown>
-      <button type="button" clrDropdownTrigger>
-        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
-      </button>
-      <clr-dropdown-menu *clrIfOpen>
-        <button
-          *ngIf="status === 'active'"
-          type="button"
-          (click)="hide()"
-          clrDropdownItem>
-          Hide group from total count
-        </button>
-        <button
-          *ngIf="status === 'hidden'"
-          type="button"
-          (click)="enable()"
-          clrDropdownItem>
-          Include group in total count
-        </button>
-        <button
-          type="button"
-          (click)="remove()"
-          clrDropdownItem>
-          Delete group
-        </button>
-      </clr-dropdown-menu>
-    </clr-dropdown>
     <ng-container *ngIf="status === 'active'">
       Group Count:
       <span *ngIf="isRequesting"
@@ -185,13 +180,26 @@
   </div>
 </div>
 
-<div [id]="'overlay_' + group.get('id')" class="undo-overlay" [class.pending]="status === 'pending'">
-  <div class="undo-inner-text">
-    <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
-    <span class="undo-text">
-      Your group has been deleted
-      <button class="btn btn-link" (click)="undo()">UNDO</button>
-    </span>
+<div
+  [id]="'overlay_' + group.get('id')"
+  class="group-overlay"
+  [class.pending]="status === 'pending'"
+  [class.hidden]="status === 'hidden'">
+  <div class="group-overlay-inner">
+    <ng-container *ngIf="status ==='pending'">
+      <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        Your group has been deleted
+        <button class="btn btn-link" (click)="undo()">UNDO</button>
+      </span>
+    </ng-container>
+    <ng-container *ngIf="status ==='hidden'">
+      <clr-icon shape="eye-hide" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        Your group has been suppressed
+        <button class="btn btn-link" (click)="enable()">ENABLE</button>
+      </span>
+    </ng-container>
   </div>
 </div>
 

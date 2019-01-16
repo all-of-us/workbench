@@ -10,10 +10,6 @@
   text-overflow: ellipsis;
 }
 
-.line-item.hide {
-  background: #eeeeee;
-}
-
 .trigger:hover > span {
   color: rgb(0, 124, 187)!important;
 }
@@ -62,4 +58,6 @@ clr-icon[shape^=error-standard] {
 .undo-text > .btn.btn-link {
   font-weight: 600;
   letter-spacing: 0;
+  height: 18px;
+  line-height: 16px;
 }
