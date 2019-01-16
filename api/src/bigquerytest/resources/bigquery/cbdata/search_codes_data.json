@@ -46,7 +46,7 @@
   },
   {
     "person_id":1,
-    "entry_date":"2009-12-03",
+    "entry_date":"2009-11-03",
     "concept_id_or_source_concept_id":4,
     "type":"SNOMED",
     "subtype":"PCS",

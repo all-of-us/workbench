@@ -36,7 +36,7 @@ public class TemporalQueryBuilder {
       "entry_date > DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String WITHIN_X_DAYS_OF =
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
-      "temp2.entry_date - ${timeValue} and temp2.entry_date + ${timeValue}\n";
+      "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String TEMPORAL_TEMPLATE =
     "select count(distinct temp1.person_id)\n" +
       "from (${query1}) temp1\n" +
@@ -68,7 +68,7 @@ public class TemporalQueryBuilder {
       }
     }
     String conditions = SAME_ENC;
-    if (includeGroup.getTime().equals(TemporalTime.DURING_SAME_ENCOUNTER_AS.name())) {
+    if (includeGroup.getTime().equals(TemporalTime.WITHIN_X_DAYS_OF.name())) {
       conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", includeGroup.getTimeValue().toString());
     } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_BEFORE.name())) {
       conditions = X_DAYS_BEFORE.replace("${timeValue}", includeGroup.getTimeValue().toString());

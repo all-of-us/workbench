@@ -32,7 +32,7 @@ public class SearchGroupPredicates {
   }
 
   public static Predicate<ListMultimap<Integer, SearchGroupItem>> notContainsTwoGroups() {
-    return itemMap -> itemMap.size() != 2;
+    return itemMap -> itemMap.keySet().size() != 2;
   }
 
   public static Predicate<ListMultimap<Integer, SearchGroupItem>> secondGroupContainsMoreThanOne() {

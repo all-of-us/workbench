@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -65,7 +64,6 @@ public class CohortQueryBuilder {
       params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
           participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
     } else {
-
       if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
         throw new BadRequestException(
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
