@@ -12,7 +12,7 @@ import {
   AccountCreationResendModalReact,
   AccountCreationUpdateModalReact
 } from 'app/views/account-creation-modals/component';
-import {AccountCreationReact} from 'app/views/account-creation/component';
+import {AccountCreation} from 'app/views/account-creation/component';
 
 
 const styles = {

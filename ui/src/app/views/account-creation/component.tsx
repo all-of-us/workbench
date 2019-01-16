@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as fp from 'lodash';
 import * as ReactDOM from 'react-dom';
 
 import {fullUrl, handleErrors} from 'app/utils/fetch';
@@ -167,7 +168,7 @@ export class AccountCreation extends
   updateProfile(attribute: string, value: string) {
     const newProfile = this.state.profile;
     newProfile[attribute] = value;
-    this.setState({profile: newProfile});
+    this.setState(({profile}) => ({profile: fp.set(profile, attribute, value)}));
   }
 
   render() {
@@ -278,7 +279,7 @@ export class AccountCreation extends
             <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
             this.isUsernameValidationError()}
                     style={{'height': '2rem', 'width': '10rem'}}
-                    onClick={() => this.createAccount}>
+                    onClick={() => this.createAccount()}>
               Next
             </Button>
           </FormSection>
