@@ -12,8 +12,8 @@ import {
   AccountCreationResendModalReact,
   AccountCreationUpdateModalReact
 } from 'app/views/account-creation-modals/component';
-import {AccountCreationReact} from 'app/views/account-creation/component';
-
+import {AccountCreationComponent} from 'app/views/account-creation/component';
+import {LoginComponent} from 'app/views/login/component';
 
 const styles = {
   buttonLinkStyling: {
@@ -114,3 +114,41 @@ export class AccountCreationSuccessReact
   }
 }
 
+@Component({
+  selector : 'app-account-creation-success',
+  templateUrl: './component.html'
+})
+export class AccountCreationSuccessComponent implements DoCheck, OnInit {
+  username: string;
+  @Input('contactEmail')
+  contactEmail: string;
+  constructor(
+      private loginComponent: LoginComponent,
+      private account: AccountCreationComponent
+  ) {
+    setTimeout(() => {
+      loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
+      loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
+    }, 0);
+  }
+
+  ngOnInit(): void {
+    this.renderReactComponent();
+  }
+
+  ngDoCheck(): void {
+    this.renderReactComponent();
+  }
+
+  renderReactComponent(): void {
+    ReactDOM.render(<AccountCreationSuccessReact
+            contactEmailOnCreation={this.contactEmail}
+            username={this.account.profile.username}
+            creationNonce = {this.account.profile.creationNonce}/>,
+        document.getElementById('account-creation-success'));
+  }
+
+  public getEmail(contactEmail: string) {
+    this.contactEmail = contactEmail;
+  }
+}
