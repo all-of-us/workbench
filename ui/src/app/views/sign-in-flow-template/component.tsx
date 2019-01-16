@@ -16,8 +16,8 @@ interface ImagesSource {
   smallerBackgroundImgSrc: string;
 }
 
-interface PageTemplateProps {
-  signIn: any;
+export interface PageTemplateProps {
+  signIn: () => void;
   windowSize: { width: number, height: number };
 }
 
@@ -26,7 +26,7 @@ interface PageTemplateState {
   invitationKey: string;
 }
 
-const pageImages = {
+export const pageImages = {
   'login': {
     backgroundImgSrc: '/assets/images/login-group.png',
     smallerBackgroundImgSrc: '/assets/images/login-standing.png'
@@ -42,7 +42,7 @@ const pageImages = {
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
-const SignPageTemplateReact = withWindowSize()(
+const RegistrationPageTemplateReact = withWindowSize()(
   class extends React.Component<PageTemplateProps, PageTemplateState> {
 
     constructor(props: PageTemplateProps) {
@@ -84,7 +84,7 @@ const SignPageTemplateReact = withWindowSize()(
     render() {
       return <div style={styles.signedInContainer}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-          <div style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+          <div id='imgTemplate' style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>
             <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>
@@ -96,7 +96,7 @@ const SignPageTemplateReact = withWindowSize()(
     }
 });
 
-export default SignPageTemplateReact;
+export default RegistrationPageTemplateReact;
 
 @Component({
   template: '<div #root></div>'
@@ -104,7 +104,7 @@ export default SignPageTemplateReact;
 export class SignInTemplateComponent extends ReactWrapperBase {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(SignPageTemplateReact, ['signIn']);
+    super(RegistrationPageTemplateReact, ['signIn']);
     this.signIn = this.signIn.bind(this);
   }
 

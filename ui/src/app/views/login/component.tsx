@@ -7,7 +7,7 @@ import {styles} from './style';
 
 const googleIcon = '/assets/icons/google-icon.png';
 
-interface LoginProps {
+export interface LoginProps {
   signIn: () => void;
   onCreateAccount: () => void;
 }
@@ -15,13 +15,13 @@ interface LoginProps {
 export class LoginReactComponent extends React.Component<LoginProps, {}> {
 
   render() {
-    return <div style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
+    return <div id='login' style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
       <div>
         <Header>
           Already have an account?
         </Header>
         <div>
-          <Button style={styles.button} onClick={() => this.props.signIn()}>
+          <Button type='primary' style={styles.button} onClick={() => this.props.signIn()}>
             <img src={googleIcon}
                    style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
             <div>
