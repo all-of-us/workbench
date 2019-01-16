@@ -49,7 +49,7 @@ describe('AccountCreationSuccessComponent', () => {
     });
   }));
 
-  fit('should render', fakeAsync(() => {
+  it('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
   }));
