@@ -67,6 +67,7 @@ export class ResourceCardComponent implements OnInit {
       }
     }
     this.actions = this.actionList.filter(elem =>  elem.type === this.resourceType);
+    console.log(this.actions);
   }
 
   renameNotebook(): void {

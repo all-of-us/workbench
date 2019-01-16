@@ -50,7 +50,7 @@
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 
-<app-edit-modal [editing]="editing"
+<app-edit-modal *ngIf="editing && (resourceCard.cohort || resourceCard.conceptSet)"
                 [resource]="resourceCard"
                 [onCancel]="closeEditModal.bind(this)"
                 [onEdit]="receiveEdit.bind(this)"></app-edit-modal>

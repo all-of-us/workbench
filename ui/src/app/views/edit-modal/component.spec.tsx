@@ -13,7 +13,6 @@ describe('ConfirmDeleteModalComponent', () => {
 
   beforeEach(() => {
     props = {
-      editing: true,
       resource: {},
       onEdit: () => {},
       onCancel: () => {}

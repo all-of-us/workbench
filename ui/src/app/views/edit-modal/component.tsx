@@ -42,7 +42,6 @@ export interface EditModalState {
 }
 
 export interface EditModalProps {
-  editing: boolean;
   resource: RecentResource;
   onEdit: Function;
   onCancel: Function;
@@ -83,17 +82,8 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     this.props.onEdit(this.state.resource);
   };
 
-  canSave(): boolean {
-    if (this.props.editing) {
-      return this.state.resourceName.length > 0;
-    } else {
-      return false;
-    }
-  }
-
   render() {
     return <React.Fragment>
-      {this.props.editing &&
       <Modal className='editModal'>
         <ModalTitle style={{fontSize: 16}}>
           Edit {this.state.resourceType} Information
@@ -115,12 +105,12 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
         <ModalFooter>
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
-          <Button disabled={!this.canSave()}
+          <Button disabled={!(this.state.resourceName.length > 0)}
                   id='save-edit'
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>
         </ModalFooter>
-      </Modal>}
+      </Modal>
     </React.Fragment>;
   }
 }
@@ -131,13 +121,12 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
   template: '<div #root></div>'
 })
 export class EditModalComponent extends ReactWrapperBase {
-  @Input('editing') editing: EditModalProps['editing'];
   @Input('resource') resource: EditModalProps['resource'];
   @Input('onEdit') onEdit: EditModalProps['onEdit'];
   @Input('onCancel') onCancel: EditModalProps['onCancel'];
 
   constructor() {
-    super(EditModal, ['editing', 'resource', 'onEdit', 'onCancel']);
+    super(EditModal, ['resource', 'onEdit', 'onCancel']);
   }
 
 }
