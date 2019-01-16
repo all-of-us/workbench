@@ -40,7 +40,9 @@
 
 <app-confirm-delete-modal [resourceType]="resourceType"
                           [resource]="resource"
-                          (receiveDelete)="receiveDelete($event)"></app-confirm-delete-modal>
+                          [receiveDelete]="receiveDelete.bind(this)"
+                          [deleting]="confirmDeleting"
+                          [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
 
 
 <app-rename-modal *ngIf="renaming && resourceCard.notebook"

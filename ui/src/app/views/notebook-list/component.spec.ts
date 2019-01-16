@@ -207,8 +207,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
-    updateAndTick(fixture);
+    simulateClickReact(fixture, '#confirm-delete');
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.length).toBe(0);
   }));
