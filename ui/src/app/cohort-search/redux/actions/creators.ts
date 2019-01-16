@@ -51,6 +51,7 @@ import {
   HIDE_ITEM,
   HIDE_GROUP,
   ENABLE_ITEM,
+  ENABLE_GROUP,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -303,6 +304,11 @@ export const hideGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof HIDE_ITEM] =>
     ({type: HIDE_ITEM, groupId, itemId});
+
+export const enableGroup =
+  (role: keyof SearchRequest, groupId: string,
+  ): ActionTypes[typeof ENABLE_GROUP] =>
+    ({type: ENABLE_GROUP, role, groupId});
 
 export const enableGroupItem =
   (groupId: string, itemId: string

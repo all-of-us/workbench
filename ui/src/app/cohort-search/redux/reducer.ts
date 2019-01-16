@@ -66,6 +66,7 @@ import {
   HIDE_ITEM,
   HIDE_GROUP,
   ENABLE_ITEM,
+  ENABLE_GROUP,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -397,7 +398,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             return item.get('id') !== action.itemId && item.get('status') === 'active';
           });
         if (!activeItems.size) {
-          state = state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
+          state = state.setIn(['entities', 'groups', action.groupId, 'count'], 0);
         }
         return state.setIn(['entities', 'items', action.itemId, 'status'], 'hidden');
       }
@@ -407,6 +408,10 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case ENABLE_ITEM: {
         return state.setIn(['entities', 'items', action.itemId, 'status'], 'active');
+      }
+
+      case ENABLE_GROUP: {
+        return state.setIn(['entities', 'groups', action.groupId, 'status'], 'active');
       }
 
       case REMOVE_ITEM: {

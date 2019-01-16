@@ -76,6 +76,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   enable() {
     this.status = 'active';
+    this.actions.enableGroup(this.role, this.groupId);
   }
 
   undo() {
