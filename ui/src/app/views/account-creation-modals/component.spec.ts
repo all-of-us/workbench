@@ -3,13 +3,15 @@ import {FormsModule} from '@angular/forms';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileService} from 'generated';
+import {
+  ProfileApi
+} from 'generated/fetch';
 
-import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-service-stub';
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
 import {AccountCreationModalsComponent} from './component';
 
@@ -25,7 +27,7 @@ describe('AccountCreationModalsComponent', () => {
         AccountCreationModalsComponent
       ],
       providers: [
-        { provide: ProfileService, useValue: new ProfileServiceStub() },
+        { provide: ProfileApi, useValue: new ProfileApiStub() },
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(AccountCreationModalsComponent);
@@ -33,7 +35,7 @@ describe('AccountCreationModalsComponent', () => {
     });
   }));
 
-  it('should render', fakeAsync(() => {
+  fit('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
   }));

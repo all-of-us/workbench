@@ -15,6 +15,10 @@ import {
 import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
 
+import {
+  ProfileApi,
+} from 'generated/fetch/api';
+
 
 const styles = {
   buttonLinkStyling: {
@@ -30,6 +34,7 @@ interface AccountCreationSuccessProps {
   username: string;
   contactEmailOnCreation: string;
   creationNonce: string;
+  profileApi: ProfileApi;
 }
 
 interface AccountCreationSuccessState {
@@ -39,7 +44,7 @@ interface AccountCreationSuccessState {
 }
 
 export class AccountCreationSuccessReact
-    extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
+extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
 
   constructor(props: AccountCreationSuccessProps) {
     super(props);
@@ -91,17 +96,18 @@ export class AccountCreationSuccessReact
                   onClick={() => this.setState({resendModal: true})}>
             Resend Instructions
           </button>
-          |
-          <button style={styles.buttonLinkStyling}
-                  onClick={() => this.setState({updateModal: true})}>
-            Change contact email
-          </button>
+|
+           <button style={styles.buttonLinkStyling}
+                   onClick={() => this.setState({updateModal: true})}>
+             Change contact email
+           </button>
         </div>
       </div>
       <AccountCreationResendModalReact
         username={this.props.username}
         creationNonce={this.props.creationNonce}
         resend={this.state.resendModal}
+        profileApi={this.props.profileApi}
         closeFunction={() => this.setState({resendModal: false})}
       />
       <AccountCreationUpdateModalReact
@@ -109,6 +115,7 @@ export class AccountCreationSuccessReact
         creationNonce={this.props.creationNonce}
         passNewEmail={(newEmail: string) => this.setState({contactEmail: newEmail})}
         update={this.state.updateModal}
+        profileApi={this.props.profileApi}
         closeFunction={() => this.setState({updateModal: false})}
       />
     </React.Fragment>;
@@ -124,6 +131,7 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
   contactEmail: string;
   constructor(
     private loginComponent: LoginComponent,
+    private profileApi: ProfileApi,
     private account: AccountCreationComponent
   ) {
     setTimeout(() => {
@@ -144,7 +152,9 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
     ReactDOM.render(<AccountCreationSuccessReact
         contactEmailOnCreation={this.contactEmail}
         username={this.account.profile.username}
-        creationNonce = {this.account.profile.creationNonce}/>,
+        creationNonce={this.account.profile.creationNonce}
+        profileApi={this.profileApi}
+    />,
       document.getElementById('account-creation-success'));
   }
 

@@ -12,6 +12,10 @@ import {
   UsernameTakenResponse,
 } from 'generated';
 
+import {
+  ProfileApi
+} from 'generated/fetch';
+
 export class ProfileStubVariables {
   static PROFILE_STUB = {
     username: 'testers',
@@ -24,6 +28,12 @@ export class ProfileStubVariables {
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
   };
+}
+
+export class ProfileApiStub extends ProfileApi {
+  constructor() {
+    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+  }
 }
 
 export class ProfileServiceStub extends ProfileService {

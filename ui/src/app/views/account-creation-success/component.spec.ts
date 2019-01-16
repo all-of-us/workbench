@@ -5,10 +5,10 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {
-  ProfileService,
-} from 'generated';
+  ProfileApi
+} from 'generated/fetch';
 
-import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
@@ -40,7 +40,7 @@ describe('AccountCreationSuccessComponent', () => {
           }
         },
         { provide: LoginComponent, useValue: {}},
-        { provide: ProfileService, useValue: new ProfileServiceStub },
+        { provide: ProfileApi, useValue: new ProfileApiStub() },
         { provide: SignInService, useValue: new SignInServiceStub()}
       ]
     }).compileComponents().then(() => {
@@ -49,7 +49,7 @@ describe('AccountCreationSuccessComponent', () => {
     });
   }));
 
-  it('should render', fakeAsync(() => {
+  fit('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
   }));
