@@ -18,6 +18,7 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
+  @Input() index;
   @Input() role: keyof SearchRequest;
 
   error: boolean;
@@ -70,6 +71,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   hide() {
+    setTimeout(() => this.setOverlayPosition());
     this.status = 'hidden';
     this.actions.removeGroup(this.role, this.groupId, true);
   }

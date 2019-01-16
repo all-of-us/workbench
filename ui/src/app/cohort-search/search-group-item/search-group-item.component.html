@@ -1,6 +1,6 @@
 <div *ngIf="status !== 'deleted'" class="flex-container">
 
-  <div *ngIf="showItem" class="line-item" [class.hide]="status === 'hidden'">
+  <div *ngIf="status === 'active'" class="line-item">
     <clr-dropdown>
       <button type="button" clrDropdownTrigger>
         <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
@@ -14,18 +14,10 @@
           Edit criteria
         </button>
         <button
-          *ngIf="status === 'active'"
           type="button"
           (click)="hide()"
           clrDropdownItem>
           Hide criteria from total count
-        </button>
-        <button
-          *ngIf="status === 'hidden'"
-          type="button"
-          (click)="enable()"
-          clrDropdownItem>
-          Include criteria in total count
         </button>
         <button
           type="button"
@@ -63,10 +55,17 @@
     </span>
   </div>
   <div *ngIf="status === 'pending'" class="undo-container">
-    <clr-icon shape="exclamation-triangle" class="is-solid" size="32"></clr-icon>
+    <clr-icon shape="exclamation-triangle" class="is-solid" size="23"></clr-icon>
     <span class="undo-text">
       Your criteria have been deleted
       <button class="btn btn-link" (click)="undo()">UNDO</button>
+    </span>
+  </div>
+  <div *ngIf="status === 'hidden'" class="undo-container">
+    <clr-icon shape="eye-hide" class="is-solid" size="23"></clr-icon>
+    <span class="undo-text">
+      Your criteria have been suppressed
+      <button class="btn btn-link" (click)="enable()">ENABLE</button>
     </span>
   </div>
 </div>
