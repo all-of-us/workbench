@@ -1,6 +1,7 @@
 import * as React from 'react';
-import * as fp from 'lodash';
 import * as ReactDOM from 'react-dom';
+
+import * as fp from 'lodash';
 
 import {fullUrl, handleErrors} from 'app/utils/fetch';
 
