@@ -13,7 +13,6 @@ import {
   AccountCreationUpdateModal
 } from 'app/views/account-creation-modals/component';
 import {AccountCreationComponent} from 'app/views/account-creation/component';
-import {LoginComponent} from 'app/views/login/component';
 
 
 const styles = {
@@ -123,14 +122,8 @@ export class AccountCreationSuccessComponent implements DoCheck, OnInit {
   @Input('contactEmail')
   contactEmail: string;
   constructor(
-    private loginComponent: LoginComponent,
     private account: AccountCreationComponent
-  ) {
-    setTimeout(() => {
-      loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
-      loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
-    }, 0);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.renderReactComponent();

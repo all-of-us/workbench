@@ -1,7 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 
-import {InvitationKeyComponent} from '../invitation-key/component';
-import {LoginComponent} from '../login/component';
 
 import {DataAccessLevel} from 'generated';
 import {Profile} from 'generated';
@@ -45,17 +43,8 @@ export class AccountCreationComponent implements AfterViewInit {
   // well as injecting LoginComponent. Should look at refactoring these
   // interactions.
   constructor(
-    private profileService: ProfileService,
-    private invitationKeyService: InvitationKeyComponent,
-    private loginComponent: LoginComponent
-  ) {
-    // This is a workaround for ExpressionChangedAfterItHasBeenCheckedError from angular
-    setTimeout(() => {
-      this.loginComponent.smallerBackgroundImgSrc =
-          '/assets/images/create-account-male-standing.png';
-      this.loginComponent.backgroundImgSrc = '/assets/images/create-account-male.png';
-    }, 0);
-  }
+    private profileService: ProfileService
+  ) {}
 
   ngAfterViewInit(): void {
     // This is necessary to avoid clarity, because clarity's tooltip library
@@ -82,7 +71,7 @@ export class AccountCreationComponent implements AfterViewInit {
 
     const request: CreateAccountRequest = {
       profile: this.profile,
-      invitationKey: this.invitationKeyService.invitationKey
+      invitationKey: ''
     };
     this.creatingAccount = true;
     this.profileService.createAccount(request).subscribe((profile) => {

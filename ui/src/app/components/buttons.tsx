@@ -27,7 +27,8 @@ const buttonVariants = {
     style: {
       ...styles.base,
       border: '2px solid', borderRadius: '0.2rem', borderColor: '#262262',
-      backgroundColor: '#ffffff', color: '#262262',
+      backgroundColor: 'transparent',
+      color: '#262262',
     },
     disabledStyle: {
       borderColor: '#c3c3c3',
