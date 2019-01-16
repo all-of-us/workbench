@@ -1,25 +1,24 @@
 import {shallow} from 'enzyme';
-import * as React from 'react';
 import * as fp from 'lodash';
+import * as React from 'react';
 
 import {
+  AccountCreation,
   AccountCreationProps,
-  AccountCreationReact,
   AccountCreationState
 } from './component';
 
 let props: AccountCreationProps;
 const component = () => {
-  return shallow<AccountCreationReact,
+  return shallow<AccountCreation,
     AccountCreationProps,
-    AccountCreationState>(<AccountCreationReact {...props}/>);
+    AccountCreationState>(<AccountCreation {...props}/>);
 };
 
 beforeEach(() => {
   props = {
     invitationKey: '',
     setProfile: () => {},
-    onAccountCreation: () => {},
   };
 });
 

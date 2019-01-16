@@ -5,7 +5,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
 
-import {AccountCreationReact} from 'app/views/account-creation/component';
+import {AccountCreation} from 'app/views/account-creation/component';
 import LoginReactComponent from 'app/views/login/component';
 
 import {DataAccessLevel, Profile} from 'generated/fetch';
@@ -79,9 +79,8 @@ const SignPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        case 'createAccount': return <AccountCreationReact
-                          invitationKey={this.state.invitationKey}
-                          setProfile={this.setProfile}/>;
+        case 'createAccount': return <AccountCreation invitationKey={this.state.invitationKey}
+                                                      setProfile={this.setProfile}/>;
         default:
           return;
         }

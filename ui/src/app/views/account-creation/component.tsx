@@ -48,7 +48,7 @@ export interface AccountCreationState {
   showAllFieldsRequiredError: boolean;
 }
 
-export class AccountCreationReact extends
+export class AccountCreation extends
     React.Component<AccountCreationProps, AccountCreationState> {
   usernameCheckTimeout: NodeJS.Timer;
 
@@ -72,7 +72,6 @@ export class AccountCreationReact extends
       creatingAccount: false,
       showAllFieldsRequiredError: false
     };
-    this.createAccount = this.createAccount.bind(this);
   }
 
 
@@ -279,7 +278,7 @@ export class AccountCreationReact extends
             <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
             this.isUsernameValidationError()}
                     style={{'height': '2rem', 'width': '10rem'}}
-                    onClick={this.createAccount}>
+                    onClick={() => this.createAccount}>
               Next
             </Button>
           </FormSection>
