@@ -255,14 +255,10 @@ export interface QuickTourReactState {
 }
 
 export interface QuickTourReactProps {
-  learning: boolean;
   closeFunction: Function;
 }
 
 export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTourReactState> {
-  state: QuickTourReactState;
-  props: QuickTourReactProps;
-
   checkImg = '/assets/images/check.svg';
   expandIcon = '/assets/icons/expand.svg';
   shrinkIcon = '/assets/icons/shrink.svg';
@@ -273,19 +269,17 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   }
 
   previous(): void {
-    this.setState(state => {
-      return {selected: state.selected - 1};
-    });
+    this.setState({selected: this.state.selected - 1});
   }
 
   next(): void {
-    if (this.state.selected === panels.length - 1) {
+    const {selected} = this.state;
+
+    if (selected === panels.length - 1) {
       this.close();
-      return;
+    } else {
+      this.setState({selected: selected + 1});
     }
-    this.setState(state => {
-      return {selected: state.selected + 1};
-    });
   }
 
   close(): void {
@@ -298,7 +292,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   }
 
   lastButtonText(): string {
-    return (this.state.selected === 4 ? 'Close' : 'Next');
+    return (this.state.selected === panels.length - 1 ? 'Close' : 'Next');
   }
 
   toggleImage(): void {
@@ -306,9 +300,22 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   }
 
   render() {
-    return <React.Fragment>
-      <div style={this.props.learning ? styles.modalBackdrop : undefined}/>
-      {this.props.learning && !this.state.fullImage &&
+    const {selected, fullImage} = this.state;
+
+    return fullImage ?
+      <div style={{...styles.mainStyling, height: '35%'}}>
+        <div style={{position: 'relative', display: 'inline-block'}}
+             id='full-image-wrapper'>
+          <img src={panels[selected].image} style={{height: '100%', width: '100%'}}/>
+          <div onClick={() => this.toggleImage()}
+               id='shrink-icon'
+               style={{position: 'absolute', right: '5%', bottom: '5%', cursor: 'pointer'}}>
+            <img src={this.shrinkIcon}/>
+          </div>
+        </div>
+      </div> :
+      <React.Fragment>
+        <div style={styles.modalBackdrop}/>
         <div style={styles.mainStyling} id='quick-tour-react' className='quickTourReact'>
           <div style={styles.title}>All of Us Researcher Workbench</div>
           <div style={styles.mainTitle}>Quick Tour</div>
@@ -316,57 +323,59 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             {panels.map((p, i) => {
               return <React.Fragment key={i}>
                 <div style={{width: '128px'}}>
-                  <div style={this.state.selected ? completedStyles.circleCompleted : styles.circle}
+                  <div style={selected ? completedStyles.circleCompleted : styles.circle}
                        id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
-                    {(i < this.state.selected) && <div style={styles.check}>
+                    {(i < selected) && <div style={styles.check}>
                         <img src={this.checkImg}/>
                     </div>}
-                    {(i ===  this.state.selected) && <div style={styles.current}/>}
+                    {(i === selected) && <div style={styles.current}/>}
                   </div>
                   <div style={styles.breadcrumbTitle}>{p.shortTitle}</div>
                   {(i !== panels.length - 1) &&
-                  <div style={i < this.state.selected ?
-                      completedStyles.connectorCompleted : styles.connector}>
+                  <div style={i < selected ?
+                    completedStyles.connectorCompleted : styles.connector}>
                   </div>}
                 </div>
               </React.Fragment>;
             })}
           </div>
           <div style={{width: '100%', paddingTop: '5%'}}>
-          <div style={styles.divider}/>
+            <div style={styles.divider}/>
           </div>
           <div style={styles.panel}>
             <div style={{width: '75%'}}>
               <div style={styles.panelTitle}
                    id='panel-title'>
-                  {panels[this.state.selected].title}
+                {panels[selected].title}
               </div>
               <div style={styles.panelContents}>
-                <div style={styles.panelText}>{panels[this.state.selected].content}</div>
+                <div style={styles.panelText}>{panels[selected].content}</div>
               </div>
             </div>
             <div style={styles.panelRight}>
-              <img src={panels[this.state.selected].image} style={styles.panelImage}/>
-                {(this.state.selected !== 0) &&
-                <div style={{position: 'absolute', right: '5%',
-                    bottom: '5%', height: '1rem', width: '1rem'}}>
-                    <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer'}}
-                         id='expand-icon'
-                         onClick={() => this.toggleImage()}>
-                        <img src={this.expandIcon}/>
-                    </div>
-                </div>}
+              <img src={panels[selected].image} style={styles.panelImage}/>
+              {(selected !== 0) &&
+              <div style={{
+                position: 'absolute', right: '5%',
+                bottom: '5%', height: '1rem', width: '1rem'
+              }}>
+                  <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer'}}
+                       id='expand-icon'
+                       onClick={() => this.toggleImage()}>
+                      <img src={this.expandIcon}/>
+                  </div>
+              </div>}
             </div>
           </div>
           <div style={styles.controls}>
             <div style={{width: '50%'}}>
-              {this.state.selected !== 0 &&
+              {selected !== 0 &&
               <Button type='darklingPrimary' id='previous' style={{marginLeft: '10%'}}
                       onClick={() => this.previous()}>Previous</Button>}
             </div>
             <div style={{display: 'flex', justifyContent: 'flex-end', width: '49%'}}>
-              {this.state.selected !== (panels.length - 1) &&
+              {selected !== (panels.length - 1) &&
               <Button type='darklingPrimary' id='close' onClick={() => this.close()}
                       style={{marginLeft: '10%', marginRight: '0.25rem'}}>Close</Button>}
               <Button type='darklingSecondary' id='next' style={{marginRight: '10%'}}
@@ -374,21 +383,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
             </div>
           </div>
         </div>
-      }
-      {this.props.learning && this.state.fullImage &&
-      <div style={{...styles.mainStyling, height: '35%'}}>
-        <div style={{position: 'relative', display: 'inline-block'}}
-             id='full-image-wrapper'>
-          <img src={panels[this.state.selected].image} style={{height: '100%', width: '100%'}}/>
-          <div onClick={() => this.toggleImage()}
-               id='shrink-icon'
-               style={{position: 'absolute', right: '5%', bottom: '5%', cursor: 'pointer'}}>
-            <img src={this.shrinkIcon}/>
-          </div>
-        </div>
-      </div>
-      }
-    </React.Fragment>;
+      </React.Fragment>;
   }
 }
 
@@ -398,10 +393,9 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
   template: '<div #root></div>',
 })
 export class QuickTourModalComponent extends ReactWrapperBase {
-  @Input('learning') learning: QuickTourReactProps['learning'];
   @Input('closeFunction') closeFunction: QuickTourReactProps['closeFunction'];
 
   constructor() {
-    super(QuickTourReact, ['learning', 'closeFunction']);
+    super(QuickTourReact, ['closeFunction']);
   }
 }

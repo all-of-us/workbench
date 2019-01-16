@@ -15,7 +15,6 @@ describe('QuickTourModalComponent', () => {
 
   beforeEach(() => {
     props = {
-      learning: true,
       closeFunction: () => {}
     };
   });
