@@ -3,13 +3,8 @@ import {Component, DoCheck, Input, OnInit} from '@angular/core';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import {fullUrl, handleErrors} from 'app/utils/fetch';
-
 import {
-  FetchArgs,
-  ProfileApiFetchParamCreator,
-  ResendWelcomeEmailRequest,
-  UpdateContactEmailRequest
+  ProfileApi,
 } from 'generated/fetch/api';
 
 import {
@@ -34,6 +29,7 @@ interface AccountCreationResendModalProps {
   creationNonce: string;
   resend: boolean;
   closeFunction: Function;
+  profileApi: ProfileApi;
 }
 
 export class AccountCreationResendModalReact extends
@@ -44,14 +40,10 @@ export class AccountCreationResendModalReact extends
   }
 
   send() {
-    const request: ResendWelcomeEmailRequest = {
+    this.props.profileApi.resendWelcomeEmail({
       username: this.props.username,
       creationNonce: this.props.creationNonce
-    };
-    const args: FetchArgs = ProfileApiFetchParamCreator().resendWelcomeEmail(request);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
-      .catch(error => console.log(error));
+    });
     this.close();
   }
 
@@ -83,6 +75,7 @@ interface AccountCreationUpdateModalProps {
   passNewEmail: Function;
   update: boolean;
   closeFunction: Function;
+  profileApi: ProfileApi;
 }
 
 interface AccountCreationUpdateModalState {
@@ -108,15 +101,11 @@ export class AccountCreationUpdateModalReact extends
       return;
     }
     this.props.passNewEmail(this.state.contactEmail);
-    const request: UpdateContactEmailRequest = {
+    this.props.profileApi.updateContactEmail({
       username: this.props.username,
       contactEmail: this.state.contactEmail,
       creationNonce: this.props.creationNonce
-    };
-    const args: FetchArgs = ProfileApiFetchParamCreator().updateContactEmail(request);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
-      .catch(error => console.log(error));
+    });
     this.props.closeFunction();
   }
 
@@ -208,13 +197,12 @@ export class AccountCreationModalsComponent implements OnInit, DoCheck {
   @Input('resend')
   public resend: boolean;
 
-  constructor(
-  ) {}
+  constructor(private profileApi: ProfileApi) {}
 
   renderModal(): void {
     let component;
     const props = {username: this.userName, creationNonce: this.creationNonce,
-                   closeFunction: this.close};
+                   closeFunction: this.close, profileApi: this.profileApi};
     if (this.resend) {
       component = AccountCreationResendModalReact;
       props['resend'] = this.resend;
