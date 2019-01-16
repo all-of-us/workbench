@@ -115,10 +115,6 @@ export class ResourceCardComponent implements OnInit {
     });
   }
 
-  // receiveRename(): void {
-  //   this.onUpdate.emit();
-  // }
-
   receiveEdit(resource: RecentResource): void {
     if (resource.cohort) {
       this.cohortsService.updateCohort(
