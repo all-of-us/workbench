@@ -84,7 +84,8 @@ const RegistrationPageTemplateReact = withWindowSize()(
     render() {
       return <div style={styles.signedInContainer}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-          <div id='imgTemplate' style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+          <div id='imgTemplate'
+               style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>
             <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>
@@ -101,7 +102,7 @@ export default RegistrationPageTemplateReact;
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase {
+export class SignInTemplateComponent extends ReactWrapperBase implements OnInit{
 
   constructor(private signInService: SignInService, private router: Router) {
     super(RegistrationPageTemplateReact, ['signIn']);
