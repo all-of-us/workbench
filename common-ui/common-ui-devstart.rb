@@ -36,7 +36,7 @@ def swagger_regen(cmd_name)
   common.run_inline %W{yarn run codegen}
 end
 
-def build(cmd_name, args)
+def build(cmd_name, ui_name, args)
   ensure_docker cmd_name, args
   options = BuildOptions.new.parse(cmd_name, args)
 
@@ -52,8 +52,14 @@ def build(cmd_name, args)
   if Set['staging', 'stable', 'prod'].include?(options.env)
     optimize = "--prod"
   end
+
+  # Angular version 5 requires --environment instead of --configuration as an option
+  angular_opts = "--configuration=#{options.env}"
+  if ui_name == "public-ui"
+    angular_opts = "--environment=#{options.env}"
+  end
   common.run_inline %W{yarn run build
-      #{optimize} --configuration=#{options.env} --no-watch --no-progress}
+      #{optimize} #{angular_opts} --no-watch --no-progress}
 end
 
 class CommonUiDevStart
@@ -69,7 +75,7 @@ class CommonUiDevStart
 
   def deploy_ui(cmd_name, args)
     ensure_docker cmd_name, args
-    DeployUI.new(cmd_name, args).run
+    DeployUI.new(cmd_name, @ui_name, args).run
   end
 
   def dev_up(*args)
@@ -137,7 +143,7 @@ class CommonUiDevStart
     Common.register_command({
                                 :invocation => "build",
                                 :description => "Builds the UI for the given environment.",
-                                :fn => ->(*args) { build("build", args) }
+                                :fn => ->(*args) { build("build", @ui_name, args) }
                             })
     Common.register_command({
                                 :invocation => "dev-up",
@@ -208,9 +214,10 @@ end
 class DeployUI
   attr_reader :common, :opts
 
-  def initialize(cmd_name, args)
+  def initialize(cmd_name, ui_name, args)
     @common = Common.new
     @cmd_name = cmd_name
+    @ui_name = ui_name
     @args = args
     @parser = create_parser(cmd_name)
     @opts = Options.new
@@ -276,7 +283,7 @@ class DeployUI
     environment_name = environment_names[@opts.project]
 
     swagger_regen(@cmd_name)
-    build(@cmd_name, %W{--environment #{environment_name}})
+    build(@cmd_name, @ui_name, %W{--environment #{environment_name}})
     ServiceAccountContext.new(@opts.project, @opts.account, @opts.key_file).run do
       cmd_prefix = @opts.dry_run ? DRY_RUN_CMD : []
       common.run_inline(cmd_prefix + %W{gcloud app deploy
