@@ -1,6 +1,6 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
@@ -122,19 +122,29 @@ describe('SearchGroupComponent', () => {
     });
   });
 
-  it('Should dispatch REMOVE_GROUP on remove button click', () => {
+  it('Should dispatch REMOVE_GROUP on remove button click', fakeAsync(() => {
+    comp.status = 'active';
+    fixture.detectChanges();
     const spy = spyOn(mockReduxInst, 'dispatch');
-    const button = fixture.debugElement.query(By.css('button#close-button'));
-    button.triggerEventHandler('click', null);
+
+    const dropdown = fixture.debugElement.query(By.css('.dropdown-toggle'));
+    dropdown.triggerEventHandler('click', null);
+
+    const removeButton = fixture.debugElement
+      .query(By.css('button[clrdropdownitem]:nth-of-type(2)'));
+    removeButton.triggerEventHandler('click', null);
+    jasmine.clock().tick(3000)
+    fixture.detectChanges()
     expect(spy).toHaveBeenCalledWith({
       type: REMOVE_GROUP,
       role: 'includes',
       groupId: 'include0'
     });
-  });
+  }));
 
   it('Should render group count if group count', () => {
     comp.group = group.set('count', 25);
+    comp.status = 'active';
     fixture.detectChanges();
 
     const footer = fixture.debugElement.query(By.css('div.card-footer'));
@@ -147,6 +157,7 @@ describe('SearchGroupComponent', () => {
 
   it('Should render a spinner if requesting', () => {
     comp.group = group.set('isRequesting', true);
+    comp.status = 'active';
     fixture.detectChanges();
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     expect(spinner).not.toBeNull();
