@@ -25,7 +25,8 @@ interface ImagesSource {
 }
 
 interface PageTemplateProps {
-  signIn: any;
+  onInit: () => void;
+  signIn: () => void;
   windowSize: { width: number, height: number };
 }
 
@@ -63,6 +64,11 @@ const RegistrationPageTemplateReact = withWindowSize()(
       this.onKeyVerified = this.onKeyVerified.bind(this);
     }
 
+    componentDidMount() {
+      document.body.style.backgroundColor = '#e2e3e5';
+      this.props.onInit();
+    }
+
     nextDirective(index) {
       switch (index) {
         case 'login':
@@ -70,7 +76,11 @@ const RegistrationPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
+        case 'createAccount': return <AccountCreationReact
+                          onAccountCreation={
+                            () => this.setCurrentStep('accountCreationSuccess')}
+                          invitationKey={this.state.invitationKey}
+                          setProfile={this.setProfile}/>;
         default:
           return;
         }
@@ -109,24 +119,22 @@ export default RegistrationPageTemplateReact;
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
+export class SignInTemplateComponent extends ReactWrapperBase {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(RegistrationPageTemplateReact, ['signIn']);
+    super(RegistrationPageTemplateReact, ['onInit', 'signIn']);
+    this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
   }
 
-  ngOnInit(): void  {
-    document.body.style.backgroundColor = '#e2e3e5';
-
+  onInit(): void  {
     this.signInService.isSignedIn$.subscribe((signedIn) => {
       if (signedIn) {
         this.router.navigateByUrl('/');
       }
     });
-    super.ngOnInit();
   }
-
+ 
   signIn(): void {
     this.signInService.signIn();
   }
