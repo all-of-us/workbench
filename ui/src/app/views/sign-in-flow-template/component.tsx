@@ -147,8 +147,8 @@ export class SignInTemplateComponent extends ReactWrapperBase {
       }
     });
   }
- 
-  signIn(): void {
+
+ signIn(): void {
     this.signInService.signIn();
   }
 
