@@ -39,7 +39,7 @@ it ('should handle family name validity', () => {
   expect(wrapper.exists('#familyName')).toBeTruthy();
   expect(wrapper.exists('#familyNameError')).toBeFalsy();
   wrapper.find('#familyName').simulate('change', {target: {value: testInput}});
-  expect(wrapper.exists('#givenNameError')).toBeTruthy();
+  expect(wrapper.exists('#familyNameError')).toBeTruthy();
 });
 
 it ('should handle organization validity', () => {
