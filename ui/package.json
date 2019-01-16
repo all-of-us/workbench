@@ -42,13 +42,7 @@
     ],
     "globals": {
       "ts-jest": {
-        "diagnostics": {
-          "warnOnly": true
-        },
-        "tsConfig": {
-          "module": "commonjs",
-          "jsx": "react"
-        }
+        "tsConfig": "src/tsconfig.jest.json"
       }
     }
   },
@@ -73,8 +67,8 @@
     "@types/lodash": "^4.14.119",
     "@types/react": "^16.7.12",
     "@types/react-dom": "^16.0.11",
-    "@types/react-onclickoutside": "^6.7.0",
     "@types/react-modal": "^3.8.0",
+    "@types/react-onclickoutside": "^6.7.0",
     "@webcomponents/custom-elements": "^1.0.0",
     "angular2-highcharts": "^0.5.5",
     "bootstrap": "4.1.2",
@@ -97,6 +91,7 @@
     "react": "^16.6.3",
     "react-addons-test-utils": "^15.6.2",
     "react-dom": "^16.6.3",
+    "react-interactive": "^0.8.1",
     "react-modal": "^3.8.1",
     "react-onclickoutside": "^6.7.1",
     "react-paginating": "^1.0.3-react16.0",

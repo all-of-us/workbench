@@ -111,11 +111,11 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
             String namedParameterConceptId = addQueryParameterValue(queryParams,
                 QueryParameterValue.int64(attribute.getConceptId()));
             String namedParameter1 = addQueryParameterValue(queryParams,
-                QueryParameterValue.int64(new Long(attribute.getOperands().get(0))));
+                QueryParameterValue.float64(new Float(attribute.getOperands().get(0))));
             String valueExpression;
             if (isBetween) {
               String namedParameter2 = addQueryParameterValue(queryParams,
-                  QueryParameterValue.int64(new Long(attribute.getOperands().get(1))));
+                  QueryParameterValue.float64(new Float(attribute.getOperands().get(1))));
               valueExpression = "@" + namedParameter1 + " and " + "@" + namedParameter2;
             } else {
               valueExpression = "@" + namedParameter1;
