@@ -65,6 +65,7 @@ import {
   CLEAR_WIZARD_FOCUS,
   HIDE_ITEM,
   HIDE_GROUP,
+  ENABLE_ITEM,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -398,13 +399,15 @@ export const rootReducer: Reducer<CohortSearchState> =
         if (!activeItems.size) {
           state = state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
         }
-        return state.updateIn(['entities', 'items', action.itemId],
-          List(),
-          item => item.set('status', 'hidden'));
+        return state.setIn(['entities', 'items', action.itemId, 'status'], 'hidden');
       }
 
       case HIDE_GROUP:
         return state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
+
+      case ENABLE_ITEM: {
+        return state.setIn(['entities', 'items', action.itemId, 'status'], 'active');
+      }
 
       case REMOVE_ITEM: {
         state = state

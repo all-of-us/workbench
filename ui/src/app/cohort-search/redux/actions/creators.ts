@@ -50,6 +50,7 @@ import {
   CLEAR_WIZARD_FOCUS,
   HIDE_ITEM,
   HIDE_GROUP,
+  ENABLE_ITEM,
   REMOVE_ITEM,
   REMOVE_GROUP,
   OPEN_WIZARD,
@@ -302,6 +303,11 @@ export const hideGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof HIDE_ITEM] =>
     ({type: HIDE_ITEM, groupId, itemId});
+
+export const enableGroupItem =
+  (groupId: string, itemId: string
+  ): ActionTypes[typeof ENABLE_ITEM] =>
+    ({type: ENABLE_ITEM, groupId, itemId});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string
