@@ -15,7 +15,7 @@ export interface LoginProps {
 export class LoginReactComponent extends React.Component<LoginProps, {}> {
 
   render() {
-    return <div id='login' style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
+    return <div data-test-id='login' style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
       <div>
         <Header>
           Already have an account?

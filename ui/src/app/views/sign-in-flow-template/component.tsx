@@ -84,8 +84,7 @@ const RegistrationPageTemplateReact = withWindowSize()(
     render() {
       return <div style={styles.signedInContainer}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-          <div id='imgTemplate'
-               style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+          <div id='template' style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>
             <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>

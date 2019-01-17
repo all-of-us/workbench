@@ -74,7 +74,7 @@ export class InvitationKeyReact extends React.Component<InvitationKeyProps, Invi
   }
 
   render() {
-    return <div id='invitation' style={{padding: '3rem 3rem 0 3rem'}}>
+    return <div data-test-id='invitation' style={{padding: '3rem 3rem 0 3rem'}}>
       <div style={{marginTop: '0', paddingTop: '.5rem'}}>
         <BoldHeader>
           Enter your Invitation Key:
