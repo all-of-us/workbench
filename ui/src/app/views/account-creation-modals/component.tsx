@@ -3,7 +3,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Error, FieldInput, styles as inputStyles} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {profileApi} from 'app/services/tsfetch';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 interface AccountCreationResendModalProps {
   username: string;

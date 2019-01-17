@@ -1,8 +1,8 @@
 import {shallow} from 'enzyme';
 import * as React from 'react';
 
-import {registerApiClient} from 'app/services/tsfetch';
-import {ProfileApiStub} from 'testing/stubs/profile-service-stub';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 import {AccountCreationResendModal, AccountCreationUpdateModal} from './component';
 

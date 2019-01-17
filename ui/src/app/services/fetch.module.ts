@@ -1,5 +1,5 @@
 import { Inject, NgModule } from '@angular/core';
-import {bindApiClients} from 'app/services/tsfetch';
+import {bindApiClients} from 'app/services/swagger-fetch-clients';
 import * as portableFetch from 'portable-fetch';
 
 import {
