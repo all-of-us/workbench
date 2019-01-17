@@ -50,7 +50,7 @@
       [groupId]="groupId"
       [itemId]="itemId">
     </app-search-group-item>
-    <div class="item-or">OR</div>
+    <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
 
   <div class="card-block">

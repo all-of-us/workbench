@@ -214,11 +214,16 @@ export class CohortSearchActions {
     // The optimization wherein we only fire the request if the item
     // has a non-zero count (i.e. it affects its group and hence the total
     // counts) ONLY WORKS if the item is NOT an only child.
-    const isOnlyActiveChild = (getGroup(groupId)(this.state))
+    const otherItems = (getGroup(groupId)(this.state))
       .get('items', List())
       .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('id') === itemId);
+    const isOnlyActiveChild = otherItems
       .filter(it => it.get('status') === 'active')
-      .equals(List([item]));
+      .isEmpty();
+    const hasHiddenItems = !otherItems
+      .filter(it => it.get('status') === 'hidden')
+      .isEmpty();
 
     this.cancelIfRequesting('items', itemId);
     if (status) {
@@ -233,7 +238,7 @@ export class CohortSearchActions {
        * count, not really. */
       if (isOnlyActiveChild) {
         this.requestTotalCount(groupId);
-        if (!status) {
+        if (!status && !hasHiddenItems) {
           this.removeGroup(role, groupId);
         }
       } else {
