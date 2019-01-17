@@ -6,7 +6,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {SignInService} from '../../services/sign-in.service';
-import {AccountCreationComponent} from '../account-creation/component';
 import {AppComponent} from '../app/component';
 import {SignInTemplateComponent} from '../sign-in-flow-template/component';
 
@@ -24,7 +23,6 @@ describe('AppComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AccountCreationComponent,
         AppComponent,
         SignInTemplateComponent
       ],

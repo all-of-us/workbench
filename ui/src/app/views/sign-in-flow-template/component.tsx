@@ -4,9 +4,13 @@ import {Router} from '@angular/router';
 import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
-import {LoginReactComponent} from 'app/views/login/component';
 
+import {AccountCreationReact} from 'app/views/account-creation/component';
+import LoginReactComponent from 'app/views/login/component';
+
+import {DataAccessLevel, Profile} from 'generated/fetch';
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
@@ -16,7 +20,9 @@ interface ImagesSource {
   smallerBackgroundImgSrc: string;
 }
 
+
 export interface PageTemplateProps {
+  onInit: () => void;
   signIn: () => void;
   windowSize: { width: number, height: number };
 }
@@ -24,6 +30,7 @@ export interface PageTemplateProps {
 interface PageTemplateState {
   currentStep: string;
   invitationKey: string;
+  profile: Profile;
 }
 
 export const pageImages = {
@@ -49,10 +56,27 @@ const RegistrationPageTemplateReact = withWindowSize()(
       super(props);
       this.state = {
         currentStep: 'login',
-        invitationKey: ''
+        invitationKey: '',
+        profile: {
+          // Note: We abuse the "username" field here by omitting "@domain.org". After
+          // profile creation, this field is populated with the full email address.
+          username: '',
+          dataAccessLevel: DataAccessLevel.Unregistered,
+          givenName: '',
+          familyName: '',
+          contactEmail: '',
+          currentPosition: '',
+          organization: '',
+          areaOfResearch: ''
+        }
       };
       this.setCurrentStep = this.setCurrentStep.bind(this);
       this.onKeyVerified = this.onKeyVerified.bind(this);
+    }
+
+    componentDidMount() {
+      document.body.style.backgroundColor = '#e2e3e5';
+      this.props.onInit();
     }
 
     nextDirective(index) {
@@ -62,7 +86,11 @@ const RegistrationPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
+        case 'createAccount': return <AccountCreationReact
+                          onAccountCreation={
+                            () => this.setCurrentStep('accountCreationSuccess')}
+                          invitationKey={this.state.invitationKey}
+                          setProfile={this.setProfile}/>;
         default:
           return;
         }
@@ -72,6 +100,10 @@ const RegistrationPageTemplateReact = withWindowSize()(
       this.setState({
         currentStep: nextStep
       });
+    }
+
+    setProfile(profile) {
+      this.setState({profile: profile});
     }
 
     onKeyVerified(invitationKey) {
@@ -104,23 +136,20 @@ export default RegistrationPageTemplateReact;
 export class SignInTemplateComponent extends ReactWrapperBase implements OnInit {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(RegistrationPageTemplateReact, ['signIn']);
+    super(RegistrationPageTemplateReact, ['onInit', 'signIn']);
+    this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
   }
 
-  ngOnInit() {
-    document.body.style.backgroundColor = '#e2e3e5';
-
+  onInit(): void  {
     this.signInService.isSignedIn$.subscribe((signedIn) => {
       if (signedIn) {
         this.router.navigateByUrl('/');
       }
     });
-    super.ngOnInit();
   }
 
-  signIn(): void {
+ signIn(): void {
     this.signInService.signIn();
   }
-
 }
