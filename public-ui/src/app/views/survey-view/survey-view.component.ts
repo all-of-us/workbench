@@ -161,7 +161,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     let percent: number = countValue / this.survey.participantCount;
     percent = parseFloat(percent.toFixed(4));
-    
     return percent * 100;
   }
   public searchQuestion(q: QuestionConcept) {
