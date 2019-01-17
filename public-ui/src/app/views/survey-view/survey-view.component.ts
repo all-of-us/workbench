@@ -18,7 +18,6 @@ import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 })
 
 export class SurveyViewComponent implements OnInit, OnDestroy {
-  
   domainId: string;
   title;
   subTitle;
@@ -35,24 +34,19 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   genderGraph: string;
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
-  
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
   searchText: FormControl = new FormControl();
   searchMethod = 'or';
   selectedGraph = 'biological_sex';
-  
   /* Show answers toggle */
   showAnswer = {};
-  
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
     });
   }
-  
   ngOnInit() {
-    
     this.loading = true;
     // Get the survey from local storage the user clicked on on a previous page
     const obj = localStorage.getItem('surveyModule');
@@ -65,14 +59,12 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (!this.searchText.value) {
       this.searchText.setValue('');
     }
-    
     this.subscriptions.push(this.api.getSurveyResults(this.surveyConceptId.toString(),
       this.searchText.value).subscribe({
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
         this.surveyName = this.survey.name;
-        
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
@@ -135,7 +127,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
             return 0;
           });
         }
-        
         this.filterResults();
         this.loading = false;
       },
@@ -147,7 +138,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         this.resultsComplete = true;
       }
     }));
-    
     // Filter when text value changes
     this.subscriptions.push(
       this.searchText.valueChanges
@@ -156,18 +146,15 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         .subscribe((query) => {
           this.filterResults();
         }));
-    
     // Set to loading as long as they are typing
     this.subscriptions.push(this.searchText.valueChanges.subscribe(
       (query) => this.loading = true));
   }
-  
   ngOnDestroy() {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
   }
-  
   public countPercentage(countValue: number) {
     if (!countValue || countValue <= 0) {
       return 0;
@@ -177,11 +164,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     
     return percent * 100;
   }
-  
   public searchQuestion(q: QuestionConcept) {
     // Todo , match all words maybe instead of any. Or allow some operators such as 'OR' 'AND'
     const text = this.searchText.value;
-    
     let words = text.split(new RegExp(',| | and | or '));
     words = words.filter(w => w.length > 0
       && w.toLowerCase() !== 'and'
@@ -210,7 +195,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     return false;
   }
-  
   public filterResults() {
     localStorage.setItem('searchText', this.searchText.value);
     this.loading = true;
@@ -220,7 +204,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     this.loading = false;
   }
-  
   public setSearchMethod(method: string, resetSearch: boolean = false) {
     this.searchMethod = method;
     if (resetSearch) {
@@ -228,7 +211,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     this.filterResults();
   }
-  
   public toggleAnswer(qid) {
     if (!this.showAnswer[qid]) {
       this.showAnswer[qid] = true;
@@ -236,15 +218,12 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       this.showAnswer[qid] = false;
     }
   }
-  
   public showAnswerGraphs(q, a: AchillesResult) {
     q.selectedAnswer = a;
   }
-  
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
-  
   public selectSurveyGenderGraph(g) {
     if (g === 'Gender Identity') {
       this.genderGraph = 'GI';
@@ -252,11 +231,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       this.genderGraph = 'BS';
     }
   }
-  
   public convertToNum(s) {
     return Number(s);
   }
-  
   public makeAnalysis(a) {
     const analysis = {
       analysisId: a.analysisId,
