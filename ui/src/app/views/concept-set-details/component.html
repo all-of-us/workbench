@@ -14,7 +14,7 @@
           Edit
         </button>
         <button clrDropdownItem class="action-item action-delete"
-            (click)="deleteModal.open()"
+            (click)="confirmDeleting=true"
             [class.disabled]="!canEdit"
             [disabled]="!canEdit">
           <clr-icon shape="trash"></clr-icon>
@@ -78,7 +78,11 @@
   </app-sliding-fab>
 </app-top-box>
 
-<app-confirm-delete-modal [resourceType]="'Concept Set'" [resource]=conceptSet (receiveDelete)=receiveDelete()>
+<app-confirm-delete-modal [resourceType]="'Concept Set'"
+                          [resource]=conceptSet
+                          [receiveDelete]=receiveDelete.bind(this)
+                          [deleting]="confirmDeleting"
+                          [closeFunction]="closeConfirmDelete.bind(this)">
 </app-confirm-delete-modal>
 
 <clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">

@@ -1,4 +1,4 @@
-import {DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ElementRef, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromJS} from 'immutable';
 import {
   find,
@@ -189,7 +189,7 @@ export function reactStyles<T extends {[key: string]: React.CSSProperties}>(t: T
  *  - React propNames must exactly match instance property names on the subclass
  *    (usually these are also annotated as Angular @Inputs)
  */
-export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
+export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
   @ViewChild('root') rootElement: ElementRef;
 
   constructor(private wrapped: (new (...args: any[]) => React.Component)|React.FunctionComponent,
@@ -199,7 +199,7 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     this.renderComponent();
   }
 
-  ngDoCheck(): void {
+  ngOnChanges(): void {
     this.renderComponent();
   }
 
@@ -217,3 +217,13 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     );
   }
 }
+
+export function decamelize(str: string, separator: string) {
+  separator = typeof separator === 'undefined' ? '_' : separator;
+
+  return str
+      .replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
+      .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
+      .toLowerCase();
+}
+

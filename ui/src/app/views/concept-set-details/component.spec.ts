@@ -27,7 +27,13 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
@@ -105,6 +111,7 @@ describe('ConceptSetDetailsComponent', () => {
     }
 
     fixture = TestBed.createComponent(ConceptSetDetailsComponent);
+    setupModals(fixture);
     // This tick initializes the component.
     tick();
     // This finishes the API calls.
@@ -223,7 +230,7 @@ describe('ConceptSetDetailsComponent', () => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
     simulateClick(fixture, de.query(By.css('.action-delete')));
-    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
+    simulateClickReact(fixture, '#confirm-delete');
 
     expect(router.navigate).toHaveBeenCalled();
     expect(conceptSetsStub.conceptSets).toEqual([]);
