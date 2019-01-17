@@ -3,7 +3,7 @@ import {RecentResource} from 'generated';
 import * as React from 'react';
 import {EditModal, EditModalProps, EditModalState} from '../edit-modal/component';
 
-describe('ConfirmDeleteModalComponent', () => {
+describe('EditModalComponent', () => {
   let props: EditModalProps;
 
   const component = () => {
