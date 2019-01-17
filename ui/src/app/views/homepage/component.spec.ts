@@ -109,34 +109,21 @@ describe('HomepageComponent', () => {
   it('should display quick tour when clicked', fakeAsync(() =>  {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
-    expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
-        renderIntoDocument(React.createElement(
-            QuickTourReact, {closeFunction: undefined})), 'quickTourReact').length).toBe(0);
+    expect(fixture.debugElement.query(By.directive(QuickTourModalComponent))).toBeFalsy();
     simulateClick(fixture, fixture.debugElement.query(By.css('#learn')));
-    tick(1000);
-    // must check the inner piece of the react element here because the quick-tour element
-    //   is always rendered, but empty when not open
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(
-        renderIntoDocument(React.createElement(
-            QuickTourReact, {closeFunction: undefined})), 'quickTourReact')).toBeTruthy();
+    expect(fixture.debugElement.query(By.directive(QuickTourModalComponent))).toBeTruthy();
   }));
 
   it('should display quick tour on first visit', fakeAsync(() => {
     updateAndTick(fixture);
-    tick(1000);
-    updateAndTick(fixture);
-    expect(ReactTestUtils.findRenderedDOMComponentWithClass(
-        renderIntoDocument(React.createElement(
-            QuickTourReact, {closeFunction: undefined})), 'quickTourReact')).toBeTruthy();
+    updateAndTick(fixture); // not clear why, but we need both of these
+    expect(fixture.debugElement.query(By.directive(QuickTourModalComponent))).toBeTruthy();
   }));
 
   it('should not auto display quick tour if not first visit', fakeAsync(() => {
     loadProfileWithPageVisits({pageVisits: [{page: 'homepage'}]});
     updateAndTick(fixture);
-    tick(1000);
-    expect(ReactTestUtils.scryRenderedDOMComponentsWithClass(
-        renderIntoDocument(React.createElement(
-            QuickTourReact, {closeFunction: undefined})), 'quickTourReact').length).toBe(0);
+    expect(fixture.debugElement.query(By.directive(QuickTourModalComponent))).toBeFalsy();
   }));
 
 });
