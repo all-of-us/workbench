@@ -1,6 +1,6 @@
 import { shallow } from 'enzyme';
-import * as React from 'react';
 import {RecentResource} from 'generated';
+import * as React from 'react';
 import {EditModal, EditModalProps, EditModalState} from '../edit-modal/component';
 
 describe('ConfirmDeleteModalComponent', () => {
