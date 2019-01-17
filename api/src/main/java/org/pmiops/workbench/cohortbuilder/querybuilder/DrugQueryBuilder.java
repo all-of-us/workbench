@@ -54,8 +54,6 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   private static final String PARENT_ONLY_TEMPLATE =
     "concept_id in (" + PARENT_CRITERIA + ")\n";
 
-  private static final String UNION_TEMPLATE = " union all\n";
-
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
