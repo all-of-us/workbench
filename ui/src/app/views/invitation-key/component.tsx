@@ -29,7 +29,8 @@ interface InvitationKeyState {
 
 export class InvitationKey extends React.Component<InvitationKeyProps, InvitationKeyState> {
 
-  inputElement: any;
+  private inputElement = React.createRef<HTMLInputElement>();
+
 
   constructor(props: InvitationKeyProps) {
     super(props);
@@ -38,7 +39,6 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       invitationKeyReq: false,
       invitationKeyInvalid: false
     };
-    this.inputElement = React.createRef();
   }
 
   next() {
@@ -46,12 +46,15 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       invitationKeyReq: false,
       invitationKeyInvalid: false
     });
+    const input = this.inputElement.current;
 
     if (isBlank(this.state.invitationKey)) {
       this.setState({
         invitationKeyReq: true
       });
-      this.inputElement.current.focus();
+      if(input) {
+        input.focus();
+      }
       return;
     }
 
@@ -66,7 +69,9 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
           this.setState({
             invitationKeyInvalid: true
           });
-          this.inputElement.current.focus();
+          if(input) {
+            input.focus();
+          }
         } else {
           this.props.onInvitationKeyVerify(this.state.invitationKey);
           return;

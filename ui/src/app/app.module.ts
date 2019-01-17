@@ -49,7 +49,7 @@ import {RenameModalComponent} from './views/rename-modal/component';
 import {ResourceCardComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
-import {SignInTemplateComponent} from './views/sign-in-flow-template/component';
+import {SignInComponent} from './views/sign-in/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
@@ -163,7 +163,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
-    SignInTemplateComponent,
+    SignInComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
     ToolTipComponent,

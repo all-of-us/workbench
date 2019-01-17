@@ -20,13 +20,13 @@ interface ImagesSource {
   smallerBackgroundImgSrc: string;
 }
 
-export interface PageTemplateProps {
+export interface SignInProps {
   onInit: () => void;
   signIn: () => void;
   windowSize: { width: number, height: number };
 }
 
-interface PageTemplateState {
+interface SignInState {
   currentStep: string;
   invitationKey: string;
   profile: Profile;
@@ -52,18 +52,16 @@ export const pageImages = {
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
-export const RegistrationPageTemplateReact = withWindowSize()(
-  class extends React.Component<PageTemplateProps, PageTemplateState> {
+export const SignInReact = withWindowSize()(
+  class extends React.Component<SignInProps, RegistrationPageTemplateState> {
 
-    constructor(props: PageTemplateProps) {
+    constructor(props: SignInProps) {
       super(props);
       this.state = {
         currentStep: 'login',
         invitationKey: '',
         profile: {} as Profile
       };
-      this.setCurrentStep = this.setCurrentStep.bind(this);
-      this.onKeyVerified = this.onKeyVerified.bind(this);
       this.setProfile = this.setProfile.bind(this);
     }
 
@@ -72,7 +70,7 @@ export const RegistrationPageTemplateReact = withWindowSize()(
       this.props.onInit();
     }
 
-    nextDirective(index) {
+    nextDirective(index:string) {
       switch (index) {
         case 'login':
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
@@ -89,13 +87,13 @@ export const RegistrationPageTemplateReact = withWindowSize()(
         }
       }
 
-    setCurrentStep(nextStep) {
+    setCurrentStep(nextStep:string) {
       this.setState({
         currentStep: nextStep
       });
     }
 
-    onKeyVerified(invitationKey) {
+    onKeyVerified(invitationKey:string) {
       this.setState({
         invitationKey: invitationKey,
         currentStep: 'accountCreation'
@@ -124,15 +122,15 @@ export const RegistrationPageTemplateReact = withWindowSize()(
     }
 });
 
-export default RegistrationPageTemplateReact;
+export default SignInReact;
 
 @Component({
   template: '<div #root></div>'
 })
-export class SignInTemplateComponent extends ReactWrapperBase {
+export class SignInComponent extends ReactWrapperBase {
 
   constructor(private signInService: SignInService, private router: Router) {
-    super(RegistrationPageTemplateReact, ['onInit', 'signIn']);
+    super(SignInReact, ['onInit', 'signIn']);
     this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
   }
