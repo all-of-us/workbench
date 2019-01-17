@@ -26,7 +26,7 @@
               {{survey.participantCount | number }}
             </div>
             <div class="card-text">
-              participants completed this survey
+              partipants completed this survey
             </div>
           </div>
         </div>
@@ -64,8 +64,9 @@
     </div>
   </div>
   -->
-  <div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.</div>
+
   <div class="survey-results" *ngIf="resultsComplete">
+
     <div class="row search">
       <div class="col-xs-12 flex-xs-middle search-input-full ">
         <div class="search-wrapper">
@@ -100,7 +101,7 @@
         </p>
       </div>
       <div class="col-xs-12">
-      Click on each response to view age and gender distributions.
+        Click on each response to view age and gender distributions.
       </div>
     </div>
     <div class="row question-result" *ngFor="let q of questions, let i = index">
@@ -115,128 +116,192 @@
               <div class="box-sub-title question question">
                 <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId"></app-highlight-search>
               </div>
+              <clr-tooltip>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-tooltip-content clrPosition=bottom-left
+                                     clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-label">The concept code is an additional piece of information that
+                    can be utilized to find medical concepts in the AoU data set. Concept codes are specific to the
+                    AoU Research Program data and are assigned to all medical concepts.
+                    In some instances,
+                    a medical concept may not be assigned a source or standard vocabulary code.
+                    In these instances, the concept code can be utilized to
+                    query the data for the medical concept.</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </div>
           </div>
         </div>
 
         <div class="row">
-            <div class="col-xs-12">
-              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers - Click on each response option for additional gender and age at occurrence data.
-                <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
-            </div>
-        </div>
-        <div class="row grid-header answers" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
-            <div class="row">
-                <div class="col-md-4 col-sm-12 col-xs-12 info-text">
-                  Answer Text
-                </div>
-                <div class="col-md-2 col-sm-12 col-xs-12 info-text">
-                  Concept Code
-                  <clr-tooltip>
-                    <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                    <clr-tooltip-content clrPosition=bottom-left
-                                         clrSize="lg" *clrIfOpen>
-                      <div class="tooltip-label">The concept code is an additional piece of information that
-                        can be utilized to find medical concepts in the AoU data set. Concept codes are specific to the
-                        AoU Research Program data and are assigned to all medical concepts.
-                        In some instances,
-                        a medical concept may not be assigned a source or standard vocabulary code.
-                        In these instances, the concept code can be utilized to
-                        query the data for the medical concept.</div>
-                    </clr-tooltip-content>
-                  </clr-tooltip>
-                </div>
-                <div class="col-md-3 col-sm-12 col-xs-12 info-text">
-                  Participant Count
-                </div>
-                <div class="col-md-3 col-sm-12 col-xs-12 info-text">
-                  % answered
-                </div>
-            </div>
+          <div class="col-xs-12">
+            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers
+              <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
           </div>
         </div>
-        <div class="row  answers answer-box" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
-            <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
-              <div class="col-sm-4 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
-                <label class="answer-text">
-                  <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
-                </label>
-              </div>
-              <div class="col-sm-2 col-xs-12">
-                <label class="concept-code">{{a.stratum3}}</label>
-              </div>
-              <ng-template #binnedSurveyQuestionDisplay>
-                <div class="col-sm-4 col-xs-12">
-                  <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
-                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
+        <ng-container *ngIf="q.subQuestionCount == 0; else subQuestionDisplay">
+          <div class="row  answers" [hidden]="!showAnswer[q.conceptId]">
+            <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
+              <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
+                <div class="col-sm-6 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
+                  <label class="answer-text">
+                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
                   </label>
-                  <ng-template #rangeLabel>
-                    <label class="answer-text">
-                      <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value"></app-highlight-search>
+                </div>
+                <ng-template #binnedSurveyQuestionDisplay>
+                  <div class="col-sm-6 col-xs-12">
+                    <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel">
+                      <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
                     </label>
-                  </ng-template>
-                </div>
-                <div class="col-sm-2 col-xs-12">
-                  <label class="concept-code">{{a.stratum3}}</label>
-                </div>
-              </ng-template>
-              <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
-                <label class="participant-count answer-text">{{a.countValue | number}}  </label>
-              </div>
-              <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
-                <div class="progress labeled">
-                  <progress max="100" value="{{a.countPercent}}" data-displayval="0%"></progress>
-                  <span>{{a.countPercent.toFixed(2)}}%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
-            <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer && q.selectedAnswer.stratum4.toLowerCase() != 'did not answer' " >
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=right
-                                     clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">Gender Chart</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
-              <div class="survey-graph-answer">{{q.selectedAnswer.stratum4}} -- {{q.selectedAnswer.stratum3}} </div>
-              <div class="chart-wrapper col-xs-12 col-sm-12">
-                <div class="col-md gender-chart-button">
-                  <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
-                  </button>
-                  <clr-tooltip>
-                    <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                    <clr-tooltip-content clrPosition=right
-                                         clrSize="lg" *clrIfOpen>
-                      <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
-                    </clr-tooltip-content>
-                  </clr-tooltip>
-                </div>
-                <app-chart [analysis]="genderGraph === 'GI' ? q.genderIdentityAnalysis : q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
-              </div>
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=right
-                                     clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">The age at occurrence bar chart provides a binned age distribution for
-                    participants at the time the medical concept being queried occurred in their records.
-                    If an individual’s record contains more than one mention of a concept,
-                    the age at occurrence is included for each mention.
-                    As a result, a participant may be counted more than once in the distribution.
+                    <ng-template #rangeLabel>
+                      <label class="answer-text">
+                        <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                      </label>
+                    </ng-template>
                   </div>
-                </clr-tooltip-content>
-              </clr-tooltip>
-              <div class="chart-wrapper age col-xs-12 col-sm-12">
-                <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"></app-chart>
+                </ng-template>
+                <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
+                  <label class="participant-count answer-text">{{a.countValue | number}}  </label>
+                </div>
+                <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
+                  <div class="progress labeled">
+                    <progress max="100" value="{{a.countPercent}}" data-displayval="0%"></progress>
+                    <span>{{a.countPercent.toFixed(2)}}%</span>
+                  </div>
+                </div>
               </div>
+            </div>
 
+            <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
+              <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="q.selectedAnswer && q.selectedAnswer.stratum4.toLowerCase() != 'did not answer' " >
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                  <clr-tooltip-content clrPosition=right
+                                       clrSize="lg" *clrIfOpen>
+                    <div class="tooltip-label">Gender chart</div>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <div class="chart-wrapper col-xs-12 col-sm-12">
+                  <div class="col-md gender-chart-button">
+                    <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
+                    </button>
+                    <clr-tooltip>
+                      <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                      <clr-tooltip-content clrPosition=right
+                                           clrSize="lg" *clrIfOpen>
+                        <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                  </div>
+                  <app-chart [analysis]="genderGraph === 'GI' ? q.genderIdentityAnalysis : q.genderAnalysis" [selectedResult]="q.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
+                </div>
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                  <clr-tooltip-content clrPosition=right
+                                       clrSize="lg" *clrIfOpen>
+                    <div class="tooltip-label">The age at occurrence bar chart provides a binned age distribution for
+                      participants at the time the medical concept being queried occurred in their records.
+                      If an individual’s record contains more than one mention of a concept,
+                      the age at occurrence is included for each mention.
+                      As a result, a participant may be counted more than once in the distribution.
+                    </div>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <div class="chart-wrapper age col-xs-12 col-sm-12">
+                  <app-chart [analysis]="q.ageAnalysis" [selectedResult]="q.selectedAnswer" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"></app-chart>
+                </div>
+
+              </div>
             </div>
           </div>
-        </div> <!-- end collapsible answers -->
+        </ng-container><!-- end collapsible answers -->
+        <ng-template #subQuestionDisplay>
+          <div class="row  grid-header answers" [hidden]="!showAnswer[q.conceptId]">
+            <div class="row col-xs-12 col-sm-12 answer-text">
+              <div class="col-md-5 flex-xs-middle"> Text
+              </div>
+              <div class="col-md-2 flex-xs-middle"> Concept code
+              </div>
+              <div class="col-md-2 flex-xs-middle"> Participant count
+              </div>
+              <div class="col-md-2 flex-xs-middle"> % answered
+              </div>
+              <div class="col-md-1 flex-xs-middle">
+              </div>
+            </div>
+            <div class="row expandable-grid-row sub-question" *ngFor="let sq of q.subQuestions" [ngClass]="{'expanded-grid-row': sq.expanded}">
+              <div class="col-md-5 flex-xs-middle">{{sq.conceptName}}</div>
+              <div class="col-md-2 flex-xs-middle">{{sq.conceptId}}</div>
+              <div class="col-md-2 flex-xs-middle">{{sq.countValue}}</div>
+              <div class="col-md-2 flex-xs-middle">{{countPercentage(sq.countValue).toFixed(2)}}</div>
+              <div class="col-md-1 flex-xs-middle">
+                <button class="icon-btn" (click)="sq.expanded = !sq.expanded">
+                  <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
+                </button>
+              </div>
+              <div class="row row-expansion flex-xs-middle" *ngIf="sq.expanded">
+                <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
+                  <div  class="row answer-text"  [class.answer-active]="sq.selectedAnswer && sq.selectedAnswer.id === a.id" (click)="showAnswerGraphs(sq, a)" *ngFor="let a of sq.countAnalysis.results">
+                    <div class="col-sm-6 col-xs-12">
+                      <label class="answer-text">
+                        <app-highlight-search [text]="removeDescribingWords(a.stratum4)" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                      </label>
+                    </div>
+                    <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="sq.selectedAnswer && sq.selectedAnswer.id === a.id">
+                      <label class="participant-count answer-text">{{a.countValue | number}}  </label>
+                    </div>
+                    <div class="col-sm-4 col-xs-12 percent-bar"  [class.answer-active]="sq.selectedAnswer && sq.selectedAnswer.id === a.id">
+                      <div class="progress labeled">
+                        <progress max="100" value="{{countPercentage(a.countValue)}}" data-displayval="0%"></progress>
+                        <span>{{countPercentage(a.countValue).toFixed(2)}}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-5 col-sm-7 col-xs-12 answer-charts">
+                  <div class="row answer-charts-wrapper flex-items-xs-middle" *ngIf="sq.selectedAnswer && sq.selectedAnswer.stratum4.toLowerCase() != 'did not answer' " >
+                    <clr-tooltip>
+                      <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                      <clr-tooltip-content clrPosition=right
+                                           clrSize="lg" *clrIfOpen>
+                        <div class="tooltip-label">Gender chart</div>
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                    <div class="chart-wrapper col-xs-12 col-sm-12">
+                      <div class="col-md gender-chart-button">
+                        <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
+                        </button>
+                        <clr-tooltip>
+                          <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                          <clr-tooltip-content clrPosition=right
+                                               clrSize="lg" *clrIfOpen>
+                            <div class="tooltip-label">Toggle here to view biological sex / gender identity chart</div>
+                          </clr-tooltip-content>
+                        </clr-tooltip>
+                      </div>
+                      <app-chart [analysis]="genderGraph === 'GI' ? sq.genderIdentityAnalysis : sq.genderAnalysis" [selectedResult]="sq.selectedAnswer" [backgroundColor]="'#D9E4EA'"></app-chart>
+                    </div>
+                    <clr-tooltip>
+                      <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                      <clr-tooltip-content clrPosition=right
+                                           clrSize="lg" *clrIfOpen>
+                        <div class="tooltip-label">The age at occurrence bar chart provides a binned age distribution for
+                          participants at the time the medical concept being queried occurred in their records.
+                          If an individual’s record contains more than one mention of a concept,
+                          the age at occurrence is included for each mention.
+                          As a result, a participant may be counted more than once in the distribution.
+                        </div>
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                    <div class="chart-wrapper age col-xs-12 col-sm-12">
+                      <app-chart [analysis]="sq.ageAnalysis" [selectedResult]="sq.selectedAnswer" [pointWidth]="20" [backgroundColor]="'#D9E4EA'"></app-chart>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
 
       </div>
 

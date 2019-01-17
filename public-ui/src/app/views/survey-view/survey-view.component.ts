@@ -18,9 +18,9 @@ import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 })
 
 export class SurveyViewComponent implements OnInit, OnDestroy {
-
+  
   domainId: string;
-  title ;
+  title;
   subTitle;
   surveys: SurveyModule[] = [];
   survey;
@@ -35,55 +35,83 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   genderGraph: string;
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
-
+  
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
   searchText: FormControl = new FormControl();
   searchMethod = 'or';
-
+  selectedGraph = 'biological_sex';
+  
   /* Show answers toggle */
   showAnswer = {};
-
+  
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
     });
   }
-
+  
   ngOnInit() {
-
+    
     this.loading = true;
     // Get the survey from local storage the user clicked on on a previous page
     const obj = localStorage.getItem('surveyModule');
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
-      this.surveyPdfUrl = '/assets/surveys/' + survey.name.replace(' ', '_') + '.pdf';
+      this.surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
     }
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
       this.searchText.setValue('');
     }
-
-    this.subscriptions.push(this.api.getSurveyResults(this.surveyConceptId.toString()).subscribe({
+    
+    this.subscriptions.push(this.api.getSurveyResults(this.surveyConceptId.toString(),
+      this.searchText.value).subscribe({
       next: x => {
         this.surveyResult = x;
         this.survey = this.surveyResult.survey;
         this.surveyName = this.survey.name;
+        
         // Add Did not answer to each question
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
-          let didNotAnswerCount  = this.survey.participantCount;
+          let didNotAnswerCount = this.survey.participantCount;
           for (const a of q.countAnalysis.results) {
+            if (q.subQuestions) {
+              let matchedQuestionConcepts: QuestionConcept[] = [];
+              matchedQuestionConcepts = q.subQuestions.filter(
+                w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
+              if (matchedQuestionConcepts.length === 0) {
+                const missingQuestionConcept = {
+                  conceptId: a.stratum3,
+                  conceptName: a.stratum4,
+                  domainId: 'ppi',
+                  conceptCode: '',
+                  countValue: a.countValue,
+                  prevalence: 0.00,
+                  subQuestionCount: 0,
+                  countAnalysis: this.makeAnalysis(q.countAnalysis),
+                  genderAnalysis: this.makeAnalysis(q.genderAnalysis),
+                  ageAnalysis: this.makeAnalysis(q.ageAnalysis),
+                  genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
+                  subQuestions: null
+                };
+                q.subQuestions.push(missingQuestionConcept);
+                q.subQuestionCount = q.subQuestionCount + 1;
+              }
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
           const result = q.countAnalysis.results[0];
-          if (didNotAnswerCount < 0 ) { didNotAnswerCount = 0; }
+          if (didNotAnswerCount < 0) {
+            didNotAnswerCount = 0;
+          }
           const notAnswerPercent = this.countPercentage(didNotAnswerCount);
           const didNotAnswerResult = {
-            analysisId : result.analysisId,
+            analysisId: result.analysisId,
             countValue: didNotAnswerCount,
             countPercent: notAnswerPercent,
             stratum1: result.stratum1,
@@ -94,17 +122,20 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           };
           q.countAnalysis.results.push(didNotAnswerResult);
         }
-
         this.questions = this.surveyResult.items;
         // Sort count value desc
-        for (const q of this.questions ) {
+        for (const q of this.questions) {
           q.countAnalysis.results.sort((a1, a2) => {
-            if (a1.countValue > a2.countValue) { return -1; }
-            if (a1.countValue < a2.countValue) { return 1; }
+            if (a1.countValue > a2.countValue) {
+              return -1;
+            }
+            if (a1.countValue < a2.countValue) {
+              return 1;
+            }
             return 0;
           });
         }
-
+        
         this.filterResults();
         this.loading = false;
       },
@@ -112,38 +143,45 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         console.error('Observer got an error: ' + err);
         this.loading = false;
       },
-      complete: () => { this.resultsComplete = true; }
+      complete: () => {
+        this.resultsComplete = true;
+      }
     }));
-
+    
     // Filter when text value changes
     this.subscriptions.push(
       this.searchText.valueChanges
         .debounceTime(400)
         .distinctUntilChanged()
-        .subscribe((query) => { this.filterResults(); } ));
-
+        .subscribe((query) => {
+          this.filterResults();
+        }));
+    
     // Set to loading as long as they are typing
     this.subscriptions.push(this.searchText.valueChanges.subscribe(
-      (query) => this.loading = true ));
+      (query) => this.loading = true));
   }
-
+  
   ngOnDestroy() {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
   }
-
+  
   public countPercentage(countValue: number) {
-    if (!countValue || countValue <= 0) { return 0; }
-    let percent: number = countValue / this.survey.participantCount ;
+    if (!countValue || countValue <= 0) {
+      return 0;
+    }
+    let percent: number = countValue / this.survey.participantCount;
     percent = parseFloat(percent.toFixed(4));
+    
     return percent * 100;
   }
-
+  
   public searchQuestion(q: QuestionConcept) {
     // Todo , match all words maybe instead of any. Or allow some operators such as 'OR' 'AND'
     const text = this.searchText.value;
-
+    
     let words = text.split(new RegExp(',| | and | or '));
     words = words.filter(w => w.length > 0
       && w.toLowerCase() !== 'and'
@@ -152,9 +190,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     // If doing an and search match all words
     if (this.searchMethod === 'and') {
       for (const w of words) {
-        if (q.conceptName.toLowerCase().indexOf(w.toLowerCase()) === -1  &&
-          q.countAnalysis.results.filter(r =>
-            r.stratum4.toLowerCase().indexOf(w.toLowerCase()) === -1 )) {
+        if ((q.conceptName.toLowerCase().indexOf(w.toLowerCase()) === -1 ||
+            q.conceptCode.toLowerCase().indexOf(w.toLowerCase()) === -1)
+          && q.countAnalysis.results.filter(r =>
+            r.stratum4.toLowerCase().indexOf(w.toLowerCase()) === -1)) {
           return false;
         }
       }
@@ -170,10 +209,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (results.length > 0) {
       return true;
     }
-
-    return false ;
+    console.log('electronicsmoking_test'.includes('smoking'));
+    return false;
   }
-
+  
   public filterResults() {
     localStorage.setItem('searchText', this.searchText.value);
     this.loading = true;
@@ -183,7 +222,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     this.loading = false;
   }
-
+  
   public setSearchMethod(method: string, resetSearch: boolean = false) {
     this.searchMethod = method;
     if (resetSearch) {
@@ -191,32 +230,63 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
     this.filterResults();
   }
-
+  
   public toggleAnswer(qid) {
-    if (! this.showAnswer[qid] ) {
+    if (!this.showAnswer[qid]) {
       this.showAnswer[qid] = true;
     } else {
       this.showAnswer[qid] = false;
     }
   }
-
+  
   public showAnswerGraphs(q, a: AchillesResult) {
     q.selectedAnswer = a;
   }
-
+  
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
-
+  
   public selectSurveyGenderGraph(g) {
-      if (g === 'Gender Identity') {
-        this.genderGraph = 'GI';
-      } else {
-        this.genderGraph = 'BS';
-      }
+    if (g === 'Gender Identity') {
+      this.genderGraph = 'GI';
+    } else {
+      this.genderGraph = 'BS';
+    }
   }
+  
   public convertToNum(s) {
     return Number(s);
   }
-
+  
+  public makeAnalysis(a) {
+    const analysis = {
+      analysisId: a.analysisId,
+      analysisName: a.analysisName,
+      stratum1Name: a.stratum1Name,
+      stratum2Name: a.stratum2Name,
+      stratum3Name: a.stratum3Name,
+      stratum4Name: a.stratum4Name,
+      stratum5Name: a.stratum5Name,
+      chartType: a.chartType,
+      dataType: a.dataType,
+      results: a.results.filter(w => w.stratum3 === a.stratum3)
+    };
+    return analysis;
+  }
+  public selectGraph(g) {
+    if (g.toLowerCase() === 'gender identity') {
+      this.selectedGraph = 'gender_identity';
+    } else if (g.toLowerCase() === 'age') {
+      this.selectedGraph = 'age';
+    } else if (g.toLowerCase() === 'biological_sex') {
+      this.selectedGraph = 'biological_sex';
+    }
+  }
+  public removeDescribingWords(text) {
+    if (text && text.toLowerCase().includes('none of these describe me')) {
+      text = text.substring(text.toLowerCase().indexOf('none of these describe me'));
+    }
+    return text;
+  }
 }

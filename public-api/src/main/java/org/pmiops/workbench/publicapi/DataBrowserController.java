@@ -78,10 +78,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
     public DataBrowserController() {}
 
     public DataBrowserController(ConceptService conceptService, ConceptDao conceptDao,
-        DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao,
-        AchillesResultDao achillesResultDao,
-        AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao,
-        EntityManager entityManager, Provider<CdrVersion> defaultCdrVersionProvider) {
+                                 DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao,
+                                 AchillesResultDao achillesResultDao,
+                                 AchillesAnalysisDao achillesAnalysisDao, AchillesResultDistDao achillesResultDistDao,
+                                 EntityManager entityManager, Provider<CdrVersion> defaultCdrVersionProvider) {
         this.conceptService = conceptService;
         this.conceptDao = conceptDao;
         this.domainInfoDao = domainInfoDao;
@@ -158,6 +158,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
                     org.pmiops.workbench.model.Analysis genderIdentityAnalysis=null;
+                    List<org.pmiops.workbench.model.QuestionConcept> subQuestions = null;
                     if(concept.getCountAnalysis() != null){
                         countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
                     }
@@ -170,6 +171,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     if(concept.getGenderIdentityAnalysis() != null){
                         genderIdentityAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderIdentityAnalysis());
                     }
+                    if(concept.getSubQuestions() != null) {
+                        subQuestions = concept.getSubQuestions().stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList());
+                    }
 
 
                     return new org.pmiops.workbench.model.QuestionConcept()
@@ -179,10 +183,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .domainId(concept.getDomainId())
                             .countValue(concept.getCountValue())
                             .prevalence(concept.getPrevalence())
+                            .subQuestionCount(concept.getSubQuestionCount())
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
                             .ageAnalysis(ageAnalysis)
-                            .genderIdentityAnalysis(genderIdentityAnalysis);
+                            .genderIdentityAnalysis(genderIdentityAnalysis)
+                            .subQuestions(subQuestions);
 
                 }
             };
@@ -326,11 +332,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(surveyKeyword);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
-            .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
-            .collect(Collectors.toList()));
+                .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
+                .collect(Collectors.toList()));
         response.setSurveyModules(surveyModules.stream()
-            .map(SurveyModule.TO_CLIENT_SURVEY_MODULE)
-            .collect(Collectors.toList()));
+                .map(SurveyModule.TO_CLIENT_SURVEY_MODULE)
+                .collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
@@ -413,11 +419,11 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         List<SurveyModule> surveyModules = ImmutableList.copyOf(surveyModuleDao.findByOrderByOrderNumberAsc());
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domainInfos.stream()
-            .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
-            .collect(Collectors.toList()));
+                .map(DomainInfo.TO_CLIENT_DOMAIN_INFO)
+                .collect(Collectors.toList()));
         response.setSurveyModules(surveyModules.stream()
-            .map(SurveyModule.TO_CLIENT_SURVEY_MODULE)
-            .collect(Collectors.toList()));
+                .map(SurveyModule.TO_CLIENT_SURVEY_MODULE)
+                .collect(Collectors.toList()));
         return ResponseEntity.ok(response);
     }
 
@@ -456,7 +462,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
         // Get questions for survey
         List<QuestionConcept> questions = questionConceptDao.findSurveyQuestions(surveyConceptId);
-
         // Get survey definition
         QuestionConceptListResponse resp = new QuestionConceptListResponse();
 
@@ -468,6 +473,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // Put ids in array for query to get all results at once
             List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
+                if (q.getSubQuestionCount() > 0) {
+                    List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
+                    List<Long> subQuestionConceptIds = subQuestions.stream().map(QuestionConcept::getConceptId).collect(Collectors.toList());
+                    List<AchillesAnalysis> subQuestionAnalyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestionConceptIds.stream().map(s -> String.valueOf(s)).collect(Collectors.toList()));
+                    QuestionConcept.mapAnalysesToQuestions(subQuestions, subQuestionAnalyses);
+                    q.setSubQuestions(subQuestions);
+                }
                 qlist.add(String.valueOf(q.getConceptId()));
             }
 
@@ -602,7 +614,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                                 unitSeperateAnalysis.add(unitAgeAnalysis);
                             }
                         }else {
-                                unitSeperateAnalysis.add(aa);
+                            unitSeperateAnalysis.add(aa);
                         }
 
                     }
@@ -717,7 +729,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         for(AchillesResult ar: aa.getResults()){
             String analysisStratumName=ar.getAnalysisStratumName();
             if (analysisStratumName == null || analysisStratumName.equals("")) {
-                   ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
+                ar.setAnalysisStratumName(QuestionConcept.raceStratumNameMap.get(ar.getStratum2()));
             }
         }
     }
