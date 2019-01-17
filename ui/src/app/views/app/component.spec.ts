@@ -8,7 +8,6 @@ import {ClarityModule} from '@clr/angular';
 import {SignInService} from '../../services/sign-in.service';
 import {AccountCreation} from '../account-creation/component';
 import {AppComponent} from '../app/component';
-import {InvitationKey} from '../invitation-key/component';
 import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
@@ -27,7 +26,6 @@ describe('AppComponent', () => {
       declarations: [
         AccountCreation,
         AppComponent,
-        InvitationKey,
         PageTemplateSignedOutComponent
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
