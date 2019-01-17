@@ -1,10 +1,6 @@
-import {DoCheck, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ElementRef, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {fromJS} from 'immutable';
-import {
-  find,
-  fromPairs,
-  isEqual
-} from 'lodash/fp';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -58,7 +54,7 @@ export function randomString(len): string {
 export const DEFAULT = Symbol();
 
 export const switchCase = (value, ...pairs) => {
-  const match = find(([v]) => v === value || v === DEFAULT, pairs);
+  const match = fp.find(([v]) => v === value || v === DEFAULT, pairs);
   return match && match[1]();
 };
 
@@ -98,7 +94,7 @@ export const withWindowSize = () => WrappedComponent => {
     resize = () => {
       const { windowSize } = this.state;
       const newSize = getWindowSize();
-      if (!isEqual(windowSize, newSize)) {
+      if (!fp.isEqual(windowSize, newSize)) {
         this.setState({ windowSize: newSize });
       }
     }
@@ -189,7 +185,7 @@ export function reactStyles<T extends {[key: string]: React.CSSProperties}>(t: T
  *  - React propNames must exactly match instance property names on the subclass
  *    (usually these are also annotated as Angular @Inputs)
  */
-export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
+export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
   @ViewChild('root') rootElement: ElementRef;
 
   constructor(private wrapped: (new (...args: any[]) => React.Component)|React.FunctionComponent,
@@ -199,7 +195,7 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     this.renderComponent();
   }
 
-  ngDoCheck(): void {
+  ngOnChanges(): void {
     this.renderComponent();
   }
 
@@ -211,9 +207,19 @@ export class ReactWrapperBase implements DoCheck, OnInit, OnDestroy {
     ReactDOM.render(
       React.createElement(
         this.wrapped,
-        fromPairs(this.propNames.map(name => [name, this[name]]))
+        fp.fromPairs(this.propNames.map(name => [name, this[name]]))
       ),
       this.rootElement.nativeElement
     );
   }
 }
+
+export function decamelize(str: string, separator: string) {
+  separator = typeof separator === 'undefined' ? '_' : separator;
+
+  return str
+      .replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
+      .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
+      .toLowerCase();
+}
+

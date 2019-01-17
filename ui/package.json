@@ -42,13 +42,7 @@
     ],
     "globals": {
       "ts-jest": {
-        "diagnostics": {
-          "warnOnly": true
-        },
-        "tsConfig": {
-          "module": "commonjs",
-          "jsx": "react"
-        }
+        "tsConfig": "src/tsconfig.jest.json"
       }
     }
   },

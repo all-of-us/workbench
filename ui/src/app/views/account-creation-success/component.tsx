@@ -9,8 +9,8 @@ import {
   SmallHeader
 } from 'app/components/headers';
 import {
-  AccountCreationResendModalReact,
-  AccountCreationUpdateModalReact
+  AccountCreationResendModal,
+  AccountCreationUpdateModal
 } from 'app/views/account-creation-modals/component';
 import {AccountCreationComponent} from 'app/views/account-creation/component';
 import {LoginComponent} from 'app/views/login/component';
@@ -98,19 +98,19 @@ export class AccountCreationSuccessReact
           </button>
         </div>
       </div>
-      <AccountCreationResendModalReact
+      {this.state.resendModal && <AccountCreationResendModal
         username={this.props.username}
         creationNonce={this.props.creationNonce}
-        resend={this.state.resendModal}
-        closeFunction={() => this.setState({resendModal: false})}
-      />
-      <AccountCreationUpdateModalReact
+        onClose={() => this.setState({resendModal: false})}
+      />}
+      {this.state.updateModal && <AccountCreationUpdateModal
         username={this.props.username}
         creationNonce={this.props.creationNonce}
-        passNewEmail={(newEmail: string) => this.setState({contactEmail: newEmail})}
-        update={this.state.updateModal}
-        closeFunction={() => this.setState({updateModal: false})}
-      />
+        onDone={(newEmail: string) => {
+          this.setState({contactEmail: newEmail, updateModal: false});
+        }}
+        onClose={() => this.setState({updateModal: false})}
+      />}
     </React.Fragment>;
   }
 }

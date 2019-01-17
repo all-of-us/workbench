@@ -7,14 +7,14 @@
 System requirements:
 
   * [Docker CE](https://www.docker.com/community-edition)
+    * Docker must be installed to build and run code (For Google workstations, see http://go/installdocker).
+    * __IMPORTANT__: be sure to allocate at least 6GB of memory to the Docker Engine. See 
+See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instructions for Mac.
   * [Ruby](https://www.ruby-lang.org/en/downloads/)
+    * Our team's dev/ops scripts are written in Ruby. Most common operations are launched via the project.rb script at the root of each sub-project.
   * [Python](https://www.python.org/downloads/) >= 2.7.9
+    * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
-
-Docker must be installed to build and run code (For Google workstations, see
-go/installdocker.). Ruby is required to run our development scripts, which
-document common operations and provide a convenient way to perform them.
-Python is required by some scripts and the Google Cloud Tools.
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
