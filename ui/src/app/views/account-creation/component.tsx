@@ -94,9 +94,9 @@ export class AccountCreation extends
     }
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
-      .then((profile) => {
-          this.setState({profile: profile, creatingAccount: false});
-          setProfile(profile);
+      .then((savedProfile) => {
+          this.setState({profile: savedProfile, creatingAccount: false});
+          setProfile(savedProfile);
         }
       )
       .catch(error => {
