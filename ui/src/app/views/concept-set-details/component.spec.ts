@@ -230,7 +230,7 @@ describe('ConceptSetDetailsComponent', () => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
     simulateClick(fixture, de.query(By.css('.action-delete')));
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
 
     expect(router.navigate).toHaveBeenCalled();
     expect(conceptSetsStub.conceptSets).toEqual([]);

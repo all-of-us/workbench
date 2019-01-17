@@ -1,7 +1,7 @@
 import {
   Component, Input,
 } from '@angular/core';
-import * as ld from 'lodash/fp';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
@@ -36,7 +36,7 @@ export class ConfirmDeleteModal
     extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
 
   static transformResourceTypeName(resourceType: string): string {
-    return ld.startCase(decamelize(resourceType, ' '));
+    return fp.startCase(decamelize(resourceType, ' '));
   }
 
   constructor(props: ConfirmDeleteModalProps) {
@@ -66,7 +66,7 @@ export class ConfirmDeleteModal
                   onClick={() => this.props.closeFunction()}>Cancel</Button>
           <Button disabled={this.state.loading}
                   style={{marginLeft: '0.5rem'}}
-                  id='confirm-delete'
+                  data-test-id='confirm-delete'
                   onClick={() => this.emitDelete()}>
             Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>

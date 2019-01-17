@@ -160,7 +160,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('.pencil')));
 
     simulateInputReact(fixture, '#new-name', 'testMockFile');
-    simulateClickReact(fixture, '#rename-button');
+    simulateClickReact(fixture, '[data-test-id="rename-button"]');
     updateAndTick(fixture);
 
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
@@ -176,7 +176,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('.pencil')));
 
     simulateInputReact(fixture, '#new-name', 'mockFile');
-    simulateClickReact(fixture, '#rename-button');
+    simulateClickReact(fixture, '[data-test-id="rename-button"]');
     updateAndTick(fixture);
 
     const errorMessage = de.queryAll(By.css('.modal-title'));
@@ -207,7 +207,7 @@ describe('NotebookListComponent', () => {
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.length).toBe(0);
   }));
