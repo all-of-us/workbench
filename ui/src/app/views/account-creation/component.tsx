@@ -76,12 +76,6 @@ export class AccountCreation extends
     };
   }
 
-  shouldComponentUpdate(nextProps: Readonly<AccountCreationProps>,
-                        nextState: Readonly<AccountCreationState>, nextContext: any): boolean {
-    return (typeof nextState.profile === 'object');
-  }
-
-
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     this.setState({showAllFieldsRequiredError: false});
