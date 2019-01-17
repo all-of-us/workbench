@@ -6,7 +6,6 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {environment} from 'environments/environment';
-import * as portableFetch from 'portable-fetch';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
@@ -21,6 +20,7 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
+import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
 import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
 import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
@@ -68,7 +68,7 @@ import {WorkspaceComponent} from './views/workspace/component';
 import {AppRoutingModule} from './app-routing.module';
 import {CohortCommonModule} from './cohort-common/module';
 import {IconsModule} from './icons/icons.module';
-import {FETCH_API_REF, FetchModule} from './services/fetch.module';
+import {FetchModule} from './services/fetch.module';
 
 import {
   ApiModule,
@@ -76,9 +76,7 @@ import {
   Configuration,
 } from 'generated';
 
-import {
-  Configuration as FetchConfiguration,
-} from 'generated/fetch';
+import {Configuration as FetchConfiguration} from 'generated/fetch';
 
 import {
   ApiModule as LeoApiModule,
@@ -139,6 +137,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AccountCreationComponent,
+    AccountCreationModalsComponent,
     AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
@@ -206,10 +205,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
         accessToken: c.accessToken,
         basePath: c.basePath
       })
-    },
-    {
-      provide: FETCH_API_REF,
-      useValue: portableFetch
     },
     ErrorHandlingService,
     ServerConfigService,

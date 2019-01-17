@@ -1,5 +1,5 @@
 import {Http} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
+import {Observable} from 'rxjs';
 import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 import {
@@ -11,6 +11,10 @@ import {
   ProfileService,
   UsernameTakenResponse,
 } from 'generated';
+
+import {
+  ProfileApi
+} from 'generated/fetch';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = {
@@ -24,6 +28,12 @@ export class ProfileStubVariables {
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
   };
+}
+
+export class ProfileApiStub extends ProfileApi {
+  constructor() {
+    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
+  }
 }
 
 export class ProfileServiceStub extends ProfileService {

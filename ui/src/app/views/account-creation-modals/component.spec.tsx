@@ -1,7 +1,18 @@
 import {shallow} from 'enzyme';
 import * as React from 'react';
 
+import {registerApiClient} from 'app/services/tsfetch';
+import {ProfileApiStub} from 'testing/stubs/profile-service-stub';
+
 import {AccountCreationResendModal, AccountCreationUpdateModal} from './component';
+
+import {
+  ProfileApi
+} from 'generated/fetch';
+
+beforeEach(() => {
+  registerApiClient(ProfileApi, new ProfileApiStub());
+});
 
 describe('AccountCreationResendModal', () => {
   it('should render', () => {

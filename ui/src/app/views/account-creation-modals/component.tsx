@@ -1,17 +1,9 @@
 import * as React from 'react';
 
-import {fullUrl, handleErrors} from 'app/utils/fetch';
-
-import {
-  FetchArgs,
-  ProfileApiFetchParamCreator,
-  ResendWelcomeEmailRequest,
-  UpdateContactEmailRequest
-} from 'generated/fetch/api';
-
 import {Button} from 'app/components/buttons';
 import {Error, FieldInput, styles as inputStyles} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {profileApi} from 'app/services/tsfetch';
 
 interface AccountCreationResendModalProps {
   username: string;
@@ -24,10 +16,7 @@ export class AccountCreationResendModal extends React.Component<
 > {
   send() {
     const {username, creationNonce, onClose} = this.props;
-    const request: ResendWelcomeEmailRequest = {username, creationNonce};
-    const args: FetchArgs = ProfileApiFetchParamCreator().resendWelcomeEmail(request);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
+    profileApi().resendWelcomeEmail({username, creationNonce})
       .catch(error => console.log(error));
     onClose();
   }
@@ -71,10 +60,7 @@ export class AccountCreationUpdateModal extends React.Component<
   updateAndSend(): void {
     const {username, creationNonce, onDone} = this.props;
     const {contactEmail} = this.state;
-    const request: UpdateContactEmailRequest = {username, contactEmail, creationNonce};
-    const args: FetchArgs = ProfileApiFetchParamCreator().updateContactEmail(request);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
+    profileApi().updateContactEmail({username, contactEmail, creationNonce})
       .catch(error => console.log(error));
     onDone(contactEmail);
   }

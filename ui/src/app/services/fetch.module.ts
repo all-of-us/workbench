@@ -1,54 +1,14 @@
 import { Inject, NgModule } from '@angular/core';
+import {bindApiClients} from 'app/services/tsfetch';
+import * as portableFetch from 'portable-fetch';
 
 import {
-  AuditApi,
-  AuditApiFactory,
-  AuthDomainApi,
-  AuthDomainApiFactory,
-  BugReportApi,
-  BugReportApiFactory,
-  CdrVersionsApi,
-  CdrVersionsApiFactory,
-  ClusterApi,
-  ClusterApiFactory,
-  CohortAnnotationDefinitionApi,
-  CohortAnnotationDefinitionApiFactory,
-  CohortBuilderApi,
-  CohortBuilderApiFactory,
-  CohortReviewApi,
-  CohortReviewApiFactory,
-  CohortsApi,
-  CohortsApiFactory,
-  ConceptsApi,
-  ConceptsApiFactory,
-  ConceptSetsApi,
-  ConceptSetsApiFactory,
-  ConfigApi,
-  ConfigApiFactory,
   Configuration as FetchConfiguration,
-  CronApi,
-  CronApiFactory,
-  OfflineClusterApi,
-  OfflineClusterApiFactory,
-  ProfileApi,
-  ProfileApiFactory,
-  StatusApi,
-  StatusApiFactory,
-  UserApi,
-  UserApiFactory,
-  UserMetricsApi,
-  UserMetricsApiFactory,
-  WorkspacesApi,
-  WorkspacesApiFactory,
+  FetchAPI,
 } from 'generated/fetch';
 
 
-export const FETCH_API_REF = 'fetchApi';
-
-const BASE_PATH_REF = 'basePath';
-const tsFetchDeps: any[] = [
-  FetchConfiguration, [new Inject(FETCH_API_REF)], [new Inject(BASE_PATH_REF)]
-];
+const FETCH_API_REF = 'fetchApi';
 
 /**
  * This module requires a FETCH_API_REF and FetchConfiguration instance to be
@@ -63,107 +23,13 @@ const tsFetchDeps: any[] = [
   imports:      [],
   declarations: [],
   exports:      [],
-  providers: [
-    {
-      provide: BASE_PATH_REF,
-      deps: [FetchConfiguration],
-      useFactory: (c: FetchConfiguration) => c.basePath
-    },
-    {
-      provide: AuditApi,
-      deps: tsFetchDeps,
-      useFactory: AuditApiFactory
-    },
-    {
-      provide: AuthDomainApi,
-      deps: tsFetchDeps,
-      useFactory: AuthDomainApiFactory
-    },
-    {
-      provide: BugReportApi,
-      deps: tsFetchDeps,
-      useFactory: BugReportApiFactory
-    },
-    {
-      provide: CdrVersionsApi,
-      deps: tsFetchDeps,
-      useFactory: CdrVersionsApiFactory
-    },
-    {
-      provide: ClusterApi,
-      deps: tsFetchDeps,
-      useFactory: ClusterApiFactory
-    },
-    {
-      provide: CohortAnnotationDefinitionApi,
-      deps: tsFetchDeps,
-      useFactory: CohortAnnotationDefinitionApiFactory
-    },
-    {
-      provide: CohortBuilderApi,
-      deps: tsFetchDeps,
-      useFactory: CohortBuilderApiFactory
-    },
-    {
-      provide: CohortReviewApi,
-      deps: tsFetchDeps,
-      useFactory: CohortReviewApiFactory
-    },
-    {
-      provide: CohortsApi,
-      deps: tsFetchDeps,
-      useFactory: CohortsApiFactory
-    },
-    {
-      provide: ConceptSetsApi,
-      deps: tsFetchDeps,
-      useFactory: ConceptSetsApiFactory
-    },
-    {
-      provide: ConceptsApi,
-      deps: tsFetchDeps,
-      useFactory: ConceptsApiFactory
-    },
-    {
-      provide: ConfigApi,
-      deps: tsFetchDeps,
-      useFactory: ConfigApiFactory
-    },
-    {
-      provide: CronApi,
-      deps: tsFetchDeps,
-      useFactory: CronApiFactory
-    },
-    {
-      provide: OfflineClusterApi,
-      deps: tsFetchDeps,
-      useFactory: OfflineClusterApiFactory
-    },
-    {
-      provide: ProfileApi,
-      deps: tsFetchDeps,
-      useFactory: ProfileApiFactory
-    },
-    {
-      provide: StatusApi,
-      deps: tsFetchDeps,
-      useFactory: StatusApiFactory
-    },
-    {
-      provide: UserApi,
-      deps: tsFetchDeps,
-      useFactory: UserApiFactory
-    },
-    {
-      provide: UserMetricsApi,
-      deps: tsFetchDeps,
-      useFactory: UserMetricsApiFactory
-    },
-    {
-      provide: WorkspacesApi,
-      deps: tsFetchDeps,
-      useFactory: WorkspacesApiFactory
-    }
-  ]
+  providers: [{
+    provide: FETCH_API_REF,
+    useValue: portableFetch
+  }]
 })
-export class FetchModule {}
+export class FetchModule {
+  constructor(conf: FetchConfiguration, @Inject(FETCH_API_REF) fetchApi: FetchAPI) {
+    bindApiClients(conf, fetchApi)
+  }
+}
