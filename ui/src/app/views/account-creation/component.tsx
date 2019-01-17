@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import * as fp from 'lodash';
+import * as fp from 'lodash/fp';
 
 import {fullUrl, handleErrors} from 'app/utils/fetch';
 
@@ -52,7 +52,7 @@ export interface AccountCreationState {
 
 export class AccountCreation extends
   React.Component<AccountCreationProps, AccountCreationState> {
-  usernameCheckTimeout: NodeJS.Timer;
+  private usernameCheckTimeout: NodeJS.Timer;
 
   constructor(props: AccountCreationProps) {
     super(props);
@@ -168,34 +168,34 @@ export class AccountCreation extends
   updateProfile(attribute: string, value: string) {
     const newProfile = this.state.profile;
     newProfile[attribute] = value;
-    this.setState(({profile}) => ({profile: fp.set(profile, attribute, value)}));
+    this.setState(({profile}) => ({profile: fp.set(attribute, value, profile)}));
   }
 
   render() {
-    return <React.Fragment>
-      <div id='account-creation'
-           style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
+    const {givenName, familyName, currentPosition, organization} = this.state.profile;
+    return <div id='account-creation'
+                style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
         <BoldHeader>Create your account</BoldHeader>
         <div>
           <FormSection>
             <LongInput type='text' id='givenName' name='givenName' autoFocus
                        placeholder='First Name'
-                       value={this.state.profile.givenName}
-                       style={(this.state.profile.givenName.length > 80) ?
+                       value={givenName}
+                       style={(givenName.length > 80) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                        onChange={e => this.updateProfile('givenName', e.target.value)}/>
-            {this.state.profile.givenName.length > 80 &&
+            {givenName.length > 80 &&
             <ErrorMessage id='givenNameError'>
               First Name must be 80 characters or less.
             </ErrorMessage>}
           </FormSection>
           <FormSection>
             <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
-                       value={this.state.profile.familyName}
-                       style={(this.state.profile.familyName.length > 80) ?
+                       value={familyName}
+                       style={(familyName.length > 80) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                        onChange={e => this.updateProfile('familyName', e.target.value)}/>
-            {this.state.profile.familyName.length > 80 &&
+            {familyName.length > 80 &&
             <ErrorMessage id='familyNameError'>
               Last Name must be 80 character or less.
             </ErrorMessage>}
@@ -208,11 +208,11 @@ export class AccountCreation extends
           <FormSection>
             <LongInput type='text' id='currentPosition' name='currentPosition'
                        placeholder='You Current Position'
-                       value={this.state.profile.currentPosition}
-                       style={(this.state.profile.currentPosition.length > 255) ?
+                       value={currentPosition}
+                       style={(currentPosition.length > 255) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                        onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
-            {this.state.profile.currentPosition.length > 255 &&
+            {currentPosition.length > 255 &&
             <ErrorMessage id='currentPositionError'>
               Current Position must be 255 characters or less.
             </ErrorMessage>}
@@ -220,16 +220,16 @@ export class AccountCreation extends
           <FormSection>
             <LongInput type='text' id='organization' name='organization'
                        placeholder='Your Organization'
-                       value={this.state.profile.organization}
-                       style={(this.state.profile.organization.length > 255) ?
+                       value={organization}
+                       style={(organization.length > 255) ?
                          inputStyles.unsuccessfulInput : inputStyles.successfulInput}
                        onChange={e => this.updateProfile('organization', e.target.value)}/>
-            {this.state.profile.organization.length > 255 &&
+            {organization.length > 255 &&
             <ErrorMessage id='organizationError'>
               Organization must be 255 characters of less.
             </ErrorMessage>}
           </FormSection>
-          <FormSection style={{'display': 'flex', 'flexDirection': 'row'}}>
+          <FormSection style={{display: 'flex'}}>
               <textarea style={{
                 ...inputStyles.formInput,
                 ...inputStyles.longInput,
@@ -288,8 +288,7 @@ export class AccountCreation extends
         <Error>
           All fields are required.
         </Error>}
-      </div>
-    </React.Fragment>;
+      </div>;
   }
 
 }
