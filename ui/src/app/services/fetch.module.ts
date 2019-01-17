@@ -30,6 +30,6 @@ const FETCH_API_REF = 'fetchApi';
 })
 export class FetchModule {
   constructor(conf: FetchConfiguration, @Inject(FETCH_API_REF) fetchApi: FetchAPI) {
-    bindApiClients(conf, fetchApi)
+    bindApiClients(conf, fetchApi);
   }
 }

@@ -54,7 +54,7 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
                   'API clients in use, else call bindApiClients(): ' + ctor);
     }
     return registry.get(ctor) as T;
-  }
+  };
 }
 
 // To add a new service, add a new entry below. Note that these properties are
@@ -84,7 +84,7 @@ export const workspacesApi = bindCtor(WorkspacesApi);
  * e.g. during app initialization.
  */
 export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
-  for (let ctor of apiCtors) {
+  for (const ctor of apiCtors) {
     // We use an anonymous subclass here because ts-fetch generates API client
     // classes with default ctor's only. BaseAPI functionality is only
     // accessible on protected properties.
