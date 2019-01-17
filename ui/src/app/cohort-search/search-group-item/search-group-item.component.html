@@ -32,7 +32,6 @@
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
       class="trigger padding-right">
-      <span *ngIf="itemIndex > 0" class="font-weight-bold">OR </span>
       <span class="code-text">Contains </span>
       <span class="code-text">{{ codeTypeDisplay }}</span>
     </small>
@@ -67,11 +66,6 @@
       <button class="btn btn-link" (click)="enable()">ENABLE</button>
     </span>
   </div>
-</div>
-
-<div *ngIf="item.status === 'deleted'">
-  <clr-icon shape="close" size="24"></clr-icon>
-
 </div>
 
 <popper-content #codesPopper>

@@ -23,7 +23,7 @@
   </div>
   <!--********************************Temporal changes start***************************************-->
 
-  <div class="card-block search-select" *ngIf="temporalDropdown && envFlag">
+  <div class="card-block" *ngIf="temporalDropdown && envFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
@@ -44,16 +44,16 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+  <div *ngFor="let itemId of items;" class="card-block search-item">
     <app-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="itemId"
-      [itemIndex]="itemIndex">
+      [itemId]="itemId">
     </app-search-group-item>
+    <div class="item-or">OR</div>
   </div>
 
-  <div class="card-block search-select">
+  <div class="card-block">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>

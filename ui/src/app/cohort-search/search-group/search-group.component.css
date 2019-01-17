@@ -5,10 +5,10 @@
   margin: 0.6rem 0;
 }
 
-.card-block.search-select {
-  display: flex;
-  justify-content: space-between;
-  min-width: 100%;
+.card-block.search-item {
+  margin: 0 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom-color: rgb(195, 195, 195);
 }
 
 .temporal-sub-card-header {
@@ -169,4 +169,12 @@ clr-icon[shape=error-standard] {
   color: #2691D0;
   font-weight: 600;
   letter-spacing: 0;
+}
+
+.item-or {
+  float: right;
+  margin-right: 50%;
+  padding: 0 10px;
+  background: #ffffff;
+  color: rgb(195, 195, 195);
 }
