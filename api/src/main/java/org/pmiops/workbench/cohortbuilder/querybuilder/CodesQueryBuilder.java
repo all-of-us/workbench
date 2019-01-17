@@ -47,14 +47,14 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
   private static final String TABLE_ID = "search_codes";
 
   private static final String CODES_SQL_TEMPLATE =
-    "select person_id, entry_date, concept_id_or_source_concept_id\n" +
+    "select person_id, entry_date, concept_id_or_source_concept_id as concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
       "where ";
 
   private static final String MULTIPLE_TEMPLATE =
     "concept_id_or_source_concept_id in (select concept_id\n" +
       "  from `${projectId}.${dataSetId}.criteria`\n" +
-      "  where ${innerParentAndChildSql}\n" +
+      "  where ${innerParentAndChildSql}" +
       ")\n" + AGE_DATE_AND_ENCOUNTER_VAR;
 
   private static final String PARENT_TEMPLATE =
@@ -138,16 +138,6 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
         }
       );
     return fullMap;
-  }
-
-  private String filterSql(String sqlStatement, ImmutableMap replacements) {
-    String returnSql = sqlStatement;
-    for (UnmodifiableIterator iterator = replacements.keySet().iterator(); iterator.hasNext(); ) {
-      String key = (String) iterator.next();
-      returnSql = returnSql.replace(key, replacements.get(key).toString());
-    }
-    return returnSql;
-
   }
 
   public class MultiKey {

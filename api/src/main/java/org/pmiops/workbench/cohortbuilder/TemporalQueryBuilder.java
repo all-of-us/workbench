@@ -37,12 +37,18 @@ public class TemporalQueryBuilder {
   private static final String WITHIN_X_DAYS_OF =
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
       "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
-  private static final String TEMPORAL_TEMPLATE =
+  private static final String TEMPORAL_EXIST_TEMPLATE =
     "select count(distinct temp1.person_id)\n" +
       "from (${query1}) temp1\n" +
       "where exists (select 1\n" +
       "from (${query2}) temp2\n" +
       "where (${conditions}))\n";
+  private static final String TEMPORAL_JOIN_TEMPLATE =
+    "select count(distinct temp1.person_id)\n" +
+      "from (${query1}) temp1\n" +
+      "join (select person_id, visit_concept_id, entry_date\n" +
+      "from (${query2})\n" +
+      ") temp2 on (${conditions})\n";
 
   public String buildQuery(Map<String, QueryParameterValue> params,
                            SearchGroup includeGroup) {
@@ -75,7 +81,8 @@ public class TemporalQueryBuilder {
     } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.name())) {
       conditions = X_DAYS_AFTER.replace("${timeValue}", includeGroup.getTimeValue().toString());
     }
-    return TEMPORAL_TEMPLATE
+    return (temporalQueryParts2.size() == 1 ?
+      TEMPORAL_EXIST_TEMPLATE : TEMPORAL_JOIN_TEMPLATE)
       .replace("${query1}", String.join(UNION_TEMPLATE, temporalQueryParts1))
       .replace("${query2}", String.join(UNION_TEMPLATE, temporalQueryParts2))
       .replace("${conditions}", conditions);
@@ -90,7 +97,6 @@ public class TemporalQueryBuilder {
         itemMap.put(item.getTemporalGroup(), item);
       });
     from(notContainsTwoGroups()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
-    from(secondGroupContainsMoreThanOne()).test(itemMap).throwException(TEMPORAL_SECOND_GROUP_MESSAGE);
     return itemMap;
   }
 

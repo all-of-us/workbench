@@ -18,5 +18,10 @@
     "type": "integer",
     "name": "age_at_event",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_concept_id",
+    "mode": "nullable"
   }
 ]

@@ -50,18 +50,22 @@ public abstract class AbstractQueryBuilder {
   public static final String AND = " and ";
   public static final String OR = " or\n";
   public static final String AGE_DATE_AND_ENCOUNTER_VAR = "${ageDateAndEncounterSql}";
-  private static final String MODIFIER_SQL_TEMPLATE = "select criteria.person_id from (${innerSql}) criteria\n";
+  private static final String MODIFIER_SQL_TEMPLATE =
+    "select criteria.person_id from (${innerSql}) criteria\n";
   private static final String DESC = " desc";
-  private static final String RANK_1_SQL_TEMPLATE = ", rank() over (partition by person_id order by entry_date${descSql}) rn";
+  private static final String RANK_1_SQL_TEMPLATE =
+    ", rank() over (partition by person_id order by entry_date${descSql}) rn";
   private static final String TEMPORAL_SQL_TEMPLATE =
     "select person_id, visit_concept_id, entry_date${rank1Sql}\n" +
       "from `${projectId}.${dataSetId}.${tableId}`\n" +
       "where ${conceptIdSql}" +
       "and person_id in (${innerSql})\n";
-  private static final String TEMPORAL_RANK_1_SQL_TEMPLATE = "select person_id, visit_concept_id, entry_date\n" +
+  private static final String TEMPORAL_RANK_1_SQL_TEMPLATE =
+    "select person_id, visit_concept_id, entry_date\n" +
     "from (${innerTemporalSql}) a\n" +
     "where rn = 1\n";
-  private static final String OCCURRENCES_SQL_TEMPLATE = "group by criteria.person_id\n" +
+  private static final String OCCURRENCES_SQL_TEMPLATE =
+    "group by criteria.person_id, criteria.entry_date, criteria.concept_id\n" +
     "having count(criteria.person_id) ";
   private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
   private static final String EVENT_DATE_SQL_TEMPLATE = "and entry_date ";

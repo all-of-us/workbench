@@ -1,6 +1,8 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.Operator;
@@ -50,19 +52,19 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String UNION_ALL = " union all\n";
   private static final String TABLE_ID = "search_measurement";
   private static final String MEASUREMENT_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where ";
-  private static final String CONCEPT_ID_TEMPLATE =
-    "concept_id = ${conceptId}\n" +
-      AGE_DATE_AND_ENCOUNTER_VAR;
+  private static final String CONCEPT_ID_EQUAL_TEMPLATE =
+    "concept_id = ${conceptId}";
+  private static final String CONCEPT_ID_IN_TEMPLATE =
+    "concept_id in unnest(${conceptIds})";
   private static final String VALUE_AS_NUMBER =
-    "value_as_number ${operator} ${value}\n";
+    " and value_as_number ${operator} ${value}";
   private static final String VALUE_AS_CONCEPT_ID =
-    "value_as_concept_id ${operator} unnest(${values})\n";
+    " and value_as_concept_id ${operator} unnest(${values})";
 
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
@@ -70,32 +72,39 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
                            String mention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
+    List<Long> conceptIds = new ArrayList<>();
+
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
-      String namedParameter = addQueryParameterValue(queryParams,
-        QueryParameterValue.int64(parameter.getConceptId()));
-      String baseSql = MEASUREMENT_SQL_TEMPLATE + CONCEPT_ID_TEMPLATE;
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        String measurementSql = baseSql;
-        if (!attribute.getName().equals(ANY)) {
+        if (attribute.getName().equals(ANY)) {
+          conceptIds.add(parameter.getConceptId());
+          if (!queryParts.contains("(" + CONCEPT_ID_IN_TEMPLATE + ")\n")) {
+            queryParts.add("(" + CONCEPT_ID_IN_TEMPLATE + ")\n");
+          }
+        } else {
+          String namedParameter = addQueryParameterValue(queryParams,
+            QueryParameterValue.int64(parameter.getConceptId()));
+          String queryPartSql = CONCEPT_ID_EQUAL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
           if (attribute.getName().equals(NUMERICAL)) {
-            measurementSql = processNumericalSql(queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
+            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
           } else if (attribute.getName().equals(CATEGORICAL)) {
-            measurementSql = processCategoricalSql(queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
+            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
           } else if (attribute.getName().equals(BOTH) && attribute.getOperator().equals(Operator.IN)) {
-            measurementSql = baseSql + AND + processCategoricalSql(queryParams, VALUE_AS_CONCEPT_ID, attribute);
+            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
           } else {
-            measurementSql = baseSql + AND + processNumericalSql(queryParams, VALUE_AS_NUMBER, attribute);
+            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
           }
         }
-        List<Modifier> modifiers = searchGroupItem.getModifiers();
-        String modifiedSql = buildModifierSql(measurementSql, queryParams, modifiers);
-        String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
-        queryParts.add(finalSql.replace("${conceptId}", "@" + namedParameter));
       }
     }
-    return String.join(UNION_ALL, queryParts);
+    List<Modifier> modifiers = searchGroupItem.getModifiers();
+    String idParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class));
+    String conceptIdSql = String.join(OR, queryParts).replace("${conceptIds}", "@" + idParameter) + AGE_DATE_AND_ENCOUNTER_VAR;
+    String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql;
+    String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
+    return buildTemporalSql(TABLE_ID, modifiedSql, conceptIdSql, queryParams, modifiers, mention);
   }
 
   @Override
@@ -126,12 +135,12 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
                                      String baseSql,
                                      Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
-        QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
+      QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
     String valueExpression;
     if (attribute.getOperator().equals(Operator.BETWEEN)) {
       String namedParameter2 = addQueryParameterValue(queryParams,
-          QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
-      valueExpression =  "@" + namedParameter1 + AND + "@" + namedParameter2;
+        QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
+      valueExpression = "@" + namedParameter1 + AND + "@" + namedParameter2;
     } else {
       valueExpression = "@" + namedParameter1;
     }
@@ -145,8 +154,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
                                        String baseSql,
                                        Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
-        QueryParameterValue.array(attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
-            Long.class));
+      QueryParameterValue.array(attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
+        Long.class));
     return baseSql
       .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
       .replace("${values}", "@" + namedParameter1);
