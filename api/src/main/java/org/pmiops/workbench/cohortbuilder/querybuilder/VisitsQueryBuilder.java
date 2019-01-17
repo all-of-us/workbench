@@ -32,10 +32,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String TABLE_ID = "search_visit";
-  //If the querybuilder will use modifiers then this sql statement has to have
-  //the distinct and entry_date
+  //If the querybuilder will use modifiers then sql statement will need entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select distinct person_id, entry_date, concept_id\n" +
+    "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
       "where ";
   private static final String CONCEPT_ID_TEMPLATE =
