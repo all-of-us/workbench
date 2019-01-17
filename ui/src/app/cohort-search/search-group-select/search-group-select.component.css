@@ -18,11 +18,15 @@
 }
 
 .card-header {
-  color: rgb(38, 34, 98);
   background-color: rgb(226, 226, 233);
+  min-width: 100%;
+}
+
+.card-header > span {
+  margin-left: calc(16px + 0.5rem);
+  color: rgb(38, 34, 98);
   font-size: 14px;
   font-weight: 600;
-  min-width: 100%;
 }
 
 clr-icon[shape=ellipsis-vertical] {
