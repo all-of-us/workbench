@@ -17,7 +17,7 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
-interface InvitationKeyProps {
+export interface InvitationKeyProps {
   onInvitationKeyVerify: (invitationKey: any) => void;
 }
 
@@ -80,7 +80,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
   }
 
   render() {
-    return <div style={{padding: '3rem 3rem 0 3rem'}}>
+    return <div data-test-id='invitationKey' style={{padding: '3rem 3rem 0 3rem'}}>
       <div style={{marginTop: '0', paddingTop: '.5rem'}}>
         <BoldHeader>
           Enter your Invitation Key:
@@ -91,7 +91,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
                    inputref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
          <AlertDanger>
-           <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
+           <div style={{fontWeight: 'bolder'}}>Invitation Key is required.</div>
          </AlertDanger>
         }
         {this.state.invitationKeyInvalid &&
