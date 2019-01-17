@@ -188,8 +188,7 @@ export function reactStyles<T extends {[key: string]: React.CSSProperties}>(t: T
 export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
   @ViewChild('root') rootElement: ElementRef;
 
-  constructor(private wrapped: (new (...args: any[]) => React.Component)|React.FunctionComponent,
-              private propNames: string[]) {}
+  constructor(private wrapped: React.ComponentType, private propNames: string[]) {}
 
   ngOnInit(): void {
     this.renderComponent();

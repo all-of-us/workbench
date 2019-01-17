@@ -30,7 +30,7 @@ import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/compon
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
 import {LeftScrollComponent} from 'app/icons/left-scroll/component';
@@ -57,6 +57,7 @@ describe('RecentWorkComponent', () => {
         RightScrollComponent,
         RightScrollLightComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         EditModalComponent,

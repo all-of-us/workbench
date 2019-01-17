@@ -25,7 +25,7 @@ import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
@@ -93,6 +93,7 @@ describe('CohortListComponent', () => {
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent
       ],
@@ -112,16 +113,17 @@ describe('CohortListComponent', () => {
     const fixture = TestBed.createComponent(CohortListComponent);
     setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
+    setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
     const deletedResource: RecentResource = app.resourceList.find(
       (r: RecentResource) => r.cohort.name === firstCohortName);
     expect(deletedResource).toBeTruthy();
-    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.trash')));
+    simulateClickReact(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     expect(app).toBeTruthy();
@@ -134,13 +136,14 @@ describe('CohortListComponent', () => {
     setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
     const editValue = 'edited name';
+    setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
-    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.pencil')));
+    simulateClickReact(fixture, '[data-test-id="pencil"]');
     updateAndTick(fixture);
     simulateInputReact(fixture, '[data-test-id="edit-name"]', editValue);
     updateAndTick(fixture);
