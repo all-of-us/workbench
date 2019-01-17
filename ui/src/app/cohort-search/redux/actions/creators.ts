@@ -296,19 +296,19 @@ export const clearWizardFocus =
   ({type: CLEAR_WIZARD_FOCUS});
 
 export const hideGroup =
-  (role: keyof SearchRequest, groupId: string,
+  (groupId: string, status: string
   ): ActionTypes[typeof HIDE_GROUP] =>
-    ({type: HIDE_GROUP, role, groupId});
+    ({type: HIDE_GROUP, groupId, status});
 
 export const hideGroupItem =
-  (groupId: string, itemId: string
+  (groupId: string, itemId: string, status: string
   ): ActionTypes[typeof HIDE_ITEM] =>
-    ({type: HIDE_ITEM, groupId, itemId});
+    ({type: HIDE_ITEM, groupId, itemId, status});
 
 export const enableGroup =
-  (role: keyof SearchRequest, groupId: string,
+  (groupId: string,
   ): ActionTypes[typeof ENABLE_GROUP] =>
-    ({type: ENABLE_GROUP, role, groupId});
+    ({type: ENABLE_GROUP, groupId});
 
 export const enableGroupItem =
   (groupId: string, itemId: string

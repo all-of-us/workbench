@@ -21,8 +21,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() itemIndex: number;
 
   error: boolean;
-  status: string;
-  prevStatus: string;
   undoTimer: any;
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
@@ -35,10 +33,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.ngRedux.select(getItem(this.itemId))
-      .subscribe(item => {
-        this.item = item;
-        this.status = item.get('status');
-      });
+      .subscribe(item => this.item = item);
 
     this.subscription.add(this.ngRedux.select(parameterList(this.itemId))
       .subscribe(rawCodes => this.rawCodes = rawCodes));
@@ -67,6 +62,10 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     return this.item.get('isRequesting', false);
   }
 
+  get status() {
+    return this.item.get('status');
+  }
+
   get codes() {
     const _type = this.item.get('type', '');
     const formatter = (param) => {
@@ -87,16 +86,14 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    this.prevStatus = this.status;
-    this.status = 'pending';
+    this.hide('pending');
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
-      this.status = 'deleted';
     }, 3000);
   }
 
-  hide() {
-    this.actions.removeGroupItem(this.role, this.groupId, this.itemId, true);
+  hide(status: string) {
+    this.actions.removeGroupItem(this.role, this.groupId, this.itemId, status);
   }
 
   enable() {
@@ -104,8 +101,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    clearTimeout(this.undoTimer);
-    this.status = this.prevStatus;
+    // For some reason Angular clears the timeout id from 'this' when the inputs change, so we'll
+    // basically clear by brute-force until we can find a better solution
+    for (let i = 1; i < 99999; i++) {
+      clearTimeout(i);
+    }
+    this.enable();
   }
 
   launchWizard() {
