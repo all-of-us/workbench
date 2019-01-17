@@ -4,11 +4,11 @@ import * as React from 'react';
 
 import {ReactWrapperBase} from 'app/utils';
 
-interface EditComponentProps {
+export interface EditComponentProps {
   disabled: boolean;
   style: object;
 }
-interface EditComponentState {
+export interface EditComponentState {
   style: object;
 }
 
