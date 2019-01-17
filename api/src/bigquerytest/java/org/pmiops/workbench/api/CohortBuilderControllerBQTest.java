@@ -468,12 +468,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //only one temporal group
     temporalItem.setTemporalGroup(0);
     assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
-
-    //more than one temporal in second group
-    SearchGroupItem sgi1 = new SearchGroupItem().temporalGroup(1);
-    SearchGroupItem sgi2 = new SearchGroupItem().temporalGroup(1);
-    temporalGroup.addItemsItem(sgi1).addItemsItem(sgi2);
-    assertMessageException(searchRequest, TEMPORAL_SECOND_GROUP_MESSAGE);
   }
 
   @Test
@@ -810,71 +804,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
     //matches searchGroupDrugChild and searchGroupMeasurement
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
 
-  @Test
-  public void countSubjectsAnyMentionOfICD9WithModifierXDaysAfterDrug() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
-    Criteria icd9ConditionChild1 =
-      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "4");
-    Criteria drugChild =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd9ConditionChild, "001"), createSearchParameter(icd9ConditionChild1, "002")))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(0);
-    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
-      .type(TreeType.DRUG.name())
-      .searchParameters(Arrays.asList(createSearchParameter(drugChild, "A09")))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(1);
-    SearchGroup searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
+    //Any Mention Of DrugChild during same encounter as Measurement
+    //First temporal group
+    searchGroupDrugChild.temporalGroup(0);
+    //Second temporal group
+    searchGroupMeasurement.temporalGroup(1);
+    searchGroupVisit.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupDrugChild, searchGroupMeasurement, searchGroupVisit))
       .temporal(true)
       .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
-      .timeValue(5L);
-    List<SearchGroup> groups = new ArrayList<>();
-    groups.add(searchGroup);
-    SearchRequest searchRequest = new SearchRequest().includes(groups);
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsAnyMentionOfMeasurementXDaysAfterDrug() throws Exception {
-    Criteria measurementLab =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, "3");
-    Criteria drugChild =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
-    Modifier modifier = new Modifier()
-      .name(ModifierType.AGE_AT_EVENT)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("25"));
-    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
-      .type(TreeType.MEAS.name())
-      .searchParameters(Arrays.asList(createSearchParameter(measurementLab, "33386-4").attributes(Arrays.asList(new Attribute().name(ANY)))))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(0);
-    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
-      .type(TreeType.DRUG.name())
-      .searchParameters(Arrays.asList(createSearchParameter(drugChild, "A09")))
-      .modifiers(Arrays.asList(modifier))
-      .temporalGroup(1);
-    SearchGroup searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
-      .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
-      .timeValue(5L);
-    List<SearchGroup> groups = new ArrayList<>();
-    groups.add(searchGroup);
-    SearchRequest searchRequest = new SearchRequest().includes(groups);
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupDrugChild and searchGroupMeasurement
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
