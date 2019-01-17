@@ -134,7 +134,7 @@ describe('ConceptSetListComponent', () => {
     simulateClick(fixture, de.query(By.css('.resource-menu')));
     simulateClick(fixture, de.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
     expect(conceptCards.length).toBe(2);
