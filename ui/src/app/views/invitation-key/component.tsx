@@ -52,7 +52,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       this.setState({
         invitationKeyReq: true
       });
-      if(input) {
+      if (input) {
         input.focus();
       }
       return;
@@ -69,7 +69,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
           this.setState({
             invitationKeyInvalid: true
           });
-          if(input) {
+          if (input) {
             input.focus();
           }
         } else {

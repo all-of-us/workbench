@@ -70,7 +70,7 @@ export const SignInReact = withWindowSize()(
       this.props.onInit();
     }
 
-    nextDirective(index:string) {
+    nextDirective(index: string) {
       switch (index) {
         case 'login':
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
@@ -87,13 +87,13 @@ export const SignInReact = withWindowSize()(
         }
       }
 
-    setCurrentStep(nextStep:string) {
+    setCurrentStep(nextStep: string) {
       this.setState({
         currentStep: nextStep
       });
     }
 
-    onKeyVerified(invitationKey:string) {
+    onKeyVerified(invitationKey: string) {
       this.setState({
         invitationKey: invitationKey,
         currentStep: 'accountCreation'
