@@ -19,7 +19,12 @@ import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
@@ -65,6 +70,7 @@ describe('RecentWorkComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(RecentWorkComponent);
+      setupModals(fixture);
       userMetricsSpy = TestBed.get(UserMetricsService);
       tick();
       // Standard window size for this test suite.  should load 4 cards by default

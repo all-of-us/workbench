@@ -16,6 +16,7 @@ import {
   simulateClick,
   simulateClickReact,
   simulateInput,
+  simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -130,6 +131,7 @@ describe('CohortListComponent', () => {
 
   it('updates the page on edit', fakeAsync(() => {
     const fixture = TestBed.createComponent(CohortListComponent);
+    setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
     const editValue = 'edited name';
     updateAndTick(fixture);
@@ -140,11 +142,9 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.pencil')));
     updateAndTick(fixture);
-    simulateInput(fixture, fixture.debugElement.query(By.css('.name-input')), editValue);
+    simulateInputReact(fixture, '#edit-name', editValue);
     updateAndTick(fixture);
-    updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-save')));
-    updateAndTick(fixture);
+    simulateClickReact(fixture, '#save-edit');
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(2);

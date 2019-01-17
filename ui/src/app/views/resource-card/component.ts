@@ -39,9 +39,7 @@ export class ResourceCardComponent implements OnInit {
   confirmDeleting = false;
 
   renaming = false;
-
-  @ViewChild(EditModalComponent)
-  editModal: EditModalComponent;
+  editing = false;
 
   constructor(
       private cohortsService: CohortsService,
@@ -116,8 +114,28 @@ export class ResourceCardComponent implements OnInit {
     });
   }
 
-  receiveRename(): void {
-    this.onUpdate.emit();
+  receiveEdit(resource: RecentResource): void {
+    if (resource.cohort) {
+      this.cohortsService.updateCohort(
+          this.wsNamespace,
+          this.wsId,
+          resource.cohort.id,
+          resource.cohort
+      ).subscribe( () => {
+        this.closeEditModal();
+        this.onUpdate.emit();
+      });
+    } else if (resource.conceptSet) {
+      this.conceptSetsService.updateConceptSet(
+          this.wsNamespace,
+          this.wsId,
+          resource.conceptSet.id,
+          resource.conceptSet
+      ).subscribe( () => {
+        this.closeEditModal();
+        this.onUpdate.emit();
+      });
+    }
   }
 
   cloneResource(resource: RecentResource): void {
@@ -212,11 +230,15 @@ export class ResourceCardComponent implements OnInit {
 
   editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
-    setTimeout(_ => this.editModal.open(), 0);
+    setTimeout(_ => this.editing = true, 0);
   }
 
   editConceptSet(): void {
-    this.editModal.open();
+    this.editing = true;
+  }
+
+  closeEditModal(): void {
+    this.editing = false;
   }
 
   reviewCohort(resource: RecentResource): void {
