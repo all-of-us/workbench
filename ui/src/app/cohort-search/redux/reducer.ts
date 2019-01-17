@@ -400,11 +400,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         if (!activeItems.size) {
           state = state.setIn(['entities', 'groups', action.groupId, 'count'], 0);
         }
-        return state.setIn(['entities', 'items', action.itemId, 'status'], 'hidden');
+        return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }
 
       case HIDE_GROUP:
-        return state.setIn(['entities', 'groups', action.groupId, 'status'], 'hidden');
+        return state.setIn(['entities', 'groups', action.groupId, 'status'], action.status);
 
       case ENABLE_ITEM: {
         return state.setIn(['entities', 'items', action.itemId, 'status'], 'active');

@@ -130,6 +130,14 @@ export class CohortSearchActions {
     this.idsInUse = this.idsInUse.add(newId);
   }
 
+  hasActiveItems(group: any) {
+    return !group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filter(it => it.get('status') === 'active')
+      .isEmpty();
+  }
+
   get state() {
     return this.ngRedux.getState();
   }
@@ -169,13 +177,13 @@ export class CohortSearchActions {
     }
   }
 
-  removeGroup(role: keyof SearchRequest, groupId: string, hide?: boolean): void {
+  removeGroup(role: keyof SearchRequest, groupId: string, status?: string): void {
     const group = getGroup(groupId)(this.state);
 
     this.cancelIfRequesting('groups', groupId);
 
-    if (hide) {
-      this.hideGroup(role, groupId);
+    if (status) {
+      this.hideGroup(groupId, status);
     } else {
       this._removeGroup(role, groupId);
       this.removeId(groupId);
@@ -183,23 +191,23 @@ export class CohortSearchActions {
 
     group.get('items', List()).forEach(itemId => {
       this.cancelIfRequesting('items', itemId);
-      if (!hide) {
+      if (!status) {
         this._removeGroupItem(groupId, itemId);
         this.removeId(itemId);
       }
     });
 
-    const activeItems = group
-      .get('items', List())
-      .map(id => getItem(id)(this.state))
-      .filter(it => it.get('status') === 'active');
-    const hasActiveItems = !activeItems.isEmpty();
-    if (hasActiveItems) {
+    if (this.hasActiveItems(group)) {
       this.requestTotalCount();
     }
   }
 
-  removeGroupItem(role: keyof SearchRequest, groupId: string, itemId: string, hide?: boolean): void {
+  removeGroupItem(
+    role: keyof SearchRequest,
+    groupId: string,
+    itemId: string,
+    status?: string
+  ): void {
     const item = getItem(itemId)(this.state);
     const hasItems = !item.get('searchParameters', List()).isEmpty();
     const countIsNonZero = item.get('count') !== 0;
@@ -213,8 +221,8 @@ export class CohortSearchActions {
       .equals(List([item]));
 
     this.cancelIfRequesting('items', itemId);
-    if (hide) {
-      this.hideGroupItem(groupId, itemId);
+    if (status) {
+      this.hideGroupItem(groupId, itemId, status);
     } else {
       this._removeGroupItem(groupId, itemId);
       this.removeId(itemId);
@@ -225,7 +233,7 @@ export class CohortSearchActions {
        * count, not really. */
       if (isOnlyActiveChild) {
         this.requestTotalCount(groupId);
-        if (!hide) {
+        if (!status) {
           this.removeGroup(role, groupId);
         }
       } else {
@@ -235,9 +243,12 @@ export class CohortSearchActions {
     }
   }
 
-  enableGroup(role: keyof SearchRequest, groupId: string) {
-    this._enableGroup(role, groupId);
-    this.requestTotalCount(groupId);
+  enableGroup(group: any) {
+    const groupId = group.get('id');
+    this._enableGroup(groupId);
+    if (this.hasActiveItems(group)) {
+      this.requestTotalCount(groupId);
+    }
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {

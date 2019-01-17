@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
@@ -22,7 +22,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
 
   error: boolean;
-  status: string;
   undoTimer: any;
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
@@ -42,7 +41,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => this.error = error);
-    this.status = this.group.get('status');
   }
 
   ngOnDestroy() {
@@ -57,33 +55,37 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     return this.group.get('id');
   }
 
+  get status() {
+    return this.group.get('status');
+  }
+
   get items() {
     return this.group.get('items', List());
   }
 
   remove() {
-    this.setOverlayPosition();
-    this.status = 'pending';
+    this.hide('pending');
     this.undoTimer = setTimeout(() => {
       this.actions.removeGroup(this.role, this.groupId);
-      this.status = 'deleted';
     }, 3000);
   }
 
-  hide() {
+  hide(status: string) {
     setTimeout(() => this.setOverlayPosition());
-    this.status = 'hidden';
-    this.actions.removeGroup(this.role, this.groupId, true);
+    this.actions.removeGroup(this.role, this.groupId, status);
   }
 
   enable() {
-    this.status = 'active';
-    this.actions.enableGroup(this.role, this.groupId);
+    this.actions.enableGroup(this.group);
   }
 
   undo() {
-    clearTimeout(this.undoTimer);
-    this.status = 'active';
+    // For some reason Angular clears the timeout id from 'this' when the inputs change, so we'll
+    // basically clear by brute-force until we can find a better solution
+    for (let i = 1; i < 99999; i++) {
+      clearTimeout(i);
+    }
+    this.enable();
   }
 
   setOverlayPosition() {

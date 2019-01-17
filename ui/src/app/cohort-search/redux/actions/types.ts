@@ -319,12 +319,13 @@ export interface ActionTypes {
   HIDE_ITEM: {
     type: typeof HIDE_ITEM;
     itemId: string;
-    groupId: string
+    groupId: string;
+    status: string;
   };
   HIDE_GROUP: {
     type: typeof HIDE_GROUP;
     groupId: string;
-    role: keyof SearchRequest;
+    status: string;
   };
   ENABLE_ITEM: {
     type: typeof ENABLE_ITEM;
@@ -334,7 +335,6 @@ export interface ActionTypes {
   ENABLE_GROUP: {
     type: typeof ENABLE_GROUP;
     groupId: string;
-    role: keyof SearchRequest;
   };
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
