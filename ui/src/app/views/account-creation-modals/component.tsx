@@ -1,7 +1,4 @@
-import {Component, DoCheck, Input, OnInit} from '@angular/core';
-
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
 import {fullUrl, handleErrors} from 'app/utils/fetch';
 
@@ -12,77 +9,46 @@ import {
   UpdateContactEmailRequest
 } from 'generated/fetch/api';
 
-import {
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalTitle,
-} from 'app/components/modals';
-
-import {
-  Error,
-  FieldInput,
-  styles as inputStyles,
-} from 'app/components/inputs';
-
-function isBlank(s: string) {
-  return (!s || /^\s*$/.test(s));
-}
+import {Button} from 'app/components/buttons';
+import {Error, FieldInput, styles as inputStyles} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
 interface AccountCreationResendModalProps {
   username: string;
   creationNonce: string;
-  resend: boolean;
-  closeFunction: Function;
+  onClose: Function;
 }
 
-export class AccountCreationResendModalReact extends
-    React.Component<AccountCreationResendModalProps, {}> {
-  constructor(props: AccountCreationResendModalProps) {
-    super(props);
-    this.state = {};
-  }
-
+export class AccountCreationResendModal extends React.Component<
+  AccountCreationResendModalProps
+> {
   send() {
-    const request: ResendWelcomeEmailRequest = {
-      username: this.props.username,
-      creationNonce: this.props.creationNonce
-    };
+    const {username, creationNonce, onClose} = this.props;
+    const request: ResendWelcomeEmailRequest = {username, creationNonce};
     const args: FetchArgs = ProfileApiFetchParamCreator().resendWelcomeEmail(request);
     fetch(fullUrl(args.url), args.options)
       .then(handleErrors)
       .catch(error => console.log(error));
-    this.close();
-  }
-
-  close(): void {
-    this.props.closeFunction();
+    onClose();
   }
 
   render() {
-    const { closeFunction } = this.props;
-    return <React.Fragment>
-      {this.props.resend &&
-      <Modal onRequestClose={closeFunction}>
-        <ModalTitle>Resend Instructions</ModalTitle>
-        <ModalFooter>
-          <button type='button' className='btn btn-outline'
-                  onClick={() => this.close()}>Cancel</button>
-          <button type='button' id='resend_instructions'
-                  className='btn btn-primary'
-                  onClick={() => this.send()}>Send</button>
-        </ModalFooter>
-      </Modal>}
-    </React.Fragment>;
+    const {onClose} = this.props;
+    return <Modal onRequestClose={onClose}>
+      <ModalTitle>Resend Instructions</ModalTitle>
+      <ModalFooter>
+        <Button type='secondary' onClick={onClose}>Cancel</Button>
+        <Button style={{marginLeft: '0.5rem'}} onClick={() => this.send()}>Send</Button>
+      </ModalFooter>
+    </Modal>;
   }
 }
 
 interface AccountCreationUpdateModalProps {
   username: string;
   creationNonce: string;
-  passNewEmail: Function;
-  update: boolean;
-  closeFunction: Function;
+  onDone: Function;
+  onClose: Function;
 }
 
 interface AccountCreationUpdateModalState {
@@ -90,11 +56,10 @@ interface AccountCreationUpdateModalState {
   emailOffFocus: boolean;
 }
 
-export class AccountCreationUpdateModalReact extends
-    React.Component<AccountCreationUpdateModalProps, AccountCreationUpdateModalState> {
-  state: AccountCreationUpdateModalState;
-  props: AccountCreationUpdateModalProps;
-
+export class AccountCreationUpdateModal extends React.Component<
+  AccountCreationUpdateModalProps,
+  AccountCreationUpdateModalState
+> {
   constructor(props: AccountCreationUpdateModalProps) {
     super(props);
     this.state = {
@@ -104,134 +69,55 @@ export class AccountCreationUpdateModalReact extends
   }
 
   updateAndSend(): void {
-    if (this.contactEmailInvalidError()) {
-      return;
-    }
-    this.props.passNewEmail(this.state.contactEmail);
-    const request: UpdateContactEmailRequest = {
-      username: this.props.username,
-      contactEmail: this.state.contactEmail,
-      creationNonce: this.props.creationNonce
-    };
+    const {username, creationNonce, onDone} = this.props;
+    const {contactEmail} = this.state;
+    const request: UpdateContactEmailRequest = {username, contactEmail, creationNonce};
     const args: FetchArgs = ProfileApiFetchParamCreator().updateContactEmail(request);
     fetch(fullUrl(args.url), args.options)
       .then(handleErrors)
       .catch(error => console.log(error));
-    this.props.closeFunction();
-  }
-
-  leaveFocusEmail(): void {
-    this.setState({emailOffFocus: true});
-  }
-
-  enterFocusEmail(): void { this.setState({emailOffFocus: false}); }
-
-  updateContactEmail(evt: React.ChangeEvent<HTMLInputElement>): void {
-    this.setState({contactEmail: evt.target.value});
-  }
-
-  contactEmailInvalidError(): boolean {
-    return !(new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/).test(this.state.contactEmail));
-  }
-
-  showEmailValidationError(): boolean {
-    if (isBlank(this.state.contactEmail) || !this.state.emailOffFocus) {
-      return false;
-    }
-    return this.contactEmailInvalidError();
-  }
-
-  close(): void {
-    this.props.closeFunction();
+    onDone(contactEmail);
   }
 
   render() {
-    const { closeFunction } = this.props;
-    return <React.Fragment>
-      {this.props.update &&
-      <Modal onRequestClose={closeFunction}>
-        <ModalTitle>Change contact email</ModalTitle>
-        <ModalBody>
-          <table style={{width: '100%'}}>
-            <tbody>
-            <tr>
-              <td><label>Contact Email:</label></td>
-              <td style={{width: '70%'}}><FieldInput
-                id='change-contact-email'
-                style={this.showEmailValidationError() ? inputStyles.unsuccessfulInput : {}}
-                onChange={(e) => this.setState({contactEmail: e.target.value})}
-                onBlur={() => this.leaveFocusEmail()}
-                onFocus={() => this.enterFocusEmail()}
-              />
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-              <td style={{width: '70%'}}>
-                {this.showEmailValidationError() &&
-                <Error>Email is not valid.</Error>
-                }
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </ModalBody>
-        <ModalFooter>
-          <button type='button' className='btn btn-outline'
-                  onClick={() => this.close()}>Cancel</button>
-          <button id='change_email' type='button'
-                  className='btn btn-primary'
-                  onClick={() => this.updateAndSend()}>Apply</button>
-        </ModalFooter>
-      </Modal>}
-    </React.Fragment>;
+    const {onClose} = this.props;
+    const {contactEmail, emailOffFocus} = this.state;
+    const emailValid = new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/).test(contactEmail);
+    const showEmailError = !emailValid && !!contactEmail.trim() && emailOffFocus;
+    return <Modal onRequestClose={onClose}>
+      <ModalTitle>Change contact email</ModalTitle>
+      <ModalBody>
+        <table style={{width: '100%'}}>
+          <tbody>
+          <tr>
+            <td><label>Contact Email:</label></td>
+            <td style={{width: '70%'}}><FieldInput
+              value={contactEmail}
+              style={showEmailError ? inputStyles.unsuccessfulInput : {}}
+              onChange={(e) => this.setState({contactEmail: e.target.value})}
+              onBlur={() => this.setState({emailOffFocus: true})}
+              onFocus={() => this.setState({emailOffFocus: false})}
+            />
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td style={{width: '70%'}}>
+              {showEmailError && <Error>Email is not valid.</Error>}
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </ModalBody>
+      <ModalFooter>
+        <Button type='secondary' onClick={onClose}>Cancel</Button>
+        <Button
+          style={{marginLeft: '0.5rem'}}
+          disabled={!emailValid}
+          onClick={() => this.updateAndSend()}
+        >Apply</Button>
+      </ModalFooter>
+    </Modal>;
   }
 
-}
-
-@Component({
-  selector: 'app-account-creation-modals',
-  templateUrl: './component.html',
-})
-
-export class AccountCreationModalsComponent implements OnInit, DoCheck {
-  @Input('updateEmail')
-  public updateEmail: Function;
-  @Input('close')
-  public close: Function;
-  @Input('username')
-  public userName: string;
-  @Input('creationNonce')
-  public creationNonce: string;
-  @Input('update')
-  public update: boolean;
-  @Input('resend')
-  public resend: boolean;
-
-  constructor(
-  ) {}
-
-  renderModal(): void {
-    let component;
-    const props = {username: this.userName, creationNonce: this.creationNonce,
-                   closeFunction: this.close};
-    if (this.resend) {
-      component = AccountCreationResendModalReact;
-      props['resend'] = this.resend;
-    } else {
-      component = AccountCreationUpdateModalReact;
-      props['passNewEmail'] = this.updateEmail;
-      props['update'] = this.update;
-    }
-    ReactDOM.render(React.createElement(component, props),
-      document.getElementById('account-creation-modal'));
-  }
-
-  ngOnInit(): void {
-    this.renderModal();
-  }
-
-  ngDoCheck(): void {
-    this.renderModal();
-  }
 }
