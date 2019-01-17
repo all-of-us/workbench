@@ -1,4 +1,4 @@
-import { map, min, range, toPairs } from 'lodash/fp';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Pagination from 'react-paginating';
 import { nextSort } from '../utils/index';
@@ -35,22 +35,22 @@ const styles = {
 export const SimpleTable = ({ columns, rowCount, rowProps }) => {
   return <div style={{ border: '1px solid #ccc' }}>
     <div style={styles.headerRow}>
-      {map(([i, { headerRenderer, size }]: any) => {
+      {fp.map(([i, { headerRenderer, size }]: any) => {
         return <div key={i} style={{ ...styles.cell, ...styles.flexCell(size) }}>
           {headerRenderer()}
         </div>;
-      }, toPairs(columns))}
+      }, fp.toPairs(columns))}
     </div>
-    {map(rowIndex => {
+    {fp.map(rowIndex => {
       const { style = {}, ...props } = rowProps ? rowProps({ rowIndex }) : {};
       return <div key={rowIndex} style={{ ...styles.bodyRow, ...style }} {...props}>
-        {map(([i, { cellRenderer, size }]: any) => {
+        {fp.map(([i, { cellRenderer, size }]: any) => {
           return <div key={i} style={{ ...styles.cell, ...styles.flexCell(size) }}>
             {cellRenderer({ rowIndex })}
           </div>;
-        }, toPairs(columns))}
+        }, fp.toPairs(columns))}
       </div>;
-    }, range(0, rowCount))}
+    }, fp.range(0, rowCount))}
   </div>;
 };
 
@@ -70,7 +70,7 @@ export const SimplePagination = ({ total, limit, currentPage, onPageChange }) =>
     {({ pages, hasPreviousPage, previousPage, hasNextPage, nextPage, totalPages }) => {
       return <div style={styles.paginationRow}>
         <div style={{ marginLeft: 'auto', marginRight: '1rem' }}>
-          {(currentPage - 1) * limit + 1} - {min([total, currentPage * limit])} of {total}
+          {(currentPage - 1) * limit + 1} - {fp.min([total, currentPage * limit])} of {total}
         </div>
         <PageButton onClick={hasPreviousPage ? (() => onPageChange(1)) : undefined}>
           <ClrIcon shape='angle-double left' />
@@ -78,7 +78,7 @@ export const SimplePagination = ({ total, limit, currentPage, onPageChange }) =>
         <PageButton onClick={hasPreviousPage ? (() => onPageChange(previousPage)) : undefined}>
           <ClrIcon shape='angle left' />
         </PageButton>
-        {map(page => {
+        {fp.map(page => {
           return <PageButton
             key={page}
             active={page === currentPage}

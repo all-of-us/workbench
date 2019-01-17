@@ -1,10 +1,4 @@
-import {
-  clamp,
-  flow,
-  isEqual,
-  pick,
-  uniqueId
-} from 'lodash/fp';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
 import onClickOutside from 'react-onclickoutside';
@@ -66,12 +60,12 @@ export const withDynamicPosition = () => WrappedComponent => {
       const { dimensions } = this.state;
       this.animation = requestAnimationFrame(() => this.reposition());
       const newDimensions = {
-        element: pick(['width', 'height'], this.element.current.getBoundingClientRect()),
-        target: pick(['top', 'bottom', 'left', 'right'],
+        element: fp.pick(['width', 'height'], this.element.current.getBoundingClientRect()),
+        target: fp.pick(['top', 'bottom', 'left', 'right'],
           document.getElementById(target).getBoundingClientRect()),
         viewport: { width: window.innerWidth, height: window.innerHeight }
       };
-      if (!isEqual(newDimensions, dimensions)) {
+      if (!fp.isEqual(newDimensions, dimensions)) {
         this.setState({dimensions: newDimensions});
       }
     }
@@ -90,13 +84,13 @@ export const withDynamicPosition = () => WrappedComponent => {
 
 export const computePopupPosition = ({ side, viewport, target, element, gap }) => {
   const getPosition = s => {
-    const left = flow(
-      clamp(0, viewport.width - element.width),
-      clamp(target.left - element.width + 16, target.right - 16)
+    const left = fp.flow(
+      fp.clamp(0, viewport.width - element.width),
+      fp.clamp(target.left - element.width + 16, target.right - 16)
     )(((target.left + target.right) / 2) - (element.width / 2));
-    const top = flow(
-      clamp(0, viewport.height - element.height),
-      clamp(target.top - element.height + 16, target.bottom - 16)
+    const top = fp.flow(
+      fp.clamp(0, viewport.height - element.height),
+      fp.clamp(target.top - element.height + 16, target.bottom - 16)
     )(((target.top + target.bottom) / 2) - (element.height / 2));
     return switchCase(s,
       ['top', () => ({ top: target.top - element.height - gap, left })],
@@ -135,10 +129,10 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
     const {side: finalSide, position} =
       computePopupPosition({ side, target, element, viewport, gap: 10 });
     const getNotchPosition = () => {
-      const left = clamp(12, element.width - 12,
+      const left = fp.clamp(12, element.width - 12,
         (target.left + target.right) / 2 - position.left
       );
-      const top = clamp(12, element.height - 12,
+      const top = fp.clamp(12, element.height - 12,
         (target.top + target.bottom) / 2 - position.top
       );
       return switchCase(finalSide,
@@ -173,7 +167,7 @@ export class TooltipTrigger extends React.Component {
   constructor(props) {
     super(props);
     this.state = { open: false };
-    this.id = `tooltip-trigger-${uniqueId('')}`;
+    this.id = `tooltip-trigger-${fp.uniqueId('')}`;
   }
 
   render() {
@@ -204,7 +198,7 @@ export class TooltipTrigger extends React.Component {
   }
 }
 
-export const Popup = flow(
+export const Popup = fp.flow(
   onClickOutside,
   withDynamicPosition()
 )(class PopupComponent extends React.Component {
@@ -251,7 +245,7 @@ export class PopupTrigger extends React.Component {
   constructor(props: any) {
     super(props);
     this.state = { open: false };
-    this.id = `popup-trigger-${uniqueId('')}`;
+    this.id = `popup-trigger-${fp.uniqueId('')}`;
   }
 
   close() {

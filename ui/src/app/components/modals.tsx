@@ -33,6 +33,15 @@ const styles = {
     display: 'flex' as 'flex',
     justifyContent: 'flex-end' as 'flex-end',
     marginTop: '1rem'
+  },
+
+  modalInput: {
+    fontWeight: 400,
+    width: '100%',
+    borderRadius: '5px',
+    height: '1.5rem',
+    border: '1px solid #9a9a9a',
+    padding: '.25rem'
   }
 };
 
@@ -52,3 +61,5 @@ export const ModalBody = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.modalBody, ...style}} />;
 export const ModalFooter = ({style = {}, ...props}) =>
   <div {...props} style={{...styles.modalFooter, ...style}} />;
+export const ModalInput = ({type = 'input', style = {}, ...props}) =>
+  <input {...props} style={{...styles.modalInput, ...styles}} />;

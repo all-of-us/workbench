@@ -16,7 +16,7 @@ import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
-import {ResourceCardComponent} from './component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from './component';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
@@ -52,6 +52,7 @@ describe('ResourceCardComponent', () => {
       declarations: [
         ResourceCardWrapperComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         EditModalComponent,
@@ -88,30 +89,6 @@ describe('ResourceCardComponent', () => {
     updateAndTick(fixture);
     expect(fixture.debugElement.query(By.css('.notebook-card'))).toBeTruthy();
   }));
-
-  // Actual actions are tested in cohort list/notebook list specs...
-  // CURRENTLY those tests don't technically test these actions, but will once
-  // planned refactoring takes place -US
-  it('should have correct options in menu when it is a cohort', fakeAsync(() => {
-    const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
-    const actionItems = de.queryAll(By.css('.action-item'))
-      .map((item) => item.nativeElement.innerText.trim());
-    ['Clone', 'Edit', 'Review', 'Delete'].forEach((action) => {
-      expect(actionItems).toContain(action);
-    });
-  }));
-
-  it('should have correct options in menu when it is a notebook', fakeAsync(() => {
-    setNotebookResource(fixture, component);
-    const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
-    const actionItems = de.queryAll(By.css('.action-item'))
-      .map((item) => item.nativeElement.innerText.trim());
-    ['Rename', 'Clone', 'Delete'].forEach((action) => {
-      expect(actionItems).toContain(action);
-    });
-  }));
 });
 
 function setNotebookResource(fixture, component) {
@@ -131,4 +108,3 @@ function setNotebookResource(fixture, component) {
   component.ngOnInit();
   updateAndTick(fixture);
 }
-
