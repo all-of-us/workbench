@@ -3,8 +3,8 @@ import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
-import {AccountCreation} from 'app/views/account-creation/component';
 import {AccountCreationSuccess} from 'app/views/account-creation-success/component';
+import {AccountCreation} from 'app/views/account-creation/component';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
 import {LoginReactComponent} from 'app/views/login/component';
 
@@ -79,9 +79,11 @@ export const RegistrationPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        case 'accountCreation': return <AccountCreation invitationKey={this.state.invitationKey}
-                                                        setProfile={this.setProfile}/>;
-        case 'accountCreationSuccess': return <AccountCreationSuccess profile={this.state.profile}/>;
+        case 'accountCreation':
+          return <AccountCreation invitationKey={this.state.invitationKey}
+                                  setProfile={this.setProfile}/>;
+        case 'accountCreationSuccess':
+          return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
           return;
         }
@@ -101,7 +103,6 @@ export const RegistrationPageTemplateReact = withWindowSize()(
     }
 
     setProfile(profile) {
-          console.log("profile: " + JSON.stringify(profile));
       this.setState({
         profile: profile,
         currentStep: 'accountCreationSuccess'

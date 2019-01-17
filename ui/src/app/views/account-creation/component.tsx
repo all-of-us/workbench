@@ -76,7 +76,8 @@ export class AccountCreation extends
     };
   }
 
-  shouldComponentUpdate(nextProps: Readonly<AccountCreationProps>, nextState: Readonly<AccountCreationState>, nextContext: any): boolean {
+  shouldComponentUpdate(nextProps: Readonly<AccountCreationProps>,
+                        nextState: Readonly<AccountCreationState>, nextContext: any): boolean {
     return (typeof nextState.profile === 'object');
   }
 
@@ -99,15 +100,12 @@ export class AccountCreation extends
       profile: this.state.profile,
       invitationKey: invitationKey
     };
-    // this.setState(({creatingAccount}) => ({creatingAccount: true}));
-    console.log("in create account");
     this.setState({creatingAccount: true});
     const args: FetchArgs = ProfileApiFetchParamCreator().createAccount(request);
     fetch(fullUrl(args.url), args.options)
       .then(handleErrors)
       .then((response) => response.json())
       .then((profile) => {
-          console.log("in create call: " + JSON.stringify(profile));
           this.setState({profile: profile, creatingAccount: false});
           setProfile(profile);
         }
