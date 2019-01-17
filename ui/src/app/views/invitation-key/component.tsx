@@ -27,7 +27,7 @@ interface InvitationKeyState {
   invitationKeyInvalid: boolean;
 }
 
-export class InvitationKeyReact extends React.Component<InvitationKeyProps, InvitationKeyState> {
+export class InvitationKey extends React.Component<InvitationKeyProps, InvitationKeyState> {
 
   inputElement: any;
 
@@ -107,4 +107,4 @@ export class InvitationKeyReact extends React.Component<InvitationKeyProps, Invi
   }
 }
 
-export default InvitationKeyReact;
+export default InvitationKey;
