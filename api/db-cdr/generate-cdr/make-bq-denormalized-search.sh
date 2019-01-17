@@ -318,9 +318,10 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrenc
 echo "Inserting conditions data into search_visit"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_visit\`
- (person_id, entry_date, concept_id, age_at_event)
+ (person_id, entry_date, concept_id, age_at_event, visit_concept_id)
 select vo.person_id, vo.visit_start_date as entry_date, vo.visit_concept_id as concept_id,
-cast(floor(date_diff(vo.visit_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event
+cast(floor(date_diff(vo.visit_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
+vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo
 join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c on (c.concept_id = vo.visit_concept_id and c.is_selectable = 1 and c.type = 'VISIT')
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = vo.person_id)"
