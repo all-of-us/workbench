@@ -48,24 +48,17 @@ public class CodesQueryBuilderTest {
 
         ListMultimap<CodesQueryBuilder.MultiKey, SearchParameter> mappedParemeters =
           queryBuilder.getMappedParameters(item.getSearchParameters());
-        assertEquals(6, mappedParemeters.keySet().size());
-        assertEquals(
-          new HashSet<CodesQueryBuilder.MultiKey>(
-            Arrays.asList(
-              queryBuilder.new MultiKey(searchParam1),
-              queryBuilder.new MultiKey(searchParam2),
-              queryBuilder.new MultiKey(searchParam4),
-              queryBuilder.new MultiKey(searchParam5),
-              queryBuilder.new MultiKey(searchParam6),
-              queryBuilder.new MultiKey(searchParam8)
-            )
-          ), mappedParemeters.keySet());
-        assertEquals(Arrays.asList(searchParam1), mappedParemeters.get(queryBuilder.new MultiKey(searchParam1)));
-        assertEquals(Arrays.asList(searchParam2, searchParam3), mappedParemeters.get(queryBuilder.new MultiKey(searchParam2)));
-        assertEquals(Arrays.asList(searchParam4), mappedParemeters.get(queryBuilder.new MultiKey(searchParam4)));
-        assertEquals(Arrays.asList(searchParam5), mappedParemeters.get(queryBuilder.new MultiKey(searchParam5)));
-        assertEquals(Arrays.asList(searchParam6, searchParam7), mappedParemeters.get(queryBuilder.new MultiKey(searchParam6)));
-        assertEquals(Arrays.asList(searchParam8), mappedParemeters.get(queryBuilder.new MultiKey(searchParam8)));
+        assertEquals(3, mappedParemeters.keySet().size());
+        for (CodesQueryBuilder.MultiKey key : mappedParemeters.keySet()) {
+            if (key.equals(CodesQueryBuilder.PARENT)) {
+                assertEquals(Arrays.asList(searchParam8), mappedParemeters.get(key));
+            } else if (key.equals(CodesQueryBuilder.CHILD)) {
+                assertEquals(Arrays.asList(searchParam1, searchParam2, searchParam3, searchParam5, searchParam6, searchParam7),
+                  mappedParemeters.get(queryBuilder.new MultiKey(searchParam2)));
+            } else {
+                assertEquals(Arrays.asList(searchParam4), mappedParemeters.get(queryBuilder.new MultiKey(searchParam4)));
+            }
+        }
     }
 
     @Test
