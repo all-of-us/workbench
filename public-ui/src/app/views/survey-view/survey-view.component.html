@@ -26,7 +26,7 @@
               {{survey.participantCount | number }}
             </div>
             <div class="card-text">
-              partipants completed this survey
+              participants completed this survey
             </div>
           </div>
         </div>
@@ -64,9 +64,8 @@
     </div>
   </div>
   -->
-
+  <div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.</div>
   <div class="survey-results" *ngIf="resultsComplete">
-
     <div class="row search">
       <div class="col-xs-12 flex-xs-middle search-input-full ">
         <div class="search-wrapper">
@@ -101,7 +100,7 @@
         </p>
       </div>
       <div class="col-xs-12">
-        Click on each response to view age and gender distributions.
+      Click on each response to view age and gender distributions.
       </div>
     </div>
     <div class="row question-result" *ngFor="let q of questions, let i = index">
@@ -116,48 +115,72 @@
               <div class="box-sub-title question question">
                 <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId"></app-highlight-search>
               </div>
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=bottom-left
-                                     clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">The concept code is an additional piece of information that
-                    can be utilized to find medical concepts in the AoU data set. Concept codes are specific to the
-                    AoU Research Program data and are assigned to all medical concepts.
-                    In some instances,
-                    a medical concept may not be assigned a source or standard vocabulary code.
-                    In these instances, the concept code can be utilized to
-                    query the data for the medical concept.</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
             </div>
           </div>
         </div>
 
         <div class="row">
-          <div class="col-xs-12">
-            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers
-              <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
-          </div>
+            <div class="col-xs-12">
+              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers - Click on each response option for additional gender and age at occurrence data.
+                <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+            </div>
         </div>
         <ng-container *ngIf="q.subQuestionCount == 0; else subQuestionDisplay">
-          <div class="row  answers" [hidden]="!showAnswer[q.conceptId]">
+          <div class="row grid-header answers" [hidden]="!showAnswer[q.conceptId]">
+            <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
+              <div class="row">
+                  <div class="col-md-4 col-sm-12 col-xs-12 info-text">
+                    Answer Text
+                  </div>
+                  <div class="col-md-2 col-sm-12 col-xs-12 info-text">
+                    Concept Code
+                    <clr-tooltip>
+                      <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                      <clr-tooltip-content clrPosition=bottom-left
+                                           clrSize="lg" *clrIfOpen>
+                        <div class="tooltip-label">The concept code is an additional piece of information that
+                          can be utilized to find medical concepts in the AoU data set. Concept codes are specific to the
+                          AoU Research Program data and are assigned to all medical concepts.
+                          In some instances,
+                          a medical concept may not be assigned a source or standard vocabulary code.
+                          In these instances, the concept code can be utilized to
+                          query the data for the medical concept.</div>
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                  </div>
+                  <div class="col-md-3 col-sm-12 col-xs-12 info-text">
+                    Participant Count
+                  </div>
+                  <div class="col-md-3 col-sm-12 col-xs-12 info-text">
+                    % answered
+                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="row  answers answer-box" [hidden]="!showAnswer[q.conceptId]">
             <div class="col-md-7 col-sm-5 col-xs-12 answer-list">
               <div  class="row answer-text"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id" (click)="showAnswerGraphs(q, a)" *ngFor="let a of q.countAnalysis.results">
-                <div class="col-sm-6 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
+                <div class="col-sm-4 col-xs-12" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
                   <label class="answer-text">
-                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                    <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
                   </label>
                 </div>
+                <div class="col-sm-2 col-xs-12">
+                  <label class="concept-code">{{a.stratum3}}</label>
+                </div>
                 <ng-template #binnedSurveyQuestionDisplay>
-                  <div class="col-sm-6 col-xs-12">
-                    <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer'; else rangeLabel">
-                      <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                  <div class="col-sm-4 col-xs-12">
+                    <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
+                      <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
                     </label>
                     <ng-template #rangeLabel>
                       <label class="answer-text">
-                        <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value" [conceptId]="a.stratum3"></app-highlight-search>
+                        <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value"></app-highlight-search>
                       </label>
                     </ng-template>
+                  </div>
+                  <div class="col-sm-2 col-xs-12">
+                    <label class="concept-code">{{a.stratum3}}</label>
                   </div>
                 </ng-template>
                 <div class="answer-text col-sm-2 col-xs-12"  [class.answer-active]="q.selectedAnswer && q.selectedAnswer.id === a.id">
@@ -178,9 +201,10 @@
                   <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
                   <clr-tooltip-content clrPosition=right
                                        clrSize="lg" *clrIfOpen>
-                    <div class="tooltip-label">Gender chart</div>
+                    <div class="tooltip-label">Gender Chart</div>
                   </clr-tooltip-content>
                 </clr-tooltip>
+                <div class="survey-graph-answer">{{q.selectedAnswer.stratum4}} -- {{q.selectedAnswer.stratum3}} </div>
                 <div class="chart-wrapper col-xs-12 col-sm-12">
                   <div class="col-md gender-chart-button">
                     <button *ngFor="let g of ['Biological Sex','Gender Identity']" [ngClass]="{active:selectedGenderGraph === g}" (click)="selectSurveyGenderGraph(g)" class="btn btn-link">{{g}}
@@ -213,8 +237,8 @@
 
               </div>
             </div>
-          </div>
-        </ng-container><!-- end collapsible answers -->
+          </div> <!-- end collapsible answers -->
+        </ng-container>
         <ng-template #subQuestionDisplay>
           <div class="row  grid-header answers" [hidden]="!showAnswer[q.conceptId]">
             <div class="row col-xs-12 col-sm-12 answer-text">

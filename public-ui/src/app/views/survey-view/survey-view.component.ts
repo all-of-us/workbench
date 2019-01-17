@@ -59,7 +59,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (obj) {
       const survey = JSON.parse(obj);
       this.surveyConceptId = survey.conceptId;
-      this.surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
+      this.surveyPdfUrl = '/assets/surveys/' + survey.name.replace(' ', '_') + '.pdf';
     }
     this.searchText.setValue(localStorage.getItem('searchText'));
     if (!this.searchText.value) {
@@ -190,8 +190,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     // If doing an and search match all words
     if (this.searchMethod === 'and') {
       for (const w of words) {
-        if ((q.conceptName.toLowerCase().indexOf(w.toLowerCase()) === -1 ||
-            q.conceptCode.toLowerCase().indexOf(w.toLowerCase()) === -1)
+        if (q.conceptName.toLowerCase().indexOf(w.toLowerCase()) === -1
           && q.countAnalysis.results.filter(r =>
             r.stratum4.toLowerCase().indexOf(w.toLowerCase()) === -1)) {
           return false;
@@ -209,7 +208,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     if (results.length > 0) {
       return true;
     }
-    console.log('electronicsmoking_test'.includes('smoking'));
     return false;
   }
   
