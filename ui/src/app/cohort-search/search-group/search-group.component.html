@@ -159,24 +159,22 @@
 
 
   <div class="card-footer text-right" *ngIf="!envFlag">
-    <ng-container *ngIf="status === 'active'">
-      Group Count:
-      <span *ngIf="isRequesting"
-            class="spinner spinner-inline"
-            [style.vertical-align]="'middle'">
-        Loading...
-      </span>
-      <span *ngIf="!isRequesting">
-        {{ group.get('count') | number }}
-      </span>
-      <span *ngIf="error">
-        <clr-icon
-          [popper]="errorPopper"
-          [popperTrigger]="'hover'"
-          shape="error-standard"
-          size="18"></clr-icon>
-      </span>
-    </ng-container>
+    Group Count:
+    <span *ngIf="isRequesting"
+          class="spinner spinner-inline"
+          [style.vertical-align]="'middle'">
+      Loading...
+    </span>
+    <span *ngIf="!isRequesting">
+      {{ group.get('count') | number }}
+    </span>
+    <span *ngIf="error">
+      <clr-icon
+        [popper]="errorPopper"
+        [popperTrigger]="'hover'"
+        shape="error-standard"
+        size="18"></clr-icon>
+    </span>
   </div>
 </div>
 

@@ -1,7 +1,8 @@
 import {select} from '@angular-redux/store';
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 import {SearchRequest} from 'generated';
 
@@ -12,14 +13,25 @@ import {SearchRequest} from 'generated';
     './search-group-list.component.css',
   ]
 })
-export class SearchGroupListComponent {
+export class SearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groups$: Observable<List<any>>;
+  @Input() index: number;
 
   @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
+  listSize: number;
+  subscription: Subscription;
+
+  ngOnInit(): void {
+    this.subscription = this.groups$.subscribe(groups => this.listSize = groups.size);
+  }
 
   get title() {
     const prefix = this.role === 'excludes' ? 'And ' : '';
     return prefix + this.role.slice(0, -1) + ` Participants Where`;
+  }
+
+  get emptyIndex() {
+    return this.listSize + this.index + 1;
   }
 }
