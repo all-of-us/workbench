@@ -1,9 +1,5 @@
 package org.pmiops.workbench.cdr.model;
 
-
-import org.hibernate.annotations.Formula;
-import org.springframework.data.jpa.repository.Query;
-
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
