@@ -41,6 +41,7 @@ const group = fromJS({
   count: null,
   isRequesting: false,
   items: ['itemA', 'itemB'],
+  status: 'active',
 });
 
 class MockActions {
@@ -122,7 +123,6 @@ describe('SearchGroupComponent', () => {
   });
 
   it('Should dispatch REMOVE_GROUP on remove button click', fakeAsync(() => {
-    comp.status = 'active';
     fixture.detectChanges();
     const spy = spyOn(mockReduxInst, 'dispatch');
 
@@ -143,7 +143,6 @@ describe('SearchGroupComponent', () => {
 
   it('Should render group count if group count', () => {
     comp.group = group.set('count', 25);
-    comp.status = 'active';
     fixture.detectChanges();
 
     const footer = fixture.debugElement.query(By.css('div.card-footer'));
@@ -156,7 +155,6 @@ describe('SearchGroupComponent', () => {
 
   it('Should render a spinner if requesting', () => {
     comp.group = group.set('isRequesting', true);
-    comp.status = 'active';
     fixture.detectChanges();
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     expect(spinner).not.toBeNull();

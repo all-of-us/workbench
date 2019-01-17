@@ -24,6 +24,7 @@ const baseItem = fromJS({
   modifiers: [],
   count: null,
   isRequesting: false,
+  status: 'active',
 });
 
 const zeroCrit = fromJS({
@@ -81,7 +82,6 @@ describe('SearchGroupItemComponent', () => {
     comp.itemIndex = 0;
 
     comp.itemId = 'item001';
-    comp.status = 'active';
 
     itemStub = MockNgRedux
       .getSelectorStub<CohortSearchState, any>(
@@ -95,11 +95,10 @@ describe('SearchGroupItemComponent', () => {
   });
 
   it('Should display code type', () => {
-    expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
-    comp.status = 'active';
     fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
     expect(display.childElementCount).toBe(2);
@@ -127,7 +126,6 @@ describe('SearchGroupItemComponent', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
-    comp.status = 'active';
     fixture.detectChanges();
 
     const expectedContext = {
@@ -151,20 +149,6 @@ describe('SearchGroupItemComponent', () => {
       item: baseItem,
       context: expectedContext,
     });
-  });
-
-  it('Should render an \'OR\' if it isn\'t the first item', () => {
-    comp.itemIndex = 1;
-    itemStub.next(baseItem);
-    codeStub.next(List([zeroCrit, oneCrit]));
-    comp.status = 'active';
-    fixture.detectChanges();
-
-    const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
-    expect(display.childElementCount).toBe(3);
-
-    const trimmedText = display.textContent.replace(/\s+/g, ' ').trim();
-    expect(trimmedText).toEqual('OR Contains ICD9 Codes');
   });
 
 });
