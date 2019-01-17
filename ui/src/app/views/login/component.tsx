@@ -7,21 +7,16 @@ import {styles} from './style';
 
 const googleIcon = '/assets/icons/google-icon.png';
 
-interface LoginProps {
-  signIn: () => void;
-  onCreateAccount: () => void;
-}
-
-export class LoginReactComponent extends React.Component<LoginProps, {}> {
-
-  render() {
+export const LoginReactComponent: React.FunctionComponent<{
+  signIn: Function, onCreateAccount: Function
+}> = ({ signIn, onCreateAccount}) => {
     return <div style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
       <div>
         <Header>
           Already have an account?
         </Header>
         <div>
-          <Button style={styles.button} onClick={() => this.props.signIn()}>
+          <Button style={styles.button} onClick={signIn}>
             <img src={googleIcon}
                    style={{ height: '54px', width: '54px', margin: '-3px 19px -3px -3px'}}/>
             <div>
@@ -35,11 +30,9 @@ export class LoginReactComponent extends React.Component<LoginProps, {}> {
           Don't have an account?
         </SmallHeader>
         <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0'}}
-                onClick={this.props.onCreateAccount}>
+                onClick={onCreateAccount}>
           Create Account
         </Button>
       </div>
     </div>;
-  }
-}
-export default LoginReactComponent;
+};
