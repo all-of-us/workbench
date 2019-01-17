@@ -45,7 +45,10 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
  */
 public abstract class AbstractQueryBuilder {
 
+  public static final String PARENT = "parent";
+  public static final String CHILD = "child";
   public static final String AND = " and ";
+  public static final String OR = " or\n";
   public static final String AGE_DATE_AND_ENCOUNTER_VAR = "${ageDateAndEncounterSql}";
   private static final String MODIFIER_SQL_TEMPLATE = "select criteria.person_id from (${innerSql}) criteria\n";
   private static final String DESC = " desc";
@@ -142,7 +145,7 @@ public abstract class AbstractQueryBuilder {
   }
 
   private String buildAgeDateAndEncounterSql(Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
-    StringBuffer modifierSql = new StringBuffer();
+    StringBuilder modifierSql = new StringBuilder();
     for (Modifier modifier : modifiers) {
       if (modifier != null) {
         validateModifier(modifier);
@@ -175,7 +178,7 @@ public abstract class AbstractQueryBuilder {
   }
 
   private String buildOccurrencesSql(Map<String, QueryParameterValue> queryParams, Modifier occurrences) {
-    StringBuffer modifierSql = new StringBuffer();
+    StringBuilder modifierSql = new StringBuilder();
     if (occurrences != null) {
       List<String> modifierParamList = new ArrayList<>();
       validateModifier(occurrences);

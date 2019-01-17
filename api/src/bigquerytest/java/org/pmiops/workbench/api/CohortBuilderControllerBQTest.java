@@ -473,7 +473,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroupItem sgi1 = new SearchGroupItem().temporalGroup(1);
     SearchGroupItem sgi2 = new SearchGroupItem().temporalGroup(1);
     temporalGroup.addItemsItem(sgi1).addItemsItem(sgi2);
-    assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
+    assertMessageException(searchRequest, TEMPORAL_SECOND_GROUP_MESSAGE);
   }
 
   @Test
@@ -758,7 +758,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup searchGroup = new SearchGroup()
       .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
+      .mention(TemporalMention.FIRST_MENTION.name())
       .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
