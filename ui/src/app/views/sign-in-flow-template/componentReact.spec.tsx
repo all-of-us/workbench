@@ -24,7 +24,6 @@ describe('SignPageTemplateReact', () => {
 
   it('should display login background image and directive by default', () => {
     const wrapper = component();
-    console.log(wrapper.html());
     const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
     expect(backgroundImage).toBe('url(\'' + pageImages.login.backgroundImgSrc + '\')');
