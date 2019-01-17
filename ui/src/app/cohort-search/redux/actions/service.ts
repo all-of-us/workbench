@@ -226,6 +226,7 @@ export class CohortSearchActions {
       .isEmpty();
 
     this.cancelIfRequesting('items', itemId);
+    this.cancelIfRequesting('groups', groupId);
     if (status) {
       this.hideGroupItem(groupId, itemId, status);
     } else {
@@ -252,14 +253,14 @@ export class CohortSearchActions {
     const groupId = group.get('id');
     this._enableGroup(groupId);
     if (this.hasActiveItems(group)) {
-      this.requestTotalCount(groupId);
+      this.requestTotalCount();
     }
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
     this._enableGroupItem(groupId, itemId);
     this.requestGroupCount(role, groupId);
-    this.requestTotalCount(groupId);
+    this.requestTotalCount();
   }
 
   fetchCriteria(kind: string, parentId: number): void {
