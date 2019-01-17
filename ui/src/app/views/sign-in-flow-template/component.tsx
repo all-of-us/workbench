@@ -3,6 +3,8 @@ import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
+import {AccountCreation} from 'app/views/account-creation/component';
+import {AccountCreationSuccess} from 'app/views/account-creation-success/component';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
 import {LoginReactComponent} from 'app/views/login/component';
 
@@ -10,6 +12,8 @@ import * as React from 'react';
 
 import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
+
+import {Profile} from 'generated/fetch';
 
 interface ImagesSource {
   backgroundImgSrc: string;
@@ -25,6 +29,7 @@ export interface PageTemplateProps {
 interface PageTemplateState {
   currentStep: string;
   invitationKey: string;
+  profile: Profile;
 }
 
 export const pageImages = {
@@ -36,9 +41,13 @@ export const pageImages = {
     backgroundImgSrc: '/assets/images/invitation-female.png',
     smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
   },
-  'createAccount': {
+  'accountCreation': {
     backgroundImgSrc: '/assets/images/create-account-male.png',
     smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
+  },
+  'accountCreationSuccess': {
+    backgroundImgSrc: '/assets/images/congrats-female.png',
+    smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
   }};
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
@@ -50,10 +59,12 @@ export const RegistrationPageTemplateReact = withWindowSize()(
       super(props);
       this.state = {
         currentStep: 'login',
-        invitationKey: ''
+        invitationKey: '',
+        profile: {} as Profile
       };
       this.setCurrentStep = this.setCurrentStep.bind(this);
       this.onKeyVerified = this.onKeyVerified.bind(this);
+      this.setProfile = this.setProfile.bind(this);
     }
 
     componentDidMount() {
@@ -68,7 +79,9 @@ export const RegistrationPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        // case 'accountCreation': return <AccountCreationReact setCurrentStep={this.setCurrentStep}
+        case 'accountCreation': return <AccountCreation invitationKey={this.state.invitationKey}
+                                                        setProfile={this.setProfile}/>;
+        case 'accountCreationSuccess': return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
           return;
         }
@@ -83,7 +96,15 @@ export const RegistrationPageTemplateReact = withWindowSize()(
     onKeyVerified(invitationKey) {
       this.setState({
         invitationKey: invitationKey,
-        currentStep: 'createAccount'
+        currentStep: 'accountCreation'
+      });
+    }
+
+    setProfile(profile) {
+          console.log("profile: " + JSON.stringify(profile));
+      this.setState({
+        profile: profile,
+        currentStep: 'accountCreationSuccess'
       });
     }
 
