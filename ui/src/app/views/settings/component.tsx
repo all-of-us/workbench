@@ -87,9 +87,11 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
           {this.state.clusterDeletionFailure ?
             <div className='error'>Could not reset your notebook server.</div> : undefined}
           <Button type='secondary'
-                  onClick={() => this.setState({resetClusterModal: false})}>Cancel</Button>
+                  onClick={() => this.setState({resetClusterModal: false})}
+                  data-test-id='cancel-button'>Cancel</Button>
           <Button disabled={this.state.resetClusterPending}
-                  onClick={() => this.resetCluster()}>Send</Button>
+                  onClick={() => this.resetCluster()}
+                  data-test-id='reset-cluster-send'>Send</Button>
         </ModalFooter>
       </Modal>}
     </React.Fragment>;

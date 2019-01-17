@@ -9,8 +9,7 @@ describe('SettingsComponent', () => {
   let props: {};
 
   const component = () => {
-    return mount<SettingsReact, {}, SettingsState>
-    (<SettingsReact {...props}/>);
+    return mount<SettingsReact, {}, SettingsState>(<SettingsReact {...props}/>);
   };
 
   beforeAll(() => {
@@ -21,10 +20,6 @@ describe('SettingsComponent', () => {
 
   afterAll(() => {
     document.removeChild(document.getElementById('popup-root'));
-  });
-
-  beforeEach(() => {
-    props = {};
   });
 
   it('should not open the cluster reset modal when no cluster', () => {
@@ -42,5 +37,8 @@ describe('SettingsComponent', () => {
     expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(0);
     wrapper.find('[data-test-id="reset-notebook-button"]').at(0).simulate('click');
     expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(1);
+    wrapper.find('[data-test-id="reset-cluster-send"]').at(0).simulate('click');
+    // VERIFY DELETE WAS CALLED HERE.
+    expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(0);
   });
 });
