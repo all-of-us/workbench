@@ -123,7 +123,6 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     };
     const args: FetchArgs = ClusterApiFetchParamCreator()
       .listClusters();
-    console.log(args);
     fetch(fullUrl(args.url), args.options)
       .then(handleErrors)
       .then((response) => response.json)
