@@ -56,7 +56,7 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
         <ModalFooter>
           <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>
           {/* TODO: Use a loading spinner here in addition to disabling. */}
-          <Button id='rename-button'
+          <Button data-test-id='rename-button'
                   disabled={this.state.loading}
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.rename()}>Rename Notebook</Button>

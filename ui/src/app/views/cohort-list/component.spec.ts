@@ -122,7 +122,7 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.trash')));
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(1);
     expect(app.resourceList).not.toContain(deletedResource);
