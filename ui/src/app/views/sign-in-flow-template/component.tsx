@@ -5,7 +5,6 @@ import {SignInService} from 'app/services/sign-in.service';
 import {withWindowSize} from 'app/utils';
 import {InvitationKeyReact} from 'app/views/invitation-key/component';
 
-import {AccountCreationReact} from 'app/views/account-creation/component';
 import LoginReactComponent from 'app/views/login/component';
 
 import {DataAccessLevel, Profile} from 'generated/fetch';
@@ -86,11 +85,6 @@ const RegistrationPageTemplateReact = withWindowSize()(
                                      this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKeyReact onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
-        case 'createAccount': return <AccountCreationReact
-                          onAccountCreation={
-                            () => this.setCurrentStep('accountCreationSuccess')}
-                          invitationKey={this.state.invitationKey}
-                          setProfile={this.setProfile}/>;
         default:
           return;
         }
@@ -116,7 +110,7 @@ const RegistrationPageTemplateReact = withWindowSize()(
     render() {
       return <div style={styles.signedInContainer}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-          <div id='template'
+          <div data-test-id='template'
                style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>

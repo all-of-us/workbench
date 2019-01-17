@@ -16,6 +16,7 @@ describe('SignPageTemplateReact', () => {
 
   beforeEach(() => {
     props = {
+      onInit: jest.fn(),
       signIn: signIn,
       windowSize: {width: 1400, height: 0}
     } as PageTemplateProps;
@@ -24,21 +25,21 @@ describe('SignPageTemplateReact', () => {
   it('should display login background image and directive by default', () => {
     const wrapper = component();
     console.log(wrapper.html());
-    const templateImage = wrapper.find('div').find({id: 'template'});
+    const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
     expect(backgroundImage).toBe('url(\'' + pageImages.login.backgroundImgSrc + '\')');
-    expect(wrapper.find('div').find({dataTestId: 'login'})).toBeTruthy();
+    expect(wrapper.find('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display small background image when window width is between 900 and 1300', () => {
     props.windowSize.width = 999;
     const wrapper = component();
-    const templateImage = wrapper.find('div').find({id: 'template'});
+    const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
         .toBe('url(\'' + pageImages.login.smallerBackgroundImgSrc + '\')');
-    expect(wrapper.find('div').find({dataTestId: 'invitation'})).toBeTruthy();
+    expect(wrapper.find('[data-test-id="invitation"]')).toBeTruthy();
   });
 
   it('should display invitation key component on clicking Create account on login page ', () => {
@@ -46,12 +47,12 @@ describe('SignPageTemplateReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('div').find({id: 'template'});
+    const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
         .toBe('url(\'' + pageImages.invitationKey.backgroundImgSrc + '\')');
-    expect(wrapper.find('div').find({dataTestId: 'invitation'})).toBeTruthy();
+    expect(wrapper.find('[data-test-id="invitation"]')).toBeTruthy();
   });
 
   it('should display invitation key with small image when width is between 900 and 1300 ', () => {
@@ -60,7 +61,7 @@ describe('SignPageTemplateReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('div').find({id: 'template'});
+    const templateImage = wrapper.find('[data-test-id="template"]');
     expect(templateImage.prop('style').backgroundImage)
         .toBe('url(\'' + pageImages.invitationKey.smallerBackgroundImgSrc + '\')');
   });
