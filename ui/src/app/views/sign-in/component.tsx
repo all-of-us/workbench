@@ -53,7 +53,7 @@ export const pageImages = {
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
 export const SignInReact = withWindowSize()(
-  class extends React.Component<SignInProps, RegistrationPageTemplateState> {
+  class extends React.Component<SignInProps, SignInState> {
 
     constructor(props: SignInProps) {
       super(props);
