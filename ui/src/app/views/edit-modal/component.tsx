@@ -93,7 +93,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
             <label className='required'
                    style={styles.fieldHeader}>{this.state.resourceType} Name: </label>
             <ModalInput value={this.state.resourceName}
-                        id='edit-name'
+                        data-test-id='edit-name'
                         onChange={(e) => this.setState({resourceName: e.target.value})}/>
           </div>
           <div style={{marginTop: '1rem'}}>
@@ -106,7 +106,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
           <Button disabled={!(this.state.resourceName.length > 0)}
-                  id='save-edit'
+                  data-test-id='save-edit'
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>
         </ModalFooter>

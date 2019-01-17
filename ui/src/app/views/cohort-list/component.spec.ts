@@ -142,9 +142,9 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     simulateClick(fixture, fixture.debugElement.query(By.css('.pencil')));
     updateAndTick(fixture);
-    simulateInputReact(fixture, '#edit-name', editValue);
+    simulateInputReact(fixture, '[data-test-id="edit-name"]', editValue);
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#save-edit');
+    simulateClickReact(fixture, '[data-test-id="save-edit"]');
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(2);

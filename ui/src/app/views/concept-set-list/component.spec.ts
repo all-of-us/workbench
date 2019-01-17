@@ -121,8 +121,8 @@ describe('ConceptSetListComponent', () => {
     tick();
     simulateClick(fixture, de.query(By.css('.pencil')));
     updateAndTick(fixture);
-    simulateInputReact(fixture, '#edit-name', 'testMockConcept');
-    simulateClickReact(fixture, '#save-edit');
+    simulateInputReact(fixture, '[data-test-id="edit-name"]', 'testMockConcept');
+    simulateClickReact(fixture, '[data-test-id="save-edit"]');
     tick();
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
