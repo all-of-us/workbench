@@ -32,16 +32,22 @@
   </ng-container>
 
   <!-- show gender totals  if we want -->
-  <ng-container *ngIf="showGenderGraph">
-    <div class="col-md-3 col-xs-12">
+  <ng-container *ngIf="showBiologicalSexGraph">
+    <div class="col-md-4 col-xs-12">
     </div>
-    <div class="col-md-3 col-xs-12 chart" *ngIf="showGenderGraph && analyses.genderAnalysis"  >
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showBiologicalSexGraph && analyses.genderAnalysis"  >
       <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showGenderGraph && analyses.genderAnalysis"  >
+    <div class="col-md-4 col-xs-12">
+    </div>
+  </ng-container>
+  <ng-container *ngIf="showGenderIdentityGraph">
+    <div class="col-md-4 col-xs-12">
+    </div>
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showGenderIdentityGraph && analyses.genderIdentityAnalysis"  >
       <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Gender Identity'"> </app-chart>
     </div>
-    <div class="col-md-2 col-xs-12">
+    <div class="col-md-4 col-xs-12">
     </div>
   </ng-container>
 

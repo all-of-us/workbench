@@ -58,7 +58,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   // defaults,  most domains
   showSources = true;
   showMeasurementGenderBins = false;
-  showGenderGraph = false;
+  showBiologicalSexGraph = false;
+  showGenderIdentityGraph = false;
   showAgeGraph = true;
   showSourcesGraph = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
@@ -190,34 +191,37 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
-    if (g === 'Gender') {
-      this.showGenderGraph = true;
-    } else if (g === 'Age') {
+    if (g === 'Biological Sex') {
+      this.showBiologicalSexGraph = true;
+    } else if (g === 'Gender Identity') {
+      this.showGenderIdentityGraph = true;
+    } else if (g === 'Age at Occurrence') {
       this.showAgeGraph = true;
     } else if (g === 'Sources') {
       this.showSourcesGraph = true;
     } else {
       this.showAgeGraph = true;
     }
-    if (this.ehrDomain.name === 'Measurements' && this.showGenderGraph) {
+    if (this.ehrDomain.name === 'Measurements' && this.showBiologicalSexGraph) {
       this.showMeasurementGenderBins = true;
-      this.showGenderGraph = false;
+      this.showBiologicalSexGraph = false;
     }
   }
   public toggleSynonyms(conceptId) {
     this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
   }
   public showToolTip(g) {
-    if (g === 'Gender') {
+    if (g === 'Biological Sex' || g === 'Gender Identity') {
       return 'Gender chart';
-    } else if (g === 'Age') {
+    } else if (g === 'Age at Occurrence') {
       return this.ageChartHelpText;
     } else if (g === 'Sources') {
       return this.sourcesChartHelpText;
     }
   }
   public resetSelectedGraphs() {
-    this.showGenderGraph = false;
+    this.showBiologicalSexGraph = false;
+    this.showGenderIdentityGraph = false;
     this.showAgeGraph = false;
     this.showSourcesGraph = false;
     this.showMeasurementGenderBins = false;
@@ -228,7 +232,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       return;
     }
     this.resetSelectedGraphs();
-    this.showGenderGraph = true;
+    if (this.ehrDomain.name === 'Measurements') {
+      this.showMeasurementGenderBins = true;
+    } else {
+      this.showBiologicalSexGraph = true;
+    }
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
   }
