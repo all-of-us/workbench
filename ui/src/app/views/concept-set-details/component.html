@@ -14,7 +14,7 @@
           Edit
         </button>
         <button clrDropdownItem class="action-item action-delete"
-            (click)="deleteModal.open()"
+            (click)="confirmDeleting=true"
             [class.disabled]="!canEdit"
             [disabled]="!canEdit">
           <clr-icon shape="trash"></clr-icon>
@@ -26,10 +26,11 @@
       <div class="concept-set-name">
         <h2 *ngIf="!editing">{{conceptSet.name}}</h2>
         <input *ngIf="editing" class="edit-name" type="text" autofocus [(ngModel)]="editName">
-        <button *ngIf="!editing" class="btn btn-icon edit-button" [disabled]="!canEdit"
-            (mouseover)="editHover=true" (mouseleave)="editHover=false" (click)="editing=true">
-          <app-edit-icon [editHover]="editHover"></app-edit-icon>
-        </button>
+        <app-edit-icon
+            class="edit-icon"
+            (click)="editing = true"
+            [disabled]="!canEdit"
+            [style]="{marginTop: '0.1rem'}"></app-edit-icon>
       </div>
       <p *ngIf="!editing">{{conceptSet.description}}</p>
       <textarea *ngIf="editing" class="edit-description" type="text" [(ngModel)]="editDescription"></textarea>
@@ -77,7 +78,11 @@
   </app-sliding-fab>
 </app-top-box>
 
-<app-confirm-delete-modal [resourceType]="'Concept Set'" [resource]=conceptSet (receiveDelete)=receiveDelete()>
+<app-confirm-delete-modal [resourceType]="'Concept Set'"
+                          [resource]=conceptSet
+                          [receiveDelete]=receiveDelete.bind(this)
+                          [deleting]="confirmDeleting"
+                          [closeFunction]="closeConfirmDelete.bind(this)">
 </app-confirm-delete-modal>
 
 <clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">

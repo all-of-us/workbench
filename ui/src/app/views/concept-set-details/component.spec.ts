@@ -27,7 +27,13 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
@@ -105,6 +111,7 @@ describe('ConceptSetDetailsComponent', () => {
     }
 
     fixture = TestBed.createComponent(ConceptSetDetailsComponent);
+    setupModals(fixture);
     // This tick initializes the component.
     tick();
     // This finishes the API calls.
@@ -138,7 +145,7 @@ describe('ConceptSetDetailsComponent', () => {
   it('should allow validLength edits', fakeAsync(() => {
     setUpComponent();
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     const newName = 'cool new name';
     const newDesc = 'cool new description';
@@ -162,7 +169,7 @@ describe('ConceptSetDetailsComponent', () => {
     const originalName = cs.name;
 
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     simulateInput(fixture, de.query(By.css('.edit-name')), '');
     simulateClick(fixture, de.query(By.css('.submit-edit-button')));
@@ -183,7 +190,7 @@ describe('ConceptSetDetailsComponent', () => {
     const originalDesc = cs.description;
 
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.edit-button')));
+    simulateClick(fixture, de.query(By.css('.edit-icon')));
 
     simulateInput(fixture, de.query(By.css('.edit-name')), 'falco');
     simulateInput(fixture, de.query(By.css('.edit-description')), 'lombardi');
@@ -223,7 +230,7 @@ describe('ConceptSetDetailsComponent', () => {
     const de = fixture.debugElement;
     simulateClick(fixture, de.query(By.css('.dropdown-toggle')));
     simulateClick(fixture, de.query(By.css('.action-delete')));
-    simulateClick(fixture, de.query(By.css('.confirm-delete-btn')));
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
 
     expect(router.navigate).toHaveBeenCalled();
     expect(conceptSetsStub.conceptSets).toEqual([]);

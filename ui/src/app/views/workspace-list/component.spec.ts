@@ -22,7 +22,10 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
-  simulateClick, updateAndTick
+  setupModals,
+  simulateClick,
+  simulateClickReact,
+  updateAndTick
 } from 'testing/test-helpers';
 
 import {
@@ -41,6 +44,7 @@ class WorkspaceListPage {
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceListComponent);
+    setupModals(this.fixture);
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.routerStub = this.fixture.debugElement.injector.get(Router);
     this.readPageData();
@@ -136,6 +140,7 @@ describe('WorkspaceListComponent', () => {
   }));
 
   it('enables deleting workspaces', fakeAsync(() => {
+    const de = workspaceListPage.fixture.debugElement;
     const deleteSpy = spyOn(TestBed.get(WorkspacesService), 'deleteWorkspace')
       .and.callThrough();
     const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
@@ -143,16 +148,12 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture,
       workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
     updateAndTick(workspaceListPage.fixture);
-    simulateClick(workspaceListPage.fixture,
-      workspaceListPage.workspaceCards[0].query(By.css('.delete-item')));
+    simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
     updateAndTick(workspaceListPage.fixture);
-    expect(workspaceListPage.fixture.componentInstance.deleteModal.deleting).toBeTruthy();
-    expect(workspaceListPage.fixture.componentInstance.deleteModal.resource)
+    expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.resource)
       .toEqual(firstWorkspace);
-    const deleteModal =
-      workspaceListPage.fixture.debugElement.query(By.css('app-confirm-delete-modal'));
-    simulateClick(workspaceListPage.fixture, deleteModal.query(By.css('.confirm-delete-btn')));
-    updateAndTick(workspaceListPage.fixture);
+    simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
     expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
     const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
     expect(numNewWorkspaces).toEqual(numWorkspaces - 1);

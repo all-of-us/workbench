@@ -1,5 +1,3 @@
-import {Component, DoCheck, Input, OnInit} from '@angular/core';
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -9,12 +7,11 @@ import {
   SmallHeader
 } from 'app/components/headers';
 import {
-  AccountCreationResendModalReact,
-  AccountCreationUpdateModalReact
+  AccountCreationResendModal,
+  AccountCreationUpdateModal
 } from 'app/views/account-creation-modals/component';
-import {AccountCreationComponent} from 'app/views/account-creation/component';
-import {LoginComponent} from 'app/views/login/component';
 
+import {Profile} from 'generated/fetch/api';
 
 const styles = {
   buttonLinkStyling: {
@@ -27,9 +24,7 @@ const styles = {
 };
 
 interface AccountCreationSuccessProps {
-  username: string;
-  contactEmailOnCreation: string;
-  creationNonce: string;
+  profile: Profile;
 }
 
 interface AccountCreationSuccessState {
@@ -38,13 +33,13 @@ interface AccountCreationSuccessState {
   contactEmail: string;
 }
 
-export class AccountCreationSuccessReact
+export class AccountCreationSuccess
     extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
 
   constructor(props: AccountCreationSuccessProps) {
     super(props);
     this.state = {
-      contactEmail: this.props.contactEmailOnCreation,
+      contactEmail: this.props.profile.contactEmail,
       resendModal: false,
       updateModal: false,
     };
@@ -52,7 +47,7 @@ export class AccountCreationSuccessReact
 
   render() {
     return <React.Fragment>
-      <div style={{marginLeft: '-0.5rem', marginRight: '-0.5rem'}}>
+      <div style={{padding: '3rem 3rem 0 3rem', marginLeft: '-0.5rem', marginRight: '-0.5'}}>
         <BolderHeader>
           CONGRATULATIONS!
         </BolderHeader>
@@ -68,7 +63,7 @@ export class AccountCreationSuccessReact
         </div>
         <div style={{whiteSpace: 'nowrap'}}>
           <Header style={{fontWeight: 400, marginTop: '0.5rem'}}>
-            {this.props.username}
+            {this.props.profile.username}
           </Header>
         </div>
         <div>
@@ -98,57 +93,20 @@ export class AccountCreationSuccessReact
           </button>
         </div>
       </div>
-      <AccountCreationResendModalReact
-        username={this.props.username}
-        creationNonce={this.props.creationNonce}
-        resend={this.state.resendModal}
-        closeFunction={() => this.setState({resendModal: false})}
-      />
-      <AccountCreationUpdateModalReact
-        username={this.props.username}
-        creationNonce={this.props.creationNonce}
-        passNewEmail={(newEmail: string) => this.setState({contactEmail: newEmail})}
-        update={this.state.updateModal}
-        closeFunction={() => this.setState({updateModal: false})}
-      />
+      {this.state.resendModal && <AccountCreationResendModal
+        username={this.props.profile.username}
+        creationNonce={this.props.profile.creationNonce}
+        onClose={() => this.setState({resendModal: false})}
+      />}
+      {this.state.updateModal && <AccountCreationUpdateModal
+        username={this.props.profile.username}
+        creationNonce={this.props.profile.creationNonce}
+        onDone={(newEmail: string) => {
+          this.setState({contactEmail: newEmail, updateModal: false});
+        }}
+        onClose={() => this.setState({updateModal: false})}
+      />}
     </React.Fragment>;
   }
 }
-@Component({
-  selector : 'app-account-creation-success',
-  templateUrl: './component.html'
-})
-export class AccountCreationSuccessComponent implements DoCheck, OnInit {
-  username: string;
-  @Input('contactEmail')
-  contactEmail: string;
-  constructor(
-    private loginComponent: LoginComponent,
-    private account: AccountCreationComponent
-  ) {
-    setTimeout(() => {
-      loginComponent.smallerBackgroundImgSrc = '/assets/images/congrats-female-standing.png';
-      loginComponent.backgroundImgSrc = '/assets/images/congrats-female.png';
-    }, 0);
-  }
 
-  ngOnInit(): void {
-    this.renderReactComponent();
-  }
-
-  ngDoCheck(): void {
-    this.renderReactComponent();
-  }
-
-  renderReactComponent(): void {
-    ReactDOM.render(<AccountCreationSuccessReact
-        contactEmailOnCreation={this.contactEmail}
-        username={this.account.profile.username}
-        creationNonce = {this.account.profile.creationNonce}/>,
-      document.getElementById('account-creation-success'));
-  }
-
-  public getEmail(contactEmail: string) {
-    this.contactEmail = contactEmail;
-  }
-}
