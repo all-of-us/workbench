@@ -36,7 +36,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
   // The email address of the AoU researcher's Google Account. Note that this
   // address should *not* be used for contact purposes, since the AoU GSuite
   // doesn't provide Gmail!
-  aouAccountEmailAddress= '';
+  aouAccountEmailAddress = '';
   // The researcher's preferred contact email address.
   contactEmailAddress = '';
   profileImage = '';
