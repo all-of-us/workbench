@@ -22,6 +22,8 @@ import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 })
 
 export class RecentWorkComponent implements OnInit {
+  leftLightIcon = 'leftLight';
+  leftIcon = 'left';
   resourceList: RecentResource[];
   resourcesLoading: boolean;
   fullList: RecentResource[] = [];

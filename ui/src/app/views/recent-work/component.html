@@ -10,10 +10,10 @@
       <div *ngIf="leftScrollVisible()" class="scroll-indicator" id="left-scroll"
            (click)="scrollLeft()">
         <div *ngIf="workspace; else homepageLeft" style="position: absolute; left: 1.2rem; z-index: 99; top: .65rem">
-          <app-left-scroll-light-icon></app-left-scroll-light-icon>
+          <app-scroll-icon [direction]='leftLightIcon'></app-scroll-icon>
         </div>
         <ng-template #homepageLeft>
-          <app-left-scroll-icon></app-left-scroll-icon>
+          <app-scroll-icon [direction]='leftIcon'></app-scroll-icon>
         </ng-template>
       </div>
       <div *ngFor="let resource of resourceList">
