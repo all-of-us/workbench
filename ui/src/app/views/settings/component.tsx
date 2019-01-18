@@ -5,15 +5,13 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {clusterApi} from 'app/services/swagger-fetch-clients';
 
 import {
   Cluster,
-  ClusterApiFetchParamCreator,
   ClusterStatus,
-  FetchArgs,
 } from 'generated/fetch/api';
 
-import {fullUrl, handleErrors} from 'app/utils/fetch';
 import {ReactWrapperBase} from 'app/utils/index';
 
 const styles = {
@@ -106,10 +104,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
   }
 
   resetCluster(): void {
-    const args: FetchArgs = ClusterApiFetchParamCreator()
-      .deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
+    clusterApi().deleteCluster(this.state.cluster.clusterNamespace, this.state.cluster.clusterName)
       .then(() => {
         this.setState({cluster: null, resetClusterPending: false, resetClusterModal: false});
         this.pollCluster();
@@ -123,11 +118,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(), 15000);
     };
-    const args: FetchArgs = ClusterApiFetchParamCreator()
-      .listClusters();
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
-      .then((response) => response.json)
+    clusterApi().listClusters()
       .then((body) => {
         const cluster = body.defaultCluster;
         if (SettingsReact.TRANSITIONAL_STATUSES.has(cluster.status)) {
