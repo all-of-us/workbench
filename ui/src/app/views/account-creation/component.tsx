@@ -3,14 +3,9 @@ import * as ReactDOM from 'react-dom';
 
 import * as fp from 'lodash/fp';
 
-import {fullUrl, handleErrors} from 'app/utils/fetch';
-
 import {
-  CreateAccountRequest,
   DataAccessLevel,
-  FetchArgs,
   Profile,
-  ProfileApiFetchParamCreator,
 } from 'generated/fetch/api';
 
 import {
@@ -32,6 +27,7 @@ import {
 import {Button} from 'app/components/buttons';
 import { FormSection } from 'app/components/forms';
 import {BoldHeader} from 'app/components/headers';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -78,30 +74,22 @@ export class AccountCreation extends
 
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
+    const profile = this.state.profile;
     this.setState({showAllFieldsRequiredError: false});
     const requiredFields =
-      [this.state.profile.givenName, this.state.profile.familyName,
-        this.state.profile.username, this.state.profile.contactEmail,
-        this.state.profile.currentPosition, this.state.profile.organization,
-        this.state.profile.areaOfResearch];
+      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
+        profile.currentPosition, profile.organization, profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
     } else if (this.isUsernameValidationError()) {
       return;
     }
-    const request: CreateAccountRequest = {
-      profile: this.state.profile,
-      invitationKey: invitationKey
-    };
     this.setState({creatingAccount: true});
-    const args: FetchArgs = ProfileApiFetchParamCreator().createAccount(request);
-    fetch(fullUrl(args.url), args.options)
-      .then(handleErrors)
-      .then((response) => response.json())
-      .then((profile) => {
-          this.setState({profile: profile, creatingAccount: false});
-          setProfile(profile);
+    profileApi().createAccount({profile, invitationKey})
+      .then((savedProfile) => {
+          this.setState({profile: savedProfile, creatingAccount: false});
+          setProfile(savedProfile);
         }
       )
       .catch(error => {
@@ -137,8 +125,9 @@ export class AccountCreation extends
   }
 
   usernameChanged(value: string): void {
+    const {username} = this.state.profile;
     this.updateProfile('username', value);
-    if (this.state.profile.username === '') {
+    if (username === '') {
       return;
     }
     this.setState({usernameConflictError: false});
@@ -146,15 +135,11 @@ export class AccountCreation extends
     clearTimeout(this.usernameCheckTimeout);
     this.setState({usernameCheckInProgress: true});
     this.usernameCheckTimeout = setTimeout(() => {
-      if (!this.state.profile.username.trim()) {
+      if (!username.trim()) {
         this.setState({usernameCheckInProgress: false});
         return;
       }
-      const args: FetchArgs = ProfileApiFetchParamCreator()
-        .isUsernameTaken(this.state.profile.username);
-      fetch(fullUrl(args.url), args.options)
-        .then(handleErrors)
-        .then((response) => response.json())
+      profileApi().isUsernameTaken(username)
         .then((body) => {
           this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
         })
