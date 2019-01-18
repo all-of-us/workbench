@@ -6,7 +6,7 @@ export interface LeftScrollState {
 
 export class LeftScrollReact extends React.Component<{}, LeftScrollState> {
 
-  constructor(props:{}) {
+  constructor(props: {}) {
     super(props);
     this.state = {
       fillColor: '#2691D0'

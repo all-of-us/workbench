@@ -6,7 +6,7 @@ export interface LeftScrollLightState {
 
 export class LeftScrollLightReact extends React.Component<{}, LeftScrollLightState> {
 
-  constructor(props:{}){
+  constructor(props: {}) {
     super(props);
     this.state = {
       fillColor: '#5FAEE0'
@@ -54,7 +54,8 @@ export class LeftScrollLightReact extends React.Component<{}, LeftScrollLightSta
             </g>
             <g id='ic_chevron_right_24px-copy' transform='translate(14.233 11.72)'
                fill='#FFF' fillRule='nonzero'>
-              <polygon id='Shape' points='1.59307033 0 0 1.57395349 5.17465399 6.69767442 0 11.8213953 1.59307033 13.3953488 8.37209302 6.69767442'
+              <polygon id='Shape' points='1.59307033 0 0 1.57395349 5.17465399 6.69767442 0
+              11.8213953 1.59307033 13.3953488 8.37209302 6.69767442'
               />
             </g>
           </g>
