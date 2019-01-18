@@ -15,8 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.*;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.MENTION;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.SEARCH_GROUP;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.SEARCH_GROUP_ITEM;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TEMPORAL_GROUP;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TEMPORAL_GROUP_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME_VALUE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notContainsTwoGroups;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeInvalid;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueRequired;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
