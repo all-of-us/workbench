@@ -44,8 +44,7 @@ class ConceptSetAddPage {
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
     this.workspacesService.getWorkspace(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-    });
+        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {});
     tick();
     this.readPageData();
   }

@@ -104,6 +104,4 @@ import {TablePage} from './table-page/table-page';
     },
   ]
 })
-export class CohortReviewModule {
-
-}
+export class CohortReviewModule {}

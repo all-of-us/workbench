@@ -33,9 +33,7 @@ describe('OverviewPage', () => {
           name: '',
           criteria: '{}'
         },
-        review: {
-
-        },
+        review: {},
         params: {
           ns: 'workspaceNamespace',
           wsid: 'workspaceId',

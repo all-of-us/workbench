@@ -58,9 +58,7 @@ describe('QueryReportComponent', () => {
           name: '',
           criteria: JSON.stringify(criteria)
         },
-        review: {
-
-        },
+        review: {},
         params: {
           ns: 'workspaceNamespace',
           wsid: 'workspaceId',

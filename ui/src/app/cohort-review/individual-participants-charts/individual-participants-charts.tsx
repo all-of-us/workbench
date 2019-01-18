@@ -217,8 +217,7 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
   @Input() shouldReRender: boolean;
   componentClass = 'react-chart';
 
-  constructor() {
-  }
+  constructor() {}
 
   ngOnChanges(): void {
     this.triggerReRender();

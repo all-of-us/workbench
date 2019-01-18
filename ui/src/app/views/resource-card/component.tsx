@@ -130,8 +130,7 @@ export class ResourceCardComponent implements OnInit {
     private conceptSetsService: ConceptSetsService,
     private signInService: SignInService,
     private route: Router,
-  ) {
-  }
+  ) {}
 
   ngOnInit() {
     this.wsNamespace = this.resourceCard.workspaceNamespace;
