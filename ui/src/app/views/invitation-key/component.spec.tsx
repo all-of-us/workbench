@@ -34,7 +34,7 @@ describe('InvitationKeyComponent', () => {
     expect(error.text()).toBe('Invitation Key is required.');
   });
 
-  it('should display error message if Invitation key is not valid', () => {
+  it('should display error message if Invitation key is not valid', async() => {
     profileApi().invitationKeyVerification = jest.fn().mockRejectedValue(() => {
           throw new Error('test error inside');
     });
@@ -45,14 +45,9 @@ describe('InvitationKeyComponent', () => {
 
     input.simulate('change', {target: {value: 'notValid '}});
     nextButton.simulate('click');
-    wrapper.update();
-
-    setTimeout(() => {
-      const error = wrapper.find(AlertDanger);
-      expect(error.text()).toBe('Invitation Key is not Valid.');
-    },100);
-
-
+    await new Promise(setImmediate).then(() => wrapper.update());
+    const error = wrapper.find(AlertDanger);
+    expect(error.text()).toBe('Invitation Key is not Valid.');
   });
 
   it('should call props onInvitationKeyVerify function on entering correct invitation key',
