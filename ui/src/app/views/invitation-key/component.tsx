@@ -1,15 +1,11 @@
-import {fullUrl} from '../../utils/fetch';
-
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {BoldHeader} from 'app/components/headers';
 import {FormInput} from 'app/components/inputs';
 
-import {
-  FetchArgs,
-  InvitationVerificationRequest,
-  ProfileApiFetchParamCreator
-} from 'generated/fetch/api';
+import {profileApi} from "app/services/swagger-fetch-clients";
+
+import {InvitationVerificationRequest} from 'generated/fetch/api';
 
 import * as React from 'react';
 
@@ -62,8 +58,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       invitationKey: this.state.invitationKey
     };
 
-    const args: FetchArgs = ProfileApiFetchParamCreator().invitationKeyVerification(request);
-    fetch(fullUrl(args.url), args.options)
+    profileApi().invitationKeyVerification(request)
       .then(response => {
         if (response.status === 400 ) {
           this.setState({
