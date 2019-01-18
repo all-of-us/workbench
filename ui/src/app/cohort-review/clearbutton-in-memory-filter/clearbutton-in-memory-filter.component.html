@@ -1,6 +1,6 @@
 <div class="form-group">
   <label for="{{ property }}">
-    Select {{ formatLabel(property) }}(s)
+    Select {{ formattedLabel() }}(s)
   </label>
   <div class="input">
     <input id="{{ property }}" (keyup)="refreshData()" [formControl]="selection"/>

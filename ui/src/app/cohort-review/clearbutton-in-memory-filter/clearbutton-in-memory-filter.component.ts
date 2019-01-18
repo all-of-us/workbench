@@ -53,7 +53,7 @@ export class ClearButtonInMemoryFilterComponent
     return !this.selection.value;
   }
 
-  formatLabel(): string {
+  formattedLabel(): string {
     return decamelize(this.property, ' ');
   }
 
