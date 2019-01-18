@@ -1,7 +1,12 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Router} from '@angular/router';
+import * as React from 'react';
 
-import {resourceActionList, ResourceType} from 'app/utils/resourceActions';
+import {Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import {PopupTrigger} from 'app/components/popups';
+import {ReactWrapperBase, switchCase} from 'app/utils/index';
+import {ResourceType} from 'app/utils/resourceActions';
 
 import {
   CohortsService, ConceptSetsService,
@@ -10,10 +15,85 @@ import {
 } from 'generated';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {environment} from 'environments/environment';
-
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
+
+const MenuItem = ({ icon, children, ...props }) => {
+  return <Clickable
+    {...props}
+    data-test-id={icon}
+    style={{
+      display: 'flex', alignItems: 'center',
+      minWidth: '5rem', height: '1.3333rem',
+      padding: '0 1rem', color: '#4A4A4A'
+     }}
+     hover={{backgroundColor: '#E0EAF1'}}
+  ><ClrIcon shape={icon} />&nbsp;{children}</Clickable>;
+};
+
+const ResourceCardMenu: React.FunctionComponent<{
+  disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
+  onCloneResource: Function, onDeleteResource: Function, onEditCohort: Function,
+  onReviewCohort: Function, onEditConceptSet: Function
+}> = ({
+  disabled, resourceType, onRenameNotebook, onCloneResource,
+  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+}) => {
+  return <PopupTrigger
+    side='bottom'
+    closeOnClick
+    content={
+      switchCase(resourceType,
+        ['notebook', () => {
+          return <React.Fragment>
+            <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+          </React.Fragment>;
+        }],
+        ['cohort', () => {
+          return <React.Fragment>
+            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
+            <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+          </React.Fragment>;
+        }],
+        ['conceptSet', () => {
+          return <React.Fragment>
+            <MenuItem icon='pencil' onClick={onEditConceptSet}>Edit</MenuItem>
+            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+          </React.Fragment>;
+        }]
+      )
+    }
+  >
+    <Clickable disabled={disabled} data-test-id='resource-menu'>
+      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}} />
+    </Clickable>
+  </PopupTrigger>;
+};
+
+@Component({
+  selector: 'app-resource-card-menu',
+  template: '<div #root></div>'
+})
+export class ResourceCardMenuComponent extends ReactWrapperBase {
+  @Input() disabled;
+  @Input() resourceType;
+  @Input() onRenameNotebook;
+  @Input() onCloneResource;
+  @Input() onDeleteResource;
+  @Input() onEditCohort;
+  @Input() onReviewCohort;
+  @Input() onEditConceptSet;
+
+  constructor() {
+    super(ResourceCardMenu, [
+      'disabled', 'resourceType', 'onRenameNotebook', 'onCloneResource',
+      'onDeleteResource', 'onEditCohort', 'onReviewCohort', 'onEditConceptSet'
+    ]);
+  }
+}
 
 @Component ({
   selector : 'app-resource-card',
@@ -32,21 +112,15 @@ export class ResourceCardComponent implements OnInit {
   @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
   @Output() duplicateNameError: EventEmitter<string> = new EventEmitter();
   @Output() invalidNameError: EventEmitter<string> = new EventEmitter();
-  actions = [];
   wsNamespace: string;
   wsId: string;
   resource: any;
   router: Router;
-  actionList = resourceActionList;
   invalidResourceError = false;
+  confirmDeleting = false;
 
   renaming = false;
-
-  @ViewChild(ConfirmDeleteModalComponent)
-  deleteModal: ConfirmDeleteModalComponent;
-
-  @ViewChild(EditModalComponent)
-  editModal: EditModalComponent;
+  editing = false;
 
   constructor(
       private cohortsService: CohortsService,
@@ -54,7 +128,8 @@ export class ResourceCardComponent implements OnInit {
       private conceptSetsService: ConceptSetsService,
       private signInService: SignInService,
       private route: Router,
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     this.wsNamespace = this.resourceCard.workspaceNamespace;
@@ -72,7 +147,6 @@ export class ResourceCardComponent implements OnInit {
         this.invalidResourceError = true;
       }
     }
-    this.actions = this.actionList.filter(elem =>  elem.type === this.resourceType);
   }
 
   renameNotebook(): void {
@@ -81,6 +155,14 @@ export class ResourceCardComponent implements OnInit {
 
   cancelRename(): void {
     this.renaming = false;
+  }
+
+  openConfirmDelete(): void {
+    this.confirmDeleting = true;
+  }
+
+  closeConfirmDelete(): void {
+    this.confirmDeleting = false;
   }
 
   receiveNotebookRename(rename: NotebookRename): void {
@@ -112,8 +194,28 @@ export class ResourceCardComponent implements OnInit {
     });
   }
 
-  receiveRename(): void {
-    this.onUpdate.emit();
+  receiveEdit(resource: RecentResource): void {
+    if (resource.cohort) {
+      this.cohortsService.updateCohort(
+          this.wsNamespace,
+          this.wsId,
+          resource.cohort.id,
+          resource.cohort
+      ).subscribe( () => {
+        this.closeEditModal();
+        this.onUpdate.emit();
+      });
+    } else if (resource.conceptSet) {
+      this.conceptSetsService.updateConceptSet(
+          this.wsNamespace,
+          this.wsId,
+          resource.conceptSet.id,
+          resource.conceptSet
+      ).subscribe( () => {
+        this.closeEditModal();
+        this.onUpdate.emit();
+      });
+    }
   }
 
   cloneResource(resource: RecentResource): void {
@@ -149,32 +251,32 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
     }
-    this.deleteModal.open();
+    this.openConfirmDelete();
   }
 
-  receiveDelete($event): void {
+  receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, $event.name)
+        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, this.resource.name)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
         break;
       }
       case ResourceType.COHORT: {
-        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, $event.id)
+        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, $event.id)
+        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.resource.id)
           .subscribe(() => {
+            this.closeConfirmDelete();
             this.onUpdate.emit();
-            this.deleteModal.close();
           });
       }
     }
@@ -208,11 +310,15 @@ export class ResourceCardComponent implements OnInit {
 
   editCohort(): void {
     // This ensures the cohort binding is picked up before the open resolves.
-    setTimeout(_ => this.editModal.open(), 0);
+    setTimeout(_ => this.editing = true, 0);
   }
 
   editConceptSet(): void {
-    this.editModal.open();
+    this.editing = true;
+  }
+
+  closeEditModal(): void {
+    this.editing = false;
   }
 
   reviewCohort(resource: RecentResource): void {

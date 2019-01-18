@@ -20,9 +20,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AccountCreationModalsComponent} from './views/account-creation-modals/component';
-import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
-import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -40,8 +37,6 @@ import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
-import {InvitationKeyComponent} from './views/invitation-key/component';
-import {LoginComponent} from './views/login/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
@@ -50,9 +45,10 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
 import {RenameModalComponent} from './views/rename-modal/component';
-import {ResourceCardComponent} from './views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
+import {SignInComponent} from './views/sign-in/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
@@ -68,12 +64,15 @@ import {WorkspaceComponent} from './views/workspace/component';
 import {AppRoutingModule} from './app-routing.module';
 import {CohortCommonModule} from './cohort-common/module';
 import {IconsModule} from './icons/icons.module';
+import {FetchModule} from './services/fetch.module';
 
 import {
   ApiModule,
   ConfigService,
   Configuration,
 } from 'generated';
+
+import {Configuration as FetchConfiguration} from 'generated/fetch';
 
 import {
   ApiModule as LeoApiModule,
@@ -127,14 +126,12 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ReactiveFormsModule,
 
     CohortCommonModule,
+    FetchModule,
     IconsModule,
     NgxChartsModule,
     ClarityModule,
   ],
   declarations: [
-    AccountCreationComponent,
-    AccountCreationModalsComponent,
-    AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
@@ -151,8 +148,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     EditModalComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
-    InvitationKeyComponent,
-    LoginComponent,
     NewNotebookModalComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
@@ -162,9 +157,11 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RecentWorkComponent,
     RenameModalComponent,
     ResourceCardComponent,
+    ResourceCardMenuComponent,
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SignInComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
     ToolTipComponent,
@@ -193,6 +190,14 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       provide: LeoConfiguration,
       deps: [SignInService],
       useFactory: getLeoConfiguration
+    },
+    {
+      provide: FetchConfiguration,
+      deps: [Configuration],
+      useFactory: (c: Configuration) => new FetchConfiguration({
+        accessToken: c.accessToken,
+        basePath: c.basePath
+      })
     },
     ErrorHandlingService,
     ServerConfigService,

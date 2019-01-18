@@ -5,7 +5,6 @@ import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
