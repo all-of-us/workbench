@@ -169,4 +169,15 @@ button:focus {
   background: none;
 }
 
+/*
+ * Force the Zendesk web widget "launcher" button to be hidden at all times.
+ * This is a style-based workaround to ensure the Zendesk launcher button isn't
+ * shown. Ideally, hiding the launcher would be possible via the Zendesk web widget
+ * API, but certain API limitations don't make that possible. See the AoU Zendesk
+ * integration doc for more details.
+ */
+iframe#launcher {
+  display: none;
+}
+
 /**:focus {outline:none !important}*/

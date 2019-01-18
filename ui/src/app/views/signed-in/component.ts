@@ -27,9 +27,18 @@ export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasReviewIdVerification = false;
+  showBugReportItem = !environment.useZendeskForSupport;
+  showHelpDeskItem = environment.useZendeskForSupport;
+  showHubForumItem = environment.useZendeskForSupport;
   headerImg = '/assets/images/all-of-us-logo.svg';
   givenName = '';
   familyName = '';
+  // The email address of the AoU researcher's Google Account. Note that this
+  // address should *not* be used for contact purposes, since the AoU GSuite
+  // doesn't provide Gmail!
+  aouAccountEmailAddress= '';
+  // The researcher's preferred contact email address.
+  contactEmailAddress = '';
   profileImage = '';
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
@@ -80,6 +89,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
           profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
+        this.aouAccountEmailAddress = profile.username;
+        this.contactEmailAddress = profile.contactEmail;
         this.minimizeChrome = this.shouldMinimize();
       });
     });
@@ -167,6 +178,50 @@ export class SignedInComponent implements OnInit, OnDestroy {
 
   openDataBrowser(): void {
     window.open(this.publicUiUrl, '_blank');
+  }
+
+  openZendeskWidget(): void {
+    // Note: we're string-protecting our access of the 'zE' property, since
+    // this property is dynamically loaded by the Zendesk web widget snippet,
+    // and can't properly be typed. If for some reason the support widget is
+    // unavailable, we'll show a notice to the user.
+    if (window['zE'] != null) {
+      // In theory, this webWidget call should identify the user who is filing
+      // this support request.
+      //
+      // In practice, the values provided via 'identify' don't seem to do much.
+      // Zendesk uses values from the 'prefill' action to assign the user email
+      // in the created ticket, which means that for AoU these tickets won't be
+      // correctly associated with the researcher's AoU Google Account. See
+      // the Zendesk integration doc for more discussion.
+      window['zE']('webWidget', 'identify', {
+        name: `${this.givenName} ${this.familyName}`,
+        email: this.aouAccountEmailAddress,
+      });
+
+      window['zE']('webWidget', 'prefill', {
+        name: {
+          value: `${this.givenName} ${this.familyName}`,
+          readOnly: true,
+        },
+        // For the contact email we use the user's *contact* email address,
+        // since the AoU email address is not a valid email inbox.
+        email: {
+          value: this.contactEmailAddress,
+          readOnly: true,
+        },
+      });
+
+      // Trigger the widget to open the full contact form (instead of the
+      // help icon, which is the starting state).
+      window['zE']('webWidget', 'open');
+    } else {
+      // TODO(gjuggler): show an error message to the user.
+    }
+  }
+
+  openHubForum(): void {
+    window.open(environment.zendeskHelpCenterUrl, '_blank');
   }
 
 }
