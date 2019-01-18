@@ -32,10 +32,9 @@ import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent} from 'app/views/resource-card/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
-import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
-import {LeftScrollComponent} from 'app/icons/left-scroll/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
 import {RightScrollComponent} from 'app/icons/right-scroll/component';
+import {ScrollComponent} from 'app/icons/scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
 
 import * as React from 'react';
@@ -56,12 +55,11 @@ describe('HomepageComponent', () => {
       declarations: [
         HomepageComponent,
         RecentWorkComponent,
-        LeftScrollComponent,
         QuickTourModalComponent,
-        LeftScrollLightComponent,
         RightScrollComponent,
         RightScrollLightComponent,
         ResourceCardComponent,
+        ScrollComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         EditModalComponent,
