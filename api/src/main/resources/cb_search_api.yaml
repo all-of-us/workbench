@@ -649,12 +649,12 @@ definitions:
 
   TemporalMention:
     type: string
-    description: possible types of mentions
+    description: Mentions refer to occurrences of entry date per person
     enum: [Any Mention, First Mention, Last Mention]
 
   TemporalTime:
     type: string
-    description: possible types of times
+    description: time refers to the amount of time in reference to temporal mentions
     enum: [During Same Encounter As, X Days Before, X Days After, Within X Days Of]
 
   DemoChartInfoListResponse:
