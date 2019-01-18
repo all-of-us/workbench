@@ -1,9 +1,9 @@
-import * as React from 'react';
-
 import {Button} from 'app/components/buttons';
 import {Error, FieldInput, styles as inputStyles} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+
+import * as React from 'react';
 
 interface AccountCreationResendModalProps {
   username: string;
@@ -11,9 +11,7 @@ interface AccountCreationResendModalProps {
   onClose: Function;
 }
 
-export class AccountCreationResendModal extends React.Component<
-  AccountCreationResendModalProps
-> {
+export class AccountCreationResendModal extends React.Component<AccountCreationResendModalProps> {
   send() {
     const {username, creationNonce, onClose} = this.props;
     profileApi().resendWelcomeEmail({username, creationNonce})

@@ -1,11 +1,11 @@
 import {Component, Input} from '@angular/core';
 
-import * as React from 'react';
-
 import {
   Button
 } from 'app/components/buttons';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
+
+import * as React from 'react';
 
 const OMOPTutorialsLink = 'https://www.ohdsi.org/past-events/2017-tutorials-' +
   'omop-common-data-model-and-standardized-vocabularies/';

@@ -8,4 +8,4 @@ export const styles = {
 };
 
 export const FormSection = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.formSection, ...style}} />;
+  <div {...props} style={{...styles.formSection, ...style}}/>;

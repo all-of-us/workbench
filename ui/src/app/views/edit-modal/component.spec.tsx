@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import {shallow} from 'enzyme';
 import {RecentResource} from 'generated';
 import * as React from 'react';
 import {EditModal, EditModalProps, EditModalState} from '../edit-modal/component';

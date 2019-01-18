@@ -39,9 +39,9 @@ export const withDynamicPosition = () => WrappedComponent => {
       super(props);
       this.state = {
         dimensions: {
-          element: { width: 0, height: 0 },
-          target: { top: 0, bottom: 0, left: 0, right: 0 },
-          viewport: { width: 0, height: 0 }
+          element: {width: 0, height: 0},
+          target: {top: 0, bottom: 0, left: 0, right: 0},
+          viewport: {width: 0, height: 0}
         }
       };
       this.element = React.createRef();
@@ -56,14 +56,14 @@ export const withDynamicPosition = () => WrappedComponent => {
     }
 
     reposition() {
-      const { target } = this.props;
-      const { dimensions } = this.state;
+      const {target} = this.props;
+      const {dimensions} = this.state;
       this.animation = requestAnimationFrame(() => this.reposition());
       const newDimensions = {
         element: fp.pick(['width', 'height'], this.element.current.getBoundingClientRect()),
         target: fp.pick(['top', 'bottom', 'left', 'right'],
           document.getElementById(target).getBoundingClientRect()),
-        viewport: { width: window.innerWidth, height: window.innerHeight }
+        viewport: {width: window.innerWidth, height: window.innerHeight}
       };
       if (!fp.isEqual(newDimensions, dimensions)) {
         this.setState({dimensions: newDimensions});
@@ -71,7 +71,7 @@ export const withDynamicPosition = () => WrappedComponent => {
     }
 
     render() {
-      const { dimensions } = this.state;
+      const {dimensions} = this.state;
       return <WrappedComponent
         dimensions={dimensions}
         elementRef={this.element}
@@ -82,7 +82,7 @@ export const withDynamicPosition = () => WrappedComponent => {
   return Wrapper;
 };
 
-export const computePopupPosition = ({ side, viewport, target, element, gap }) => {
+export const computePopupPosition = ({side, viewport, target, element, gap}) => {
   const getPosition = s => {
     const left = fp.flow(
       fp.clamp(0, viewport.width - element.width),
@@ -93,10 +93,10 @@ export const computePopupPosition = ({ side, viewport, target, element, gap }) =
       fp.clamp(target.top - element.height + 16, target.bottom - 16)
     )(((target.top + target.bottom) / 2) - (element.height / 2));
     return switchCase(s,
-      ['top', () => ({ top: target.top - element.height - gap, left })],
-      ['bottom', () => ({ top: target.bottom + gap, left })],
-      ['left', () => ({ left: target.left - element.width - gap, top })],
-      ['right', () => ({ left: target.right + gap, top })]
+      ['top', () => ({top: target.top - element.height - gap, left})],
+      ['bottom', () => ({top: target.bottom + gap, left})],
+      ['left', () => ({left: target.left - element.width - gap, top})],
+      ['right', () => ({left: target.right + gap, top})]
     );
   };
   const position = getPosition(side);
@@ -110,10 +110,10 @@ export const computePopupPosition = ({ side, viewport, target, element, gap }) =
   };
   const finalSide = maybeFlip(side);
   const finalPosition = getPosition(finalSide);
-  return { side: finalSide, position: finalPosition };
+  return {side: finalSide, position: finalPosition};
 };
 
-export const PopupPortal = ({ children }) => {
+export const PopupPortal = ({children}) => {
   return createPortal(React.Children.only(children), document.getElementById('popup-root'));
 };
 
@@ -127,7 +127,7 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
   render() {
     const {children, side, elementRef, dimensions: {target, element, viewport}} = this.props;
     const {side: finalSide, position} =
-      computePopupPosition({ side, target, element, viewport, gap: 10 });
+      computePopupPosition({side, target, element, viewport, gap: 10});
     const getNotchPosition = () => {
       const left = fp.clamp(12, element.width - 12,
         (target.left + target.right) / 2 - position.left
@@ -136,10 +136,10 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
         (target.top + target.bottom) / 2 - position.top
       );
       return switchCase(finalSide,
-        ['top', () => ({ bottom: 0, left, transform: 'rotate(180deg)' })],
-        ['bottom', () => ({ top: 0, left })],
-        ['left', () => ({ right: 0, top, transform: 'rotate(90deg)' })],
-        ['right', () => ({ left: 0, top, transform: 'rotate(270deg)' })]
+        ['top', () => ({bottom: 0, left, transform: 'rotate(180deg)'})],
+        ['bottom', () => ({top: 0, left})],
+        ['left', () => ({right: 0, top, transform: 'rotate(90deg)'})],
+        ['right', () => ({left: 0, top, transform: 'rotate(270deg)'})]
       );
     };
     return <PopupPortal>
@@ -152,7 +152,7 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
       >
         {children}
         <svg viewBox='0 0 2 1' style={{...getNotchPosition(), ...styles.notch}}>
-          <path d='M0,1l1,-1l1,1Z' />
+          <path d='M0,1l1,-1l1,1Z'/>
         </svg>
       </div>
     </PopupPortal>;
@@ -166,13 +166,13 @@ export class TooltipTrigger extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { open: false };
+    this.state = {open: false};
     this.id = `tooltip-trigger-${fp.uniqueId('')}`;
   }
 
   render() {
-    const { children, content, ...props } = this.props;
-    const { open } = this.state;
+    const {children, content, ...props} = this.props;
+    const {open} = this.state;
     if (!content) {
       return children;
     }
@@ -190,7 +190,7 @@ export class TooltipTrigger extends React.Component {
           if (child.props.onMouseLeave) {
             child.props.onMouseLeave(...args);
           }
-          this.setState({ open: false });
+          this.setState({open: false});
         }
       })}
       {open && <Tooltip target={this.id} {...props}>{content}</Tooltip>}
@@ -220,14 +220,15 @@ export const Popup = fp.flow(
       },
       onClick
     } = this.props;
-    const { position } = computePopupPosition({ side, target, element, viewport, gap: 10 });
+    const {position} = computePopupPosition({side, target, element, viewport, gap: 10});
     return <PopupPortal>
       <div
         onClick={onClick}
         ref={elementRef}
         style={{
           transform: `translate(${position.left}px, ${position.top}px)`,
-          ...styles.popup} as React.CSSProperties}
+          ...styles.popup
+        } as React.CSSProperties}
       >{children}</div>
     </PopupPortal>;
   }
@@ -244,17 +245,17 @@ export class PopupTrigger extends React.Component {
 
   constructor(props: any) {
     super(props);
-    this.state = { open: false };
+    this.state = {open: false};
     this.id = `popup-trigger-${fp.uniqueId('')}`;
   }
 
   close() {
-    this.setState({ open: false });
+    this.setState({open: false});
   }
 
   render() {
-    const { children, content, closeOnClick, ...props } = this.props;
-    const { open } = this.state;
+    const {children, content, closeOnClick, ...props} = this.props;
+    const {open} = this.state;
     const child = React.Children.only(children);
     return <React.Fragment>
       {React.cloneElement(child, {
@@ -264,15 +265,15 @@ export class PopupTrigger extends React.Component {
           if (child.props.onClick) {
             child.props.onClick(...args);
           }
-          this.setState({ open: !open });
+          this.setState({open: !open});
         }
       })}
       {open && <Popup
-        target={this.id}
-        handleClickOutside={() => this.setState({ open: false })}
-        outsideClickIgnoreClass={this.id}
-        onClick={closeOnClick ? () => this.close() : undefined}
-        {...props}
+          target={this.id}
+          handleClickOutside={() => this.setState({open: false})}
+          outsideClickIgnoreClass={this.id}
+          onClick={closeOnClick ? () => this.close() : undefined}
+          {...props}
       >{content}</Popup>}
     </React.Fragment>;
   }

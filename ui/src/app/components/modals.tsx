@@ -56,10 +56,10 @@ export const Modal = ({width = 450, ...props}) => {
 };
 
 export const ModalTitle = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalTitle, ...style}} />;
+  <div {...props} style={{...styles.modalTitle, ...style}}/>;
 export const ModalBody = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalBody, ...style}} />;
+  <div {...props} style={{...styles.modalBody, ...style}}/>;
 export const ModalFooter = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.modalFooter, ...style}} />;
+  <div {...props} style={{...styles.modalFooter, ...style}}/>;
 export const ModalInput = ({type = 'input', style = {}, ...props}) =>
-  <input {...props} style={{...styles.modalInput, ...styles}} />;
+  <input {...props} style={{...styles.modalInput, ...styles}}/>;
