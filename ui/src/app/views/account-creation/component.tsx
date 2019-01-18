@@ -3,14 +3,9 @@ import * as ReactDOM from 'react-dom';
 
 import * as fp from 'lodash/fp';
 
-import {fullUrl, handleErrors} from 'app/utils/fetch';
-
 import {
-  CreateAccountRequest,
   DataAccessLevel,
-  FetchArgs,
   Profile,
-  ProfileApiFetchParamCreator,
 } from 'generated/fetch/api';
 
 import {
@@ -80,12 +75,10 @@ export class AccountCreation extends
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
-    const {givenName, familyName, username, contactEmail,
-      currentPosition, organization, areaOfResearch} = this.state.profile;
     this.setState({showAllFieldsRequiredError: false});
     const requiredFields =
-      [givenName, familyName, username, contactEmail,
-        currentPosition, organization, areaOfResearch];
+      [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
+        profile.currentPosition, profile.organization, profile.areaOfResearch];
     if (requiredFields.some(isBlank)) {
       this.setState({showAllFieldsRequiredError: true});
       return;
