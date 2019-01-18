@@ -14,18 +14,8 @@ describe('SettingsComponent', () => {
     return mount<SettingsReact, {}, SettingsState>(<SettingsReact/>);
   };
 
-  beforeAll(() => {
-    const popupRoot = document.createElement('div');
-    popupRoot.setAttribute('id', 'popup-root');
-    document.body.appendChild(popupRoot);
-  });
-
   beforeEach(() => {
     registerApiClient(ClusterApi, new ClusterApiStub());
-  });
-
-  afterAll(() => {
-    document.removeChild(document.getElementById('popup-root'));
   });
 
   it('should not open the cluster reset modal when no cluster', () => {

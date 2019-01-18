@@ -21,8 +21,7 @@
 /common-api/src/generated
 /ui/package-lock.json
 /ui/coverage
-/ui/**/*.js
-/ui/**/*.map
+g/ui/**/*.map
 /ui/dist/**
 /ui/sa-key.json
 /ui/yarn-error.log
