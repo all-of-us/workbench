@@ -655,20 +655,20 @@ end
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
   :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
+Generates big query denormalized tables for search and review. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
 })
 
-def generate_criteria_table(*args)
+def make_bq_denormalized_review(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
+  common.run_inline %W{docker-compose run db-make-bq-denormalized-review} + args
 end
 
 Common.register_command({
-  :invocation => "generate-criteria-table",
-  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
-  :fn => ->(*args) { generate_criteria_table(*args) }
+  :invocation => "make-bq-denormalized-review",
+  :description => "make-bq-denormalized-review --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_review(*args) }
 })
 
 def make_bq_denormalized_search(*args)
@@ -681,6 +681,18 @@ Common.register_command({
   :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_search(*args) }
+})
+
+def generate_criteria_table(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
+end
+
+Common.register_command({
+  :invocation => "generate-criteria-table",
+  :description => "generate-criteria-table --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { generate_criteria_table(*args) }
 })
 
 def generate_private_cdr_counts(*args)
