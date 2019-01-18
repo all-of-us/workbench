@@ -153,7 +153,7 @@ describe('WorkspaceListComponent', () => {
     expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
     expect(workspaceListPage.fixture.componentInstance.resource)
       .toEqual(firstWorkspace);
-    simulateClickReact(workspaceListPage.fixture, '#confirm-delete');
+    simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
     expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
     const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
     expect(numNewWorkspaces).toEqual(numWorkspaces - 1);

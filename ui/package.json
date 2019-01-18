@@ -79,6 +79,7 @@
     "dom-to-image": "^2.6.0",
     "enhanced-resolve": "3.3.0",
     "highcharts": "^6.2.0",
+    "highcharts-react-official": "^2.0.0",
     "immutable": "^4.0.0-rc.9",
     "lodash": "^4.17.11",
     "moment": "^2.20.1",

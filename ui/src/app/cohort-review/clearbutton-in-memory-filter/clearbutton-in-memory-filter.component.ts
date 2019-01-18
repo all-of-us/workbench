@@ -5,6 +5,8 @@ import {Subject} from 'rxjs/Subject';
 import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
 
+import {decamelize} from 'app/utils';
+
 
 @Component({
   selector: 'app-clearbutton-in-memory-filter',
@@ -49,6 +51,10 @@ export class ClearButtonInMemoryFilterComponent
 
   get isDisabled(): boolean {
     return !this.selection.value;
+  }
+
+  formattedLabel(): string {
+    return decamelize(this.property, ' ');
   }
 
   ngOnDestroy() {
