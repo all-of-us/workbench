@@ -18,9 +18,15 @@ if [[ ! -d ~/workbench/.git ]]; then
   sudo chown -R circleci ~/workbench
 fi
 cd ~/workbench
-git fetch
+
+# Get all tags; by default only tags from active remote branches are fetched.
+# In the case of a cherry pick, the original branch may not exist or may have
+# already been deleted.
+git fetch --tags
+
 # Drop any untracked/ignored files which may have carried over, to ensure a clean build.
 git clean -fdx
+
 git checkout "${WORKBENCH_VERSION}"
 git submodule update --init --recursive
 git status

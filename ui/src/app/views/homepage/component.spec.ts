@@ -29,7 +29,7 @@ import {HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent, QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
 import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
@@ -60,6 +60,7 @@ describe('HomepageComponent', () => {
         RightScrollLightComponent,
         ResourceCardComponent,
         ScrollComponent,
+        ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         EditModalComponent,

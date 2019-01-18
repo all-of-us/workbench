@@ -12,7 +12,7 @@ import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 
@@ -32,7 +32,7 @@ import {
   setupModals,
   simulateClick,
   simulateClickReact,
-  simulateInput,
+  simulateInputReact,
   updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
@@ -79,6 +79,7 @@ describe('ConceptSetListComponent', () => {
         EditModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent,
       ],
@@ -117,12 +118,12 @@ describe('ConceptSetListComponent', () => {
 
   it('displays correct information when concept set renamed', fakeAsync(() => {
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     tick();
-    simulateClick(fixture, de.query(By.css('.pencil')));
+    simulateClickReact(fixture, '[data-test-id="pencil"]');
     updateAndTick(fixture);
-    simulateInput(fixture, de.query(By.css('.name-input')), 'testMockConcept');
-    simulateClick(fixture, de.query(By.css('.btn-save')));
+    simulateInputReact(fixture, '[data-test-id="edit-name"]', 'testMockConcept');
+    simulateClickReact(fixture, '[data-test-id="save-edit"]');
     tick();
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
@@ -131,10 +132,10 @@ describe('ConceptSetListComponent', () => {
 
   it('displays correct information when concept set deleted', fakeAsync(() => {
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
-    simulateClick(fixture, de.query(By.css('.trash')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
+    simulateClickReact(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     updateAndTick(fixture);
     const conceptCards = de.queryAll(By.css('.item-card'));
     expect(conceptCards.length).toBe(2);

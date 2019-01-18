@@ -31,7 +31,6 @@ export class ConceptSetDetailsComponent {
   conceptSet: ConceptSet;
 
   editing = false;
-  editHover = false;
   editSubmitting = false;
   editName: string;
   editDescription: string;
