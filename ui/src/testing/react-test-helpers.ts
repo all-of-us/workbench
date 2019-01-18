@@ -5,5 +5,4 @@ import {ReactWrapper} from 'enzyme';
 // is no zone, regardless of whether the imports are used.
 export async function completeApiCall(wrapper: ReactWrapper) {
   await new Promise(setImmediate).then(() => wrapper.update());
-  await new Promise(setImmediate).then(() => wrapper.update());
 }

@@ -21,19 +21,15 @@ export class ClusterApiStub extends ClusterApi {
 
   listClusters(extraHttpRequestParams?: any): Promise<ClusterListResponse> {
     return new Promise<ClusterListResponse>(resolve => {
-      setTimeout(() => {
-        resolve({defaultCluster: this.cluster});
-      }, 0);
+      resolve({defaultCluster: this.cluster});
     });
   }
 
   deleteCluster(projectName: string, clusterName: string,
                 extraHttpRequestParams?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
-      setTimeout(() => {
-        this.cluster.status = ClusterStatus.Deleting;
-        resolve({});
-      }, 0);
+      this.cluster.status = ClusterStatus.Deleting;
+      resolve({});
     });
   }
 }
