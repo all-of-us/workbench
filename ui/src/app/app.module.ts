@@ -20,8 +20,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AccountCreationSuccessComponent} from './views/account-creation-success/component';
-import {AccountCreationComponent} from './views/account-creation/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -39,8 +37,6 @@ import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
-import {InvitationKeyComponent} from './views/invitation-key/component';
-import {LoginComponent} from './views/login/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
@@ -52,6 +48,7 @@ import {RenameModalComponent} from './views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
+import {SignInComponent} from './views/sign-in/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
@@ -135,8 +132,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
-    AccountCreationComponent,
-    AccountCreationSuccessComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
@@ -153,8 +148,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     EditModalComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
-    InvitationKeyComponent,
-    LoginComponent,
     NewNotebookModalComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
@@ -168,6 +161,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     RoutingSpinnerComponent,
     SettingsComponent,
     SignedInComponent,
+    SignInComponent,
     SlidingFabComponent,
     StigmatizationPageComponent,
     ToolTipComponent,
