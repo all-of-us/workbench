@@ -2,18 +2,18 @@ import {Component, Input} from '@angular/core';
 import {ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
-import {LeftScrollReact} from "../left-scroll/component";
-import {LeftScrollLightReact} from "../left-scroll-light/component";
+import {LeftScrollLightReact} from '../left-scroll-light/component';
+import {LeftScrollReact} from '../left-scroll/component';
 
 interface ScrollProps {
-  direction: string
+  direction: string;
 }
 
 export const ScrollReact: React.FunctionComponent<{direction: string}> = ({direction}) => {
      return  <div>
        {
          (() => {
-           switch(direction) {
+           switch (direction) {
              case 'left':
                return <LeftScrollReact/>;
              case 'leftLight':
@@ -30,7 +30,7 @@ export const ScrollReact: React.FunctionComponent<{direction: string}> = ({direc
   template: '<div #root></div>'
 })
 export class ScrollComponent extends ReactWrapperBase {
-  @Input('direction') direction:ScrollProps['direction'];
+  @Input('direction') direction: ScrollProps['direction'];
 
   constructor() {
     super(ScrollReact, ['direction']);
