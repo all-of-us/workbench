@@ -82,7 +82,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
                   domainId: 'ppi',
                   conceptCode: '',
                   countValue: a.countValue,
-                  prevalence: 0.00,
+                  prevalence: a.prevalence,
                   subQuestionCount: 0,
                   countAnalysis: this.makeAnalysis(q.countAnalysis),
                   genderAnalysis: this.makeAnalysis(q.genderAnalysis),
