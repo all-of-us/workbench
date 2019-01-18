@@ -5,8 +5,6 @@ import {FormInput} from 'app/components/inputs';
 
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
-import {InvitationVerificationRequest} from 'generated/fetch/api';
-
 import * as React from 'react';
 
 function isBlank(s: string) {
@@ -54,24 +52,19 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       return;
     }
 
-    const request: InvitationVerificationRequest = {
-      invitationKey: this.state.invitationKey
-    };
-
-    profileApi().invitationKeyVerification(request)
+    profileApi()
+      .invitationKeyVerification({invitationKey: this.state.invitationKey})
       .then(response => {
-        if (response.status === 400 ) {
-          this.setState({
-            invitationKeyInvalid: true
-          });
-          if (input) {
-            input.focus();
-          }
-        } else {
-          this.props.onInvitationKeyVerify(this.state.invitationKey);
-          return;
-        }})
-      .catch(error => console.log(error));
+        this.props.onInvitationKeyVerify(this.state.invitationKey);
+       })
+      .catch(error => {
+        this.setState({
+          invitationKeyInvalid: true
+        });
+        if (input) {
+          input.focus();
+        }
+      });
   }
 
   render() {
