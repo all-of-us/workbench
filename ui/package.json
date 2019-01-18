@@ -26,6 +26,7 @@
       "./test-shim.js",
       "./test-setup.js"
     ],
+    "setupTestFrameworkScriptFile": "./test-setup-script.js",
     "moduleFileExtensions": [
       "ts",
       "tsx",
