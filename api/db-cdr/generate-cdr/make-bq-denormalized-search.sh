@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This generates big query denormalized tables.
+# This generates big query denormalized tables for search.
 
 set -xeuo pipefail
 IFS=$'\n\t'
@@ -43,21 +43,6 @@ then
   exit 1
 fi
 if [[ $datasets =~ .*$BQ_DATASET.* ]]; then
-  echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
-else
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-
-# Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls)
-if [ -z "$datasets" ]
-then
-  echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
-  exit 1
-fi
-re=\\b$BQ_DATASET\\b
-if [[ $datasets =~ $re ]]; then
   echo "$BQ_PROJECT.$BQ_DATASET exists. Good. Carrying on."
 else
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."

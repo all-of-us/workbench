@@ -115,6 +115,7 @@ services:
       command: wait-for db:3306 -- ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public --run-list data --context local
       env_file:
         - db-cdr/vars.env
+
   db-make-bq-denormalized-tables:
       depends_on:
         - db
@@ -129,6 +130,25 @@ services:
         - ~/.gsutil:/.gsutil:cached
 
       entrypoint: ["./generate-cdr/make-bq-denormalized-tables.sh"]
+      environment:
+        - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
+      env_file:
+        - db-cdr/vars.env
+
+  db-make-bq-denormalized-review:
+      depends_on:
+        - db
+      build:
+        context: ./src/dev/server
+      user: ${UID}
+      working_dir: /w/db-cdr
+      volumes:
+        - gradle-cache:/.gradle
+        - .:/w:cached
+        - ~/.config:/.config:cached
+        - ~/.gsutil:/.gsutil:cached
+
+      entrypoint: ["./generate-cdr/make-bq-denormalized-review.sh"]
       environment:
         - GOOGLE_APPLICATION_CREDENTIALS=/w/sa-key.json
       env_file:
