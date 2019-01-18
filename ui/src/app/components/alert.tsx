@@ -26,6 +26,6 @@ export const styles = reactStyles({
 });
 
 export const Alert = ({style = {}, ...props}) =>
-    <div {...props} style={{...styles.alert, ...style}} />;
+  <div {...props} style={{...styles.alert, ...style}}/>;
 export const AlertDanger = ({style = {}, ...props}) =>
-    <div {...props} style={{...styles.alert, ...styles.danger, ...style}}  />;
+  <Alert {...props} style={{...styles.danger, ...style}}/>;
