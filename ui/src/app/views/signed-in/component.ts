@@ -43,6 +43,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
   sidenavToggle = false;
   publicUiUrl = environment.publicUiUrl;
   minimizeChrome = false;
+  // True if the user tried to open the Zendesk support widget and an error
+  // occurred.
+  zendeskLoadError = false;
   billingProjectInitialized = false;
   billingProjectQuery: NodeJS.Timer;
   private profileLoadingSub: Subscription;
@@ -216,7 +219,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
       // help icon, which is the starting state).
       window['zE']('webWidget', 'open');
     } else {
-      // TODO(gjuggler): show an error message to the user.
+      // Show an error message to the user, asking them to reload or contact
+      // support via email.
+      this.zendeskLoadError = true;
     }
   }
 

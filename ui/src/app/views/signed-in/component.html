@@ -31,6 +31,18 @@
   </div>
 </div>
 
+<clr-alert
+    *ngIf="zendeskLoadError"
+    [clrAlertType]="'alert-danger'"
+    [clrAlertAppLevel]="true"
+    [clrAlertClosable]="true">
+  <div clr-alert-item class="alert-item">
+    An error occurred loading the help desk submission form. Please reload the page, or email
+    &nbsp;<a href="mailto:support@aousupporthelp.zendesk.com">support@aousupporthelp.zendesk.com</a>
+    &nbsp;directly with your support request.
+  </div>
+</clr-alert>
+
 <div class="content-container">
   <div class="background-image"></div>
   <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
