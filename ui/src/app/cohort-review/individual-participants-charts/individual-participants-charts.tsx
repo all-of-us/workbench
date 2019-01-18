@@ -207,8 +207,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
 
 @Component({
   selector: 'app-individual-participants-charts',
-  template: `
-      <div class="react-chart chart-container"></div>`,
+  template: `<div class="react-chart chart-container"></div>`,
   styleUrls: ['./individual-participants-charts.css']
 })
 export class IndividualParticipantsChartsComponent implements OnChanges, OnInit {
