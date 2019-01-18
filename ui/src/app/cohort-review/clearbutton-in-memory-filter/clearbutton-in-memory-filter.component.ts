@@ -4,6 +4,7 @@ import {ClrDatagridFilterInterface} from '@clr/angular';
 import {Subject} from 'rxjs/Subject';
 import {Subscription} from 'rxjs/Subscription';
 import {Participant} from '../participant.model';
+import {decamelize} from 'app/utils';
 
 
 @Component({
@@ -49,6 +50,10 @@ export class ClearButtonInMemoryFilterComponent
 
   get isDisabled(): boolean {
     return !this.selection.value;
+  }
+
+  formatLabel(): string {
+    return decamelize(this.property, ' ');
   }
 
   ngOnDestroy() {

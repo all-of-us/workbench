@@ -13,7 +13,7 @@ import {ReviewStateService} from '../review-state.service';
 const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
-  displayName: 'Start Date',
+  displayName: 'Date',
 };
 const endDate = {
   name: 'endDate',
