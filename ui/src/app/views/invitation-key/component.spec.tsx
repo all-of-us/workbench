@@ -4,9 +4,11 @@ import * as React from 'react';
 import InvitationKeyReact, {InvitationKeyProps} from './component';
 
 import {AlertDanger} from 'app/components/alert';
-
 import {Button} from 'app/components/buttons';
 import {FormInput} from 'app/components/inputs';
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {ProfileApi} from 'generated/fetch';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 describe('InvitationKeyComponent', () => {
   let props: InvitationKeyProps;
@@ -20,6 +22,7 @@ describe('InvitationKeyComponent', () => {
 
   beforeEach(() => {
     props = {onInvitationKeyVerify: onInvitationVerify};
+    registerApiClient(ProfileApi, new ProfileApiStub());
     onInvitationVerify.mockClear();
   });
 
@@ -31,26 +34,33 @@ describe('InvitationKeyComponent', () => {
     expect(error.text()).toBe('Invitation Key is required.');
   });
 
-  it('should display error message if Invitation key is not valid', async() => {
-    window.fetch = jest.fn().mockImplementation(() =>
-        Promise.resolve({status: 400}));
+  it('should display error message if Invitation key is not valid', () => {
+    profileApi().invitationKeyVerification = jest.fn().mockRejectedValue(() => {
+          throw new Error('test error inside');
+    });
 
     const wrapper = component();
     const input = wrapper.find(FormInput);
     const nextButton = wrapper.find(Button);
 
     input.simulate('change', {target: {value: 'notValid '}});
-
-    await nextButton.simulate('click');
+    nextButton.simulate('click');
     wrapper.update();
-    const error = wrapper.find(AlertDanger);
-    expect(error.text()).toBe('Invitation Key is not Valid.');
+
+    setTimeout(() => {
+      const error = wrapper.find(AlertDanger);
+      expect(error.text()).toBe('Invitation Key is not Valid.');
+    },100);
+
+
   });
 
   it('should call props onInvitationKeyVerify function on entering correct invitation key',
       async() => {
-        window.fetch = jest.fn().mockImplementation(() =>
-            Promise.resolve({status: 200}));
+        profileApi()
+            .invitationKeyVerification = jest.fn()
+            .mockReturnValue(Promise.resolve('result1'));
+
 
         const wrapper = component();
         const input = wrapper.find(FormInput);
