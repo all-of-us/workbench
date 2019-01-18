@@ -79,7 +79,6 @@ describe('SearchGroupItemComponent', () => {
     // Default Inputs for tests
     comp.role = 'includes';
     comp.groupId = 'include0';
-    comp.itemIndex = 0;
 
     comp.itemId = 'item001';
 
