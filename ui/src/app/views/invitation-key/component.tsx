@@ -3,7 +3,7 @@ import {Button} from 'app/components/buttons';
 import {BoldHeader} from 'app/components/headers';
 import {FormInput} from 'app/components/inputs';
 
-import {profileApi} from "app/services/swagger-fetch-clients";
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {InvitationVerificationRequest} from 'generated/fetch/api';
 
