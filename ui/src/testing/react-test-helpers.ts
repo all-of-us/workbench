@@ -6,6 +6,6 @@ import {ReactWrapper} from 'enzyme';
 //   import {ComponentFixture, tick} from '@angular/core/testing';
 // And fails with:
 //   ReferenceError: Zone is not defined
-export async function completeApiCall(wrapper: ReactWrapper) {
+export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
   await new Promise(setImmediate).then(() => wrapper.update());
 }
