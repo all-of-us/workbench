@@ -2,7 +2,7 @@ import {Injectable, NgZone} from '@angular/core';
 import {Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
-import {ErrorCode, ErrorResponse} from 'generated';
+import {ErrorCode} from 'generated';
 
 @Injectable()
 export class ErrorHandlingService {
@@ -23,7 +23,7 @@ export class ErrorHandlingService {
   }
 
   // convert error response from API JSON to ErrorResponse object, otherwise, report parse error
-  public static convertAPIError (e: Response) {
+  public static convertAPIError(e: Response) {
     try {
       const { errorClassName = null,
         errorCode = null,
@@ -68,7 +68,7 @@ export class ErrorHandlingService {
   }
 
   // don't retry API calls unless the status code is 503.
-  public retryApi (observable: Observable<any>, toRun = 3): Observable<any> {
+  public retryApi(observable: Observable<any>, toRun = 3): Observable<any> {
     let numberRuns = 0;
 
     return observable.retryWhen(errors => {

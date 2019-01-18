@@ -20,7 +20,6 @@ import {
   ConceptSet,
   ConceptSetsService,
   Domain,
-  StandardConceptFilter,
   WorkspaceAccessLevel,
 } from 'generated';
 

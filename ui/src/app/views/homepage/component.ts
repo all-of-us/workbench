@@ -1,14 +1,11 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {hasRegisteredAccess} from 'app/utils';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
-import {RecentWorkComponent} from 'app/views/recent-work/component';
 
 import {
   BillingProjectStatus,
-  DataAccessLevel,
   IdVerificationStatus,
   PageVisit,
   Profile,

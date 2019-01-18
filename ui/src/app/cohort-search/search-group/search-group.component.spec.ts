@@ -8,7 +8,6 @@ import {NgxPopperModule} from 'ngx-popper';
 
 import {
   CohortSearchActions,
-  CohortSearchState,
   OPEN_WIZARD,
   openWizard,
   REMOVE_GROUP,

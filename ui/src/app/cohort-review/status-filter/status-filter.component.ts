@@ -4,7 +4,6 @@ import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filt
 import {Participant} from '../participant.model';
 
 import {CohortStatus, ParticipantCohortStatusColumns} from 'generated';
-import {WorkspaceAccessLevel} from '../../../generated';
 
 @Component({
   selector: 'app-status-filter',

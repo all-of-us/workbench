@@ -30,7 +30,6 @@ import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
-  simulateClick,
   simulateClickReact,
   simulateInputReact,
   updateAndTick} from 'testing/test-helpers';

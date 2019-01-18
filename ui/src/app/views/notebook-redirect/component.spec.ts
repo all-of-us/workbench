@@ -1,5 +1,5 @@
 import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {Response, ResponseOptions} from '@angular/http';
+import {Response} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, convertToParamMap} from '@angular/router';
@@ -22,7 +22,6 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {
   ClusterLocalizeRequest,
-  ClusterLocalizeResponse,
   ClusterService,
   ClusterStatus
 } from 'generated';

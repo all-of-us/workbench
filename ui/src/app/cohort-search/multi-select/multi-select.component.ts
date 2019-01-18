@@ -4,7 +4,7 @@ import {FormControl} from '@angular/forms';
 import {TreeType} from 'generated';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {activeParameterList, CohortSearchActions, CohortSearchState, isParameterActive} from '../redux';
+import {activeParameterList, CohortSearchActions, CohortSearchState} from '../redux';
 
 
 @Component({

@@ -63,7 +63,6 @@ import {WorkspaceComponent} from './views/workspace/component';
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
 import {CohortCommonModule} from './cohort-common/module';
-import {EditComponent} from './icons/edit/component';
 import {IconsModule} from './icons/icons.module';
 import {FetchModule} from './services/fetch.module';
 
@@ -146,7 +145,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptTableComponent,
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
-    EditComponent,
     EditModalComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,

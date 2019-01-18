@@ -15,7 +15,6 @@ import {
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 
 import {
-  Cohort,
   RecentResource,
 } from 'generated';
 

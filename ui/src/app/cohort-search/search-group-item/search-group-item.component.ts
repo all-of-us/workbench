@@ -1,25 +1,13 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+
+import {SearchRequest, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  getItem,
-  itemError,
-  parameterList
-} from '../redux';
+import {CohortSearchActions, CohortSearchState, getItem, itemError, parameterList} from '../redux';
 
-import {
-  attributeDisplay,
-  getCodeOptions,
-  nameDisplay,
-  typeDisplay,
-  typeToTitle,
-} from '../utils';
-
-import {SearchRequest, TreeType} from 'generated';
+import {attributeDisplay, getCodeOptions, nameDisplay, typeDisplay, typeToTitle, } from '../utils';
 
 @Component({
   selector: 'app-search-group-item',

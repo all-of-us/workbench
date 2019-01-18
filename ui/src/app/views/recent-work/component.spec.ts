@@ -22,7 +22,6 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
   simulateClick,
-  simulateClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 

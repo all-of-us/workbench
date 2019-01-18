@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {User, UserResponse, WorkspaceAccessLevel} from '../../generated';
+import {User, UserResponse} from '../../generated';
 
 @Injectable()
 export class UserServiceStub {

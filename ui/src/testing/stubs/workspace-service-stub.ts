@@ -164,7 +164,7 @@ export class WorkspacesServiceStub {
   deleteWorkspace(workspaceNamespace: string, workspaceId: string): Observable<EmptyResponse> {
     return new Observable<EmptyResponse>(observer => {
       setTimeout(() => {
-        const deletionIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const deletionIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -183,7 +183,7 @@ export class WorkspacesServiceStub {
   getWorkspace(workspaceNamespace: string, workspaceId: string): Observable<WorkspaceResponse> {
     return new Observable<WorkspaceResponse>(observer => {
       setTimeout(() => {
-        const workspaceReceived = this.workspaces.find(function(workspace: Workspace) {
+        const workspaceReceived = this.workspaces.find((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -235,7 +235,7 @@ export class WorkspacesServiceStub {
                   newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
-        const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }
@@ -281,7 +281,7 @@ export class WorkspacesServiceStub {
                  request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
     return new Observable<ShareWorkspaceResponse>(observer => {
       setTimeout(() => {
-        const updateIndex = this.workspaces.findIndex(function(workspace: Workspace) {
+        const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
           if (workspace.id === workspaceId) {
             return true;
           }

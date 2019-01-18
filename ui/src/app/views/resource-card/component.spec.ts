@@ -9,7 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';

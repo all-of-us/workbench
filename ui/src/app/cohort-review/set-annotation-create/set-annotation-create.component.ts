@@ -8,7 +8,6 @@ import {
   AnnotationType,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
-  ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
 
 @Component({

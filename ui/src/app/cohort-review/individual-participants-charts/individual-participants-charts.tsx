@@ -98,7 +98,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
           text: 'Entry Date',
         },
         labels: {
-          formatter: function () {
+          formatter: function() {
             return moment.unix(this.value).format('YYYY');
           },
         },
@@ -112,7 +112,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
           text: header,
         },
         labels: {
-          formatter: function () {
+          formatter: function() {
             return names[this.value];
           }
         },

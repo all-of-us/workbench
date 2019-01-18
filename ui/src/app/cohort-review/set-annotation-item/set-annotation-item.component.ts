@@ -1,10 +1,8 @@
 import {
     Component,
-    ElementRef,
     EventEmitter,
     Input,
     NgZone,
-    OnInit,
     Output,
     ViewChild
 } from '@angular/core';

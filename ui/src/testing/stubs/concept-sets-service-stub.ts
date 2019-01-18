@@ -1,4 +1,3 @@
-import {Response, ResponseOptions} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
 import {ConceptsServiceStub} from './concepts-service-stub';

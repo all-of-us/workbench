@@ -13,9 +13,7 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
-  simulateClick,
   simulateClickReact,
-  simulateInput,
   simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
@@ -30,7 +28,6 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
-  Cohort,
   CohortsService,
   ConceptSetsService,
   RecentResource,
