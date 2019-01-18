@@ -88,12 +88,14 @@ public class TemporalQueryBuilder {
       }
     }
     String conditions = SAME_ENC;
+    String parameterName = "p" + params.size();
+    params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
     if (includeGroup.getTime().equals(TemporalTime.WITHIN_X_DAYS_OF.name())) {
-      conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", includeGroup.getTimeValue().toString());
+      conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", "@" + parameterName);
     } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_BEFORE.name())) {
-      conditions = X_DAYS_BEFORE.replace("${timeValue}", includeGroup.getTimeValue().toString());
+      conditions = X_DAYS_BEFORE.replace("${timeValue}", "@" + parameterName);
     } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.name())) {
-      conditions = X_DAYS_AFTER.replace("${timeValue}", includeGroup.getTimeValue().toString());
+      conditions = X_DAYS_AFTER.replace("${timeValue}", "@" + parameterName);
     }
     return (temporalQueryParts2.size() == 1 ?
       TEMPORAL_EXIST_TEMPLATE : TEMPORAL_JOIN_TEMPLATE)
