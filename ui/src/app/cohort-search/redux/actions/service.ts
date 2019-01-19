@@ -91,6 +91,7 @@ export class CohortSearchActions {
   @dispatch() _enableGroupItem = ActionFuncs.enableGroupItem;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
+  @dispatch() setTimeoutId = ActionFuncs.setTimeoutId;
   @dispatch() requestAttributes = ActionFuncs.requestAttributes;
   @dispatch() loadAttributes = ActionFuncs.loadAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;

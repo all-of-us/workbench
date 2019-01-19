@@ -54,6 +54,7 @@ export const ENABLE_ITEM = 'ENABLE_ITEM';
 export const ENABLE_GROUP = 'ENABLE_GROUP';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
+export const SET_ENTITY_TIMEOUT = 'SET_ENTITY_TIMEOUT';
 export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
 export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 
@@ -330,7 +331,7 @@ export interface ActionTypes {
   ENABLE_ITEM: {
     type: typeof ENABLE_ITEM;
     itemId: string;
-    groupId: string
+    groupId: string;
   };
   ENABLE_GROUP: {
     type: typeof ENABLE_GROUP;
@@ -339,12 +340,18 @@ export interface ActionTypes {
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
     itemId: string;
-    groupId: string
+    groupId: string;
   };
   REMOVE_GROUP: {
     type: typeof REMOVE_GROUP;
     groupId: string;
     role: keyof SearchRequest;
+  };
+  SET_ENTITY_TIMEOUT: {
+    type: typeof SET_ENTITY_TIMEOUT;
+    entity: string;
+    entityId: string;
+    timeoutId: number;
   };
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
@@ -436,6 +443,7 @@ export type RootAction =
   | ActionTypes[typeof ENABLE_GROUP]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
+  | ActionTypes[typeof SET_ENTITY_TIMEOUT]
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
