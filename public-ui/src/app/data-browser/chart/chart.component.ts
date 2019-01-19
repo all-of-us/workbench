@@ -101,7 +101,7 @@ export class ChartComponent implements OnChanges {
             style: this.isGenderIdentityAnalysis()
                 ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
             distance: this.isGenderIdentityAnalysis() ? 3 : -30,
-            formatter: () => {
+            formatter: function() {
               if (this.percentage < 1) {
                 return this.point.name + ' ' + Number(this.percentage).toFixed(1) + '%';
               }
