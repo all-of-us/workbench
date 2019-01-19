@@ -69,6 +69,7 @@ import {
   ENABLE_GROUP,
   REMOVE_ITEM,
   REMOVE_GROUP,
+  SET_ENTITY_TIMEOUT,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -462,6 +463,13 @@ export const rootReducer: Reducer<CohortSearchState> =
           selections: {},
           ...action.context
         }));
+
+      case SET_ENTITY_TIMEOUT: {
+        return state.setIn(
+          ['entities', action.entity, action.entityId, 'timeoutId'],
+          action.timeoutId
+        );
+      }
 
       case REOPEN_WIZARD:
         const selections = state.getIn(['entities', 'parameters'], Map()).filter(

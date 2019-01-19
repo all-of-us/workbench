@@ -22,7 +22,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
 
   error: boolean;
-  undoTimer: any;
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
   timeDropDown = ['During same encounter as',
@@ -65,9 +64,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   remove() {
     this.hide('pending');
-    this.undoTimer = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       this.actions.removeGroup(this.role, this.groupId);
     }, 3000);
+    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
+    // have to keep in the redux store
+    console.log(timeoutId);
+    this.actions.setTimeoutId('groups', this.groupId, timeoutId);
   }
 
   hide(status: string) {
@@ -80,11 +83,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    // For some reason Angular clears the timeout id from 'this' when the inputs change, so we'll
-    // basically clear by brute-force until we can find a better solution
-    for (let i = 1; i < 99999; i++) {
-      clearTimeout(i);
-    }
+    console.log(this.group.toJS());
+    clearTimeout(this.group.get('timeoutId'));
     this.enable();
   }
 

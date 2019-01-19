@@ -20,7 +20,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() itemId: string;
 
   error: boolean;
-  undoTimer: any;
   private item: Map<any, any> = Map();
   private rawCodes: List<any> = List();
   private subscription: Subscription;
@@ -86,9 +85,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   remove() {
     this.hide('pending');
-    this.undoTimer = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
-    }, 3000);
+    }, 10000);
+    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
+    // have to keep in the redux store
+    this.actions.setTimeoutId('items', this.itemId, timeoutId);
   }
 
   hide(status: string) {
@@ -100,11 +102,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    // For some reason Angular clears the timeout id from 'this' when the inputs change, so we'll
-    // basically clear by brute-force until we can find a better solution
-    for (let i = 1; i < 99999; i++) {
-      clearTimeout(i);
-    }
+    console.log(this.item.toJS());
+    clearTimeout(this.item.get('timeoutId'));
     this.enable();
   }
 
