@@ -114,7 +114,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    console.log(this.item.toJS());
     clearTimeout(this.item.get('timeoutId'));
     this.enable();
   }

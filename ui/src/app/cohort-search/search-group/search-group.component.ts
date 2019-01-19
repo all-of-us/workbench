@@ -69,7 +69,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     }, 3000);
     // For some reason Angular will delete the timeout id from scope if the inputs change, so we
     // have to keep in the redux store
-    console.log(timeoutId);
     this.actions.setTimeoutId('groups', this.groupId, timeoutId);
   }
 
@@ -83,7 +82,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    console.log(this.group.toJS());
     clearTimeout(this.group.get('timeoutId'));
     this.enable();
   }

@@ -87,8 +87,7 @@ export class CohortSearchActions {
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
   @dispatch() hideGroup = ActionFuncs.hideGroup;
   @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
-  @dispatch() _enableGroup = ActionFuncs.enableGroup;
-  @dispatch() _enableGroupItem = ActionFuncs.enableGroupItem;
+  @dispatch() enableEntity = ActionFuncs.enableEntity;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
   @dispatch() setTimeoutId = ActionFuncs.setTimeoutId;
@@ -252,14 +251,14 @@ export class CohortSearchActions {
 
   enableGroup(group: any) {
     const groupId = group.get('id');
-    this._enableGroup(groupId);
+    this.enableEntity('groups', groupId);
     if (this.hasActiveItems(group)) {
       this.requestTotalCount();
     }
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
-    this._enableGroupItem(groupId, itemId);
+    this.enableEntity('items', itemId);
     this.requestGroupCount(role, groupId);
     this.requestTotalCount();
   }
