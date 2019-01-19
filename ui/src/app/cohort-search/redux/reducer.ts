@@ -65,8 +65,7 @@ import {
   CLEAR_WIZARD_FOCUS,
   HIDE_ITEM,
   HIDE_GROUP,
-  ENABLE_ITEM,
-  ENABLE_GROUP,
+  ENABLE_ENTITY,
   REMOVE_ITEM,
   REMOVE_GROUP,
   SET_ENTITY_TIMEOUT,
@@ -407,12 +406,8 @@ export const rootReducer: Reducer<CohortSearchState> =
       case HIDE_GROUP:
         return state.setIn(['entities', 'groups', action.groupId, 'status'], action.status);
 
-      case ENABLE_ITEM: {
-        return state.setIn(['entities', 'items', action.itemId, 'status'], 'active');
-      }
-
-      case ENABLE_GROUP: {
-        return state.setIn(['entities', 'groups', action.groupId, 'status'], 'active');
+      case ENABLE_ENTITY: {
+        return state.setIn(['entities', action.entity, action.entityId, 'status'], 'active');
       }
 
       case REMOVE_ITEM: {

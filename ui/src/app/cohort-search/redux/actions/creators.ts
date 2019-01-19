@@ -50,8 +50,7 @@ import {
   CLEAR_WIZARD_FOCUS,
   HIDE_ITEM,
   HIDE_GROUP,
-  ENABLE_ITEM,
-  ENABLE_GROUP,
+  ENABLE_ENTITY,
   REMOVE_ITEM,
   REMOVE_GROUP,
   SET_ENTITY_TIMEOUT,
@@ -306,15 +305,10 @@ export const hideGroupItem =
   ): ActionTypes[typeof HIDE_ITEM] =>
     ({type: HIDE_ITEM, groupId, itemId, status});
 
-export const enableGroup =
-  (groupId: string,
-  ): ActionTypes[typeof ENABLE_GROUP] =>
-    ({type: ENABLE_GROUP, groupId});
-
-export const enableGroupItem =
-  (groupId: string, itemId: string
-  ): ActionTypes[typeof ENABLE_ITEM] =>
-    ({type: ENABLE_ITEM, groupId, itemId});
+export const enableEntity =
+  (entity: string, entityId: string,
+  ): ActionTypes[typeof ENABLE_ENTITY] =>
+    ({type: ENABLE_ENTITY, entity, entityId});
 
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string
