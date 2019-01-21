@@ -44,10 +44,10 @@ public class TemporalQueryBuilder {
   private static final String SAME_ENC =
     "temp1.person_id = temp2.person_id and temp1.visit_concept_id = temp2.visit_concept_id\n";
   private static final String X_DAYS_BEFORE =
-    "temp1.person_id = temp2.person_id and temp1.entry_date < DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
+    "temp1.person_id = temp2.person_id and temp1.entry_date <= DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String X_DAYS_AFTER =
     "temp1.person_id = temp2.person_id and temp1." +
-      "entry_date > DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
+      "entry_date >= DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String WITHIN_X_DAYS_OF =
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
       "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
