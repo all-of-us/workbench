@@ -398,7 +398,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             return item.get('id') !== action.itemId && item.get('status') === 'active';
           });
         if (!activeItems.size) {
-          state = state.setIn(['entities', 'groups', action.groupId, 'count'], 0);
+          state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
         }
         return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }

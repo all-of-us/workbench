@@ -158,7 +158,7 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="!envFlag">
+  <div class="card-footer text-right" *ngIf="group.get('count') !== null && !envFlag">
     Group Count:
     <span *ngIf="isRequesting"
           class="spinner spinner-inline"
