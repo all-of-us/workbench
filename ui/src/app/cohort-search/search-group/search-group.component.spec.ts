@@ -154,7 +154,7 @@ describe('SearchGroupComponent', () => {
   });
 
   it('Should render a spinner if requesting', () => {
-    comp.group = group.set('isRequesting', true);
+    comp.group = group.set('isRequesting', true).set('count', 1);
     fixture.detectChanges();
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     expect(spinner).not.toBeNull();
