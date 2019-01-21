@@ -16,7 +16,7 @@
           type="button"
           (click)="hide('hidden')"
           clrDropdownItem>
-          Hide criteria from total count
+          Suppress criteria from total count
         </button>
         <button
           type="button"
@@ -55,14 +55,14 @@
   <div *ngIf="status === 'pending'" class="undo-container">
     <clr-icon shape="exclamation-triangle" class="is-solid" size="23"></clr-icon>
     <span class="undo-text">
-      Your criteria have been deleted
+      This criteria has been deleted
       <button class="btn btn-link" (click)="undo()">UNDO</button>
     </span>
   </div>
   <div *ngIf="status === 'hidden'" class="undo-container">
     <clr-icon shape="eye-hide" class="is-solid" size="23"></clr-icon>
     <span class="undo-text">
-      Your criteria have been suppressed
+      This criteria has been suppressed
       <button class="btn btn-link" (click)="enable()">ENABLE</button>
     </span>
   </div>

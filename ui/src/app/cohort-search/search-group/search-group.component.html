@@ -9,7 +9,7 @@
           type="button"
           (click)="hide('hidden')"
           clrDropdownItem>
-          Hide group from total count
+          Suppress group from total count
         </button>
         <button
           type="button"
@@ -187,14 +187,14 @@
     <ng-container *ngIf="status ==='pending'">
       <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
       <span class="overlay-text">
-        Your group has been deleted
+        This group has been deleted
         <button class="btn btn-link" (click)="undo()">UNDO</button>
       </span>
     </ng-container>
     <ng-container *ngIf="status ==='hidden'">
       <clr-icon shape="eye-hide" class="is-solid" size="56"></clr-icon>
       <span class="overlay-text">
-        Your group has been suppressed
+        This group has been suppressed
         <button class="btn btn-link" (click)="enable()">ENABLE</button>
       </span>
     </ng-container>
