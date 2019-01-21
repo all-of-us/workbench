@@ -759,6 +759,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //matches searchGroupIcd9Child and searchGroupIcd10Child
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
+    //First Mention Of DrugParent 5 Days Before ICD10Child
+    //First temporal group
+    searchGroupDrugParent.temporalGroup(0);
+    //Second temporal group
+    searchGroupIcd10Child.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupDrugParent, searchGroupIcd10Child))
+      .temporal(true)
+      .mention(TemporalMention.FIRST_MENTION.name())
+      .time(TemporalTime.X_DAYS_BEFORE.name())
+      .timeValue(5L);
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupDrugParent and searchGroupIcd10Child
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
     //Any Mention Of (ICD9Parent or Snomed with modifiers) 5 Days before ICD10
     //First temporal group
     searchGroupIcd9Parent.temporalGroup(0);
@@ -769,7 +784,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
       .temporal(true)
       .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.X_DAYS_BEFORE.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
     searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
     //matches searchGroupSnomed and searchGroupIcd10Child

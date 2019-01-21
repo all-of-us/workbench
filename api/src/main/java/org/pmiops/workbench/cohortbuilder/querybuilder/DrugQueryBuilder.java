@@ -65,15 +65,17 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
 
     Long[] parentIds = paramMap.get(PARENT).stream().toArray(Long[]::new);
     Long[] childIds = paramMap.get(CHILD).stream().toArray(Long[]::new);
-    String parentParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(parentIds, Long.class));
-    String childParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(childIds, Long.class));
     if (Arrays.asList(CHILD).containsAll(paramMap.keySet())) {
+      String childParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(childIds, Long.class));
       conceptIdSql.append(CHILD_ONLY_TEMPLATE.replace("${childConceptIds}", "@" + childParameter));
       baseSql.append(conceptIdSql.toString());
     } else if (Arrays.asList(PARENT).containsAll(paramMap.keySet())) {
+      String parentParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(parentIds, Long.class));
       conceptIdSql.append(PARENT_ONLY_TEMPLATE.replace("${parentConceptIds}", "@" + parentParameter));
       baseSql.append(conceptIdSql.toString());
     } else {
+      String childParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(childIds, Long.class));
+      String parentParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(parentIds, Long.class));
       conceptIdSql.append(BOTH_TEMPLATE.replace("${parentConceptIds}", "@" + parentParameter)
         .replace("${childConceptIds}", "@" + childParameter));
       baseSql.append(conceptIdSql.toString());
