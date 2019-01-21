@@ -315,7 +315,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     }
     this.subscription = this.route.data.map(({participant}) => participant)
       .subscribe(participants => {
-        console.log(participants.participantId);
          this.participantsId = participants.participantId;
       });
 
@@ -338,7 +337,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
         loading: true,
         items: []
       };
-      console.log('from 2nd one' + this.participantsId)
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
         this.participantsId , domainName, limit)
         .subscribe(data => {
