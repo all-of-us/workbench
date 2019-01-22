@@ -21,7 +21,8 @@ import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/mode
 export class QuickSearchComponent implements OnInit, OnDestroy {
     pageImage = '/assets/db-images/man-standing.png';
     title = 'Search Across Data Types';
-    subTitle = 'Conduct a search across all AoU Research Program data types, including surveys, ' +
+    subTitle = 'Conduct a search across all All of Us Research Program data types, ' +
+      'including surveys, ' +
       'physical measurements taken at the time of participant enrollment ' +
       ' (“program physical measurements”), ' +
       'and electronic health record (EHR) data. Search using common keywords and/or ' +
