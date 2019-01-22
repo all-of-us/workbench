@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -17,10 +18,13 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
+import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
@@ -43,6 +47,8 @@ public class FireCloudServiceImplTest {
   @Mock
   private GroupsApi endUserGroupsApi;
   @Mock
+  private NihApi nihApi;
+  @Mock
   private StatusApi statusApi;
 
   @Rule
@@ -52,8 +58,8 @@ public class FireCloudServiceImplTest {
   public void setUp() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(endUserGroupsApi), Providers.of(workspacesApi), Providers.of(statusApi),
-        new FirecloudRetryHandler(new NoBackOffPolicy()));
+        Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
+        Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()));
   }
 
   @Test
@@ -118,4 +124,20 @@ public class FireCloudServiceImplTest {
         Lists.newArrayList(new ManagedGroupAccessResponse().groupName("group").role("member")));
     assertThat(service.isUserMemberOfGroup("group")).isTrue();
   }
+
+  @Test
+  public void testNihStatus() throws Exception {
+    NihStatus status = new NihStatus().linkedNihUsername("test").linkExpireTime(500L);
+    when(nihApi.nihStatus()).thenReturn(status);
+    assertThat(service.getNihStatus()).isNotNull();
+    assertThat(service.getNihStatus()).isEqualTo(status);
+  }
+
+  @Test
+  public void testNihCallback() throws Exception {
+    JWTWrapper wrapper = new JWTWrapper().jwt("random");
+    doNothing().when(nihApi).nihCallback(wrapper);
+    service.postNihCallback(wrapper);
+  }
+
 }
