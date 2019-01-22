@@ -233,9 +233,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
   }
-  
   public toggleTopConcepts(domainName) {
-    if (! this.showTopConcepts[domainName] ) {
+    if (!this.showTopConcepts[domainName] ) {
       this.showTopConcepts[domainName] = true;
     } else {
       this.showTopConcepts[domainName] = false;
