@@ -90,9 +90,6 @@ export class DbConfigService {
     'color': 'black', 'font-family': 'Gotham HTF',	'font-size': '14px',
       'font-weight': '300', 'textOutline': 'none'
   };
-  TOP_CONCEPTS_STYLE = {
-    'text-overflow': 'ellipsis', 'font-family': 'Gotham HTF',	'font-size': '14px'
-  };
 
   pmGroups: ConceptGroup[] = [];
   genderAnalysis: Analysis;

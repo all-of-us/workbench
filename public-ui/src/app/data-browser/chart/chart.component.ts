@@ -153,7 +153,6 @@ export class ChartComponent implements OnChanges {
             whiteSpace: 'wrap',
             fontSize: '11px',
           },
-          step: 0,
         },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR
