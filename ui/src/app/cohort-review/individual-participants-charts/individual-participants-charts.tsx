@@ -190,7 +190,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
 
   render() {
      const chartData = this.props.chartData;
-    if (!chartData.loading && chartData) {
+    if (!chartData.loading && chartData.items.length) {
       this.setYaxisValue();
       const ScatterChart = () => <div>
         <HighchartsReact
