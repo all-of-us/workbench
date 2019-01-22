@@ -2,10 +2,8 @@
   <div class="col-header">
     <h2 class="participant-header">{{ title | titlecase }}</h2>
   </div>
-
-  <!-- .size, not .length => this is an immutable.js list -->
-  <div *ngFor="let group of (groups$ | async)">
-    <app-search-group [group]="group" [role]="role">
+  <div *ngFor="let group of (groups$ | async); let i = index;">
+    <app-search-group [group]="group" [index]="i" [role]="role">
     </app-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>

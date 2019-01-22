@@ -18,6 +18,7 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
+  @Input() index;
   @Input() role: keyof SearchRequest;
 
   error: boolean;
@@ -33,10 +34,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   readonly envFlag = environment.enableTemporal;
+  position = 'bottom-left';
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
+    console.log(this.group.toJS());
+    console.log(this.index);
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => this.error = error);
   }
@@ -86,5 +90,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
   getTimeTitle(time) {
     this.timeDropdownOption = time;
+  }
+
+  setMenuPosition() {
+    const id = this.role + this.index + '-button';
+    const dropdown = document.getElementById(id).getBoundingClientRect();
+    this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }
 }
