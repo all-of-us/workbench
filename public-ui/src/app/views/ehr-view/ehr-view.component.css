@@ -16,3 +16,6 @@
 .hand-cursor {
     cursor: pointer;
 }
+.top-concepts-chart {
+    background-size: contain;
+}
