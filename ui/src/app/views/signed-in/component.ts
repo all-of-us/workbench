@@ -222,6 +222,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
       // Show an error message to the user, asking them to reload or contact
       // support via email.
       this.zendeskLoadError = true;
+      console.error('Error loading Zendesk widget');
     }
   }
 
