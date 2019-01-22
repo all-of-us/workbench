@@ -39,8 +39,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
-    console.log(this.group.toJS());
-    console.log(this.index);
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => this.error = error);
   }
