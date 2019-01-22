@@ -4,6 +4,8 @@ import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {CohortSearchActions} from '../redux';
 
 import {SearchRequest} from 'generated';
+import {Simulate} from 'react-dom/test-utils';
+import drop = Simulate.drop;
 
 @Component({
   selector: 'app-search-group-select',
@@ -15,6 +17,7 @@ export class SearchGroupSelectComponent {
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
+  position = 'bottom-left';
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -29,5 +32,10 @@ export class SearchGroupSelectComponent {
     const role = this.role;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
+  }
+
+  setMenuPosition() {
+    const dropdown = document.getElementById(this.role + '-button').getBoundingClientRect();
+    this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }
 }
