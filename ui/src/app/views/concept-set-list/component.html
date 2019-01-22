@@ -36,7 +36,7 @@
     </div>
     <div style="display: flex; flex-wrap: wrap;">
       <div *ngFor="let conceptSet of resourceList">
-        <app-resource-card [resourceCard]="conceptSet" [cssClass]="'for-list'"
+        <app-resource-card [resourceCard]="conceptSet"
                            (onUpdate)="loadConceptSets()"
                            (duplicateNameError)="duplicateNameError($event)">
         </app-resource-card>
