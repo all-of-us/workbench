@@ -48,19 +48,17 @@
         <h4 class="dropdown-header">Program Data</h4>
         <button
           *ngFor="let criteria of programTypes"
-          id="criteria.type"
+          [id]="criteria.type"
           class="dropdown-item"
           type="button"
-          [disabled]="criteria.disabled"
           (click)="launchWizard(criteria)"
           clrDropdownItem>{{criteria.name}}</button>
         <div class="dropdown-divider"></div>
         <h4 class="dropdown-header">Domains</h4>
         <button *ngFor="let criteria of domainTypes"
-          id="criteria.type"
+          [id]="criteria.type"
           class="dropdown-item"
           type="button"
-          [disabled]="criteria.disabled"
           (click)="launchWizard(criteria)"
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
@@ -97,10 +95,9 @@
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <ng-container *ngFor="let criteria of domainTypes">
           <button *ngIf="criteria.name !== 'Demographics'"
-                  id="criteria.type"
+                  [id]="criteria.type"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="criteria.disabled"
                   (click)="launchWizard(criteria)"
                   clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
