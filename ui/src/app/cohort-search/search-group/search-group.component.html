@@ -54,10 +54,10 @@
   <div class="card-block">
     <ng-template #groupDropDown>
     <clr-dropdown>
-      <button type="button" class="btn selection-button" clrDropdownTrigger>
+      <button [id]="role + index + '-button'" type="button" class="btn selection-button" (click)="setMenuPosition()" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
-      <clr-dropdown-menu clrPosition="bottom-left">
+      <clr-dropdown-menu clrPosition="{{position}}">
         <h4 class="dropdown-header">Program Data</h4>
         <button
           *ngFor="let criteria of programTypes"
