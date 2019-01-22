@@ -64,7 +64,6 @@
           [id]="criteria.type"
           class="dropdown-item"
           type="button"
-          [disabled]="criteria.disabled"
           (click)="launchWizard(criteria)"
           clrDropdownItem>{{criteria.name}}</button>
         <div class="dropdown-divider"></div>
@@ -75,7 +74,6 @@
             [id]="criteria.type"
             class="dropdown-item"
             type="button"
-            [disabled]="criteria.disabled"
             (click)="launchWizard(criteria)"
             clrDropdownItem>{{criteria.name}}</button>
           <ng-container *ngIf="criteria.children">
@@ -83,7 +81,6 @@
               [id]="criteria.type + '-' + index"
               class="dropdown-item"
               type="button"
-              [disabled]="criteria.disabled"
               clrDropdownTrigger>{{criteria.name}}</button>
             <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
               <clr-dropdown-menu [id]="'demo-menu-' + index">
@@ -92,7 +89,6 @@
                   [id]="child.subtype"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="child.disabled"
                   (click)="launchWizard(child)"
                   clrDropdownItem>{{child.name}}</button>
               </clr-dropdown-menu>
@@ -171,10 +167,9 @@
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <ng-container *ngFor="let criteria of domainTypes">
           <button *ngIf="criteria.name !== 'Demographics'"
-                  id="criteria.type"
+                  [id]="criteria.type"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="criteria.disabled"
                   (click)="launchWizard(criteria, 1)"
                   clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
