@@ -471,10 +471,10 @@ definitions:
         default: false
       mention:
         description: first, last or any mention(used in temporal realtionships)
-        type: string
+        $ref: "#/definitions/TemporalMention"
       time:
         description: time frame between temporal items
-        type: string
+        $ref: "#/definitions/TemporalTime"
       timeValue:
         description: time value between temporal items
         type: integer
@@ -649,6 +649,16 @@ definitions:
       enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
       HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
       BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
+
+  TemporalMention:
+    type: string
+    description: Mentions refer to occurrences of entry date per person
+    enum: [ANY_MENTION, FIRST_MENTION, LAST_MENTION]
+
+  TemporalTime:
+    type: string
+    description: time refers to the amount of time in reference to temporal mentions
+    enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
 
   DemoChartInfoListResponse:
     type: object

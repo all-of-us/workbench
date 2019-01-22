@@ -56,6 +56,9 @@ export const isRequesting = (kind, id) => state =>
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
+// export const getTemporalFlag = (state): any =>
+//   state.getIn(['entities', 'temporal'], false);
+
 /**
  * Wizard
  */
