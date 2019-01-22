@@ -76,7 +76,6 @@ export class RecentWorkComponent implements OnInit {
 
   updateList(): void {
     if (this.workspace) {
-      this.cssClass = 'for-list';
       const wsData: WorkspaceData = this.route.snapshot.data.workspace;
       this.accessLevel = wsData.accessLevel;
       const notebookCall = this.workspacesService

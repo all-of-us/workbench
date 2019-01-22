@@ -3,8 +3,9 @@ import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {Card} from 'app/components/card';
 import {PopupTrigger} from 'app/components/popups';
-import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
+import {decamelize, reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActions';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 
@@ -95,15 +96,12 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
 
 const styles = reactStyles({
   card: {
-    borderRadius: '0.2rem',
-    boxShadow: '0 0.125rem 0.125rem 0 #d7d7d7',
+    marginTop: '1rem',
+    justifyContent: 'space-between',
     width: '200px',
     height: '223px',
     marginRight: '1rem',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    padding: '0.75rem'
+    padding: '0.75rem 0.75rem 0rem 0.75rem'
   },
   cardName: {
     fontSize: '18px',
@@ -120,6 +118,35 @@ const styles = reactStyles({
     lineHeight: '14px',
     fontWeight: 300,
     marginBottom: '0.2rem'
+  },
+  resourceType: {
+    height: '22px',
+    width: 'max-content',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    borderRadius: '4px 4px 0 0',
+    display: 'flex',
+    justifyContent: 'center',
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat, sans-serif',
+    fontSize: '12px',
+    fontWeight: 500
+  },
+  cardFooter: {
+    display: 'flex',
+    flexDirection: 'column'
+  }
+});
+
+const resourceTypeStyles = reactStyles({
+  cohort: {
+    backgroundColor: '#F8C954'
+  },
+  conceptSet: {
+    backgroundColor: '#AB87B3'
+  },
+  notebook: {
+    backgroundColor: '#8BC990'
   }
 });
 
@@ -174,7 +201,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         };
       }
     }
-    console.log(this.state.resourceType);
+    console.log(Date.now());
   }
 
   get actionsDisabled(): boolean {
@@ -198,6 +225,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return this.props.resourceCard.cohort.name;
     } else if (this.state.resourceType === ResourceType.CONCEPT_SET) {
       return this.props.resourceCard.conceptSet.name;
+    }
+  }
+
+  get description(): string {
+    if (this.state.resourceType === ResourceType.COHORT) {
+      return this.props.resourceCard.cohort.description;
+    } else if (this.state.resourceType === ResourceType.CONCEPT_SET) {
+      return this.props.resourceCard.conceptSet.description;
     }
   }
 
@@ -375,24 +410,32 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   render() {
     return <React.Fragment>
-      <div style={styles.card}>
-        <div style={{display: 'flex', alignItems: 'flex-start'}}>
-          <ResourceCardMenu disabled={this.actionsDisabled}
-                            resourceType={this.state.resourceType}
-                            onCloneResource={this.cloneResource}
-                            onDeleteResource={this.openConfirmDelete}
-                            onRenameNotebook={this.renameNotebook}
-                            onEditCohort={this.editCohort}
-                            onEditConceptSet={this.editConceptSet}
-                            onReviewCohort={this.reviewCohort}/>
-          <div style={styles.cardName}
-               onClick={() => this.openResource}>{this.displayName}</div>
+      <Card style={styles.card}>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+            <ResourceCardMenu disabled={this.actionsDisabled}
+                              resourceType={this.state.resourceType}
+                              onCloneResource={this.cloneResource}
+                              onDeleteResource={this.openConfirmDelete}
+                              onRenameNotebook={this.renameNotebook}
+                              onEditCohort={this.editCohort}
+                              onEditConceptSet={this.editConceptSet}
+                              onReviewCohort={this.reviewCohort}/>
+            <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
+              <div style={styles.cardName}
+                   onClick={() => this.openResource()}>{this.displayName}
+              </div>
+            </Clickable>
+          </div>
+          <div>{this.description}</div>
         </div>
-        <div>description goes here</div>
-        <div style={{display: 'flex', flexDirection: 'column'}}>
-          <div style={styles.lastModified}>Last Modified: {this.props.resourceCard.modifiedTime}</div>
+        <div style={styles.cardFooter}>
+          <div style={styles.lastModified}>
+            Last Modified: {this.props.resourceCard.modifiedTime}</div>
+          <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}>
+            {decamelize(this.state.resourceType, ' ')}</div>
         </div>
-      </div>
+      </Card>
     </React.Fragment>
   }
 }
