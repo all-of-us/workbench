@@ -2,20 +2,16 @@ import {Component, Input,} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Clickable} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
+import {Button, Clickable} from 'app/components/buttons';
 import {Card} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActions';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
-import {
-  Cohort, CohortsService, ConceptSetsService,
-  ConceptSet,FileDetail,
-  NotebookRename, RecentResource,
-  WorkspacesService
-} from 'generated';
+import {NotebookRename, RecentResource} from 'generated';
 
 const MenuItem = ({ icon, children, ...props }) => {
   return <Clickable
@@ -102,7 +98,8 @@ const styles = reactStyles({
     width: '200px',
     height: '223px',
     marginRight: '1rem',
-    padding: '0.75rem 0.75rem 0rem 0.75rem'
+    padding: '0.75rem 0.75rem 0rem 0.75rem',
+    boxShadow: '0 0 0 0'
   },
   cardName: {
     fontSize: '18px',
@@ -411,6 +408,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   render() {
     return <React.Fragment>
+      {this.state.invalidResourceError &&
+      <Modal>
+        <ModalTitle>Invalid Resource Type</ModalTitle>
+        <ModalBody>Please Report a Bug.</ModalBody>
+        <ModalFooter>
+          <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
+        </ModalFooter>
+      </Modal>}
       <Card style={styles.card}>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
