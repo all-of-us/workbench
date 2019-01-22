@@ -743,7 +743,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .searchParameters(Arrays.asList(
         createSearchParameter(measurementLab,"Lab").attributes(Arrays.asList(new Attribute().name(ANY)))));
 
-    //Any Mention Of (ICD9Child or Snomed with modifiers) 5 Days After ICD10
+    //First Mention Of (ICD9Child or Snomed with modifiers) 5 Days After ICD10
     //First temporal group
     searchGroupIcd9Child.temporalGroup(0);
     searchGroupSnomed.temporalGroup(0);
@@ -774,7 +774,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //matches searchGroupDrugParent and searchGroupIcd10Child
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Any Mention Of (ICD9Parent or Snomed with modifiers) 5 Days before ICD10
+    //Any Mention Of (ICD9Parent or Snomed with modifiers) 5 Days after ICD10Child
     //First temporal group
     searchGroupIcd9Parent.temporalGroup(0);
     searchGroupSnomed.temporalGroup(0);
@@ -806,7 +806,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //matches searchGroupCpt and searchGroupVisit
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Any Mention Of DrugChild during same encounter as Measurement
+    //First Mention Of DrugChild during same encounter as Measurement
     //First temporal group
     searchGroupDrugChild.temporalGroup(0);
     //Second temporal group
@@ -820,17 +820,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //matches searchGroupDrugChild and searchGroupMeasurement
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Any Mention Of DrugChild during same encounter as Measurement
+    //Last Mention Of DrugChild during same encounter as Measurement
     //First temporal group
     searchGroupDrugChild.temporalGroup(0);
-    //Second temporal group
+    //Second temporal group has 2 types(this will envoke the join sql)
     searchGroupMeasurement.temporalGroup(1);
     searchGroupVisit.temporalGroup(1);
     searchGroup = new SearchGroup()
       .items(Arrays.asList(searchGroupDrugChild, searchGroupMeasurement, searchGroupVisit))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
+      .mention(TemporalMention.LAST_MENTION.name())
       .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
+    //matches searchGroupDrugChild and searchGroupMeasurement
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //Last Mention Of (Measurement and visit) X days after DrugParent
+    //First temporal group
+    searchGroupMeasurement.temporalGroup(0);
+    searchGroupVisit.temporalGroup(0);
+    //Second temporal
+    searchGroupDrugParent.temporalGroup(1);
+    searchGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupMeasurement, searchGroupVisit, searchGroupDrugParent))
+      .temporal(true)
+      .mention(TemporalMention.LAST_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
+      .timeValue(10L);
     searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
     //matches searchGroupDrugChild and searchGroupMeasurement
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
