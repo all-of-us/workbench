@@ -1,4 +1,7 @@
 import * as React from 'react';
+
+import {withStyle} from 'app/utils/index';
+
 export const styles = {
   input: {
     marginLeft: '.5rem',
@@ -55,13 +58,8 @@ export const styles = {
 };
 
 
-export const FieldInput = ({style = {}, ...props}) =>
-  <input {...props} style={{...styles.input, ...style}} />;
-export const FormInput = ({style = {}, ...props}) =>
-    <input {...props} style={{...styles.formInput, ...style}} ref={props.inputref}/>;
-export const LongInput = ({style = {}, ...props}) =>
-  <input {...props} style={{...styles.formInput, ...styles.longInput, ...style}} />;
-export const Error = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.error, ...style}} />;
-export const ErrorMessage = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.errorMessage, ...style}} />;
+export const FieldInput = withStyle(styles.input)('input');
+export const FormInput = withStyle(styles.formInput)('input');
+export const LongInput = withStyle({...styles.formInput, ...styles.longInput})('input');
+export const Error = withStyle(styles.error)('div');
+export const ErrorMessage = withStyle(styles.errorMessage)('div');

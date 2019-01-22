@@ -76,7 +76,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
                    placeholder='Invitation Key' onChange={input =>
                                                  this.setState({invitationKey: input.target.value})}
-                   inputref={this.inputElement} autoFocus/>
+                   ref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
          <AlertDanger>
            <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>

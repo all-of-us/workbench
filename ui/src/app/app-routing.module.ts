@@ -28,6 +28,7 @@ import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
 import {environment} from 'environments/environment';
+import {NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
 
 declare let gtag: Function;
@@ -265,6 +266,8 @@ const routes: Routes = [
 export class AppRoutingModule {
 
  constructor(public router: Router) {
+    NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
+    NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         gtag('config', environment.gaId, { 'page_path': event.urlAfterRedirects });
