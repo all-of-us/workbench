@@ -1,11 +1,12 @@
 import {Component, Input,} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Card} from 'app/components/card';
 import {PopupTrigger} from 'app/components/popups';
-import {decamelize, reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
+import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActions';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 
@@ -433,7 +434,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <div style={styles.lastModified}>
             Last Modified: {this.props.resourceCard.modifiedTime}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}>
-            {decamelize(this.state.resourceType, ' ')}</div>
+            {fp.startCase(fp.camelCase(this.state.resourceType))}</div>
         </div>
       </Card>
     </React.Fragment>
