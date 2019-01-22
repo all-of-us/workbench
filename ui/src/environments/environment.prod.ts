@@ -11,7 +11,7 @@ export const environment: Environment = {
   publicUiUrl: 'https://databrowser.researchallofus.org',
   debug: false,
   gaId: 'UA-112406425-4',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc/',
+  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
 
 
   // Use care when changing these flags in prod!

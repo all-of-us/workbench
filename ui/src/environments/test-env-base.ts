@@ -10,5 +10,5 @@ export const testEnvironmentBase = {
   publicApiUrl: 'https://public-api-dot-all-of-us-workbench-test.appspot.com',
   publicUiUrl: 'https://public-ui-dot-all-of-us-workbench-test.appspot.com',
   gaId: 'UA-112406425-1',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc/',
+  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
 };

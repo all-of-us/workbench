@@ -12,7 +12,7 @@ export const environment: Environment = {
   publicUiUrl: 'http://localhost:4201',
   debug: true,
   gaId: 'UA-112406425-5',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc/',
+  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
 
   enableTemporal: true,
   useZendeskForSupport: true,

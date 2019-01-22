@@ -11,7 +11,7 @@ export const environment: Environment = {
   publicUiUrl: 'https://public-ui-dot-all-of-us-rw-staging.appspot.com',
   debug: false,
   gaId: 'UA-112406425-2',
-  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc/',
+  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
 
   enableTemporal: false,
   useZendeskForSupport: false,
