@@ -31,6 +31,18 @@
   </div>
 </div>
 
+<clr-alert
+    *ngIf="zendeskLoadError"
+    [clrAlertType]="'alert-danger'"
+    [clrAlertAppLevel]="true"
+    [clrAlertClosable]="true">
+  <div clr-alert-item class="alert-item">
+    An error occurred loading the help desk submission form. Please reload the page, or email
+    &nbsp;<a href="mailto:support@aousupporthelp.zendesk.com">support@aousupporthelp.zendesk.com</a>
+    &nbsp;directly with your support request.
+  </div>
+</clr-alert>
+
 <div class="content-container">
   <div class="background-image"></div>
   <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
@@ -61,7 +73,14 @@
           *ngIf="hasReviewIdVerification"
           routerLink="/admin/review-id-verification"
           (click)="sidenavToggle = false">Review ID Verifications</button>
+      <button class="btn btn-primary nav-link help-desk-item"
+          *ngIf="showHelpDeskItem"
+          (click)="openZendeskWidget(); sidenavToggle = false;">Help Desk</button>
+      <button class="btn btn-primary nav-link hub-forum-item"
+          *ngIf="showHubForumItem"
+          (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
       <button class="btn btn-secondary btn-bug-report"
+          *ngIf="showBugReportItem"
           (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
