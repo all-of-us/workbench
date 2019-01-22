@@ -314,8 +314,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     }
     this.subscription = this.route.data.map(({participant}) => participant)
       .subscribe(participants => {
-        this.clickedParticipantId ? this.participantsId = this.clickedParticipantId
-          : this.participantsId = participants.participantId;
+        this.participantsId = this.clickedParticipantId || participants.participantId;
       });
     this.getDomainsParticipantsData();
   }
