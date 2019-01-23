@@ -7,7 +7,7 @@ import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients'
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 
-import {Cluster, ClusterApi, ClusterStatus} from 'generated/fetch/api';
+import {ClusterApi} from 'generated/fetch/api';
 
 describe('SettingsComponent', () => {
   const component = () => {
@@ -25,7 +25,7 @@ describe('SettingsComponent', () => {
     expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(0);
   });
 
-  it('should allow deleting the cluster when there is one', async () => {
+  it('should allow deleting the cluster when there is one', async() => {
     const spy = jest.spyOn(clusterApi(), 'deleteCluster');
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

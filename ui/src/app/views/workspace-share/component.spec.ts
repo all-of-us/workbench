@@ -1,4 +1,4 @@
-import {DebugElement, Type} from '@angular/core';
+import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
@@ -27,7 +27,7 @@ import {
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
-import {UserServiceStub} from '../../../testing/stubs/user-service-stub';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 
 interface UserRoleRow {
   fullName: string;
@@ -55,7 +55,7 @@ class WorkspaceSharePage {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
         this.fixture.componentInstance.workspace = response.workspace;
-    });
+      });
     tick();
     this.readPageData();
   }
@@ -175,18 +175,18 @@ describe('WorkspaceShareComponent', () => {
     expect(workspaceSharePage.roleNamePairsOnPage.length).toEqual(3);
     expect(workspaceSharePage.roleNamePairsOnPage[0].email).toBe(userValuesStub.items[0].email);
     expect(workspaceSharePage.roleNamePairsOnPage[0].role)
-        .toBe(userValuesStub.items[0].role.toLocaleString());
+      .toBe(userValuesStub.items[0].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe(userValuesStub.items[0].name);
 
     expect(workspaceSharePage.roleNamePairsOnPage[1].email).toBe(userValuesStub.items[1].email);
     expect(workspaceSharePage.roleNamePairsOnPage[1].role)
-        .toBe(userValuesStub.items[1].role.toLocaleString());
+      .toBe(userValuesStub.items[1].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[1].fullName).toBe(userValuesStub.items[1].name);
 
 
     expect(workspaceSharePage.roleNamePairsOnPage[2].email).toBe(userValuesStub.items[2].email);
     expect(workspaceSharePage.roleNamePairsOnPage[2].role)
-        .toBe(userValuesStub.items[2].role.toLocaleString());
+      .toBe(userValuesStub.items[2].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[2].fullName).toBe(userValuesStub.items[2].name);
   }));
 
@@ -196,7 +196,7 @@ describe('WorkspaceShareComponent', () => {
     tick(1000);
     workspaceSharePage.fixture.detectChanges();
     simulateClick(workspaceSharePage.fixture,
-        workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
+      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.fixture.detectChanges();
 
     workspaceSharePage.readPageData();

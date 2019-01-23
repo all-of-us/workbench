@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 
-import {Domain} from 'generated';
 
 @Component({
   selector: 'app-concept-table',

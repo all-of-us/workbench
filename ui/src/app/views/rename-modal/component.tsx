@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import * as React from 'react';
 
 import {
   Button
@@ -15,12 +14,15 @@ import {
 
 import {ReactWrapperBase} from 'app/utils';
 
+import * as React from 'react';
+
 
 interface RenameModalProps {
-  resource: {name: string};
+  resource: { name: string };
   onRename: Function;
   onCancel: Function;
 }
+
 interface RenameModalState {
   loading: boolean;
   newName: string;

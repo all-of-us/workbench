@@ -33,7 +33,7 @@ it('should handle given name validity', () => {
   expect(wrapper.exists('#givenNameError')).toBeTruthy();
 });
 
-it ('should handle family name validity', () => {
+it('should handle family name validity', () => {
   const wrapper = component();
   const testInput = fp.repeat(101, 'a');
   expect(wrapper.exists('#familyName')).toBeTruthy();
@@ -42,7 +42,7 @@ it ('should handle family name validity', () => {
   expect(wrapper.exists('#familyNameError')).toBeTruthy();
 });
 
-it ('should handle organization validity', () => {
+it('should handle organization validity', () => {
   const wrapper = component();
   const testInput = fp.repeat(300, 'a');
   expect(wrapper.exists('#organization')).toBeTruthy();
@@ -51,7 +51,7 @@ it ('should handle organization validity', () => {
   expect(wrapper.exists('#organizationError')).toBeTruthy();
 });
 
-it ('should handle current position validity', () => {
+it('should handle current position validity', () => {
   const wrapper = component();
   const testInput = fp.repeat(300, 'a');
   expect(wrapper.exists('#currentPosition')).toBeTruthy();
@@ -60,7 +60,7 @@ it ('should handle current position validity', () => {
   expect(wrapper.exists('#currentPositionError')).toBeTruthy();
 });
 
-it ('should handle username validity starts with .', () => {
+it('should handle username validity starts with .', () => {
   const wrapper = component();
   expect(wrapper.exists('#username')).toBeTruthy();
   expect(wrapper.exists('#usernameError')).toBeFalsy();

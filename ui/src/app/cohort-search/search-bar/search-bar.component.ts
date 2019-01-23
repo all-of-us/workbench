@@ -1,9 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaSubtype,
   activeCriteriaType,
@@ -14,7 +11,10 @@ import {
   ingredientsForBrand,
   isAutocompleteLoading,
   subtreeSelected,
-} from '../redux';
+} from 'app/cohort-search/redux';
+import {TreeSubType, TreeType} from 'generated';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 const trigger = 2;
 

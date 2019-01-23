@@ -1,15 +1,13 @@
 /**
  * OAuth2 via GAPI sign-in.
  */
-import 'rxjs/Rx';
-
 import {Injectable, NgZone} from '@angular/core';
-import {ActivatedRouteSnapshot, NavigationEnd, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
-import {Observable} from 'rxjs/Observable';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
+import 'rxjs/Rx';
 
 
 declare const gapi: any;
@@ -24,9 +22,10 @@ export class SignInService {
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
+
   constructor(private zone: NgZone,
-      private router: Router,
-      serverConfigService: ServerConfigService) {
+    private router: Router,
+    serverConfigService: ServerConfigService) {
     this.zone = zone;
 
     serverConfigService.getConfig().subscribe((config) => {
@@ -50,9 +49,9 @@ export class SignInService {
     return new Promise((resolve) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
-            client_id: this.clientId,
-            hosted_domain: config.gsuiteDomain,
-            scope: 'https://www.googleapis.com/auth/plus.login openid profile'
+          client_id: this.clientId,
+          hosted_domain: config.gsuiteDomain,
+          scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         }).then(() => {
           this.subscribeToAuth2User();
         });

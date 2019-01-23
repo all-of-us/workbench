@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 @Component({
   selector: 'app-set-annotation-modal',
@@ -30,13 +30,13 @@ export class SetAnnotationModalComponent {
     this.state.annotationManagerOpen.next(value);
   }
 
-    get openEdit() {
-        return this.state.editAnnotationManagerOpen.getValue();
-    }
+  get openEdit() {
+    return this.state.editAnnotationManagerOpen.getValue();
+  }
 
-    set openEdit(value: boolean) {
-        this.state.editAnnotationManagerOpen.next(value);
-    }
+  set openEdit(value: boolean) {
+    this.state.editAnnotationManagerOpen.next(value);
+  }
 
   get modalTitle() {
     return {

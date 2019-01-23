@@ -56,7 +56,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       .invitationKeyVerification({invitationKey: this.state.invitationKey})
       .then(response => {
         this.props.onInvitationKeyVerify(this.state.invitationKey);
-       })
+      })
       .catch(error => {
         this.setState({
           invitationKeyInvalid: true
@@ -76,19 +76,19 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         <TextInput id='invitationKey' value={this.state.invitationKey}
                    style={{width: '16rem'}}
                    placeholder='Invitation Key'
-                   onChange={v => this.setState({invitationKey: v})}
+          onChange={v => this.setState({invitationKey: v})}
                    ref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
-         <AlertDanger>
-           <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
-         </AlertDanger>
+        <AlertDanger>
+            <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
+        </AlertDanger>
         }
         {this.state.invitationKeyInvalid &&
-         <AlertDanger>
-           <div style={{fontWeight: 'bolder'}}>
-             Invitation Key is not Valid.
-           </div>
-         </AlertDanger>
+        <AlertDanger>
+            <div style={{fontWeight: 'bolder'}}>
+                Invitation Key is not Valid.
+            </div>
+        </AlertDanger>
         }
         <div>
           <Button style={{width: '10rem', height: '2rem', margin: '.25rem .5rem .25rem 0'}}

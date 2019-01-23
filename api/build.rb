@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Ruby goals used by our build (not intended to be invoked directly by developers)
 
+require "optparse"
 require_relative "../aou-utils/workbench"
 require_relative "../aou-utils/swagger"
 
@@ -16,5 +17,13 @@ Common.register_command({
   :description => "Merges API YAML files together to produce a single YAML spec.",
   :fn => ->() { merge_yaml() }
 })
+
+OptionParser.new do |opts|
+  opts.on("--no-docker") do ||
+    Dir.chdir(__dir__)
+    merge_yaml()
+    exit
+  end
+end.parse!
 
 Workbench.handle_argv_or_die(__FILE__)
