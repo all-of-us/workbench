@@ -1,6 +1,5 @@
 import * as React from 'react';
-import {reactStyles} from 'app/utils';
-import {withStyle} from 'app/utils/index';
+import {reactStyles, withStyle} from 'app/utils';
 
 
 const styles = reactStyles({

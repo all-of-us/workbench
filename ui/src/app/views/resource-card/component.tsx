@@ -1,4 +1,4 @@
-import {Component, Input,} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -8,13 +8,13 @@ import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActions';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 
 import {RecentResource} from 'generated';
-import {EditModal} from "../edit-modal/component";
-import {RenameModal} from "../rename-modal/component";
-import {ConfirmDeleteModal} from "../confirm-delete-modal/component";
+import {ConfirmDeleteModal} from '../confirm-delete-modal/component';
+import {EditModal} from '../edit-modal/component';
+import {RenameModal} from '../rename-modal/component';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
@@ -154,18 +154,18 @@ const resourceTypeStyles = reactStyles({
 });
 
 export interface ResourceCardProps {
-  resourceCard: RecentResource,
-  onUpdate: Function,
-  duplicateNameError: Function,
-  invalidNameError: Function
+  resourceCard: RecentResource;
+  onUpdate: Function;
+  duplicateNameError: Function;
+  invalidNameError: Function;
 }
 
 export interface ResourceCardState {
-  resourceType: ResourceType,
-  renaming: boolean,
-  editing: boolean,
-  confirmDeleting: boolean,
-  invalidResourceError: boolean,
+  resourceType: ResourceType;
+  renaming: boolean;
+  editing: boolean;
+  confirmDeleting: boolean;
+  invalidResourceError: boolean;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -449,7 +449,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                             resourceType={this.state.resourceType}
                             receiveDelete={this.receiveDelete.bind(this)}
                             closeFunction={this.closeConfirmDelete.bind(this)}/>}
-    </React.Fragment>
+    </React.Fragment>;
   }
 }
 
@@ -465,6 +465,6 @@ export class ResourceCardComponent extends ReactWrapperBase {
   @Input('invalidNameError') invalidNameError: ResourceCardProps['invalidNameError'];
 
   constructor() {
-    super(ResourceCard, ['resourceCard', 'onUpdate'])
+    super(ResourceCard, ['resourceCard', 'onUpdate']);
   }
 }
