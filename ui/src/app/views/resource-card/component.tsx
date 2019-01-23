@@ -8,8 +8,8 @@ import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger} from 'app/components/popups';
 import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActions';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActions';
 
 import {RecentResource} from 'generated';
 import {ConfirmDeleteModal} from '../confirm-delete-modal/component';
@@ -293,7 +293,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.props.resourceCard.workspaceNamespace,
             this.props.resourceCard.workspaceFirecloudName,
             this.props.resourceCard.notebook.name)
-            .then(() => {this.props.onUpdate();});
+            .then(() => {
+          this.props.onUpdate();
+        });
         break;
       }
       case ResourceType.COHORT: {
