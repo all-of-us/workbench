@@ -174,7 +174,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       } else {
         this.actions.setCriteriaSearchTerms([option.name]);
         const ids = [option.id];
-        let path = option.path.split('.');
+        const path = option.path.split('.');
         this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
       }
     }
