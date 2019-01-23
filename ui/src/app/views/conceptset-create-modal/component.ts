@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {ConceptSet, ConceptsService, CreateConceptSetRequest, DomainInfo} from '../../../generated';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
-import {Domain} from '../../../generated/model/domain';
+import {ConceptSet, ConceptsService, CreateConceptSetRequest, DomainInfo} from 'generated';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
+import {Domain} from 'generated/model/domain';
 
 @Component({
   selector: 'app-create-concept-modal',

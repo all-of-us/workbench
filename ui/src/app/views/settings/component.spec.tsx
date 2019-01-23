@@ -7,7 +7,7 @@ import {clusterApi, registerApiClient} from 'app/services/swagger-fetch-clients'
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 
-import {Cluster, ClusterApi, ClusterStatus} from 'generated/fetch/api';
+import {ClusterApi} from 'generated/fetch/api';
 
 describe('SettingsComponent', () => {
   const component = () => {

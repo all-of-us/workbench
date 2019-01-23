@@ -22,8 +22,6 @@ import {
   NotebooksService,
 } from 'notebooks-generated';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
-
 enum Progress {
   Unknown,
   Initializing,

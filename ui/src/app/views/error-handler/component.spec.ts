@@ -8,7 +8,7 @@ import {StatusCheckServiceStub} from 'testing/stubs/status-check-service-stub';
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'app/testing/test-helpers';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ServerConfigService} from 'app/services/server-config.service';

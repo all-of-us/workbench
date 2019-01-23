@@ -5,6 +5,31 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attributes-page.component';
+import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
+import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
+import {GenderChartComponent} from 'app/cohort-search/gender-chart/gender-chart.component';
+import {ModalComponent} from 'app/cohort-search/modal/modal.component';
+import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
+import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
+import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
+import {
+  cancelWizard,
+  CohortSearchActions,
+  finishWizard,
+  resetStore
+} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {SearchGroupItemComponent} from 'app/cohort-search/search-group-item/search-group-item.component';
+import {SearchGroupListComponent} from 'app/cohort-search/search-group-list/search-group-list.component';
+import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/search-group-select.component';
+import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.component';
+import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
+import {TreeComponent} from 'app/cohort-search/tree/tree.component';
 import {CohortBuilderService, CohortsService} from 'generated';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
@@ -12,31 +37,6 @@ import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {ComboChartComponent} from '../../cohort-common/combo-chart/combo-chart.component';
 import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
-import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
-import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
-import {DemographicsComponent} from '../demographics/demographics.component';
-import {GenderChartComponent} from '../gender-chart/gender-chart.component';
-import {ModalComponent} from '../modal/modal.component';
-import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
-import {MultiSelectComponent} from '../multi-select/multi-select.component';
-import {NodeInfoComponent} from '../node-info/node-info.component';
-import {NodeComponent} from '../node/node.component';
-import {OptionInfoComponent} from '../option-info/option-info.component';
-import {OverviewComponent} from '../overview/overview.component';
-import {
-  cancelWizard,
-  CohortSearchActions,
-  finishWizard,
-  resetStore
-} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
-import {SearchBarComponent} from '../search-bar/search-bar.component';
-import {SearchGroupItemComponent} from '../search-group-item/search-group-item.component';
-import {SearchGroupListComponent} from '../search-group-list/search-group-list.component';
-import {SearchGroupSelectComponent} from '../search-group-select/search-group-select.component';
-import {SearchGroupComponent} from '../search-group/search-group.component';
-import {SelectionInfoComponent} from '../selection-info/selection-info.component';
-import {TreeComponent} from '../tree/tree.component';
 import {CohortSearchComponent} from './cohort-search.component';
 
 class MockActions {

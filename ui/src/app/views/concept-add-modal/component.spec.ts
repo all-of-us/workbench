@@ -6,23 +6,23 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {
-   ConceptsService, Domain, WorkspaceResponse,
-  WorkspacesService
-} from '../../../generated';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
-import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
+import {ConceptSetsServiceStub} from 'app/testing/stubs/concept-sets-service-stub';
 import {
   ConceptsServiceStub, ConceptStubVariables
-} from '../../../testing/stubs/concepts-service-stub';
+} from 'app/testing/stubs/concepts-service-stub';
 import {
   WorkspacesServiceStub,
   WorkspaceStubVariables
-} from '../../../testing/stubs/workspace-service-stub';
+} from 'app/testing/stubs/workspace-service-stub';
 import {
   simulateClick, simulateEvent,
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'app/testing/test-helpers';
+import {
+   ConceptsService, Domain, WorkspaceResponse,
+  WorkspacesService
+} from 'generated';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {ConceptAddModalComponent} from './component';
 
 class ConceptSetAddPage {

@@ -1,5 +1,5 @@
 import {Http} from '@angular/http';
-import {InvitationVerificationRequest} from 'app/generated/model/invitationVerificationRequest';
+import {InvitationVerificationRequest} from 'generated/model/invitationVerificationRequest';
 import {Observable} from 'rxjs/Observable';
 
 import {

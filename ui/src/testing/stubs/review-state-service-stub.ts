@@ -1,4 +1,4 @@
-import {Cohort, CohortReview} from 'app/generated';
+import {Cohort, CohortReview} from 'generated';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';

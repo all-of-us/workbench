@@ -12,7 +12,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {ServerConfigService} from 'app/services/server-config.service';
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'app/testing/test-helpers';
 
 import {AdminReviewIdVerificationComponent} from 'app/views/admin-review-id-verification/component';
 
