@@ -377,7 +377,7 @@
 }
 
 .image {
-  height: 136px;
+  max-height: 136px;
   width: 8rem;
   padding-right: 12%;
 }

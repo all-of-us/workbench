@@ -1,19 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 369.4 254.9" style="enable-background:new 0 0 369.4 254.9;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill:none;stroke:#FFFFFF;stroke-width:14.6079;stroke-miterlimit:10;}
-	.st1{fill:none;stroke:#FFFFFF;stroke-width:13.1766;stroke-miterlimit:10;}
-</style>
-<g>
-	<circle class="st0" cx="186" cy="126.1" r="65.7"/>
-	<line class="st0" x1="229.8" y1="169.9" x2="288.3" y2="228.4"/>
-</g>
-<path class="st1" d="M212.7,154.1h-52.2c-3.3,0-6-2.7-6-6v-41.5c0-3.3,2.7-6,6-6h52.2c3.3,0,6,2.7,6,6v41.5
-	C218.7,151.4,216,154.1,212.7,154.1z"/>
-<path class="st1" d="M91.5,154.1H39.3c-3.3,0-6-2.7-6-6v-41.5c0-3.3,2.7-6,6-6h52.2c3.3,0,6,2.7,6,6v41.5
-	C97.5,151.4,94.8,154.1,91.5,154.1z"/>
-<path class="st1" d="M335.5,154.1h-52.2c-3.3,0-6-2.7-6-6v-41.5c0-3.3,2.7-6,6-6h52.2c3.3,0,6,2.7,6,6v41.5
-	C341.5,151.4,338.8,154.1,335.5,154.1z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 369.4 254.9">
+	<style>
+		.st0,.st1{fill:none;stroke:#fff;stroke-width:14.6079;stroke-miterlimit:10}.st1{stroke-width:13.1766}
+	</style>
+	<circle cx="186" cy="126.1" r="65.7" class="st0"/>
+	<path d="M229.8 169.9l58.5 58.5" class="st0"/>
+	<path d="M212.7 154.1h-52.2c-3.3 0-6-2.7-6-6v-41.5c0-3.3 2.7-6 6-6h52.2c3.3 0 6 2.7 6 6v41.5c0 3.3-2.7 6-6 6zM91.5 154.1H39.3c-3.3 0-6-2.7-6-6v-41.5c0-3.3 2.7-6 6-6h52.2c3.3 0 6 2.7 6 6v41.5c0 3.3-2.7 6-6 6zM335.5 154.1h-52.2c-3.3 0-6-2.7-6-6v-41.5c0-3.3 2.7-6 6-6h52.2c3.3 0 6 2.7 6 6v41.5c0 3.3-2.7 6-6 6z" class="st1"/>
 </svg>
