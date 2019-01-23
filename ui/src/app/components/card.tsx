@@ -1,6 +1,5 @@
-import * as React from 'react';
 import {reactStyles, withStyle} from 'app/utils';
-
+import * as React from 'react';
 
 const styles = reactStyles({
   card: {

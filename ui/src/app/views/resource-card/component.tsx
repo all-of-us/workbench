@@ -5,10 +5,10 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger} from 'app/components/popups';
 import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActions';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 
 import {RecentResource} from 'generated';
@@ -293,7 +293,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.props.resourceCard.workspaceNamespace,
             this.props.resourceCard.workspaceFirecloudName,
             this.props.resourceCard.notebook.name)
-            .then(() => {this.props.onUpdate()});
+            .then(() => {this.props.onUpdate();});
         break;
       }
       case ResourceType.COHORT: {
