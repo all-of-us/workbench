@@ -25,13 +25,13 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {BugReportComponent} from '../bug-report/component';
-import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
-import {WorkspaceNavBarComponent} from '../workspace-nav-bar/component';
-import {WorkspaceShareComponent} from '../workspace-share/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 @Component({
   selector: 'app-test',

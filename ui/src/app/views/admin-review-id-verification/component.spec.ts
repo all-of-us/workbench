@@ -9,12 +9,12 @@ import {
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 
+import {ServerConfigService} from 'app/services/server-config.service';
 import {
   updateAndTick
 } from '../../../testing/test-helpers';
-import {ServerConfigService} from '../../services/server-config.service';
 
-import {AdminReviewIdVerificationComponent} from '../admin-review-id-verification/component';
+import {AdminReviewIdVerificationComponent} from 'app/views/admin-review-id-verification/component';
 
 describe('AdminReviewIdVerificationComponent', () => {
   let fixture: ComponentFixture<AdminReviewIdVerificationComponent>;

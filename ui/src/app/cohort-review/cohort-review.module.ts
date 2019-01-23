@@ -11,7 +11,7 @@ import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Pages */
-import {CohortCommonModule} from '../cohort-common/module';
+import {CohortCommonModule} from 'app/cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';

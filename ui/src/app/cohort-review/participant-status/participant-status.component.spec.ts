@@ -2,13 +2,13 @@ import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
+import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
+import {Participant} from 'app/cohort-review/participant.model';
 import {Observable} from 'rxjs/Observable';
-import {CreateReviewPage} from '../create-review-page/create-review-page';
-import {Participant} from '../participant.model';
 import {ParticipantStatusComponent} from './participant-status.component';
 
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {CohortReviewService, CohortStatus} from 'generated';
-import {ReviewStateService} from '../review-state.service';
 
 
 class StubRoute {

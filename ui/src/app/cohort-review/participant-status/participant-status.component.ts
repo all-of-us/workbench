@@ -4,7 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Participant} from '../participant.model';
+import {Participant} from 'app/cohort-review/participant.model';
 
 import {
   CohortReviewService,

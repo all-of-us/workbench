@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {dateValidator} from 'app/cohort-search/validators';
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -21,7 +22,6 @@ import {
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {dateValidator} from '../../cohort-search/validators';
 
 interface Annotation {
   definition: CohortAnnotationDefinition;

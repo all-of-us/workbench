@@ -7,6 +7,7 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
@@ -15,7 +16,6 @@ import {
   WorkspacesService
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {ToolTipComponent} from '../tooltip/component';
 
 
 @Component({

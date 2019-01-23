@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 @Component({
   selector: 'app-set-annotation-modal',

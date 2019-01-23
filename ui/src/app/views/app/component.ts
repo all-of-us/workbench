@@ -10,8 +10,8 @@ import {
 } from '@angular/router';
 
 
+import {cookiesEnabled} from 'app/utils';
 import {environment} from 'environments/environment';
-import {cookiesEnabled} from '../../utils';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';

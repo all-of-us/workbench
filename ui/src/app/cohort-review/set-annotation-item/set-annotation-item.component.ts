@@ -9,7 +9,7 @@ import {
 import {FormControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
     CohortAnnotationDefinition,

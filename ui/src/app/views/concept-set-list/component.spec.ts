@@ -35,7 +35,7 @@ import {
   updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {ToolTipComponent} from '../tooltip/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 
 
 const activatedRouteStub  = {

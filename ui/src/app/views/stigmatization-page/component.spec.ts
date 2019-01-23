@@ -6,9 +6,9 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {ServerConfigService} from '../../services/server-config.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {StigmatizationPageComponent} from '../stigmatization-page/component';
+import {StigmatizationPageComponent} from 'app/views/stigmatization-page/component';
 
 describe('StigmatizationPageComponent', () => {
   let fixture: ComponentFixture<StigmatizationPageComponent>;

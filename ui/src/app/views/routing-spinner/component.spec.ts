@@ -9,9 +9,9 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {ServerConfigService} from '../../services/server-config.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
+import {RoutingSpinnerComponent} from 'app/views/routing-spinner/component';
 
 describe('RoutingSpinnerComponent', () => {
   let fixture: ComponentFixture<RoutingSpinnerComponent>;

@@ -56,8 +56,8 @@ import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
-import {NewNotebookModalComponent} from '../new-notebook-modal/component';
 
 const activatedRouteStub  = {
   snapshot: {

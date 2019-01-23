@@ -2,8 +2,8 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 @Component({
   templateUrl: './detail-page.html',

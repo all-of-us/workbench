@@ -3,10 +3,10 @@ import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ClearButtonFilterComponent} from '../clearbutton-filter/clearbutton-filter.component';
-import {MultiSelectFilterComponent} from '../multiselect-filter/multiselect-filter.component';
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
+import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
   Cohort,

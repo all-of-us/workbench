@@ -23,7 +23,7 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {NewNotebookModalComponent} from '../new-notebook-modal/component';
+import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 
 describe('NewNotebookModalComponent', () => {
   let fixture: ComponentFixture<NewNotebookModalComponent>;

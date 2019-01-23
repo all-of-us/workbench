@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
   CohortReview,

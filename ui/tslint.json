@@ -1,6 +1,10 @@
 {
   "extends": "../common-ui/tslint.json",
   "rulesDirectory": [
-    "../ui/node_modules/codelyzer"
-  ]
+    "node_modules/codelyzer",
+    "node_modules/tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "no-relative-imports": [true, "allow-siblings"]
+  }
 }

@@ -26,12 +26,12 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
-import {SignInService} from '../../services/sign-in.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
+import {SignInService} from 'app/services/sign-in.service';
 
-import {BugReportComponent} from '../bug-report/component';
-import {ProfilePageComponent} from '../profile-page/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ProfilePageComponent} from 'app/views/profile-page/component';
 /* tslint:disable */
 // We need to disable tslint so it does not complain about the selector we use for the mock.
 @Component({

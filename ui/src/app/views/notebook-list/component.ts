@@ -8,6 +8,7 @@ import {BugReportComponent} from 'app/views/bug-report/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   Cluster,
   FileDetail,
@@ -19,7 +20,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',

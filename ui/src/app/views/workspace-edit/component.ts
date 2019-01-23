@@ -8,6 +8,7 @@ import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-sto
 
 import {deepCopy, isBlank} from 'app/utils';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
   CloneWorkspaceResponse,
@@ -17,7 +18,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 

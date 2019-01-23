@@ -23,13 +23,13 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   DataAccessLevel,
   UnderservedPopulationEnum,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 
 describe('WorkspaceEditComponent', () => {

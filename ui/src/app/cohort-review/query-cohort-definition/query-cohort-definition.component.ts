@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {typeToTitle} from 'app/cohort-search/utils';
 import {CohortBuilderService, TreeType} from 'generated';
-import {typeToTitle} from '../../cohort-search/utils';
 
 
 

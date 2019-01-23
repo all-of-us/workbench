@@ -10,6 +10,7 @@ import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
   Cohort,
@@ -21,7 +22,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 /*
  * Search filters used by the cohort and notebook data tables to

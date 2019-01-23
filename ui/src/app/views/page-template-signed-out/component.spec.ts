@@ -8,9 +8,9 @@ import {
   updateAndTick
 } from '../../../testing/test-helpers';
 
-import {ServerConfigService} from '../../services/server-config.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
+import {PageTemplateSignedOutComponent} from 'app/views/page-template-signed-out/component';
 
 describe('PageTemplateSignedOutComponent', () => {
   let fixture: ComponentFixture<PageTemplateSignedOutComponent>;
