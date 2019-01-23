@@ -1,7 +1,7 @@
+import {nextSort} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Pagination from 'react-paginating';
-import {nextSort} from '../utils/index';
 import {ClrIcon} from './icons';
 
 const rowHeight = '1.5rem';

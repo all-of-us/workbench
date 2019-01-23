@@ -1,8 +1,8 @@
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CohortSearchActions} from 'app/cohort-search/redux';
+import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {TreeType} from 'generated';
-import {CohortSearchActions} from '../redux';
-import {attributeDisplay, nameDisplay, typeDisplay} from '../utils';
 
 @Component({
     selector: 'crit-selection-info',

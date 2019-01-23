@@ -2,8 +2,8 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {fromJS, List} from 'immutable';
 
+import {CohortSearchState, initialState, SR_ID} from 'app/cohort-search/redux/store';
 import {TreeType} from 'generated';
-import {CohortSearchState, initialState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
 
 /**

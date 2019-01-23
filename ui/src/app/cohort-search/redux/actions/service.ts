@@ -12,8 +12,8 @@ import {
   TreeType
 } from 'generated';
 
+import {stripHtml} from 'app/cohort-search/utils';
 import {fromJS, isImmutable, List, Map, Set} from 'immutable';
-import {stripHtml} from '../../utils';
 
 import {
   activeGroupId,
@@ -31,7 +31,7 @@ import {
   isCriteriaLoading,
   isRequesting,
   SR_ID,
-} from '../store';
+} from 'app/cohort-search/redux/store';
 import * as ActionFuncs from './creators';
 
 @Injectable()

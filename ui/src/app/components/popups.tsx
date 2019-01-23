@@ -1,8 +1,8 @@
+import {switchCase} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
 import onClickOutside from 'react-onclickoutside';
-import {switchCase} from '../utils/index';
 
 const styles = {
   tooltip: {

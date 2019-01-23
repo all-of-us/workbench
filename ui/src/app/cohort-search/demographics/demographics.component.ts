@@ -11,7 +11,7 @@ import {
   CohortSearchState,
   participantsCount,
   previewStatus,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 

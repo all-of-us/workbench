@@ -1,14 +1,14 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 import {
   activeItem,
   codeDropdownOptions,
   CohortSearchActions,
   CohortSearchState,
-} from '../redux';
-import {getCodeOptions} from '../utils';
+} from 'app/cohort-search/redux';
+import {getCodeOptions} from 'app/cohort-search/utils';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({

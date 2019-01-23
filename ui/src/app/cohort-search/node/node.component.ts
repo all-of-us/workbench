@@ -17,9 +17,9 @@ import {
   isCriteriaLoading,
   isEmpty,
   subtreeSelected,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
-import {highlightMatches, stripHtml} from '../utils';
+import {highlightMatches, stripHtml} from 'app/cohort-search/utils';
 
 @Component({
   selector: 'crit-node',

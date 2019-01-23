@@ -1,10 +1,10 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
+import {activeParameterList, CohortSearchActions, CohortSearchState} from 'app/cohort-search/redux';
 import {TreeType} from 'generated';
 import {List, Set} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {activeParameterList, CohortSearchActions, CohortSearchState} from '../redux';
 
 
 @Component({

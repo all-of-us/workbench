@@ -10,7 +10,7 @@ import {
   initGroup,
   OPEN_WIZARD,
   openWizard,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
 import {CohortBuilderService} from 'generated';
 import {SearchGroupSelectComponent} from './search-group-select.component';

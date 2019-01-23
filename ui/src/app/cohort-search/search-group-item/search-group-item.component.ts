@@ -5,9 +5,9 @@ import {SearchRequest, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {CohortSearchActions, CohortSearchState, getItem, itemError, parameterList} from '../redux';
+import {CohortSearchActions, CohortSearchState, getItem, itemError, parameterList} from 'app/cohort-search/redux';
 
-import {attributeDisplay, getCodeOptions, nameDisplay, typeDisplay, typeToTitle, } from '../utils';
+import {attributeDisplay, getCodeOptions, nameDisplay, typeDisplay, typeToTitle, } from 'app/cohort-search/utils';
 
 @Component({
   selector: 'app-search-group-item',
