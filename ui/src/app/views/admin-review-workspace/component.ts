@@ -17,7 +17,7 @@ import {
 @Component({
   templateUrl: './component.html',
   styleUrls: ['./component.css',
-              '../../styles/errors.css']
+    '../../styles/errors.css']
 })
 export class AdminReviewWorkspaceComponent implements OnInit {
   workspaces: Workspace[] = [];

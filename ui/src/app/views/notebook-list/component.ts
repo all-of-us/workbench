@@ -154,6 +154,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   get actionsDisabled(): boolean {
-      return !this.writePermission;
+    return !this.writePermission;
   }
 }

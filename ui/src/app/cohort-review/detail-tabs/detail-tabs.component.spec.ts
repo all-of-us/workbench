@@ -54,7 +54,7 @@ describe('DetailTabsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DetailTabsComponent, IndividualParticipantsChartsComponent],
       imports: [ChartModule, ClarityModule, RouterTestingModule],
-       schemas: [NO_ERRORS_SCHEMA],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {
           provide: HighchartsStatic,

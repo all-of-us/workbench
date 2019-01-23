@@ -27,12 +27,12 @@ const validStatuses = [
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges {
 
-    participantOption: any;
-    defaultOption = false;
-    test: any;
+  participantOption: any;
+  defaultOption = false;
+  test: any;
 
 
-    readonly cohortStatusList = validStatuses.map(status => ({
+  readonly cohortStatusList = validStatuses.map(status => ({
     value: status,
     display: Participant.formatStatusForText(status),
   }));
@@ -60,14 +60,14 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
   ngOnChanges() {
 
     if (this.statusControl.value) {
-        this.defaultOption = true;
-        if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
-            this.participantOption = 'NEEDS FURTHER REVIEW';
-        } else {
-            this.participantOption = this.statusControl.value;
-        }
+      this.defaultOption = true;
+      if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
+        this.participantOption = 'NEEDS FURTHER REVIEW';
+      } else {
+        this.participantOption = this.statusControl.value;
+      }
     } else {
-        this.defaultOption = false;
+      this.defaultOption = false;
     }
   }
 

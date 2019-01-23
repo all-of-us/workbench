@@ -80,9 +80,9 @@ export const ResearchPurposeItems = {
 
 @Component({
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/inputs.css'],
+    '../../styles/buttons.css',
+    '../../styles/cards.css',
+    '../../styles/inputs.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceEditComponent implements OnInit {
@@ -295,7 +295,7 @@ export class WorkspaceEditComponent implements OnInit {
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
         this.resetWorkspaceEditor();
-    });
+      });
   }
 
   resetWorkspaceEditor(): void {
@@ -354,7 +354,7 @@ export class WorkspaceEditComponent implements OnInit {
             this.workspace.namespace,
             this.workspace.id).then(() => {
               this.navigateBack();
-          });
+            });
         },
         (error) => {
           if (error.status === 409) {

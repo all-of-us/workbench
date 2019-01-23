@@ -125,12 +125,12 @@ describe('ProfilePageComponent', () => {
   }));
 
   it('handles empty givenName field', fakeAsync(() => {
-      simulateInput(
+    simulateInput(
           fixture, fixture.debugElement.query(By.css('#givenName')), '');
-      tick(300);
-      updateAndTick(fixture);
-      expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
-      expect(fixture.debugElement.query(By.css('#givenNameEmpty'))).toBeTruthy();
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#givenNameEmpty'))).toBeTruthy();
   }));
 
   it('handles empty familyName field', fakeAsync(() => {

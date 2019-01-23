@@ -91,10 +91,10 @@ describe('TablePage', () => {
         QueryDescriptiveStatsComponent
       ],
       imports: [ClarityModule,
-                ReactiveFormsModule,
-                RouterTestingModule,
-                NgxPopperModule,
-                NgxChartsModule],
+        ReactiveFormsModule,
+        RouterTestingModule,
+        NgxPopperModule,
+        NgxChartsModule],
       providers: [
         {provide: NgRedux},
         {provide: CohortReviewService},

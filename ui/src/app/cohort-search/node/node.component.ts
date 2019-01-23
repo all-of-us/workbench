@@ -263,7 +263,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   setExpanded(path: Array<number>, end: number) {
     let obj = this.expandedTree[path[0]];
     for (let x = 1; x < end; x++) {
-        obj = obj.children[path[x]];
+      obj = obj.children[path[x]];
     }
     if (obj.children.length) {
       obj.expanded = true;

@@ -18,7 +18,7 @@ describe('QueryDescriptiveStatsComponent', () => {
         QueryDescriptiveStatsComponent,
       ],
       imports: [
-         ClarityModule,
+        ClarityModule,
       ],
       providers: [
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},

@@ -47,9 +47,9 @@ class ConceptSetCreatePage {
     this.workspacesService.getWorkspace(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-      this.fixture.componentInstance.wsId = response.workspace.id;
-      this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
-    });
+          this.fixture.componentInstance.wsId = response.workspace.id;
+          this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
+        });
     tick();
     this.readPageData();
   }
@@ -74,19 +74,19 @@ class ConceptSetCreatePage {
     }
   }
 }
-  const activatedRouteStub  = {
-    snapshot: {
-      url: [
+const activatedRouteStub  = {
+  snapshot: {
+    url: [
         {path: 'workspaces'},
         {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
         {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      ],
-      params: {
-        'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-      }
+    ],
+    params: {
+      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     }
-  };
+  }
+};
 
 describe('ConceptSetComponent', () => {
   let conceptSetCreatePage: ConceptSetCreatePage;

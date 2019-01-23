@@ -15,11 +15,11 @@ import {
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/headers.css',
-              '../../styles/inputs.css',
-              '../../styles/errors.css',
-              './component.css'],
+    '../../styles/cards.css',
+    '../../styles/headers.css',
+    '../../styles/inputs.css',
+    '../../styles/errors.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class ProfilePageComponent implements OnInit {

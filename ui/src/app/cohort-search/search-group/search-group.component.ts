@@ -24,7 +24,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
   timeDropDown = ['During same encounter as',
-                  'X Days before', 'X Days after', 'Within X days of',
+    'X Days before', 'X Days after', 'Within X days of',
     'On or X days before', 'On or X days after'];
   dropdownOption: any;
   timeDropdownOption: any;

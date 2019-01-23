@@ -101,8 +101,8 @@ describe('CohortListComponent', () => {
         { provide: SignInService, useValue: new SignInServiceStub()},
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub()}
       ] }).compileComponents().then(() => {
-      cohortListPage = new CohortListPage(TestBed);
-    });
+        cohortListPage = new CohortListPage(TestBed);
+      });
     tick();
   }));
 

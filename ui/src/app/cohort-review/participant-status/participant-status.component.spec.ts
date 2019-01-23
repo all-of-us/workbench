@@ -29,8 +29,8 @@ class ApiSpy {
     .createSpy('updateParticipantCohortStatus')
     .and
     .returnValue(Observable.of({participantId: 1,
-        status: CohortStatus.INCLUDED,
-        birthDate: '12-31-1969'}));
+      status: CohortStatus.INCLUDED,
+      birthDate: '12-31-1969'}));
 }
 
 const participant: Participant = new Participant({

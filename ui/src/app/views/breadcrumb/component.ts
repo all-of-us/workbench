@@ -54,14 +54,14 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * intermediate pages.
    */
   private static filterBreadcrumbs(breadcrumbs: Breadcrumb[]): Array<Breadcrumb> {
-      if (breadcrumbs.length > 0) {
-          let last = breadcrumbs[breadcrumbs.length - 1];
-          while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
-              breadcrumbs.pop();
-              last = breadcrumbs[breadcrumbs.length - 1];
-          }
+    if (breadcrumbs.length > 0) {
+      let last = breadcrumbs[breadcrumbs.length - 1];
+      while ((breadcrumbs.length > 1) && (last.isIntermediate)) {
+        breadcrumbs.pop();
+        last = breadcrumbs[breadcrumbs.length - 1];
       }
-      return breadcrumbs;
+    }
+    return breadcrumbs;
   }
 
   ngOnInit() {

@@ -83,9 +83,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
-          this.setState({profile: savedProfile, creatingAccount: false});
-          setProfile(savedProfile);
-        }
+        this.setState({profile: savedProfile, creatingAccount: false});
+        setProfile(savedProfile);
+      }
       )
       .catch(error => {
         console.log(error);

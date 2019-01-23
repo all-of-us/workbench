@@ -123,25 +123,25 @@ describe('WorkspaceEditComponent', () => {
 
   it('should show a conflict-specific error when creating a name conflict workspace',
     fakeAsync(() => {
-    setupComponent(WorkspaceEditMode.Create);
-    testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
-    testComponent.workspace.name = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
-    testComponent.workspace.id = WorkspaceStubVariables.DEFAULT_WORKSPACE_ID;
-    testComponent.workspace.description = WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION;
-    const originalSize = workspacesService.workspaces.length;
-    fixture.detectChanges();
-    fixture.debugElement.query(By.css('.add-button'))
+      setupComponent(WorkspaceEditMode.Create);
+      testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
+      testComponent.workspace.name = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
+      testComponent.workspace.id = WorkspaceStubVariables.DEFAULT_WORKSPACE_ID;
+      testComponent.workspace.description = WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION;
+      const originalSize = workspacesService.workspaces.length;
+      fixture.detectChanges();
+      fixture.debugElement.query(By.css('.add-button'))
       .triggerEventHandler('click', null);
-    updateAndTick(fixture);
-    updateAndTick(fixture);
-    expect(workspacesService.workspaces.length).toBe(originalSize);
-    const modalTitle = fixture.debugElement.query(By.css('.modal-title'));
-    const modalBody = fixture.debugElement.query(By.css('.modal-body'));
-    expect(modalTitle.nativeElement.textContent).toEqual('Error:');
-    const errorMsg = 'You already have a workspace named ' + testComponent.workspace.name
+      updateAndTick(fixture);
+      updateAndTick(fixture);
+      expect(workspacesService.workspaces.length).toBe(originalSize);
+      const modalTitle = fixture.debugElement.query(By.css('.modal-title'));
+      const modalBody = fixture.debugElement.query(By.css('.modal-body'));
+      expect(modalTitle.nativeElement.textContent).toEqual('Error:');
+      const errorMsg = 'You already have a workspace named ' + testComponent.workspace.name
       + '. Please choose another name.';
-    expect(modalBody.nativeElement.textContent).toEqual(errorMsg);
-  }));
+      expect(modalBody.nativeElement.textContent).toEqual(errorMsg);
+    }));
 
   it('should show a generic error when creating an id conflict workspace', fakeAsync(() => {
     setupComponent(WorkspaceEditMode.Create);

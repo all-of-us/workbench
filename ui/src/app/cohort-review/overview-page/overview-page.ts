@@ -65,9 +65,9 @@ export class OverviewPage implements OnInit, OnDestroy {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     this.typesList.map(domainName => {
       this.domainsData[domainName] = {
-              conditionTitle: '',
-              loading: true
-            };
+        conditionTitle: '',
+        loading: true
+      };
       this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {

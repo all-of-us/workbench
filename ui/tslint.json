@@ -2,9 +2,20 @@
   "extends": "../common-ui/tslint.json",
   "rulesDirectory": [
     "node_modules/codelyzer",
-    "node_modules/tslint-microsoft-contrib"
+    "node_modules/tslint-microsoft-contrib",
+    "node_modules/tslint-eslint-rules/dist/rules"
   ],
   "rules": {
-    "no-relative-imports": [true, "allow-siblings"]
+    "no-relative-imports": [
+      true,
+      "allow-siblings"
+    ],
+    "ter-indent": [
+      true,
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ]
   }
 }

@@ -89,9 +89,9 @@ export class HomepageComponent implements OnInit, OnDestroy {
     },
       e => {},
       () => {
-      if (this.firstVisit) {
-        this.quickTour = true;
-      }
+        if (this.firstVisit) {
+          this.quickTour = true;
+        }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
     this.profileStorageService.profile$.subscribe((profile) => {
@@ -167,11 +167,11 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   navigateToProfile(): void {
-   this.router.navigate(['profile']);
+    this.router.navigate(['profile']);
   }
 
   listWorkspaces(): void {
-   this.router.navigate(['workspaces']);
+    this.router.navigate(['workspaces']);
   }
 
   get twoFactorBannerEnabled() {

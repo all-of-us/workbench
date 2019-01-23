@@ -52,12 +52,12 @@ const activatedRouteStub  = {
 
 function isSelectedDomain(
   domain: DomainInfo, fixture: ComponentFixture<ConceptHomepageComponent>): boolean {
-    if (fixture.debugElement.query(
+  if (fixture.debugElement.query(
       By.css('.domain-selector-button.active'))
       .children[0].nativeNode.textContent.trim() === domain.name) {
-        return true;
-    }
-    return false;
+    return true;
+  }
+  return false;
 }
 
 describe('ConceptHomepageComponent', () => {

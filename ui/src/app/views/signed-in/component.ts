@@ -19,8 +19,8 @@ import {Authority, BillingProjectStatus} from 'generated';
 @Component({
   selector: 'app-signed-in',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/errors.css'],
+    '../../styles/buttons.css',
+    '../../styles/errors.css'],
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit, OnDestroy {
@@ -114,7 +114,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
         this.billingProjectInitialized = true;
       } else {
         this.billingProjectQuery = setTimeout(() => {
-            this.profileStorageService.reload();
+          this.profileStorageService.reload();
         }, 10000);
       }
     });

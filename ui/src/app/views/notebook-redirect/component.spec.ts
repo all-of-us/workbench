@@ -118,11 +118,11 @@ describe('NotebookRedirectComponent', () => {
           }
         }},
       ]}).compileComponents().then(() => {
-      fixture = TestBed.createComponent(NotebookRedirectComponent);
-      spyOn(window.history, 'replaceState').and.stub();
-      blockingClusterStub.release();
-      blockingNotebooksStub.release();
-    });
+        fixture = TestBed.createComponent(NotebookRedirectComponent);
+        spyOn(window.history, 'replaceState').and.stub();
+        blockingClusterStub.release();
+        blockingNotebooksStub.release();
+      });
   }));
 
   function spinner() {
@@ -375,11 +375,11 @@ describe('NotebookRedirectComponent', () => {
           }
         }},
       ]}).compileComponents().then(() => {
-      fixture = TestBed.createComponent(NotebookRedirectComponent);
-      spyOn(window.history, 'replaceState').and.stub();
-      blockingClusterStub.release();
-      blockingNotebooksStub.release();
-    });
+        fixture = TestBed.createComponent(NotebookRedirectComponent);
+        spyOn(window.history, 'replaceState').and.stub();
+        blockingClusterStub.release();
+        blockingNotebooksStub.release();
+      });
   }));
 
 

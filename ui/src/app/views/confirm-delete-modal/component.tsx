@@ -53,24 +53,27 @@ export class ConfirmDeleteModal
     return <React.Fragment>
       {this.props.deleting &&
       <Modal className='confirmDeleteModal'>
-          <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
-              delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
-              : {this.props.resource.name}?
-          </ModalTitle>
-          <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
-              This will permanently delete
-              the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
-          </ModalBody>
-          <ModalFooter style={{paddingTop: '1rem'}}>
-              <Button type='secondary'
-                      onClick={() => this.props.closeFunction()}>Cancel</Button>
-              <Button disabled={this.state.loading}
-                      style={{marginLeft: '0.5rem'}}
-                      data-test-id='confirm-delete'
-                      onClick={() => this.emitDelete()}>
-                  Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
-              </Button>
-          </ModalFooter>
+        <ModalTitle style={{lineHeight: '28px'}}>
+          Are you sure you want to
+          delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          : {this.props.resource.name}?
+        </ModalTitle>
+        <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
+          This will permanently delete
+          the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
+        </ModalBody>
+        <ModalFooter style={{paddingTop: '1rem'}}>
+          <Button
+              type='secondary'
+              onClick={() => this.props.closeFunction()}>Cancel</Button>
+          <Button
+            disabled={this.state.loading}
+            style={{marginLeft: '0.5rem'}}
+            data-test-id='confirm-delete'
+            onClick={() => this.emitDelete()}>
+              Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          </Button>
+        </ModalFooter>
       </Modal>}
     </React.Fragment>;
   }

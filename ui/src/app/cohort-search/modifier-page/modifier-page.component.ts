@@ -24,9 +24,9 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-    selector: 'crit-modifier-page',
-    templateUrl: './modifier-page.component.html',
-    styleUrls: ['./modifier-page.component.css']
+  selector: 'crit-modifier-page',
+  templateUrl: './modifier-page.component.html',
+  styleUrls: ['./modifier-page.component.css']
 })
 export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
   @select(activeCriteriaType) ctype$;
@@ -95,8 +95,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     maxLength: 2,
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
-        name: 'Any',
-        value: undefined,
+      name: 'Any',
+      value: undefined,
     }, {
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
@@ -248,7 +248,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           .forEach(mod => this.actions.addModifier(mod));
 
         // update the calculate button
-         this.formChanges = !newMods.every(element => element === undefined);
+        this.formChanges = !newMods.every(element => element === undefined);
         // clear preview/counts
         this.preview = Map();
       })

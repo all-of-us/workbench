@@ -45,8 +45,8 @@ export class ConceptAddModalComponent {
     private conceptSetsService: ConceptSetsService,
     private conceptService: ConceptsService,
     private route: ActivatedRoute) {
-      this.wsNamespace = this.route.snapshot.params['ns'];
-      this.wsId = this.route.snapshot.params['wsid'];
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
   }
 
   open(): void {
@@ -62,8 +62,8 @@ export class ConceptAddModalComponent {
           }
           this.loading = false;
         }, (error) => {
-          this.loading = false;
-        });
+      this.loading = false;
+    });
     this.modalOpen = true;
     this.selectDomain = this.selectedDomain;
     this.selectConceptList = this.selectedConcepts
@@ -145,7 +145,7 @@ export class ConceptAddModalComponent {
           setTimeout(() => {
             this.errorSaving = false;
             this.errorMsg = '';
-           }, 5000);
+          }, 5000);
         });
   }
 }

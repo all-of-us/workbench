@@ -30,13 +30,13 @@ export class SetAnnotationModalComponent {
     this.state.annotationManagerOpen.next(value);
   }
 
-    get openEdit() {
-        return this.state.editAnnotationManagerOpen.getValue();
-    }
+  get openEdit() {
+    return this.state.editAnnotationManagerOpen.getValue();
+  }
 
-    set openEdit(value: boolean) {
-        this.state.editAnnotationManagerOpen.next(value);
-    }
+  set openEdit(value: boolean) {
+    this.state.editAnnotationManagerOpen.next(value);
+  }
 
   get modalTitle() {
     return {

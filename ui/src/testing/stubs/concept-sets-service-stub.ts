@@ -57,13 +57,13 @@ export class ConceptSetsServiceStub {
 
   public getConceptSetsInWorkspace(
     workspaceNamespace: string, workspaceId: string): Observable<ConceptSetListResponse> {
-      return new Observable<ConceptSetListResponse>(observer => {
-        setTimeout(() => {
-          observer.next({items: this.conceptSets});
-          observer.complete();
-        }, 0);
-      });
-    }
+    return new Observable<ConceptSetListResponse>(observer => {
+      setTimeout(() => {
+        observer.next({items: this.conceptSets});
+        observer.complete();
+      }, 0);
+    });
+  }
 
   public updateConceptSet(
       workspaceNamespace: string, workspaceId: string, conceptSetId: number,

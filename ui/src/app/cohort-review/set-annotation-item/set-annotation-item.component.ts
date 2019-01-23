@@ -18,33 +18,33 @@ import {
 } from 'generated';
 
 @Component({
-    selector: 'app-set-annotation-item',
-    templateUrl: './set-annotation-item.component.html',
-    styleUrls: ['./set-annotation-item.component.css']
+  selector: 'app-set-annotation-item',
+  templateUrl: './set-annotation-item.component.html',
+  styleUrls: ['./set-annotation-item.component.css']
 })
 export class SetAnnotationItemComponent {
-    @Input() definition: CohortAnnotationDefinition;
-    @Output() isPosting = new EventEmitter<boolean>();
+  @Input() definition: CohortAnnotationDefinition;
+  @Output() isPosting = new EventEmitter<boolean>();
 
-    editing = false;
-    name = new FormControl('', Validators.required);
+  editing = false;
+  name = new FormControl('', Validators.required);
 
-    @ViewChild('nameInput') nameInput;
+  @ViewChild('nameInput') nameInput;
 
-    constructor(
+  constructor(
         private route: ActivatedRoute,
         private annotationAPI: CohortAnnotationDefinitionService,
         private state: ReviewStateService,
         private ngZone: NgZone,
     ) {}
 
-    edit(): void {
-        this.editing = true;
-        this.name.setValue(this.definition.columnName);
-        this.setFocus();
-    }
+  edit(): void {
+    this.editing = true;
+    this.name.setValue(this.definition.columnName);
+    this.setFocus();
+  }
 
-    setFocus() {
+  setFocus() {
         // tslint:disable
         /* For all the reasons behind this TOTALLY OBVIOUS solution to the
          * extremely complex problem of focusing an input, please see the
@@ -54,26 +54,26 @@ export class SetAnnotationItemComponent {
          * https://github.com/angular/angular/issues/6179
          */
         // tslint:enable
-        this.ngZone.runOutsideAngular(() => {
-            setTimeout(() => this.nameInput.nativeElement.focus(), 0);
-        });
+    this.ngZone.runOutsideAngular(() => {
+      setTimeout(() => this.nameInput.nativeElement.focus(), 0);
+    });
+  }
+
+  saveEdit(): void {
+    const columnName = this.name.value.trim();
+    const oldColumnName = this.definition.columnName.trim();
+
+    if (this.name.invalid || (columnName === oldColumnName)) {
+      this.cancelEdit();
+      return ;
     }
 
-    saveEdit(): void {
-        const columnName = this.name.value.trim();
-        const oldColumnName = this.definition.columnName.trim();
+    const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const id = this.definition.cohortAnnotationDefinitionId;
+    this.isPosting.emit(true);
 
-        if (this.name.invalid || (columnName === oldColumnName)) {
-            this.cancelEdit();
-            return ;
-        }
-
-        const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
-        const {ns, wsid, cid} = this.route.snapshot.params;
-        const id = this.definition.cohortAnnotationDefinitionId;
-        this.isPosting.emit(true);
-
-        this.annotationAPI
+    this.annotationAPI
             .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
             .switchMap(_ => this.annotationAPI
                 .getCohortAnnotationDefinitions(ns, wsid, cid)
@@ -81,25 +81,25 @@ export class SetAnnotationItemComponent {
             .do((defns: CohortAnnotationDefinition[]) =>
                 this.state.annotationDefinitions.next(defns))
             .subscribe(_ => {
-            this.editing = false;
-            this.isPosting.emit(false);
-        });
+              this.editing = false;
+              this.isPosting.emit(false);
+            });
+  }
+
+  cancelEdit(event?) {
+    this.name.setValue(this.definition.columnName);
+    this.editing = false;
+    if (event) {
+      event.stopPropagation();
     }
+  }
 
-    cancelEdit(event?) {
-        this.name.setValue(this.definition.columnName);
-        this.editing = false;
-        if (event) {
-            event.stopPropagation();
-        }
-    }
+  delete(): void {
+    const {ns, wsid, cid} = this.route.snapshot.params;
+    const id = this.definition.cohortAnnotationDefinitionId;
+    this.isPosting.emit(true);
 
-    delete(): void {
-        const {ns, wsid, cid} = this.route.snapshot.params;
-        const id = this.definition.cohortAnnotationDefinitionId;
-        this.isPosting.emit(true);
-
-        this.annotationAPI
+    this.annotationAPI
             .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
             .switchMap(_ => this.annotationAPI
                 .getCohortAnnotationDefinitions(ns, wsid, cid)
@@ -107,5 +107,5 @@ export class SetAnnotationItemComponent {
             .do((defns: CohortAnnotationDefinition[]) =>
                 this.state.annotationDefinitions.next(defns))
             .subscribe(_ => this.isPosting.emit(false));
-    }
+  }
 }

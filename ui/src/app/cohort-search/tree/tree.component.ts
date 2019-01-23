@@ -21,7 +21,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
       || this.node.get('type') === TreeType[TreeType.ICD10]
       || this.node.get('type') === TreeType[TreeType.CPT]
       || this.node.get('type') === TreeType[TreeType.SNOMED]) {
-        super.ngOnInit();
+      super.ngOnInit();
     }
   }
 

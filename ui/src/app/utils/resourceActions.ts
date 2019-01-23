@@ -1,4 +1,4 @@
-  import {
+ import {
     Cohort,
     ConceptSet,
     FileDetail,
@@ -6,7 +6,7 @@
     WorkspaceAccessLevel
   } from 'generated';
 
-  export enum ResourceType {
+export enum ResourceType {
     NOTEBOOK = 'notebook',
     COHORT = 'cohort',
     CONCEPT_SET = 'conceptSet',

@@ -86,10 +86,10 @@ const pyNotebookMetadata = {
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/headers.css',
-              '../../styles/inputs.css',
-              './component.css'],
+    '../../styles/cards.css',
+    '../../styles/headers.css',
+    '../../styles/inputs.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class NotebookRedirectComponent implements OnInit, OnDestroy {
@@ -194,7 +194,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         // so instead just giving it a sec to "redirect"
         setTimeout(() => {
           this.incrementProgress(Progress.Loaded);
-          }, 1000);
+        }, 1000);
       });
   }
 
@@ -273,9 +273,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .map(resp => resp.clusterLocalDirectory);
   }
 
-    navigateBack(): void {
-      this.locationService.back();
-    }
+  navigateBack(): void {
+    this.locationService.back();
+  }
 
   private initializeProgressMap(): void {
     for (const p in Object.keys(Progress)) {

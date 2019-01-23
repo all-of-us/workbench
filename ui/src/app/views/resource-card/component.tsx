@@ -186,9 +186,9 @@ export class ResourceCardComponent implements OnInit {
         }
       })
       .subscribe(() => {
-          this.renaming = false;
-          this.onUpdate.emit(rename);
-        },
+        this.renaming = false;
+        this.onUpdate.emit(rename);
+      },
         (dupName) => {
           this.duplicateNameError.emit(dupName);
           this.renaming = false;
@@ -302,9 +302,9 @@ export class ResourceCardComponent implements OnInit {
         this.route.navigate(
           ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
             encodeURIComponent(this.resourceCard.notebook.name)], {
-            queryParams,
-            relativeTo: null,
-          });
+              queryParams,
+              relativeTo: null,
+            });
       }
     }
   }

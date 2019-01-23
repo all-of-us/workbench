@@ -25,7 +25,7 @@ describe('DetailAllEventsComponent', () => {
     })
   };
 
-    beforeEach(async(() => {
+  beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [ ClearButtonInMemoryFilterComponent,

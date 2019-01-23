@@ -46,7 +46,7 @@ export const ErrorMessage = withStyle(styles.errorMessage)('div');
 
 export const ValidationError = ({children}) => {
   if (!children) {
-  return null;
+    return null;
   }
   return <div
     style={{

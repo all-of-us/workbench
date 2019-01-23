@@ -55,7 +55,7 @@ class WorkspaceSharePage {
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
         this.fixture.componentInstance.workspace = response.workspace;
-    });
+      });
     tick();
     this.readPageData();
   }

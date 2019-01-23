@@ -133,8 +133,8 @@ describe('NotebookListComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
-      notebookListPage = new NotebookListPage(TestBed);
-    });
+        notebookListPage = new NotebookListPage(TestBed);
+      });
     tick();
   }));
 

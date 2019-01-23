@@ -4,7 +4,7 @@ import {Observable} from 'rxjs/Observable';
 
 @Injectable()
 export class UserServiceStub {
-    constructor() {}
+  constructor() {}
 
   user(searchTerm) {
     return new Observable<UserResponse>(observer => {

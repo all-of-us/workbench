@@ -41,7 +41,7 @@ export class CreateConceptSetModalComponent {
       this.conceptDomainList = response.items;
       this.domain = this.conceptDomainList[0].domain;
     });
-      this.modalOpen = true;
+    this.modalOpen = true;
   }
 
   close(): void {
@@ -71,9 +71,9 @@ export class CreateConceptSetModalComponent {
     };
     this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, request)
         .subscribe(() => {
-      this.modalOpen = false;
-      this.onUpdate.emit();
-    });
+          this.modalOpen = false;
+          this.onUpdate.emit();
+        });
   }
 }
 

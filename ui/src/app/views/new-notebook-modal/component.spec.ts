@@ -91,7 +91,7 @@ describe('NewNotebookModalComponent', () => {
     expect(fixture.componentInstance.route.navigate).toHaveBeenCalledWith(['workspaces',
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS, WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       'notebooks', name], {queryParams: {'kernelType': Kernels.Python3,
-      'creating': true}});
+        'creating': true}});
     expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeFalsy();
   }));
 
@@ -106,7 +106,7 @@ describe('NewNotebookModalComponent', () => {
     simulateClick(fixture, fixture.debugElement.query(By.css('.confirm-name-btn')));
     expect(fixture.componentInstance.route.navigate).toHaveBeenCalledWith(['workspaces',
       WorkspaceStubVariables.DEFAULT_WORKSPACE_NS, WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-    'notebooks', name], {queryParams: {'kernelType': Kernels.R, 'creating': true}});
+      'notebooks', name], {queryParams: {'kernelType': Kernels.R, 'creating': true}});
     expect(fixture.debugElement.query(By.css('clr-modal')).classes['open']).toBeFalsy();
   }));
 });

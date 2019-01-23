@@ -66,11 +66,11 @@ describe('ResourceCardComponent', () => {
       ]
     }).compileComponents()
       .then(() => {
-      fixture = TestBed.createComponent(ResourceCardWrapperComponent);
-      component = fixture.debugElement.children[0].componentInstance;
+        fixture = TestBed.createComponent(ResourceCardWrapperComponent);
+        component = fixture.debugElement.children[0].componentInstance;
 
-      fixture.detectChanges();
-    });
+        fixture.detectChanges();
+      });
   }));
 
   it('should render', fakeAsync(() => {

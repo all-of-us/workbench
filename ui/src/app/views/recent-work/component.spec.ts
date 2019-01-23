@@ -97,7 +97,7 @@ describe('RecentWorkComponent', () => {
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
     expect(cardNames).toEqual(
-        ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
+      ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
         'sample name 2']);
   }));
 

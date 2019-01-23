@@ -36,7 +36,7 @@ export class SetAnnotationCreateComponent {
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
- annotationOptions = '';
+  annotationOptions = '';
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -94,12 +94,12 @@ export class SetAnnotationCreateComponent {
         this.addValue.reset();
       });
   }
-   get open() {
+  get open() {
     return this.state.annotationManagerOpen.getValue();
   }
 
   set open(value: boolean) {
-      this.state.annotationManagerOpen.next(value);
+    this.state.annotationManagerOpen.next(value);
   }
 
   cancel() {

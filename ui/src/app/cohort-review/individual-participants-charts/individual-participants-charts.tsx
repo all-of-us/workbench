@@ -119,13 +119,13 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         tickInterval: 1,
         lineWidth: 1,
       },
-        {
-          title: {
-            enabled: false,
-          },
-          opposite: true,
-          lineWidth: 1,
-        }],
+      {
+        title: {
+          enabled: false,
+        },
+        opposite: true,
+        lineWidth: 1,
+      }],
       plotOptions: {
         scatter: {
           marker: {

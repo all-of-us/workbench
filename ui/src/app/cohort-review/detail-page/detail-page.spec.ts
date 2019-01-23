@@ -96,10 +96,10 @@ describe('DetailPage', () => {
         ValidatorErrorsComponent,
       ],
       imports: [ClarityModule,
-                NgxPopperModule,
-                ReactiveFormsModule,
-                ChartModule,
-                RouterTestingModule],
+        NgxPopperModule,
+        ReactiveFormsModule,
+        ChartModule,
+        RouterTestingModule],
       providers: [
         {
           provide: HighchartsStatic,

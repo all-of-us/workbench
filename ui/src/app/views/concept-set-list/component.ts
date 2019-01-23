@@ -50,10 +50,10 @@ export class ConceptSetListComponent implements OnInit {
   conceptCreateModal: CreateConceptSetModalComponent;
 
   ngOnInit(): void {
-      this.wsNamespace = this.route.snapshot.params['ns'];
-      this.wsId = this.route.snapshot.params['wsid'];
-      this.conceptSetsLoading = true;
-      this.loadConceptSets();
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
+    this.conceptSetsLoading = true;
+    this.loadConceptSets();
   }
 
   loadConceptSets() {
