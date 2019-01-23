@@ -64,7 +64,6 @@
     "no-irregular-whitespace": true,
     "no-misused-new": true,
     "no-non-null-assertion": true,
-    "no-relative-imports": true,
     "no-shadowed-variable": true,
     "no-string-literal": false,
     "no-string-throw": true,
