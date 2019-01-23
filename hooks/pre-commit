@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-eval "$( cd "$(dirname "$0")" ; pwd -P )/apply-git-secrets.sh"
+eval "$(git rev-parse --show-toplevel)/hooks/apply-git-secrets.sh"
 
 git secrets --pre_commit_hook -- "$@"
 

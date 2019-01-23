@@ -218,3 +218,11 @@ export function decamelize(str: string, separator: string) {
     .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
     .toLowerCase();
 }
+
+export const withStyle = styleObj => WrappedComponent => {
+  const Wrapper = React.forwardRef(({ style = {}, ...props }: any, ref) => {
+    return <WrappedComponent ref={ref} style={{...styleObj, ...style}} {...props} />;
+  });
+  Wrapper.displayName = 'withStyle';
+  return Wrapper;
+};

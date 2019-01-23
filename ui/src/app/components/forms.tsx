@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import {withStyle} from 'app/utils/index';
+
 export const styles = {
   formSection: {
     marginTop: '1rem',
@@ -7,5 +9,4 @@ export const styles = {
   }
 };
 
-export const FormSection = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.formSection, ...style}}/>;
+export const FormSection = withStyle(styles.formSection)('div');

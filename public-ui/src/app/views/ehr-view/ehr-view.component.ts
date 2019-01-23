@@ -52,7 +52,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'but may be recorded in many different ways. \n' +
     'The sources represent the many different ways that the standard medical concept ' +
     'returned in the search results has been recorded in patient records. \n' +
-    'The sources bar chart provides the top 10 source concepts from the AoU data.';
+    'The sources bar chart provides the top 10 source concepts from the All of Us data.';
 
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
@@ -75,9 +75,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'processes that are ordered or carried out on individuals for ' +
     'diagnostic or therapeutic purposes are captured by the procedures domain.'};
   conceptCodeHelpText = 'The concept code is an additional piece of information that\n' +
-    'can be utilized to find medical concepts in the AoU data set. ' +
+    'can be utilized to find medical concepts in the All of Us data set. ' +
     'Concept codes are specific to the\n' +
-    'AoU Research Program data and are assigned to all medical concepts.\n' +
+    'All of Us Research Program data and are assigned to all medical concepts.\n' +
     'In some instances,\n' +
     'a medical concept may not be assigned a source or standard vocabulary code.\n' +
     'In these instances, the concept code can be utilized to\n' +

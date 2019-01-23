@@ -3,6 +3,8 @@ import {Component, Input} from '@angular/core';
 import {
   Button
 } from 'app/components/buttons';
+import {styles as headerStyles} from 'app/components/headers';
+import {TextInput} from 'app/components/inputs';
 import {
   Modal,
   ModalBody,
@@ -50,10 +52,10 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
       <Modal>
         <ModalTitle>Please enter the new name for {this.props.resource.name}</ModalTitle>
         <ModalBody>
-          <label>New Name: </label>
-          <input id='new-name' type='text'
-                 onChange={(e) => this.setState({newName: e.target.value})}>
-          </input>
+          <div style={headerStyles.formLabel}>New Name:</div>
+          <TextInput id='new-name'
+             onChange={v => this.setState({newName: v})}
+          />
         </ModalBody>
         <ModalFooter>
           <Button type='secondary' onClick={() => this.props.onCancel()}>Cancel</Button>

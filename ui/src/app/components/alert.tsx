@@ -1,6 +1,8 @@
 import {reactStyles} from 'app/utils';
 import * as React from 'react';
 
+import {withStyle} from 'app/utils/index';
+
 export const styles = reactStyles({
   alert: {
     fontSize: '.54167rem',
@@ -25,7 +27,5 @@ export const styles = reactStyles({
   }
 });
 
-export const Alert = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.alert, ...style}}/>;
-export const AlertDanger = ({style = {}, ...props}) =>
-  <Alert {...props} style={{...styles.danger, ...style}}/>;
+export const Alert = withStyle(styles.alert)('div');
+export const AlertDanger = withStyle(styles.danger)(Alert);
