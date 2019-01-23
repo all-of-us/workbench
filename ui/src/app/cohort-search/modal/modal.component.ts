@@ -11,6 +11,7 @@ import {
   CohortSearchActions,
   nodeAttributes,
   previewStatus,
+  scrollId,
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
@@ -37,7 +38,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeItem) item$: Observable<any>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
-  @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(scrollId) scrollTo$: Observable<any>;
+  @select(subtreeSelected) subtree$: Observable<any>;
   @select(previewStatus) preview$;
   @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
@@ -110,9 +112,16 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
+      .filter(nodeId => !!nodeId)
+      .subscribe(nodeId => {
+        this.setScroll(nodeId);
+      })
+    );
+
+    this.subscription.add(this.subtree$
       .filter(nodeIds => !!nodeIds)
       .subscribe(nodeIds => {
-        this.setScroll(nodeIds[0]);
+        this.disableCursor = nodeIds.length > 0;
       })
     );
 
@@ -150,21 +159,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
   setScroll(nodeId: string) {
-    let node: any;
-    this.disableCursor = true;
-    Observable.interval(100)
-      .takeWhile((val, index) => !node && index < 30)
-      .subscribe(i => {
-        node = document.getElementById('node' + nodeId.toString());
-        if (node) {
-          setTimeout(() => {
-            node.scrollIntoView({behavior: 'smooth'});
-            this.disableCursor = false;
-          }, 200);
-        } else if (i === 29) {
-          this.disableCursor = false;
-        }
-      });
+    const node = document.getElementById('node' + nodeId.toString());
+    if (node) {
+      node.scrollIntoView({behavior: 'smooth'});
+    }
+    this.disableCursor = false;
   }
 
   ngOnDestroy() {
