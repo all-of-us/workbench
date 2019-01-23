@@ -25,7 +25,7 @@ describe('SettingsComponent', () => {
     expect(wrapper.find('Modal[data-test-id="reset-notebook-modal"]').length).toBe(0);
   });
 
-  it('should allow deleting the cluster when there is one', async () => {
+  it('should allow deleting the cluster when there is one', async() => {
     const spy = jest.spyOn(clusterApi(), 'deleteCluster');
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

@@ -140,7 +140,7 @@ describe('WorkspaceNavBarComponent', () => {
       router = TestBed.get(Router);
 
       router.navigateByUrl(
-          `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
+        `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
           WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
       // Clarity needs several ticks/redraw cycles to render its button group.
       tick();

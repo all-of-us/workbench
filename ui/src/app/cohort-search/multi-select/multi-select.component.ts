@@ -29,7 +29,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
   @Output() addedItems = new EventEmitter<boolean>();
   selectedOption: any;
   constructor(private actions: CohortSearchActions,
-                private ngRedux: NgRedux<CohortSearchState>) {}
+    private ngRedux: NgRedux<CohortSearchState>) {}
 
 
   ngOnInit() {
@@ -39,15 +39,15 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
             .subscribe(regex => this.regex = regex);
 
     this.subscription.add (this.ngRedux
-            .select(activeParameterList)
-            .subscribe(val => {
-              this.selectedOption = [];
-              val.forEach( paramList => {
-                if (paramList.get('type') === TreeType.DEMO) {
-                  this.selectedOption.push(paramList.get('parameterId'));
-                }
-              });
-            }));
+      .select(activeParameterList)
+      .subscribe(val => {
+        this.selectedOption = [];
+        val.forEach( paramList => {
+          if (paramList.get('type') === TreeType.DEMO) {
+            this.selectedOption.push(paramList.get('parameterId'));
+          }
+        });
+      }));
   }
 
   ngOnDestroy() {
@@ -56,7 +56,7 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
 
   get filteredOptions() {
     return this.options
-            .filter(opt => this.regex.test(opt.get('name', '')));
+      .filter(opt => this.regex.test(opt.get('name', '')));
   }
 
   select(opt) {

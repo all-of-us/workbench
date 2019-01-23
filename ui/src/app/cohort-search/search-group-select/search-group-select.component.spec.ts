@@ -44,7 +44,7 @@ describe('SearchGroupSelectComponent', () => {
         {provide: CohortSearchActions, useValue: new MockActions()},
       ],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

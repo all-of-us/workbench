@@ -93,11 +93,11 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   showCalculateContainer = false;
   count: any;
   constructor(
-        private route: ActivatedRoute,
-        private api: CohortBuilderService,
-        private actions: CohortSearchActions,
-        private ngRedux: NgRedux<CohortSearchState>
-    ) {}
+    private route: ActivatedRoute,
+    private api: CohortBuilderService,
+    private actions: CohortSearchActions,
+    private ngRedux: NgRedux<CohortSearchState>
+  ) {}
 
   ngOnChanges() {
     this.showCalculateContainer = false;
@@ -143,31 +143,31 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.subscription.add(this.selection$
-            .map(sel => sel.size === 0)
-            .subscribe(sel => this.noSelection = sel)
+      .map(sel => sel.size === 0)
+      .subscribe(sel => this.noSelection = sel)
         );
 
 
     this.subscription.add(this.count$
-        .subscribe(totalCount => {
-          if (totalCount) {
-            this.count = totalCount;
-          }
-        }));
+      .subscribe(totalCount => {
+        if (totalCount) {
+          this.count = totalCount;
+        }
+      }));
 
     this.subscription.add (this.ngRedux
-            .select(activeParameterList)
-            .subscribe(val => {
-              val.forEach( paramList => {
+      .select(activeParameterList)
+      .subscribe(val => {
+        val.forEach( paramList => {
 
-                if (paramList.get('subtype') === TreeSubType.DEC) {
-                  this.deceasedClicked = paramList.get('name');
-                } else if (paramList.get('subtype') === TreeSubType.AGE) {
-                  this.ageClicked = paramList.get('name');
-                }
-              });
+          if (paramList.get('subtype') === TreeSubType.DEC) {
+            this.deceasedClicked = paramList.get('name');
+          } else if (paramList.get('subtype') === TreeSubType.AGE) {
+            this.ageClicked = paramList.get('name');
+          }
+        });
 
-            }));
+      }));
   }
 
   ngOnDestroy() {
@@ -193,21 +193,21 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         ].map(code => {
           this.loading[code] = true;
           this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-                .subscribe(response => {
-                  const items = response.items
+            .subscribe(response => {
+              const items = response.items
                         .filter(item => item.parentId !== 0
                             || code === TreeSubType[TreeSubType.DEC]);
-                  items.sort(sortByCountThenName);
-                  const nodes = fromJS(items).map(node => {
-                    if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                      const paramId =
+              items.sort(sortByCountThenName);
+              const nodes = fromJS(items).map(node => {
+                if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+                  const paramId =
                                 `param${node.get('conceptId', node.get('code'))}`;
-                      node = node.set('parameterId', paramId);
-                    }
-                    return node;
-                  });
-                  this.loadOptions(nodes, code);
-                });
+                  node = node.set('parameterId', paramId);
+                }
+                return node;
+              });
+              this.loadOptions(nodes, code);
+            });
         });
   }
 
@@ -322,7 +322,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
     const selectedAge = this.selection$
             .map(selectedNodes => selectedNodes
-                .find(node => node.get('subtype') === TreeSubType[TreeSubType.AGE])
+              .find(node => node.get('subtype') === TreeSubType[TreeSubType.AGE])
             );
 
     const ageDiff = this.ageRange.valueChanges
@@ -397,7 +397,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     const wrapper = document.getElementById('count-wrapper');
     const count = document.getElementById('age-count');
     wrapper.setAttribute(
-            'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+      'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
         );
         // set style properties also for cross-browser compatibility
     wrapper.style.width = slider.offsetWidth.toString();

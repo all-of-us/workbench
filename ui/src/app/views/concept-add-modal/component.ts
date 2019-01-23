@@ -52,16 +52,16 @@ export class ConceptAddModalComponent {
   open(): void {
     this.loading = true;
     this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId).subscribe(
-        (response) => {
-          this.conceptSets = response.items.filter((concept) => {
-            return concept.domain === this.selectedDomain;
-          });
-          this.existingSetSelected = this.conceptSets && this.conceptSets.length > 0;
-          if (this.conceptSets && this.conceptSets.length > 0) {
-            this.selectedConceptSet = this.conceptSets[0];
-          }
-          this.loading = false;
-        }, (error) => {
+      (response) => {
+        this.conceptSets = response.items.filter((concept) => {
+          return concept.domain === this.selectedDomain;
+        });
+        this.existingSetSelected = this.conceptSets && this.conceptSets.length > 0;
+        if (this.conceptSets && this.conceptSets.length > 0) {
+          this.selectedConceptSet = this.conceptSets[0];
+        }
+        this.loading = false;
+      }, (error) => {
       this.loading = false;
     });
     this.modalOpen = true;
@@ -99,14 +99,14 @@ export class ConceptAddModalComponent {
         addedIds: conceptIds
       };
       this.conceptSetsService.updateConceptSetConcepts(
-          this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
-          .subscribe((response) => {
-            this.saving = false;
-            this.modalOpen = false;
-            this.saveComplete.emit();
-          }, (error) => {
-            this.errorMsg = error.toString();
-          });
+        this.wsNamespace, this.wsId, this.selectedConceptSet.id, updateConceptSetReq)
+        .subscribe((response) => {
+          this.saving = false;
+          this.modalOpen = false;
+          this.saveComplete.emit();
+        }, (error) => {
+          this.errorMsg = error.toString();
+        });
       return;
     }
 
@@ -131,21 +131,21 @@ export class ConceptAddModalComponent {
     };
 
     this.conceptSetsService.createConceptSet(this.wsNamespace, this.wsId, request)
-        .subscribe((response) => {
-          this.saving = false;
-          this.modalOpen = false;
-          this.saveComplete.emit();
-        }, (error) => {
-          this.errorSaving = true;
-          if (error.status === 400) {
-            this.errorMsg = 'Concept with same name already exist';
-          } else {
-            this.errorMsg = 'Error while saving concept please try again';
-          }
-          setTimeout(() => {
-            this.errorSaving = false;
-            this.errorMsg = '';
-          }, 5000);
-        });
+      .subscribe((response) => {
+        this.saving = false;
+        this.modalOpen = false;
+        this.saveComplete.emit();
+      }, (error) => {
+        this.errorSaving = true;
+        if (error.status === 400) {
+          this.errorMsg = 'Concept with same name already exist';
+        } else {
+          this.errorMsg = 'Error while saving concept please try again';
+        }
+        setTimeout(() => {
+          this.errorSaving = false;
+          this.errorMsg = '';
+        }, 5000);
+      });
   }
 }

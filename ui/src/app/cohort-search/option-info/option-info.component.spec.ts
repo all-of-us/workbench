@@ -13,7 +13,7 @@ describe('OptionInfoComponent', () => {
       declarations: [ OptionInfoComponent, SafeHtmlPipe ],
       imports: [ NgxPopperModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

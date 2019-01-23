@@ -24,8 +24,8 @@ export class SignInService {
   public clientId = environment.clientId;
 
   constructor(private zone: NgZone,
-              private router: Router,
-              serverConfigService: ServerConfigService) {
+    private router: Router,
+    serverConfigService: ServerConfigService) {
     this.zone = zone;
 
     serverConfigService.getConfig().subscribe((config) => {

@@ -68,7 +68,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public isUsernameTaken(username: string, extraHttpRequestParams?: any):
-      Observable<UsernameTakenResponse> {
+  Observable<UsernameTakenResponse> {
     return new Observable(observer => {
       observer.next({
         isTaken: username === ProfileStubVariables.PROFILE_STUB.username

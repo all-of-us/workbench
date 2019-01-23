@@ -32,11 +32,11 @@ export class SetAnnotationItemComponent {
   @ViewChild('nameInput') nameInput;
 
   constructor(
-        private route: ActivatedRoute,
-        private annotationAPI: CohortAnnotationDefinitionService,
-        private state: ReviewStateService,
-        private ngZone: NgZone,
-    ) {}
+    private route: ActivatedRoute,
+    private annotationAPI: CohortAnnotationDefinitionService,
+    private state: ReviewStateService,
+    private ngZone: NgZone,
+  ) {}
 
   edit(): void {
     this.editing = true;
@@ -74,16 +74,16 @@ export class SetAnnotationItemComponent {
     this.isPosting.emit(true);
 
     this.annotationAPI
-            .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
-            .switchMap(_ => this.annotationAPI
-                .getCohortAnnotationDefinitions(ns, wsid, cid)
-                .pluck('items'))
-            .do((defns: CohortAnnotationDefinition[]) =>
+      .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
+      .switchMap(_ => this.annotationAPI
+        .getCohortAnnotationDefinitions(ns, wsid, cid)
+        .pluck('items'))
+      .do((defns: CohortAnnotationDefinition[]) =>
                 this.state.annotationDefinitions.next(defns))
-            .subscribe(_ => {
-              this.editing = false;
-              this.isPosting.emit(false);
-            });
+      .subscribe(_ => {
+        this.editing = false;
+        this.isPosting.emit(false);
+      });
   }
 
   cancelEdit(event?) {
@@ -100,12 +100,12 @@ export class SetAnnotationItemComponent {
     this.isPosting.emit(true);
 
     this.annotationAPI
-            .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
-            .switchMap(_ => this.annotationAPI
-                .getCohortAnnotationDefinitions(ns, wsid, cid)
-                .pluck('items'))
-            .do((defns: CohortAnnotationDefinition[]) =>
+      .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
+      .switchMap(_ => this.annotationAPI
+        .getCohortAnnotationDefinitions(ns, wsid, cid)
+        .pluck('items'))
+      .do((defns: CohortAnnotationDefinition[]) =>
                 this.state.annotationDefinitions.next(defns))
-            .subscribe(_ => this.isPosting.emit(false));
+      .subscribe(_ => this.isPosting.emit(false));
   }
 }

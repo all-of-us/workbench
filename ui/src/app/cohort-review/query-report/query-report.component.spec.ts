@@ -129,7 +129,7 @@ describe('QueryReportComponent', () => {
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -20,8 +20,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   breadcrumbs: Breadcrumb[];
   constructor(
-      private activatedRoute: ActivatedRoute,
-      private router: Router) {}
+    private activatedRoute: ActivatedRoute,
+    private router: Router) {}
 
   /**
    * Generate a breadcrumb using the default label and url. Uses the route's
@@ -30,9 +30,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * do substitution with the 'wsid' value in the route's paramMap.
    */
   private static makeBreadcrumb(label: string,
-                                isIntermediate: boolean,
-                                url: string,
-                                route: ActivatedRoute): Breadcrumb {
+    isIntermediate: boolean,
+    url: string,
+    route: ActivatedRoute): Breadcrumb {
     let newLabel = label;
     // Perform variable substitution in label only if needed.
     if (newLabel.indexOf(':') >= 0) {
@@ -70,7 +70,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     this.subscription = this.router.events.filter(event => event instanceof NavigationEnd)
       .subscribe(event => {
         this.breadcrumbs = BreadcrumbComponent.filterBreadcrumbs(
-            this.buildBreadcrumbs(this.activatedRoute.root));
+          this.buildBreadcrumbs(this.activatedRoute.root));
       });
   }
 
@@ -83,8 +83,8 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
    * Derived from current route in conjunction with the overall route structure.
    */
   private buildBreadcrumbs(route: ActivatedRoute,
-                           url: string = '',
-                           breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
+    url: string = '',
+    breadcrumbs: Breadcrumb[] = []): Array<Breadcrumb> {
     const children: ActivatedRoute[] = route.children;
     const routeDataBreadcrumb = 'breadcrumb';
     if (children.length === 0) {

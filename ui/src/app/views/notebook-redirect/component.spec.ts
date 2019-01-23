@@ -44,8 +44,8 @@ class BlockingNotebooksStub extends NotebooksServiceStub {
   }
 
   public setCookieWithHttpInfo(
-      googleProject: string, clusterName: string,
-      extraHttpRequestParams?: any): Observable<Response> {
+    googleProject: string, clusterName: string,
+    extraHttpRequestParams?: any): Observable<Response> {
     return this.blocker.flatMap(() => {
       return super.setCookieWithHttpInfo(
         googleProject, clusterName, extraHttpRequestParams);
@@ -66,7 +66,7 @@ class BlockingClusterStub extends ClusterServiceStub {
   }
 
   localize(projectName: string, clusterName: string,
-      req: ClusterLocalizeRequest, extraHttpRequestParams?: any): Observable<{}> {
+    req: ClusterLocalizeRequest, extraHttpRequestParams?: any): Observable<{}> {
     return this.blocker.flatMap(() => {
       return super.localize(projectName, clusterName, req, extraHttpRequestParams);
     });

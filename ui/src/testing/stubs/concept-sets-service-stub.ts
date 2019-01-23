@@ -66,8 +66,8 @@ export class ConceptSetsServiceStub {
   }
 
   public updateConceptSet(
-      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-      req: ConceptSet): Observable<ConceptSet> {
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: ConceptSet): Observable<ConceptSet> {
     return new Observable<ConceptSet>(obs => {
       setTimeout(() => {
         const target = this.mustFindConceptSet(conceptSetId);
@@ -80,7 +80,7 @@ export class ConceptSetsServiceStub {
   }
 
   public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
-                          extraHttpRequestParams?: any): Observable<ConceptSet> {
+    extraHttpRequestParams?: any): Observable<ConceptSet> {
     return new Observable<ConceptSet>(observer => {
       setTimeout(() => {
         observer.next(this.conceptSets[0]);
@@ -90,8 +90,8 @@ export class ConceptSetsServiceStub {
   }
 
   public updateConceptSetConcepts(
-      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-      req: UpdateConceptSetRequest): Observable<ConceptSet> {
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: UpdateConceptSetRequest): Observable<ConceptSet> {
     return new Observable<ConceptSet>(obs => {
       setTimeout(() => {
         const target = this.conceptSets.find(cs => cs.id === conceptSetId);
@@ -121,8 +121,8 @@ export class ConceptSetsServiceStub {
   }
 
   public deleteConceptSet(
-      workspaceNamespace: string, workspaceId: string,
-      conceptSetId: number): Observable<void> {
+    workspaceNamespace: string, workspaceId: string,
+    conceptSetId: number): Observable<void> {
     return new Observable<void>(obs => {
       setTimeout(() => {
         const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);

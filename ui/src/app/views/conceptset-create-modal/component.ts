@@ -27,8 +27,8 @@ export class CreateConceptSetModalComponent {
   alreadyExist = false;
 
   constructor(private conceptsService: ConceptsService,
-              private conceptSetService: ConceptSetsService,
-              private route: ActivatedRoute) {
+    private conceptSetService: ConceptSetsService,
+    private route: ActivatedRoute) {
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
   }
@@ -70,10 +70,10 @@ export class CreateConceptSetModalComponent {
       conceptSet: concept
     };
     this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, request)
-        .subscribe(() => {
-          this.modalOpen = false;
-          this.onUpdate.emit();
-        });
+      .subscribe(() => {
+        this.modalOpen = false;
+        this.onUpdate.emit();
+      });
   }
 }
 

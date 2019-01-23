@@ -126,7 +126,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty givenName field', fakeAsync(() => {
     simulateInput(
-          fixture, fixture.debugElement.query(By.css('#givenName')), '');
+      fixture, fixture.debugElement.query(By.css('#givenName')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
@@ -135,7 +135,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty familyName field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#familyName')), '');
+      fixture, fixture.debugElement.query(By.css('#familyName')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.familyNameNotEmpty).toBeFalsy();
@@ -144,7 +144,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty current position field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#currentPosition')), '');
+      fixture, fixture.debugElement.query(By.css('#currentPosition')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentPositionNotEmpty).toBeFalsy();
@@ -153,7 +153,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty organization field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#organization')), '');
+      fixture, fixture.debugElement.query(By.css('#organization')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.organizationNotEmpty).toBeFalsy();
@@ -162,7 +162,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty organization field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#areaOfResearch')), '');
+      fixture, fixture.debugElement.query(By.css('#areaOfResearch')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentResearchNotEmpty).toBeFalsy();

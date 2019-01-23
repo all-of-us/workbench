@@ -231,8 +231,8 @@ export class WorkspacesServiceStub {
   }
 
   updateWorkspace(workspaceNamespace: string,
-                  workspaceId: string,
-                  newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
+    workspaceId: string,
+    newWorkspace: UpdateWorkspaceRequest): Observable<Workspace> {
     return new Observable<Workspace>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
@@ -252,8 +252,8 @@ export class WorkspacesServiceStub {
   }
 
   cloneWorkspace(workspaceNamespace: string,
-                 workspaceId: string,
-                 cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
+    workspaceId: string,
+    cloneReq: CloneWorkspaceRequest): Observable<CloneWorkspaceResponse> {
     return new Observable<CloneWorkspaceResponse>(observer => {
       setTimeout(() => {
         if (cloneReq.workspace.name === WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME) {
@@ -277,8 +277,8 @@ export class WorkspacesServiceStub {
   }
 
   shareWorkspace(workspaceNamespace: string,
-                 workspaceId: string,
-                 request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
+    workspaceId: string,
+    request: ShareWorkspaceRequest): Observable<ShareWorkspaceResponse> {
     return new Observable<ShareWorkspaceResponse>(observer => {
       setTimeout(() => {
         const updateIndex = this.workspaces.findIndex((workspace: Workspace) => {
@@ -306,7 +306,7 @@ export class WorkspacesServiceStub {
   }
 
   getNoteBookList(workspaceNamespace: string,
-      workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
+    workspaceId: string, extraHttpRequestParams?: any): Observable<Array<FileDetail>> {
     return new Observable<Array<FileDetail>>(observer => {
       setTimeout(() => {
         observer.next(this.notebookList);
@@ -316,7 +316,7 @@ export class WorkspacesServiceStub {
   }
 
   renameNotebook(workspaceNamespace: string, workspaceId: string,
-      rename: NotebookRename): Observable<FileDetail> {
+    rename: NotebookRename): Observable<FileDetail> {
     return new Observable<FileDetail>(observer => {
       setTimeout(() => {
         const responseItems: FileDetail = {
@@ -331,7 +331,7 @@ export class WorkspacesServiceStub {
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
-      notebookName: String): Observable<any> {
+    notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
         const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
@@ -346,7 +346,7 @@ export class WorkspacesServiceStub {
   }
 
   deleteNotebook(workspaceNamespace: string, workspaceId: string,
-      notebookName: String): Observable<any> {
+    notebookName: String): Observable<any> {
     return new Observable<any>(observer => {
       setTimeout(() => {
         this.notebookList.pop();
@@ -357,7 +357,7 @@ export class WorkspacesServiceStub {
   }
 
   localizeAllFiles(workspaceNamespace: string, workspaceId: string,
-      extraHttpRequestParams?: any): Observable<{}> {
+    extraHttpRequestParams?: any): Observable<{}> {
     return new Observable<{}>(observer => {
       setTimeout(() => {
         observer.next(null);

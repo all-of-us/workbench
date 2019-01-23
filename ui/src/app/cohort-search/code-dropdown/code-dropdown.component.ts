@@ -25,9 +25,9 @@ export class CodeDropdownComponent implements  OnInit {
   @select(activeItem) activeItem$: Observable<any>;
   @select(codeDropdownOptions) options$: Observable<any>;
   constructor(
-        private ngRedux: NgRedux<CohortSearchState>,
-        private actions: CohortSearchActions
-    ) {}
+    private ngRedux: NgRedux<CohortSearchState>,
+    private actions: CohortSearchActions
+  ) {}
 
   ngOnInit() {
     this.subscription = this.activeItem$

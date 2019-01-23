@@ -14,7 +14,17 @@
       true,
       2,
       {
-        "SwitchCase": 1
+        "SwitchCase": 1,
+        "MemberExpression": 1,
+        "FunctionDeclaration": {
+          "parameters": 1
+        },
+        "FunctionExpression": {
+          "parameters": 1
+        },
+        "CallExpression": {
+          "arguments": 1
+        }
       }
     ]
   }

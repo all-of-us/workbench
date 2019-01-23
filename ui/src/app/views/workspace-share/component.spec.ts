@@ -175,18 +175,18 @@ describe('WorkspaceShareComponent', () => {
     expect(workspaceSharePage.roleNamePairsOnPage.length).toEqual(3);
     expect(workspaceSharePage.roleNamePairsOnPage[0].email).toBe(userValuesStub.items[0].email);
     expect(workspaceSharePage.roleNamePairsOnPage[0].role)
-        .toBe(userValuesStub.items[0].role.toLocaleString());
+      .toBe(userValuesStub.items[0].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[0].fullName).toBe(userValuesStub.items[0].name);
 
     expect(workspaceSharePage.roleNamePairsOnPage[1].email).toBe(userValuesStub.items[1].email);
     expect(workspaceSharePage.roleNamePairsOnPage[1].role)
-        .toBe(userValuesStub.items[1].role.toLocaleString());
+      .toBe(userValuesStub.items[1].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[1].fullName).toBe(userValuesStub.items[1].name);
 
 
     expect(workspaceSharePage.roleNamePairsOnPage[2].email).toBe(userValuesStub.items[2].email);
     expect(workspaceSharePage.roleNamePairsOnPage[2].role)
-        .toBe(userValuesStub.items[2].role.toLocaleString());
+      .toBe(userValuesStub.items[2].role.toLocaleString());
     expect(workspaceSharePage.roleNamePairsOnPage[2].fullName).toBe(userValuesStub.items[2].name);
   }));
 
@@ -196,7 +196,7 @@ describe('WorkspaceShareComponent', () => {
     tick(1000);
     workspaceSharePage.fixture.detectChanges();
     simulateClick(workspaceSharePage.fixture,
-        workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
+      workspaceSharePage.fixture.debugElement.query(By.css('.add-button')));
     workspaceSharePage.fixture.detectChanges();
 
     workspaceSharePage.readPageData();

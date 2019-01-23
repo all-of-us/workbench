@@ -45,11 +45,11 @@ class ConceptSetCreatePage {
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
 
     this.workspacesService.getWorkspace(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-          this.fixture.componentInstance.wsId = response.workspace.id;
-          this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
-        });
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
+        this.fixture.componentInstance.wsId = response.workspace.id;
+        this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
+      });
     tick();
     this.readPageData();
   }
@@ -146,7 +146,7 @@ describe('ConceptSetComponent', () => {
       conceptSet: concepts
     };
     expect(spyObj).toHaveBeenCalledWith(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, request);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, request);
   }));
 });
 

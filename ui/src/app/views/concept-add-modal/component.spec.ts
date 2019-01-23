@@ -43,8 +43,8 @@ class ConceptSetAddPage {
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
     this.workspacesService.getWorkspace(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {});
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {});
     tick();
     this.readPageData();
   }
@@ -131,17 +131,17 @@ describe('ConceptSetAddComponent', () => {
   }));
 
   it('disables option to add to existing if concept set does not exist',
-      fakeAsync(() => {
-        conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.DRUG;
-        conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
+    fakeAsync(() => {
+      conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.DRUG;
+      conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
         ConceptStubVariables.STUB_CONCEPTS;
-        conceptSetAddCreatePage.fixture.componentInstance.open();
-        conceptSetAddCreatePage.readPageData();
-        tick();
-        expect(conceptSetAddCreatePage.formSections.length).toBe(2);
-        expect(conceptSetAddCreatePage.fixture.debugElement
-      .query(By.css('#select-add')).properties['disabled']).toBeTruthy();
-      }));
+      conceptSetAddCreatePage.fixture.componentInstance.open();
+      conceptSetAddCreatePage.readPageData();
+      tick();
+      expect(conceptSetAddCreatePage.formSections.length).toBe(2);
+      expect(conceptSetAddCreatePage.fixture.debugElement
+        .query(By.css('#select-add')).properties['disabled']).toBeTruthy();
+    }));
 
   it('selects Add to Existing option by default'
       , fakeAsync(() => {

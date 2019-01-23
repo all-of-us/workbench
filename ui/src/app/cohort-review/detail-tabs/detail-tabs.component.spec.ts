@@ -65,7 +65,7 @@ describe('DetailTabsComponent', () => {
         {provide: ActivatedRoute, useValue: activatedRouteStub},
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

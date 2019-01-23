@@ -95,8 +95,8 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
     this.subscription.add(this.selection$
-        .map(sel => sel.size === 0)
-        .subscribe(sel => this.noSelection = sel)
+      .map(sel => sel.size === 0)
+      .subscribe(sel => this.noSelection = sel)
       );
     this.subscription.add(this.attributes$
       .subscribe(node => {

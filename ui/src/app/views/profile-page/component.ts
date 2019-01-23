@@ -69,9 +69,9 @@ export class ProfilePageComponent implements OnInit {
   }
 
   constructor(
-      private profileService: ProfileService,
-      private profileStorageService: ProfileStorageService,
-      private signInService: SignInService
+    private profileService: ProfileService,
+    private profileStorageService: ProfileStorageService,
+    private signInService: SignInService
   ) {}
 
   ngOnInit(): void {

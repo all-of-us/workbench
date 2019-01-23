@@ -262,7 +262,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private localizeNotebooks(notebookNames: Array<string>,
-                            playgroundMode: boolean): Observable<string> {
+    playgroundMode: boolean): Observable<string> {
     return this.clusterService
       .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
         workspaceNamespace: this.wsNamespace,

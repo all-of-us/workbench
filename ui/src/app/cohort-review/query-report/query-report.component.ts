@@ -22,9 +22,9 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
   workspace: Workspace;
 
   constructor(private api: CohortBuilderService,
-              private route: ActivatedRoute,
-              private cdref: ChangeDetectorRef,
-              private cdrVersionStorageService: CdrVersionStorageService) {}
+    private route: ActivatedRoute,
+    private cdref: ChangeDetectorRef,
+    private cdrVersionStorageService: CdrVersionStorageService) {}
 
   ngOnInit() {
     const {cohort, review} = this.route.snapshot.data;
