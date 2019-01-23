@@ -12,6 +12,9 @@ import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
 import {NotebookRename, RecentResource} from 'generated';
+import {EditModal} from "../edit-modal/component";
+import {RenameModal} from "../rename-modal/component";
+import {ConfirmDeleteModal} from "../confirm-delete-modal/component";
 
 const MenuItem = ({ icon, children, ...props }) => {
   return <Clickable
@@ -202,6 +205,18 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     console.log(Date.now());
   }
 
+  get isCohort(): boolean {
+    return this.state.resourceType === ResourceType.COHORT;
+  }
+
+  get isConceptSet(): boolean {
+    return this.state.resourceType === ResourceType.CONCEPT_SET;
+  }
+
+  get isNotebook(): boolean {
+    return this.state.resourceType === ResourceType.NOTEBOOK;
+  }
+
   get actionsDisabled(): boolean {
     return !this.writePermission;
   }
@@ -212,24 +227,24 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   get notebookReadOnly(): boolean {
-    return this.state.resourceType === ResourceType.NOTEBOOK
+    return this.isNotebook
         && this.props.resourceCard.permission === 'READER';
   }
 
   get displayName(): string {
-    if (this.state.resourceType === ResourceType.NOTEBOOK) {
+    if (this.isNotebook) {
       return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
-    } else if (this.state.resourceType === ResourceType.COHORT) {
+    } else if (this.isCohort) {
       return this.props.resourceCard.cohort.name;
-    } else if (this.state.resourceType === ResourceType.CONCEPT_SET) {
+    } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
     }
   }
 
   get description(): string {
-    if (this.state.resourceType === ResourceType.COHORT) {
+    if (this.isCohort) {
       return this.props.resourceCard.cohort.description;
-    } else if (this.state.resourceType === ResourceType.CONCEPT_SET) {
+    } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
     }
   }
@@ -421,12 +436,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.state.resourceType}
-                              onCloneResource={this.cloneResource}
-                              onDeleteResource={this.openConfirmDelete}
-                              onRenameNotebook={this.renameNotebook}
-                              onEditCohort={this.editCohort}
-                              onEditConceptSet={this.editConceptSet}
-                              onReviewCohort={this.reviewCohort}/>
+                              onCloneResource={this.cloneResource.bind(this)}
+                              onDeleteResource={this.openConfirmDelete.bind(this)}
+                              onRenameNotebook={this.renameNotebook.bind(this)}
+                              onEditCohort={this.editCohort.bind(this)}
+                              onEditConceptSet={this.editConceptSet.bind(this)}
+                              onReviewCohort={this.reviewCohort.bind(this)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
               <div style={styles.cardName}
                    onClick={() => this.openResource()}>{this.displayName}
@@ -442,6 +457,20 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             {fp.startCase(fp.camelCase(this.state.resourceType))}</div>
         </div>
       </Card>
+      {this.state.editing && (this.isCohort  || this.isConceptSet) &&
+        <EditModal resource={this.props.resourceCard}
+                   onEdit={this.receiveEdit.bind(this)}
+                   onCancel={this.closeEditModal.bind(this)}/>}
+      {this.state.renaming && this.isNotebook &&
+        <RenameModal resourceName={this.displayName}
+                     onRename={this.receiveNotebookRename.bind(this)}
+                     onCancel={this.cancelRename.bind(this)}/>}
+      {this.state.confirmDeleting &&
+        <ConfirmDeleteModal resourceName={this.displayName}
+                            deleting={this.state.confirmDeleting}
+                            resourceType={this.state.resourceType}
+                            receiveDelete={this.receiveDelete.bind(this)}
+                            closeFunction={this.closeConfirmDelete.bind(this)}/>}
     </React.Fragment>
   }
 }

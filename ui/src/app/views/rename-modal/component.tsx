@@ -15,7 +15,7 @@ import {ReactWrapperBase} from 'app/utils';
 
 
 interface RenameModalProps {
-  resource: {name: string};
+  resourceName: string;
   onRename: Function;
   onCancel: Function;
 }
@@ -38,7 +38,7 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
       loading: true
     });
     this.props.onRename({
-      name: this.props.resource.name,
+      name: this.props.resourceName,
       newName: this.state.newName
     });
   }
@@ -46,7 +46,7 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
   render() {
     return <React.Fragment>
       <Modal>
-        <ModalTitle>Please enter the new name for {this.props.resource.name}</ModalTitle>
+        <ModalTitle>Please enter the new name for {this.props.resourceName}</ModalTitle>
         <ModalBody>
           <label>New Name: </label>
           <input id='new-name' type='text'
@@ -71,11 +71,11 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
   template: '<div #root></div>'
 })
 export class RenameModalComponent extends ReactWrapperBase {
-  @Input('resource') resource: RenameModalProps['resource'];
+  @Input('resource') resourceName: RenameModalProps['resourceName'];
   @Input('onRename') onRename: RenameModalProps['onRename'];
   @Input('onCancel') onCancel: RenameModalProps['onCancel'];
 
   constructor() {
-    super(RenameModal, ['resource', 'onRename', 'onCancel']);
+    super(RenameModal, ['resourceName', 'onRename', 'onCancel']);
   }
 }

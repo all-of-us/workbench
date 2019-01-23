@@ -129,7 +129,7 @@
   </div>
 </clr-modal>
 <app-confirm-delete-modal [resourceType]="'workspace'"
-                          [resource]="resource"
+                          [resourceName]="resource.name"
                           [receiveDelete]="receiveDelete.bind(this)"
                           [deleting]="confirmDeleting"
                           [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
