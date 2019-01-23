@@ -8,12 +8,7 @@ import {
   Profile,
 } from 'generated/fetch/api';
 
-import {
-  Error,
-  ErrorMessage,
-  LongInput,
-  styles as inputStyles
-} from 'app/components/inputs';
+import { Error, ErrorMessage, styles as inputStyles, TextArea, TextInput } from 'app/components/inputs';
 
 import {
   InfoIcon,
@@ -157,75 +152,77 @@ export class AccountCreation extends
   }
 
   render() {
-    const {givenName, familyName, currentPosition, organization} = this.state.profile;
+    const {
+      profile: {
+        givenName, familyName, currentPosition, organization,
+        contactEmail, username, areaOfResearch
+      }
+    } = this.state;
     return <div id='account-creation'
                 style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
         <BoldHeader>Create your account</BoldHeader>
         <div>
           <FormSection>
-            <LongInput type='text' id='givenName' name='givenName' autoFocus
+            <TextInput id='givenName' name='givenName' autoFocus
                        placeholder='First Name'
                        value={givenName}
-                       style={(givenName.length > 80) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('givenName', e.target.value)}/>
+                       invalid={givenName.length > 80}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('givenName', v)}/>
             {givenName.length > 80 &&
             <ErrorMessage id='givenNameError'>
               First Name must be 80 characters or less.
             </ErrorMessage>}
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
+            <TextInput id='familyName' name='familyName' placeholder='Last Name'
                        value={familyName}
-                       style={(familyName.length > 80) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('familyName', e.target.value)}/>
+                       invalid={familyName.length > 80}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('familyName', v)}/>
             {familyName.length > 80 &&
             <ErrorMessage id='familyNameError'>
               Last Name must be 80 character or less.
             </ErrorMessage>}
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='contactEmail' name='contactEmail'
+            <TextInput id='contactEmail' name='contactEmail'
                        placeholder='Email Address'
-                       onChange={e => this.updateProfile('contactEmail', e.target.value)}/>
+                       value={contactEmail}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('contactEmail', v)}/>
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='currentPosition' name='currentPosition'
-                       placeholder='You Current Position'
+            <TextInput id='currentPosition' name='currentPosition'
+                       placeholder='Your Current Position'
                        value={currentPosition}
-                       style={(currentPosition.length > 255) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
+                       invalid={currentPosition.length > 255}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('currentPosition', v)}/>
             {currentPosition.length > 255 &&
             <ErrorMessage id='currentPositionError'>
               Current Position must be 255 characters or less.
             </ErrorMessage>}
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='organization' name='organization'
+            <TextInput id='organization' name='organization'
                        placeholder='Your Organization'
                        value={organization}
-                       style={(organization.length > 255) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('organization', e.target.value)}/>
+                       invalid={organization.length > 255}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('organization', v)}/>
             {organization.length > 255 &&
             <ErrorMessage id='organizationError'>
               Organization must be 255 characters of less.
             </ErrorMessage>}
           </FormSection>
           <FormSection style={{display: 'flex'}}>
-              <textarea style={{
-                ...inputStyles.formInput,
-                ...inputStyles.longInput,
-                'height': '10em',
-                'resize': 'none',
-                'width': '16rem'
-              }}
+              <TextArea style={{height: '10em', resize: 'none', width: '16rem'}}
                         id='areaOfResearch'
                         name='areaOfResearch'
                         placeholder='Describe Your Current Research'
-                        onChange={e => this.updateProfile('areaOfResearch', e.target.value)}/>
+                        value={areaOfResearch}
+                        onChange={v => this.updateProfile('areaOfResearch', v)}/>
             <TooltipTrigger content='You are required to describe your current research in
                       order to help All of Us improve the Researcher Workbench.'>
               <InfoIcon style={{
@@ -236,10 +233,12 @@ export class AccountCreation extends
             </TooltipTrigger>
           </FormSection>
           <FormSection>
-            <LongInput type='text' id='username' name='username' placeholder='New Username'
-                       onChange={e => this.usernameChanged(e.target.value)}
-                       style={(this.state.usernameConflictError || this.usernameInvalidError()) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
+            <TextInput id='username' name='username' placeholder='New Username'
+                       value={username}
+                       onChange={v => this.usernameChanged(v)}
+                       invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                       style={{width: '16rem'}}
+            />
             <div style={inputStyles.iconArea}>
               <ValidationIcon validSuccess={this.usernameValid()}/>
             </div>
