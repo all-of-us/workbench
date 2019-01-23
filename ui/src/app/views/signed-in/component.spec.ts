@@ -16,7 +16,7 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
   updateAndTick
-} from 'app/testing/test-helpers';
+} from 'testing/test-helpers';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';

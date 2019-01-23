@@ -20,7 +20,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {UserServiceStub} from 'app/testing/stubs/user-service-stub';
 import {
   UserRole,
   UserService,
@@ -28,6 +27,7 @@ import {
   WorkspaceResponse,
   WorkspacesService
 } from 'generated';
+import {UserServiceStub} from 'testing/stubs/user-service-stub';
 
 interface UserRoleRow {
   fullName: string;

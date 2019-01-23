@@ -7,11 +7,11 @@ import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
-import {CohortReviewServiceStub} from 'app/testing/stubs/cohort-review-service-stub';
-import {ReviewStateServiceStub} from 'app/testing/stubs/review-state-service-stub';
 import {CohortReviewService} from 'generated';
 import * as highCharts from 'highcharts';
 import {Observable} from 'rxjs/Observable';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {DetailTabsComponent} from './detail-tabs.component';
 
 

@@ -23,7 +23,7 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {
   simulateClick,
   updateAndTick
-} from 'app/testing/test-helpers';
+} from 'testing/test-helpers';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';

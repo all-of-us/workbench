@@ -7,7 +7,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {
   updateAndTick
-} from 'app/testing/test-helpers';
+} from 'testing/test-helpers';
 
 import {ServerConfigService} from 'app/services/server-config.service';
 

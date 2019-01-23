@@ -17,7 +17,7 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {
   updateAndTick
-} from 'app/testing/test-helpers';
+} from 'testing/test-helpers';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
