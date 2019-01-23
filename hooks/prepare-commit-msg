@@ -2,6 +2,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-./hooks/apply-git-secrets.sh
+eval "$( cd "$(dirname "$0")" ; pwd -P )/apply-git-secrets.sh"
 
 git secrets --prepare_commit_msg_hook -- "$@"
