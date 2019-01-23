@@ -104,12 +104,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
   firstVisit = true;
   username = '';
+  creatingNotebook = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-
-  @ViewChild(NewNotebookModalComponent)
-  newNotebookModal: NewNotebookModalComponent;
 
   constructor(
     private route: ActivatedRoute,
@@ -196,7 +194,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.newNotebookModal.open();
+    this.creatingNotebook = true;
+  }
+
+  closeNotebookModal() {
+    this.creatingNotebook = false;
   }
 
   buildCohort(): void {
