@@ -10,8 +10,6 @@ import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetListComponent} from 'app/views/concept-set-list/component';
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
@@ -76,8 +74,6 @@ describe('ConceptSetListComponent', () => {
         ConceptSetListComponent,
         ConfirmDeleteModalComponent,
         CreateConceptSetModalComponent,
-        EditModalComponent,
-        RenameModalComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,

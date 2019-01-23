@@ -24,11 +24,9 @@ import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 import {HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent, QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
@@ -64,8 +62,6 @@ describe('HomepageComponent', () => {
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
-        EditModalComponent,
         ExpandComponent,
         ShrinkComponent
       ],

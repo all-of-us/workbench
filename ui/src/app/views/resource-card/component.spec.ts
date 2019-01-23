@@ -19,8 +19,6 @@ import {WorkspacesService} from 'generated/api/workspaces.service';
 import {ResourceCardComponent, ResourceCardMenuComponent} from './component';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 
 @Component({
   selector: 'app-resource-card-wrapper',
@@ -54,8 +52,6 @@ describe('ResourceCardComponent', () => {
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
-        EditModalComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [

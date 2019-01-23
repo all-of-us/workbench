@@ -23,8 +23,6 @@ import {
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
@@ -88,10 +86,8 @@ describe('CohortListComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        EditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,

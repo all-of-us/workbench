@@ -356,15 +356,15 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.props.onUpdate();
       });
     } else if (this.isConceptSet) {
-      conceptSetsApi().updateConceptSet(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.conceptSet.id,
-          this.props.resourceCard.conceptSet
-      ).then( () => {
-        this.closeEditModal();
-        this.props.onUpdate();
-      });
+      // conceptSetsApi().updateConceptSet(
+      //     this.props.resourceCard.workspaceNamespace,
+      //     this.props.resourceCard.workspaceFirecloudName,
+      //     this.props.resourceCard.conceptSet.id,
+      //     this.props.resourceCard.conceptSet
+      // ).then( () => {
+      //   this.closeEditModal();
+      //   this.props.onUpdate();
+      // });
     }
   }
 

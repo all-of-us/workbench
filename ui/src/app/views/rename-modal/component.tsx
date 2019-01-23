@@ -65,17 +65,3 @@ export class RenameModal extends React.Component<RenameModalProps, RenameModalSt
     </React.Fragment>;
   }
 }
-
-@Component({
-  selector: 'app-rename-modal',
-  template: '<div #root></div>'
-})
-export class RenameModalComponent extends ReactWrapperBase {
-  @Input('resource') resourceName: RenameModalProps['resourceName'];
-  @Input('onRename') onRename: RenameModalProps['onRename'];
-  @Input('onCancel') onCancel: RenameModalProps['onCancel'];
-
-  constructor() {
-    super(RenameModal, ['resourceName', 'onRename', 'onCancel']);
-  }
-}

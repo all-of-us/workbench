@@ -27,9 +27,7 @@ import {
 } from 'testing/test-helpers';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
 import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
@@ -59,8 +57,6 @@ describe('RecentWorkComponent', () => {
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
-        EditModalComponent,
       ],
       providers: [
         {provide: CohortsService, useValue: new CohortsServiceStub()},

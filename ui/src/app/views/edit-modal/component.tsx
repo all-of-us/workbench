@@ -114,19 +114,3 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
     </React.Fragment>;
   }
 }
-
-
-@Component({
-  selector: 'app-edit-modal',
-  template: '<div #root></div>'
-})
-export class EditModalComponent extends ReactWrapperBase {
-  @Input('resource') resource: EditModalProps['resource'];
-  @Input('onEdit') onEdit: EditModalProps['onEdit'];
-  @Input('onCancel') onCancel: EditModalProps['onCancel'];
-
-  constructor() {
-    super(EditModal, ['resource', 'onEdit', 'onCancel']);
-  }
-
-}

@@ -33,7 +33,6 @@ import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConceptTableComponent} from './views/concept-table/component';
 import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
-import {EditModalComponent} from './views/edit-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -44,7 +43,6 @@ import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/c
 import {ProfilePageComponent} from './views/profile-page/component';
 import {QuickTourModalComponent} from './views/quick-tour-modal/component';
 import {RecentWorkComponent} from './views/recent-work/component';
-import {RenameModalComponent} from './views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from './views/resource-card/component';
 import {RoutingSpinnerComponent} from './views/routing-spinner/component';
 import {SettingsComponent} from './views/settings/component';
@@ -145,7 +143,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptTableComponent,
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
-    EditModalComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
@@ -155,7 +152,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ProfilePageComponent,
     QuickTourModalComponent,
     RecentWorkComponent,
-    RenameModalComponent,
     ResourceCardComponent,
     ResourceCardMenuComponent,
     RoutingSpinnerComponent,
