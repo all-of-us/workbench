@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -286,7 +287,17 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public NihStatus getNihStatus() {
     NihApi nihApi = nihApiProvider.get();
-    return retryHandler.run((context) -> nihApi.nihStatus());
+    return retryHandler.run((context) -> {
+      try {
+        return nihApi.nihStatus();
+      } catch (ApiException e) {
+        if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+          return null;
+        } else {
+          throw e;
+        }
+      }
+    });
   }
 
   @Override

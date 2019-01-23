@@ -10,6 +10,7 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
+import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
@@ -104,6 +105,14 @@ public class FireCloudConfig {
     GroupsApi api = new GroupsApi();
     api.setApiClient(apiClient);
     return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public NihApi nihApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+    NihApi nihApi = new NihApi();
+    nihApi.setApiClient(apiClient);
+    return nihApi;
   }
 
   @Bean
