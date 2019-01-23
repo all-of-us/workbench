@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
@@ -134,10 +136,26 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
+  public void testNihStatusNotFound() throws Exception {
+    when(nihApi.nihStatus()).thenThrow(new ApiException(404, "Not Found"));
+    assertThat(service.getNihStatus()).isNull();
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testNihStatusException() throws Exception {
+    when(nihApi.nihStatus()).thenThrow(new ApiException(500, "Internal Server Error"));
+    service.getNihStatus();
+  }
+
+  @Test
   public void testNihCallback() throws Exception {
     JWTWrapper wrapper = new JWTWrapper().jwt("random");
     doNothing().when(nihApi).nihCallback(wrapper);
-    service.postNihCallback(wrapper);
+    try {
+      service.postNihCallback(wrapper);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
 }
