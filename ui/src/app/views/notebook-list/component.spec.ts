@@ -133,8 +133,8 @@ describe('NotebookListComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
-      notebookListPage = new NotebookListPage(TestBed);
-    });
+        notebookListPage = new NotebookListPage(TestBed);
+      });
     tick();
   }));
 
@@ -167,7 +167,7 @@ describe('NotebookListComponent', () => {
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
     expect(fixture.componentInstance.resourceList[0].notebook.name)
-        .toEqual('testMockFile.ipynb');
+      .toEqual('testMockFile.ipynb');
   }));
 
   it('displays correct information when notebook renamed with duplicate name', fakeAsync(() => {
@@ -199,7 +199,7 @@ describe('NotebookListComponent', () => {
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
-        .toContain('mockFile Clone.ipynb');
+      .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {

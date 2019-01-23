@@ -6,16 +6,16 @@ import {Operator, TreeSubType, TreeType} from 'generated';
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {PM_UNITS} from '../constant';
+import {PM_UNITS} from 'app/cohort-search/constant';
 import {
 attributesPreviewStatus,
 CohortSearchActions,
 isAttributeLoading,
 nodeAttributes,
 previewError,
-} from '../redux';
-import {stripHtml} from '../utils';
-import {numberAndNegativeValidator, rangeValidator} from '../validators';
+} from 'app/cohort-search/redux';
+import {stripHtml} from 'app/cohort-search/utils';
+import {numberAndNegativeValidator, rangeValidator} from 'app/cohort-search/validators';
 
 @Component({
   selector: 'crit-attributes-page',

@@ -20,7 +20,7 @@ export class ProfileStorageService {
   public profile$ = this.profile.asObservable();
 
   constructor(private profileService: ProfileService,
-              private errorHandlingService: ErrorHandlingService) {
+    private errorHandlingService: ErrorHandlingService) {
     this.reload();
   }
 

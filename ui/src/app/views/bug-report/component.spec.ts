@@ -63,7 +63,7 @@ describe('BugReportComponent', () => {
       ] }).compileComponents().then(() => {
         bugReportPage = new BugReportPage(TestBed);
       });
-      tick();
+    tick();
   }));
 
 

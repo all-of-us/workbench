@@ -17,13 +17,13 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {AdminReviewWorkspaceComponent} from '../admin-review-workspace/component';
-import {BugReportComponent} from '../bug-report/component';
+import {AdminReviewWorkspaceComponent} from 'app/views/admin-review-workspace/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
 
 describe('AdminReviewWorkspaceComponent', () => {
   let fixture: ComponentFixture<AdminReviewWorkspaceComponent>;

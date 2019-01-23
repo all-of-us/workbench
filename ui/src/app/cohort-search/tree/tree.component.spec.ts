@@ -4,12 +4,10 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {fromJS} from 'immutable';
-import {NgxPopperModule} from 'ngx-popper';
-import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
-import {NodeInfoComponent} from '../node-info/node-info.component';
-import {NodeComponent} from '../node/node.component';
-import {OptionInfoComponent} from '../option-info/option-info.component';
+import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
 import {
 activeCriteriaTreeType,
 CohortSearchActions,
@@ -17,9 +15,11 @@ criteriaChildren,
 criteriaError,
 criteriaSearchTerms,
 isCriteriaLoading,
-} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
-import {SearchBarComponent} from '../search-bar/search-bar.component';
+} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 import {TreeComponent} from './tree.component';
 
 class MockActions {

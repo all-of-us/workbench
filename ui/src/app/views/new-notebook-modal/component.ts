@@ -52,12 +52,12 @@ export class NewNotebookModalComponent {
       notebookName: this.newName + '.ipynb'
     }).subscribe();
     this.route.navigate(['workspaces', this.workspace.namespace, this.workspace.id,
-        'notebooks', encodeURIComponent(this.newName)], {
-      queryParams: {
-        'kernelType': this.kernelType,
-        'creating': true
-      }
-    });
+      'notebooks', encodeURIComponent(this.newName)], {
+        queryParams: {
+          'kernelType': this.kernelType,
+          'creating': true
+        }
+      });
     this.close();
   }
 

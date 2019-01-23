@@ -5,9 +5,9 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {SignInService} from '../../services/sign-in.service';
-import {AppComponent} from '../app/component';
-import {PageTemplateSignedOutComponent} from '../page-template-signed-out/component';
+import {SignInService} from 'app/services/sign-in.service';
+import {AppComponent} from 'app/views/app/component';
+import {PageTemplateSignedOutComponent} from 'app/views/page-template-signed-out/component';
 
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 

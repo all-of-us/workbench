@@ -1,4 +1,4 @@
-import {Component, DoCheck, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {ParticipantChartData} from 'generated';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -52,7 +52,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         yAxisValue,
         newStartDate: moment(items.startDate, 'YYYY-MM-DD').unix() // format date to unix timestamp
       });
-      yAxisValue ++;
+      yAxisValue++;
     });
 
     this.props.chartData.items.map(i => {
@@ -73,7 +73,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
     });
 
     if (this.trimmedData.length) {
-       this.getChartsData();
+      this.getChartsData();
     }
   }
 
@@ -98,7 +98,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
           text: 'Entry Date',
         },
         labels: {
-          formatter: function () {
+          formatter: function() {
             return moment.unix(this.value).format('YYYY');
           },
         },
@@ -112,20 +112,20 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
           text: header,
         },
         labels: {
-          formatter: function () {
+          formatter: function() {
             return names[this.value];
           }
         },
         tickInterval: 1,
         lineWidth: 1,
       },
-        {
-          title: {
-            enabled: false,
-          },
-          opposite: true,
-          lineWidth: 1,
-        }],
+      {
+        title: {
+          enabled: false,
+        },
+        opposite: true,
+        lineWidth: 1,
+      }],
       plotOptions: {
         scatter: {
           marker: {
@@ -189,7 +189,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   }
 
   render() {
-     const chartData = this.props.chartData;
+    const chartData = this.props.chartData;
     if (!chartData.loading && chartData.items.length) {
       this.setYaxisValue();
       const ScatterChart = () => <div>
@@ -215,19 +215,21 @@ export class IndividualParticipantsChartsComponent implements OnChanges, OnInit 
   @Input() chartKey = 0;
   @Input() shouldReRender: boolean;
   componentClass = 'react-chart';
+
   constructor() {}
 
-  ngOnChanges (): void {
+  ngOnChanges(): void {
     this.triggerReRender();
   }
 
-  ngOnInit (): void {
+  ngOnInit(): void {
     this.triggerReRender();
   }
 
   triggerReRender(): void {
     ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
-      {chartData: this.chartData,
+      {
+        chartData: this.chartData,
         chartKey: this.chartKey,
       }),
       document.getElementsByClassName(this.componentClass)[this.chartKey]);
