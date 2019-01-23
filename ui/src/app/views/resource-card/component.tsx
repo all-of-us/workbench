@@ -112,8 +112,6 @@ export class ResourceCardComponent implements OnInit {
   @Input('cssClass')
   cssClass: string;
   @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
-  @Output() duplicateNameError: EventEmitter<string> = new EventEmitter();
-  @Output() invalidNameError: EventEmitter<string> = new EventEmitter();
   wsNamespace: string;
   wsId: string;
   resource: any;
@@ -166,33 +164,9 @@ export class ResourceCardComponent implements OnInit {
     this.confirmDeleting = false;
   }
 
-  receiveNotebookRename(rename: NotebookRename): void {
-    let newName = rename.newName;
-    if (!(new RegExp('^.+\.ipynb$').test(newName))) {
-      newName = rename.newName + '.ipynb';
-      rename.newName = newName;
-    }
-    if (new RegExp('.*\/.*').test(newName)) {
-      this.renaming = false;
-      this.invalidNameError.emit(newName);
-      return;
-    }
-    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-      .switchMap((fileList) => {
-        if (fileList.filter((nb) => nb.name === newName).length > 0) {
-          throw new Error(newName);
-        } else {
-          return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
-        }
-      })
-      .subscribe(() => {
-        this.renaming = false;
-        this.onUpdate.emit(rename);
-      },
-        (dupName) => {
-          this.duplicateNameError.emit(dupName);
-          this.renaming = false;
-        });
+  receiveNotebookRename(): void {
+    this.renaming = false;
+    this.onUpdate.emit();
   }
 
   receiveEdit(resource: RecentResource): void {
