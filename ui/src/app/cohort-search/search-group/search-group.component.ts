@@ -6,6 +6,7 @@ import {CohortSearchActions, CohortSearchState, groupError} from '../redux';
 
 import {CohortStatus, SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
+import {switchAll} from "rxjs/operators";
 
 @Component({
   selector: 'app-search-group',
@@ -20,7 +21,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
   error: boolean;
   temporalFlag = false;
-  whichMention = [this.formatStatusForText(TemporalMention.ANYMENTION),
+  whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
     TemporalMention.LASTMENTION];
   timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
@@ -80,7 +81,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getMentionTitle(mention) {
-    // this.formatStatusForText(mention);
     this.dropdownOption = mention;
 
   }
@@ -91,8 +91,27 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
  formatStatusForText(mention: TemporalMention): string {
     return {
       [TemporalMention.ANYMENTION]: 'Any Mention',
-      [TemporalMention.FIRSTMENTION]: 'Any Mention',
-      [TemporalMention.LASTMENTION]: 'Any Mention',
+      [TemporalMention.FIRSTMENTION]: 'First Mention',
+      [TemporalMention.LASTMENTION]: 'Last Mention',
     }[mention];
+  }
+
+  formatStatus(mention) {
+   switch (mention) {
+     case 'ANY_MENTION' :
+       return 'Any Mention';
+     case 'FIRST_MENTION' :
+       return 'First Mention';
+     case 'LAST_MENTION' :
+       return 'Last Mention';
+     case 'DURING_SAME_ENCOUNTER_AS' :
+       return 'During same encounter as';
+     case 'X_DAYS_BEFORE' :
+       return 'X Days before';
+     case 'X_DAYS_AFTER' :
+       return 'X Days after';
+     case 'WITHIN_X_DAYS_OF' :
+       return 'Within X Days of';
+   }
   }
 }

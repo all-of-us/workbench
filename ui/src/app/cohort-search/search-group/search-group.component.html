@@ -12,8 +12,8 @@
   <div class="card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
-        <ng-template #login> Which Mention</ng-template>
+        <div *ngIf="dropdownOption; else mentionTitle"> {{formatStatus(dropdownOption)}}</div>
+        <ng-template #mentionTitle> Which Mention</ng-template>
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -23,7 +23,7 @@
           class="dropdown-item"
           type="button"
           (click)="getMentionTitle(mention)"
-          clrDropdownItem>{{mention}}</button>
+          clrDropdownItem>{{formatStatus(mention)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
     <span class="of-text"> of </span>
@@ -49,7 +49,7 @@
           <h4 class="dropdown-header">Program Data</h4>
           <button
             *ngFor="let criteria of programTypes"
-            id="criteria.type"
+            id="criteria.type program"
             class="dropdown-item"
             type="button"
             [disabled]="criteria.disabled"
@@ -58,7 +58,7 @@
           <div class="dropdown-divider"></div>
           <h4 class="dropdown-header">Domains</h4>
           <button *ngFor="let criteria of domainTypes"
-                  id="criteria.type"
+                  id="criteria.type domains"
                   class="dropdown-item"
                   type="button"
                   [disabled]="criteria.disabled"
@@ -68,6 +68,7 @@
       </clr-dropdown>
     </ng-template>
 
+
       <clr-dropdown *ngIf="temporalFlag; else groupDropDown">
         <button type="button" class="btn selection-button" clrDropdownTrigger>
           Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -75,7 +76,7 @@
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
           <ng-container *ngFor="let criteria of domainTypes">
             <button *ngIf="criteria.name !== 'Demographics'"
-                    id="criteria.type"
+                    id="criteria.type domain"
                     class="dropdown-item"
                     type="button"
                     [disabled]="criteria.disabled"
@@ -92,7 +93,7 @@
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="timeDropdownOption; else time"> {{timeDropdownOption}}</div>
+        <div *ngIf="timeDropdownOption; else time"> {{formatStatus(timeDropdownOption)}}</div>
         <ng-template #time> Define Time</ng-template>
          <clr-icon shape="caret down"></clr-icon>
       </button>
@@ -103,12 +104,21 @@
           class="dropdown-item"
           type="button"
           (click)="getTimeTitle(timeName)"
-          clrDropdownItem>{{timeName}}</button>
+          clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
     <input class="time-inputbox" type="number" placeholder="X">
   </div>
-
+  <ng-container *ngIf="temporalFlag">
+    <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+      <app-search-group-item
+        [role]="role"
+        [groupId]="groupId"
+        [itemId]="itemId"
+        [itemIndex]="itemIndex">
+      </app-search-group-item>
+    </div>
+  </ng-container>
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
