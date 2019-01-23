@@ -23,7 +23,7 @@
     <div style="display: flex; flex-wrap: wrap; justify-content: flex-start;">
       <div *ngFor="let notebook of resourceList">
         <app-resource-card [resourceCard]="notebook"
-                           (onUpdate)="updateList($event)"
+                           [onUpdate]="updateList.bind(this)"
                            (duplicateNameError)="duplicateNameError($event)"
                            (invalidNameError)="invalidNameError($event)">
         </app-resource-card>

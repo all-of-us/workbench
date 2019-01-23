@@ -11,10 +11,12 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 
-import {NotebookRename, RecentResource} from 'generated';
+import {RecentResource} from 'generated';
 import {EditModal} from "../edit-modal/component";
 import {RenameModal} from "../rename-modal/component";
 import {ConfirmDeleteModal} from "../confirm-delete-modal/component";
+
+import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 const MenuItem = ({ icon, children, ...props }) => {
   return <Clickable
@@ -285,112 +287,88 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   cloneResource(): void {
-    // switch (this.state.resourceType) {
-    //   case ResourceType.NOTEBOOK: {
-    //     this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-    //         .map(() => this.onUpdate.emit())
-    //         .subscribe(() => {});
-    //     break;
-    //   }
-    //   case ResourceType.COHORT: {
-    //     const url =
-    //         '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?cohortId=';
-    //     navigateByUrl(url + resource.cohort.id);
-    //     this.onUpdate.emit();
-    //     break;
-    //   }
-    // }
+    switch (this.state.resourceType) {
+      case ResourceType.NOTEBOOK: {
+        workspacesApi().cloneNotebook(
+            this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName,
+            this.props.resourceCard.notebook.name)
+            .then(() => {this.props.onUpdate()});
+        break;
+      }
+      case ResourceType.COHORT: {
+        const url =
+            '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
+            this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
+        navigateByUrl(url + this.props.resourceCard.cohort.id);
+        this.props.onUpdate();
+        break;
+      }
+    }
   }
 
-  // TODO: how do i call the different services?
   receiveDelete(): void {
-    // switch (this.state.resourceType) {
-    //   case ResourceType.NOTEBOOK: {
-    //     this.workspacesService.deleteNotebook(
-    //         this.props.resourceCard.workspaceNamespace,
-    //         this.props.resourceCard.workspaceFirecloudName,
-    //         this.state.resource.name)
-    //         .subscribe(() => {
-    //           this.closeConfirmDelete();
-    //           this.onUpdate.emit();
-    //         });
-    //     break;
-    //   }
-    //   case ResourceType.COHORT: {
-    //     this.cohortsService.deleteCohort(
-    //         this.props.resourceCard.workspaceNamespace,
-    //         this.props.resourceCard.workspaceFirecloudName,
-    //         this.state.resource.id)
-    //         .subscribe(() => {
-    //           this.closeConfirmDelete();
-    //           this.onUpdate.emit();
-    //         });
-    //     break;
-    //   }
-    //   case ResourceType.CONCEPT_SET: {
-    //     this.conceptSetsService.deleteConceptSet(
-    //         this.props.resourceCard.workspaceNamespace,
-    //         this.props.resourceCard.workspaceFirecloudName,
-    //         this.state.resource.id)
-    //         .subscribe(() => {
-    //           this.closeConfirmDelete();
-    //           this.onUpdate.emit();
-    //         });
-    //   }
-    // }
+    switch (this.state.resourceType) {
+      case ResourceType.NOTEBOOK: {
+        workspacesApi().deleteNotebook(
+            this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName,
+            this.props.resourceCard.notebook.name)
+            .then(() => {
+              this.closeConfirmDelete();
+              this.props.onUpdate();
+            });
+        break;
+      }
+      case ResourceType.COHORT: {
+        cohortsApi().deleteCohort(
+            this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName,
+            this.props.resourceCard.cohort.id)
+            .then(() => {
+              this.closeConfirmDelete();
+              this.props.onUpdate();
+            });
+        break;
+      }
+      case ResourceType.CONCEPT_SET: {
+        conceptSetsApi().deleteConceptSet(
+            this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName,
+            this.props.resourceCard.conceptSet.id)
+            .then(() => {
+              this.closeConfirmDelete();
+              this.props.onUpdate();
+            });
+      }
+    }
   }
 
   receiveEdit(): void {
-    // if (resource.cohort) {
-    //   this.cohortsService.updateCohort(
-    //       this.wsNamespace,
-    //       this.wsId,
-    //       resource.cohort.id,
-    //       resource.cohort
-    //   ).subscribe( () => {
-    //     this.closeEditModal();
-    //     this.onUpdate.emit();
-    //   });
-    // } else if (resource.conceptSet) {
-    //   this.conceptSetsService.updateConceptSet(
-    //       this.wsNamespace,
-    //       this.wsId,
-    //       resource.conceptSet.id,
-    //       resource.conceptSet
-    //   ).subscribe( () => {
-    //     this.closeEditModal();
-    //     this.onUpdate.emit();
-    //   });
-    // }
+    if (this.isCohort) {
+      cohortsApi().updateCohort(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohort.id,
+          this.props.resourceCard.cohort
+      ).then( () => {
+        this.closeEditModal();
+        this.props.onUpdate();
+      });
+    } else if (this.isConceptSet) {
+      conceptSetsApi().updateConceptSet(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.conceptSet.id,
+          this.props.resourceCard.conceptSet
+      ).then( () => {
+        this.closeEditModal();
+        this.props.onUpdate();
+      });
+    }
   }
 
-  receiveNotebookRename(rename: NotebookRename): void {
-    // let newName = rename.newName;
-    // if (!(new RegExp('^.+\.ipynb$').test(newName))) {
-    //   newName = rename.newName + '.ipynb';
-    //   rename.newName = newName;
-    // }
-    // if (new RegExp('.*\/.*').test(newName)) {
-    //   this.renaming = false;
-    //   this.invalidNameError.emit(newName);
-    //   return;
-    // }
-    // this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-    //     .switchMap((fileList) => {
-    //       if (fileList.filter((nb) => nb.name === newName).length > 0) {
-    //         throw new Error(newName);
-    //       } else {
-    //         return this.workspacesService.renameNotebook(this.wsNamespace, this.wsId, rename);
-    //       }
-    //     })
-    //     .subscribe(() => {
-    //           this.renaming = false;
-    //           this.onUpdate.emit(rename);
-    //         },
-    //         (dupName) => {
-    //           this.duplicateNameError.emit(dupName);
-    //           this.renaming = false;
-    //         });
+  receiveNotebookRename(): void {
   }
 
   openResource(): void {
