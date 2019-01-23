@@ -64,8 +64,8 @@ export class ConfirmDeleteModal
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button
-              type='secondary'
-              onClick={() => this.props.closeFunction()}>Cancel</Button>
+            type='secondary'
+            onClick={() => this.props.closeFunction()}>Cancel</Button>
           <Button
             disabled={this.state.loading}
             style={{marginLeft: '0.5rem'}}
