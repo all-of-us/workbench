@@ -10,8 +10,7 @@ import {
   CohortSearchState,
   getGroup,
   initialState,
-  SR_ID,
-  groupError, getTemporalFlag
+  SR_ID
 } from './store';
 
 /* tslint:disable:ordered-imports */
@@ -469,16 +468,15 @@ export const rootReducer: Reducer<CohortSearchState> =
         const groupItems = ['entities', 'groups', groupId, 'items'];
         const group = getGroup(groupId)(state);
         const isTemporal = group.get('temporal');
-
-          if (item.get('searchParameters', List()).isEmpty()) {
-            return state
-              .updateIn(groupItems, List(),
-                items => items.filterNot(
-                  id => id === itemId)
-              )
-              .deleteIn(['entities', 'items', itemId])
-              .set('wizard', Map({open: false}));
-          }
+        if (item.get('searchParameters', List()).isEmpty()) {
+          return state
+            .updateIn(groupItems, List(),
+              items => items.filterNot(
+                id => id === itemId)
+            )
+            .deleteIn(['entities', 'items', itemId])
+            .set('wizard', Map({open: false}));
+        }
         const setUnique = element => list =>
           list.includes(element) ? list : list.push(element);
 
@@ -488,7 +486,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             parameter
           );
 
-        if(isTemporal) {
+        if (isTemporal) {
           return state
             .updateIn(groupItems, List(), setUnique(itemId))
             .setIn(['entities', 'items', itemId], item)

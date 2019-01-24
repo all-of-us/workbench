@@ -1,12 +1,11 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {List, Map} from 'immutable';
+import {Subscription} from 'rxjs/Subscription';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
 import {CohortSearchActions, CohortSearchState, getItem, groupError} from '../redux';
 
-import {CohortStatus, SearchRequest, TemporalMention, TemporalTime} from 'generated';
-import {Subscription} from 'rxjs/Subscription';
-import {switchAll} from "rxjs/operators";
 
 @Component({
   selector: 'app-search-group',

@@ -337,20 +337,22 @@ export interface ActionTypes {
     item: any;
     context?: ActiveContext;
   };
+
   WIZARD_FINISH: {
     type: typeof WIZARD_FINISH;
   };
+
   UPDATE_TEMPORAL: {
     type: typeof UPDATE_TEMPORAL;
     flag: boolean;
     groupId: string;
-  }
+  };
 
   UPDATE_MENTION: {
     type: typeof UPDATE_MENTION;
     mention: any;
     groupId: string;
-  }
+  };
 
   WIZARD_CANCEL: {
     type: typeof WIZARD_CANCEL;

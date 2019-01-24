@@ -115,13 +115,12 @@ export class CohortSearchActions {
     this.addId(newId);
     return newId;
   }
-  updateTemporal(flag:boolean, groupId:any) {
+  updateTemporal(flag: boolean, groupId: string) {
     this._updatedTemporal(flag, groupId);
   }
 
-  updateWhichMention(mention: any, groupId:any) {
+  updateWhichMention(mention: any, groupId: string) {
     this._updateWhichMention(mention, groupId);
-
   }
 
   genSuffix(): string {
