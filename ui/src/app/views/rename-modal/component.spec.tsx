@@ -14,7 +14,7 @@ describe('RenameModal', () => {
 
   it('should render', () => {
     const wrapper = mount(<RenameModal
-      resource={{name: 'a'}}
+      notebookName='a'
       onCancel={() => {}}
       onRename={() => {}}
       workspace={{namespace: 'a', name: 'b'}}
