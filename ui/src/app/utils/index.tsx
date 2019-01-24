@@ -226,3 +226,16 @@ export const withStyle = styleObj => WrappedComponent => {
   Wrapper.displayName = 'withStyle';
   return Wrapper;
 };
+
+export const summarizeErrors = errors => {
+  const errorList = fp.cond([
+    [fp.isPlainObject, fp.flatMap(fp.values)],
+    [fp.isArray, fp.identity],
+    [() => true, () => []]
+  ])(errors);
+  if (errorList.length) {
+    return errorList.map((v, i) => {
+      return <div key={i} style={{marginTop: i !== 0 ? '0.25rem' : undefined}}>{v}</div>;
+    });
+  }
+};

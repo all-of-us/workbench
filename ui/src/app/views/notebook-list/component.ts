@@ -46,12 +46,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   notebookRenameConflictError = false;
   notebookRenameError = false;
   duplicateName = '';
+  creatingNotebook = false;
 
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(NewNotebookModalComponent)
-  newNotebookModal: NewNotebookModalComponent;
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
@@ -109,7 +108,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.newNotebookModal.open();
+    this.creatingNotebook = true;
+  }
+
+  closeNotebookModal() {
+    this.creatingNotebook = false;
   }
 
   updateList(rename?: NotebookRename): void {
