@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -23,15 +23,15 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {
   simulateClick,
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {BugReportComponent} from '../bug-report/component';
-import {ConfirmDeleteModalComponent} from '../confirm-delete-modal/component';
-import {WorkspaceNavBarComponent} from '../workspace-nav-bar/component';
-import {WorkspaceShareComponent} from '../workspace-share/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 @Component({
   selector: 'app-test',
@@ -140,7 +140,7 @@ describe('WorkspaceNavBarComponent', () => {
       router = TestBed.get(Router);
 
       router.navigateByUrl(
-          `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
+        `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
           WorkspaceStubVariables.DEFAULT_WORKSPACE_ID);
       // Clarity needs several ticks/redraw cycles to render its button group.
       tick();

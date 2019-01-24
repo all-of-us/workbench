@@ -5,11 +5,11 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
+import {activeModifierList, CohortSearchActions, previewStatus} from 'app/cohort-search/redux';
 import {CohortBuilderService} from 'generated';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
-import {activeModifierList, CohortSearchActions, previewStatus} from '../redux';
 import {ModifierPageComponent} from './modifier-page.component';
 
 class MockActions {

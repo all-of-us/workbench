@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {
   Cohort,

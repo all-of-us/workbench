@@ -62,170 +62,170 @@ const routes: Routes = [
           title: 'Stigmatization Definition'
         }
       }, {
-      path: 'workspaces',
-      data: {
-        breadcrumb: {
-          value: 'Workspaces',
-          intermediate: true
-        }
-      },
-      children: [
-        {
-          path: '',
-          component: WorkspaceListComponent,
-          data: {title: 'View Workspaces'}
+        path: 'workspaces',
+        data: {
+          breadcrumb: {
+            value: 'Workspaces',
+            intermediate: true
+          }
         },
-        {
-          /* TODO The children under ./views need refactoring to use the data
-           * provided by the route rather than double-requesting it.
-           */
-          path: ':ns/:wsid',
-          component: WorkspaceNavBarComponent,
-          data: {
-            title: 'View Workspace Details',
-            breadcrumb: {
-              value: 'Param: Workspace Name',
-            }
+        children: [
+          {
+            path: '',
+            component: WorkspaceListComponent,
+            data: {title: 'View Workspaces'}
           },
-          runGuardsAndResolvers: 'always',
-          resolve: {
-            workspace: WorkspaceResolver,
-          },
-          children: [
-            {
-              path: '',
-              component: WorkspaceComponent,
-              data: {
-                title: 'View Workspace Details',
-              }
-            }, {
-              path: 'edit',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Edit Workspace',
-                mode: WorkspaceEditMode.Edit,
-                breadcrumb: {
-                  value: 'Edit Workspace',
-                }
-              }
-            }, {
-              path: 'clone',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Clone Workspace',
-                mode: WorkspaceEditMode.Clone,
-                breadcrumb: {
-                  value: 'Clone Workspace',
-                }
+          {
+            /* TODO The children under ./views need refactoring to use the data
+             * provided by the route rather than double-requesting it.
+             */
+            path: ':ns/:wsid',
+            component: WorkspaceNavBarComponent,
+            data: {
+              title: 'View Workspace Details',
+              breadcrumb: {
+                value: 'Param: Workspace Name',
               }
             },
-            {
-              path: 'notebooks',
-              data: {
-                breadcrumb: {
-                  value: 'Notebooks',
-                  intermediate: true
+            runGuardsAndResolvers: 'always',
+            resolve: {
+              workspace: WorkspaceResolver,
+            },
+            children: [
+              {
+                path: '',
+                component: WorkspaceComponent,
+                data: {
+                  title: 'View Workspace Details',
                 }
-              },
-              children: [
-                {
-                  path: '',
-                  component: NotebookListComponent,
-                  data: {
-                    title: 'View Notebooks'
-                  }
-                }, {
-                  path: ':nbName',
-                  component: NotebookRedirectComponent,
-                  data: {
-                    title: 'Notebook',
-                    breadcrumb: {
-                        value: 'Param: Notebook Name'
-                    },
-                    minimizeChrome: true
+              }, {
+                path: 'edit',
+                component: WorkspaceEditComponent,
+                data: {
+                  title: 'Edit Workspace',
+                  mode: WorkspaceEditMode.Edit,
+                  breadcrumb: {
+                    value: 'Edit Workspace',
                   }
                 }
-              ]
-            }, {
-              path: 'cohorts',
-              data: {
-                breadcrumb: {
-                  value: 'Cohorts',
-                  intermediate: true
+              }, {
+                path: 'clone',
+                component: WorkspaceEditComponent,
+                data: {
+                  title: 'Clone Workspace',
+                  mode: WorkspaceEditMode.Clone,
+                  breadcrumb: {
+                    value: 'Clone Workspace',
+                  }
                 }
               },
-              children: [
-                {
-                  path: '',
-                  component: CohortListComponent,
-                  data: {
-                    title: 'View Cohorts',
-                  },
+              {
+                path: 'notebooks',
+                data: {
+                  breadcrumb: {
+                    value: 'Notebooks',
+                    intermediate: true
+                  }
                 },
-                {
-                  path: 'build',
-                  loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-                  data: {
-                    breadcrumb: {
-                      value: 'Add a Cohort',
+                children: [
+                  {
+                    path: '',
+                    component: NotebookListComponent,
+                    data: {
+                      title: 'View Notebooks'
+                    }
+                  }, {
+                    path: ':nbName',
+                    component: NotebookRedirectComponent,
+                    data: {
+                      title: 'Notebook',
+                      breadcrumb: {
+                        value: 'Param: Notebook Name'
+                      },
+                      minimizeChrome: true
                     }
                   }
+                ]
+              }, {
+                path: 'cohorts',
+                data: {
+                  breadcrumb: {
+                    value: 'Cohorts',
+                    intermediate: true
+                  }
                 },
-                {
-                  path: ':cid/review',
-                  loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                children: [
+                  {
+                    path: '',
+                    component: CohortListComponent,
+                    data: {
+                      title: 'View Cohorts',
+                    },
+                  },
+                  {
+                    path: 'build',
+                    loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                    data: {
+                      breadcrumb: {
+                        value: 'Add a Cohort',
+                      }
+                    }
+                  },
+                  {
+                    path: ':cid/review',
+                    loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                    data: {
+                      title: 'Cohort',
+                      breadcrumb: {
+                        value: 'Param: Cohort Name',
+                      }
+                    },
+                    resolve: {
+                      cohort: CohortResolver,
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'concepts',
+                component: ConceptHomepageComponent,
+                data: {
+                  title: 'Search Concepts',
+                  breadcrumb: {
+                    value: 'Concepts',
+                    intermediate: true
+                  }
+                }
+              },
+              {
+                path: 'concepts/sets',
+                data: {
+                  breadcrumb: {
+                    value: 'Concept Sets',
+                    intermediate: true
+                  }
+                },
+                children: [{
+                  path: '',
+                  component: ConceptSetListComponent,
                   data: {
-                    title: 'Cohort',
+                    title: 'View Concept Sets',
+                  }
+                }, {
+                  path: ':csid',
+                  component: ConceptSetDetailsComponent,
+                  data: {
+                    title: 'Concept Set',
                     breadcrumb: {
-                      value: 'Param: Cohort Name',
+                      value: 'Param: Concept Set Name',
                     }
                   },
                   resolve: {
-                    cohort: CohortResolver,
+                    conceptSet: ConceptSetResolver,
                   }
-                }
-              ]
-            },
-            {
-              path: 'concepts',
-              component: ConceptHomepageComponent,
-              data: {
-                title: 'Search Concepts',
-                breadcrumb: {
-                  value: 'Concepts',
-                  intermediate: true
-                }
-              }
-            },
-            {
-              path: 'concepts/sets',
-              data: {
-                breadcrumb: {
-                  value: 'Concept Sets',
-                  intermediate: true
-                }
-              },
-              children: [{
-                path: '',
-                component: ConceptSetListComponent,
-                data: {
-                  title: 'View Concept Sets',
-                }
-              }, {
-                path: ':csid',
-                component: ConceptSetDetailsComponent,
-                data: {
-                  title: 'Concept Set',
-                  breadcrumb: {
-                    value: 'Param: Concept Set Name',
-                  }
-                },
-                resolve: {
-                  conceptSet: ConceptSetResolver,
-                }
+                }]
               }]
-            }]
-        }]
+          }]
       },
       {
         path: 'admin/review-workspace',
@@ -265,7 +265,7 @@ const routes: Routes = [
 })
 export class AppRoutingModule {
 
- constructor(public router: Router) {
+  constructor(public router: Router) {
     NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
     NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {

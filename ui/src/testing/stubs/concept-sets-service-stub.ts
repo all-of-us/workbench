@@ -1,4 +1,3 @@
-import {Response, ResponseOptions} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
 import {ConceptsServiceStub} from './concepts-service-stub';
@@ -58,17 +57,17 @@ export class ConceptSetsServiceStub {
 
   public getConceptSetsInWorkspace(
     workspaceNamespace: string, workspaceId: string): Observable<ConceptSetListResponse> {
-      return new Observable<ConceptSetListResponse>(observer => {
-        setTimeout(() => {
-          observer.next({items: this.conceptSets});
-          observer.complete();
-        }, 0);
-      });
-    }
+    return new Observable<ConceptSetListResponse>(observer => {
+      setTimeout(() => {
+        observer.next({items: this.conceptSets});
+        observer.complete();
+      }, 0);
+    });
+  }
 
   public updateConceptSet(
-      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-      req: ConceptSet): Observable<ConceptSet> {
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: ConceptSet): Observable<ConceptSet> {
     return new Observable<ConceptSet>(obs => {
       setTimeout(() => {
         const target = this.mustFindConceptSet(conceptSetId);
@@ -81,7 +80,7 @@ export class ConceptSetsServiceStub {
   }
 
   public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
-                          extraHttpRequestParams?: any): Observable<ConceptSet> {
+    extraHttpRequestParams?: any): Observable<ConceptSet> {
     return new Observable<ConceptSet>(observer => {
       setTimeout(() => {
         observer.next(this.conceptSets[0]);
@@ -91,8 +90,8 @@ export class ConceptSetsServiceStub {
   }
 
   public updateConceptSetConcepts(
-      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-      req: UpdateConceptSetRequest): Observable<ConceptSet> {
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: UpdateConceptSetRequest): Observable<ConceptSet> {
     return new Observable<ConceptSet>(obs => {
       setTimeout(() => {
         const target = this.conceptSets.find(cs => cs.id === conceptSetId);
@@ -122,8 +121,8 @@ export class ConceptSetsServiceStub {
   }
 
   public deleteConceptSet(
-      workspaceNamespace: string, workspaceId: string,
-      conceptSetId: number): Observable<void> {
+    workspaceNamespace: string, workspaceId: string,
+    conceptSetId: number): Observable<void> {
     return new Observable<void>(obs => {
       setTimeout(() => {
         const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);

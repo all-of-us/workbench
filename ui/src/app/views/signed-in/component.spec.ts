@@ -16,17 +16,17 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ErrorHandlingService} from '../../services/error-handling.service';
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
-import {SignInService} from '../../services/sign-in.service';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
+import {SignInService} from 'app/services/sign-in.service';
 
-import {BreadcrumbComponent} from '../breadcrumb/component';
-import {BugReportComponent} from '../bug-report/component';
-import {RoutingSpinnerComponent} from '../routing-spinner/component';
-import {SignedInComponent} from '../signed-in/component';
+import {BreadcrumbComponent} from 'app/views/breadcrumb/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {RoutingSpinnerComponent} from 'app/views/routing-spinner/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;

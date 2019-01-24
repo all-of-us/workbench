@@ -1,13 +1,13 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {typeToTitle} from 'app/cohort-search/utils';
+import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CohortReviewService} from '../../../generated';
-import {typeToTitle} from '../../cohort-search/utils';
-import {ReviewStateService} from '../review-state.service';
 
 /* The most common column types */
 const itemDate = {

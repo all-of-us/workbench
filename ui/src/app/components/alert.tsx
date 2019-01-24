@@ -28,4 +28,4 @@ export const styles = reactStyles({
 });
 
 export const Alert = withStyle(styles.alert)('div');
-export const AlertDanger = withStyle({...styles.alert, ...styles.danger})('div');
+export const AlertDanger = withStyle(styles.danger)(Alert);

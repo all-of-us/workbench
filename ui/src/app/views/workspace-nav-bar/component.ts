@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
@@ -16,8 +15,8 @@ import {
 @Component({
   selector: 'app-workspace-nav-bar',
   styleUrls: ['../../styles/buttons.css',
-              '../../styles/headers.css',
-              './component.css'],
+    '../../styles/headers.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
@@ -102,9 +101,9 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     this.workspacesService.deleteWorkspace(
       workspace.namespace, workspace.id).subscribe(() => {
         this.router.navigate(['/workspaces']);
-    }, () => {
-      this.workspaceDeletionError = true;
-    });
+      }, () => {
+        this.workspaceDeletionError = true;
+      });
   }
 
   receiveDelete(): void {

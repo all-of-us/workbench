@@ -1,23 +1,25 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Router} from '@angular/router';
-import * as React from 'react';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
+
+import {SignInService} from 'app/services/sign-in.service';
 import {ReactWrapperBase, switchCase} from 'app/utils/index';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {
-  CohortsService, ConceptSetsService,
-  NotebookRename, RecentResource,
+  CohortsService,
+  ConceptSetsService,
+  NotebookRename,
+  RecentResource,
   WorkspacesService
 } from 'generated';
 
-import {SignInService} from 'app/services/sign-in.service';
-import {EditModalComponent} from 'app/views/edit-modal/component';
+import * as React from 'react';
 
-const MenuItem = ({ icon, children, ...props }) => {
+const MenuItem = ({icon, children, ...props}) => {
   return <Clickable
     {...props}
     data-test-id={icon}
@@ -25,9 +27,9 @@ const MenuItem = ({ icon, children, ...props }) => {
       display: 'flex', alignItems: 'center',
       minWidth: '5rem', height: '1.3333rem',
       padding: '0 1rem', color: '#4A4A4A'
-     }}
-     hover={{backgroundColor: '#E0EAF1'}}
-  ><ClrIcon shape={icon} />&nbsp;{children}</Clickable>;
+    }}
+    hover={{backgroundColor: '#E0EAF1'}}
+  ><ClrIcon shape={icon}/>&nbsp;{children}</Clickable>;
 };
 
 const ResourceCardMenu: React.FunctionComponent<{
@@ -35,9 +37,9 @@ const ResourceCardMenu: React.FunctionComponent<{
   onCloneResource: Function, onDeleteResource: Function, onEditCohort: Function,
   onReviewCohort: Function, onEditConceptSet: Function
 }> = ({
-  disabled, resourceType, onRenameNotebook, onCloneResource,
-  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
-}) => {
+        disabled, resourceType, onRenameNotebook, onCloneResource,
+        onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+      }) => {
   return <PopupTrigger
     side='bottom'
     closeOnClick
@@ -68,7 +70,7 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}} />
+      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -95,8 +97,8 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
   }
 }
 
-@Component ({
-  selector : 'app-resource-card',
+@Component({
+  selector: 'app-resource-card',
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
     '../../styles/template.css',
@@ -123,13 +125,12 @@ export class ResourceCardComponent implements OnInit {
   editing = false;
 
   constructor(
-      private cohortsService: CohortsService,
-      private workspacesService: WorkspacesService,
-      private conceptSetsService: ConceptSetsService,
-      private signInService: SignInService,
-      private route: Router,
-  ) {
-  }
+    private cohortsService: CohortsService,
+    private workspacesService: WorkspacesService,
+    private conceptSetsService: ConceptSetsService,
+    private signInService: SignInService,
+    private route: Router,
+  ) {}
 
   ngOnInit() {
     this.wsNamespace = this.resourceCard.workspaceNamespace;
@@ -185,33 +186,33 @@ export class ResourceCardComponent implements OnInit {
         }
       })
       .subscribe(() => {
-          this.renaming = false;
-          this.onUpdate.emit(rename);
-        },
+        this.renaming = false;
+        this.onUpdate.emit(rename);
+      },
         (dupName) => {
           this.duplicateNameError.emit(dupName);
           this.renaming = false;
-    });
+        });
   }
 
   receiveEdit(resource: RecentResource): void {
     if (resource.cohort) {
       this.cohortsService.updateCohort(
-          this.wsNamespace,
-          this.wsId,
-          resource.cohort.id,
-          resource.cohort
-      ).subscribe( () => {
+        this.wsNamespace,
+        this.wsId,
+        resource.cohort.id,
+        resource.cohort
+      ).subscribe(() => {
         this.closeEditModal();
         this.onUpdate.emit();
       });
     } else if (resource.conceptSet) {
       this.conceptSetsService.updateConceptSet(
-          this.wsNamespace,
-          this.wsId,
-          resource.conceptSet.id,
-          resource.conceptSet
-      ).subscribe( () => {
+        this.wsNamespace,
+        this.wsId,
+        resource.conceptSet.id,
+        resource.conceptSet
+      ).subscribe(() => {
         this.closeEditModal();
         this.onUpdate.emit();
       });
@@ -290,20 +291,20 @@ export class ResourceCardComponent implements OnInit {
       }
       case ResourceType.CONCEPT_SET: {
         this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts',
-        'sets', resource.conceptSet.id], {relativeTo: null});
+          'sets', resource.conceptSet.id], {relativeTo: null});
         break;
       }
       case ResourceType.NOTEBOOK: {
         let queryParams = null;
         if (this.notebookReadOnly) {
-          queryParams = { playgroundMode: true };
+          queryParams = {playgroundMode: true};
         }
         this.route.navigate(
           ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
-           encodeURIComponent(this.resourceCard.notebook.name)], {
-             queryParams,
-             relativeTo: null,
-           });
+            encodeURIComponent(this.resourceCard.notebook.name)], {
+              queryParams,
+              relativeTo: null,
+            });
       }
     }
   }
@@ -323,8 +324,8 @@ export class ResourceCardComponent implements OnInit {
 
   reviewCohort(resource: RecentResource): void {
     const url =
-        '/workspaces/' + this.wsNamespace
-        + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
+      '/workspaces/' + this.wsNamespace
+      + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
     this.route.navigateByUrl(url);
   }
 

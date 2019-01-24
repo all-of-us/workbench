@@ -77,7 +77,7 @@
     </div>
   </div>
 </div>
-<app-quick-tour-modal [learning]="quickTour" [closeFunction]="closeQuickTour"></app-quick-tour-modal>
+<app-quick-tour-modal *ngIf="quickTour" [closeFunction]="closeQuickTour"></app-quick-tour-modal>
 <clr-modal [(clrModalOpen)]="open" [clrModalSize]="'md'">
   <div class="modal-body">
     <video *ngIf="open" controls #myVideo style="width: 100%" autoplay>

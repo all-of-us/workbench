@@ -54,21 +54,21 @@ export class WorkspaceShareComponent implements OnInit {
   autocompleteLoading = false;
 
   constructor(private userService: UserService,
-              private locationService: Location,
-              private route: ActivatedRoute,
-              public profileStorageService: ProfileStorageService,
-              private workspacesService: WorkspacesService,
-              private serverConfigService: ServerConfigService) {
+    private locationService: Location,
+    private route: ActivatedRoute,
+    public profileStorageService: ProfileStorageService,
+    private workspacesService: WorkspacesService,
+    private serverConfigService: ServerConfigService) {
     serverConfigService.getConfig().subscribe((config) => {
       this.gsuiteDomain = config.gsuiteDomain;
     });
     this.searchTermChanged
-        .debounceTime(300)
-        .distinctUntilChanged()
-        .subscribe(model => {
-          this.searchTerm = model;
-          this.userSearch(this.searchTerm);
-        });
+      .debounceTime(300)
+      .distinctUntilChanged()
+      .subscribe(model => {
+        this.searchTerm = model;
+        this.userSearch(this.searchTerm);
+      });
   }
 
   ngOnInit(): void {
@@ -86,11 +86,11 @@ export class WorkspaceShareComponent implements OnInit {
     this.workspaceShareError = false;
     this.workspace.userRoles = this.userRolesList;
     this.workspacesService.shareWorkspace(
-        this.workspace.namespace,
-        this.workspace.id, {
-          workspaceEtag: this.workspace.etag,
-          items: this.workspace.userRoles
-        }).subscribe(
+      this.workspace.namespace,
+      this.workspace.id, {
+        workspaceEtag: this.workspace.etag,
+        items: this.workspace.userRoles
+      }).subscribe(
         (resp: ShareWorkspaceResponse) => {
           this.workspace.etag = resp.workspaceEtag;
           this.usersLoading = false;
@@ -129,18 +129,18 @@ export class WorkspaceShareComponent implements OnInit {
 
   reloadWorkspace(): Observable<WorkspaceResponse> {
     const obs: Observable<WorkspaceResponse> = this.workspacesService.getWorkspace(
-        this.workspace.namespace,
-        this.workspace.id);
+      this.workspace.namespace,
+      this.workspace.id);
     obs.subscribe(
-        (workspaceResponse) => {
-          this.accessLevel = workspaceResponse.accessLevel;
-          this.workspace = workspaceResponse.workspace;
-        },
-        (error) => {
-          if (error.status === 404) {
-            this.notFound = true;
-          }
+      (workspaceResponse) => {
+        this.accessLevel = workspaceResponse.accessLevel;
+        this.workspace = workspaceResponse.workspace;
+      },
+      (error) => {
+        if (error.status === 404) {
+          this.notFound = true;
         }
+      }
     );
     return obs;
   }
@@ -226,21 +226,21 @@ export class WorkspaceShareComponent implements OnInit {
 
   checkUnique(email: String, familyName: String, givenName: String): boolean {
     return Array.from(this.userRolesList)
-        .filter(r => r.email === email)
-        .filter(r => r.familyName === familyName)
-        .filter(r => r.givenName === givenName)
-        .length === 0;
+      .filter(r => r.email === email)
+      .filter(r => r.familyName === familyName)
+      .filter(r => r.givenName === givenName)
+      .length === 0;
   }
 
   get showSearchResults(): boolean {
     return !this.autocompleteLoading &&
-        this.autocompleteUsers.length > 0 &&
-        !isBlank(this.searchTerm);
+      this.autocompleteUsers.length > 0 &&
+      !isBlank(this.searchTerm);
   }
 
   get showAutocompleteNoResults(): boolean {
     return this.autocompleteNoResults &&
-        !isBlank(this.searchTerm);
+      !isBlank(this.searchTerm);
   }
 
 }

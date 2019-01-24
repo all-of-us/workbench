@@ -1,6 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
-import {Participant} from '../participant.model';
+import {Participant} from 'app/cohort-review/participant.model';
 
 @Component({
   selector: 'app-sidebar-content',

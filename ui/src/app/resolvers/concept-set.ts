@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {
   ConceptSet,
