@@ -1,8 +1,8 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {List} from 'immutable';
+import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {List, Map} from 'immutable';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {CohortSearchActions, CohortSearchState, groupError} from '../redux';
+import {CohortSearchActions, CohortSearchState, getItem, groupError} from '../redux';
 
 import {CohortStatus, SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
@@ -20,7 +20,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
   error: boolean;
-  temporalFlag = false;
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
     TemporalMention.LASTMENTION];
@@ -32,16 +31,28 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   dropdownOption: any;
   timeDropdownOption: any;
   subscription: Subscription;
-
+  itemSubscription: Subscription;
+  private item: Map<any, any> = Map();
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
+  tempGroup: any;
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
+  // ngOnChanges() {
+  //   if(this.group) {
+  //     console.log('from Onchanges---->>' + this.group.get('temporal'));
+  //   }
+  // }
+
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
-      .subscribe(error => this.error = error);
-      this.temporalFlag = this.group.get('temporal');
+      .subscribe(error => {
+        this.error = error
+      });
+    this.itemSubscription = this.ngRedux.select(getItem(this.group.get('id')))
+      .subscribe(item => this.item = item);
+
   }
 
   ngOnDestroy() {
@@ -50,6 +61,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   get isRequesting() {
     return this.group.get('isRequesting', false);
+  }
+
+  get temporalFlag() {
+    // console.log(this.group.get('temporal'));
+    return this.group.get('temporal');
   }
 
   get groupId() {
@@ -64,6 +80,10 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.actions.removeGroup(this.role, this.groupId);
   }
 
+ getTemporalGroup(e) {
+    this.tempGroup = e;
+ }
+
   launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
@@ -76,8 +96,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-    e.target.checked === true ?
-      this.temporalFlag = true : this.temporalFlag = false;
+     this.actions.updateTemporal(e.target.checked, this.groupId);
   }
 
   getMentionTitle(mention) {

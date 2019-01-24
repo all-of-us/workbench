@@ -94,6 +94,7 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
+  @dispatch() _updatedTemporal = ActionFuncs.UpdatedTemporal;
   @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
@@ -112,6 +113,9 @@ export class CohortSearchActions {
     }
     this.addId(newId);
     return newId;
+  }
+  updateTemporal(flag:boolean, groupId:any) {
+    this._updatedTemporal(flag, groupId);
   }
 
   genSuffix(): string {

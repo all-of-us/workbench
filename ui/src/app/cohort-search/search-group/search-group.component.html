@@ -8,7 +8,6 @@
 
 <div class="card bg-faded">
   <!--********************************Temporal changes start***************************************-->
-
   <div class="card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
@@ -32,6 +31,7 @@
 
   <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
     <app-search-group-item
+      (temporalGroupValue)="getTemporalGroup($event)"
       [role]="role"
       [groupId]="groupId"
       [itemId]="itemId"
@@ -111,7 +111,9 @@
   </div>
   <ng-container *ngIf="temporalFlag">
     <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+      {{itemIndex}}
       <app-search-group-item
+        (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
         [groupId]="groupId"
         [itemId]="itemId"
@@ -141,7 +143,7 @@
   <div class="container card-footer">
     <div class="row">
       <div class="toggle-switch col-sm-1">
-        <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" (click)="getTemporal($event)">
+        <input class="" id="{{groupId}}" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
         <label class="" for="{{groupId}}">
           <span class="solid-preview-label"></span>
          </label>

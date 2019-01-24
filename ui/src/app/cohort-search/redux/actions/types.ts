@@ -56,6 +56,7 @@ export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
+export const UPDATE_TEMPORAL = 'UPDATE_TEMPORAL';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
 export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
@@ -338,6 +339,11 @@ export interface ActionTypes {
   WIZARD_FINISH: {
     type: typeof WIZARD_FINISH;
   };
+  UPDATE_TEMPORAL: {
+    type: typeof UPDATE_TEMPORAL;
+    flag: boolean;
+    groupId: any;
+  }
   WIZARD_CANCEL: {
     type: typeof WIZARD_CANCEL;
   };
@@ -413,6 +419,7 @@ export type RootAction =
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
+  | ActionTypes[typeof UPDATE_TEMPORAL]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
   | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]

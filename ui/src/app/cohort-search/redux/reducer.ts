@@ -11,6 +11,7 @@ import {
   getGroup,
   initialState,
   SR_ID,
+  groupError, getTemporalFlag
 } from './store';
 
 /* tslint:disable:ordered-imports */
@@ -67,6 +68,7 @@ import {
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
+  UPDATE_TEMPORAL,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -307,6 +309,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['entities', 'groups', action.groupId],
+
             fromJS({
               id: action.groupId,
               items: [],
@@ -323,6 +326,8 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['entities', 'searchRequests', SR_ID, action.role],
             groupList => groupList.push(action.groupId)
           );
+
+
 
       case ADD_PARAMETER:
         return state
@@ -445,22 +450,29 @@ export const rootReducer: Reducer<CohortSearchState> =
           ...action.context
         }));
 
+      case UPDATE_TEMPORAL: {
+        // console.log(action.flag, action.groupId)
+        const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
+        return state.setIn(groupItems, action.flag);
+      }
+
       case WIZARD_FINISH: {
         const item = activeItem(state);
         const itemId = item.get('id');
         const groupId = activeGroupId(state);
         const groupItems = ['entities', 'groups', groupId, 'items'];
+        const group = getGroup(groupId)(state);
+        const isTemporal = group.get('temporal');
 
-        if (item.get('searchParameters', List()).isEmpty()) {
-          return state
-            .updateIn(groupItems, List(),
-              items => items.filterNot(
-                id => id === itemId)
-            )
-            .deleteIn(['entities', 'items', itemId])
-            .set('wizard', Map({open: false}));
-        }
-
+          if (item.get('searchParameters', List()).isEmpty()) {
+            return state
+              .updateIn(groupItems, List(),
+                items => items.filterNot(
+                  id => id === itemId)
+              )
+              .deleteIn(['entities', 'items', itemId])
+              .set('wizard', Map({open: false}));
+          }
         const setUnique = element => list =>
           list.includes(element) ? list : list.push(element);
 
@@ -470,12 +482,22 @@ export const rootReducer: Reducer<CohortSearchState> =
             parameter
           );
 
-        return state
-          .updateIn(groupItems, List(), setUnique(itemId))
-          .setIn(['entities', 'items', itemId], item)
-          .updateIn(['entities', 'parameters'], Map(), mergeParams)
-          .set('wizard', Map({open: false}))
-          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
+        if(isTemporal) {
+          return state
+            .updateIn(groupItems, List(), setUnique(itemId))
+            .setIn(['entities', 'items', itemId], item)
+            .setIn(['entities', 'items', itemId, 'temporalGroup'], 1)
+            .updateIn(['entities', 'parameters'], Map(), mergeParams)
+            .set('wizard', Map({open: false}))
+            .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
+        } else {
+          return state
+            .updateIn(groupItems, List(), setUnique(itemId))
+            .setIn(['entities', 'items', itemId], item)
+            .updateIn(['entities', 'parameters'], Map(), mergeParams)
+            .set('wizard', Map({open: false}))
+            .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
+        }
       }
 
       case WIZARD_CANCEL: {

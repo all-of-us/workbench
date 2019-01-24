@@ -56,8 +56,9 @@ export const isRequesting = (kind, id) => state =>
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
-// export const getTemporalFlag = (state): any =>
-//   state.getIn(['entities', 'temporal'], false);
+
+export const getTemporalFlag = (state): any =>
+  state.getIn(['entities', 'temporal'], false);
 
 /**
  * Wizard
@@ -123,7 +124,11 @@ export const isAttributeLoading = (state): boolean =>
 export const participantsCount = (state): any =>
   state.getIn(['wizard', 'item', 'count'], false);
 
-
+export const isDomainNameExists = (cid: any, domain: string) => (state): boolean => {
+  const domainExists = state.getIn(['reviewChartData', 'domainCharts']).has(cid);
+  return domainExists ?
+    state.getIn(['reviewChartData', 'domainCharts', cid]).has(domain) : false;
+};
 /**
  * Criteria
  */

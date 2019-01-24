@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -31,6 +31,8 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() groupId: string;
   @Input() itemId: string;
   @Input() itemIndex: number;
+  @Output() temporalGroupValue = new EventEmitter<any>();
+
 
   error: boolean;
   private item: Map<any, any> = Map();
@@ -51,6 +53,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.ngRedux.select(itemError(this.itemId))
       .subscribe(error => this.error = error));
+    this.temporalGroupValue.emit(this.item.get('temporalGroup'))
   }
 
   ngOnDestroy() {
@@ -72,6 +75,12 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   get isRequesting() {
     return this.item.get('isRequesting', false);
   }
+
+  // get temporalGroup() {
+  //   // console.log(this.item);
+  //  return this.temporalGroupValue.emit(this.item.get('temporalGroup'));
+  //   // return this.item.get('temporalGroup');
+  // }
 
   get codes() {
     const _type = this.item.get('type', '');

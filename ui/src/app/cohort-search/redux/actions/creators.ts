@@ -53,6 +53,7 @@ import {
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
+  UPDATE_TEMPORAL,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -325,6 +326,9 @@ export const reOpenWizard =
 
 export const finishWizard =
   (): ActionTypes[typeof WIZARD_FINISH] => ({type: WIZARD_FINISH});
+
+export const UpdatedTemporal =
+  (flag:boolean, groupId:any): ActionTypes[typeof UPDATE_TEMPORAL] => ({type: UPDATE_TEMPORAL, flag, groupId});
 
 export const cancelWizard =
   (): ActionTypes[typeof WIZARD_CANCEL] => ({type: WIZARD_CANCEL});
