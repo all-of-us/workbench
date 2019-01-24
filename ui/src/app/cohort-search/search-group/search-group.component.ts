@@ -125,6 +125,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
         return 'X Days after';
       case 'WITHIN_X_DAYS_OF' :
         return 'Within X Days of';
-   }
+    }
   }
 }
