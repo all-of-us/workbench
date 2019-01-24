@@ -54,14 +54,14 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
 
   //If the querybuilder will use modifiers then this sql statement has to have
   //the distinct and ${modifierColumns}
-  private static final String CODES_SQL_TEMPLATE =
+
+  private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
+    "in unnest(${conceptIds})\n" +
+      "${encounterSql}";  private static final String CODES_SQL_TEMPLATE =
     "select distinct a.person_id, ${modifierColumns}\n" +
       "from `${projectId}.${dataSetId}.${tableName}` a\n" +
       "where a.${tableId}\n";
 
-  private static final String CHILD_CODE_IN_CLAUSE_TEMPLATE =
-    "in unnest(${conceptIds})\n" +
-      "${encounterSql}";
 
   private static final String GROUP_CODE_LIKE_TEMPLATE =
     "in (select concept_id \n" +
