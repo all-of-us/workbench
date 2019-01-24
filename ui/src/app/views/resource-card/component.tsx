@@ -411,7 +411,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
         </ModalFooter>
       </Modal>}
-      <Card style={styles.card}>
+      <Card style={styles.card}
+            data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
@@ -424,6 +425,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onReviewCohort={this.reviewCohort.bind(this)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
               <div style={styles.cardName}
+                   data-test-id='card-name'
                    onClick={() => this.openResource()}>{this.displayName}
               </div>
             </Clickable>

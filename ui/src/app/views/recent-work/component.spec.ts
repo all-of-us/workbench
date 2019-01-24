@@ -20,9 +20,9 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {
+  findElementsReact,
   setupModals,
   simulateClick,
-  simulateClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -89,10 +89,12 @@ describe('RecentWorkComponent', () => {
     tick();
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const cardsOnPage = fixture.debugElement.queryAll(By.css('.card'));
+    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
     expect(cardsOnPage.length).toEqual(4);
-    const cardNames = fixture.debugElement.queryAll(By.css('.name'))
-      .map((card) => card.nativeElement.innerText);
+    let cardNames: string[] = [];
+    findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
+      cardNames[i] = card.innerText;
+    });
     expect(cardNames).toEqual(
         ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
         'sample name 2']);
@@ -102,9 +104,11 @@ describe('RecentWorkComponent', () => {
   it('should display recent work', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
-    const de = fixture.debugElement;
-    const cardsOnPage = de.queryAll(By.css('.card'));
-    const cardNames = de.queryAll(By.css('.name')).map((card) => card.nativeElement.innerText);
+    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    let cardNames: string[] = [];
+    findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
+      cardNames[i] = card.innerText;
+    });
     expect(cardsOnPage.length).toEqual(4);
     // should match LAST 4, and NOT include the "oldest"
     expect(cardNames).toEqual(
@@ -149,8 +153,14 @@ describe('RecentWorkComponent', () => {
     const de = fixture.debugElement;
     const rightScroll = () => de.query(By.css('#right-scroll'));
     const leftScroll = () => de.query(By.css('#left-scroll'));
-    const nameQuery = () => de.queryAll(By.css('.name'))
-      .map((card) => card.nativeElement.innerText.trim());
+    const nameQuery = () => {
+      let cardNames: string[] = [];
+      findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
+        cardNames[i] = card.innerText;
+      });
+      return cardNames;
+    };
+
     simulateClick(fixture, rightScroll());
     updateAndTick(fixture);
     // should have scrolled right so should be FIRST 4 and NOT last
@@ -174,24 +184,21 @@ describe('RecentWorkComponent', () => {
   it('should resize when screen resizes', fakeAsync( () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
-    const de = fixture.debugElement;
-    const cardsOnPage = de.queryAll(By.css('.card'));
+    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
     expect(cardsOnPage.length).toEqual(4);
 
     // Make it small - should show 3 cards
     fixture.nativeElement.style.width = '800px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
-    const deLess = fixture.debugElement;
-    const lessCards = deLess.queryAll(By.css('.card'));
+    const lessCards = findElementsReact(fixture,'[data-test-id="card"]');
     expect(lessCards.length).toEqual(3);
 
     // Now make it big - should show 5 cards
     fixture.nativeElement.style.width = '1200px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
-    const deMore = fixture.debugElement;
-    const moreCards = deMore.queryAll(By.css('.card'));
+    const moreCards = findElementsReact(fixture,'[data-test-id="card"]');
     expect(moreCards.length).toEqual(5);
   }));
 });
