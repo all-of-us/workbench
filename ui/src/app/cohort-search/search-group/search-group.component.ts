@@ -95,6 +95,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   getMentionTitle(mention) {
     this.dropdownOption = mention;
+    this.actions.updateWhichMention(mention, this.groupId);
 
   }
   getTimeTitle(time) {
@@ -109,8 +110,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     }[mention];
   }
 
-  formatStatus(mention) {
-   switch (mention) {
+  formatStatus(options) {
+   switch (options) {
      case 'ANY_MENTION' :
        return 'Any Mention';
      case 'FIRST_MENTION' :

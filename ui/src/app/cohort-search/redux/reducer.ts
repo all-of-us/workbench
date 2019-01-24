@@ -69,6 +69,7 @@ import {
   REOPEN_WIZARD,
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
+  UPDATE_MENTION,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -454,6 +455,11 @@ export const rootReducer: Reducer<CohortSearchState> =
         // console.log(action.flag, action.groupId)
         const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
         return state.setIn(groupItems, action.flag);
+      }
+
+      case UPDATE_MENTION: {
+        const groupItems = ['entities', 'groups', action.groupId, 'mention'];
+        return state.setIn(groupItems, action.mention);
       }
 
       case WIZARD_FINISH: {

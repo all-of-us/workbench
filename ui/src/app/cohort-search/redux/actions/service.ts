@@ -94,7 +94,8 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
-  @dispatch() _updatedTemporal = ActionFuncs.UpdatedTemporal;
+  @dispatch() _updatedTemporal = ActionFuncs.updatedTemporal;
+  @dispatch() _updateWhichMention = ActionFuncs.updateWhichMention;
   @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
 
@@ -116,6 +117,11 @@ export class CohortSearchActions {
   }
   updateTemporal(flag:boolean, groupId:any) {
     this._updatedTemporal(flag, groupId);
+  }
+
+  updateWhichMention(mention: any, groupId:any) {
+    this._updateWhichMention(mention, groupId);
+
   }
 
   genSuffix(): string {

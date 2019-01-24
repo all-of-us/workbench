@@ -57,6 +57,7 @@ export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
 export const UPDATE_TEMPORAL = 'UPDATE_TEMPORAL';
+export const UPDATE_MENTION = 'UPDATE_MENTION';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
 export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
@@ -342,8 +343,15 @@ export interface ActionTypes {
   UPDATE_TEMPORAL: {
     type: typeof UPDATE_TEMPORAL;
     flag: boolean;
-    groupId: any;
+    groupId: string;
   }
+
+  UPDATE_MENTION: {
+    type: typeof UPDATE_MENTION;
+    mention: any;
+    groupId: string;
+  }
+
   WIZARD_CANCEL: {
     type: typeof WIZARD_CANCEL;
   };
@@ -420,6 +428,7 @@ export type RootAction =
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof UPDATE_TEMPORAL]
+  | ActionTypes[typeof UPDATE_MENTION]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
   | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]

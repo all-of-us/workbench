@@ -54,6 +54,7 @@ import {
   REOPEN_WIZARD,
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
+  UPDATE_MENTION,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -327,8 +328,11 @@ export const reOpenWizard =
 export const finishWizard =
   (): ActionTypes[typeof WIZARD_FINISH] => ({type: WIZARD_FINISH});
 
-export const UpdatedTemporal =
+export const updatedTemporal =
   (flag:boolean, groupId:any): ActionTypes[typeof UPDATE_TEMPORAL] => ({type: UPDATE_TEMPORAL, flag, groupId});
+
+export const updateWhichMention =
+  (mention:any, groupId:any): ActionTypes[typeof UPDATE_MENTION] => ({type: UPDATE_MENTION, mention, groupId});
 
 export const cancelWizard =
   (): ActionTypes[typeof WIZARD_CANCEL] => ({type: WIZARD_CANCEL});
