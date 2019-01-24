@@ -115,6 +115,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   get selectAllChildren() {
     return (this.isDrug
       || this.node.get('type') === TreeType.ICD9
+      || this.node.get('type') === TreeType.PPI
       || this.node.get('type') === TreeType.ICD10)
       && this.node.get('group');
   }

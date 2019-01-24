@@ -1,7 +1,7 @@
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {BoldHeader} from 'app/components/headers';
-import {FormInput} from 'app/components/inputs';
+import {TextInput} from 'app/components/inputs';
 
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
@@ -73,9 +73,10 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         <BoldHeader>
           Enter your Invitation Key:
         </BoldHeader>
-        <FormInput type='text' id='invitationKey' value={this.state.invitationKey}
-                   placeholder='Invitation Key' onChange={input =>
-                                                 this.setState({invitationKey: input.target.value})}
+        <TextInput id='invitationKey' value={this.state.invitationKey}
+                   style={{width: '16rem'}}
+                   placeholder='Invitation Key'
+                   onChange={v => this.setState({invitationKey: v})}
                    ref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
          <AlertDanger>

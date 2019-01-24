@@ -1,7 +1,8 @@
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {Error, FieldInput, styles as inputStyles} from 'app/components/inputs';
+import {styles as headerStyles} from 'app/components/headers';
+import {TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
@@ -73,27 +74,16 @@ export class AccountCreationUpdateModal extends React.Component<
     return <Modal onRequestClose={onClose}>
       <ModalTitle>Change contact email</ModalTitle>
       <ModalBody>
-        <table style={{width: '100%'}}>
-          <tbody>
-          <tr>
-            <td><label>Contact Email:</label></td>
-            <td style={{width: '70%'}}><FieldInput
-              value={contactEmail}
-              style={showEmailError ? inputStyles.unsuccessfulInput : {}}
-              onChange={(e) => this.setState({contactEmail: e.target.value})}
-              onBlur={() => this.setState({emailOffFocus: true})}
-              onFocus={() => this.setState({emailOffFocus: false})}
-            />
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td style={{width: '70%'}}>
-              {showEmailError && <Error>Email is not valid.</Error>}
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <div style={headerStyles.formLabel}>Contact Email:</div>
+        <TextInput
+          autoFocus
+          value={contactEmail}
+          invalid={showEmailError}
+          onChange={v => this.setState({contactEmail: v})}
+          onBlur={() => this.setState({emailOffFocus: true})}
+          onFocus={() => this.setState({emailOffFocus: false})}
+        />
+        {showEmailError && <ValidationError>Email is not valid.</ValidationError>}
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={onClose}>Cancel</Button>
