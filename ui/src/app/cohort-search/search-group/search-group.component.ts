@@ -66,7 +66,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.hide('pending');
     const timeoutId = setTimeout(() => {
       this.actions.removeGroup(this.role, this.groupId);
-    }, 3000);
+    }, 10000);
     // For some reason Angular will delete the timeout id from scope if the inputs change, so we
     // have to keep in the redux store
     this.actions.setTimeoutId('groups', this.groupId, timeoutId);

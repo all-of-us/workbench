@@ -198,7 +198,19 @@ export class CohortSearchActions {
     });
 
     if (this.hasActiveItems(group)) {
-      this.requestTotalCount();
+      const activeGroupsWithItems = !groupList('includes')(this.state)
+        .merge(groupList('excludes')(this.state))
+        .filter(
+          grp => grp.get('status') === 'active'
+            && grp.get('id') !== groupId
+            && this.hasActiveItems(grp)
+        )
+        .isEmpty();
+      if (activeGroupsWithItems) {
+        this.requestTotalCount();
+      } else {
+        // todo clear total count
+      }
     }
   }
 
