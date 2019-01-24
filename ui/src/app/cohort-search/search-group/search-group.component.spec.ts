@@ -132,7 +132,7 @@ describe('SearchGroupComponent', () => {
     const removeButton = fixture.debugElement
       .query(By.css('button[clrdropdownitem]:nth-of-type(2)'));
     removeButton.triggerEventHandler('click', null);
-    jasmine.clock().tick(3000);
+    jasmine.clock().tick(10000);
     fixture.detectChanges();
     expect(spy).toHaveBeenCalledWith({
       type: REMOVE_GROUP,
