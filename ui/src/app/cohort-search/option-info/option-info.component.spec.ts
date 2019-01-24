@@ -1,7 +1,7 @@
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {NgxPopperModule} from 'ngx-popper';
 
-import {SafeHtmlPipe} from '../safe-html.pipe';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {OptionInfoComponent} from './option-info.component';
 
 describe('OptionInfoComponent', () => {
@@ -13,7 +13,7 @@ describe('OptionInfoComponent', () => {
       declarations: [ OptionInfoComponent, SafeHtmlPipe ],
       imports: [ NgxPopperModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

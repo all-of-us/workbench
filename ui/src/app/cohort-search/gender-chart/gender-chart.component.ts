@@ -1,5 +1,4 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {List, Map} from 'immutable';
 
 
 @Component({

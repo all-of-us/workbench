@@ -1,8 +1,8 @@
+import {Cohort, CohortReview} from 'generated';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {Cohort, CohortReview} from '../../generated';
 
 export class ReviewStateServiceStub {
   public annotationDefinitions = new ReplaySubject<CohortAnnotationDefinition[]>(1);

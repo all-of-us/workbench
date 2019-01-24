@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
   CohortReview,
@@ -113,11 +113,11 @@ export class DetailHeaderComponent implements OnChanges {
     const {ns, wsid, cid} = this.route.parent.snapshot.params;
     const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
     const request = {
-        page: page,
-        pageSize: size,
-        sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
-        sortOrder: SortOrder.Asc,
-        pageFilterType: PageFilterType.ParticipantCohortStatuses
+      page: page,
+      pageSize: size,
+      sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
+      sortOrder: SortOrder.Asc,
+      pageFilterType: PageFilterType.ParticipantCohortStatuses
     };
     return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }

@@ -10,8 +10,8 @@ import {
 } from '@angular/router';
 
 
+import {cookiesEnabled} from 'app/utils';
 import {environment} from 'environments/environment';
-import {cookiesEnabled} from '../../utils';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
@@ -20,7 +20,7 @@ export const overriddenPublicUrlKey = 'publicApiUrlOverride';
 @Component({
   selector: 'app-aou',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css'],
+    '../../styles/buttons.css'],
   templateUrl: './component.html'
 })
 export class AppComponent implements OnInit {

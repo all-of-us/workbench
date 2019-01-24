@@ -6,8 +6,8 @@ import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   Cluster,
   FileDetail,
@@ -19,7 +19,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -47,12 +46,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   notebookRenameConflictError = false;
   notebookRenameError = false;
   duplicateName = '';
+  creatingNotebook = false;
 
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(NewNotebookModalComponent)
-  newNotebookModal: NewNotebookModalComponent;
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
@@ -110,7 +108,11 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.newNotebookModal.open();
+    this.creatingNotebook = true;
+  }
+
+  closeNotebookModal() {
+    this.creatingNotebook = false;
   }
 
   updateList(rename?: NotebookRename): void {
@@ -155,6 +157,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   }
 
   get actionsDisabled(): boolean {
-      return !this.writePermission;
+    return !this.writePermission;
   }
 }

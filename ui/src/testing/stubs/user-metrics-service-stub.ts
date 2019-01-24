@@ -15,8 +15,8 @@ export class UserMetricsServiceStub {
   }
 
   updateRecentResource(workspaceNamespace: string, workspaceId: string,
-                       recentResourceRequest: RecentResourceRequest,
-                       extraHttpRequestParams?: any): Observable<RecentResource> {
+    recentResourceRequest: RecentResourceRequest,
+    extraHttpRequestParams?: any): Observable<RecentResource> {
     return new Observable<RecentResource>(observer => {
       setTimeout(() => {
         observer.complete();

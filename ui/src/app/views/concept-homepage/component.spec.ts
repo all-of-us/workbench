@@ -52,12 +52,12 @@ const activatedRouteStub  = {
 
 function isSelectedDomain(
   domain: DomainInfo, fixture: ComponentFixture<ConceptHomepageComponent>): boolean {
-    if (fixture.debugElement.query(
-      By.css('.domain-selector-button.active'))
-      .children[0].nativeNode.textContent.trim() === domain.name) {
-        return true;
-    }
-    return false;
+  if (fixture.debugElement.query(
+    By.css('.domain-selector-button.active'))
+    .children[0].nativeNode.textContent.trim() === domain.name) {
+    return true;
+  }
+  return false;
 }
 
 describe('ConceptHomepageComponent', () => {
@@ -183,7 +183,7 @@ describe('ConceptHomepageComponent', () => {
         .and.callThrough();
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement
-        .query(By.css('.standard-concepts-checkbox')).children[0]);
+      .query(By.css('.standard-concepts-checkbox')).children[0]);
     simulateInput(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
     simulateEvent(fixture,
@@ -205,7 +205,7 @@ describe('ConceptHomepageComponent', () => {
 
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement
-        .query(By.css('.standard-concepts-checkbox')).children[0]);
+      .query(By.css('.standard-concepts-checkbox')).children[0]);
     simulateInput(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), searchTerm);
     simulateEvent(fixture,

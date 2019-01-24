@@ -12,7 +12,7 @@ import {
   getItem,
   parameterList,
   REOPEN_WIZARD,
-} from '../redux';
+} from 'app/cohort-search/redux';
 import {SearchGroupItemComponent} from './search-group-item.component';
 
 import {CohortBuilderService, TreeType} from 'generated';

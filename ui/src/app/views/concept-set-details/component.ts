@@ -1,15 +1,11 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 import {
   ConceptSet,
   ConceptSetsService,
-  Domain,
-  DomainInfo,
-  StandardConceptFilter,
   WorkspaceAccessLevel,
 } from 'generated';
 
