@@ -112,19 +112,19 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   formatStatus(options) {
     switch (options) {
       case 'ANY_MENTION' :
-       return 'Any Mention';
+        return 'Any Mention';
       case 'FIRST_MENTION' :
-       return 'First Mention';
+        return 'First Mention';
       case 'LAST_MENTION' :
-       return 'Last Mention';
+        return 'Last Mention';
       case 'DURING_SAME_ENCOUNTER_AS' :
-       return 'During same encounter as';
+        return 'During same encounter as';
       case 'X_DAYS_BEFORE' :
-       return 'X Days before';
+        return 'X Days before';
       case 'X_DAYS_AFTER' :
-       return 'X Days after';
+        return 'X Days after';
       case 'WITHIN_X_DAYS_OF' :
-       return 'Within X Days of';
+        return 'Within X Days of';
    }
   }
 }
