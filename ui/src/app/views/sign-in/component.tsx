@@ -1,19 +1,18 @@
-import {Component, Inject, OnChanges, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
-import {withWindowSize} from 'app/utils';
+import {ReactWrapperBase, withWindowSize} from 'app/utils';
 import {AccountCreationSuccess} from 'app/views/account-creation-success/component';
 import {AccountCreation} from 'app/views/account-creation/component';
 import {InvitationKey} from 'app/views/invitation-key/component';
 import {LoginReactComponent} from 'app/views/login/component';
 
+import {Profile} from 'generated/fetch';
+
 import * as React from 'react';
 
-import {ReactWrapperBase} from 'app/utils';
 import {styles} from './style';
-
-import {Profile} from 'generated/fetch';
 
 interface ImagesSource {
   backgroundImgSrc: string;
@@ -48,7 +47,8 @@ export const pageImages = {
   'accountCreationSuccess': {
     backgroundImgSrc: '/assets/images/congrats-female.png',
     smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
-  }};
+  }
+};
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
@@ -74,7 +74,7 @@ export const SignInReact = withWindowSize()(
       switch (index) {
         case 'login':
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
-                                     this.setCurrentStep('invitationKey')}/>;
+            this.setCurrentStep('invitationKey')}/>;
         case 'invitationKey':
           return <InvitationKey onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
         case 'accountCreation':
@@ -84,8 +84,8 @@ export const SignInReact = withWindowSize()(
           return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
           return;
-        }
       }
+    }
 
     setCurrentStep(nextStep: string) {
       this.setState({
@@ -120,7 +120,7 @@ export const SignInReact = withWindowSize()(
         </div>
       </div>;
     }
-});
+  });
 
 export default SignInReact;
 
@@ -135,7 +135,7 @@ export class SignInComponent extends ReactWrapperBase {
     this.signIn = this.signIn.bind(this);
   }
 
-  onInit(): void  {
+  onInit(): void {
     this.signInService.isSignedIn$.subscribe((signedIn) => {
       if (signedIn) {
         this.router.navigateByUrl('/');
@@ -143,7 +143,7 @@ export class SignInComponent extends ReactWrapperBase {
     });
   }
 
- signIn(): void {
+  signIn(): void {
     this.signInService.signIn();
   }
 

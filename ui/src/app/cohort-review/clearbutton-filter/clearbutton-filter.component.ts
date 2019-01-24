@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ClrDatagridFilterInterface} from '@clr/angular';
 
-import {Participant} from '../participant.model';
+import {Participant} from 'app/cohort-review/participant.model';
 
 import {
   ParticipantCohortStatusColumns,

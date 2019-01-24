@@ -5,10 +5,10 @@ import {ClarityModule} from '@clr/angular';
 import {CohortAnnotationDefinitionService} from 'generated';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
-import {ReviewStateService} from '../review-state.service';
-import {SetAnnotationCreateComponent} from '../set-annotation-create/set-annotation-create.component';
-import {SetAnnotationItemComponent} from '../set-annotation-item/set-annotation-item.component';
-import {SetAnnotationListComponent} from '../set-annotation-list/set-annotation-list.component';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {SetAnnotationCreateComponent} from 'app/cohort-review/set-annotation-create/set-annotation-create.component';
+import {SetAnnotationItemComponent} from 'app/cohort-review/set-annotation-item/set-annotation-item.component';
+import {SetAnnotationListComponent} from 'app/cohort-review/set-annotation-list/set-annotation-list.component';
 import {SetAnnotationModalComponent} from './set-annotation-modal.component';
 
 describe('SetAnnotationModalComponent', () => {

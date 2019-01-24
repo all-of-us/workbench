@@ -11,6 +11,8 @@
     "noImplicitAny": true,
     "suppressImplicitAnyIndexErrors": true,
     "jsx": "react",
-    "allowJs": true
+    "allowJs": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   }
 }

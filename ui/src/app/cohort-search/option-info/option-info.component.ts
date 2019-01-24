@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
+import {highlightMatches} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
-import {highlightMatches, stripHtml} from '../utils';
 
 @Component({
   selector: 'app-option-info',

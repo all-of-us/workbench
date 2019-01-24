@@ -9,18 +9,18 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
-import {PREDEFINED_ATTRIBUTES} from '../constant';
+import {PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
 import {
   CohortSearchActions,
   CohortSearchState,
   isParameterActive,
   selectedGroups,
   subtreeSelected
-} from '../redux';
-import {stripHtml} from '../utils';
+} from 'app/cohort-search/redux';
+import {stripHtml} from 'app/cohort-search/utils';
+import {TreeSubType, TreeType} from 'generated';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'crit-node-info',

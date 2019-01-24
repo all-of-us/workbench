@@ -18,7 +18,7 @@ import {
   includeGroups,
   isRequstingTotal,
   totalCount,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels

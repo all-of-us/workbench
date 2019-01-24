@@ -32,10 +32,10 @@ export class AdminReviewIdVerificationComponent implements OnInit {
   ngOnInit(): void {
     this.profileService.getIdVerificationsForReview()
       .subscribe(
-          profilesResp => {
-            this.profiles = this.sortProfileList(profilesResp.profileList);
-            this.contentLoaded = true;
-          });
+        profilesResp => {
+          this.profiles = this.sortProfileList(profilesResp.profileList);
+          this.contentLoaded = true;
+        });
   }
 
   setIdVerificationStatus(profile: Profile, newStatus: IdVerificationStatus): void {

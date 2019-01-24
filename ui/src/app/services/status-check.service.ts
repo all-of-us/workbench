@@ -1,9 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Http} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
 
 import {InterceptedHttp} from 'app/factory/InterceptedHttp';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 
 import {StatusService} from 'generated';
 

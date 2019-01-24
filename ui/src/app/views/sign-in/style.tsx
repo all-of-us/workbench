@@ -1,9 +1,8 @@
-import * as React from 'react';
 
 export const styles = {
   template: (windowSize, images) => {
     return {
-      backgroundImage:  calculateImage(),
+      backgroundImage: calculateImage(),
       backgroundColor: '#dedfe1',
       backgroundRepeat: 'no-repeat',
       width: '100%',
@@ -23,7 +22,7 @@ export const styles = {
     function calculateBackgroundPosition() {
       let position = 'bottom right -1rem';
       if (windowSize.width > 900 && windowSize.width <= 1300) {
-        position = 'bottom right' ;
+        position = 'bottom right';
       }
       return position;
     }

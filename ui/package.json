@@ -5,12 +5,14 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "dev-up": "yarn run codegen && yarn start",
     "build": "ng build",
     "test": "ng test --source-map=false",
+    "test-react": "jest",
     "lint": "ng lint --type-check",
     "e2e": "ng e2e",
     "codegen": "yarn run merge-swagger && yarn run codegen-clean && yarn run codegen-swagger && yarn run codegen-swagger-fetch && yarn run post-codegen && yarn run notebooks-codegen-swagger && yarn run notebooks-post-codegen",
-    "merge-swagger": "../api/build.rb merge-yaml",
+    "merge-swagger": "../api/build.rb merge-yaml --no-docker",
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-angular --input-spec ../api/src/main/resources/merged.yaml --output src/generated --additional-properties ngVersion=2",
     "codegen-swagger-fetch": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/merged.yaml --output src/generated/fetch",
@@ -77,8 +79,6 @@
     "d3": "^4.12.2",
     "dom-to-image": "^2.6.0",
     "enhanced-resolve": "3.3.0",
-    "enzyme": "^3.7.0",
-    "enzyme-adapter-react-16": "^1.7.0",
     "highcharts": "^6.2.0",
     "highcharts-react-official": "^2.0.0",
     "immutable": "^4.0.0-rc.9",
@@ -104,6 +104,7 @@
     "stacktrace-js": "^2.0.0",
     "ts-jest": "^23.10.5",
     "tslib": "^1.9.0",
+    "validate.js": "^0.12.0",
     "yarn": "^1.12.3",
     "zone.js": "0.8.26"
   },
@@ -137,6 +138,8 @@
     "react-test-renderer": "^16.6.3",
     "ts-node": "~3.0.4",
     "tslint": "^5.9.1",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-microsoft-contrib": "^6.0.0",
     "typescript": ">=3.1.1 <3.2"
   }
 }

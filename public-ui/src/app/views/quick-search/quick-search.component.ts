@@ -19,7 +19,6 @@ import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/mode
         './quick-search.component.css']
 })
 export class QuickSearchComponent implements OnInit, OnDestroy {
-    pageImage = '/assets/db-images/man-standing.png';
     title = 'Search Across Data Types';
     subTitle = 'Conduct a search across all All of Us Research Program data types, ' +
       'including surveys, ' +
@@ -38,6 +37,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     dataType = null;
     EHR_DATATYPE = 'ehr';
     SURVEY_DATATYPE = 'surveys';
+    PROGRAM_PHYSICAL_MEASUREMENTS = 'program_physical_measurements';
     domainHelpText = {'condition': 'Medical concepts that describe the ' +
       'health status of an individual, ' +
       'such as medical diagnoses, are found in the conditions domain.',
@@ -79,6 +79,16 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
             'response options for each question. ' +
             'The Data Browser provides a total count, ' +
             'grouped by age at occurrence and gender, for each response option.';
+      }
+      if (this.dataType === this.PROGRAM_PHYSICAL_MEASUREMENTS) {
+        this.title = 'Program Physical Measurements';
+        this.subTitle = 'Participants have the option to provide a standard set of ' +
+          'physical measurements as part\n' +
+          'of the enrollment process  (“program physical measurements”).\n' +
+          'Use this tool to browse distributions of measurement ' +
+          'values and counts,\n' +
+          'grouped by age at occurrence and gender, for each ' +
+          'program physical measurement.';
       }
     // Get search result from localStorage
       this.prevSearchText = localStorage.getItem('searchText');

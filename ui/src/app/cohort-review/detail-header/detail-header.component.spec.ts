@@ -3,8 +3,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortReviewService} from 'generated';
 
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {DetailHeaderComponent} from './detail-header.component';
 
 describe('DetailHeaderComponent', () => {
