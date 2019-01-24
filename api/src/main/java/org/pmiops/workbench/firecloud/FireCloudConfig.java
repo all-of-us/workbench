@@ -110,9 +110,8 @@ public class FireCloudConfig {
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public NihApi nihApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
-    NihApi nihApi = new NihApi();
-    nihApi.setApiClient(apiClient);
-    return nihApi;
+    // When checking for NIH account information, we use the end user credentials.
+    return new NihApi(apiClient);
   }
 
   @Bean
