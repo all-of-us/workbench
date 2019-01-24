@@ -11,7 +11,6 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   Cluster,
   FileDetail,
-  NotebookRename,
   PageVisit,
   ProfileService,
   RecentResource,
@@ -43,9 +42,6 @@ export class NotebookListComponent implements OnInit, OnDestroy {
   showTip: boolean;
   newPageVisit: PageVisit = { page: NotebookListComponent.PAGE_ID};
   firstVisit = true;
-  notebookRenameConflictError = false;
-  notebookRenameError = false;
-  duplicateName = '';
   creatingNotebook = false;
 
 
@@ -115,24 +111,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
     this.creatingNotebook = false;
   }
 
-  updateList(rename?: NotebookRename): void {
-    if (rename === undefined) {
-      this.loadNotebookList();
-    } else {
-      const nb = this.resourceList.filter(resource => resource.notebook.name === rename.name)[0];
-      const newNb = Object.assign({}, nb);
-      newNb.notebook.name = rename.newName;
-      this.resourceList.splice(this.resourceList.indexOf(nb), 1, newNb);
-    }
-  }
-
-  duplicateNameError(dupName: string): void {
-    this.duplicateName = dupName;
-    this.notebookRenameConflictError = true;
-  }
-
-  invalidNameError(): void {
-    this.notebookRenameError = true;
+  updateList(): void {
+    this.loadNotebookList();
   }
 
   submitNotebooksLoadBugReport(): void {
