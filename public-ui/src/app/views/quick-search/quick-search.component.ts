@@ -19,7 +19,6 @@ import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/mode
         './quick-search.component.css']
 })
 export class QuickSearchComponent implements OnInit, OnDestroy {
-    pageImage = '/assets/db-images/man-standing.png';
     title = 'Search Across Data Types';
     subTitle = 'Conduct a search across all All of Us Research Program data types, ' +
       'including surveys, ' +
