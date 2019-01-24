@@ -41,7 +41,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.ngRedux.select(itemError(this.itemId))
       .subscribe(error => this.error = error));
-    this.temporalGroupValue.emit(this.item.get('temporalGroup'))
+    this.temporalGroupValue.emit(this.item.get('temporalGroup'));
   }
 
   ngOnDestroy() {

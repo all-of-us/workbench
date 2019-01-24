@@ -1,10 +1,11 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {CohortSearchActions, CohortSearchState, getItem, groupError} from 'app/cohort-search/redux';
 import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {CohortSearchActions, CohortSearchState, getItem, groupError} from '../redux';
+
 
 
 @Component({
@@ -25,8 +26,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
-    TemporalTime.WITHINXDAYSOF,
-    ];
+    TemporalTime.WITHINXDAYSOF];
   dropdownOption: any;
   timeDropdownOption: any;
   subscription: Subscription;
@@ -41,7 +41,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => {
-        this.error = error
+        this.error = error;
       });
     this.itemSubscription = this.ngRedux.select(getItem(this.group.get('id')))
       .subscribe(item => this.item = item);
@@ -73,9 +73,9 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.actions.removeGroup(this.role, this.groupId);
   }
 
- getTemporalGroup(e) {
+  getTemporalGroup(e) {
     this.tempGroup = e;
- }
+  }
 
   launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');
@@ -89,7 +89,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-     this.actions.updateTemporal(e.target.checked, this.groupId);
+    this.actions.updateTemporal(e.target.checked, this.groupId);
   }
 
   getMentionTitle(mention) {
@@ -101,7 +101,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.timeDropdownOption = time;
   }
 
- formatStatusForText(mention: TemporalMention): string {
+  formatStatusForText(mention: TemporalMention): string {
     return {
       [TemporalMention.ANYMENTION]: 'Any Mention',
       [TemporalMention.FIRSTMENTION]: 'First Mention',
@@ -110,7 +110,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   formatStatus(options) {
-   switch (options) {
+    switch (options) {
      case 'ANY_MENTION' :
        return 'Any Mention';
      case 'FIRST_MENTION' :

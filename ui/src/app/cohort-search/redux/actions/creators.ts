@@ -329,11 +329,11 @@ export const finishWizard =
   (): ActionTypes[typeof WIZARD_FINISH] => ({type: WIZARD_FINISH});
 
 export const updatedTemporal =
-  (flag:boolean, groupId:any): ActionTypes[typeof UPDATE_TEMPORAL] =>
+  (flag: boolean, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL] =>
     ({type: UPDATE_TEMPORAL, flag, groupId});
 
 export const updateWhichMention =
-  (mention:any, groupId:any): ActionTypes[typeof UPDATE_MENTION] =>
+  (mention: any, groupId: any): ActionTypes[typeof UPDATE_MENTION] =>
     ({type: UPDATE_MENTION, mention, groupId});
 
 export const cancelWizard =
