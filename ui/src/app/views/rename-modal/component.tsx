@@ -25,7 +25,7 @@ const fullName = name => {
 };
 
 interface RenameModalProps {
-  resource: {name: string};
+  notebookName: string;
   workspace: {namespace: string, name: string};
   onRename: Function;
   onCancel: Function;
@@ -59,11 +59,11 @@ export class RenameModal extends React.Component<RenameModalProps, {
 
   private async rename() {
     try {
-      const {onRename, workspace, resource} = this.props;
+      const {onRename, workspace, notebookName} = this.props;
       const {newName} = this.state;
       this.setState({saving: true});
       await workspacesApi().renameNotebook(workspace.namespace, workspace.name, {
-        name: resource.name,
+        name: notebookName,
         newName: fullName(newName)
       });
       onRename();
@@ -75,7 +75,7 @@ export class RenameModal extends React.Component<RenameModalProps, {
   }
 
   render() {
-    const {resource, onCancel} = this.props;
+    const {notebookName, onCancel} = this.props;
     const {saving, newName, existingNames, nameTouched} = this.state;
     const errors = validate({newName: fullName(newName)}, {newName: {
       presence: {allowEmpty: false},
@@ -89,7 +89,7 @@ export class RenameModal extends React.Component<RenameModalProps, {
       }
     }});
     return <Modal>
-      <ModalTitle>Please enter the new name for {resource.name}</ModalTitle>
+      <ModalTitle>Please enter the new name for {notebookName}</ModalTitle>
       <ModalBody>
         <div style={headerStyles.formLabel}>New Name:</div>
         <TextInput autoFocus id='new-name'
@@ -120,12 +120,12 @@ export class RenameModal extends React.Component<RenameModalProps, {
   template: '<div #root></div>'
 })
 export class RenameModalComponent extends ReactWrapperBase {
-  @Input('resource') resource: RenameModalProps['resource'];
+  @Input('notebookName') notebookName: RenameModalProps['notebookName'];
   @Input('workspace') workspace: RenameModalProps['workspace'];
   @Input('onRename') onRename: RenameModalProps['onRename'];
   @Input('onCancel') onCancel: RenameModalProps['onCancel'];
 
   constructor() {
-    super(RenameModal, ['resource', 'workspace', 'onRename', 'onCancel']);
+    super(RenameModal, ['notebookName', 'workspace', 'onRename', 'onCancel']);
   }
 }
