@@ -62,5 +62,5 @@ export function findElementsReact<C>(
   fixture: ComponentFixture<C>,
   selector: string
 ) {
-  return fixture.debugElement.nativeElement.querySelectorAll(selector);
+  return [].slice.call(fixture.debugElement.nativeElement.querySelectorAll(selector));
 }

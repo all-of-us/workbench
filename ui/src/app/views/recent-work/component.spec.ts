@@ -91,10 +91,8 @@ describe('RecentWorkComponent', () => {
     updateAndTick(fixture);
     const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
     expect(cardsOnPage.length).toEqual(4);
-    let cardNames: string[] = [];
-    findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
-      cardNames[i] = card.innerText;
-    });
+    const cardNames = findElementsReact(fixture, '[data-test-id="card-name"]').
+      map((card) => card.innerText);
     expect(cardNames).toEqual(
         ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
         'sample name 2']);
@@ -105,10 +103,8 @@ describe('RecentWorkComponent', () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
     const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
-    let cardNames: string[] = [];
-    findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
-      cardNames[i] = card.innerText;
-    });
+    const cardNames = findElementsReact(fixture, '[data-test-id="card-name"]').
+      map((card) => card.innerText);
     expect(cardsOnPage.length).toEqual(4);
     // should match LAST 4, and NOT include the "oldest"
     expect(cardNames).toEqual(
@@ -153,13 +149,8 @@ describe('RecentWorkComponent', () => {
     const de = fixture.debugElement;
     const rightScroll = () => de.query(By.css('#right-scroll'));
     const leftScroll = () => de.query(By.css('#left-scroll'));
-    const nameQuery = () => {
-      let cardNames: string[] = [];
-      findElementsReact(fixture, '[data-test-id="card-name"]').forEach((card, i) => {
-        cardNames[i] = card.innerText;
-      });
-      return cardNames;
-    };
+    const nameQuery = () => findElementsReact(fixture, '[data-test-id="card-name"]').
+        map((card) => card.innerText);
 
     simulateClick(fixture, rightScroll());
     updateAndTick(fixture);

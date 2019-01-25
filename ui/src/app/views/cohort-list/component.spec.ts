@@ -12,10 +12,9 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
+  findElementsReact,
   setupModals,
-  simulateClick,
   simulateClickReact,
-  simulateInput,
   simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
@@ -27,6 +26,10 @@ import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resour
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {CohortsApi} from 'generated/fetch';
+
 import {
   Cohort,
   CohortsService,
@@ -35,6 +38,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+//import {CohortsApi} from "../../../generated/fetch/api";
 
 
 const activatedRouteStub  = {
@@ -102,6 +106,7 @@ describe('CohortListComponent', () => {
       ] }).compileComponents().then(() => {
       cohortListPage = new CohortListPage(TestBed);
     });
+    registerApiClient(CohortsApi, new CohortsApiStub());
     tick();
   }));
 
@@ -112,7 +117,7 @@ describe('CohortListComponent', () => {
     setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    const firstCohortName = findElementsReact(fixture,'[data-test-id="card-name"]')[0].innerText;
     const deletedResource: RecentResource = app.resourceList.find(
       (r: RecentResource) => r.cohort.name === firstCohortName);
     expect(deletedResource).toBeTruthy();
@@ -135,7 +140,7 @@ describe('CohortListComponent', () => {
     setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    const firstCohortName = findElementsReact(fixture,'[data-test-id="card-name"]')[0].innerText;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
@@ -147,8 +152,8 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(2);
-    const listOfNames = fixture.debugElement
-      .queryAll(By.css('.name')).map(el => el.nativeNode.innerText);
+    const listOfNames = findElementsReact(fixture,'[data-test-id="card-name"]')
+        .map(el => el.innerText);
     expect(listOfNames).toContain(editValue);
     expect(listOfNames).not.toContain(firstCohortName);
   }));

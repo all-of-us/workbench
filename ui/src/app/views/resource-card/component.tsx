@@ -204,7 +204,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         };
       }
     }
-    console.log(Date.now());
   }
 
   get isCohort(): boolean {
@@ -329,6 +328,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
             this.props.resourceCard.cohort.id)
             .then(() => {
               this.closeConfirmDelete();
+              console.log('deleted cohort');
               this.props.onUpdate();
             });
         break;

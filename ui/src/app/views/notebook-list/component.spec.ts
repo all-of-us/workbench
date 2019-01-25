@@ -38,6 +38,7 @@ import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
 import {
+  findElementsReact,
   setupModals,
   simulateClick,
   simulateClickReact,
@@ -69,7 +70,7 @@ class NotebookListPage {
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
     const de = this.fixture.debugElement;
-    this.notebookCards = de.queryAll(By.css('.item-card'));
+    this.notebookCards = findElementsReact(this.fixture, '[data-test-id="card-name"]');
     this.addCard = de.queryAll((By.css('.add-card')))[0];
   }
 }
@@ -192,20 +193,21 @@ describe('NotebookListComponent', () => {
     fixture.componentInstance.updateList();
     tick();
     updateAndTick(fixture);
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
+    const notebooksOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    expect(notebooksOnPage.map((nb) => nb.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
         .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     simulateClickReact(fixture, '[data-test-id="trash"]');
+    console.log('clicking delete');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    console.log('deleted');
+    const notebooksOnPage = findElementsReact(fixture,'[data-test-id="card"]');
     expect(notebooksOnPage.length).toBe(0);
   }));
 });

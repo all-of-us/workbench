@@ -98,7 +98,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
           </div>
           <div style={{marginTop: '1rem'}}>
             <label style={styles.fieldHeader}>Description: </label>
-            <textarea value={this.state.resourceDescription}
+            <textarea value={this.state.resourceDescription || ''}
                       onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
           </div>
         </ModalBody>
