@@ -50,5 +50,5 @@ export interface Environment {
   useZendeskForSupport: boolean;
 
   // Whether users should be able to use JupyterLab as an option.
-  enableJupyterLab: boolean
+  enableJupyterLab: boolean;
 }

@@ -17,11 +17,8 @@ import {
   WorkspacesService
 } from 'generated';
 
-import * as React from 'react';
 import {environment} from 'environments/environment';
-
-import {SignInService} from 'app/services/sign-in.service';
-import {EditModalComponent} from 'app/views/edit-modal/component';
+import * as React from 'react';
 
 const MenuItem = ({icon, children, ...props}) => {
   return <Clickable
