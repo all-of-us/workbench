@@ -94,7 +94,7 @@ describe('RecentWorkComponent', () => {
     const cardNames = findElementsReact(fixture, '[data-test-id="card-name"]').
       map((card) => card.innerText);
     expect(cardNames).toEqual(
-        ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
+      ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
         'sample name 2']);
   }));
 

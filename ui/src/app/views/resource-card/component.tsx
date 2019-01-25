@@ -18,7 +18,7 @@ import {RenameModal} from '../rename-modal/component';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
-const MenuItem = ({ icon, children, ...props }) => {
+const MenuItem = ({icon, children, ...props}) => {
   return <Clickable
     {...props}
     data-test-id={icon}
@@ -26,9 +26,9 @@ const MenuItem = ({ icon, children, ...props }) => {
       display: 'flex', alignItems: 'center',
       minWidth: '5rem', height: '1.3333rem',
       padding: '0 1rem', color: '#4A4A4A'
-     }}
-     hover={{backgroundColor: '#E0EAF1'}}
-  ><ClrIcon shape={icon} />&nbsp;{children}</Clickable>;
+    }}
+    hover={{backgroundColor: '#E0EAF1'}}
+  ><ClrIcon shape={icon}/>&nbsp;{children}</Clickable>;
 };
 
 const ResourceCardMenu: React.FunctionComponent<{
@@ -36,9 +36,9 @@ const ResourceCardMenu: React.FunctionComponent<{
   onCloneResource: Function, onDeleteResource: Function, onEditCohort: Function,
   onReviewCohort: Function, onEditConceptSet: Function
 }> = ({
-  disabled, resourceType, onRenameNotebook, onCloneResource,
-  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
-}) => {
+        disabled, resourceType, onRenameNotebook, onCloneResource,
+        onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+      }) => {
   return <PopupTrigger
     side='bottom'
     closeOnClick
@@ -69,7 +69,7 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}} />
+      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -371,6 +371,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   receiveNotebookRename(): void {
+    this.setState({renaming: false});
+    this.props.onUpdate();
   }
 
   openResource(): void {
@@ -444,7 +446,11 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                    onEdit={this.receiveEdit.bind(this)}
                    onCancel={this.closeEditModal.bind(this)}/>}
       {this.state.renaming && this.isNotebook &&
-        <RenameModal resourceName={this.displayName}
+        <RenameModal notebookName={this.displayName}
+                     workspace={{
+                       namespace: this.props.resourceCard.workspaceNamespace,
+                       name: this.props.resourceCard.workspaceFirecloudName
+                     }}
                      onRename={this.receiveNotebookRename.bind(this)}
                      onCancel={this.cancelRename.bind(this)}/>}
       {this.state.confirmDeleting &&

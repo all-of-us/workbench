@@ -5,13 +5,13 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
-import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {
   addParameter,
   CohortSearchActions,
   hideAttributesPage,
   requestAttributePreview,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
 import {CohortBuilderService} from 'generated';
 import {AttributesPageComponent} from './attributes-page.component';

@@ -1,13 +1,10 @@
 import {
   Component, Input,
 } from '@angular/core';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 
 import {
-  decamelize,
-  ReactWrapperBase
-} from 'app/utils';
+  Button
+} from 'app/components/buttons';
 
 import {
   Modal,
@@ -17,8 +14,11 @@ import {
 } from 'app/components/modals';
 
 import {
-  Button
-} from 'app/components/buttons';
+  decamelize,
+  ReactWrapperBase
+} from 'app/utils';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 export interface ConfirmDeleteModalProps {
   deleting: boolean;
@@ -33,7 +33,7 @@ export interface ConfirmDeleteModalState {
 }
 
 export class ConfirmDeleteModal
-    extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
+  extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
 
   static transformResourceTypeName(resourceType: string): string {
     return fp.startCase(decamelize(resourceType, ' '));
@@ -53,7 +53,8 @@ export class ConfirmDeleteModal
     return <React.Fragment>
       {this.props.deleting &&
       <Modal className='confirmDeleteModal'>
-        <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
+        <ModalTitle style={{lineHeight: '28px'}}>
+          Are you sure you want to
           delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           : {this.props.resourceName}?
         </ModalTitle>
@@ -62,13 +63,15 @@ export class ConfirmDeleteModal
           the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
-          <Button type='secondary'
-                  onClick={() => this.props.closeFunction()}>Cancel</Button>
-          <Button disabled={this.state.loading}
-                  style={{marginLeft: '0.5rem'}}
-                  data-test-id='confirm-delete'
-                  onClick={() => this.emitDelete()}>
-            Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          <Button
+            type='secondary'
+            onClick={() => this.props.closeFunction()}>Cancel</Button>
+          <Button
+            disabled={this.state.loading}
+            style={{marginLeft: '0.5rem'}}
+            data-test-id='confirm-delete'
+            onClick={() => this.emitDelete()}>
+              Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>
         </ModalFooter>
       </Modal>}

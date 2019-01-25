@@ -23,6 +23,12 @@ export const styles = {
   h4: {
     fontWeight: 300,
     color: '#000',
+  },
+  formLabel: {
+    color: '#262262',
+    fontWeight: 600,
+    marginTop: '0.5rem',
+    marginBottom: '0.125rem'
   }
 };
 

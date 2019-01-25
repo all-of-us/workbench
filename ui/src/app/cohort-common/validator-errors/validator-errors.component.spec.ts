@@ -11,7 +11,7 @@ describe('ValidatorErrorsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ValidatorErrorsComponent ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

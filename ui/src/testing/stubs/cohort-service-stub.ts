@@ -93,7 +93,7 @@ export class CohortsServiceStub {
   getCohort(_: string, wsid: string, cid: number): Observable<Cohort> {
     return new Observable<Cohort>(observer => {
       setTimeout(() => {
-        observer.next(this.cohorts.find(function(cohort: CohortStub) {
+        observer.next(this.cohorts.find((cohort: CohortStub) => {
           if (cohort.id === cid && cohort.workspaceId === wsid) {
             return true;
           }
@@ -107,7 +107,7 @@ export class CohortsServiceStub {
     return new Observable<Cohort>(observer => {
       setTimeout(() => {
 
-        const index = this.cohorts.findIndex(function(cohort: CohortStub) {
+        const index = this.cohorts.findIndex((cohort: CohortStub) => {
           if (cohort.id === cid && cohort.workspaceId) {
             return true;
           }
@@ -130,7 +130,7 @@ export class CohortsServiceStub {
   createCohort(_: string, wsid: string, newCohort: Cohort): Observable<Cohort> {
     return new Observable<Cohort>(observer => {
       setTimeout(() => {
-        observer.next(this.cohorts.find(function(cohort: Cohort) {
+        observer.next(this.cohorts.find((cohort: Cohort) => {
           if (cohort.id === newCohort.id) {
             observer.error(new Error(`Error creating. Cohort with `
                                     + `id: ${cohort.id} already exists.`));

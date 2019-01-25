@@ -26,13 +26,13 @@ export const DOMAIN_TYPES = [
 ];
 
 export const PM_UNITS = {
-    'HEIGHT': 'cm',
-    'WEIGHT': 'kg' ,
-    'BMI': '',
-    'WC': 'cm',
-    'HC': 'cm',
-    'BP': '',
-    'HR-DETAIL': 'beats/min'
+  'HEIGHT': 'cm',
+  'WEIGHT': 'kg' ,
+  'BMI': '',
+  'WC': 'cm',
+  'HC': 'cm',
+  'BP': '',
+  'HR-DETAIL': 'beats/min'
 };
 
 export const PREDEFINED_ATTRIBUTES = {

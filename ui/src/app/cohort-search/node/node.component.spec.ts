@@ -4,9 +4,7 @@ import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
-import {fromJS} from 'immutable';
-import {NgxPopperModule} from 'ngx-popper';
-import {NodeInfoComponent} from '../node-info/node-info.component';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
 import {
   activeCriteriaTreeType,
   CohortSearchActions,
@@ -14,8 +12,10 @@ import {
   criteriaError,
   criteriaSearchTerms,
   isCriteriaLoading,
-} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
+} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {fromJS} from 'immutable';
+import {NgxPopperModule} from 'ngx-popper';
 import {NodeComponent} from './node.component';
 
 class MockActions {

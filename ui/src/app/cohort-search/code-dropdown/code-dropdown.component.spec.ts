@@ -4,7 +4,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 
-import {CohortSearchActions} from '../redux';
+import {CohortSearchActions} from 'app/cohort-search/redux';
 
 import {CodeDropdownComponent} from './code-dropdown.component';
 

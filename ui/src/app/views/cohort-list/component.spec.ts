@@ -31,7 +31,6 @@ import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {CohortsApi} from 'generated/fetch';
 
 import {
-  Cohort,
   CohortsService,
   ConceptSetsService,
   RecentResource,

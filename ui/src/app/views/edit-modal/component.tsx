@@ -1,10 +1,8 @@
 import {Component, Input} from '@angular/core';
-import * as React from 'react';
 
 import {
-  Cohort,
-  RecentResource,
-} from 'generated';
+  Button
+} from 'app/components/buttons';
 
 import {
   Modal,
@@ -14,11 +12,13 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
-import {
-  Button
-} from 'app/components/buttons';
-
 import {reactStyles, ReactWrapperBase} from 'app/utils';
+
+import {
+  RecentResource,
+} from 'generated';
+
+import * as React from 'react';
 
 const styles = reactStyles({
   fieldHeader: {

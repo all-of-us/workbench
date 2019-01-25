@@ -2,9 +2,9 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
+import {CohortSearchActions} from 'app/cohort-search/redux';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {CohortSearchActions} from '../redux';
 import {SelectionInfoComponent} from './selection-info.component';
 
 describe('SelectionInfoComponent', () => {

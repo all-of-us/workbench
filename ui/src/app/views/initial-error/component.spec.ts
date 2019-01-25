@@ -7,11 +7,11 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ServerConfigService} from '../../services/server-config.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 
-import {InitialErrorComponent} from '../initial-error/component';
+import {InitialErrorComponent} from 'app/views/initial-error/component';
 
 describe('InitialErrorComponent', () => {
   let fixture: ComponentFixture<InitialErrorComponent>;

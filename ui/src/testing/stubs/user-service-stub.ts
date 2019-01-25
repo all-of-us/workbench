@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
+import {User, UserResponse} from 'generated';
 import {Observable} from 'rxjs/Observable';
-import {User, UserResponse, WorkspaceAccessLevel} from '../../generated';
 
 @Injectable()
 export class UserServiceStub {
-    constructor() {}
+  constructor() {}
 
   user(searchTerm) {
     return new Observable<UserResponse>(observer => {

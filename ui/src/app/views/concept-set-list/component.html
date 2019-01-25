@@ -37,8 +37,7 @@
     <div style="display: flex; flex-wrap: wrap;">
       <div *ngFor="let conceptSet of resourceList">
         <app-resource-card [resourceCard]="conceptSet"
-                           [onUpdate]="loadConceptSets.bind(this)"
-                           (duplicateNameError)="duplicateNameError($event)">
+                           [onUpdate]="loadConceptSets.bind(this)">
         </app-resource-card>
       </div>
     </div>
@@ -46,7 +45,3 @@
 </app-top-box>
 
 <app-create-concept-modal (onUpdate)="loadConceptSets()"></app-create-concept-modal>
-<clr-modal [(clrModalOpen)]="nameConflictError">
-  <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">You already have a concept set named {{duplicateName}}. Please choose another name.</div>
-</clr-modal>

@@ -91,7 +91,7 @@ export class RecentWorkComponent implements OnInit {
           const cohortResources = convertToResources(cohorts.items, this.workspace.namespace,
             this.workspace.id, this.accessLevel, ResourceType.COHORT);
           const conceptResources = convertToResources(concepts.items, this.workspace.namespace,
-              this.workspace.id, this.accessLevel, ResourceType.CONCEPT_SET);
+            this.workspace.id, this.accessLevel, ResourceType.CONCEPT_SET);
           this.fullList = notebookResources.concat(cohortResources).concat(conceptResources);
           this.fullList.sort((leftSide, rightSide): number => {
             if (leftSide.modifiedTime < rightSide.modifiedTime) { return 1; }
