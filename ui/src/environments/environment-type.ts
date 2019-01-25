@@ -50,5 +50,7 @@ export interface Environment {
   useZendeskForSupport: boolean;
 
   // Whether users should be able to use JupyterLab as an option.
+  // See RW-1966 for details.
+  // Exit criteria: remove flag for Athens release.
   enableJupyterLab: boolean;
 }
