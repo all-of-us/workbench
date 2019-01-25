@@ -5,6 +5,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
@@ -172,6 +173,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
+    WorkspaceWrapperComponent,
     HomepageComponent,
     HighlightSearchComponent,
   ],

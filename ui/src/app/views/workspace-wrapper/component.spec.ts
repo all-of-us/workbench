@@ -30,8 +30,8 @@ import {ServerConfigService} from 'app/services/server-config.service';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/old-component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 @Component({
   selector: 'app-test',
@@ -70,7 +70,7 @@ class FakeNotebooksComponent {}
 })
 class FakeCohortsComponent {}
 
-describe('WorkspaceNavBarComponent', () => {
+describe('WorkspaceWrapperComponent', () => {
   let fixture: ComponentFixture<FakeAppComponent>;
   let router: Router;
   beforeEach(fakeAsync(() => {
@@ -80,7 +80,7 @@ describe('WorkspaceNavBarComponent', () => {
         ClarityModule.forRoot(),
         RouterTestingModule.withRoutes([{
           path: 'workspaces/:ns/:wsid',
-          component: WorkspaceNavBarComponent,
+          component: WorkspaceWrapperComponent,
           data: {
             workspace: {
               ...WorkspacesServiceStub.stubWorkspace(),
@@ -120,7 +120,7 @@ describe('WorkspaceNavBarComponent', () => {
         FakeConceptsComponent,
         FakeNotebooksComponent,
         FakeCohortsComponent,
-        WorkspaceNavBarComponent,
+        WorkspaceWrapperComponent,
         WorkspaceShareComponent,
       ],
       providers: [

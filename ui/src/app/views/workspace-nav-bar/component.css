@@ -131,7 +131,7 @@ label.dropdown-header {
 }
 
 @media print {
-  .doNotPrint {
+  .do-not-print {
     display: none !important;
     -webkit-print-color-adjust: exact;
   }
