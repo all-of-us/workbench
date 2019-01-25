@@ -89,7 +89,7 @@ describe('RecentWorkComponent', () => {
     tick();
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    const cardsOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(cardsOnPage.length).toEqual(4);
     const cardNames = findElementsReact(fixture, '[data-test-id="card-name"]').
       map((card) => card.innerText);
@@ -102,7 +102,7 @@ describe('RecentWorkComponent', () => {
   it('should display recent work', fakeAsync(() => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
-    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    const cardsOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     const cardNames = findElementsReact(fixture, '[data-test-id="card-name"]').
       map((card) => card.innerText);
     expect(cardsOnPage.length).toEqual(4);
@@ -150,7 +150,7 @@ describe('RecentWorkComponent', () => {
     const rightScroll = () => de.query(By.css('#right-scroll'));
     const leftScroll = () => de.query(By.css('#left-scroll'));
     const nameQuery = () => findElementsReact(fixture, '[data-test-id="card-name"]').
-        map((card) => card.innerText);
+      map((card) => card.innerText);
 
     simulateClick(fixture, rightScroll());
     updateAndTick(fixture);
@@ -175,21 +175,21 @@ describe('RecentWorkComponent', () => {
   it('should resize when screen resizes', fakeAsync( () => {
     userMetricsSpy.getUserRecentResources.and.returnValue(Observable.of(stubRecentResources(5)));
     updateAndTick(fixture);
-    const cardsOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    const cardsOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(cardsOnPage.length).toEqual(4);
 
     // Make it small - should show 3 cards
     fixture.nativeElement.style.width = '800px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
-    const lessCards = findElementsReact(fixture,'[data-test-id="card"]');
+    const lessCards = findElementsReact(fixture, '[data-test-id="card"]');
     expect(lessCards.length).toEqual(3);
 
     // Now make it big - should show 5 cards
     fixture.nativeElement.style.width = '1200px';
     window.dispatchEvent(new Event('resize'));
     updateAndTick(fixture);
-    const moreCards = findElementsReact(fixture,'[data-test-id="card"]');
+    const moreCards = findElementsReact(fixture, '[data-test-id="card"]');
     expect(moreCards.length).toEqual(5);
   }));
 });

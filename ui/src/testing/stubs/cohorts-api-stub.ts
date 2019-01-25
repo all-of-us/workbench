@@ -1,3 +1,4 @@
+import {Empty} from '@angular-devkit/core/src/virtual-fs/host';
 import {
   Cohort,
   CohortsApi,
@@ -6,9 +7,8 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {WorkspaceStubVariables} from "./workspace-service-stub";
-import {convertToResources, ResourceType} from "../../app/utils/resourceActionsReact";
-import {Empty} from "@angular-devkit/core/src/virtual-fs/host";
+import {convertToResources, ResourceType} from '../../app/utils/resourceActionsReact';
+import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;
@@ -83,7 +83,7 @@ export class CohortsApiStub extends CohortsApi {
     this.cohorts = [exampleCohort, exampleCohortTwo];
     this.workspaces = [stubWorkspace];
     this.resourceList = convertToResources(this.cohorts, stubWorkspace.namespace,
-        stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
+      stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
   }
 
   updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {

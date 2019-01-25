@@ -188,7 +188,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.state  = {
           resourceType: ResourceType.COHORT,
           invalidResourceError: false,
-            ...defaultState
+          ...defaultState
         };
       } else if (props.resourceCard.conceptSet) {
         this.state = {
@@ -289,12 +289,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     switch (this.state.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().cloneNotebook(
-            this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName,
-            this.props.resourceCard.notebook.name)
-            .then(() => {
-          this.props.onUpdate();
-        });
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.notebook.name)
+          .then(() => {
+            this.props.onUpdate();
+          });
         break;
       }
       case ResourceType.COHORT: {
@@ -312,36 +312,36 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     switch (this.state.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().deleteNotebook(
-            this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName,
-            this.props.resourceCard.notebook.name)
-            .then(() => {
-              this.closeConfirmDelete();
-              this.props.onUpdate();
-            });
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.notebook.name)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
         break;
       }
       case ResourceType.COHORT: {
         cohortsApi().deleteCohort(
-            this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName,
-            this.props.resourceCard.cohort.id)
-            .then(() => {
-              this.closeConfirmDelete();
-              console.log('deleted cohort');
-              this.props.onUpdate();
-            });
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohort.id)
+          .then(() => {
+            this.closeConfirmDelete();
+            console.log('deleted cohort');
+            this.props.onUpdate();
+          });
         break;
       }
       case ResourceType.CONCEPT_SET: {
         conceptSetsApi().deleteConceptSet(
-            this.props.resourceCard.workspaceNamespace,
-            this.props.resourceCard.workspaceFirecloudName,
-            this.props.resourceCard.conceptSet.id)
-            .then(() => {
-              this.closeConfirmDelete();
-              this.props.onUpdate();
-            });
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.conceptSet.id)
+          .then(() => {
+            this.closeConfirmDelete();
+            this.props.onUpdate();
+          });
       }
     }
   }
@@ -349,10 +349,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   receiveEdit(): void {
     if (this.isCohort) {
       cohortsApi().updateCohort(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.cohort.id,
-          this.props.resourceCard.cohort
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.cohort.id,
+        this.props.resourceCard.cohort
       ).then( () => {
         this.closeEditModal();
         this.props.onUpdate();
@@ -393,9 +393,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           queryParams = { playgroundMode: true };
         }
         navigate(
-            ['workspaces', this.props.resourceCard.workspaceNamespace,
-              this.props.resourceCard.workspaceFirecloudName, 'notebooks',
-              encodeURIComponent(this.props.resourceCard.notebook.name)], {
+          ['workspaces', this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName, 'notebooks',
+            encodeURIComponent(this.props.resourceCard.notebook.name)], {
               queryParams,
               relativeTo: null,
             });

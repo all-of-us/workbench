@@ -14,21 +14,21 @@ export enum ResourceType {
 }
 
 export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
-                                   workspaceNamespace: string, workspaceId: string,
-                                   accessLevel: WorkspaceAccessLevel,
-                                   resourceType: ResourceType): RecentResource[] {
+  workspaceNamespace: string, workspaceId: string,
+  accessLevel: WorkspaceAccessLevel,
+  resourceType: ResourceType): RecentResource[] {
   const resourceList = [];
   for (const resource of list) {
     resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
-        accessLevel, resourceType));
+      accessLevel, resourceType));
   }
   return resourceList;
 }
 
 export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
-                                  workspaceNamespace: string, workspaceId: string,
-                                  accessLevel: WorkspaceAccessLevel,
-                                  resourceType: ResourceType): RecentResource {
+  workspaceNamespace: string, workspaceId: string,
+  accessLevel: WorkspaceAccessLevel,
+  resourceType: ResourceType): RecentResource {
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();

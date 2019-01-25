@@ -160,7 +160,7 @@ describe('NotebookListComponent', () => {
     fixture.componentInstance.updateList();
     tick();
     updateAndTick(fixture);
-    const notebooksOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    const notebooksOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(notebooksOnPage.map((nb) => nb.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
       .toContain('mockFile Clone.ipynb');
@@ -174,7 +174,7 @@ describe('NotebookListComponent', () => {
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     console.log('deleted');
-    const notebooksOnPage = findElementsReact(fixture,'[data-test-id="card"]');
+    const notebooksOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(notebooksOnPage.length).toBe(0);
   }));
 });
