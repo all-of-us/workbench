@@ -17,6 +17,7 @@ import {
   WorkspacesService
 } from 'generated';
 
+import {environment} from 'environments/environment';
 import * as React from 'react';
 
 const MenuItem = ({icon, children, ...props}) => {
@@ -34,12 +35,12 @@ const MenuItem = ({icon, children, ...props}) => {
 
 const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
-  onCloneResource: Function, onDeleteResource: Function, onEditCohort: Function,
-  onReviewCohort: Function, onEditConceptSet: Function
+  onOpenJupyterLabNotebook: any, onCloneResource: Function, onDeleteResource: Function,
+  onEditCohort: Function, onReviewCohort: Function, onEditConceptSet: Function
 }> = ({
-        disabled, resourceType, onRenameNotebook, onCloneResource,
-        onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
-      }) => {
+  disabled, resourceType, onRenameNotebook, onOpenJupyterLabNotebook, onCloneResource,
+  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+}) => {
   return <PopupTrigger
     side='bottom'
     closeOnClick
@@ -50,6 +51,19 @@ const ResourceCardMenu: React.FunctionComponent<{
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            {
+              environment.enableJupyterLab &&
+              /*
+               This does not support both playground mode and jupyterLab yet,
+               that is a work in progress. We do not need to worry about that
+               here, because the menu will not open if you do not have write
+               access, and playground mode is currently only enabled if you do
+               not have write access.
+              */
+              <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
+                Open in Jupyter Lab
+              </MenuItem>
+            }
           </React.Fragment>;
         }],
         ['cohort', () => {
@@ -83,6 +97,7 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
   @Input() disabled;
   @Input() resourceType;
   @Input() onRenameNotebook;
+  @Input() onOpenJupyterLabNotebook;
   @Input() onCloneResource;
   @Input() onDeleteResource;
   @Input() onEditCohort;
@@ -91,8 +106,9 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
 
   constructor() {
     super(ResourceCardMenu, [
-      'disabled', 'resourceType', 'onRenameNotebook', 'onCloneResource',
-      'onDeleteResource', 'onEditCohort', 'onReviewCohort', 'onEditConceptSet'
+      'disabled', 'resourceType', 'onRenameNotebook', 'onOpenJupyterLabNotebook',
+      'onCloneResource', 'onDeleteResource', 'onEditCohort', 'onReviewCohort',
+      'onEditConceptSet'
     ]);
   }
 }
@@ -257,7 +273,7 @@ export class ResourceCardComponent implements OnInit {
     }
   }
 
-  openResource(resource: RecentResource): void {
+  openResource(resource: RecentResource, jupyterLab?: boolean): void {
     switch (this.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort(resource);
@@ -269,9 +285,12 @@ export class ResourceCardComponent implements OnInit {
         break;
       }
       case ResourceType.NOTEBOOK: {
-        let queryParams = null;
+        const queryParams = {
+          playgroundMode: false,
+          jupyterLabMode: jupyterLab
+        };
         if (this.notebookReadOnly) {
-          queryParams = {playgroundMode: true};
+          queryParams.playgroundMode = true;
         }
         this.route.navigate(
           ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
