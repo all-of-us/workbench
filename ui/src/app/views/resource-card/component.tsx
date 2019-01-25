@@ -11,10 +11,10 @@ import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {EditModal} from 'app/views/edit-modal/component';
+import {RenameModal} from 'app/views/rename-modal/component';
 import {RecentResource} from 'generated';
-import {ConfirmDeleteModal} from '../confirm-delete-modal/component';
-import {EditModal} from '../edit-modal/component';
-import {RenameModal} from '../rename-modal/component';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
@@ -204,6 +204,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         };
       }
     }
+
   }
 
   get isCohort(): boolean {
@@ -240,6 +241,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
     }
+  }
+
+  get displayDate(): string {
+    const date = new Date(Number(this.props.resourceCard.modifiedTime));
+    // datetime formatting to slice off weekday from readable date string
+    return date.toDateString().split(' ').slice(1).join(' ');
   }
 
   get description(): string {
@@ -436,7 +443,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         </div>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
-            Last Modified: {this.props.resourceCard.modifiedTime}</div>
+            Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}>
             {fp.startCase(fp.camelCase(this.state.resourceType))}</div>
         </div>

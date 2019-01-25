@@ -1,4 +1,4 @@
-import {Empty} from '@angular-devkit/core/src/virtual-fs/host';
+import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
 import {
   Cohort,
   CohortsApi,
@@ -7,7 +7,6 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-import {convertToResources, ResourceType} from '../../app/utils/resourceActionsReact';
 import {WorkspaceStubVariables} from './workspace-service-stub';
 
 export let DEFAULT_COHORT_ID = 1;
