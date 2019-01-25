@@ -374,7 +374,7 @@ export interface ActionTypes {
     type: typeof UPDATE_TEMPORAL_TIME_VALUE;
     timeValue: any;
     groupId: string;
-  }
+  };
 
   LOAD_ENTITIES: {
     type: typeof LOAD_ENTITIES;
