@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {typeToTitle} from 'app/cohort-search/utils';
 import {CohortBuilderService, TreeType} from 'generated';
-import {typeToTitle} from '../../cohort-search/utils';
 
 
 
@@ -60,7 +60,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     let typeMatched;
     const modArray =  params.map(eachParam => {
       if (eachParam.type === 'DRUG') {
-         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
+        typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === eachParam.type);
       }
@@ -105,10 +105,10 @@ export class QueryCohortDefinitionComponent implements OnInit {
           type: param.type};
       } else {
         return _type === 'CONDITION' || _type === 'PROCEDURE' ?
-          {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
-            type: param.type} :
-          {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
-            type: param.type};
+        {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
+          type: param.type} :
+        {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
+          type: param.type};
       }
     });
     return this.removeDuplicates(noModArray);
@@ -161,7 +161,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
         group: k,
         data: groupedData[k].data,
         customString : groupedData[k].data.reduce((acc, d) => {
-         return this.getFormattedString(acc, d);
+          return this.getFormattedString(acc, d);
         }, '')
       });
     });

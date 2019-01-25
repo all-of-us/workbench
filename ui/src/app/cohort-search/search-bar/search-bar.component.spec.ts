@@ -6,9 +6,9 @@ import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 
-import {OptionInfoComponent} from '../option-info/option-info.component';
-import {CohortSearchActions} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
+import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
+import {CohortSearchActions} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
 import {SearchBarComponent} from './search-bar.component';
 
 describe('SearchBarComponent', () => {

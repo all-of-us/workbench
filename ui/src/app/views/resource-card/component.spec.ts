@@ -9,7 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {updateAndTick} from 'testing/test-helpers';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortsService} from 'generated/api/cohorts.service';
@@ -66,11 +66,11 @@ describe('ResourceCardComponent', () => {
       ]
     }).compileComponents()
       .then(() => {
-      fixture = TestBed.createComponent(ResourceCardWrapperComponent);
-      component = fixture.debugElement.children[0].componentInstance;
+        fixture = TestBed.createComponent(ResourceCardWrapperComponent);
+        component = fixture.debugElement.children[0].componentInstance;
 
-      fixture.detectChanges();
-    });
+        fixture.detectChanges();
+      });
   }));
 
   it('should render', fakeAsync(() => {

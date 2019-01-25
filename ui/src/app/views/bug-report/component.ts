@@ -13,9 +13,9 @@ import {
   selector: 'app-bug-report',
   templateUrl: './component.html',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/errors.css',
-              '../../styles/inputs.css']
+    '../../styles/buttons.css',
+    '../../styles/errors.css',
+    '../../styles/inputs.css']
 })
 export class BugReportComponent {
   BugReportType = BugReportType;

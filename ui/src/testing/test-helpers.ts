@@ -16,25 +16,25 @@ export function updateAndTick<C>(fixture: ComponentFixture<C>) {
 }
 
 export function simulateInput<C>(
-    fixture: ComponentFixture<C>,
-    element: DebugElement,
-    text: string) {
+  fixture: ComponentFixture<C>,
+  element: DebugElement,
+  text: string) {
   element.nativeNode.value = text;
   element.nativeNode.dispatchEvent(new Event('input'));
   updateAndTick(fixture);
 }
 
 export function simulateEvent<C>(
-    fixture: ComponentFixture<C>,
-    element: DebugElement,
-    eventType: string) {
+  fixture: ComponentFixture<C>,
+  element: DebugElement,
+  eventType: string) {
   element.triggerEventHandler(eventType, null);
   updateAndTick(fixture);
 }
 
 export function simulateClick<C>(
-    fixture: ComponentFixture<C>,
-    element: DebugElement) {
+  fixture: ComponentFixture<C>,
+  element: DebugElement) {
   simulateEvent(fixture, element, 'click');
 }
 

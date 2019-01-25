@@ -23,13 +23,13 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   DataAccessLevel,
   UnderservedPopulationEnum,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 
 describe('WorkspaceEditComponent', () => {
@@ -123,25 +123,25 @@ describe('WorkspaceEditComponent', () => {
 
   it('should show a conflict-specific error when creating a name conflict workspace',
     fakeAsync(() => {
-    setupComponent(WorkspaceEditMode.Create);
-    testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
-    testComponent.workspace.name = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
-    testComponent.workspace.id = WorkspaceStubVariables.DEFAULT_WORKSPACE_ID;
-    testComponent.workspace.description = WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION;
-    const originalSize = workspacesService.workspaces.length;
-    fixture.detectChanges();
-    fixture.debugElement.query(By.css('.add-button'))
-      .triggerEventHandler('click', null);
-    updateAndTick(fixture);
-    updateAndTick(fixture);
-    expect(workspacesService.workspaces.length).toBe(originalSize);
-    const modalTitle = fixture.debugElement.query(By.css('.modal-title'));
-    const modalBody = fixture.debugElement.query(By.css('.modal-body'));
-    expect(modalTitle.nativeElement.textContent).toEqual('Error:');
-    const errorMsg = 'You already have a workspace named ' + testComponent.workspace.name
+      setupComponent(WorkspaceEditMode.Create);
+      testComponent.workspace.namespace = WorkspaceStubVariables.DEFAULT_WORKSPACE_NS;
+      testComponent.workspace.name = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
+      testComponent.workspace.id = WorkspaceStubVariables.DEFAULT_WORKSPACE_ID;
+      testComponent.workspace.description = WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION;
+      const originalSize = workspacesService.workspaces.length;
+      fixture.detectChanges();
+      fixture.debugElement.query(By.css('.add-button'))
+        .triggerEventHandler('click', null);
+      updateAndTick(fixture);
+      updateAndTick(fixture);
+      expect(workspacesService.workspaces.length).toBe(originalSize);
+      const modalTitle = fixture.debugElement.query(By.css('.modal-title'));
+      const modalBody = fixture.debugElement.query(By.css('.modal-body'));
+      expect(modalTitle.nativeElement.textContent).toEqual('Error:');
+      const errorMsg = 'You already have a workspace named ' + testComponent.workspace.name
       + '. Please choose another name.';
-    expect(modalBody.nativeElement.textContent).toEqual(errorMsg);
-  }));
+      expect(modalBody.nativeElement.textContent).toEqual(errorMsg);
+    }));
 
   it('should show a generic error when creating an id conflict workspace', fakeAsync(() => {
     setupComponent(WorkspaceEditMode.Create);
@@ -258,46 +258,46 @@ describe('WorkspaceEditComponent', () => {
   }));
 
   it('should not create a workspace without description and fill later checkbox not selected',
-      fakeAsync(() => {
-        spyOn(TestBed.get(Router), 'navigate');
-        workspacesService.workspaces = [];
-        setupComponent(WorkspaceEditMode.Create);
+    fakeAsync(() => {
+      spyOn(TestBed.get(Router), 'navigate');
+      workspacesService.workspaces = [];
+      setupComponent(WorkspaceEditMode.Create);
 
-        testComponent.workspace.namespace = 'foo';
-        testComponent.workspace.name = 'created';
-        testComponent.workspace.id = 'created';
-        testComponent.workspace.description = '';
-        testComponent.fillDetailsLater = false;
-        fixture.detectChanges();
+      testComponent.workspace.namespace = 'foo';
+      testComponent.workspace.name = 'created';
+      testComponent.workspace.id = 'created';
+      testComponent.workspace.description = '';
+      testComponent.fillDetailsLater = false;
+      fixture.detectChanges();
 
-        fixture.debugElement.query(By.css('.add-button'))
-            .triggerEventHandler('click', null);
-        fixture.detectChanges();
-        tick();
-        expect(workspacesService.workspaces.length).toBe(0);
-      }));
+      fixture.debugElement.query(By.css('.add-button'))
+        .triggerEventHandler('click', null);
+      fixture.detectChanges();
+      tick();
+      expect(workspacesService.workspaces.length).toBe(0);
+    }));
 
   it('should create a workspace without description and fill later checkbox selected',
-      fakeAsync(() => {
-        spyOn(TestBed.get(Router), 'navigate');
-        workspacesService.workspaces = [];
-        setupComponent(WorkspaceEditMode.Create);
+    fakeAsync(() => {
+      spyOn(TestBed.get(Router), 'navigate');
+      workspacesService.workspaces = [];
+      setupComponent(WorkspaceEditMode.Create);
 
-        testComponent.workspace.namespace = 'foo';
-        testComponent.workspace.name = 'created';
-        testComponent.workspace.id = 'created';
-        testComponent.workspace.description = '';
-        testComponent.fillDetailsLater = true;
-        fixture.detectChanges();
+      testComponent.workspace.namespace = 'foo';
+      testComponent.workspace.name = 'created';
+      testComponent.workspace.id = 'created';
+      testComponent.workspace.description = '';
+      testComponent.fillDetailsLater = true;
+      fixture.detectChanges();
 
-        fixture.debugElement.query(By.css('.add-button'))
-            .triggerEventHandler('click', null);
-        fixture.detectChanges();
-        tick();
-        expect(workspacesService.workspaces.length).toBe(1);
-        expect(workspacesService.workspaces[0].name).toBe('created');
-        expect(workspacesService.workspaces[0].description).toBe('');
-      }));
+      fixture.debugElement.query(By.css('.add-button'))
+        .triggerEventHandler('click', null);
+      fixture.detectChanges();
+      tick();
+      expect(workspacesService.workspaces.length).toBe(1);
+      expect(workspacesService.workspaces[0].name).toBe('created');
+      expect(workspacesService.workspaces[0].description).toBe('');
+    }));
 
   it('should not create a workspace with name greater than 80 characters', fakeAsync(() => {
     spyOn(TestBed.get(Router), 'navigate');
@@ -335,7 +335,7 @@ describe('WorkspaceEditComponent', () => {
 
   it('should not allow duplicate workspace name while cloning', fakeAsync(() => {
     workspacesService.workspaceAccess.set(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, WorkspaceAccessLevel.READER);
     setupComponent(WorkspaceEditMode.Clone);
     fixture.componentRef.instance.profileStorageService.reload();
     tick();
@@ -343,13 +343,13 @@ describe('WorkspaceEditComponent', () => {
     const workspaceName = WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME;
     simulateInput(fixture, de.query(By.css('.name')), workspaceName );
     fixture.debugElement.query(By.css('.add-button'))
-        .triggerEventHandler('click', null);
+      .triggerEventHandler('click', null);
     updateAndTick(fixture);
     updateAndTick(fixture);
     de = fixture.debugElement;
     const errorText = de.query(By.css('.modal-body')).childNodes[0].nativeNode.data;
     expect(errorText).toBe(
-        'You already have a workspace named '
+      'You already have a workspace named '
         + workspaceName + '. Please choose another name.');
   }));
 });

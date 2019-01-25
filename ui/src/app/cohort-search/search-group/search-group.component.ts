@@ -1,9 +1,9 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {CohortSearchActions, CohortSearchState, groupError} from 'app/cohort-search/redux';
 import {environment} from 'environments/environment';
 import {List} from 'immutable';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {CohortSearchActions, CohortSearchState, groupError} from '../redux';
 
 import {SearchRequest} from 'generated';
 import {Subscription} from 'rxjs/Subscription';
@@ -24,7 +24,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   temporalDropdown = false;
   whichMention = ['Any mention', 'First mention', 'Last mention'];
   timeDropDown = ['During same encounter as',
-                  'X Days before', 'X Days after', 'Within X days of',
+    'X Days before', 'X Days after', 'Within X days of',
     'On or X days before', 'On or X days after'];
   dropdownOption: any;
   timeDropdownOption: any;

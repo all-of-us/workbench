@@ -39,7 +39,8 @@
 
 
 <app-rename-modal *ngIf="renaming && resourceCard.notebook"
-                  [resource]="resourceCard.notebook"
+                  [notebookName]="resourceCard.notebook.name"
+                  [workspace]="{namespace: this.wsNamespace, name: this.wsId}"
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 

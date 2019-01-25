@@ -181,4 +181,8 @@
   </div>
 </clr-modal>
 <app-bug-report></app-bug-report>
-<app-new-notebook-modal [workspace]="workspace" [existingNotebooks]="notebookList"></app-new-notebook-modal>
+<app-new-notebook-modal *ngIf="creatingNotebook"
+  [workspace]="workspace"
+  [existingNotebooks]="notebookList"
+  [onClose]="closeNotebookModal.bind(this)"
+></app-new-notebook-modal>

@@ -85,7 +85,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   @ViewChild('chartElement') chartEl: ElementRef;
 
 
-  constructor (private route: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
               private api: DataBrowserService
   ) {
     this.route.params.subscribe(params => {

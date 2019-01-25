@@ -133,8 +133,8 @@ describe('NotebookListComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
-      notebookListPage = new NotebookListPage(TestBed);
-    });
+        notebookListPage = new NotebookListPage(TestBed);
+      });
     tick();
   }));
 
@@ -154,39 +154,6 @@ describe('NotebookListComponent', () => {
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile.ipynb');
   }));
 
-  it('displays correct information when notebook renamed', fakeAsync(() => {
-    const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
-    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
-    simulateClickReact(fixture, '[data-test-id="pencil"]');
-
-    simulateInputReact(fixture, '#new-name', 'testMockFile');
-    simulateClickReact(fixture, '[data-test-id="rename-button"]');
-    updateAndTick(fixture);
-
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
-    expect(fixture.componentInstance.resourceList[0].notebook.name)
-        .toEqual('testMockFile.ipynb');
-  }));
-
-  it('displays correct information when notebook renamed with duplicate name', fakeAsync(() => {
-    const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
-    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
-    simulateClickReact(fixture, '[data-test-id="pencil"]');
-
-    simulateInputReact(fixture, '#new-name', 'mockFile');
-    simulateClickReact(fixture, '[data-test-id="rename-button"]');
-    updateAndTick(fixture);
-
-    const errorMessage = de.queryAll(By.css('.modal-title'));
-    expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
-    simulateClick(fixture, de.query(By.css('.close')));
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile');
-  }));
-
   it('displays correct information when notebook cloned', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
     const de = fixture.debugElement;
@@ -199,7 +166,7 @@ describe('NotebookListComponent', () => {
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
-        .toContain('mockFile Clone.ipynb');
+      .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
