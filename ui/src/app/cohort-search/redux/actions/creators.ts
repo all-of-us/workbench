@@ -55,6 +55,8 @@ import {
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
   UPDATE_MENTION,
+  UPDATE_TEMPORAL_TIME,
+  UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -328,6 +330,13 @@ export const reOpenWizard =
 export const finishWizard =
   (): ActionTypes[typeof WIZARD_FINISH] => ({type: WIZARD_FINISH});
 
+export const cancelWizard =
+  (): ActionTypes[typeof WIZARD_CANCEL] => ({type: WIZARD_CANCEL});
+
+export const setWizardContext =
+  (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
+  ({type: SET_WIZARD_CONTEXT, context});
+
 export const updatedTemporal =
   (flag: boolean, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL] =>
     ({type: UPDATE_TEMPORAL, flag, groupId});
@@ -336,12 +345,13 @@ export const updateWhichMention =
   (mention: any, groupId: any): ActionTypes[typeof UPDATE_MENTION] =>
     ({type: UPDATE_MENTION, mention, groupId});
 
-export const cancelWizard =
-  (): ActionTypes[typeof WIZARD_CANCEL] => ({type: WIZARD_CANCEL});
+export const updateTemporalTime =
+  (time: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME] =>
+    ({type: UPDATE_TEMPORAL_TIME, time, groupId});
 
-export const setWizardContext =
-  (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
-  ({type: SET_WIZARD_CONTEXT, context});
+export const updateTemporalTimeValue =
+  (timeValue: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE] =>
+    ({type: UPDATE_TEMPORAL_TIME_VALUE, timeValue, groupId});
 
 export const loadEntities =
   (entities: any): ActionTypes[typeof LOAD_ENTITIES] =>

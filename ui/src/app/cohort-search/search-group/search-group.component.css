@@ -135,7 +135,7 @@
   transition: right .15s ease-in;
 }
 
-.time-inputbox {
+.time-inputBox {
   width: 2rem;
   border: 1px solid #9a9a9a;
   padding: 0.6rem;

@@ -69,6 +69,8 @@ import {
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
   UPDATE_MENTION,
+  UPDATE_TEMPORAL_TIME,
+  UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -459,6 +461,16 @@ export const rootReducer: Reducer<CohortSearchState> =
       case UPDATE_MENTION: {
         const groupItems = ['entities', 'groups', action.groupId, 'mention'];
         return state.setIn(groupItems, action.mention);
+      }
+
+      case UPDATE_TEMPORAL_TIME: {
+        const groupItems = ['entities', 'groups', action.groupId, 'time'];
+        return state.setIn(groupItems, action.time);
+      }
+
+      case UPDATE_TEMPORAL_TIME_VALUE: {
+        const groupItems = ['entities', 'groups', action.groupId, 'timeValue'];
+        return state.setIn(groupItems, action.timeValue);
       }
 
       case WIZARD_FINISH: {

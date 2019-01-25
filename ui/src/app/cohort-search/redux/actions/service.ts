@@ -94,10 +94,12 @@ export class CohortSearchActions {
   @dispatch() openWizard = ActionFuncs.openWizard;
   @dispatch() reOpenWizard = ActionFuncs.reOpenWizard;
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
-  @dispatch() _updatedTemporal = ActionFuncs.updatedTemporal;
-  @dispatch() _updateWhichMention = ActionFuncs.updateWhichMention;
   @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
+  @dispatch() _updatedTemporal = ActionFuncs.updatedTemporal;
+  @dispatch() _updateWhichMention = ActionFuncs.updateWhichMention;
+  @dispatch() _updateTemporalTime = ActionFuncs.updateTemporalTime;
+  @dispatch() _updateTemporalTimeValue = ActionFuncs.updateTemporalTimeValue;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
   @dispatch() _resetStore = ActionFuncs.resetStore;
@@ -121,6 +123,14 @@ export class CohortSearchActions {
 
   updateWhichMention(mention: any, groupId: string) {
     this._updateWhichMention(mention, groupId);
+  }
+
+  updateTemporalTime(time: any, groupId: string) {
+    this._updateTemporalTime(time, groupId);
+  }
+
+  updateTemporalTimeValue(timeValue: any, groupId: string) {
+    this._updateTemporalTimeValue(timeValue, groupId);
   }
 
   genSuffix(): string {

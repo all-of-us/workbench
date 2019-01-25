@@ -11,7 +11,7 @@
   <div class="card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="dropdownOption; else mentionTitle"> {{formatStatus(dropdownOption)}}</div>
+        <div *ngIf="mention; else mentionTitle"> {{formatStatus(mention)}}</div>
         <ng-template #mentionTitle> Which Mention</ng-template>
         <clr-icon shape="caret down"></clr-icon>
       </button>
@@ -93,8 +93,8 @@
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="timeDropdownOption; else time"> {{formatStatus(timeDropdownOption)}}</div>
-        <ng-template #time> Define Time</ng-template>
+        <div *ngIf="time; else defineTime"> {{formatStatus(time)}}</div>
+        <ng-template #defineTime> Define Time</ng-template>
          <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -107,11 +107,10 @@
           clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <input class="time-inputbox" type="number" placeholder="X">
+    <input class="time-inputBox" type="number" [(ngModel)]="timeValue" placeholder="X"  (keyup)="getTimeValue($event)">
   </div>
   <ng-container *ngIf="temporalFlag">
     <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
-      {{itemIndex}}
       <app-search-group-item
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"

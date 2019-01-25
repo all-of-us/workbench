@@ -27,8 +27,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
     TemporalTime.WITHINXDAYSOF];
-  dropdownOption: any;
-  timeDropdownOption: any;
   subscription: Subscription;
   itemSubscription: Subscription;
   private item: Map<any, any> = Map();
@@ -73,6 +71,18 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.actions.removeGroup(this.role, this.groupId);
   }
 
+  get mention() {
+    return this.group.get('mention');
+  }
+
+  get time() {
+    return this.group.get('time');
+  }
+
+  get timeValue() {
+    return this.group.get('timeValue');
+  }
+
   getTemporalGroup(e) {
     this.tempGroup = e;
   }
@@ -93,12 +103,15 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getMentionTitle(mention) {
-    this.dropdownOption = mention;
     this.actions.updateWhichMention(mention, this.groupId);
-
   }
+
   getTimeTitle(time) {
-    this.timeDropdownOption = time;
+    this.actions.updateTemporalTime(time, this.groupId);
+  }
+
+  getTimeValue(e) {
+    this.actions.updateTemporalTimeValue(e.target.value, this.groupId);
   }
 
   formatStatusForText(mention: TemporalMention): string {

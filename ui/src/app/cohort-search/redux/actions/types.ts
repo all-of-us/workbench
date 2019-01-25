@@ -58,6 +58,8 @@ export const REOPEN_WIZARD = 'REOPEN_WIZARD';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
 export const UPDATE_TEMPORAL = 'UPDATE_TEMPORAL';
 export const UPDATE_MENTION = 'UPDATE_MENTION';
+export const UPDATE_TEMPORAL_TIME = 'UPDATE_TEMPORAL_TIME';
+export const UPDATE_TEMPORAL_TIME_VALUE = 'UPDATE_TEMPORAL_TIME_VALUE';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
 export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
@@ -342,6 +344,14 @@ export interface ActionTypes {
     type: typeof WIZARD_FINISH;
   };
 
+  WIZARD_CANCEL: {
+    type: typeof WIZARD_CANCEL;
+  };
+  SET_WIZARD_CONTEXT: {
+    type: typeof SET_WIZARD_CONTEXT;
+    context: ActiveContext;
+  };
+
   UPDATE_TEMPORAL: {
     type: typeof UPDATE_TEMPORAL;
     flag: boolean;
@@ -354,13 +364,17 @@ export interface ActionTypes {
     groupId: string;
   };
 
-  WIZARD_CANCEL: {
-    type: typeof WIZARD_CANCEL;
+  UPDATE_TEMPORAL_TIME: {
+    type: typeof UPDATE_TEMPORAL_TIME;
+    time: any;
+    groupId: string;
   };
-  SET_WIZARD_CONTEXT: {
-    type: typeof SET_WIZARD_CONTEXT;
-    context: ActiveContext;
-  };
+
+  UPDATE_TEMPORAL_TIME_VALUE: {
+    type: typeof UPDATE_TEMPORAL_TIME_VALUE;
+    timeValue: any;
+    groupId: string;
+  }
 
   LOAD_ENTITIES: {
     type: typeof LOAD_ENTITIES;
@@ -431,6 +445,8 @@ export type RootAction =
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof UPDATE_TEMPORAL]
   | ActionTypes[typeof UPDATE_MENTION]
+  | ActionTypes[typeof UPDATE_TEMPORAL_TIME]
+  | ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
   | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]
