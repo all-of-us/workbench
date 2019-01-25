@@ -18,6 +18,10 @@ import {
 } from 'generated';
 
 import * as React from 'react';
+import {environment} from 'environments/environment';
+
+import {SignInService} from 'app/services/sign-in.service';
+import {EditModalComponent} from 'app/views/edit-modal/component';
 
 const MenuItem = ({icon, children, ...props}) => {
   return <Clickable
@@ -50,16 +54,19 @@ const ResourceCardMenu: React.FunctionComponent<{
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
-            {/*
-              This does not support both playground mode and jupyterLab yet,
-              that is a work in progress. We do not need to worry about that
-              here, because the menu will not open if you do not have write
-              access, and playground mode is currently only enabled if you do
-              not have write access.
-            */}
-            <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
-              Open in Jupyter Lab
-            </MenuItem>
+            {
+              environment.enableJupyterLab &&
+              /*
+               This does not support both playground mode and jupyterLab yet,
+               that is a work in progress. We do not need to worry about that
+               here, because the menu will not open if you do not have write
+               access, and playground mode is currently only enabled if you do
+               not have write access.
+              */
+              <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
+                Open in Jupyter Lab
+              </MenuItem>
+            }
           </React.Fragment>;
         }],
         ['cohort', () => {
