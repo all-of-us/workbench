@@ -449,8 +449,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, MENTION, temporalParam.getValue());
 
+    //temporal mention invalid
+    temporalGroup.setMention("blah");
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP, MENTION, temporalGroup.getMention());
+
     //temporal time null
     temporalGroup.setMention(TemporalMention.ANY_MENTION.name());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
+      SEARCH_GROUP, TIME, temporalGroup.getTime());
+
+    //temporal time invalid
+    temporalGroup.setTime("blah");
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME, temporalGroup.getTime());
 
