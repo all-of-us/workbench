@@ -31,6 +31,10 @@ public class SearchGroupPredicates {
     return sgi -> sgi.getTemporalGroup() == null;
   }
 
+  public static Predicate<SearchGroupItem> temporalGroupNotZeroAndNotOne() {
+    return sgi -> sgi.getTemporalGroup() != 0 && sgi.getTemporalGroup() != 1;
+  }
+
   public static Predicate<ListMultimap<Integer, SearchGroupItem>> notContainsTwoGroups() {
     return itemMap -> itemMap.keySet().size() != 2;
   }
