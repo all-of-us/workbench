@@ -23,47 +23,66 @@
   </div>
 </div>
 
-<!-- Top summary boxes -- only show if have results -->
-<div class="row white-card-box top-stat one-row" *ngIf="items.length > 0">
-  <div class="col-xs-12">
-
-    <div class="row">
-      <h5 class="box-title">
-        {{ehrDomain.name}}
-        <clr-tooltip>
-          <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
-          <clr-tooltip-content clrPosition=right
-                             clrSize="lg" *clrIfOpen>
-            <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
-          </clr-tooltip-content>
-        </clr-tooltip>
-      </h5>
-    </div>
-
-    <div class="row">
-      <h5 class="box-title">
-        <a class="toggle-link" (click)="toggleTopConcepts(ehrDomain.name)"> Top 10 Medical Concepts by Descending Participant Counts
-        <clr-icon *ngIf="!showTopConcepts[ehrDomain.name]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showTopConcepts[ehrDomain.name]" shape="caret" dir="down"></clr-icon>
-        </a>
-      </h5>
-    </div>
-    <div class="row grid-header top-concepts-chart" [hidden]="!showTopConcepts[ehrDomain.name]">
-      <div class="chart-wrapper flex-xs-middle">
-        <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 Medical Concepts by Descending Participant Counts'"
-                   [pointWidth]="10" [backgroundColor]="'#D9E4EA'"> </app-chart>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
 <div  class="row result-list">
   <div class="col-xs-12 col-no-gutter">
     <div class="white-card-box">
+      <div class="col-xs-12" *ngIf="items.length > 0">
+        <!-- Top summary boxes -- only show if have results -->
+        <div class="row domain-summary">
+          <h5 class="box-title">
+            {{ehrDomain.name}}
+            <clr-tooltip>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-tooltip-content clrPosition=right
+                                   clrSize="lg" *clrIfOpen>
+                <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </h5>
+        </div>
 
+        <div class="row domain-summary">
+          <h5 class="box-title">
+            <a class="toggle-link" (click)="toggleTopConcepts(ehrDomain.name)"> Top 10 Medical Concepts by Descending Participant Counts
+              <clr-icon *ngIf="!showTopConcepts[ehrDomain.name]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showTopConcepts[ehrDomain.name]" shape="caret" dir="down"></clr-icon>
+            </a>
+          </h5>
+        </div>
+        <div class="row grid-header top-concepts-chart" [hidden]="!showTopConcepts[ehrDomain.name]">
+          <div class="chart-wrapper flex-xs-middle">
+            <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 Medical Concepts by Descending Participant Counts'"
+                       [pointWidth]="10" [backgroundColor]="'#D9E4EA'"> </app-chart>
+          </div>
+        </div>
+      </div>
       <div class="results-grid" *ngIf="items.length > 0" >
+        <div class="row col-xs-12 matching-concepts-help-text-display">
+          <h5 class="box-title">
+            Showing top {{items.length}}&nbsp;
+          </h5>
+          <h5 class="box-title" *ngIf="searchText.value.length === 0; else no_search_term">
+            concepts for this domain
+            <clr-tooltip>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-tooltip-content clrPosition=right
+                                   clrSize="lg" *clrIfOpen>
+                <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </h5>
+          <ng-template #no_search_term>
+            <h5 class="box-title" *ngIf="searchText.value.length > 0">
+              matching medical concepts
+              <clr-tooltip>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-tooltip-content clrPosition=right
+                                     clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </h5>
+          </ng-template>
+        </div>
         <div class="row" *ngIf="items.length === 1 && items[0].standardConcept != 'S' && standardConcepts.length > 0">
           <div class="col-xs-12 db-alert">
             <clr-alert  [clrAlertClosable]="false" [clrAlertType]="info">
@@ -73,8 +92,8 @@
             </clr-alert>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md grid-header flex-xs-middle info-text"> {{ehrDomain.name}}
+        <div class="row expandable-grid-row col-header-row">
+          <div class="col-md grid-header flex-xs-middle info-text col-border"> {{ehrDomain.name}}
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
@@ -83,7 +102,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md grid-header flex-xs-middle info-text"> Synonyms
+          <div class="col-md grid-header flex-xs-middle info-text col-border"> Synonyms
             <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
@@ -95,7 +114,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md-1 grid-header flex-items-xs-right info-text"> Participants of <b> {{totalParticipants | number}}</b>
+          <div class="col-md-1 grid-header flex-items-xs-right info-text col-border"> Participants of <b> {{totalParticipants | number}}</b>
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
@@ -108,7 +127,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md-1 grid-header flex-xs-middle info-text">
+          <div class="col-md-1 grid-header flex-xs-middle info-text col-border">
             Vocabulary Code
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
@@ -124,7 +143,7 @@
                 </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md-1 grid-header flex-xs-middle info-text">
+          <div class="col-md-1 grid-header flex-xs-middle info-text col-border">
             Concept Code
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>

@@ -19,3 +19,21 @@
 .top-concepts-chart {
     background-size: contain;
 }
+.col-border {
+    border-right: 1px solid black;
+    padding: .25rem;
+}
+.col-header-row {
+    background-color: #ECECF1;
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+}
+.db-alert {
+    padding: .5rem;
+}
+.matching-concepts-help-text-display {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+.domain-summary {
+    margin: .65rem;
+}
