@@ -1,6 +1,3 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
 import {
   BolderHeader,
   Header,
@@ -12,6 +9,7 @@ import {
 } from 'app/views/account-creation-modals/component';
 
 import {Profile} from 'generated/fetch/api';
+import * as React from 'react';
 
 const styles = {
   buttonLinkStyling: {
@@ -34,7 +32,7 @@ interface AccountCreationSuccessState {
 }
 
 export class AccountCreationSuccess
-    extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
+  extends React.Component<AccountCreationSuccessProps, AccountCreationSuccessState> {
 
   constructor(props: AccountCreationSuccessProps) {
     super(props);
@@ -94,17 +92,17 @@ export class AccountCreationSuccess
         </div>
       </div>
       {this.state.resendModal && <AccountCreationResendModal
-        username={this.props.profile.username}
-        creationNonce={this.props.profile.creationNonce}
-        onClose={() => this.setState({resendModal: false})}
+          username={this.props.profile.username}
+          creationNonce={this.props.profile.creationNonce}
+          onClose={() => this.setState({resendModal: false})}
       />}
       {this.state.updateModal && <AccountCreationUpdateModal
-        username={this.props.profile.username}
-        creationNonce={this.props.profile.creationNonce}
-        onDone={(newEmail: string) => {
-          this.setState({contactEmail: newEmail, updateModal: false});
-        }}
-        onClose={() => this.setState({updateModal: false})}
+          username={this.props.profile.username}
+          creationNonce={this.props.profile.creationNonce}
+          onDone={(newEmail: string) => {
+            this.setState({contactEmail: newEmail, updateModal: false});
+          }}
+          onClose={() => this.setState({updateModal: false})}
       />}
     </React.Fragment>;
   }

@@ -1,4 +1,4 @@
-  import {
+ import {
     Cohort,
     ConceptSet,
     FileDetail,
@@ -6,7 +6,7 @@
     WorkspaceAccessLevel
   } from 'generated';
 
-  export enum ResourceType {
+export enum ResourceType {
     NOTEBOOK = 'notebook',
     COHORT = 'cohort',
     CONCEPT_SET = 'conceptSet',
@@ -14,9 +14,9 @@
   }
 
 export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
-                                   workspaceNamespace: string, workspaceId: string,
-                                   accessLevel: WorkspaceAccessLevel,
-                                   resourceType: ResourceType): RecentResource[] {
+  workspaceNamespace: string, workspaceId: string,
+  accessLevel: WorkspaceAccessLevel,
+  resourceType: ResourceType): RecentResource[] {
   const resourceList = [];
   for (const resource of list) {
     resourceList.push(convertToResource(resource, workspaceNamespace, workspaceId,
@@ -26,9 +26,9 @@ export function convertToResources(list: FileDetail[] | Cohort[] | ConceptSet[],
 }
 
 export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
-                                  workspaceNamespace: string, workspaceId: string,
-                                  accessLevel: WorkspaceAccessLevel,
-                                  resourceType: ResourceType): RecentResource {
+  workspaceNamespace: string, workspaceId: string,
+  accessLevel: WorkspaceAccessLevel,
+  resourceType: ResourceType): RecentResource {
   let modifiedTime: string;
   if (!resource.lastModifiedTime) {
     modifiedTime = new Date().toDateString();

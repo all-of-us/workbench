@@ -4,9 +4,9 @@ import {NavigationError, Router} from '@angular/router';
 
 // Mostly borrowed from the Job Manager.
 @Component({
-    selector: 'app-initial-error',
-    templateUrl: './component.html',
-    styleUrls: ['./component.css']
+  selector: 'app-initial-error',
+  templateUrl: './component.html',
+  styleUrls: ['./component.css']
 })
 export class InitialErrorComponent {
   initialLoadErrorHeader: string;

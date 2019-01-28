@@ -1,8 +1,8 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {ReviewStateService} from '../review-state.service';
 
 
 @Component({

@@ -8,7 +8,7 @@ import {fromJS, List, Map} from 'immutable';
 
 import {MultiSelectComponent} from './multi-select.component';
 
-import {CohortSearchActions} from '../redux';
+import {CohortSearchActions} from 'app/cohort-search/redux';
 
 // Default test data
 const optA = Map({name: 'A', count: 10, parameterId: 'paramA'});

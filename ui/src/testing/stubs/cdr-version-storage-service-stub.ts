@@ -1,7 +1,6 @@
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 import {
-  CdrVersion,
   CdrVersionListResponse
 } from 'generated';
 

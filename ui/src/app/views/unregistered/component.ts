@@ -1,8 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, NavigationError, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
-import {timer} from 'rxjs/observable/timer';
-import {Subscription} from 'rxjs/Subscription';
+import {ActivatedRoute, Router} from '@angular/router';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
@@ -13,6 +10,8 @@ import {
   IdVerificationStatus,
   ProfileService,
 } from 'generated';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   templateUrl: './component.html',

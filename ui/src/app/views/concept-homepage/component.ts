@@ -6,6 +6,7 @@ import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   Concept,
   ConceptsService,
@@ -15,7 +16,6 @@ import {
   StandardConceptFilter,
   VocabularyCount,
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 interface ConceptCacheSet {
   domain: Domain;

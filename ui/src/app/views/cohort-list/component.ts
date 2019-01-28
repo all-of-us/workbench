@@ -1,17 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 
 import {
-  Cohort,
-  CohortListResponse,
   CohortsService,
   RecentResource,
-  Workspace,
   WorkspaceAccessLevel,
 } from 'generated';
 

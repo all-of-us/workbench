@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
-import {ReviewStateService} from '../review-state.service';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats.component';
 
 
@@ -18,7 +18,7 @@ describe('QueryDescriptiveStatsComponent', () => {
         QueryDescriptiveStatsComponent,
       ],
       imports: [
-         ClarityModule,
+        ClarityModule,
       ],
       providers: [
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},

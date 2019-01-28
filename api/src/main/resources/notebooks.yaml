@@ -981,6 +981,10 @@ definitions:
         description: |
           Optional, map of extension name and notebook plus server extension. The extension can either be a tar.gz file on google storage or a python package.
           Example, {"ext1":"gs://bucket/extension.tar.gz", "pipExt":"python-package"}
+      labExtensions:
+        type: object
+        description: |
+          Optional, map of extension name and jupyterLab extension
   SubsystemStatus:
     description: status of a subsystem Leonardo depends on
     type: object

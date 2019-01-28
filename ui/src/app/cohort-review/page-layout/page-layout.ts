@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {ReviewStatus} from 'generated';
-import {ReviewStateService} from '../review-state.service';
 
 @Component({
   templateUrl: './page-layout.html',
