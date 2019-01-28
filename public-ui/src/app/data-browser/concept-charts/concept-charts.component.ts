@@ -8,7 +8,7 @@ import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
 import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
-import {graphType} from 'app/utils/graphtypes';
+import {graphType} from '../../utils/graphtypes';
 
 @Component({
   selector: 'app-concept-charts',

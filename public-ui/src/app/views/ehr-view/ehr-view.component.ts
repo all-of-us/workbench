@@ -4,7 +4,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {graphType} from 'app/utils/graphtypes';
+import {graphType} from '../../utils/graphtypes';
 
 import { FormControl } from '@angular/forms';
 import {
@@ -197,7 +197,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     } else {
       this.graphToShow = graphType.Age;
     }
-    if (this.ehrDomain.name === 'Measurements' && this.graphToShow == graphType.BiologicalSex) {
+    if (this.ehrDomain.name === 'Measurements' && this.graphToShow === graphType.BiologicalSex) {
       this.graphToShow = graphType.MeasurementBins;
     }
   }
@@ -222,7 +222,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       return;
     }
     this.resetSelectedGraphs();
-    // In the case of measurements we show the histogram of values in the place of normal gender graph.
+    // In the case of measurements we show the histogram of
+    // values in the place of normal gender graph.
     if (this.ehrDomain.name === 'Measurements') {
       this.graphToShow = graphType.MeasurementBins;
     } else {
