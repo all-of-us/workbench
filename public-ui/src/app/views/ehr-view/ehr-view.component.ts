@@ -186,16 +186,27 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
-    if (g === 'Biological Sex') {
-      this.graphToShow = graphType.BiologicalSex;
-    } else if (g === 'Gender Identity') {
-      this.graphToShow = graphType.GenderIdentity;
-    } else if (g === 'Age at Occurrence') {
-      this.graphToShow = graphType.Age;
-    } else if (g === 'Sources') {
-      this.graphToShow = graphType.Sources;
-    } else {
-      this.graphToShow = graphType.Age;
+    switch(g) {
+      case graphType.BiologicalSex: {
+        this.graphToShow = graphType.BiologicalSex;
+        break;
+      }
+      case graphType.GenderIdentity: {
+        this.graphToShow = graphType.GenderIdentity;
+        break;
+      }
+      case graphType.Age: {
+        this.graphToShow = graphType.Age;
+        break;
+      }
+      case graphType.Sources: {
+        this.graphToShow = graphType.Sources;
+        break;
+      }
+      default: {
+        this.graphToShow = graphType.Age;
+        break;
+      }
     }
     if (this.ehrDomain.name === 'Measurements' && this.graphToShow === graphType.BiologicalSex) {
       this.graphToShow = graphType.MeasurementBins;
