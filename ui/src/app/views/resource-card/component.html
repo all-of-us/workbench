@@ -4,6 +4,7 @@
       [disabled]="actionsDisabled"
       [resourceType]="resourceType"
       [onRenameNotebook]="renameNotebook.bind(this)"
+      [onOpenJupyterLabNotebook]="openResource.bind(this, resourceCard, true)"
       [onCloneResource]="cloneResource.bind(this, resourceCard)"
       [onDeleteResource]="deleteResource.bind(this, resourceCard)"
       [onEditCohort]="editCohort.bind(this)"
@@ -39,7 +40,8 @@
 
 
 <app-rename-modal *ngIf="renaming && resourceCard.notebook"
-                  [resource]="resourceCard.notebook"
+                  [notebookName]="resourceCard.notebook.name"
+                  [workspace]="{namespace: this.wsNamespace, name: this.wsId}"
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 
