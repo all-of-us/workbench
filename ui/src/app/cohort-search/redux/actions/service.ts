@@ -71,6 +71,7 @@ export class CohortSearchActions {
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
+  @dispatch() clearTotalCount = ActionFuncs.clearTotalCount;
 
   @dispatch() _requestPreview = ActionFuncs.requestPreview;
 
@@ -179,16 +180,13 @@ export class CohortSearchActions {
 
   removeGroup(role: keyof SearchRequest, groupId: string, status?: string): void {
     const group = getGroup(groupId)(this.state);
-
     this.cancelIfRequesting('groups', groupId);
-
     if (status) {
       this.hideGroup(groupId, status);
     } else {
       this._removeGroup(role, groupId);
       this.removeId(groupId);
     }
-
     group.get('items', List()).forEach(itemId => {
       this.cancelIfRequesting('items', itemId);
       if (!status) {
@@ -196,7 +194,6 @@ export class CohortSearchActions {
         this.removeId(itemId);
       }
     });
-
     if (this.hasActiveItems(group)) {
       const activeGroupsWithItems = !groupList('includes')(this.state)
         .merge(groupList('excludes')(this.state))
@@ -210,6 +207,7 @@ export class CohortSearchActions {
         this.requestTotalCount();
       } else {
         // todo clear total count
+        this.clearTotalCount();
       }
     }
   }

@@ -31,6 +31,7 @@ import {
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+  CLEAR_TOTAL_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -224,6 +225,10 @@ export const countRequestError =
   (entityType: string, entityId: string, error?: any
   ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
+
+export const clearTotalCount =
+  (): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
+  ({type: CLEAR_TOTAL_COUNT});
 
 export const requestPreview =
   (cdrVersionId: number, request: SearchRequest

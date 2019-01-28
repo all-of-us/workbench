@@ -46,6 +46,7 @@ import {
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+  CLEAR_TOTAL_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -289,6 +290,9 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['entities', action.entityType, action.entityId, 'error'],
             fromJS({error: action.error})
           );
+
+      case CLEAR_TOTAL_COUNT:
+        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
 
       case LOAD_CHARTS_RESULTS:
         return state
