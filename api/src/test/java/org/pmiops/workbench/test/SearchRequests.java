@@ -1,11 +1,16 @@
 package org.pmiops.workbench.test;
 
+import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
+
+import java.util.Arrays;
 
 public class SearchRequests {
 
@@ -42,6 +47,46 @@ public class SearchRequests {
       searchGroupItem.addSearchParametersItem(parameter);
     }
     return searchRequest(searchGroupItem);
+  }
+
+  public static SearchRequest temporalRequest() {
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(1L);
+    SearchParameter icd10 = new SearchParameter()
+        .type(TreeType.ICD10.name())
+        .subtype(TreeSubType.CM.name())
+        .group(false)
+        .conceptId(9L);
+    SearchParameter snomed = new SearchParameter()
+        .type(TreeType.SNOMED.name())
+        .subtype(TreeSubType.CM.name())
+        .group(false)
+        .conceptId(4L);
+
+    SearchGroupItem icd9SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd9)
+      .temporalGroup(0);
+    SearchGroupItem icd10SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd10)
+      .temporalGroup(1);
+    SearchGroupItem snomedSGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(snomed)
+      .temporalGroup(0);
+
+    //First Mention Of (ICD9Child or Snomed) 5 Days After ICD10
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
+      .temporal(true)
+      .mention(TemporalMention.FIRST_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
+      .timeValue(5L);
+    return new SearchRequest().includes(Arrays.asList(temporalGroup));
   }
 
   private static SearchRequest searchRequest(SearchGroupItem searchGroupItem) {
