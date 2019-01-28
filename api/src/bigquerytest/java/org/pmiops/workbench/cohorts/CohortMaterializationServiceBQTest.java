@@ -225,6 +225,14 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void testMaterializeCohortTemporalGroup() {
+    MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(null,
+            SearchRequests.temporalRequest(), null, 0, makeRequest(1000));
+    assertPersonIds(response, 1L);
+    assertThat(response.getNextPageToken()).isNull();
+  }
+
+  @Test
   public void testMaterializeCohortWithReviewNullStatusFilter() {
     MaterializeCohortResponse response = cohortMaterializationService.materializeCohort(cohortReview,
         SearchRequests.allGenders(), null, 0, makeRequest(2));
