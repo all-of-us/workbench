@@ -13,6 +13,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {ReactWrapperBase, summarizeErrors} from 'app/utils';
@@ -101,7 +102,6 @@ export class RenameModal extends React.Component<RenameModalProps, {
       </ModalBody>
       <ModalFooter>
         <Button type='secondary' onClick={onCancel}>Cancel</Button>
-        {/* TODO: Use a loading spinner here in addition to disabling. */}
         <TooltipTrigger content={summarizeErrors(errors)}>
           <Button
             data-test-id='rename-button'
@@ -111,6 +111,7 @@ export class RenameModal extends React.Component<RenameModalProps, {
           >Rename Notebook</Button>
         </TooltipTrigger>
       </ModalFooter>
+      {saving && <SpinnerOverlay />}
     </Modal>;
   }
 }
