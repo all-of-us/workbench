@@ -6,23 +6,22 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SearchGroupPredicates {
 
   private static final List<String> MENTION_TYPES =
-    Arrays.asList(TemporalMention.ANY_MENTION.name(),
-      TemporalMention.FIRST_MENTION.name(),
-      TemporalMention.LAST_MENTION.name());
+    Stream.of(TemporalMention.values())
+      .map(Enum::name)
+      .collect(Collectors.toList());
 
   private static final List<String> TIME_TYPES =
-    Arrays.asList(TemporalTime.DURING_SAME_ENCOUNTER_AS.name(),
-      TemporalTime.X_DAYS_BEFORE.name(),
-      TemporalTime.X_DAYS_AFTER.name(),
-      TemporalTime.WITHIN_X_DAYS_OF.name());
+    Stream.of(TemporalTime.values())
+      .map(Enum::name)
+      .collect(Collectors.toList());
 
   private static final List<String> REQUIRED_TIME_VALUE_TYPES =
     TIME_TYPES.stream().skip(1).collect(Collectors.toList());
