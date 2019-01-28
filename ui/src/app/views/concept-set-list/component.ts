@@ -14,7 +14,7 @@ import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
-import {ToolTipComponent} from '../tooltip/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -31,8 +31,6 @@ export class ConceptSetListComponent implements OnInit {
   conceptSetsLoading = false;
   conceptSetsList: ConceptSet[];
   resourceList: RecentResource[];
-  duplicateName: string;
-  nameConflictError = false;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
@@ -50,10 +48,10 @@ export class ConceptSetListComponent implements OnInit {
   conceptCreateModal: CreateConceptSetModalComponent;
 
   ngOnInit(): void {
-      this.wsNamespace = this.route.snapshot.params['ns'];
-      this.wsId = this.route.snapshot.params['wsid'];
-      this.conceptSetsLoading = true;
-      this.loadConceptSets();
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
+    this.conceptSetsLoading = true;
+    this.loadConceptSets();
   }
 
   loadConceptSets() {
@@ -69,11 +67,6 @@ export class ConceptSetListComponent implements OnInit {
 
   newConceptSet(): void {
     this.conceptCreateModal.open();
-  }
-
-  duplicateNameError(dupName: string) {
-    this.duplicateName = dupName;
-    this.nameConflictError = true;
   }
 
   get writePermission(): boolean {

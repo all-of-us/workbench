@@ -1,6 +1,6 @@
 import {Http} from '@angular/http';
+import {InvitationVerificationRequest} from 'generated/model/invitationVerificationRequest';
 import {Observable} from 'rxjs/Observable';
-import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 import {
   BillingProjectStatus,
@@ -68,7 +68,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public isUsernameTaken(username: string, extraHttpRequestParams?: any):
-      Observable<UsernameTakenResponse> {
+  Observable<UsernameTakenResponse> {
     return new Observable(observer => {
       observer.next({
         isTaken: username === ProfileStubVariables.PROFILE_STUB.username

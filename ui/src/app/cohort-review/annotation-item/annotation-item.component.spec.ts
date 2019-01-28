@@ -3,8 +3,8 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {CohortAnnotationDefinition, CohortReviewService, ParticipantCohortAnnotation} from 'generated';
-import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
 import {AnnotationItemComponent} from './annotation-item.component';
 
 interface Annotation {
