@@ -685,185 +685,367 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsTemporalTests() throws Exception {
-    Criteria icd9Child =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
-    Criteria icd9Parent =
-      createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
-    Criteria icd10Child =
-      createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "9");
-    Criteria icd10Parent =
-      createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name());
-    Criteria cptChild =
-      createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "10");
-    Criteria snomedChild =
-      createCriteriaChild(TreeType.SNOMED.name(), TreeSubType.CM.name(), 0, "4");
-    Criteria visitCriteria = createCriteriaChild(TreeType.VISIT.name(), null, 0, "1");
-    Criteria drugChild =
-      createCriteriaChild(TreeType.DRUG.name(), TreeSubType.ATC.name(), 0, "11");
-    Criteria drugParent = createCriteriaParent(TreeType.DRUG.name(), TreeSubType.ATC.name()).conceptId("21600932");
-    Criteria measurementLab =
-      createCriteriaChild(TreeType.MEAS.name(), TreeSubType.LAB.name(), 0, "3");
-
+  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers() throws Exception {
     Modifier ageModifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
       .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
       .operands(Arrays.asList("25"));
-    Modifier eventDateModifier = new Modifier()
-      .name(ModifierType.EVENT_DATE)
-      .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("2019-01-15"));
     Modifier visitsModifier = new Modifier()
       .name(ModifierType.ENCOUNTERS)
       .operator(Operator.IN)
       .operands(Arrays.asList("1"));
-    Modifier occurrencesModifier = new Modifier()
-      .name(ModifierType.NUM_OF_OCCURRENCES)
-      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-      .operands(Arrays.asList("1"));
 
-    SearchGroupItem searchGroupIcd9Child = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd9Child,"001")))
-      .modifiers(Arrays.asList(ageModifier));
-    SearchGroupItem searchGroupIcd9Parent = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd9Parent,"001")))
-      .modifiers(Arrays.asList(eventDateModifier));
-    SearchGroupItem searchGroupIcd10Child = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd10Child,"100")))
-      .modifiers(Arrays.asList(visitsModifier));
-    SearchGroupItem searchGroupIcd10Parent = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(icd10Parent,"100")))
-      .modifiers(Arrays.asList(occurrencesModifier));
-    SearchGroupItem searchGroupCpt = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(cptChild,"1234")));
-    SearchGroupItem searchGroupSnomed = new SearchGroupItem()
-      .type(TreeType.CONDITION.name())
-      .searchParameters(Arrays.asList(createSearchParameter(snomedChild,"423902002")));
-    SearchGroupItem searchGroupVisit = new SearchGroupItem()
-      .type(TreeType.VISIT.name())
-      .searchParameters(Arrays.asList(createSearchParameter(visitCriteria,"")));
-    SearchGroupItem searchGroupDrugChild = new SearchGroupItem()
-      .type(TreeType.DRUG.name())
-      .searchParameters(Arrays.asList(createSearchParameter(drugChild,"Rxnorm")));
-    SearchGroupItem searchGroupDrugParent = new SearchGroupItem()
-      .type(TreeType.DRUG.name())
-      .searchParameters(Arrays.asList(createSearchParameter(drugParent,"Rxnorm")));
-    SearchGroupItem searchGroupMeasurement = new SearchGroupItem()
-      .type(TreeType.MEAS.name())
-      .searchParameters(Arrays.asList(
-        createSearchParameter(measurementLab,"Lab").attributes(Arrays.asList(new Attribute().name(ANY)))));
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(1L);
+    SearchParameter icd10 = new SearchParameter()
+      .type(TreeType.ICD10.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(9L);
+    SearchParameter snomed = new SearchParameter()
+      .type(TreeType.SNOMED.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(4L);
 
-    //First Mention Of (ICD9Child or Snomed with modifiers) 5 Days After ICD10
-    //First temporal group
-    searchGroupIcd9Child.temporalGroup(0);
-    searchGroupSnomed.temporalGroup(0);
-    //Second temporal group
-    searchGroupIcd10Child.temporalGroup(1);
-    SearchGroup searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
+    SearchGroupItem icd9SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd9)
+      .temporalGroup(0)
+      .addModifiersItem(ageModifier);
+    SearchGroupItem icd10SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd10)
+      .temporalGroup(1)
+      .addModifiersItem(visitsModifier);
+    SearchGroupItem snomedSGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(snomed)
+      .temporalGroup(0);
+
+    //First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
       .mention(TemporalMention.FIRST_MENTION.name())
       .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupIcd9Child and searchGroupIcd10Child
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //First Mention Of DrugParent 5 Days Before ICD10Child
-    //First temporal group
-    searchGroupDrugParent.temporalGroup(0);
-    //Second temporal group
-    searchGroupIcd10Child.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupDrugParent, searchGroupIcd10Child))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    //matches icd9SGI in group 0 and icd10SGI in group 1
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void firstMentionOfICD9WithOccurrencesOrSnomed5DaysAfterICD10() throws Exception {
+    Modifier occurrencesModifier = new Modifier()
+      .name(ModifierType.NUM_OF_OCCURRENCES)
+      .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+      .operands(Arrays.asList("2"));
+
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(1L);
+    SearchParameter icd10 = new SearchParameter()
+      .type(TreeType.ICD10.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(9L);
+    SearchParameter snomed = new SearchParameter()
+      .type(TreeType.SNOMED.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(4L);
+
+    SearchGroupItem icd9SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd9)
+      .temporalGroup(0)
+      .addModifiersItem(occurrencesModifier);
+    SearchGroupItem icd10SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd10)
+      .temporalGroup(1);
+    SearchGroupItem snomedSGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(snomed)
+      .temporalGroup(0);
+
+    //First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
+      .temporal(true)
+      .mention(TemporalMention.FIRST_MENTION.name())
+      .time(TemporalTime.X_DAYS_AFTER.name())
+      .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    //matches icd9SGI in group 0 and icd10SGI in group 1
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
+    Modifier visitsModifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+
+    SearchParameter drug = new SearchParameter()
+      .type(TreeType.DRUG.name())
+      .subtype(TreeSubType.ATC.name())
+      .group(true)
+      .conceptId(21600932L);
+    SearchParameter icd10 = new SearchParameter()
+      .type(TreeType.ICD10.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(9L);
+
+    SearchGroupItem drugSGI = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .addSearchParametersItem(drug)
+      .temporalGroup(0);
+    SearchGroupItem icd10SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd10)
+      .temporalGroup(1)
+      .addModifiersItem(visitsModifier);
+
+    //First Mention Of Drug 5 Days Before ICD10 w/modifiers
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(drugSGI, icd10SGI))
       .temporal(true)
       .mention(TemporalMention.FIRST_MENTION.name())
       .time(TemporalTime.X_DAYS_BEFORE.name())
       .timeValue(5L);
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupDrugParent and searchGroupIcd10Child
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Any Mention Of (ICD9Parent or Snomed with modifiers) 5 Days after ICD10Child
-    //First temporal group
-    searchGroupIcd9Parent.temporalGroup(0);
-    searchGroupSnomed.temporalGroup(0);
-    //Second temporal group
-    searchGroupIcd10Child.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupIcd9Child, searchGroupSnomed, searchGroupIcd10Child))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void anyMentionOfICD9Parent5DaysAfterICD10Child() throws Exception {
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(true)
+      .value("001");
+    SearchParameter icd10 = new SearchParameter()
+      .type(TreeType.ICD10.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(9L);
+
+    SearchGroupItem icd9SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd9)
+      .temporalGroup(0);
+    SearchGroupItem icd10SGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(icd10)
+      .temporalGroup(1);
+
+    //Any Mention Of ICD9 5 Days After ICD10
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(icd9SGI, icd10SGI))
       .temporal(true)
       .mention(TemporalMention.ANY_MENTION.name())
       .time(TemporalTime.X_DAYS_AFTER.name())
       .timeValue(5L);
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupSnomed and searchGroupIcd10Child
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Any Mention Of (ICD10Parent(modifier) or CPT) within 5 Days of visit
-    //First temporal group
-    searchGroupIcd10Parent.temporalGroup(0);
-    searchGroupCpt.temporalGroup(0);
-    //Second temporal group
-    searchGroupVisit.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupIcd10Parent, searchGroupCpt, searchGroupVisit))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
+    SearchParameter cpt = new SearchParameter()
+      .type(TreeType.CPT.name())
+      .subtype(TreeSubType.CPT4.name())
+      .group(false)
+      .conceptId(10L);
+    SearchParameter visit = new SearchParameter()
+      .type(TreeType.VISIT.name())
+      .group(false)
+      .conceptId(1L);
+
+    SearchGroupItem cptSGI = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(cpt)
+      .temporalGroup(0);
+    SearchGroupItem visitSGI = new SearchGroupItem()
+      .type(TreeType.VISIT.name())
+      .addSearchParametersItem(visit)
+      .temporalGroup(1);
+
+    //Any Mention Of ICD10 Parent within 5 Days of visit
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(visitSGI, cptSGI))
       .temporal(true)
       .mention(TemporalMention.ANY_MENTION.name())
       .time(TemporalTime.WITHIN_X_DAYS_OF.name())
       .timeValue(5L);
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupCpt and searchGroupVisit
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //First Mention Of DrugChild during same encounter as Measurement
-    //First temporal group
-    searchGroupDrugChild.temporalGroup(0);
-    //Second temporal group
-    searchGroupMeasurement.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupDrugChild, searchGroupMeasurement))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    SearchParameter drug = new SearchParameter()
+      .type(TreeType.DRUG.name())
+      .subtype(TreeSubType.ATC.name())
+      .group(false)
+      .conceptId(11L);
+    SearchParameter measurement = new SearchParameter()
+      .type(TreeType.MEAS.name())
+      .subtype(TreeSubType.LAB.name())
+      .group(false)
+      .conceptId(3L)
+      .attributes(Arrays.asList(new Attribute().name(ANY)));
+
+    SearchGroupItem drugSGI = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .addSearchParametersItem(drug)
+      .temporalGroup(0);
+    SearchGroupItem measurementSGI = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .addSearchParametersItem(measurement)
+      .temporalGroup(1);
+
+    //First Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
+      .mention(TemporalMention.FIRST_MENTION.name())
       .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupDrugChild and searchGroupMeasurement
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Last Mention Of DrugChild during same encounter as Measurement
-    //First temporal group
-    searchGroupDrugChild.temporalGroup(0);
-    //Second temporal group has 2 types(this will envoke the join sql)
-    searchGroupMeasurement.temporalGroup(1);
-    searchGroupVisit.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupDrugChild, searchGroupMeasurement, searchGroupVisit))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+    SearchParameter drug = new SearchParameter()
+      .type(TreeType.DRUG.name())
+      .subtype(TreeSubType.ATC.name())
+      .group(false)
+      .conceptId(11L);
+    SearchParameter measurement = new SearchParameter()
+      .type(TreeType.MEAS.name())
+      .subtype(TreeSubType.LAB.name())
+      .group(false)
+      .conceptId(3L)
+      .attributes(Arrays.asList(new Attribute().name(ANY)));
+
+    SearchGroupItem drugSGI = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .addSearchParametersItem(drug)
+      .temporalGroup(0);
+    SearchGroupItem measurementSGI = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .addSearchParametersItem(measurement)
+      .temporalGroup(1);
+
+    //Last Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
       .mention(TemporalMention.LAST_MENTION.name())
       .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupDrugChild and searchGroupMeasurement
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
-    //Last Mention Of (Measurement and visit) X days after DrugParent
-    //First temporal group
-    searchGroupMeasurement.temporalGroup(0);
-    searchGroupVisit.temporalGroup(0);
-    //Second temporal
-    searchGroupDrugParent.temporalGroup(1);
-    searchGroup = new SearchGroup()
-      .items(Arrays.asList(searchGroupMeasurement, searchGroupVisit, searchGroupDrugParent))
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
+    SearchParameter drug = new SearchParameter()
+      .type(TreeType.DRUG.name())
+      .subtype(TreeSubType.ATC.name())
+      .group(false)
+      .conceptId(11L);
+    SearchParameter measurement = new SearchParameter()
+      .type(TreeType.MEAS.name())
+      .subtype(TreeSubType.LAB.name())
+      .group(false)
+      .conceptId(3L)
+      .attributes(Arrays.asList(new Attribute().name(ANY)));
+    SearchParameter visit = new SearchParameter()
+      .type(TreeType.VISIT.name())
+      .group(false)
+      .conceptId(1L);
+
+    SearchGroupItem drugSGI = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .addSearchParametersItem(drug)
+      .temporalGroup(0);
+    SearchGroupItem measurementSGI = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .addSearchParametersItem(measurement)
+      .temporalGroup(1);
+    SearchGroupItem visitSGI = new SearchGroupItem()
+      .type(TreeType.VISIT.name())
+      .addSearchParametersItem(visit)
+      .temporalGroup(1);
+
+    //Last Mention Of Drug during same encounter as measurement
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
+      .temporal(true)
+      .mention(TemporalMention.LAST_MENTION.name())
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
+    SearchParameter measurement = new SearchParameter()
+      .type(TreeType.MEAS.name())
+      .subtype(TreeSubType.LAB.name())
+      .group(false)
+      .conceptId(3L)
+      .attributes(Arrays.asList(new Attribute().name(ANY)));
+    SearchParameter visit = new SearchParameter()
+      .type(TreeType.VISIT.name())
+      .group(false)
+      .conceptId(1L);
+    SearchParameter drug = new SearchParameter()
+      .type(TreeType.DRUG.name())
+      .subtype(TreeSubType.ATC.name())
+      .group(true)
+      .conceptId(21600932L);
+
+    SearchGroupItem measurementSGI = new SearchGroupItem()
+      .type(TreeType.MEAS.name())
+      .addSearchParametersItem(measurement)
+      .temporalGroup(0);
+    SearchGroupItem visitSGI = new SearchGroupItem()
+      .type(TreeType.VISIT.name())
+      .addSearchParametersItem(visit)
+      .temporalGroup(0);
+    SearchGroupItem drugSGI = new SearchGroupItem()
+      .type(TreeType.DRUG.name())
+      .addSearchParametersItem(drug)
+      .temporalGroup(1);
+
+    //Last Mention Of Measurement or Visit 5 days after Drug
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
       .temporal(true)
       .mention(TemporalMention.LAST_MENTION.name())
       .time(TemporalTime.X_DAYS_AFTER.name())
-      .timeValue(10L);
-    searchRequest = new SearchRequest().includes(Arrays.asList(searchGroup));
-    //matches searchGroupDrugChild and searchGroupMeasurement
+      .timeValue(5L);
+
+    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
