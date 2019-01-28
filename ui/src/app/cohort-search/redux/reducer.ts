@@ -9,9 +9,6 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
-  getTemporalGroupItems,
-  getItem,
-  getTempItem,
   initialState,
   SR_ID
 } from './store';
@@ -436,7 +433,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             searchParameters: [],
             modifiers: [],
             count: null,
-            temporalGroup: 0,
+            temporalGroup: action.tempGroup ? action.tempGroup : 0,
             isRequesting: false,
           },
           selections: {},
@@ -482,9 +479,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         const groupId = activeGroupId(state);
         const groupItems = ['entities', 'groups', groupId, 'items'];
         const group = getGroup(groupId)(state);
-        const isTemporal = group.get('temporal');
-        const isTemGroup = getTemporalGroupItems(state);
-        console.log(getTemporalGroupItems);
         if (item.get('searchParameters', List()).isEmpty()) {
           return state
             .updateIn(groupItems, List(),
@@ -503,22 +497,12 @@ export const rootReducer: Reducer<CohortSearchState> =
             parameter
           );
 
-        if (isTemporal) {
-          return state
-            .updateIn(groupItems, List(), setUnique(itemId))
-            .setIn(['entities', 'items', itemId], item)
-            .setIn(['entities', 'items', itemId, 'temporalGroup'], 1)
-            .updateIn(['entities', 'parameters'], Map(), mergeParams)
-            .set('wizard', Map({open: false}))
-            .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
-        } else {
           return state
             .updateIn(groupItems, List(), setUnique(itemId))
             .setIn(['entities', 'items', itemId], item)
             .updateIn(['entities', 'parameters'], Map(), mergeParams)
             .set('wizard', Map({open: false}))
             .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
-         }
       }
 
       case WIZARD_CANCEL: {

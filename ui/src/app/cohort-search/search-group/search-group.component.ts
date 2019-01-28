@@ -1,5 +1,5 @@
 import {NgRedux, select} from '@angular-redux/store';
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {
   CohortSearchActions,
@@ -8,7 +8,7 @@ import {
   getTemporalGroupItems
 } from 'app/cohort-search/redux';
 import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
-import {List, Map} from 'immutable';
+import {Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -26,8 +26,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
   @select (getTemporalGroupItems) getTemporalGroupItems$;
   nonTemporalItems = [];
-  temporalItems =[];
-
+  temporalItems = [];
   error: boolean;
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
@@ -53,12 +52,12 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
         this.error = error;
       });
 
-  this.itemSubscription = this.getTemporalGroupItems$
-    .filter(open => !!open)
-    .subscribe(i => {
-      this.nonTemporalItems = i.nonTemporalItems;
-      this.temporalItems = i.temporalItems;
-    });
+    this.itemSubscription = this.getTemporalGroupItems$
+      .filter(open => !!open)
+      .subscribe(i => {
+        this.nonTemporalItems = i.nonTemporalItems;
+        this.temporalItems = i.temporalItems;
+      });
   }
 
   ngOnDestroy() {
@@ -78,10 +77,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   get groupId() {
     return this.group.get('id');
   }
-
-  // get items() {
-  //   return this.group.get('items', List());
-  // }
 
   remove(event) {
     this.actions.removeGroup(this.role, this.groupId);
@@ -104,7 +99,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     // console.log(this.tempGroup);
   }
 
-  launchWizard(criteria: any) {
+  launchWizard(criteria: any, tempGroup?: number) {
+    console.log(tempGroup);
     const itemId = this.actions.generateId('items');
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
     const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : null;
@@ -112,7 +108,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     const codes = criteria.codes || false;
     const {role, groupId} = this;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
-    this.actions.openWizard(itemId, criteria.type, context);
+    this.actions.openWizard(itemId, criteria.type, context, tempGroup);
   }
 
   getTemporal(e) {

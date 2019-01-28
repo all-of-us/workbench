@@ -318,9 +318,9 @@ export const hideAttributesPage =
  * Context mgmt
  */
 export const openWizard =
-  (itemId: string, itemType: string, context: object
+  (itemId: string, itemType: string, context: object, tempGroup?: number
   ): ActionTypes[typeof OPEN_WIZARD] =>
-  ({type: OPEN_WIZARD, itemId, itemType, context});
+  ({type: OPEN_WIZARD, itemId, itemType, context, tempGroup});
 
 export const reOpenWizard =
   (item: any, context: object

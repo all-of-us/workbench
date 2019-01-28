@@ -333,6 +333,7 @@ export interface ActionTypes {
     itemId: string;
     itemType: string;
     context?: ActiveContext;
+    tempGroup?: number;
   };
   REOPEN_WIZARD: {
     type: typeof REOPEN_WIZARD;
