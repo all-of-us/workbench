@@ -73,7 +73,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   showGenderGraph = false;
   showAgeGraph = true;
   showSourcesGraph = false;
-  showTopConcepts = {};
+  showTopConcepts = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
     'health status of an individual, ' +
     'such as medical diagnoses, are found in the conditions domain.',
@@ -245,11 +245,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
   }
-  public toggleTopConcepts(domainName) {
-    if (!this.showTopConcepts[domainName]) {
-      this.showTopConcepts[domainName] = true;
+  public toggleTopConcepts() {
+    if (!this.showTopConcepts) {
+      this.showTopConcepts = true;
     } else {
-      this.showTopConcepts[domainName] = false;
+      this.showTopConcepts = false;
     }
   }
 }

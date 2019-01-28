@@ -43,12 +43,12 @@
 
         <div class="row domain-summary">
           <h5 class="box-title">
-            <a class="toggle-link" (click)="toggleTopConcepts(ehrDomain.name)"> Top 10 Medical Concepts by Descending Participant Counts
-              <clr-icon *ngIf="!showTopConcepts[ehrDomain.name]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showTopConcepts[ehrDomain.name]" shape="caret" dir="down"></clr-icon>
+            <a class="toggle-link" (click)="toggleTopConcepts()"> Top 10 Medical Concepts by Descending Participant Counts
+              <clr-icon *ngIf="!showTopConcepts" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showTopConcepts" shape="caret" dir="down"></clr-icon>
             </a>
           </h5>
         </div>
-        <div class="row grid-header top-concepts-chart" [hidden]="!showTopConcepts[ehrDomain.name]">
+        <div class="row grid-header top-concepts-chart" [hidden]="!showTopConcepts">
           <div class="chart-wrapper flex-xs-middle">
             <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 Medical Concepts by Descending Participant Counts'"
                        [pointWidth]="10" [backgroundColor]="'#D9E4EA'"> </app-chart>
