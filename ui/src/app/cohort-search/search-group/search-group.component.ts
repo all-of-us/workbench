@@ -8,7 +8,7 @@ import {
   groupError
 } from 'app/cohort-search/redux';
 import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
-import {Map} from 'immutable';
+import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -24,20 +24,25 @@ import {Subscription} from 'rxjs/Subscription';
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
-  @select (getTemporalGroupItems) getTemporalGroupItems$;
+  // @select (getTemporalGroupItems) getTemporalGroupItems$;
   nonTemporalItems = [];
   temporalItems = [];
   error: boolean;
+  dropdownOption = {
+    selected: [TemporalMention.ANYMENTION, TemporalMention.ANYMENTION, TemporalMention.ANYMENTION]
+  };
+
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
     TemporalMention.LASTMENTION];
+
   timeDropDown = [TemporalTime.DURINGSAMEENCOUNTERAS,
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
     TemporalTime.WITHINXDAYSOF];
+
   subscription: Subscription;
   itemSubscription: Subscription;
-  // private item: Map<any, any> = Map();
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   tempGroup: any;
@@ -52,8 +57,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
         this.error = error;
       });
 
-    this.itemSubscription = this.getTemporalGroupItems$
-      .filter(open => !!open)
+    this.itemSubscription = this.ngRedux.select(getTemporalGroupItems(this.group.get('id')))
+      .filter(temporal => !!temporal)
       .subscribe(i => {
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
@@ -99,8 +104,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     // console.log(this.tempGroup);
   }
 
+  get items() {
+    return this.group.get('items', List());
+  }
+
   launchWizard(criteria: any, tempGroup?: number) {
-    console.log(tempGroup);
     const itemId = this.actions.generateId('items');
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
     const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : null;
@@ -125,14 +133,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   getTimeValue(e) {
     this.actions.updateTemporalTimeValue(e.target.value, this.groupId);
-  }
-
-  formatStatusForText(mention: TemporalMention): string {
-    return {
-      [TemporalMention.ANYMENTION]: 'Any Mention',
-      [TemporalMention.FIRSTMENTION]: 'First Mention',
-      [TemporalMention.LASTMENTION]: 'Last Mention',
-    }[mention];
   }
 
   formatStatus(options) {

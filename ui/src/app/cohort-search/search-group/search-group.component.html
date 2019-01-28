@@ -13,6 +13,7 @@
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="mention; else mentionTitle"> {{formatStatus(mention)}}</div>
         <ng-template #mentionTitle> Which Mention</ng-template>
+        <!--<span>{{formatStatus(dropdownOption.selected[0])}}</span>-->
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -29,7 +30,7 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block">
+  <div id="non{{groupId}}" *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block">
     <app-search-group-item
       (temporalGroupValue)="getTemporalGroup($event)"
       [role]="role"
@@ -38,7 +39,17 @@
       [itemIndex]="itemIndex">
     </app-search-group-item>
   </div>
-
+  <!--<ng-container *ngIf="!temporalFlag">-->
+    <!--<div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">-->
+      <!--<app-search-group-item-->
+        <!--(temporalGroupValue)="getTemporalGroup($event)"-->
+        <!--[role]="role"-->
+        <!--[groupId]="groupId"-->
+        <!--[itemId]="itemId"-->
+        <!--[itemIndex]="itemIndex">-->
+      <!--</app-search-group-item>-->
+    <!--</div>-->
+  <!--</ng-container>-->
   <div class="card-header">
     <ng-template #groupDropDown>
       <clr-dropdown>
@@ -109,6 +120,7 @@
     </clr-dropdown>
     <input class="time-inputBox" type="number" [(ngModel)]="timeValue" placeholder="X"  (keyup)="getTimeValue($event)">
   </div>
+
   <ng-container *ngIf="temporalFlag">
     <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
       <app-search-group-item

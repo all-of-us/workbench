@@ -18,9 +18,22 @@ export const groupList = kind => (state): List<any> =>
 export const includeGroups = groupList('includes');
 export const excludeGroups = groupList('excludes');
 
-export const itemList = groupId => state =>
-  state.getIn(['entities', 'groups', groupId, 'items'], List()).map(itemId =>
-    state.getIn(['entities', 'items', itemId], Map()));
+export const getTemporalGroupItems = (groupId) => (state) => {
+  const itemObj = {
+    nonTemporalItems: [],
+    temporalItems: [],
+  };
+  state.getIn(['entities', 'groups', groupId, 'items'], List()).forEach(itemId => {
+  const item = state.getIn(['entities', 'items', itemId], Map());
+  if(item.get('temporalGroup') === 0) {
+    itemObj.nonTemporalItems.push(itemId);
+  } else {
+    itemObj.temporalItems.push(itemId);
+  }
+  });
+  return itemObj;
+};
+
 
 export const parameterList = itemId => state =>
   state.getIn(['entities', 'items', itemId, 'searchParameters'], List()).map(
@@ -59,22 +72,7 @@ export const isRequesting = (kind, id) => state =>
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
-export const getTemporalGroupItems = (state) => {
-  const items = state.getIn(['entities', 'items'], Map());
-  const itemObj = {
-    nonTemporalItems: [],
-    temporalItems: [],
-  };
-  items.entrySeq().forEach( ([key, value]) => {
-    const itemValue = value.toJS();
-    if (itemValue.temporalGroup === 0) {
-      itemObj.nonTemporalItems.push(key);
-    } else {
-      itemObj.temporalItems.push(key);
-    }
-  });
-  return itemObj;
-};
+
 
 
 /**
