@@ -1,30 +1,8 @@
 import * as React from 'react';
 
-export interface LeftScrollLightState {
-  fillColor: string;
-}
-
-export class LeftScrollLightReact extends React.Component<{}, LeftScrollLightState> {
-
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      fillColor: '#5FAEE0'
-    };
-  }
-
-  mouseOver(): void {
-    this.setState({fillColor: '#1892E0'});
-  }
-
-  mouseLeave(): void {
-    this.setState({fillColor: '#5FAEE0'});
-  }
-
-  render() {
-    return <svg width='40' height='41' viewBox='0 0 40 41' xmlns='http://www.w3.org/2000/svg'
-                xmlnsXlink='http://www.w3.org/1999/xlink' onMouseOver={() => this.mouseOver()}
-                onMouseLeave={() => this.mouseLeave()}>
+export const ScrollIconReact = (props) => {
+    return <svg viewBox='0 0 40 41' xmlns='http://www.w3.org/2000/svg'
+                xmlnsXlink='http://www.w3.org/1999/xlink' {...props}>
       <defs>
         <circle id='path-1' cx='18' cy='18' r='18' />
         <filter x='-11.1%' y='-8.3%' width='122.2%' height='125%' filterUnits='objectBoundingBox'
@@ -45,12 +23,12 @@ export class LeftScrollLightReact extends React.Component<{}, LeftScrollLightSta
           </feMerge>
         </filter>
       </defs>
-      <g id='Workspaces' fill='none' fillRule='evenodd' opacity='0.54'>
+      <g id='Workspaces' fill='none' fillRule='evenodd'>
         <g id='About-Workspace' transform='translate(-232 -326)'>
           <g id='scroll' transform='rotate(180 135 183)'>
             <g id='Oval-3'>
               <use fill='#000' filter='url(#filter-2)' xlinkHref='#path-1' />
-              <use fill={this.state.fillColor} xlinkHref='#path-1' />
+              <use fill='currentColor' xlinkHref='#path-1' />
             </g>
             <g id='ic_chevron_right_24px-copy' transform='translate(14.233 11.72)'
                fill='#FFF' fillRule='nonzero'>
@@ -62,6 +40,5 @@ export class LeftScrollLightReact extends React.Component<{}, LeftScrollLightSta
         </g>
       </g>
     </svg>;
-  }
-}
+};
 
