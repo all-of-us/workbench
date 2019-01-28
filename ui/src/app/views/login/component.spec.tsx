@@ -4,15 +4,12 @@ import * as React from 'react';
 import LoginReactComponent from './component';
 
 describe('LoginComponent', () => {
-  let props: {signIn: Function,onCreateAccount:Function};
+  let props: {signIn: Function, onCreateAccount: Function};
 
   const signIn = jest.fn();
   const onCreateAccount = jest.fn();
 
-  const component = (props) => {
-    return mount
-    (<LoginReactComponent {...props}/>);
-  };
+  const component = (props) => mount(<LoginReactComponent {...props}/>);
 
   beforeEach(() => {
     props = {

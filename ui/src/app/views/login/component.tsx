@@ -33,15 +33,6 @@ export const LoginReactComponent: React.FunctionComponent<{
           Create Account
         </Button>
       </div>
-      <div style={{paddingTop: '1.25rem'}}>
-        <SmallHeader>
-          Don't have an account?
-        </SmallHeader>
-        <Button type='secondary' style={{fontSize: '10px', margin: '.25rem .5rem .25rem 0'}}
-                onClick={onCreateAccount}>
-          Create Account
-        </Button>
-      </div>
     </div>;
   };
 

@@ -10,9 +10,7 @@ describe('SignInReact', () => {
 
   const signIn = jest.fn();
 
-  const component = () => {
-    return mount(<SignInReact {...props}/>);
-  };
+  const component = () => mount(<SignInReact {...props}/>);
 
   beforeEach(() => {
     props = {
@@ -27,7 +25,7 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
     expect(backgroundImage).toBe('url(\'' + pageImages.login.backgroundImgSrc + '\')');
-    expect(wrapper.find('[data-test-id="login"]')).toBeTruthy();
+    expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display small background image when window width is between 900 and 1300', () => {
@@ -37,8 +35,8 @@ describe('SignInReact', () => {
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
-        .toBe('url(\'' + pageImages.login.smallerBackgroundImgSrc + '\')');
-    expect(wrapper.find('[data-test-id="invitation"]')).toBeTruthy();
+      .toBe('url(\'' + pageImages.login.smallerBackgroundImgSrc + '\')');
+    expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display invitation key component on clicking Create account on login page ', () => {
@@ -50,8 +48,8 @@ describe('SignInReact', () => {
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
-        .toBe('url(\'' + pageImages.invitationKey.backgroundImgSrc + '\')');
-    expect(wrapper.find('[data-test-id="invitation"]')).toBeTruthy();
+      .toBe('url(\'' + pageImages.invitationKey.backgroundImgSrc + '\')');
+    expect(wrapper.exists('[data-test-id="invitationKey"]')).toBeTruthy();
   });
 
   it('should display invitation key with small image when width is between 900 and 1300 ', () => {
@@ -62,6 +60,6 @@ describe('SignInReact', () => {
     wrapper.update();
     const templateImage = wrapper.find('[data-test-id="template"]');
     expect(templateImage.prop('style').backgroundImage)
-        .toBe('url(\'' + pageImages.invitationKey.smallerBackgroundImgSrc + '\')');
+      .toBe('url(\'' + pageImages.invitationKey.smallerBackgroundImgSrc + '\')');
   });
 });
