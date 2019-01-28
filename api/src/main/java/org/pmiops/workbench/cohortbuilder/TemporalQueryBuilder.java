@@ -24,12 +24,10 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME_VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionInvalid;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notContainsTwoGroups;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNotZeroAndNotOne;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeInvalid;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueRequired;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
@@ -118,8 +116,8 @@ public class TemporalQueryBuilder {
   }
 
   private void validateSearchGroup(SearchGroup searchGroup) {
-    from(mentionNull().or(mentionInvalid())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, searchGroup.getMention());
-    from(timeNull().or(timeInvalid())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, searchGroup.getTime());
+    from(mentionInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, searchGroup.getMention());
+    from(timeInvalid()).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, searchGroup.getTime());
     from(timeValueNull().and(timeValueRequired())).test(searchGroup).throwException(NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, searchGroup.getTimeValue());
   }
 }

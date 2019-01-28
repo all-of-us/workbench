@@ -13,18 +13,11 @@ import java.util.stream.Stream;
 
 public class SearchGroupPredicates {
 
-  private static final List<String> MENTION_TYPES =
-    Stream.of(TemporalMention.values())
-      .map(Enum::name)
-      .collect(Collectors.toList());
-
-  private static final List<String> TIME_TYPES =
-    Stream.of(TemporalTime.values())
-      .map(Enum::name)
-      .collect(Collectors.toList());
-
   private static final List<String> REQUIRED_TIME_VALUE_TYPES =
-    TIME_TYPES.stream().skip(1).collect(Collectors.toList());
+    Stream.of(TemporalTime.values())
+      .skip(1)
+      .map(Enum::name)
+      .collect(Collectors.toList());
 
   public static Predicate<SearchGroupItem> temporalGroupNull() {
     return sgi -> sgi.getTemporalGroup() == null;
@@ -38,20 +31,12 @@ public class SearchGroupPredicates {
     return itemMap -> itemMap.keySet().size() != 2;
   }
 
-  public static Predicate<SearchGroup> mentionNull() {
-    return sg -> sg.getMention() == null;
-  }
-
   public static Predicate<SearchGroup> mentionInvalid() {
-    return sg -> !MENTION_TYPES.stream().anyMatch(sg.getMention()::equalsIgnoreCase);
-  }
-
-  public static Predicate<SearchGroup> timeNull() {
-    return sg -> sg.getTime() == null;
+    return sg -> TemporalMention.fromValue(sg.getMention()) == null;
   }
 
   public static Predicate<SearchGroup> timeInvalid() {
-    return sg -> !TIME_TYPES.stream().anyMatch(sg.getTime()::equalsIgnoreCase);
+    return sg -> TemporalTime.fromValue(sg.getTime()) == null;
   }
 
   public static Predicate<SearchGroup> timeValueNull() {
