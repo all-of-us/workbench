@@ -24,8 +24,8 @@ export const getTemporalGroupItems = (groupId) => (state) => {
     temporalItems: [],
   };
   state.getIn(['entities', 'groups', groupId, 'items'], List()).forEach(itemId => {
-  const item = state.getIn(['entities', 'items', itemId], Map());
-  if(item.get('temporalGroup') === 0) {
+    const item = state.getIn(['entities', 'items', itemId], Map());
+    if (item.get('temporalGroup') === 0) {
     itemObj.nonTemporalItems.push(itemId);
   } else {
     itemObj.temporalItems.push(itemId);
