@@ -1,7 +1,12 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {CohortSearchActions, CohortSearchState, getItem, groupError} from 'app/cohort-search/redux';
+import {
+  CohortSearchActions,
+  CohortSearchState,
+  groupError,
+  getTemporalGroupItems
+} from 'app/cohort-search/redux';
 import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -19,6 +24,10 @@ import {Subscription} from 'rxjs/Subscription';
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
+  @select (getTemporalGroupItems) getTemporalGroupItems$;
+  nonTemporalItems = [];
+  temporalItems =[];
+
   error: boolean;
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
@@ -29,10 +38,12 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     TemporalTime.WITHINXDAYSOF];
   subscription: Subscription;
   itemSubscription: Subscription;
-  private item: Map<any, any> = Map();
+  // private item: Map<any, any> = Map();
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   tempGroup: any;
+  private item: Map<any, any> = Map();
+  itemId: any;
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -41,21 +52,26 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
       .subscribe(error => {
         this.error = error;
       });
-    this.itemSubscription = this.ngRedux.select(getItem(this.group.get('id')))
-      .subscribe(item => this.item = item);
 
+  this.itemSubscription = this.getTemporalGroupItems$
+    .filter(open => !!open)
+    .subscribe(i => {
+      this.nonTemporalItems = i.nonTemporalItems;
+      this.temporalItems = i.temporalItems;
+    });
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.itemSubscription.unsubscribe();
   }
+
 
   get isRequesting() {
     return this.group.get('isRequesting', false);
   }
 
   get temporalFlag() {
-    // console.log(this.group.get('temporal'));
     return this.group.get('temporal');
   }
 
@@ -63,9 +79,9 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     return this.group.get('id');
   }
 
-  get items() {
-    return this.group.get('items', List());
-  }
+  // get items() {
+  //   return this.group.get('items', List());
+  // }
 
   remove(event) {
     this.actions.removeGroup(this.role, this.groupId);
@@ -85,6 +101,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   getTemporalGroup(e) {
     this.tempGroup = e;
+    // console.log(this.tempGroup);
   }
 
   launchWizard(criteria: any) {

@@ -9,6 +9,9 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
+  getTemporalGroupItems,
+  getItem,
+  getTempItem,
   initialState,
   SR_ID
 } from './store';
@@ -480,6 +483,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         const groupItems = ['entities', 'groups', groupId, 'items'];
         const group = getGroup(groupId)(state);
         const isTemporal = group.get('temporal');
+        const isTemGroup = getTemporalGroupItems(state);
+        console.log(getTemporalGroupItems);
         if (item.get('searchParameters', List()).isEmpty()) {
           return state
             .updateIn(groupItems, List(),
@@ -513,7 +518,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             .updateIn(['entities', 'parameters'], Map(), mergeParams)
             .set('wizard', Map({open: false}))
             .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
-        }
+         }
       }
 
       case WIZARD_CANCEL: {

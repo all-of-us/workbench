@@ -29,7 +29,7 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+  <div *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block">
     <app-search-group-item
       (temporalGroupValue)="getTemporalGroup($event)"
       [role]="role"
@@ -110,7 +110,7 @@
     <input class="time-inputBox" type="number" [(ngModel)]="timeValue" placeholder="X"  (keyup)="getTimeValue($event)">
   </div>
   <ng-container *ngIf="temporalFlag">
-    <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+    <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
       <app-search-group-item
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"

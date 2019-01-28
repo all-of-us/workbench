@@ -3,6 +3,7 @@ import {List, Map} from 'immutable';
 import {SR_ID} from './initial';
 
 import {SearchRequest} from 'generated';
+import {number} from "prop-types";
 
 
 
@@ -28,6 +29,9 @@ export const parameterList = itemId => state =>
 
 export const getItem = itemId => state =>
   state.getIn(['entities', 'items', itemId], Map());
+
+export const getTempItem = itemId => state =>
+  state.getIn(['entities', 'items', itemId, 'temporalGroup'], false);
 
 export const getGroup = groupId => state =>
   state.getIn(['entities', 'groups', groupId], Map());
@@ -56,9 +60,29 @@ export const isRequesting = (kind, id) => state =>
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
 
+export const getTemporalGroupItems = (state) => {
+  const items =state.getIn(['entities', 'items'], Map());
+  const itemObj = {
+    nonTemporalItems: [],
+    temporalItems: [],
+  };
+  items.entrySeq().forEach( ([key, value]) => {
+    const itemValue = value.toJS();
+    if(itemValue.temporalGroup === 0) {
+      itemObj.nonTemporalItems.push(key);
+    } else {
+      itemObj.temporalItems.push(key);
+    }
+  });
+  return itemObj;
+}
 
-export const getTemporalFlag = (state): any =>
-  state.getIn(['entities', 'temporal'], false);
+
+
+
+
+
+
 
 /**
  * Wizard
