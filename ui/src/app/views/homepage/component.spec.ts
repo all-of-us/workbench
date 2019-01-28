@@ -6,9 +6,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ExpandComponent} from 'app/icons/expand/component';
-import {ShrinkComponent} from 'app/icons/shrink/component';
-
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
