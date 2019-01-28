@@ -5,8 +5,11 @@ import {fromJS} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -238,4 +241,38 @@ export const summarizeErrors = errors => {
       return <div key={i} style={{marginTop: i !== 0 ? '0.25rem' : undefined}}>{v}</div>;
     });
   }
+};
+
+export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>, name: string) => {
+  return (WrappedComponent) => {
+    class Wrapper extends React.Component<any, {value: T}> {
+      static displayName = 'connectBehaviorSubject()';
+      private subscription;
+
+      constructor(props) {
+        super(props);
+        this.state = {value: subject.getValue()};
+      }
+
+      componentDidMount() {
+        this.subscription = subject.subscribe(v => this.setState({value: v}));
+      }
+
+      componentWillUnmount() {
+        this.subscription.unsubscribe();
+      }
+
+      render() {
+        const {value} = this.state;
+        return <WrappedComponent {...this.props} {...{[name]: value}} />;
+      }
+    }
+
+    return Wrapper;
+  };
+};
+
+// HOC that provides a 'workspace' prop with current WorkspaceData
+export const withCurrentWorkspace = () => {
+  return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
