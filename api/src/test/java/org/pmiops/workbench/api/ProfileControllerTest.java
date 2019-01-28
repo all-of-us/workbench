@@ -739,6 +739,21 @@ public class ProfileControllerTest {
     verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
   }
 
+  @Test
+  public void testUpdateNihToken() {
+    fail();
+  }
+
+  @Test
+  public void testUpdateNihTokenBadRequestException() {
+    fail();
+  }
+
+  @Test
+  public void testUpdateNihTokenInternalServerError() {
+    fail();
+  }
+
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
