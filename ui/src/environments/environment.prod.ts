@@ -12,12 +12,11 @@ export const environment: Environment = {
   debug: false,
   gaId: 'UA-112406425-4',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
-
-
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including
   // exit criteria and Jira ticket links.
   enableTemporal: false,
   useZendeskForSupport: false,
+  enableJupyterLab: false
 };

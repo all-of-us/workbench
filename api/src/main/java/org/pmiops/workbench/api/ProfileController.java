@@ -39,6 +39,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -366,7 +367,13 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
-    return ResponseEntity.ok(profileService.getProfile(user));
+    Profile profile = profileService.getProfile(user);
+    NihStatus nihStatus = fireCloudService.getNihStatus();
+    if (nihStatus != null) {
+      profile.setLinkedNihUsername(nihStatus.getLinkedNihUsername());
+      profile.setLinkExpireTime(nihStatus.getLinkExpireTime());
+    }
+    return ResponseEntity.ok(profile);
   }
 
   @Override
