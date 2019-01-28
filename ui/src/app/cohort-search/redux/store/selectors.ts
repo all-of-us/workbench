@@ -74,7 +74,7 @@ export const getTemporalGroupItems = (state) => {
     }
   });
   return itemObj;
-}
+};
 
 
 /**

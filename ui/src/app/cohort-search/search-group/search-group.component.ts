@@ -4,8 +4,8 @@ import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {
   CohortSearchActions,
   CohortSearchState,
-  groupError,
-  getTemporalGroupItems
+  getTemporalGroupItems,
+  groupError
 } from 'app/cohort-search/redux';
 import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
 import {Map} from 'immutable';

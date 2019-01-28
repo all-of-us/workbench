@@ -497,12 +497,12 @@ export const rootReducer: Reducer<CohortSearchState> =
             parameter
           );
 
-          return state
-            .updateIn(groupItems, List(), setUnique(itemId))
-            .setIn(['entities', 'items', itemId], item)
-            .updateIn(['entities', 'parameters'], Map(), mergeParams)
-            .set('wizard', Map({open: false}))
-            .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
+        return state
+          .updateIn(groupItems, List(), setUnique(itemId))
+          .setIn(['entities', 'items', itemId], item)
+          .updateIn(['entities', 'parameters'], Map(), mergeParams)
+          .set('wizard', Map({open: false}))
+          .set('criteria', Map({tree: {}, requests: {}, errors: {}}));
       }
 
       case WIZARD_CANCEL: {
