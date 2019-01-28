@@ -186,7 +186,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
-    switch(g) {
+    switch (g) {
       case graphType.BiologicalSex: {
         this.graphToShow = graphType.BiologicalSex;
         break;
