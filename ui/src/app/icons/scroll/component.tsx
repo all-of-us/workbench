@@ -1,9 +1,9 @@
 import {Component, Input} from '@angular/core';
 import {ReactWrapperBase} from 'app/utils';
 
+import {ScrollIconReact} from 'app/icons/scroll-icon/component';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
-import {ScrollIconReact} from '../scroll-icon/component';
 
 const FillColorId = '#2691D0';
 const HoverFillColorId = '#72B9E2';
@@ -28,12 +28,12 @@ export const ScrollReact: React.FunctionComponent<{icon: string, shade: string, 
         height = '41';
       }
 
-    return  <div>
-      <Interactive as={wrapper}
-        style={{color: color, opacity: opacity, transform: transform, ...style}}
-        hover={{color: hoverColor}} width= {width} height={height}/>
-    </div>;
-};
+      return  <div>
+        <Interactive as={wrapper}
+          style={{color: color, opacity: opacity, transform: transform, ...style}}
+          hover={{color: hoverColor}} width= {width} height={height}/>
+      </div>;
+    };
 
 @Component({
   selector: 'app-scroll-icon',
@@ -46,5 +46,5 @@ export class ScrollComponent extends ReactWrapperBase {
 
   constructor() {
     super(ScrollReact, ['icon', 'shade', 'style']);
-   }
+  }
 }
