@@ -6,33 +6,17 @@ import LoginReactComponent from './component';
 describe('LoginComponent', () => {
   let props: {signIn: Function, onCreateAccount: Function};
 
-  const signIn = jest.fn();
-  const onCreateAccount = jest.fn();
-
   const component = (props) => mount(<LoginReactComponent {...props}/>);
 
   beforeEach(() => {
     props = {
-      signIn: signIn,
-      onCreateAccount: onCreateAccount
+      signIn: () => {},
+      onCreateAccount: () => {}
     };
-    signIn.mockClear();
-    onCreateAccount.mockClear();
   });
 
-  it('should signIn on clicking google icon', () => {
+  it('should render', () => {
     const wrapper = component(props);
-    const signInButton = wrapper.find('[type="primary"]');
-    signInButton.simulate('click');
-    expect(signIn).toHaveBeenCalled();
-    expect(onCreateAccount).not.toHaveBeenCalled();
-  });
-
-  it('should call props onCreateAccount function on clicking Create account button', () => {
-    const wrapper = component(props);
-    const createAccountButton = wrapper.find('[type="secondary"]');
-    createAccountButton.simulate('click');
-    expect(signIn).not.toHaveBeenCalled();
-    expect(onCreateAccount).toHaveBeenCalled();
+    expect(wrapper).toBeTruthy();
   });
 });

@@ -14,7 +14,7 @@ describe('SignInReact', () => {
 
   beforeEach(() => {
     props = {
-      onInit: jest.fn(),
+      onInit: () => {},
       signIn: signIn,
       windowSize: {width: 1400, height: 0}
     } as SignInProps;
