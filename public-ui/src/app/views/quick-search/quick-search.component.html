@@ -115,10 +115,32 @@
 
     </div>
 
+    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS)"> Program Phyiscal Measurements:  </h5>
+    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS)">
+      <div class="col col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-12">
+        <div class="white-card-box search-result">
+          <h5 class="box-title">
+            Program Physical Measurements
+          </h5>
+          <p class="card-text bigger">
+            <span>Participants have the option to provide a standard set of physical measurements as part
+            of the enrollment process  (“program physical measurements”).
+            Use this tool to browse distributions of measurement values and counts,
+            grouped by age at occurrence and gender, for each program physical measurement.</span>
+          </p>
+
+          <div class="card-text bottom">
+            <button class="btn btn-primary" [routerLink]="['physical-measurements']"> View Program Physical Measurements </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
   </div>
 
   <div class="hidden-sm-down  col-md-2">
-    <img [src]="pageImage" class="page-image"/>
   </div>
 
 </div>

@@ -31,8 +31,6 @@ export class ConceptSetListComponent implements OnInit {
   conceptSetsLoading = false;
   conceptSetsList: ConceptSet[];
   resourceList: RecentResource[];
-  duplicateName: string;
-  nameConflictError = false;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
@@ -69,11 +67,6 @@ export class ConceptSetListComponent implements OnInit {
 
   newConceptSet(): void {
     this.conceptCreateModal.open();
-  }
-
-  duplicateNameError(dupName: string) {
-    this.duplicateName = dupName;
-    this.nameConflictError = true;
   }
 
   get writePermission(): boolean {

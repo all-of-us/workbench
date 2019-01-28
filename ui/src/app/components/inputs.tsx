@@ -86,3 +86,12 @@ export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
     }}
   />;
 };
+
+export const RadioButton = ({ onChange, ...props }) => {
+  return <input
+    type='radio'
+    {...props}
+    onChange={onChange}
+    onClick={onChange}
+  />;
+};

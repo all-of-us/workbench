@@ -5,21 +5,25 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
+import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
 import org.pmiops.workbench.firecloud.model.ManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.Profile;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -39,6 +43,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<GroupsApi> endUserGroupsApiProvider;
+  private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final FirecloudRetryHandler retryHandler;
@@ -58,13 +63,14 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
       @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
-      Provider<WorkspacesApi> workspacesApiProvider, Provider<StatusApi> statusApiProvider,
-      FirecloudRetryHandler retryHandler) {
+      Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
+      Provider<StatusApi> statusApiProvider, FirecloudRetryHandler retryHandler) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.endUserGroupsApiProvider = endUserGroupsApiProvider;
+    this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
@@ -277,4 +283,30 @@ public class FireCloudServiceImpl implements FireCloudService {
       return false;
     });
   }
+
+  @Override
+  public NihStatus getNihStatus() {
+    NihApi nihApi = nihApiProvider.get();
+    return retryHandler.run((context) -> {
+      try {
+        return nihApi.nihStatus();
+      } catch (ApiException e) {
+        if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+          return null;
+        } else {
+          throw e;
+        }
+      }
+    });
+  }
+
+  @Override
+  public void postNihCallback(JWTWrapper wrapper) {
+    NihApi nihApi = nihApiProvider.get();
+    retryHandler.run((context) -> {
+      nihApi.nihCallback(wrapper);
+      return null;
+    });
+  }
+
 }
