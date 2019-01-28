@@ -27,6 +27,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPr
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notContainsTwoGroups;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNotZeroAndNotOne;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueNull;
@@ -108,7 +109,7 @@ public class TemporalQueryBuilder {
     ListMultimap<Integer, SearchGroupItem> itemMap = ArrayListMultimap.create();
     searchGroup.getItems()
       .forEach(item -> {
-        from(temporalGroupNull()).test(item)
+        from(temporalGroupNull().or(temporalGroupNotZeroAndNotOne())).test(item)
           .throwException(NOT_VALID_MESSAGE, SEARCH_GROUP_ITEM, TEMPORAL_GROUP, item.getTemporalGroup());
         itemMap.put(item.getTemporalGroup(), item);
       });
