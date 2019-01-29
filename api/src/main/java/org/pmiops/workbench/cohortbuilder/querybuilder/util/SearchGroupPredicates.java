@@ -6,6 +6,7 @@ import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -23,12 +24,8 @@ public class SearchGroupPredicates {
     return sgi -> sgi.getTemporalGroup() == null;
   }
 
-  public static Predicate<SearchGroupItem> temporalGroupNotZeroAndNotOne() {
-    return sgi -> sgi.getTemporalGroup() != 0 && sgi.getTemporalGroup() != 1;
-  }
-
-  public static Predicate<ListMultimap<Integer, SearchGroupItem>> notContainsTwoGroups() {
-    return itemMap -> itemMap.keySet().size() != 2;
+  public static Predicate<ListMultimap<Integer, SearchGroupItem>> notZeroAndNotOne() {
+    return itemMap -> !itemMap.keySet().containsAll(Arrays.asList(0,1));
   }
 
   public static Predicate<SearchGroup> mentionInvalid() {

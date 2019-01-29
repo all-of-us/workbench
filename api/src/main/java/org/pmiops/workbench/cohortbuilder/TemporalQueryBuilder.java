@@ -24,9 +24,8 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TIME_VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.mentionInvalid;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notContainsTwoGroups;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.temporalGroupNotZeroAndNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.notZeroAndNotOne;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.SearchGroupPredicates.timeValueRequired;
@@ -107,11 +106,11 @@ public class TemporalQueryBuilder {
     ListMultimap<Integer, SearchGroupItem> itemMap = ArrayListMultimap.create();
     searchGroup.getItems()
       .forEach(item -> {
-        from(temporalGroupNull().or(temporalGroupNotZeroAndNotOne())).test(item)
+        from(temporalGroupNull()).test(item)
           .throwException(NOT_VALID_MESSAGE, SEARCH_GROUP_ITEM, TEMPORAL_GROUP, item.getTemporalGroup());
         itemMap.put(item.getTemporalGroup(), item);
       });
-    from(notContainsTwoGroups()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
+    from(notZeroAndNotOne()).test(itemMap).throwException(TEMPORAL_GROUP_MESSAGE);
     return itemMap;
   }
 
