@@ -13,7 +13,7 @@ export const environment: Environment = {
   debug: true,
   gaId: 'UA-112406425-5',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
-
   enableTemporal: true,
   useZendeskForSupport: true,
+  enableJupyterLab: true
 };
