@@ -120,8 +120,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   usernameChanged(value: string): void {
-    const {username} = this.state.profile;
     this.updateProfile('username', value);
+    const {username} = this.state.profile;
     if (username === '') {
       return;
     }
