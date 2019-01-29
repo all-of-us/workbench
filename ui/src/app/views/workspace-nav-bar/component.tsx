@@ -2,13 +2,12 @@ import {Component, Input} from '@angular/core';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {Popup} from 'app/components/popups';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {PopupTrigger} from 'app/components/popups';
+import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon/component';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
-
 import * as React from 'react';
 
 
@@ -37,7 +36,7 @@ const styles = reactStyles({
     fontWeight: 500, color: 'white', textTransform: 'uppercase',
     height: 60, paddingRight: 16,
     boxShadow: 'inset rgba(0, 0, 0, 0.12) 0px 3px 2px 0px',
-    width: 'calc(100% + 1.6rem)',
+    width: 'calc(100% + 1.2rem)',
     marginLeft: '-0.6rem',
     paddingLeft: 80, borderBottom: `5px solid ${colors.blue[0]}`, flex: 'none'
   },
@@ -53,11 +52,14 @@ const styles = reactStyles({
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
   },
-  menuIcon: {
-    backgroundImage: 'url("/assets/icons/card-menu-icon.svg")',
-    width: 27, height: 27
+  menuButton: {
+    width: 27, height: 27,
+    opacity: 0.65, marginRight: 16
   }
 });
+
+const menuIcon = (iconName) =>
+  <ClrIcon shape={iconName} style={{marginRight: '.5rem'}} size={15}/>;
 
 const tabs = [
   {name: 'About', link: ''},
@@ -66,57 +68,82 @@ const tabs = [
   {name: 'Notebooks', link: 'notebooks'}
 ];
 
+const navSeparator = <div style={styles.separator}/>;
 
-export class WorkspaceNavBarReact extends React.Component<
-  // tabPath is a prop so this re-renders when it changes, replace when there's a React router
-  {shareFunction: Function, deleteFunction: Function, workspace: WorkspaceData, tabPath: String},
-  {isDropdownOpen: boolean}
-> {
-  constructor(props) {
-    super(props);
-    this.state = {isDropdownOpen: false};
-  }
+const MenuButton = ({disabled = false, children, ...props}) => {
+  return <Clickable
+    disabled={disabled}
+    style={{
+      display: 'flex', alignItems: 'center',
+      fontSize: 12, minWidth: 125, height: '2rem',
+      color: disabled ? colors.gray[2] : undefined,
+      padding: '0 1.5rem',
+      cursor: disabled ? 'not-allowed' : 'pointer'
+    }}
+    hover={!disabled ? {backgroundColor: colors.blue[3], fontWeight: 'bold'} : undefined}
+    {...props}>
+    {children}
+  </Clickable>;
+};
 
-  render() {
-    const {shareFunction, deleteFunction, workspace, tabPath} = this.props;
-    const {isDropdownOpen} = this.state;
-    const {namespace, id} = workspace;
-    const activeTab = fp.find({link: tabPath}, tabs);
+
+export const WorkspaceNavBarReact = props => {
+  const {shareFunction, deleteFunction, workspace, tabPath} = props;
+  const {namespace, id} = workspace;
+  const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
 
-    const navSeparator = <div style={styles.separator}/>;
+  const navTab = currentTab => {
+    const {name, link} = currentTab;
+    const selected = tabPath === link;
+    const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
 
-    const navTab = currentTab => {
-      const {name, link} = currentTab;
-      const selected = tabPath === link;
-      const hideSeparator = selected || tabs.indexOf(activeTab) === tabs.indexOf(currentTab) + 1;
-
-      return <React.Fragment>
-        <Clickable
-          style={{...styles.tab, ...(selected ? styles.active : {})}}
-          hover={{color: styles.active.color}}
-          onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
-        >
-          {name}
-        </Clickable>
-        {!hideSeparator && navSeparator}
-      </React.Fragment>;
-
-    };
-
-    return <div id='workspace-top-nav-bar'
-                className='btn-group do-not-print'
-                style={styles.container}>
-      {activeTab !== tabs[0] && navSeparator}
-      {...fp.map(tab => navTab(tab), tabs)}
-      <div style={{flexGrow: 1}} />
+    return <React.Fragment key={name}>
       <Clickable
-        onClick={() => this.setState({isDropdownOpen: true})}
-        style={styles.menuIcon}/>
-      {isDropdownOpen && <Popup></Popup>}
-    </div>;
-  }
-}
+        style={{...styles.tab, ...(selected ? styles.active : {})}}
+        hover={{color: styles.active.color}}
+        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+      >
+        {name}
+      </Clickable>
+      {!hideSeparator && navSeparator}
+    </React.Fragment>;
+
+  };
+
+  return <div id='workspace-top-nav-bar'
+              className='do-not-print'
+              style={styles.container}>
+    {activeTabIndex > 0 && navSeparator}
+    {fp.map(tab => navTab(tab), tabs)}
+    <div style={{flexGrow: 1}}/>
+    <PopupTrigger
+      side='bottom'
+      closeOnClick={true}
+      content={
+        <React.Fragment>
+          <MenuButton onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
+            {menuIcon('copy')}Clone
+          </MenuButton>
+          <MenuButton onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}>
+            {menuIcon('pencil')}Edit
+          </MenuButton>
+          <MenuButton onClick={() => shareFunction()}>
+            {menuIcon('share')}Share
+          </MenuButton>
+          <MenuButton onClick={() => deleteFunction()}>
+            {menuIcon('trash')}Delete
+          </MenuButton>
+        </React.Fragment>
+      }>
+      <Clickable
+        style={styles.menuButton}
+        hover={{opacity: 1}}>
+        <CardMenuIconComponentReact/>
+      </Clickable>
+    </PopupTrigger>
+  </div>;
+};
 
 @Component({
   selector: 'app-workspace-nav-bar',

@@ -1,5 +1,8 @@
-<app-workspace-nav-bar *ngIf="displayNavBar" [shareFunction]="share" [deleteFunction]="openConfirmDelete"
-                       [workspace]="workspace" [tabPath]="tabPath"></app-workspace-nav-bar>
+<app-workspace-nav-bar *ngIf="displayNavBar"
+                       [shareFunction]="share.bind(this)"
+                       [deleteFunction]="openConfirmDelete.bind(this)"
+                       [workspace]="workspace"
+                       [tabPath]="tabPath"></app-workspace-nav-bar>
 
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
   <h3 class="modal-title">Error:</h3>
