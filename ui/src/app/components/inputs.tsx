@@ -1,10 +1,8 @@
 import * as React from 'react';
-export const styles = {
-  input: {
-    marginLeft: '.5rem',
-    width: '90%'
-  },
 
+import {withStyle} from 'app/utils/index';
+
+export const styles = {
   unsuccessfulInput: {
     backgroundColor: '#FCEFEC',
     borderColor: '#F68D76'
@@ -14,24 +12,12 @@ export const styles = {
     borderColor: '#7AC79B'
   },
 
-  longInput: {
-    width: '16rem'
-  },
-
   error: {
     padding: '0 0.5rem',
     fontWeight: 600,
     color: '#2F2E7E',
     marginTop: '0.2rem',
     width: '90%'
-  },
-
-  formInput: {
-    borderRadius: '5px',
-    backgroundColor: 'white',
-    lineHeight: '1.5rem',
-    height: '1.5rem',
-    width: '16rem'
   },
 
   errorMessage: {
@@ -55,13 +41,57 @@ export const styles = {
 };
 
 
-export const FieldInput = ({style = {}, ...props}) =>
-  <input {...props} style={{...styles.input, ...style}} />;
-export const FormInput = ({style = {}, ...props}) =>
-    <input {...props} style={{...styles.formInput, ...style}} ref={props.inputref}/>;
-export const LongInput = ({style = {}, ...props}) =>
-  <input {...props} style={{...styles.formInput, ...styles.longInput, ...style}} />;
-export const Error = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.error, ...style}} />;
-export const ErrorMessage = ({style = {}, ...props}) =>
-  <div {...props} style={{...styles.errorMessage, ...style}} />;
+export const Error = withStyle(styles.error)('div');
+export const ErrorMessage = withStyle(styles.errorMessage)('div');
+
+export const ValidationError = ({children}) => {
+  if (!children) {
+    return null;
+  }
+  return <div
+    style={{
+      color: '#c72314',
+      fontSize: 10, fontWeight: 500, textTransform: 'uppercase',
+      marginLeft: '0.5rem', marginTop: '0.25rem'
+    }}
+  >{children}</div>;
+};
+
+export const TextInput = ({style = {}, onChange, invalid = false, ...props}) => {
+  return <input
+    {...props}
+    onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+    style={{
+      width: '100%', height: '1.5rem',
+      border: '1px solid #9a9a9a', borderRadius: 4,
+      padding: '0 0.5rem',
+      backgroundColor: '#fff',
+      ...(invalid ? styles.unsuccessfulInput : {}),
+      ...style
+    }}
+  />;
+};
+
+export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
+  return <textarea
+    {...props}
+    onChange={onChange ? (e => onChange(e.target.value)) : undefined}
+    style={{
+      width: '100%',
+      border: '1px solid #9a9a9a', borderRadius: 4,
+      padding: '0.25rem 0.5rem',
+      backgroundColor: '#fff',
+      ...(invalid ? styles.unsuccessfulInput : {}),
+      ...style
+    }}
+  />;
+};
+
+export const RadioButton = ({ onChange, ...props }) => {
+  return <input
+    type='radio'
+    {...props}
+    onChange={onChange}
+    onClick={onChange}
+  />;
+};

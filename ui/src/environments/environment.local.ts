@@ -1,6 +1,7 @@
+import {Environment} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
-export const environment = {
+export const environment: Environment = {
   displayTag: 'Local->Local',
   allOfUsApiUrl: 'http://localhost:8081',
   clientId: testEnvironmentBase.clientId,
@@ -11,5 +12,8 @@ export const environment = {
   publicUiUrl: 'http://localhost:4201',
   debug: true,
   gaId: 'UA-112406425-5',
-  enableTemporal: true
+  zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  enableTemporal: true,
+  useZendeskForSupport: true,
+  enableJupyterLab: true
 };

@@ -9,20 +9,20 @@ import {ClarityModule} from '@clr/angular';
 import {
    ConceptsService, Domain, WorkspaceResponse,
   WorkspacesService
-} from '../../../generated';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
-import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
+} from 'generated';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
+import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {
   ConceptsServiceStub, ConceptStubVariables
-} from '../../../testing/stubs/concepts-service-stub';
+} from 'testing/stubs/concepts-service-stub';
 import {
   WorkspacesServiceStub,
   WorkspaceStubVariables
-} from '../../../testing/stubs/workspace-service-stub';
+} from 'testing/stubs/workspace-service-stub';
 import {
   simulateClick, simulateEvent,
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 import {ConceptAddModalComponent} from './component';
 
 class ConceptSetAddPage {
@@ -43,9 +43,8 @@ class ConceptSetAddPage {
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
     this.workspacesService.getWorkspace(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-    });
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {});
     tick();
     this.readPageData();
   }
@@ -132,32 +131,32 @@ describe('ConceptSetAddComponent', () => {
   }));
 
   it('disables option to add to existing if concept set does not exist',
-      fakeAsync(() => {
-    conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.DRUG;
-    conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
+    fakeAsync(() => {
+      conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.DRUG;
+      conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
         ConceptStubVariables.STUB_CONCEPTS;
-    conceptSetAddCreatePage.fixture.componentInstance.open();
-    conceptSetAddCreatePage.readPageData();
-    tick();
-    expect(conceptSetAddCreatePage.formSections.length).toBe(2);
-    expect(conceptSetAddCreatePage.fixture.debugElement
-      .query(By.css('#select-add')).properties['disabled']).toBeTruthy();
-  }));
+      conceptSetAddCreatePage.fixture.componentInstance.open();
+      conceptSetAddCreatePage.readPageData();
+      tick();
+      expect(conceptSetAddCreatePage.formSections.length).toBe(2);
+      expect(conceptSetAddCreatePage.fixture.debugElement
+        .query(By.css('#select-add')).properties['disabled']).toBeTruthy();
+    }));
 
   it('selects Add to Existing option by default'
       , fakeAsync(() => {
-    conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.CONDITION;
-    conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
+        conceptSetAddCreatePage.fixture.componentInstance.selectedDomain = Domain.CONDITION;
+        conceptSetAddCreatePage.fixture.componentInstance.selectedConcepts =
         ConceptStubVariables.STUB_CONCEPTS;
-    conceptSetAddCreatePage.fixture.componentInstance.open();
-    conceptSetAddCreatePage.readPageData();
-    const selects = conceptSetAddCreatePage.fixture.debugElement
+        conceptSetAddCreatePage.fixture.componentInstance.open();
+        conceptSetAddCreatePage.readPageData();
+        const selects = conceptSetAddCreatePage.fixture.debugElement
         .queryAll(By.css('#select-add'));
-    simulateClick(conceptSetAddCreatePage.fixture, selects[0]);
-    conceptSetAddCreatePage.readPageData();
-    expect(conceptSetAddCreatePage.conceptSelect.children[0].name).toBe('option');
-    expect(conceptSetAddCreatePage.conceptSelect.children[1].name).toBe('option');
-  }));
+        simulateClick(conceptSetAddCreatePage.fixture, selects[0]);
+        conceptSetAddCreatePage.readPageData();
+        expect(conceptSetAddCreatePage.conceptSelect.children[0].name).toBe('option');
+        expect(conceptSetAddCreatePage.conceptSelect.children[1].name).toBe('option');
+      }));
 
   it('on selecting create new option, only name and description field should be displayed'
       , fakeAsync(() => {

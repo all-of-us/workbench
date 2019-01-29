@@ -1,19 +1,19 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {typeToTitle} from 'app/cohort-search/utils';
+import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
 } from 'generated';
 import {Subscription} from 'rxjs/Subscription';
-import {CohortReviewService} from '../../../generated';
-import {typeToTitle} from '../../cohort-search/utils';
-import {ReviewStateService} from '../review-state.service';
 
 /* The most common column types */
 const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
-  displayName: 'Start Date',
+  displayName: 'Date',
 };
 const endDate = {
   name: 'endDate',
@@ -300,21 +300,27 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
 
 
   ngOnChanges() {
-    if (this.clickedParticipantId) {
+    if (this.clickedParticipantId && this.participantsId !== this.clickedParticipantId) {
       this.chartLoadedSpinner = true;
-      this.participantsId = this.clickedParticipantId;
       if (this.summaryActive) {
-        this.getDomainsParticipantsData();
+        this.getSubscribedData();
       }
     }
   }
 
-  ngOnInit() {
+  getSubscribedData() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
     this.subscription = this.route.data.map(({participant}) => participant)
       .subscribe(participants => {
-        this.participantsId = participants.participantId;
+        this.participantsId = this.clickedParticipantId || participants.participantId;
       });
     this.getDomainsParticipantsData();
+  }
+
+  ngOnInit() {
+    this.getSubscribedData();
   }
 
 
@@ -326,13 +332,14 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     this.domainList.map(domainName => {
       this.chartData[domainName] = {
         conditionTitle: '',
-        loading: true
+        loading: true,
+        items: []
       };
       const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
         this.participantsId , domainName, limit)
         .subscribe(data => {
           const participantsData = data;
-          this.chartData[domainName] = participantsData.items;
+          this.chartData[domainName].items = participantsData.items;
           this.chartData[domainName].conditionTitle = typeToTitle(domainName);
           this.chartData[domainName].loading = false;
         });

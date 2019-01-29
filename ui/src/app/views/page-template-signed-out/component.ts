@@ -30,7 +30,7 @@ export class PageTemplateSignedOutComponent implements OnChanges, OnInit {
   updateImages(): void {
     if (this.template !== undefined) {
       this.template.nativeElement.style
-          .setProperty('--smaller-image', `url("${this.smallerImageSrc}")`);
+        .setProperty('--smaller-image', `url("${this.smallerImageSrc}")`);
       this.template.nativeElement.style.setProperty('--larger-image', `url("${this.imageSrc}")`);
     }
   }

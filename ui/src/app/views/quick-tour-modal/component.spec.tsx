@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import {shallow} from 'enzyme';
 import * as React from 'react';
 
 import {panels, QuickTourReact, QuickTourReactProps, QuickTourReactState} from './component';
@@ -15,7 +15,6 @@ describe('QuickTourModalComponent', () => {
 
   beforeEach(() => {
     props = {
-      learning: true,
       closeFunction: () => {}
     };
   });

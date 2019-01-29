@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {dateValidator} from 'app/cohort-search/validators';
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -21,7 +22,6 @@ import {
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {dateValidator} from '../../cohort-search/validators';
 
 interface Annotation {
   definition: CohortAnnotationDefinition;
@@ -147,7 +147,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     const newValue = this.isDate
       ? this.form.controls.formattedDate.value : this.form.controls.annotation.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
-    const annoId = this.annotation.value.annotationId ;
+    const annoId = this.annotation.value.annotationId;
 
     let apiCall;
 
@@ -174,7 +174,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     } else {
       if (newValue) {
         // There's no annotation ID so this must be a create
-        const request = <ParticipantCohortAnnotation> {
+        const request = <ParticipantCohortAnnotation>{
           cohortAnnotationDefinitionId: defnId,
           ...this.annotation.value,
           [this.valuePropertyName]: newValue,
@@ -195,7 +195,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
             this.annotation.value.annotationId = update.annotationId;
           }
         }
-        setTimeout (() => {
+        setTimeout(() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;
           setTimeout(() => {
@@ -210,11 +210,11 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   get valuePropertyName() {
     return {
-      [AnnotationType.STRING]:   'annotationValueString',
-      [AnnotationType.DATE]:     'annotationValueDate',
-      [AnnotationType.ENUM]:     'annotationValueEnum',
-      [AnnotationType.BOOLEAN]:  'annotationValueBoolean',
-      [AnnotationType.INTEGER]:  'annotationValueInteger'
+      [AnnotationType.STRING]: 'annotationValueString',
+      [AnnotationType.DATE]: 'annotationValueDate',
+      [AnnotationType.ENUM]: 'annotationValueEnum',
+      [AnnotationType.BOOLEAN]: 'annotationValueBoolean',
+      [AnnotationType.INTEGER]: 'annotationValueInteger'
     }[this.annotation.definition.annotationType];
   }
 

@@ -15,11 +15,11 @@ describe('HighlightSearchComponent', () => {
   let fixture: ComponentFixture<TestHighlightComponent>;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-        declarations: [
-          HighlightSearchComponent,
-          TestHighlightComponent
-        ]
-      })
+      declarations: [
+        HighlightSearchComponent,
+        TestHighlightComponent
+      ]
+    })
       .compileComponents();
   }));
   beforeEach(() => {

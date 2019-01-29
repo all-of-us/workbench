@@ -8,14 +8,14 @@ import {StatusCheckServiceStub} from 'testing/stubs/status-check-service-stub';
 
 import {
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ErrorHandlingService} from '../../services/error-handling.service';
-import {ServerConfigService} from '../../services/server-config.service';
-import {StatusCheckService} from '../../services/status-check.service';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
+import {ServerConfigService} from 'app/services/server-config.service';
+import {StatusCheckService} from 'app/services/status-check.service';
 
 
-import {ErrorHandlerComponent} from '../error-handler/component';
+import {ErrorHandlerComponent} from 'app/views/error-handler/component';
 
 describe('ErrorHandlerComponent', () => {
   let fixture: ComponentFixture<ErrorHandlerComponent>;

@@ -1,17 +1,17 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {DetailPage} from '../detail-page/detail-page';
-import {PageLayout} from '../page-layout/page-layout';
-import {TablePage} from '../table-page/table-page';
+import {DetailPage} from 'app/cohort-review/detail-page/detail-page';
+import {PageLayout} from 'app/cohort-review/page-layout/page-layout';
+import {TablePage} from 'app/cohort-review/table-page/table-page';
 
 import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
 import {ParticipantAnnotationsResolver} from './participant-annotations.resolver';
 import {ParticipantResolver} from './participant.resolver';
 
-import {AnnotationDefinitionsResolver} from '../../resolvers/annotation-definitions';
-import {ReviewResolver} from '../../resolvers/review';
-import {QueryReportComponent} from '../query-report/query-report.component';
+import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
+import {AnnotationDefinitionsResolver} from 'app/resolvers/annotation-definitions';
+import {ReviewResolver} from 'app/resolvers/review';
 
 
 const routes: Routes = [{

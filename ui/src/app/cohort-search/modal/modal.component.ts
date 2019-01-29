@@ -1,11 +1,7 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DomainType, TreeSubType, TreeType} from 'generated';
-import {Map} from 'immutable';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -17,8 +13,12 @@ import {
   previewStatus,
   subtreeSelected,
   wizardOpen,
-} from '../redux';
-import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
+} from 'app/cohort-search/redux';
+import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
+import {DomainType, TreeSubType, TreeType} from 'generated';
+import {Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
@@ -94,9 +94,9 @@ export class ModalComponent implements OnInit, OnDestroy {
         });
       })
     );
-      this.subscription.add(this.selection$
-        .map(sel => sel.size === 0)
-        .subscribe(sel => this.noSelection = sel)
+    this.subscription.add(this.selection$
+      .map(sel => sel.size === 0)
+      .subscribe(sel => this.noSelection = sel)
       );
     this.subscription.add(this.attributes$
       .subscribe(node => {

@@ -4,7 +4,7 @@ import {ClrDatagridFilterInterface} from '@clr/angular';
 import {Subject} from 'rxjs/Subject';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Participant} from '../participant.model';
+import {Participant} from 'app/cohort-review/participant.model';
 
 import {
   ParticipantCohortStatusColumns,

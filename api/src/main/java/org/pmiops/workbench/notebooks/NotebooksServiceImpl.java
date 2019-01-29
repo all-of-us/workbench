@@ -55,7 +55,8 @@ public class NotebooksServiceImpl implements NotebooksService {
             .nbExtensions(ImmutableMap.of(
                 "playground-extension", config.firecloud.jupyterPlaygroundExtensionUri))
             .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
-            .combinedExtensions(ImmutableMap.<String, String>of()))
+            .combinedExtensions(ImmutableMap.<String, String>of())
+            .labExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()
             .masterDiskSize(20 /* GB */)
             .masterMachineType("n1-standard-2"));

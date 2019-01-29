@@ -4,7 +4,6 @@ import {Observable} from 'rxjs/Observable';
 
 import {
   CohortBuilderService,
-  ConceptIdName,
   ParticipantDemographics,
 } from 'generated';
 

@@ -3,7 +3,6 @@ import 'rxjs/Rx';
 import {Injectable} from '@angular/core';
 
 import {Workspace} from 'generated';
-import {WorkspaceResponse} from 'generated';
 import {WorkspacesService} from 'generated';
 import {WorkspaceAccessLevel} from 'generated';
 

@@ -165,8 +165,8 @@ describe('BreadcrumbComponent', () => {
       router.navigate(pathArray);
       tick();
       expect(testComponent.breadcrumbs.length).toBe(
-          pathArray.length,
-          'Breadcrumbs should exist for each element of the supported path: ' + p);
+        pathArray.length,
+        'Breadcrumbs should exist for each element of the supported path: ' + p);
     }
   }));
 
@@ -175,7 +175,7 @@ describe('BreadcrumbComponent', () => {
       router.navigate([].concat.apply([], [p]));
       tick();
       expect(testComponent.breadcrumbs.length)
-          .toBe(0, 'Breadcrumbs should be empty for unsupported path: ' + p);
+        .toBe(0, 'Breadcrumbs should be empty for unsupported path: ' + p);
     }
   }));
 
@@ -183,7 +183,7 @@ describe('BreadcrumbComponent', () => {
     router.navigate(['params', 'P1']);
     tick();
     expect(testComponent.breadcrumbs.pop().label)
-        .toBe('P1', 'Breadcrumb label should be "P1"');
+      .toBe('P1', 'Breadcrumb label should be "P1"');
   }));
 
   it('should lookup name when there is a workspace name param', fakeAsync(() => {

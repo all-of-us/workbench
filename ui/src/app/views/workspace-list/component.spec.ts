@@ -110,7 +110,7 @@ describe('WorkspaceListComponent', () => {
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
       });
-      tick();
+    tick();
   }));
 
 
@@ -119,7 +119,7 @@ describe('WorkspaceListComponent', () => {
     workspaceListPage.workspacesService.getWorkspaces()
       .subscribe(workspaces => {
         expectedWorkspaces = workspaces.items.length;
-    });
+      });
     tick();
     expect(workspaceListPage.workspaceCards.length).toEqual(expectedWorkspaces);
   }));
