@@ -48,20 +48,9 @@ describe('ResourceCardComponent', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should render a cohort with the correct modals if resource is cohort', () => {
+  it('should render a cohort if resource is cohort', () => {
     const wrapper = component(ResourceCardWrapper.cohortCard);
     expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Cohort');
-
-    //console.log(wrapper.debug());
-
-    console.log(wrapper.find('[data-test-id="resource-card-menu"]').length);
-    console.log(wrapper.find('[data-test-id="resource-card-menu"]').html());
-    wrapper.find('[data-test-id="resource-card-menu"]').simulate('click');
-    // console.log(wrapper.find('[data-test-id="resource-card-menu"]').html());
-
-    // console.log(wrapper.debug());
-    //expect(wrapper.find('[data-test-id="copy"]').exists()).toBeTruthy();
-
   });
 
   it('should render a concept set if resource is concept set', () => {
@@ -73,5 +62,8 @@ describe('ResourceCardComponent', () => {
     const wrapper = component(ResourceCardWrapper.notebookCard);
     expect(wrapper.find('[data-test-id="card-type"]').text()).toBe('Notebook');
   })
+
+  // Note: this spec is not testing the Popup menus on resource cards due to an issue using
+  //    PopupTrigger in the test suite.
 
 });
