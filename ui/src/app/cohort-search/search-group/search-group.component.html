@@ -5,15 +5,16 @@
   (click)="remove($event)">
   DELETE GROUP
 </button>
-
+hi{{mention}}
 <div class="card bg-faded">
   <!--********************************Temporal changes start***************************************-->
   <div class="card-header" *ngIf="temporalFlag">
+
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="mention; else mentionTitle"> {{formatStatus(mention)}}</div>
-        <ng-template #mentionTitle> Which Mention</ng-template>
-        <!--<span>{{formatStatus(dropdownOption.selected[0])}}</span>-->
+        <!--<div *ngIf="mention; else mentionTitle"> {{formatStatus(mention)}}</div>-->
+        <!--<ng-template #mentionTitle> </ng-template>-->
+        <span>{{formatStatus(mention)}}</span>
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -28,6 +29,7 @@
     </clr-dropdown>
     <span class="of-text"> of </span>
   </div>
+
   <!--**********************************Temporal changes end******************************************-->
 
   <div id="non{{groupId}}" *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block">
@@ -105,7 +107,7 @@
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="time; else defineTime"> {{formatStatus(time)}}</div>
-        <ng-template #defineTime> Define Time</ng-template>
+        <ng-template #defineTime>{{formatStatus(time)}}</ng-template>
          <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -124,6 +126,7 @@
   <ng-container *ngIf="temporalFlag">
     <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
       <app-search-group-item
+        class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
         [groupId]="groupId"

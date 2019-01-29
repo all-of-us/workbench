@@ -19,7 +19,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() groupId: string;
   @Input() itemId: string;
   @Input() itemIndex: number;
-  @Output() temporalGroupValue = new EventEmitter<any>();
 
 
   error: boolean;
@@ -42,7 +41,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.ngRedux.select(itemError(this.itemId))
       .subscribe(error => this.error = error));
-    this.temporalGroupValue.emit(this.item.get('temporalGroup'));
   }
 
   ngOnDestroy() {

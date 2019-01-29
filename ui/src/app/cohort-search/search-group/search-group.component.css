@@ -57,7 +57,7 @@
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
   font-weight: 100 !important;
-  width:10rem;
+  width:12rem;
   text-align: start;
 }
 .time-selection-button:hover {
@@ -143,7 +143,7 @@
   text-align: center;
 }
 .of-text{
-  padding-right: 12rem;
+  padding-right: 6rem;
   padding-top: 0.2rem;
   font-size: 14px;
 }
@@ -151,3 +151,11 @@
 clr-icon[shape^=error-standard] {
   color: #d9534f;
 }
+
+/*::ng-deep .card .card-block:last-child {*/
+  /*border: none;*/
+/*}*/
+
+/*:host::ng-deep .card-block .test:last-child{*/
+  /*border: none;*/
+/*}*/

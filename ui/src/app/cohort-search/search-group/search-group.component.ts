@@ -24,14 +24,9 @@ import {Subscription} from 'rxjs/Subscription';
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
-  // @select (getTemporalGroupItems) getTemporalGroupItems$;
   nonTemporalItems = [];
   temporalItems = [];
   error: boolean;
-  dropdownOption = {
-    selected: [TemporalMention.ANYMENTION, TemporalMention.ANYMENTION, TemporalMention.ANYMENTION]
-  };
-
   whichMention = [TemporalMention.ANYMENTION,
     TemporalMention.FIRSTMENTION,
     TemporalMention.LASTMENTION];
@@ -40,13 +35,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
     TemporalTime.WITHINXDAYSOF];
-
+  name= this.whichMention[0];
   subscription: Subscription;
   itemSubscription: Subscription;
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
-  tempGroup: any;
-  private item: Map<any, any> = Map();
   itemId: any;
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
@@ -99,11 +92,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     return this.group.get('timeValue');
   }
 
-  getTemporalGroup(e) {
-    this.tempGroup = e;
-    // console.log(this.tempGroup);
-  }
-
   get items() {
     return this.group.get('items', List());
   }
@@ -120,11 +108,14 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
+    console.log(this.group.get('mention'));
+    e.target.checked? this.getMentionTitle(this.whichMention[0]): this.getMentionTitle(this.group.get('mention'));
+    e.target.checked? this.getTimeTitle(this.timeDropDown[0]): this.getTimeTitle('');
     this.actions.updateTemporal(e.target.checked, this.groupId);
   }
 
-  getMentionTitle(mention) {
-    this.actions.updateWhichMention(mention, this.groupId);
+  getMentionTitle(mentionName) {
+    this.actions.updateWhichMention(mentionName, this.groupId);
   }
 
   getTimeTitle(time) {
