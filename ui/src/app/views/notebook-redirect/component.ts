@@ -108,6 +108,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private wsId: string;
   private wsNamespace: string;
+  private jupyterLabMode = false;
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
@@ -128,6 +129,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
     this.wsId = this.route.snapshot.params['wsid'];
     this.creating = this.route.snapshot.queryParams['creating'] || false;
     this.playground = (this.route.snapshot.queryParams['playgroundMode'] === 'true');
+    this.jupyterLabMode = (this.route.snapshot.queryParams['jupyterLabMode'] === 'true');
     this.setNotebookNames();
 
     if (this.creating) {
@@ -187,8 +189,15 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
+        let url;
+        if (this.jupyterLabMode) {
+          url = this.jupyterLabUrl(this.cluster, nbName);
+        } else {
+          url = this.notebookUrl(this.cluster, nbName);
+        }
         this.leoUrl = this.sanitizer
-          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
+          .bypassSecurityTrustResourceUrl(url);
+
         // Angular 2 only provides a load hook for iFrames
         // the load hook triggers on url definition, not on completion of url load
         // so instead just giving it a sec to "redirect"
@@ -231,6 +240,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
+  }
+
+  private jupyterLabUrl(cluster: Cluster, nbName: string): string {
+    return encodeURI(
+      environment.leoApiUrl + '/notebooks/'
+      + cluster.clusterNamespace + '/'
+      + cluster.clusterName + '/lab/tree/' + nbName);
   }
 
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {

@@ -4,6 +4,12 @@
     margin-top: -1.5rem;
 }
 
+.app-container {
+    width: 100%;
+    padding-right: 0.6rem;
+    padding-left: 1rem;
+}
+
 @media (max-width: 978px) {
     .content-container {
         padding:0;

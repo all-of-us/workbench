@@ -17,6 +17,7 @@ import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {environment} from 'environments/environment';
 
 const MenuItem = ({icon, children, ...props}) => {
   return <Clickable
@@ -33,12 +34,12 @@ const MenuItem = ({icon, children, ...props}) => {
 
 const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
-  onCloneResource: Function, onDeleteResource: Function, onEditCohort: Function,
-  onReviewCohort: Function, onEditConceptSet: Function
+  onOpenJupyterLabNotebook: any, onCloneResource: Function, onDeleteResource: Function,
+  onEditCohort: Function, onReviewCohort: Function, onEditConceptSet: Function
 }> = ({
-        disabled, resourceType, onRenameNotebook, onCloneResource,
-        onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
-      }) => {
+  disabled, resourceType, onRenameNotebook, onOpenJupyterLabNotebook, onCloneResource,
+  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+}) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
     side='bottom'
@@ -50,6 +51,19 @@ const ResourceCardMenu: React.FunctionComponent<{
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
+            {
+              environment.enableJupyterLab &&
+              /*
+               This does not support both playground mode and jupyterLab yet,
+               that is a work in progress. We do not need to worry about that
+               here, because the menu will not open if you do not have write
+               access, and playground mode is currently only enabled if you do
+               not have write access.
+              */
+              <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
+                Open in Jupyter Lab
+              </MenuItem>
+            }
           </React.Fragment>;
         }],
         ['cohort', () => {
@@ -83,6 +97,7 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
   @Input() disabled;
   @Input() resourceType;
   @Input() onRenameNotebook;
+  @Input() onOpenJupyterLabNotebook;
   @Input() onCloneResource;
   @Input() onDeleteResource;
   @Input() onEditCohort;
@@ -91,8 +106,9 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
 
   constructor() {
     super(ResourceCardMenu, [
-      'disabled', 'resourceType', 'onRenameNotebook', 'onCloneResource',
-      'onDeleteResource', 'onEditCohort', 'onReviewCohort', 'onEditConceptSet'
+      'disabled', 'resourceType', 'onRenameNotebook', 'onOpenJupyterLabNotebook',
+      'onCloneResource', 'onDeleteResource', 'onEditCohort', 'onReviewCohort',
+      'onEditConceptSet'
     ]);
   }
 }
@@ -394,7 +410,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     this.props.onUpdate();
   }
 
-  openResource(): void {
+  openResource(jupyterLab?: boolean): void {
     switch (this.state.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort();
@@ -407,9 +423,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       case ResourceType.NOTEBOOK: {
-        let queryParams = null;
+        let queryParams = {
+          playgroundMode: false,
+          jupyterLabMode: jupyterLab
+        };
         if (this.notebookReadOnly) {
-          queryParams = { playgroundMode: true };
+          queryParams.playgroundMode = true;
         }
         navigate(
           ['workspaces', this.props.resourceCard.workspaceNamespace,
@@ -443,7 +462,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onRenameNotebook={this.renameNotebook.bind(this)}
                               onEditCohort={this.editCohort.bind(this)}
                               onEditConceptSet={this.editConceptSet.bind(this)}
-                              onReviewCohort={this.reviewCohort.bind(this)}/>
+                              onReviewCohort={this.reviewCohort.bind(this)}
+                              onOpenJupyterLabNotebook={this.openResource.bind(this, true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
               <div style={styles.cardName}
                    data-test-id='card-name'

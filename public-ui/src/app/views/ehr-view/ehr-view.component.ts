@@ -53,6 +53,18 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'The sources represent the many different ways that the standard medical concept ' +
     'returned in the search results has been recorded in patient records. \n' +
     'The sources bar chart provides the top 10 source concepts from the All of Us data.';
+  matchingConceptsHelptText = 'Medical concepts are similar to medical terms; ' +
+    'they capture medical information\n' +
+    'in an individual’s records and may sometimes have values associated with them.\n' +
+    'For example, “height” is a medical concept that has a measurement value (in centimeters).\n' +
+    'These concepts are categorized into different domains. ' +
+    'Domains are types of medical information.\n' +
+    'The Data Browser searches the All of Us public data for medical concepts that\n' +
+    'match the keyword or code entered in the search bar.\n' +
+    'The Data Browser counts how many participants have at least\n' +
+    'one mention of the matching medical concepts in their records.\n' +
+    'Matching medical concepts that have the highest participant counts ' +
+    'are returned at the top of the list.';
 
   /* Show different graphs depending on domain we are in */
   // defaults,  most domains
@@ -61,6 +73,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   showGenderGraph = false;
   showAgeGraph = true;
   showSourcesGraph = false;
+  showTopConcepts = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
     'health status of an individual, ' +
     'such as medical diagnoses, are found in the conditions domain.',
@@ -231,5 +244,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.showGenderGraph = true;
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
+  }
+  public toggleTopConcepts() {
+    this.showTopConcepts = !this.showTopConcepts;
   }
 }
