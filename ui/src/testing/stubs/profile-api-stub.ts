@@ -11,7 +11,8 @@ export class ProfileApiStub extends ProfileApi {
 
   public invitationKeyVerification(request?: InvitationVerificationRequest, options?: any) {
     if (request.invitationKey === 'dummy') {
-      const mockResponse = new Response(JSON.stringify({result: 'valid'}), {status: 200})
+      const mockResponse = new Response(
+          JSON.stringify({result: 'valid'}), {status: 200});
       return Promise.resolve(mockResponse);
     } else {
       const err = new Error('Invalid invitation code');
