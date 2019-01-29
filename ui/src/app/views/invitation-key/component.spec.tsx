@@ -33,15 +33,11 @@ describe('InvitationKeyComponent', () => {
   });
 
   it('should display error message if Invitation key is not valid', async() => {
-    profileApi().invitationKeyVerification = jest.fn().mockRejectedValue(() => {
-      throw new Error('test error inside');
-    });
-
     const wrapper = component();
     const input = wrapper.find(TextInput);
     const nextButton = wrapper.find(Button);
 
-    input.simulate('change', {target: {value: 'notValid '}});
+    input.simulate('change', {target: {value: 'incorrect'}});
     nextButton.simulate('click');
     await new Promise(setImmediate).then(() => wrapper.update());
     const error = wrapper.find(AlertDanger);
@@ -50,13 +46,11 @@ describe('InvitationKeyComponent', () => {
 
   it('should call props onInvitationKeyVerify function on entering correct invitation key',
     async() => {
-      profileApi().invitationKeyVerification =
-          jest.fn().mockReturnValue(Promise.resolve('result1'));
       const wrapper = component();
       const input = wrapper.find(TextInput);
       const nextButton = wrapper.find(Button);
 
-      input.simulate('change', {target: {value: 'Correct Invitation Key'}});
+      input.simulate('change', {target: {value: 'dummy'}});
 
       await nextButton.simulate('click');
       wrapper.update();

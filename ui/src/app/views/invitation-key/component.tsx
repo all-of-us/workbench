@@ -41,14 +41,13 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       invitationKeyInvalid: false
     });
     const input = this.inputElement.current;
-
+    if (input) {
+      input.focus();
+    }
     if (isBlank(this.state.invitationKey)) {
       this.setState({
         invitationKeyReq: true
       });
-      if (input) {
-        input.focus();
-      }
       return;
     }
 
@@ -61,9 +60,6 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         this.setState({
           invitationKeyInvalid: true
         });
-        if (input) {
-          input.focus();
-        }
       });
   }
 
