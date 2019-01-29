@@ -6,13 +6,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ExpandComponent} from 'app/icons/expand/component';
-import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
-import {LeftScrollComponent} from 'app/icons/left-scroll/component';
-import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
-import {RightScrollComponent} from 'app/icons/right-scroll/component';
-import {ShrinkComponent} from 'app/icons/shrink/component';
-
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
@@ -24,6 +17,9 @@ import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
+import {ExpandComponent} from 'app/icons/expand/component';
+import {ScrollComponent} from 'app/icons/scroll/component';
+import {ShrinkComponent} from 'app/icons/shrink/component';
 import {ProfileService} from 'generated';
 import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
@@ -56,12 +52,9 @@ describe('HomepageComponent', () => {
       declarations: [
         HomepageComponent,
         RecentWorkComponent,
-        LeftScrollComponent,
         QuickTourModalComponent,
-        LeftScrollLightComponent,
-        RightScrollComponent,
-        RightScrollLightComponent,
         ResourceCardComponent,
+        ScrollComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
