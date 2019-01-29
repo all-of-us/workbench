@@ -203,7 +203,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           this.setState({workspaceShareError: true});
         }
         this.setState({usersLoading: false});
-    });
+      });
   }
 
   removeCollaborator(user: UserRole): void {
@@ -338,9 +338,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                   </div>
                   <div style={styles.collaboratorIcon}>
                     <ClrIcon shape='plus-circle' style={{height: '21px', width: '21px'}}
-                             onClick={() => {this.addCollaborator(user);}}/>
+                             onClick={() => { this.addCollaborator(user); }}/>
                   </div>
-                </div>;})}
+                </div>; })}
             </div>}
           </div>
           {this.state.userNotFound && <div style={styles.errorMessage}>
