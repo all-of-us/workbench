@@ -195,15 +195,15 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         this.setState(({workspace}) => ({workspace: fp.set('userRoles', resp.items, workspace)}));
         this.props.closeFunction();
       }).catch(error => {
-      if (error.status === 400) {
-        this.setState({userNotFound: true});
-      } else if (error.status === 409) {
-        this.setState({workspaceUpdateConflictError: true});
-      } else {
-        this.setState({workspaceShareError: true});
-      }
-      this.setState({usersLoading: false});
-      });
+        if (error.status === 400) {
+          this.setState({userNotFound: true});
+        } else if (error.status === 409) {
+          this.setState({workspaceUpdateConflictError: true});
+        } else {
+          this.setState({workspaceShareError: true});
+        }
+        this.setState({usersLoading: false});
+    });
   }
 
   removeCollaborator(user: UserRole): void {
@@ -263,7 +263,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         const userResponse = response;
         userResponse.users = fp.uniqBy(user =>
           [user.email, user.familyName, user.givenName].join(), response.users);
-        this.setState({autocompleteUsers: userResponse.users.splice(0,4)});
+        this.setState({autocompleteUsers: userResponse.users.splice(0, 4)});
       });
   }
 
@@ -299,11 +299,17 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           <div>
           <label>Share {this.props.workspace.name}</label>
           <TooltipTrigger content={<div style={styles.tooltipLabel}>
-            Search for a collaborator that has an All of Us research account. Collaborators can be assigned different permissions within your Workspace.
+            Search for a collaborator that has an All of Us research account. Collaborators can
+            be assigned different permissions within your Workspace.
             <ul>
-              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>Reader</span> can view your notebooks, but not make edits, deletes or share contents of the Workspace.</li>
-              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>Writer</span> can view, edit and delete content in the Workspace but not share the Workspace with others.</li>
-              <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>Owner</span> can view, edit, delete and share contents in the Workspace.</li>
+              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                Reader</span> can view your notebooks, but not make edits, deletes or share
+                contents of the Workspace.</li>
+              <li style={styles.tooltipPoint}>A <span style={{'textDecoration': 'underline'}}>
+                Writer</span> can view, edit and delete content in the Workspace but not share
+                the Workspace with others.</li>
+              <li style={styles.tooltipPoint}>An <span style={{'textDecoration': 'underline'}}>
+                Owner</span> can view, edit, delete and share contents in the Workspace.</li>
             </ul>
           </div>}>
             <InfoIcon style={{width: '13px', height: '14px', marginLeft: '.4rem'}}/>
@@ -314,10 +320,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           <div style={styles.dropdown}>
             <ClrIcon shape='search' style={{width: '21px', height: '21px'}}/>
             <input style={styles.noBorder} type='text' placeholder='Find Collaborators'
-                   disabled={!this.hasPermission} onChange={e => this.searchTermChangedEvent(e.target.value)}/>
+                   disabled={!this.hasPermission} onChange={
+                     e => this.searchTermChangedEvent(e.target.value)}/>
             {/* TODO: US 1/29/19 should use new spinner? */}
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
-            {this.showAutocompleteNoResults && <div style={{...styles.dropdownMenu, ...styles.open, overflowY: 'hidden'}}>
+            {this.showAutocompleteNoResults && <div style={{...styles.dropdownMenu, ...styles.open,
+              overflowY: 'hidden'}}>
               <div style={styles.dropdownItem}>
                 <em>No results based on your search</em>
               </div></div>}
@@ -329,7 +337,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                     <div style={styles.userName}>{user.email}</div>
                   </div>
                   <div style={styles.collaboratorIcon}>
-                    <ClrIcon shape='plus-circle' style={{height: '21px', width: '21px'}} onClick={() => {this.addCollaborator(user)}}/>
+                    <ClrIcon shape='plus-circle' style={{height: '21px', width: '21px'}}
+                             onClick={() => {this.addCollaborator(user);}}/>
                   </div>
                 </div>;})}
             </div>}
@@ -350,7 +359,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
               return <div key={i}>
                 <div style={styles.wrapper}>
                   <div style={styles.box}>
-                    <h5 style={{...styles.userName, ...styles.collabUser}}>{user.givenName} {user.familyName}</h5>
+                    <h5 style={{...styles.userName, ...styles.collabUser}}>{user.givenName}
+                    {user.familyName}</h5>
                     <div style={styles.userName}>{user.email}</div>
                     <label>
                       <select style={styles.roles}
@@ -364,7 +374,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                 <div style={styles.box}>
                   <div style={styles.collaboratorIcon}>
                     {(this.hasPermission && (user.email !== this.props.userEmail)) &&
-                    <ClrIcon shape='minus-circle' style={{height: '21px', width: '21px'}} onClick={() => this.removeCollaborator(user)}/>
+                    <ClrIcon shape='minus-circle' style={{height: '21px', width: '21px'}}
+                             onClick={() => this.removeCollaborator(user)}/>
                     }
                   </div>
                 </div>
@@ -374,8 +385,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
             })}
           </div>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Button type='secondary' style={{margin: '.25rem .5rem .25rem 0', border: '0'}} onClick={() => this.props.closeFunction()}>Cancel</Button>
-            <Button style={{margin: '.25rem .5rem .25rem 0', backgroundColor: '#2691D0'}} disabled={!this.hasPermission} onClick={() => this.save()}>Save</Button>
+            <Button type='secondary' style={{margin: '.25rem .5rem .25rem 0', border: '0'}}
+                    onClick={() => this.props.closeFunction()}>Cancel</Button>
+            <Button style={{margin: '.25rem .5rem .25rem 0', backgroundColor: '#2691D0'}}
+                    disabled={!this.hasPermission} onClick={() => this.save()}>Save</Button>
           </div>
         </ModalBody>
       </Modal>}
