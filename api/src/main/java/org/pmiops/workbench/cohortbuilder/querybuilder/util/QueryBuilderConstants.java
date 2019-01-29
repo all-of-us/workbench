@@ -24,7 +24,7 @@ public final class QueryBuilderConstants {
   public static final String BP_TWO_ATTRIBUTE_MESSAGE =
     "Bad Request: Attribute Blood Pressure must provide two attributes(systolic and diastolic).";
   public static final String TEMPORAL_GROUP_MESSAGE =
-    "Bad Request: Search Group Items must provided for 2 different temporal groups.";
+    "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).";
 
   //Exception Message parameters
   public static final String PARAMETERS = "Parameters";

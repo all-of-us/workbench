@@ -438,16 +438,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, VALUE, ppiParam.getValue());
+  }
 
+  @Test
+  public void temporalMessageExceptions() throws Exception {
+    SearchParameter param1 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(1L);
+    SearchParameter param2 = new SearchParameter()
+      .type(TreeType.ICD10.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(9L);
+
+    SearchGroupItem searchGroupItem1 = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(param1);
+    SearchGroupItem searchGroupItem2 = new SearchGroupItem()
+      .type(TreeType.CONDITION.name())
+      .addSearchParametersItem(param2);
+
+    SearchGroup temporalGroup = new SearchGroup()
+      .items(Arrays.asList(searchGroupItem1, searchGroupItem2))
+      .temporal(true);
+    SearchRequest searchRequest = new SearchRequest()
+      .includes(Arrays.asList(temporalGroup));
     //temporal mention null
-    Criteria temporal =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
-    SearchParameter temporalParam = createSearchParameter(temporal, null);
-    searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(temporalParam), new ArrayList<>());
-    SearchGroup temporalGroup = searchRequest.getIncludes().get(0);
-    temporalGroup.setTemporal(true);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, MENTION, temporalParam.getValue());
+      SEARCH_GROUP, MENTION, param1.getValue());
 
     //temporal mention invalid
     temporalGroup.setMention("blah");
@@ -471,17 +491,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     //temporal group is null
     temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
-    SearchGroupItem temporalItem = temporalGroup.getItems().get(0);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP_ITEM, TEMPORAL_GROUP, temporalItem.getTemporalGroup());
+      SEARCH_GROUP_ITEM, TEMPORAL_GROUP, searchGroupItem1.getTemporalGroup());
 
     //temporal group not valid
-    temporalItem.setTemporalGroup(2);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP_ITEM, TEMPORAL_GROUP, temporalItem.getTemporalGroup());
-
-    //only one temporal group
-    temporalItem.setTemporalGroup(0);
+    searchGroupItem1.setTemporalGroup(2);
+    searchGroupItem2.setTemporalGroup(3);
     assertMessageException(searchRequest, TEMPORAL_GROUP_MESSAGE);
   }
 
