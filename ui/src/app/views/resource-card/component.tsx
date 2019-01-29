@@ -40,6 +40,7 @@ const ResourceCardMenu: React.FunctionComponent<{
         onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
       }) => {
   return <PopupTrigger
+    data-test-id='resource-card-menu'
     side='bottom'
     closeOnClick
     content={
@@ -156,8 +157,6 @@ const resourceTypeStyles = reactStyles({
 export interface ResourceCardProps {
   resourceCard: RecentResource;
   onUpdate: Function;
-  duplicateNameError: Function;
-  invalidNameError: Function;
 }
 
 export interface ResourceCardState {
@@ -444,7 +443,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
             Last Modified: {this.displayDate}</div>
-          <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}>
+          <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}
+               data-test-id='card-type'>
             {fp.startCase(fp.camelCase(this.state.resourceType))}</div>
         </div>
       </Card>
@@ -478,8 +478,6 @@ export class ResourceCardComponent extends ReactWrapperBase {
   resourceType: ResourceType;
   @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
   @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
-  @Input('duplicateNameError') duplicateNameError: ResourceCardProps['duplicateNameError'];
-  @Input('invalidNameError') invalidNameError: ResourceCardProps['invalidNameError'];
 
   constructor() {
     super(ResourceCard, ['resourceCard', 'onUpdate']);
