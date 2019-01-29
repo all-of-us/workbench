@@ -680,7 +680,7 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.postNihCallback(wrapper);
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      throw new ServerErrorException("Unable to update NIH token", e);
     }
   }
 
