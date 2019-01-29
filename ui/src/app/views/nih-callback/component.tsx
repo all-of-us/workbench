@@ -1,8 +1,11 @@
 import {Component} from '@angular/core';
+import {c} from "@angular/core/src/render3";
+import {el} from "@angular/platform-browser/testing/src/browser_util";
 import {styles} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withStyle} from 'app/utils';
+import {navigateByUrl} from 'app/utils/navigation';
 
 import * as React from 'react';
 
@@ -29,18 +32,24 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
       // The `search` component of `location` starts with `?`
       const token = window.location.search.replace('?', '');
       try {
-        await profileApi().updateNihToken({ jwt: token });
-        window.location.assign('/');
+        const response = await profileApi().updateNihToken({ jwt: token });
+        this.navigateHome();
       } catch (e) {
-        this.setState({error: true, errorMessage: e});
+        this.setState({error: true, errorMessage: 'Error saving NIH Authentication'});
       }
     } else {
-      this.setState({error: true, errorMessage: 'Invalid callback token provided.'});
+      this.setState({error: true, errorMessage: 'An NIH Authentication token is required.'});
     }
   }
 
+  navigateHome() {
+    navigateByUrl('/');
+  }
+
   render() {
-    const error = <Error>Error Linking NIH Username: {this.state.errorMessage}</Error>;
+    const error = <Error>Error Linking NIH Username: {this.state.errorMessage}
+      <div onClick={this.navigateHome} style={{cursor: 'pointer'}}>Please try linking again.</div>
+    </Error>;
     return (this.state.error ? error : <SpinnerOverlay />);
   }
 

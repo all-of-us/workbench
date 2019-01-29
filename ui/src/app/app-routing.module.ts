@@ -57,6 +57,12 @@ const routes: Routes = [
           title: 'Awaiting ID Verification'
         }
       }, {
+        path: 'nih-callback',
+        component: NihCallbackComponent,
+        data: {
+          title: 'NIH Authentication'
+        }
+      }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
         data: {
@@ -250,12 +256,6 @@ const routes: Routes = [
         data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
       }
     ]
-  }, {
-    path: 'nih-callback',
-    component: NihCallbackComponent,
-    canActivate: [SignInGuard],
-    data: {title: 'NIH Authentication Callback'},
-    runGuardsAndResolvers: 'always'
   }
 ];
 
