@@ -23,7 +23,8 @@ export class NihCallback extends React.Component<{}, {}> {
     console.log(JSON.stringify(window.location));
     const search: string = window.location.search;
     if (search.length > 1) {
-      const token = window.location.search.substr(0, 1);
+      // The `search` component of location starts with `?`
+      const token = window.location.search.replace('?', '');
       NihCallback.updateNihToken(token);
     }
   }
