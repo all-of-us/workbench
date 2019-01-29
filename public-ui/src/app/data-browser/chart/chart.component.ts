@@ -147,8 +147,11 @@ export class ChartComponent implements OnChanges {
         categories: options.categories,
         // type: 'category',
         labels: {
+          align: 'right',
+          reserveSpace: true,
           style: {
-            whiteSpace: 'nowrap',
+            whiteSpace: 'wrap',
+            fontSize: '11px',
           },
         },
         lineWidth: 1,
@@ -296,14 +299,16 @@ export class ChartComponent implements OnChanges {
     };
     return {
       chart: {
-        type: 'column',
+        type: 'bar',
         backgroundColor: this.backgroundColor,
       },
       title: {text: null, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth,
-      xAxisTitle: null
+      pointPadding: 0.25,
+      minPointLength: 3,
+      pointWidth: 5,
+      xAxisTitle: null,
     };
 
   }
