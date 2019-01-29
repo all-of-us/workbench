@@ -447,7 +447,11 @@ export class CohortSearchActions {
         .filter(itemId => (getItem(itemId)(this.state)).get('status') === 'active')
         .size === 0;
     });
-    const emptyIntersection = noActiveGroups || noGroupsWithActiveItems;
+
+    if (noActiveGroups || noGroupsWithActiveItems) {
+      this.clearTotalCount();
+      return;
+    }
 
     /* If any member of an intersection is the null set, the intersection is
      * the null set - unless the member in question is itself outdated (i.e.
@@ -461,7 +465,7 @@ export class CohortSearchActions {
     /* In either case the total count is provably zero without needing to ask
      * the API
      */
-    if (nullIntersection || emptyIntersection) {
+    if (nullIntersection) {
       this.setChartData('searchRequests', SR_ID, []);
       return;
     }
