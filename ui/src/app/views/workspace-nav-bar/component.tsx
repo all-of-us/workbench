@@ -52,14 +52,19 @@ const styles = reactStyles({
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
   },
-  menuButton: {
+  dropdownHeader: {
+    fontSize: 12,
+    lineHeight: '30px',
+    color: '#262262',
+    fontWeight: 600,
+    paddingLeft: 12,
+    width: 160
+  },
+  menuButtonIcon: {
     width: 27, height: 27,
     opacity: 0.65, marginRight: 16
   }
 });
-
-const menuIcon = (iconName) =>
-  <ClrIcon shape={iconName} style={{marginRight: '.5rem'}} size={15}/>;
 
 const tabs = [
   {name: 'About', link: ''},
@@ -74,10 +79,10 @@ const MenuButton = ({disabled = false, children, ...props}) => {
   return <Clickable
     disabled={disabled}
     style={{
-      display: 'flex', alignItems: 'center',
-      fontSize: 12, minWidth: 125, height: '2rem',
-      color: disabled ? colors.gray[2] : undefined,
-      padding: '0 1.5rem',
+      display: 'flex', alignItems: 'center', justifyContent: 'start',
+      fontSize: 12, minWidth: 125, height: 32,
+      color: disabled ? colors.gray[2] : 'black',
+      padding: '0 12px',
       cursor: disabled ? 'not-allowed' : 'pointer'
     }}
     hover={!disabled ? {backgroundColor: colors.blue[3], fontWeight: 'bold'} : undefined}
@@ -86,6 +91,8 @@ const MenuButton = ({disabled = false, children, ...props}) => {
   </Clickable>;
 };
 
+const menuIcon = (iconName) =>
+  <ClrIcon shape={iconName} style={{marginRight: 8}} size={15}/>;
 
 export const WorkspaceNavBarReact = props => {
   const {shareFunction, deleteFunction, workspace, tabPath} = props;
@@ -122,6 +129,7 @@ export const WorkspaceNavBarReact = props => {
       closeOnClick={true}
       content={
         <React.Fragment>
+          <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuButton onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
             {menuIcon('copy')}Clone
           </MenuButton>
@@ -137,7 +145,7 @@ export const WorkspaceNavBarReact = props => {
         </React.Fragment>
       }>
       <Clickable
-        style={styles.menuButton}
+        style={styles.menuButtonIcon}
         hover={{opacity: 1}}>
         <CardMenuIconComponentReact/>
       </Clickable>
