@@ -1,5 +1,3 @@
-import {Component, Input} from '@angular/core';
-
 import {
   Button
 } from 'app/components/buttons';
@@ -12,11 +10,11 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 
 import {
   RecentResource,
-} from 'generated';
+} from 'generated/fetch';
 
 import * as React from 'react';
 

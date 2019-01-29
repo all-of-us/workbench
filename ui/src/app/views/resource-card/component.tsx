@@ -14,7 +14,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
-import {RecentResource} from 'generated';
+import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
@@ -161,6 +161,7 @@ export interface ResourceCardProps {
 
 export interface ResourceCardState {
   resourceType: ResourceType;
+  resourceCard: RecentResource;
   renaming: boolean;
   editing: boolean;
   confirmDeleting: boolean;
@@ -180,24 +181,34 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       if (props.resourceCard.notebook) {
         this.state = {
           resourceType: ResourceType.NOTEBOOK,
+          resourceCard: props.resourceCard,
           invalidResourceError: false,
           ...defaultState
         };
       } else if (props.resourceCard.cohort) {
         this.state  = {
           resourceType: ResourceType.COHORT,
+          resourceCard: props.resourceCard,
           invalidResourceError: false,
           ...defaultState
         };
       } else if (props.resourceCard.conceptSet) {
+        // TODO [1/29/19]: Need to thread generated/fetch model types through for API calls
+        //  once parent components (notebook-list, cohort-list, concept-set-list) are converted
+        //  this should go away and resourceCard can be used as what comes through the props
+        const myTempConceptSet = {...this.props.resourceCard.conceptSet,
+          domain: props.resourceCard.conceptSet.domain as Domain};
         this.state = {
           resourceType: ResourceType.CONCEPT_SET,
+          resourceCard: {...props.resourceCard, conceptSet: myTempConceptSet},
           invalidResourceError: false,
           ...defaultState
         };
+
       } else {
         this.state = {
           resourceType: ResourceType.INVALID,
+          resourceCard: props.resourceCard,
           invalidResourceError: true,
           ...defaultState
         };
@@ -364,15 +375,17 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.props.onUpdate();
       });
     } else if (this.isConceptSet) {
-      // conceptSetsApi().updateConceptSet(
-      //     this.props.resourceCard.workspaceNamespace,
-      //     this.props.resourceCard.workspaceFirecloudName,
-      //     this.props.resourceCard.conceptSet.id,
-      //     this.props.resourceCard.conceptSet
-      // ).then( () => {
-      //   this.closeEditModal();
-      //   this.props.onUpdate();
-      // });
+      conceptSetsApi().updateConceptSet(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.conceptSet.id,
+          // TODO [1/29/19]: change back to prop once parent components
+          //  (notebook-list, cohort-list, concept-set-list) are converted
+          this.state.resourceCard.conceptSet
+      ).then( () => {
+        this.closeEditModal();
+        this.props.onUpdate();
+      });
     }
   }
 
@@ -449,7 +462,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         </div>
       </Card>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
-        <EditModal resource={this.props.resourceCard}
+      // TODO [1/29/19]: change back to this.prop.resourceCard once parent components
+      //  (notebook-list, cohort-list, concept-set-list) are converted
+        <EditModal resource={this.state.resourceCard}
                    onEdit={this.receiveEdit.bind(this)}
                    onCancel={this.closeEditModal.bind(this)}/>}
       {this.state.renaming && this.isNotebook &&
