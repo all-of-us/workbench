@@ -370,6 +370,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
     Profile profile = profileService.getProfile(user);
+    // Note: The following requires that the current request is authenticated.
     NihStatus nihStatus = fireCloudService.getNihStatus();
     if (nihStatus != null) {
       profile.setLinkedNihUsername(nihStatus.getLinkedNihUsername());
@@ -439,7 +440,8 @@ public class ProfileController implements ProfileApiDelegate {
       throw new WorkbenchException(e);
     }
 
-    return getProfileResponse(user);
+    // Note: Avoid getProfileResponse() here as this is not an authenticated request.
+    return ResponseEntity.ok(profileService.getProfile(user));
   }
 
   @Override
