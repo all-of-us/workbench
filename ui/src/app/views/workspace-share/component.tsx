@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {workspacesApi, userApi} from 'app/services/swagger-fetch-clients';
+import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as fp from 'lodash/fp';
@@ -16,9 +16,9 @@ import {
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated/fetch/api';
+
 import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
-
 import {TooltipTrigger} from 'app/components/popups';
 
 const styles = reactStyles( {
@@ -139,26 +139,26 @@ const styles = reactStyles( {
 });
 
 export interface WorkspaceShareState {
-  autocompleteLoading: boolean,
-  autocompleteUsers: User[],
-  userNotFound: boolean,
-  toShare: string,
-  workspaceShareError: boolean,
-  usersLoading: boolean,
-  userRolesList: UserRole[],
-  workspaceFound: boolean,
-  workspaceUpdateConflictError: boolean,
-  workspace: Workspace,
-  searchTerm: string,
+  autocompleteLoading: boolean;
+  autocompleteUsers: User[];
+  userNotFound: boolean;
+  toShare: string;
+  workspaceShareError: boolean;
+  usersLoading: boolean;
+  userRolesList: UserRole[];
+  workspaceFound: boolean;
+  workspaceUpdateConflictError: boolean;
+  workspace: Workspace;
+  searchTerm: string;
 }
 
 export interface WorkspaceShareProps {
-  workspace: Workspace,
-  accessLevel: WorkspaceAccessLevel,
-  userEmail: string,
-  closeFunction: Function,
-  sharing: boolean,
-  onInit: () => void
+  workspace: Workspace;
+  accessLevel: WorkspaceAccessLevel;
+  userEmail: string;
+  closeFunction: Function;
+  sharing: boolean;
+  onInit: () => void;
 }
 export class WorkspaceShare extends React.Component<WorkspaceShareProps, WorkspaceShareState> {
 
@@ -185,21 +185,24 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       return;
     }
     this.setState({usersLoading: true, workspaceShareError: false});
-    workspacesApi().shareWorkspace(this.state.workspace.namespace, this.state.workspace.id, {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles}).
-    then((resp: ShareWorkspaceResponse) => {
+    workspacesApi().shareWorkspace(this.state.workspace.namespace,
+      this.state.workspace.id,
+      {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
+      .then((resp: ShareWorkspaceResponse) => {
         this.setState({usersLoading: false, toShare: '', searchTerm: ''});
-        this.setState(({workspace}) => ({workspace: fp.set('etag', resp.workspaceEtag, workspace)}));
+        this.setState(({workspace}) =>
+          ({workspace: fp.set('etag', resp.workspaceEtag, workspace)}));
         this.setState(({workspace}) => ({workspace: fp.set('userRoles', resp.items, workspace)}));
         this.props.closeFunction();
       }).catch(error => {
-        if (error.status === 400) {
-          this.setState({userNotFound: true});
-        } else if (error.status === 409) {
-          this.setState({workspaceUpdateConflictError: true});
-        } else {
-          this.setState({workspaceShareError: true});
-        }
-        this.setState({usersLoading: false});
+      if (error.status === 400) {
+        this.setState({userNotFound: true});
+      } else if (error.status === 409) {
+        this.setState({workspaceUpdateConflictError: true});
+      } else {
+        this.setState({workspaceShareError: true});
+      }
+      this.setState({usersLoading: false});
       });
   }
 
@@ -257,8 +260,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           return;
         }
         this.setState({autocompleteLoading: false});
-        let userResponse = response;
-        userResponse.users = fp.uniqBy(user => [user.email, user.familyName, user.givenName].join(), response.users);
+        const userResponse = response;
+        userResponse.users = fp.uniqBy(user =>
+          [user.email, user.familyName, user.givenName].join(), response.users);
         this.setState({autocompleteUsers: userResponse.users.splice(0,4)});
       });
   }
