@@ -111,9 +111,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.confirmDeleting = false;
   }
 
-  share(): void {
-    this.shareModal.open();
-  }
+  // TODO: US 1/28/19 Add back in once nav bar converted
+  // share(): void {
+  //   this.shareModal.open();
+  // }
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;

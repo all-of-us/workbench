@@ -172,7 +172,11 @@
     </a>
   </div>
 </div>
-<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
+<app-workspace-share [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [closeFunction]="closeShare.bind(this)"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>

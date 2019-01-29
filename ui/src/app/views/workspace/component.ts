@@ -84,6 +84,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
+  sharing = false;
   showTip: boolean;
   workspace: Workspace;
   cdrVersion: CdrVersion;
@@ -225,7 +226,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
   }
 
   dismissTip(): void {
