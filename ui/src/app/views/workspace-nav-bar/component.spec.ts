@@ -70,7 +70,7 @@ class FakeNotebooksComponent {}
 })
 class FakeCohortsComponent {}
 
-describe('WorkspaceNavBarComponent', () => {
+xdescribe('WorkspaceNavBarComponent', () => {
   let fixture: ComponentFixture<FakeAppComponent>;
   let router: Router;
   beforeEach(fakeAsync(() => {
