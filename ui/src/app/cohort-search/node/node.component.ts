@@ -98,6 +98,7 @@ export class NodeComponent implements OnInit, OnDestroy {
               if (child.parentId === 0) {
                 criteriaList.push(child);
               } else {
+                console.log('from else');
                 criteriaList = this.addChildToParent(child, criteriaList);
               }
             });
@@ -182,6 +183,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       }
       if (item.id === child.parentId) {
         item.children.push(child);
+        console.log(itemList);
         return itemList;
       }
       if (item.children.length) {

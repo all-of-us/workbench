@@ -134,6 +134,13 @@ export const criteriaChildren =
     }
   };
 
+export const ppiAnswers = (path) => (state) => {
+  const ppiPath = path.split('.');
+  const [grandParent, parent] = ppiPath.splice(ppiPath.length-2);
+  return state.getIn(['criteria', 'tree', 'PPI', parseInt(grandParent, 10)],
+    List()).find( i => i.get('id') === parseInt(parent, 10));
+};
+
 export const isEmpty =
   (kind: string, id: number) => (state): boolean =>
     state.getIn(['criteria', 'tree', 'empty', kind, id], false);
