@@ -69,7 +69,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     }, 10000);
     // For some reason Angular will delete the timeout id from scope if the inputs change, so we
     // have to keep in the redux store
-    this.actions.setTimeoutId('groups', this.groupId, timeoutId);
+    this.actions.setTimeoutId('groups', this.groupId, timeoutId, Date.now(), 10000);
   }
 
   hide(status: string) {
@@ -82,7 +82,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   undo() {
-    clearTimeout(this.group.get('timeoutId'));
+    clearTimeout(this.group.getIn(['timeout', 'id']));
     this.enable();
   }
 
@@ -103,6 +103,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     const codes = criteria.codes || false;
     const {role, groupId} = this;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
+    this.actions.pausePendingItems(groupId);
     this.actions.openWizard(itemId, criteria.type, context);
   }
 

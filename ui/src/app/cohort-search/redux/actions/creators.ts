@@ -55,6 +55,7 @@ import {
   REMOVE_ITEM,
   REMOVE_GROUP,
   SET_ENTITY_TIMEOUT,
+  PAUSE_PENDING_ITEMS,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -326,9 +327,14 @@ export const removeGroupItem =
   ({type: REMOVE_ITEM, groupId, itemId});
 
 export const setTimeoutId =
-  (entity: string, entityId: string, timeoutId: any
+  (entity: string, entityId: string, timeoutId: any, start: number, duration: number
   ): ActionTypes[typeof SET_ENTITY_TIMEOUT] =>
-  ({type: SET_ENTITY_TIMEOUT, entity, entityId, timeoutId});
+  ({type: SET_ENTITY_TIMEOUT, entity, entityId, timeoutId, start, duration});
+
+export const pausePendingItems =
+  (groupId: string
+  ): ActionTypes[typeof PAUSE_PENDING_ITEMS] =>
+    ({type: PAUSE_PENDING_ITEMS, groupId});
 
 export const requestAttributes =
   (cdrVersionId: number, node: any

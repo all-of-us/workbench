@@ -30,6 +30,7 @@ import {
   isAutocompleteLoading,
   isCriteriaLoading,
   isRequesting,
+  pendingItemList,
   SR_ID,
 } from 'app/cohort-search/redux/store';
 import * as ActionFuncs from './creators';
@@ -92,6 +93,7 @@ export class CohortSearchActions {
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
   @dispatch() setTimeoutId = ActionFuncs.setTimeoutId;
+  @dispatch() pausePendingItems = ActionFuncs.pausePendingItems;
   @dispatch() requestAttributes = ActionFuncs.requestAttributes;
   @dispatch() loadAttributes = ActionFuncs.loadAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
@@ -151,6 +153,7 @@ export class CohortSearchActions {
     const groupId = activeGroupId(this.state);
     const itemId = activeItem(this.state).get('id');
     const selections = activeParameterList(this.state);
+    this.resumePendingItems(role, groupId);
     this._finishWizard();
 
     if (!selections.isEmpty()) {
@@ -169,6 +172,9 @@ export class CohortSearchActions {
     if (autocompleteLoading) {
       this.cancelAutocompleteRequest();
     }
+    const role = activeRole(this.state);
+    const groupId = activeGroupId(this.state);
+    this.resumePendingItems(role, groupId);
     this._cancelWizard();
   }
 
@@ -206,7 +212,6 @@ export class CohortSearchActions {
       if (activeGroupsWithItems) {
         this.requestTotalCount();
       } else {
-        // todo clear total count
         this.clearTotalCount();
       }
     }
@@ -271,6 +276,17 @@ export class CohortSearchActions {
     this.enableEntity('items', itemId);
     this.requestGroupCount(role, groupId);
     this.requestTotalCount();
+  }
+
+  resumePendingItems(role: keyof SearchRequest, groupId: string) {
+    pendingItemList(groupId)(this.state).forEach(item => {
+      const itemId = item.get('id');
+      const timeout = item.get('timeout').toJS();
+      const timeoutId = setTimeout(() => {
+        this.removeGroupItem(role, groupId, itemId);
+      }, timeout.duration);
+      this.setTimeoutId('items', itemId, timeoutId, Date.now(), timeout.duration);
+    });
   }
 
   fetchCriteria(kind: string, parentId: number): void {
