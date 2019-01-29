@@ -39,17 +39,17 @@
       [itemIndex]="itemIndex">
     </app-search-group-item>
   </div>
-  <!--<ng-container *ngIf="!temporalFlag">-->
-    <!--<div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">-->
-      <!--<app-search-group-item-->
-        <!--(temporalGroupValue)="getTemporalGroup($event)"-->
-        <!--[role]="role"-->
-        <!--[groupId]="groupId"-->
-        <!--[itemId]="itemId"-->
-        <!--[itemIndex]="itemIndex">-->
-      <!--</app-search-group-item>-->
-    <!--</div>-->
-  <!--</ng-container>-->
+  <ng-container *ngIf="!temporalFlag">
+    <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
+      <app-search-group-item
+        (temporalGroupValue)="getTemporalGroup($event)"
+        [role]="role"
+        [groupId]="groupId"
+        [itemId]="itemId"
+        [itemIndex]="itemIndex">
+      </app-search-group-item>
+    </div>
+  </ng-container>
   <div class="card-header">
     <ng-template #groupDropDown>
       <clr-dropdown>
