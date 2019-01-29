@@ -2027,6 +2027,14 @@ definitions:
         description: Timestamp when the user requests identity verification.
       twoFactorEnabled:
         type: boolean
+      linkedNihUsername:
+        type: string
+        description: The user's NIH username
+      linkExpireTime:
+        type: integer
+        description: The FireCloud-calculated expiration time
+        format: int64
+        default: 0
 
   InstitutionalAffiliation:
     type: object

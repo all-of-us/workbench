@@ -3,6 +3,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -44,6 +45,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const handleData = (data) => {
       const workspace = <WorkspaceData> data.workspace;
+      currentWorkspaceStore.next(workspace);
       this.workspace = workspace;
       this.accessLevel = workspace.accessLevel;
     };
@@ -62,6 +64,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    currentWorkspaceStore.next(undefined);
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
