@@ -392,12 +392,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       });
     } else if (this.isConceptSet) {
       conceptSetsApi().updateConceptSet(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.conceptSet.id,
-          // TODO [1/29/19]: change back to prop once parent components
-          //  (notebook-list, cohort-list, concept-set-list) are converted
-          this.state.resourceCard.conceptSet
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.conceptSet.id,
+        // TODO [1/29/19]: change back to prop once parent components
+        //  (notebook-list, cohort-list, concept-set-list) are converted
+        this.state.resourceCard.conceptSet
       ).then( () => {
         this.closeEditModal();
         this.props.onUpdate();
@@ -423,7 +423,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       case ResourceType.NOTEBOOK: {
-        let queryParams = {
+        const queryParams = {
           playgroundMode: false,
           jupyterLabMode: jupyterLab
         };
