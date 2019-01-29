@@ -25,7 +25,7 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String ID_SQL_TEMPLATE =
-    "select person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+    "select rand() as x, person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
       "from `${projectId}.${dataSetId}.person` person\n" +
       "where\n";
 
@@ -67,7 +67,7 @@ public class ParticipantCounter {
       "order by count desc, name asc\n" +
       "limit ${limit}\n";
 
-    private static final String ID_SQL_ORDER_BY = "order by person_id\nlimit";
+    private static final String ID_SQL_ORDER_BY = "order by x\nlimit";
 
     private static final String OFFSET_SUFFIX = " offset ";
 

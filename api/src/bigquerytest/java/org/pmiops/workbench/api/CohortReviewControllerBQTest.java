@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.dao.WorkspaceServiceImpl;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
@@ -509,6 +510,30 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void tearDown() {
     workspaceDao.delete(workspace.getWorkspaceId());
     cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+  }
+
+  @Test
+  public void createCohortReview() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    Cohort cohortWithoutReview = new Cohort();
+    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
+    cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+    cohortDao.save(cohortWithoutReview);
+
+    org.pmiops.workbench.model.CohortReview cohortReview =
+      controller.createCohortReview(NAMESPACE,
+        NAME,
+        cohortWithoutReview.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+
+    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
+    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus()).isEqualTo(CohortStatus.NOT_REVIEWED);
   }
 
   @Test
@@ -1370,7 +1395,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private void stubMockFirecloudGetWorkspace() throws ApiException {
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
-    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }
 }
