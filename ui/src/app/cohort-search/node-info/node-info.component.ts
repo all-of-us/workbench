@@ -14,9 +14,9 @@ import {
   CohortSearchActions,
   CohortSearchState,
   isParameterActive,
+  ppiAnswers,
   selectedGroups,
   subtreeSelected,
-  ppiAnswers
 } from 'app/cohort-search/redux';
 import {stripHtml} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
@@ -151,10 +151,10 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         // console.log(this.node);
         this.actions.fetchAllChildren(this.node);
       } else {
-        let name = this.node.get('name');
-        if(this.node.get('type') === TreeType[TreeType.PPI]) {
+        let modifiedName = this.node.get('name');
+        if (this.node.get('type') === TreeType[TreeType.PPI]) {
           const parent = ppiAnswers(this.node.get('path'))(this.ngRedux.getState()).toJS();
-          name = parent.name + ' - ' + name;
+          modifiedName = parent.name + ' - ' + modifiedName;
         }
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
@@ -165,7 +165,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           });
         }
-        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes).set('name', name);
+        const param = this.node.set('parameterId', this.paramId)
+          .set('attributes', attributes).set('name', modifiedName);
         this.actions.addParameter(param);
       }
     }
