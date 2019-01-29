@@ -84,10 +84,6 @@ const styles = reactStyles( {
     marginTop: '.25rem'
   },
 
-  dropdownItem: {
-    height: '60px'
-  },
-
   wrapper: {
     display: 'grid',
     gridTemplateColumns: '9rem 0.1rem 0.1rem',
@@ -117,14 +113,6 @@ const styles = reactStyles( {
     margin: '0 0 0 4rem',
     color: '#2691D0',
     cursor: 'pointer'
-  },
-
-  errorMessage: {
-    color: 'red',
-  },
-
-  roles: {
-    width: '6rem'
   },
 
   sharingBody: {
@@ -326,7 +314,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
             {this.showAutocompleteNoResults && <div style={{...styles.dropdownMenu, ...styles.open,
               overflowY: 'hidden'}}>
-              <div style={styles.dropdownItem}>
+              <div style={{height: '60px'}}>
                 <em>No results based on your search</em>
               </div></div>}
             {this.showSearchResults && <div style={{...styles.dropdownMenu, ...styles.open}}>
@@ -343,10 +331,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                 </div>; })}
             </div>}
           </div>
-          {this.state.userNotFound && <div style={styles.errorMessage}>
+          {this.state.userNotFound && <div style={{color: 'red'}}>
             User {this.state.toShare} not found.
           </div>}
-          {this.state.workspaceShareError && <div style={styles.errorMessage}>
+          {this.state.workspaceShareError && <div style={{color: 'red'}}>
             Failed to share workspace. Please try again.
           </div>}
           {this.state.usersLoading && <div>
@@ -363,7 +351,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                     {user.familyName}</h5>
                     <div style={styles.userName}>{user.email}</div>
                     <label>
-                      <select style={styles.roles}
+                      <select style={{width: '6rem'}}
                               disabled={!this.hasPermission || user.email === this.props.userEmail}>
                         <option value='READER'>Reader</option>
                         <option value='WRITER'>Writer</option>
