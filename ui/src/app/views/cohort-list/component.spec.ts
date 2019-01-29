@@ -13,9 +13,8 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
-  simulateClick,
   simulateClickReact,
-  simulateInput,
+  simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -24,12 +23,11 @@ import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {
-  Cohort,
   CohortsService,
   ConceptSetsService,
   RecentResource,
@@ -92,6 +90,7 @@ describe('CohortListComponent', () => {
         ConfirmDeleteModalComponent,
         RenameModalComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent
       ],
@@ -102,8 +101,8 @@ describe('CohortListComponent', () => {
         { provide: SignInService, useValue: new SignInServiceStub()},
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub()}
       ] }).compileComponents().then(() => {
-      cohortListPage = new CohortListPage(TestBed);
-    });
+        cohortListPage = new CohortListPage(TestBed);
+      });
     tick();
   }));
 
@@ -111,18 +110,19 @@ describe('CohortListComponent', () => {
     const fixture = TestBed.createComponent(CohortListComponent);
     setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
+    setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
     const deletedResource: RecentResource = app.resourceList.find(
       (r: RecentResource) => r.cohort.name === firstCohortName);
     expect(deletedResource).toBeTruthy();
-    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.trash')));
+    simulateClickReact(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(1);
     expect(app.resourceList).not.toContain(deletedResource);
@@ -130,21 +130,21 @@ describe('CohortListComponent', () => {
 
   it('updates the page on edit', fakeAsync(() => {
     const fixture = TestBed.createComponent(CohortListComponent);
+    setupModals(fixture);
     const app = fixture.debugElement.componentInstance;
     const editValue = 'edited name';
+    setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
     const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
-    simulateClick(fixture, fixture.debugElement.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.pencil')));
+    simulateClickReact(fixture, '[data-test-id="pencil"]');
     updateAndTick(fixture);
-    simulateInput(fixture, fixture.debugElement.query(By.css('.name-input')), editValue);
+    simulateInputReact(fixture, '[data-test-id="edit-name"]', editValue);
     updateAndTick(fixture);
-    updateAndTick(fixture);
-    simulateClick(fixture, fixture.debugElement.query(By.css('.btn-save')));
-    updateAndTick(fixture);
+    simulateClickReact(fixture, '[data-test-id="save-edit"]');
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(2);

@@ -16,7 +16,7 @@ import {EditModalComponent} from 'app/views/edit-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
-import {ResourceCardComponent} from 'app/views/resource-card/component';
+import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
@@ -115,6 +115,7 @@ describe('NotebookListComponent', () => {
         NewNotebookModalComponent,
         NotebookListComponent,
         ResourceCardComponent,
+        ResourceCardMenuComponent,
         RenameModalComponent,
         ToolTipComponent,
         TopBoxComponent,
@@ -132,8 +133,8 @@ describe('NotebookListComponent', () => {
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
-      notebookListPage = new NotebookListPage(TestBed);
-    });
+        notebookListPage = new NotebookListPage(TestBed);
+      });
     tick();
   }));
 
@@ -153,61 +154,28 @@ describe('NotebookListComponent', () => {
     expect(app.notebookList[0].path).toEqual('gs://bucket/notebooks/mockFile.ipynb');
   }));
 
-  it('displays correct information when notebook renamed', fakeAsync(() => {
-    const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
-    simulateClick(fixture, de.query(By.css('.pencil')));
-
-    simulateInputReact(fixture, '#new-name', 'testMockFile');
-    simulateClickReact(fixture, '#rename-button');
-    updateAndTick(fixture);
-
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('testMockFile');
-    expect(fixture.componentInstance.resourceList[0].notebook.name)
-        .toEqual('testMockFile.ipynb');
-  }));
-
-  it('displays correct information when notebook renamed with duplicate name', fakeAsync(() => {
-    const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
-    simulateClick(fixture, de.query(By.css('.pencil')));
-
-    simulateInputReact(fixture, '#new-name', 'mockFile');
-    simulateClickReact(fixture, '#rename-button');
-    updateAndTick(fixture);
-
-    const errorMessage = de.queryAll(By.css('.modal-title'));
-    expect(errorMessage.map(com => com.nativeElement.innerText)[0]).toEqual('Error:');
-    simulateClick(fixture, de.query(By.css('.close')));
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile');
-  }));
-
   it('displays correct information when notebook cloned', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
-    simulateClick(fixture, de.query(By.css('.copy')));
+    simulateClickReact(fixture, '[data-test-id="copy"]');
     fixture.componentInstance.updateList();
     tick();
     updateAndTick(fixture);
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
-        .toContain('mockFile Clone.ipynb');
+      .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
     const de = fixture.debugElement;
-    simulateClick(fixture, de.query(By.css('.resource-menu')));
-    simulateClick(fixture, de.query(By.css('.trash')));
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
+    simulateClickReact(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
-    simulateClickReact(fixture, '#confirm-delete');
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
     const notebooksOnPage = de.queryAll(By.css('.item-card'));
     expect(notebooksOnPage.length).toBe(0);
   }));

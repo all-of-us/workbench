@@ -1,22 +1,16 @@
 <div class="card item-card {{cssClass}} {{resourceType}}-card">
   <div class="header-area">
-    <clr-dropdown>
-      <button type="button" class="resource-menu" [disabled]="actionsDisabled" clrDropdownTrigger>
-        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
-      </button>
-      <clr-dropdown-menu *clrIfOpen>
-        <div *ngFor="let action of actions">
-          <button clrDropdownItem
-                  class="action-item {{action.class}}"
-                  (click)=this[action.link](this.resourceCard)
-                  [class.disabled]="actionsDisabled"
-                  [disabled]="actionsDisabled">
-            <clr-icon [attr.shape]=action.class></clr-icon>
-            {{action.text}}
-          </button>
-        </div>
-      </clr-dropdown-menu>
-    </clr-dropdown>
+    <app-resource-card-menu
+      [disabled]="actionsDisabled"
+      [resourceType]="resourceType"
+      [onRenameNotebook]="renameNotebook.bind(this)"
+      [onOpenJupyterLabNotebook]="openResource.bind(this, resourceCard, true)"
+      [onCloneResource]="cloneResource.bind(this, resourceCard)"
+      [onDeleteResource]="deleteResource.bind(this, resourceCard)"
+      [onEditCohort]="editCohort.bind(this)"
+      [onReviewCohort]="reviewCohort.bind(this, resourceCard)"
+      [onEditConceptSet]="editConceptSet.bind(this)"
+    ></app-resource-card-menu>
     <div class="name" [class.disabled]="actionsDisabled && !notebookReadOnly"
          (click)="(actionsDisabled && !notebookReadOnly) || openResource(this.resourceCard)">
       {{notebookDisplayName}}
@@ -46,12 +40,15 @@
 
 
 <app-rename-modal *ngIf="renaming && resourceCard.notebook"
-                  [resource]="resourceCard.notebook"
+                  [notebookName]="resourceCard.notebook.name"
+                  [workspace]="{namespace: this.wsNamespace, name: this.wsId}"
                   [onCancel]="cancelRename.bind(this)"
                   [onRename]="receiveNotebookRename.bind(this)"></app-rename-modal>
 
-<app-edit-modal [resource]="resourceCard"
-                        (updateFinished)="receiveRename()"></app-edit-modal>
+<app-edit-modal *ngIf="editing && (resourceCard.cohort || resourceCard.conceptSet)"
+                [resource]="resourceCard"
+                [onCancel]="closeEditModal.bind(this)"
+                [onEdit]="receiveEdit.bind(this)"></app-edit-modal>
 
 <div *ngIf="resourceTypeInvalidError">
     <clr-modal>

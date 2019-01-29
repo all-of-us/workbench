@@ -24,7 +24,7 @@
 }
 
 .detail-page {
-  transition: margin .5s;
+  transition: margin 0.5s;
   margin-right: 24px;
 }
 

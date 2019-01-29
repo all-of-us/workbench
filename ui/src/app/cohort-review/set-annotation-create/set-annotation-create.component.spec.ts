@@ -4,7 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortAnnotationDefinitionService} from 'generated';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {SetAnnotationCreateComponent} from './set-annotation-create.component';
 
 describe('SetAnnotationCreateComponent', () => {

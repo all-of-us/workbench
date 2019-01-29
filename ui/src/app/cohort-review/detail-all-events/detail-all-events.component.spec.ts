@@ -8,8 +8,8 @@ import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 
-import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
-import {DetailTabTableComponent} from '../detail-tab-table/detail-tab-table.component';
+import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
+import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {DetailAllEventsComponent} from './detail-all-events.component';
 
 describe('DetailAllEventsComponent', () => {
@@ -25,7 +25,7 @@ describe('DetailAllEventsComponent', () => {
     })
   };
 
-    beforeEach(async(() => {
+  beforeEach(async(() => {
 
     TestBed.configureTestingModule({
       declarations: [ ClearButtonInMemoryFilterComponent,

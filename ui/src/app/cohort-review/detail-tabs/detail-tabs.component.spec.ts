@@ -5,13 +5,13 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
+import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {CohortReviewService} from 'generated';
 import * as highCharts from 'highcharts';
 import {Observable} from 'rxjs/Observable';
-import {CohortReviewServiceStub} from '../../../testing/stubs/cohort-review-service-stub';
-import {ReviewStateServiceStub} from '../../../testing/stubs/review-state-service-stub';
-import {IndividualParticipantsChartsComponent} from '../individual-participants-charts/individual-participants-charts';
-import {ReviewStateService} from '../review-state.service';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
+import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {DetailTabsComponent} from './detail-tabs.component';
 
 
@@ -54,7 +54,7 @@ describe('DetailTabsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [DetailTabsComponent, IndividualParticipantsChartsComponent],
       imports: [ChartModule, ClarityModule, RouterTestingModule],
-       schemas: [NO_ERRORS_SCHEMA],
+      schemas: [NO_ERRORS_SCHEMA],
       providers: [
         {
           provide: HighchartsStatic,
@@ -65,7 +65,7 @@ describe('DetailTabsComponent', () => {
         {provide: ActivatedRoute, useValue: activatedRouteStub},
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

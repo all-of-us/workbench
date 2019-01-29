@@ -1,6 +1,6 @@
 import {Component, OnChanges, OnInit} from '@angular/core';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
 import {TreeType} from 'generated';
-import {NodeComponent} from '../node/node.component';
 
 /*
  * The TreeComponent bootstraps the criteria tree; it has no display except for
@@ -21,7 +21,7 @@ export class TreeComponent extends NodeComponent implements OnInit, OnChanges {
       || this.node.get('type') === TreeType[TreeType.ICD10]
       || this.node.get('type') === TreeType[TreeType.CPT]
       || this.node.get('type') === TreeType[TreeType.SNOMED]) {
-        super.ngOnInit();
+      super.ngOnInit();
     }
   }
 

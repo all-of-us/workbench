@@ -86,7 +86,7 @@ export class ChartComponent implements OnChanges {
           pointWidth: options.pointWidth ? options.pointWidth : null,
           minPointLength: 3,
           events: {
-            click: function (event) {
+            click: event => {
               // Todo handle click and log events in analytics
               // console.log('plot options clicked ', event.point);
             }
@@ -101,7 +101,7 @@ export class ChartComponent implements OnChanges {
             style: this.isGenderIdentityAnalysis()
                 ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
             distance: this.isGenderIdentityAnalysis() ? 3 : -30,
-            formatter: function () {
+            formatter: function() {
               if (this.percentage < 1) {
                 return this.point.name + ' ' + Number(this.percentage).toFixed(1) + '%';
               }
@@ -147,8 +147,11 @@ export class ChartComponent implements OnChanges {
         categories: options.categories,
         // type: 'category',
         labels: {
+          align: 'right',
+          reserveSpace: true,
           style: {
-            whiteSpace: 'nowrap',
+            whiteSpace: 'wrap',
+            fontSize: '11px',
           },
         },
         lineWidth: 1,
@@ -232,7 +235,7 @@ export class ChartComponent implements OnChanges {
       return 0;
     });
 
-    const seriesClick = function (event) {
+    const seriesClick = event => {
       const thisCtrl = event.point.options.thisCtrl;
       // Todo handle click and log events in analytics
       // console.log('Count plot Clicked point :', event.point);
@@ -296,14 +299,16 @@ export class ChartComponent implements OnChanges {
     };
     return {
       chart: {
-        type: 'column',
+        type: 'bar',
         backgroundColor: this.backgroundColor,
       },
       title: {text: null, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth,
-      xAxisTitle: null
+      pointPadding: 0.25,
+      minPointLength: 3,
+      pointWidth: 5,
+      xAxisTitle: null,
     };
 
   }
@@ -475,7 +480,7 @@ export class ChartComponent implements OnChanges {
     }
 
     // Todo we will use this later in drill downs and such
-    const seriesClick = function(event) {
+    const seriesClick = event => {
       const thisCtrl = event.point.options.thisCtrl;
       // Todo handle click events
       // console.log('Histogram plot Clicked point :',  event.point);

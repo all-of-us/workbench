@@ -1,10 +1,9 @@
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {Observable} from 'rxjs/Observable';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
 
 import {
@@ -15,7 +14,6 @@ import {
   AnnotationType,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
-  ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
 
 

@@ -3,18 +3,15 @@ import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
-import {fromJS, Map} from 'immutable';
-import {NouisliderModule} from 'ng2-nouislider';
-import {NgxPopperModule} from 'ngx-popper';
-import {ValidatorErrorsComponent} from '../../cohort-common/validator-errors/validator-errors.component';
-import {AttributesPageComponent} from '../attributes-page/attributes-page.component';
-import {CodeDropdownComponent} from '../code-dropdown/code-dropdown.component';
-import {DemographicsComponent} from '../demographics/demographics.component';
-import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
-import {MultiSelectComponent} from '../multi-select/multi-select.component';
-import {NodeInfoComponent} from '../node-info/node-info.component';
-import {NodeComponent} from '../node/node.component';
-import {OptionInfoComponent} from '../option-info/option-info.component';
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
+import {AttributesPageComponent} from 'app/cohort-search/attributes-page/attributes-page.component';
+import {CodeDropdownComponent} from 'app/cohort-search/code-dropdown/code-dropdown.component';
+import {DemographicsComponent} from 'app/cohort-search/demographics/demographics.component';
+import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
+import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
+import {NodeInfoComponent} from 'app/cohort-search/node-info/node-info.component';
+import {NodeComponent} from 'app/cohort-search/node/node.component';
+import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.component';
 import {
 activeCriteriaTreeType,
 activeCriteriaType,
@@ -22,11 +19,14 @@ activeParameterList,
 CohortSearchActions,
 nodeAttributes,
 wizardOpen
-} from '../redux';
-import {SafeHtmlPipe} from '../safe-html.pipe';
-import {SearchBarComponent} from '../search-bar/search-bar.component';
-import {SelectionInfoComponent} from '../selection-info/selection-info.component';
-import {TreeComponent} from '../tree/tree.component';
+} from 'app/cohort-search/redux';
+import {SafeHtmlPipe} from 'app/cohort-search/safe-html.pipe';
+import {SearchBarComponent} from 'app/cohort-search/search-bar/search-bar.component';
+import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
+import {TreeComponent} from 'app/cohort-search/tree/tree.component';
+import {fromJS, Map} from 'immutable';
+import {NouisliderModule} from 'ng2-nouislider';
+import {NgxPopperModule} from 'ngx-popper';
 import {ModalComponent} from './modal.component';
 
 class MockActions {

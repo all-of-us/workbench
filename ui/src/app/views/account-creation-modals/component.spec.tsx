@@ -1,7 +1,15 @@
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {shallow} from 'enzyme';
+
+import {ProfileApi} from 'generated/fetch';
 import * as React from 'react';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 import {AccountCreationResendModal, AccountCreationUpdateModal} from './component';
+
+beforeEach(() => {
+  registerApiClient(ProfileApi, new ProfileApiStub());
+});
 
 describe('AccountCreationResendModal', () => {
   it('should render', () => {

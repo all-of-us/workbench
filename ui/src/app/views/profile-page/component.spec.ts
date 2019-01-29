@@ -24,14 +24,14 @@ import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {
   simulateInput,
   updateAndTick
-} from '../../../testing/test-helpers';
+} from 'testing/test-helpers';
 
-import {ProfileStorageService} from '../../services/profile-storage.service';
-import {ServerConfigService} from '../../services/server-config.service';
-import {SignInService} from '../../services/sign-in.service';
+import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
+import {SignInService} from 'app/services/sign-in.service';
 
-import {BugReportComponent} from '../bug-report/component';
-import {ProfilePageComponent} from '../profile-page/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {ProfilePageComponent} from 'app/views/profile-page/component';
 /* tslint:disable */
 // We need to disable tslint so it does not complain about the selector we use for the mock.
 @Component({
@@ -125,17 +125,17 @@ describe('ProfilePageComponent', () => {
   }));
 
   it('handles empty givenName field', fakeAsync(() => {
-      simulateInput(
-          fixture, fixture.debugElement.query(By.css('#givenName')), '');
-      tick(300);
-      updateAndTick(fixture);
-      expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
-      expect(fixture.debugElement.query(By.css('#givenNameEmpty'))).toBeTruthy();
+    simulateInput(
+      fixture, fixture.debugElement.query(By.css('#givenName')), '');
+    tick(300);
+    updateAndTick(fixture);
+    expect(fixture.componentInstance.givenNameNotEmpty).toBeFalsy();
+    expect(fixture.debugElement.query(By.css('#givenNameEmpty'))).toBeTruthy();
   }));
 
   it('handles empty familyName field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#familyName')), '');
+      fixture, fixture.debugElement.query(By.css('#familyName')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.familyNameNotEmpty).toBeFalsy();
@@ -144,7 +144,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty current position field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#currentPosition')), '');
+      fixture, fixture.debugElement.query(By.css('#currentPosition')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentPositionNotEmpty).toBeFalsy();
@@ -153,7 +153,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty organization field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#organization')), '');
+      fixture, fixture.debugElement.query(By.css('#organization')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.organizationNotEmpty).toBeFalsy();
@@ -162,7 +162,7 @@ describe('ProfilePageComponent', () => {
 
   it('handles empty organization field', fakeAsync(() => {
     simulateInput(
-        fixture, fixture.debugElement.query(By.css('#areaOfResearch')), '');
+      fixture, fixture.debugElement.query(By.css('#areaOfResearch')), '');
     tick(300);
     updateAndTick(fixture);
     expect(fixture.componentInstance.currentResearchNotEmpty).toBeFalsy();

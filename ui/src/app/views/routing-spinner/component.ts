@@ -17,8 +17,6 @@ import {
   Router,
 } from '@angular/router';
 
-import {Observable} from 'rxjs/Observable';
-
 @Component({
   selector: 'app-routing-spinner',
   templateUrl: './component.html',

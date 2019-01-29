@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import {withStyle} from 'app/utils/index';
+
 const headerColor = '#262262';
 
 export const styles = {
@@ -21,14 +23,16 @@ export const styles = {
   h4: {
     fontWeight: 300,
     color: '#000',
+  },
+  formLabel: {
+    color: '#262262',
+    fontWeight: 600,
+    marginTop: '0.5rem',
+    marginBottom: '0.125rem'
   }
 };
 
-export const BolderHeader = ({style = {}, ...props}) =>
-  <h1 {...props} style={{...styles.h1, ...style}}/>;
-export const BoldHeader = ({style = {}, ...props}) =>
-  <h2 {...props} style={{...styles.h2, ...style}}/>;
-export const Header = ({style = {}, ...props}) =>
-  <h3 {...props} style={{...styles.h3, ...style}}/>;
-export const SmallHeader = ({style = {}, ...props}) =>
-  <h4 {...props} style={{...styles.h4, ...style}}/>;
+export const BolderHeader = withStyle(styles.h1)('h1');
+export const BoldHeader = withStyle(styles.h2)('h2');
+export const Header = withStyle(styles.h3)('h3');
+export const SmallHeader = withStyle(styles.h4)('h4');

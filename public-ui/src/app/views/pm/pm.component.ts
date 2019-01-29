@@ -14,7 +14,6 @@ import {DbConfigService} from '../../utils/db-config.service';
 })
 export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   title = 'Browse Program Physical Measurements';
-  pageImage = '/assets/db-images/man-standing.png';
   private subscriptions: ISubscription[] = [];
   loadingStack: any = [];
 
