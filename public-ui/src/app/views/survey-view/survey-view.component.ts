@@ -235,27 +235,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
   public makeAnalysis(a) {
     const analysis = {
-      analysisId: a.analysisId,
-      analysisName: a.analysisName,
-      stratum1Name: a.stratum1Name,
-      stratum2Name: a.stratum2Name,
-      stratum3Name: a.stratum3Name,
-      stratum4Name: a.stratum4Name,
-      stratum5Name: a.stratum5Name,
-      chartType: a.chartType,
-      dataType: a.dataType,
+      ...a,
       results: a.results.filter(w => w.stratum3 === a.stratum3)
     };
     return analysis;
-  }
-  public selectGraph(g) {
-    if (g.toLowerCase() === 'gender identity') {
-      this.selectedGraph = 'gender_identity';
-    } else if (g.toLowerCase() === 'age') {
-      this.selectedGraph = 'age';
-    } else if (g.toLowerCase() === 'biological_sex') {
-      this.selectedGraph = 'biological_sex';
-    }
   }
   public removeDescribingWords(text) {
     if (text && text.toLowerCase().includes('none of these describe me')) {
