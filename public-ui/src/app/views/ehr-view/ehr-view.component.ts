@@ -246,10 +246,6 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     r.expanded = true;
   }
   public toggleTopConcepts() {
-    if (!this.showTopConcepts) {
-      this.showTopConcepts = true;
-    } else {
-      this.showTopConcepts = false;
-    }
+    this.showTopConcepts = !this.showTopConcepts;
   }
 }
