@@ -22,6 +22,11 @@ export const itemList = groupId => state =>
   state.getIn(['entities', 'groups', groupId, 'items'], List()).map(itemId =>
     state.getIn(['entities', 'items', itemId], Map()));
 
+export const pendingItemList = groupId => state =>
+  state.getIn(['entities', 'groups', groupId, 'items'], List())
+    .map(itemId => state.getIn(['entities', 'items', itemId], Map()))
+    .filter(item => item.get('status') === 'pending');
+
 export const parameterList = itemId => state =>
   state.getIn(['entities', 'items', itemId, 'searchParameters'], List()).map(
     critId => state.getIn(['entities', 'parameters', critId], Map()));

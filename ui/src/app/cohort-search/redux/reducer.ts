@@ -11,6 +11,7 @@ import {
   getGroup,
   getItem,
   initialState,
+  pendingItemList,
   SR_ID,
 } from './store';
 
@@ -70,6 +71,7 @@ import {
   REMOVE_ITEM,
   REMOVE_GROUP,
   SET_ENTITY_TIMEOUT,
+  PAUSE_PENDING_ITEMS,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -463,12 +465,26 @@ export const rootReducer: Reducer<CohortSearchState> =
           ...action.context
         }));
 
-      case SET_ENTITY_TIMEOUT: {
+      case SET_ENTITY_TIMEOUT:
         return state.setIn(
-          ['entities', action.entity, action.entityId, 'timeoutId'],
-          action.timeoutId
+          ['entities', action.entity, action.entityId, 'timeout'],
+          Map({
+            id: action.timeoutId,
+            start: action.start,
+            duration: action.duration
+          })
         );
-      }
+
+      case PAUSE_PENDING_ITEMS:
+        pendingItemList(action.groupId)(state).forEach(item => {
+          const timeout = item.get('timeout').toJS();
+          clearTimeout(timeout.id);
+          const duration = timeout.duration - (Date.now() - timeout.start);
+          state = state.setIn(
+            ['entities', 'items', item.get('id'), 'timeout', 'duration'], duration
+          );
+        });
+        return state;
 
       case REOPEN_WIZARD:
         const selections = state.getIn(['entities', 'parameters'], Map()).filter(
