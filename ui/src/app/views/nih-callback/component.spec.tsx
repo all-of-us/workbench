@@ -27,22 +27,22 @@ describe('NihCallback', () => {
   it('should show an error without a search argument', () => {
     pushHistory(endpoint);
     const wrapper = mount(<NihCallback/>);
-    expect(window.location.pathname).toBe(endpoint);
     expect(wrapper.text()).toContain('Error');
   });
 
   it('should show an error with an empty search argument', () => {
     pushHistory(endpoint + '?token=');
     const wrapper = mount(<NihCallback/>);
-    expect(window.location.pathname).toBe(endpoint);
     expect(wrapper.text()).toContain('Error');
   });
 
-  it('should redirect with a valid search argument', () => {
+  it('should succeed with a valid search argument', () => {
     // Trigger a call to the profile service for NIH token update
     pushHistory(endpoint + '?token=valid-search-arg');
     const wrapper = mount(<NihCallback/>);
     expect(wrapper.text()).not.toContain('Error');
+    // Should render a spinner that redirects home
+    expect(wrapper.html()).toContain('svg');
   });
 
 });
