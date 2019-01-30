@@ -26,7 +26,6 @@ export const Error = withStyle(styles.error)('div');
 const spinner = <div style={styles.overlay}><div style={styles.square}><Spinner /></div></div>;
 
 export interface NihCallbackState {
-  error: boolean;
   errorMessage: string;
 }
 
@@ -35,7 +34,6 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
   constructor(props) {
     super(props);
     this.state = {
-      error: false,
       errorMessage: ''
     };
   }
@@ -56,7 +54,7 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
   }
 
   private setErrorStatus(message: string) {
-    this.setState({error: true, errorMessage: message});
+    this.setState({errorMessage: message});
   }
 
   private navigateHome() {
@@ -68,7 +66,7 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
       <div onClick={this.navigateHome} style={{cursor: 'pointer'}}>Please try linking again.</div>
     </Error>;
 
-    return (this.state.error ? error : spinner);
+    return (this.state.errorMessage ? error : spinner);
   }
 
 }
