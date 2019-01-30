@@ -94,12 +94,12 @@ describe('ConceptSetListComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(ConceptSetListComponent);
+      registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
       setupModals(fixture);
       // This tick initializes the component.
       tick();
       // This finishes the API calls.
       updateAndTick(fixture);
-      registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
       // This finishes the page reloading.
       updateAndTick(fixture);
     });
@@ -131,14 +131,13 @@ describe('ConceptSetListComponent', () => {
     expect(conceptCards[0]).toMatch('testMockConcept');
   }));
 
-  // it('displays correct information when concept set deleted', fakeAsync(() => {
-  //   const de = fixture.debugElement;
-  //   simulateClickReact(fixture, '[data-test-id="resource-menu"]');
-  //   simulateClickReact(fixture, '[data-test-id="trash"]');
-  //   updateAndTick(fixture);
-  //   simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
-  //   updateAndTick(fixture);
-  //   const conceptCards = de.queryAll(By.css('.item-card'));
-  //   expect(conceptCards.length).toBe(2);
-  // }));
+  it('displays correct information when concept set deleted', fakeAsync(() => {
+    simulateClickReact(fixture, '[data-test-id="resource-menu"]');
+    simulateClickReact(fixture, '[data-test-id="trash"]');
+    updateAndTick(fixture);
+    simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
+    updateAndTick(fixture);
+    const conceptCards = findElementsReact(fixture, '[data-test-id="card-name"]');
+    expect(conceptCards.length).toBe(2);
+  }));
 });

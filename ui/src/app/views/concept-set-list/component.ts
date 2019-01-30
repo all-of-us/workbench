@@ -10,6 +10,8 @@ import {
   WorkspaceAccessLevel,
 } from 'generated';
 
+import {generateDomain} from 'app/utils/index';
+
 // import {Domain} from 'generated/fetch';
 
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
@@ -59,12 +61,12 @@ export class ConceptSetListComponent implements OnInit {
     this.loadConceptSets();
   }
 
-  // TODO: this should use the API?
   loadConceptSets() {
     this.conceptSetsLoading = true;
-    this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId)
-      .subscribe(conceptSetListResponse => {
-        this.conceptSetsList = conceptSetListResponse.items;
+    conceptSetsApi().getConceptSetsInWorkspace(this.wsNamespace, this.wsId)
+      .then(conceptSetListResponse => {
+        this.conceptSetsList = conceptSetListResponse.items
+            .map(s => ({...s, domain: generateDomain(s.domain)}));
         this.resourceList = convertToResources(this.conceptSetsList, this.wsNamespace,
           this.wsId, this.accessLevel, ResourceType.CONCEPT_SET);
         this.conceptSetsLoading = false;
