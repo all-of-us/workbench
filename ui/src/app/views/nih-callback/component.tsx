@@ -6,11 +6,6 @@ import {navigateByUrl} from 'app/utils/navigation';
 
 import * as React from 'react';
 
-export interface NihCallbackState {
-  error: boolean;
-  errorMessage: string;
-}
-
 const styles = reactStyles({
   overlay: {
     backgroundColor: 'transparent',
@@ -21,16 +16,19 @@ const styles = reactStyles({
     display: 'flex', backgroundColor: 'transparent', borderRadius: 4, padding: '0.5rem'
   },
   error: {
-    padding: '0 0.5rem',
     fontWeight: 600,
     color: '#2F2E7E',
-    marginTop: '0.2rem',
-    width: '90%'
+    margin: '1rem'
   }
 });
 
 export const Error = withStyle(styles.error)('div');
 const spinner = <div style={styles.overlay}><div style={styles.square}><Spinner /></div></div>;
+
+export interface NihCallbackState {
+  error: boolean;
+  errorMessage: string;
+}
 
 export class NihCallback extends React.Component<{}, NihCallbackState> {
 
@@ -43,19 +41,22 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
   }
 
   async componentDidMount() {
-    const search: string = window.location.search;
-    if (search.length > 1) {
-      // The `search` component of `location` starts with `?`
-      const token = window.location.search.replace('?', '');
+    // Assumes callback url has format of `/nih-callback?token=XYZ`
+    const token = window.location.search.replace('?token=', '');
+    if (token.length > 1) {
       try {
-        const response = await profileApi().updateNihToken({ jwt: token });
+        await profileApi().updateNihToken({ jwt: token });
         this.navigateHome();
       } catch (e) {
-        this.setState({error: true, errorMessage: 'Error saving NIH Authentication'});
+        this.setErrorStatus('Error saving NIH Authentication status');
       }
     } else {
-      this.setState({error: true, errorMessage: 'An NIH Authentication token is required.'});
+      this.setErrorStatus('An NIH Authentication token is required.');
     }
+  }
+
+  setErrorStatus(message: string) {
+    this.setState({error: true, errorMessage: message});
   }
 
   navigateHome() {
@@ -77,7 +78,7 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
  *  1. Act as a destination endpoint (callback url) after user logs into nih
  *  2. Grab the nih token from the redirected callback request
  *  3. Post nih token to the profile service
- *  4. Redirect user to the home page
+ *  4. Redirect user to the home page if successful
  *  5. Display any errors
  */
 @Component({
