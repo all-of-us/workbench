@@ -246,23 +246,6 @@ public class CriteriaDaoTest {
     jdbcTemplate.execute("drop table criteria_relationship");
   }
 
-  @Test
-  public void findCriteriaByTypeAndSubtypeAndCode() throws Exception {
-    Criteria parentIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003", "name", 0, true, true, "1.2");
-    criteriaDao.save(parentIcd10);
-    Criteria childIcd10 = createCriteria(TreeType.ICD10.name(), TreeSubType.PCS.name(), "003.1", "name", parentIcd10.getId(), false, true, "1.2." + parentIcd10.getId());
-    criteriaDao.save(childIcd10);
-
-    final List<String> icd10DomainList =
-      criteriaDao.findCriteriaByTypeAndSubtypeAndCode(
-        TreeType.ICD10.name(),
-        TreeSubType.PCS.name(),
-        "003");
-
-    assertEquals(1, icd10DomainList.size());
-    assertEquals("Condition", icd10DomainList.get(0));
-  }
-
   private Criteria createCriteria(String type,
                                   String subtype,
                                   String code,
@@ -274,7 +257,7 @@ public class CriteriaDaoTest {
     return new Criteria()
       .code(code)
       .count("10")
-      .conceptId("1000")
+      .conceptId(parentId == 0 ? null : "1000")
       .domainId("Condition")
       .group(group)
       .selectable(selectable)

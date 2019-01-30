@@ -19,33 +19,35 @@ public class ParticipantCounter {
   public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
 
+  private static final String PERSON_TABLE = "person";
+
+  private static final String SEARCH_PERSON_TABLE = "search_person";
+
   private static final String COUNT_SQL_TEMPLATE =
     "select count(*) as count\n" +
-      "from `${projectId}.${dataSetId}.person` person\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
   private static final String ID_SQL_TEMPLATE =
     "select rand() as x, person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
-      "from `${projectId}.${dataSetId}.person` person\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
-    "select concept1.concept_code as gender, \n" +
-      "case when concept2.concept_name is null then 'Unknown' else concept2.concept_name end as race, \n" +
+    "select gender, \n" +
+      "race, \n" +
       "case " + getAgeRangeSql(0, 18) + "\n" +
       getAgeRangeSql(19, 44) + "\n" +
       getAgeRangeSql(45, 64) + "\n" +
       "else '> 65'\n" +
       "end as ageRange,\n" +
       "count(*) as count\n" +
-      "from `${projectId}.${dataSetId}.person` person\n" +
-      "left join `${projectId}.${dataSetId}.concept` concept1 on (person.gender_concept_id = concept1.concept_id and concept1.vocabulary_id in ('Gender', 'None'))\n" +
-      "left join `${projectId}.${dataSetId}.concept` concept2 on (person.race_concept_id = concept2.concept_id and concept2.vocabulary_id = 'Race')\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
     "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n" +
-      "from `${projectId}.${dataSetId}.${table}` person\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
@@ -71,8 +73,6 @@ public class ParticipantCounter {
 
     private static final String OFFSET_SUFFIX = " offset ";
 
-    private static final String PERSON_TABLE = "person";
-
     @Autowired
     public ParticipantCounter(CohortQueryBuilder cohortQueryBuilder) {
         this.cohortQueryBuilder = cohortQueryBuilder;
@@ -83,7 +83,8 @@ public class ParticipantCounter {
      * defined by the provided {@link ParticipantCriteria}.
      */
     public QueryJobConfiguration buildParticipantCounterQuery(ParticipantCriteria participantCriteria) {
-        return buildQuery(participantCriteria, COUNT_SQL_TEMPLATE, "");
+        return buildQuery(participantCriteria, COUNT_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE),
+          "", SEARCH_PERSON_TABLE);
     }
 
     /**
@@ -91,7 +92,8 @@ public class ParticipantCounter {
      * defined by the provided {@link ParticipantCriteria}.
      */
     public QueryJobConfiguration buildDemoChartInfoCounterQuery(ParticipantCriteria participantCriteria) {
-        return buildQuery(participantCriteria, DEMO_CHART_INFO_SQL_TEMPLATE, DEMO_CHART_INFO_SQL_GROUP_BY);
+        return buildQuery(participantCriteria, DEMO_CHART_INFO_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE),
+          DEMO_CHART_INFO_SQL_GROUP_BY, SEARCH_PERSON_TABLE);
     }
 
     /**
@@ -112,21 +114,18 @@ public class ParticipantCounter {
       endSqlTemplate = endSqlTemplate
         .replace("${limit}", limit)
         .replace("${tableId}", STANDARD_CONCEPT_ID);
-      return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate);
+      return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate, table);
     }
 
-    public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
-        long resultSize, long offset) {
+  public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
+                                                       long resultSize,
+                                                       long offset) {
         String endSql = ID_SQL_ORDER_BY + " " + resultSize;
         if (offset > 0) {
             endSql += OFFSET_SUFFIX + offset;
         }
-        return buildQuery(participantCriteria, ID_SQL_TEMPLATE, endSql);
-    }
-
-    public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
-        String sqlTemplate, String endSql) {
-        return buildQuery(participantCriteria, sqlTemplate, endSql, PERSON_TABLE);
+        return buildQuery(participantCriteria, ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE),
+          endSql, PERSON_TABLE);
     }
 
     public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -143,7 +142,7 @@ public class ParticipantCounter {
      * @return
      */
     private static String getAgeRangeSql(int lo, int hi) {
-        return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) >= " + lo +
-                " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(person.year_of_birth, person.month_of_birth, person.day_of_birth), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
+      return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) >= " + lo +
+        " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }

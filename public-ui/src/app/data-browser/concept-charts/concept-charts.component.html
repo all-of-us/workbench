@@ -32,24 +32,30 @@
   </ng-container>
 
   <!-- show gender totals  if we want -->
-  <ng-container *ngIf="showGenderGraph">
-    <div class="col-md-3 col-xs-12">
+  <ng-container *ngIf="showGraph === graphType.BiologicalSex">
+    <div class="col-md-4 col-xs-12">
     </div>
-    <div class="col-md-3 col-xs-12 chart" *ngIf="showGenderGraph && analyses.genderAnalysis"  >
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
       <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showGenderGraph && analyses.genderAnalysis"  >
+    <div class="col-md-4 col-xs-12">
+    </div>
+  </ng-container>
+  <ng-container *ngIf="showGraph === graphType.GenderIdentity">
+    <div class="col-md-4 col-xs-12">
+    </div>
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.GenderIdentity && analyses.genderIdentityAnalysis"  >
       <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Gender Identity'"> </app-chart>
     </div>
-    <div class="col-md-2 col-xs-12">
+    <div class="col-md-4 col-xs-12">
     </div>
   </ng-container>
 
   <!-- show age totals  if we want -->
-  <ng-container *ngIf="showAgeGraph">
+  <ng-container *ngIf="showGraph === graphType.Age">
     <div class="col-md-4 col-xs-12">
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showAgeGraph && analyses.ageAnalysis" >
+    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
       <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
     </div>
     <div class="col-md-4 col-xs-12">
@@ -57,10 +63,10 @@
   </ng-container>
 
   <!-- show sources totals  if we want -->
-  <ng-container *ngIf="showSourcesGraph">
-    <div class="col-md-4 col-xs-12" *ngIf="showSourcesGraph">
+  <ng-container *ngIf="showGraph === graphType.Sources">
+    <div class="col-md-4 col-xs-12" *ngIf="showGraph === graphType.Sources">
     </div>
-    <div class="col-md-4 col-xs-12 chart"  *ngIf="showSourcesGraph && sourceConcepts && sourceConcepts.length">
+    <div class="col-md-4 col-xs-12 chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
       <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20"
                  [backgroundColor]="backgroundColor" [chartTitle]="'Sources'">
       </app-chart>
