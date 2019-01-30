@@ -375,7 +375,9 @@ export class ChartComponent implements OnChanges {
     });
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
-      chart: {type: 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
+      chart: {type: (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID
+          || this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID)
+        ? 'pie' : 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
       title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
