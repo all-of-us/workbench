@@ -36,9 +36,9 @@ public class ParticipantCounter {
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =
     "select gender, \n" +
       "race, \n" +
-      "case " + getAgeRangeSql(0, 18, SEARCH_PERSON_TABLE) + "\n" +
-      getAgeRangeSql(19, 44, SEARCH_PERSON_TABLE) + "\n" +
-      getAgeRangeSql(45, 64, SEARCH_PERSON_TABLE) + "\n" +
+      "case " + getAgeRangeSql(0, 18) + "\n" +
+      getAgeRangeSql(19, 44) + "\n" +
+      getAgeRangeSql(45, 64) + "\n" +
       "else '> 65'\n" +
       "end as ageRange,\n" +
       "count(*) as count\n" +
@@ -141,8 +141,8 @@ public class ParticipantCounter {
      * @param hi - upper bound of the age range
      * @return
      */
-    private static String getAgeRangeSql(int lo, int hi, String table) {
-      return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + table + ".dob), MONTH)/12) as INT64) >= " + lo +
-        " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + table + ".dob), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
+    private static String getAgeRangeSql(int lo, int hi) {
+      return "when CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) >= " + lo +
+        " and CAST(FLOOR(DATE_DIFF(CURRENT_DATE, DATE(" + SEARCH_PERSON_TABLE + ".dob), MONTH)/12) as INT64) <= " + hi + " then '" + lo + "-" + hi + "'";
     }
 }
