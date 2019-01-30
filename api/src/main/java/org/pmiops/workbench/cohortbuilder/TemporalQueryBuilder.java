@@ -33,7 +33,8 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 
 /**
  * TemporalQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for the Temporal criteria groups.
+ * for BigQuery for the Temporal criteria groups. The temporal group functionality description
+ * is here: https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8
  */
 @Service
 public class TemporalQueryBuilder {
