@@ -41,6 +41,10 @@
   margin-top: 2.5rem;
 }
 
+.tree-container.ingredients {
+  margin-top: 3.5rem;
+}
+
 .alert.alert-warning {
   color: #E28327;
   border: 0;

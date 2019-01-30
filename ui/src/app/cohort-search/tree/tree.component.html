@@ -22,7 +22,7 @@
   </div>
 </div>
 
-<div class="tree-container">
+<div class="tree-container" [class.ingredients]="ingredients.length > 0">
   <crit-node *ngFor="let item of children" [node]="item"></crit-node>
 </div>
 
