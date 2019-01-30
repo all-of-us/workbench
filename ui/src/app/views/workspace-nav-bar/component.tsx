@@ -142,10 +142,9 @@ export const WorkspaceNavBarReact = withCurrentWorkspace()(props => {
 export class WorkspaceNavBarComponent extends ReactWrapperBase {
   @Input() shareFunction;
   @Input() deleteFunction;
-  @Input() workspace;
   @Input() tabPath;
 
   constructor() {
-    super(WorkspaceNavBarReact, ['shareFunction', 'deleteFunction', 'workspace', 'tabPath']);
+    super(WorkspaceNavBarReact, ['shareFunction', 'deleteFunction', 'tabPath']);
   }
 }

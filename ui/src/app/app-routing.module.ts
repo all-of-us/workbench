@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
@@ -21,6 +20,7 @@ import {StigmatizationPageComponent} from './views/stigmatization-page/component
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
+import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
