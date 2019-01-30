@@ -94,9 +94,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         ingredients.forEach(item => {
           if (!this.ingredientList.includes(item.name)) {
             this.ingredientList.push(item.name);
+            ids.push(item.id);
+            path = path.concat(item.path.split('.'));
           }
-          ids.push(item.id);
-          path = path.concat(item.path.split('.'));
         });
         if (this.ingredientList.length) {
           this.actions.setCriteriaSearchTerms(this.ingredientList);
