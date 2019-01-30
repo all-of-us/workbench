@@ -63,6 +63,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     StringBuilder baseSql = new StringBuilder(DRUG_SQL_TEMPLATE);
     StringBuilder conceptIdSql = new StringBuilder();
 
+    //Parent and child nodes generate different sql statements
+    //Parent nodes match the parent id in the path of the children and use the child conceptId
+    //Child nodes are looked up by conceptId
     Long[] parentIds = paramMap.get(PARENT).stream().toArray(Long[]::new);
     Long[] childIds = paramMap.get(CHILD).stream().toArray(Long[]::new);
     if (Arrays.asList(CHILD).containsAll(paramMap.keySet())) {
