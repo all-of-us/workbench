@@ -649,19 +649,43 @@ Common.register_command({
 
 def make_bq_denormalized_tables(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-denormalized-tables} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh} + args
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
   :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
+Generates big query denormalized tables for search and review. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
+})
+
+def make_bq_denormalized_review(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-review",
+  :description => "make-bq-denormalized-review --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_review(*args) }
+})
+
+def make_bq_denormalized_search(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-search",
+  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_search(*args) }
 })
 
 def generate_criteria_table(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
 end
 
 Common.register_command({
@@ -673,12 +697,12 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 
 def generate_private_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-private-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
 end
 
 def generate_public_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-public-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-public-cdr-counts.sh} + args
 end
 
 Common.register_command({
@@ -723,7 +747,7 @@ def generate_cloudsql_db(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-generate-cloudsql-db
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket}}
   end
@@ -785,7 +809,7 @@ Import bucket of files or a single file in a bucket to a cloudsql database",
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
 end
 
 Common.register_command({
@@ -798,7 +822,7 @@ Creates and populates local mysql database from data in bucket made by generate-
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
 end
 
 Common.register_command({
@@ -811,7 +835,7 @@ Creates and populates local mysql databases cdr<VERSION> and public<VERSION> fro
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-mysqldump-local-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
 end
 
 
@@ -1202,6 +1226,47 @@ Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
   :fn => ->(*args) { connect_to_cloud_db("connect-to-cloud-db", *args) }
+})
+
+def connect_to_cloud_db_binlog(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  env = read_db_vars(gcc)
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.status "\n" + "*" * 80
+    common.status "Listing available journal files: "
+
+    # "root" is required for binlog access.
+    password = env["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+      "echo 'SHOW BINARY LOGS;' | " +
+      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "--database=#{env['DB_NAME']} --password=#{password}", password)
+    common.status "*" * 80
+
+    common.status "\n" + "*" * 80
+    common.status "mysql login has been configured. Pick a journal file from " +
+                  "above and run commands like: "
+    common.status "  mysqlbinlog -R mysql-bin.xxxxxx\n"
+    common.status "See the Workbench playbook for more details."
+    common.status "*" * 80
+
+    # Work out of /tmp for easy local file redirection. We don't want binlogs
+    # winding up back in Workbench source control accidentally.
+    run_with_redirects(
+      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "cd /tmp; /bin/bash", password)
+  end
+end
+
+Common.register_command({
+  :invocation => "connect-to-cloud-db-binlog",
+  :description => "Connect to a Cloud SQL database for mysqlbinlog access",
+  :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
 })
 
 

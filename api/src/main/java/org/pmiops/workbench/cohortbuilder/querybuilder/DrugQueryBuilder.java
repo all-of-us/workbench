@@ -3,10 +3,12 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,45 +27,66 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String DRUG_CHILD_SQL_TEMPLATE =
-    "select distinct person_id, drug_exposure_start_date as entry_date, drug_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.drug_exposure`\n" +
-      "where drug_concept_id in unnest(${childConceptIds})\n";
+  private static final String TABLE_ID = "search_drug";
+  private static final String DRUG_SQL_TEMPLATE =
+    "select person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where ";
 
-  private static final String DRUG_PARENT_SQL_TEMPLATE =
-    "select distinct person_id, drug_exposure_start_date as entry_date, drug_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.drug_exposure`\n" +
-      "where drug_concept_id in (\n" +
-      "   select a.concept_id from\n" +
-      "   `${projectId}.${dataSetId}.criteria` a\n" +
-      "    join (select CONCAT( '%.', CAST(id as STRING), '%') as path from `${projectId}.${dataSetId}.criteria` where concept_id in unnest(${parentConceptIds})) b \n" +
-      "    on a.path like b.path\n" +
-      "    and is_group = 0\n" +
-      "    and is_selectable = 1\n" +
-      "    and type = 'DRUG'\n" +
-      "    and subtype = 'ATC')\n";
+  private static final String CHILD_ONLY_TEMPLATE =
+    "concept_id in unnest(${childConceptIds})\n";
 
-  private static final String UNION_TEMPLATE = " union all\n";
+  private static final String PARENT_CRITERIA = "select a.concept_id from\n" +
+    "`${projectId}.${dataSetId}.criteria` a\n" +
+    "join (select CONCAT( '%.', CAST(id as STRING), '%') as path\n" +
+    "from `${projectId}.${dataSetId}.criteria`\n" +
+    "where concept_id in unnest(${parentConceptIds})) b\n" +
+    "on a.path like b.path\n" +
+    "and is_group = 0\n" +
+    "and is_selectable = 1\n" +
+    "and type = 'DRUG'\n" +
+    "and subtype = 'ATC'";
 
-  private static final String ENCOUNTERS_SQL_TEMPLATE = "${encounterSql}";
+  private static final String BOTH_TEMPLATE =
+    "concept_id in (" + PARENT_CRITERIA + " or\n" +
+      CHILD_ONLY_TEMPLATE + ")\n";
+
+  private static final String PARENT_ONLY_TEMPLATE =
+    "concept_id in (" + PARENT_CRITERIA + ")\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    ListMultimap<String, Long> paramMap = getMappedParameters(parameters.getParameters());
-    List<String> queryParts = new ArrayList<>();
-    for (String key : paramMap.keySet()) {
-      Long[] conceptIds = paramMap.get(key).stream().toArray(Long[]::new);
-      String namedParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
-      if ("Children".equals(key)) {
-        queryParts.add(DRUG_CHILD_SQL_TEMPLATE.replace("${childConceptIds}", "@" + namedParameter));
-      } else {
-        queryParts.add(DRUG_PARENT_SQL_TEMPLATE.replace("${parentConceptIds}", "@" + namedParameter));
-      }
-    }
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           String mention) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    ListMultimap<String, Long> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
+    StringBuilder baseSql = new StringBuilder(DRUG_SQL_TEMPLATE);
+    StringBuilder conceptIdSql = new StringBuilder();
 
-    String drugSql = String.join(UNION_TEMPLATE, queryParts) + ENCOUNTERS_SQL_TEMPLATE;
-    return buildModifierSql(drugSql, queryParams, parameters.getModifiers());
+    //Parent and child nodes generate different sql statements
+    //Parent nodes match the parent id in the path of the children and use the child conceptId
+    //Child nodes are looked up by conceptId
+    Long[] parentIds = paramMap.get(PARENT).stream().toArray(Long[]::new);
+    Long[] childIds = paramMap.get(CHILD).stream().toArray(Long[]::new);
+    if (Arrays.asList(CHILD).containsAll(paramMap.keySet())) {
+      String childParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(childIds, Long.class));
+      conceptIdSql.append(CHILD_ONLY_TEMPLATE.replace("${childConceptIds}", "@" + childParameter));
+      baseSql.append(conceptIdSql.toString());
+    } else if (Arrays.asList(PARENT).containsAll(paramMap.keySet())) {
+      String parentParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(parentIds, Long.class));
+      conceptIdSql.append(PARENT_ONLY_TEMPLATE.replace("${parentConceptIds}", "@" + parentParameter));
+      baseSql.append(conceptIdSql.toString());
+    } else {
+      String childParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(childIds, Long.class));
+      String parentParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(parentIds, Long.class));
+      conceptIdSql.append(BOTH_TEMPLATE.replace("${parentConceptIds}", "@" + parentParameter)
+        .replace("${childConceptIds}", "@" + childParameter));
+      baseSql.append(conceptIdSql.toString());
+    }
+    baseSql.append(AGE_DATE_AND_ENCOUNTER_VAR);
+    List<Modifier> modifiers = searchGroupItem.getModifiers();
+    String modifiedSql = buildModifierSql(baseSql.toString(), queryParams, modifiers);
+    return buildTemporalSql(TABLE_ID, modifiedSql, conceptIdSql.toString(), queryParams, modifiers, mention);
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {
@@ -73,9 +96,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       .forEach(param -> {
         validateSearchParameter(param);
         if (param.getGroup()) {
-          fullMap.put("Parents", param.getConceptId());
+          fullMap.put(PARENT, param.getConceptId());
         } else {
-          fullMap.put("Children", param.getConceptId());
+          fullMap.put(CHILD, param.getConceptId());
         }
       });
     return fullMap;

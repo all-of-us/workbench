@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "entry_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "source_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "subtype",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "value_as_number",
+    "type": "float"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "value_as_concept_id",
+    "type": "integer"
+  }
+]

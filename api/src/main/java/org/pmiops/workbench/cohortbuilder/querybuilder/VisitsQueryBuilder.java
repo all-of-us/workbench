@@ -2,6 +2,9 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.springframework.stereotype.Service;
 
@@ -28,65 +31,39 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
-  //If the querybuilder will use modifiers then this sql statement has to have
-  //the distinct and visit_start_date as entry_date
+  private static final String TABLE_ID = "search_visit";
+  //If the querybuilder will use modifiers then sql statement will need entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select distinct person_id, visit_start_date as entry_date, visit_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.visit_occurrence` a\n";
-
-  private static final String VISIT_CHILD_CLAUSE_TEMPLATE =
-    "where a.visit_concept_id in unnest(${visitConceptIds})\n";
-
-  private static final String VISIT_PARENT_CLAUSE_TEMPLATE =
-    "where a.visit_concept_id in (\n" +
-      "select descendant_id\n" +
-      "from `${projectId}.${dataSetId}.criteria_ancestor` \n" +
-      "where ancestor_id in unnest(${parentIds}))\n";
-
-  private static final String UNION_TEMPLATE = " union all\n";
+    "select person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
+      "where ";
+  private static final String CONCEPT_ID_TEMPLATE =
+    "concept_id in unnest(${visitConceptIds})\n" +
+      AGE_DATE_AND_ENCOUNTER_VAR;
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters inputParameters) {
-    from(parametersEmpty()).test(inputParameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    List<String> queryParts = new ArrayList<>();
-
-    List<Long> parentList = new ArrayList<>();
-    List<Long> childList = new ArrayList<>();
-    for (SearchParameter parameter : inputParameters.getParameters()) {
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem inputParameters,
+                           String mention) {
+    from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+    List<Long> conceptIdList = new ArrayList<>();
+    for (SearchParameter parameter : inputParameters.getSearchParameters()) {
       from(typeBlank().or(visitTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
       from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
-      if (parameter.getGroup()) {
-        parentList.add(parameter.getConceptId());
-      } else {
-        childList.add(parameter.getConceptId());
-      }
+      conceptIdList.add(parameter.getConceptId());
     }
 
-    // Collect all parent type queries to run them together
-    if (!parentList.isEmpty()) {
-      String namedParameter = addQueryParameterValue(queryParams,
-          QueryParameterValue.array(parentList.stream().toArray(Long[]::new), Long.class));
-      String parentSql = VISIT_SELECT_CLAUSE_TEMPLATE +
-        VISIT_PARENT_CLAUSE_TEMPLATE.replace("${parentIds}", "@" + namedParameter);
-      queryParts.add(parentSql);
+    if (conceptIdList.isEmpty()) {
+      throw new BadRequestException(
+        "Bad Request: please provide valid concept ids with search parameters ");
     }
-
-    // Collect all child type queries to run them together
-    if (!childList.isEmpty()) {
-      String namedParameter = addQueryParameterValue(queryParams,
-          QueryParameterValue.array(childList.stream().toArray(Long[]::new), Long.class));
-      String childSql = VISIT_SELECT_CLAUSE_TEMPLATE +
-        VISIT_CHILD_CLAUSE_TEMPLATE.replace("${visitConceptIds}", "@" + namedParameter);
-      queryParts.add(childSql);
-    }
-
-    // Combine the parent and child queries, or just use the one
-    String visitSql = queryParts.size() > 1 ?
-      String.join(UNION_TEMPLATE, queryParts) : queryParts.get(0);
-
-    String finalSql = buildModifierSql(visitSql, queryParams, inputParameters.getModifiers());
-
-    return finalSql;
+    String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
+    List<Modifier> modifiers = inputParameters.getModifiers();
+    String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
+    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+    String namedParameter = addQueryParameterValue(queryParams,
+      QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
+    return finalSql.replace("${visitConceptIds}", "@" + namedParameter);
   }
 
   @Override

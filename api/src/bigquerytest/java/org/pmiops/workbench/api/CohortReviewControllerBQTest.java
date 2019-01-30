@@ -10,6 +10,7 @@ import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
+import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -32,7 +33,29 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AllEvents;
+import org.pmiops.workbench.model.CohortChartData;
+import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.Condition;
+import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Drug;
+import org.pmiops.workbench.model.Measurement;
+import org.pmiops.workbench.model.Observation;
+import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.PageRequest;
+import org.pmiops.workbench.model.ParticipantChartData;
+import org.pmiops.workbench.model.ParticipantChartDataListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.ParticipantData;
+import org.pmiops.workbench.model.ParticipantDataListResponse;
+import org.pmiops.workbench.model.PhysicalMeasurement;
+import org.pmiops.workbench.model.Procedure;
+import org.pmiops.workbench.model.ReviewFilter;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SortOrder;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -122,11 +145,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ReviewQueryBuilder.class,
     CohortService.class,
     ParticipantCounter.class,
-    DomainLookupService.class,
     CohortQueryBuilder.class,
+    TemporalQueryBuilder.class,
     QueryBuilderFactory.class,
-    ParticipantCounter.class,
-    DomainLookupService.class
+    ParticipantCounter.class
   })
   @MockBean({
     FireCloudService.class,
@@ -160,11 +182,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       "p_drug",
       "p_physical_measure",
       "person",
-      "measurement",
-      "condition_occurrence",
-      "procedure_occurrence",
-      "drug_exposure",
-      "concept",
+      "search_person",
+      "search_codes",
       "criteria"
     );
   }
@@ -509,6 +528,30 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public void tearDown() {
     workspaceDao.delete(workspace.getWorkspaceId());
     cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+  }
+
+  @Test
+  public void createCohortReview() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    Cohort cohortWithoutReview = new Cohort();
+    cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
+    cohortWithoutReview.setCriteria("{\"includes\":[{\"id\":\"includes_9bdr91i2t\",\"items\":[{\"id\":\"items_r0tsp87r4\",\"type\":\"CONDITION\",\"searchParameters\":[{\"parameterId\":\"param25164\"," +
+      "\"name\":\"Malignant neoplasm of bronchus and lung\",\"value\":\"C34\",\"type\":\"ICD10\",\"subtype\":\"CM\",\"group\":false,\"domainId\":\"Condition\",\"conceptId\":\"1\"}],\"modifiers\":[]}]}],\"excludes\":[]}");
+    cohortDao.save(cohortWithoutReview);
+
+    org.pmiops.workbench.model.CohortReview cohortReview =
+      controller.createCohortReview(NAMESPACE,
+        NAME,
+        cohortWithoutReview.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        new CreateReviewRequest()
+          .size(1)).getBody();
+
+    assertThat(cohortReview.getReviewStatus()).isEqualTo(ReviewStatus.CREATED);
+    assertThat(cohortReview.getReviewSize()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
+    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus()).isEqualTo(CohortStatus.NOT_REVIEWED);
   }
 
   @Test
@@ -1370,7 +1413,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   private void stubMockFirecloudGetWorkspace() throws ApiException {
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
-    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
+    workspaceResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }
 }

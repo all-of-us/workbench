@@ -358,6 +358,7 @@ if [[ $tables =~ $cri_table_check ]]; then
         from (
         select min(id) as id, '[rank1]' as synonyms
         from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+        where est_count != -1
         group by name, type, subtype) as crit
         where crit.id = ct.id"
 fi
