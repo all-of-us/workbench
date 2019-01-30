@@ -26,8 +26,7 @@
                   "type": "ICD9",
                   "subtype": "CM",
                   "group": true,
-                  "conceptId": null,
-                  "domainId": ""
+                  "conceptId": null
                 }
               ],
               "modifiers": []

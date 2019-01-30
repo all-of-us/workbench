@@ -188,7 +188,6 @@ public class WorkspacesControllerTest {
           CohortMaterializationService.class,
           CloudStorageService.class,
           BigQueryService.class,
-          DomainLookupService.class,
           ParticipantCounter.class,
           UserService.class,
           UserRecentResourceService.class,

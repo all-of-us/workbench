@@ -558,9 +558,6 @@ definitions:
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
-      domainId:
-        description: clue to determine which tables to search
-        type: string
       conceptId:
         description: The concept id that maps to concept table.
         type: integer
