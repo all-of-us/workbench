@@ -1,58 +1,67 @@
-import {shallow} from 'enzyme';
+import {currentWorkspaceStore, NavStore} from 'app/utils/navigation';
+import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
+import {mount} from 'enzyme';
+import {WorkspaceAccessLevel} from 'generated';
 import * as React from 'react';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
-import {
-  WorkspaceNavBarReact, WorkspaceNavBarReactProps
-} from 'app/views/workspace-nav-bar/component';
+describe('WorkspaceNavBarComponent', () => {
 
-xdescribe('QuickTourModalComponent', () => {
-
-  let props: WorkspaceNavBarReactProps;
+  let props: {};
+  const workspace = {
+    ...WorkspacesServiceStub.stubWorkspace(),
+    accessLevel: WorkspaceAccessLevel.OWNER,
+  };
 
   const component = () => {
-    return shallow(<WorkspaceNavBarReact {...props}/>);
+    return mount(<WorkspaceNavBarReact {...props}/>, {attachTo: document.getElementById('root')});
   };
 
   beforeEach(() => {
-    props = {
-      shareFunction: () => {},
-      deleteFunction: () => {},
-      workspace: {},
-      tabPath: ''
-    };
+    props = {};
+
+    currentWorkspaceStore.next(workspace);
   });
 
   it('should render', () => {
     const wrapper = component();
     expect(wrapper).toBeTruthy();
-    });
+  });
 
   it('should highlight the active tab', () => {
+    props = {tabPath: ''};
     const wrapper = component();
-    expect(wrapper.exists('[data-test-id="previous"]')).toBeFalsy();
+    expect(wrapper.find({'data-test-id': 'About', 'aria-selected': true}).exists()).toBeTruthy();
   });
 
   it('should navigate on tab click', () => {
+    const navSpy = jest.fn();
+    NavStore.navigate = navSpy;
     const wrapper = component();
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[0].title);
-    wrapper.find('[data-test-id="next"]').simulate('click');
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[1].title);
+
+    wrapper.find({'data-test-id': 'Cohorts'}).first().simulate('click');
+    expect(navSpy).toHaveBeenCalledWith(
+      ['/workspaces', workspace.namespace, workspace.id, 'cohorts']);
   });
 
-  it('should update on workspace navigate', () => {
+  it('should call delete method when clicked', () => {
+    const deleteSpy = jest.fn();
+    props = {deleteFunction: deleteSpy};
     const wrapper = component();
-    const panelNum = 2;
-    wrapper.find('[data-test-id="breadcrumb' + panelNum + '"]').simulate('click');
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[panelNum].title);
+
+    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'trash'}).first().simulate('click');
+    expect(deleteSpy).toHaveBeenCalled();
   });
 
-  it('should close menu on action', () => {
+  it('should call share method when clicked', () => {
+    const shareSpy = jest.fn();
+    props = {shareFunction: shareSpy};
     const wrapper = component();
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[0].title);
-    wrapper.find('[data-test-id="next"]').simulate('click');
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[1].title);
-    wrapper.find('[data-test-id="previous"]').simulate('click');
-    // expect(wrapper.find('[data-test-id="panel-title"]').text()).toBe(panels[0].title);
+
+    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
+    wrapper.find({'data-test-id': 'share'}).first().simulate('click');
+    expect(shareSpy).toHaveBeenCalled();
   });
 
 });

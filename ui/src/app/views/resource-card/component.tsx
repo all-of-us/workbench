@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Router} from '@angular/router';
 
-import {Clickable} from 'app/components/buttons';
+import {Clickable, MenuItem} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 
@@ -19,19 +19,6 @@ import {
 
 import {environment} from 'environments/environment';
 import * as React from 'react';
-
-const MenuItem = ({icon, children, ...props}) => {
-  return <Clickable
-    {...props}
-    data-test-id={icon}
-    style={{
-      display: 'flex', alignItems: 'center',
-      minWidth: '5rem', height: '1.3333rem',
-      padding: '0 1rem', color: '#4A4A4A'
-    }}
-    hover={{backgroundColor: '#E0EAF1'}}
-  ><ClrIcon shape={icon}/>&nbsp;{children}</Clickable>;
-};
 
 const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,

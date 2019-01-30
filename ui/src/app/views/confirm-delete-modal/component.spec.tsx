@@ -17,7 +17,6 @@ describe('ConfirmDeleteModalComponent', () => {
 
   beforeEach(() => {
     props = {
-      deleting: true,
       resourceType: 'test',
       resource: {name: 'testResource'},
       receiveDelete: () => {},

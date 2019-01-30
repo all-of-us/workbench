@@ -1,36 +1,17 @@
 import {Component, Input} from '@angular/core';
 
-import {Clickable} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {Clickable, MenuItem} from 'app/components/buttons';
+import {PopupTrigger} from 'app/components/popups';
 import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon/component';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceAccessLevel} from 'generated';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-// probably move to shared location once needed elsewhere
-const colors = {
-  blue: [
-    '#2691d0',
-    '#5aa6da',
-    '#85bde4',
-    '#afd3ed',
-    '#d7eaf6',
-    '#eaf4fb'
-  ],
-  gray: [
-    '#4a4a4a',
-    '#6e6e6e',
-    '#929292',
-    '#b7b7b7',
-    '#dbdbdb',
-    '#ededed'
-  ],
-};
 
 const styles = reactStyles({
   container: {
@@ -77,38 +58,7 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
-// probably move to shared location once needed elsewhere
-const MenuButton = ({disabled = false, children, ...props}) => {
-  return <TooltipTrigger side='left' content={disabled && 'Requires owner permission'}>
-    <Clickable
-      disabled={disabled}
-      style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'start',
-        fontSize: 12, minWidth: 125, height: 32,
-        color: disabled ? colors.gray[2] : 'black',
-        padding: '0 12px',
-        cursor: disabled ? 'not-allowed' : 'pointer'
-      }}
-      hover={!disabled ? {backgroundColor: colors.blue[3], fontWeight: 'bold'} : undefined}
-      {...props}
-    >
-      {children}
-    </Clickable>
-  </TooltipTrigger>;
-};
-
-// probably move to shared location once needed elsewhere
-const menuIcon = (iconName) =>
-  <ClrIcon shape={iconName} style={{marginRight: 8}} size={15}/>;
-
-export interface WorkspaceNavBarReactProps extends React.FunctionComponent {
-  shareFunction: Function;
-  deleteFunction: Function;
-  workspace: WorkspaceData;
-  tabPath: string;
-}
-
-export const WorkspaceNavBarReact = (props: WorkspaceNavBarReactProps): JSX.Element => {
+export const WorkspaceNavBarReact = withCurrentWorkspace()(props => {
   const {shareFunction, deleteFunction, workspace, tabPath} = props;
   const {namespace, id, accessLevel} = workspace;
   const isNotOwner = accessLevel !== WorkspaceAccessLevel.OWNER;
@@ -122,6 +72,8 @@ export const WorkspaceNavBarReact = (props: WorkspaceNavBarReactProps): JSX.Elem
 
     return <React.Fragment key={name}>
       <Clickable
+        data-test-id={name}
+        aria-selected={selected}
         style={{...styles.tab, ...(selected ? styles.active : {})}}
         hover={{color: styles.active.color}}
         onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
@@ -142,23 +94,37 @@ export const WorkspaceNavBarReact = (props: WorkspaceNavBarReactProps): JSX.Elem
       content={
         <React.Fragment>
           <div style={styles.dropdownHeader}>Workspace Actions</div>
-          <MenuButton onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
-            {menuIcon('copy')}Clone
-          </MenuButton>
-          <MenuButton disabled={isNotOwner}
-                      onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
+          <MenuItem
+            icon='copy'
+            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
+            Clone
+          </MenuItem>
+          <MenuItem
+            icon='pencil'
+            tooltip={isNotOwner && 'Requires owner permission'}
+            disabled={isNotOwner}
+            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
           >
-            {menuIcon('pencil')}Edit
-          </MenuButton>
-          <MenuButton disabled={isNotOwner} onClick={() => shareFunction()}>
-            {menuIcon('share')}Share
-          </MenuButton>
-          <MenuButton disabled={isNotOwner} onClick={() => deleteFunction()}>
-            {menuIcon('trash')}Delete
-          </MenuButton>
+            Edit
+          </MenuItem>
+          <MenuItem
+            icon='share'
+            tooltip={isNotOwner && 'Requires owner permission'}
+            disabled={isNotOwner}
+            onClick={() => shareFunction()}>
+            Share
+          </MenuItem>
+          <MenuItem
+            icon='trash'
+            tooltip={isNotOwner && 'Requires owner permission'}
+            disabled={isNotOwner}
+            onClick={() => deleteFunction()}>
+            Delete
+          </MenuItem>
         </React.Fragment>
       }>
       <Clickable
+        data-test-id='workspace-menu-button'
         style={styles.menuButtonIcon}
         hover={{opacity: 1}}
       >
@@ -166,7 +132,7 @@ export const WorkspaceNavBarReact = (props: WorkspaceNavBarReactProps): JSX.Elem
       </Clickable>
     </PopupTrigger>
   </div>;
-};
+});
 
 @Component({
   selector: 'app-workspace-nav-bar',
