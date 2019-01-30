@@ -76,14 +76,14 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     });
   }
 
-  public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
-                          extraHttpRequestParams?: any): Promise<ConceptSet> {
-    return new Promise<ConceptSet>(resolve => {
-      setTimeout(() => {
-        resolve(this.conceptSets[0]);
-      });
-    });
-  }
+  // public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
+  //                         extraHttpRequestParams?: any): Promise<ConceptSet> {
+  //   return new Promise<ConceptSet>(resolve => {
+  //     setTimeout(() => {
+  //       resolve(this.conceptSets[0]);
+  //     });
+  //   });
+  // }
 
   // public updateConceptSetConcepts(
   //     workspaceNamespace: string, workspaceId: string, conceptSetId: number,

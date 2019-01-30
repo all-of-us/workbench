@@ -37,6 +37,10 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {WorkspacesApi} from 'generated/fetch';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+
 import {
   findElementsReact,
   setupModals,
@@ -59,6 +63,7 @@ class NotebookListPage {
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(NotebookListComponent);
     setupModals(this.fixture);
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.readPageData();
@@ -153,7 +158,6 @@ describe('NotebookListComponent', () => {
 
   it('displays correct information when notebook cloned', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="copy"]');
@@ -170,10 +174,9 @@ describe('NotebookListComponent', () => {
     const fixture = notebookListPage.fixture;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     simulateClickReact(fixture, '[data-test-id="trash"]');
-    console.log('clicking delete');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
-    console.log('deleted');
+    updateAndTick(fixture);
     const notebooksOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(notebooksOnPage.length).toBe(0);
   }));

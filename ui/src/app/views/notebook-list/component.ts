@@ -19,6 +19,8 @@ import {
   WorkspacesService
 } from 'generated';
 
+import {workspacesApi} from "app/services/swagger-fetch-clients"
+
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
@@ -85,8 +87,8 @@ export class NotebookListComponent implements OnInit, OnDestroy {
 
   private loadNotebookList() {
     this.notebooksLoading = true;
-    this.workspacesService.getNoteBookList(this.wsNamespace, this.wsId)
-      .subscribe(
+    workspacesApi().getNoteBookList(this.wsNamespace, this.wsId)
+      .then(
         fileList => {
           this.notebookList = fileList;
           this.resourceList = convertToResources(fileList, this.wsNamespace,
