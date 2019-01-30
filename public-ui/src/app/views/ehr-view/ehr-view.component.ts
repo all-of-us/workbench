@@ -4,7 +4,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {graphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/graphtypes';
 
 import { FormControl } from '@angular/forms';
 import {
@@ -68,7 +68,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'are returned at the top of the list.';
 
   /* Show different graphs depending on domain we are in */
-  graphToShow = graphType.BiologicalSex;
+  graphToShow = GraphType.BiologicalSex;
   showTopConcepts = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
     'health status of an individual, ' +
@@ -199,30 +199,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
-    switch (g) {
-      case graphType.BiologicalSex: {
-        this.graphToShow = graphType.BiologicalSex;
-        break;
-      }
-      case graphType.GenderIdentity: {
-        this.graphToShow = graphType.GenderIdentity;
-        break;
-      }
-      case graphType.Age: {
-        this.graphToShow = graphType.Age;
-        break;
-      }
-      case graphType.Sources: {
-        this.graphToShow = graphType.Sources;
-        break;
-      }
-      default: {
-        this.graphToShow = graphType.Age;
-        break;
-      }
-    }
-    if (this.ehrDomain.name === 'Measurements' && this.graphToShow === graphType.BiologicalSex) {
-      this.graphToShow = graphType.MeasurementBins;
+    this.graphToShow = g;
+    if (this.ehrDomain.name === 'Measurements' && this.graphToShow === GraphType.BiologicalSex) {
+      this.graphToShow = GraphType.MeasurementBins;
     }
   }
   public toggleSynonyms(conceptId) {
@@ -238,7 +217,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
   }
   public resetSelectedGraphs() {
-    this.graphToShow = graphType.None;
+    this.graphToShow = GraphType.None;
   }
   public expandRow(concepts: any[], r: any) {
     if (r.expanded) {
@@ -249,9 +228,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     // In the case of measurements we show the histogram of
     // values in the place of normal gender graph.
     if (this.ehrDomain.name === 'Measurements') {
-      this.graphToShow = graphType.MeasurementBins;
+      this.graphToShow = GraphType.MeasurementBins;
     } else {
-      this.graphToShow = graphType.BiologicalSex;
+      this.graphToShow = GraphType.BiologicalSex;
     }
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;

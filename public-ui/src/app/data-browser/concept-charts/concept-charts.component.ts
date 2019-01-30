@@ -8,7 +8,7 @@ import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
 import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
-import {graphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/graphtypes';
 
 @Component({
   selector: 'app-concept-charts',
@@ -18,7 +18,7 @@ import {graphType} from '../../utils/graphtypes';
 export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   @Input() concept: Concept;
   @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
-  @Input() showGraph = graphType.None;
+  @Input() showGraph = GraphType.None;
   @Input() showRace = false;
   @Input() showEthnicity = false;
 
@@ -42,7 +42,7 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   genderResults: AchillesResult[] = [];
   displayMeasurementGraphs = false;
   toDisplayMeasurementGenderAnalysis: Analysis;
-  graphType = graphType;
+  graphType = GraphType;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
@@ -79,12 +79,12 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
     if (!this.analyses) {
       return;
     }
-    if (this.showGraph === graphType.MeasurementBins) {
+    if (this.showGraph === GraphType.MeasurementBins) {
       this.genderResults = this.analyses.genderAnalysis.results;
     }
     this.unitNames = [];
     if (this.analyses && this.analyses.measurementValueGenderAnalysis
-      && this.showGraph === graphType.MeasurementBins) {
+      && this.showGraph === GraphType.MeasurementBins) {
       this.displayMeasurementGraphs = true;
       for (const aa of this.analyses.measurementValueGenderAnalysis) {
         this.unitNames.push(aa.unitName);
@@ -93,7 +93,7 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
     }
   }
   ngOnChanges() {
-    if (this.showGraph !== graphType.MeasurementBins) {
+    if (this.showGraph !== GraphType.MeasurementBins) {
       this.displayMeasurementGraphs = false;
     } else {
       this.displayMeasurementGraphs = true;
