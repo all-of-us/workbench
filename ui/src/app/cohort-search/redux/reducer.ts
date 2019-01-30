@@ -454,7 +454,7 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case UPDATE_TEMPORAL: {
         const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
-        return state.setIn(groupItems, action.flag)
+        return state.setIn(groupItems, action.flag);
       }
 
       case UPDATE_MENTION: {

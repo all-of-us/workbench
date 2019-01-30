@@ -35,13 +35,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     TemporalTime.XDAYSAFTER,
     TemporalTime.XDAYSBEFORE,
     TemporalTime.WITHINXDAYSOF];
-  name= this.whichMention[0];
+  name = this.whichMention[0];
   subscription: Subscription;
   itemSubscription: Subscription;
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
-  treeType= [];
+  treeType = [];
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -66,11 +66,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.itemSubscription.unsubscribe();
   }
 
-  get typeFlag () {
+  get typeFlag() {
     let flag = true;
     this.treeType.map(m => {
-      if( m === TreeType[TreeType.PM]) {
-          flag = false;
+      if ( m === TreeType[TreeType.PM]) {
+        flag = false;
       }
     });
     return flag;
@@ -120,10 +120,10 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-    e.target.checked && this.mention === ''?
-      this.getMentionTitle(this.whichMention[0]): this.getMentionTitle(this.mention);
+    e.target.checked && this.mention === '' ?
+      this.getMentionTitle(this.whichMention[0]) : this.getMentionTitle(this.mention);
     e.target.checked && this.time === '' ?
-      this.getTimeTitle(this.timeDropDown[0]): this.getTimeTitle(this.time);
+      this.getTimeTitle(this.timeDropDown[0]) : this.getTimeTitle(this.time);
 
     this.actions.updateTemporal(e.target.checked, this.groupId);
   }
