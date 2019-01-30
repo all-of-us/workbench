@@ -55,11 +55,11 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
     }
   }
 
-  setErrorStatus(message: string) {
+  private setErrorStatus(message: string) {
     this.setState({error: true, errorMessage: message});
   }
 
-  navigateHome() {
+  private navigateHome() {
     navigateByUrl('/');
   }
 
