@@ -1,6 +1,5 @@
 package org.pmiops.workbench.test;
 
-import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
