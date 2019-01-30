@@ -39,7 +39,7 @@ describe('SignInReact', () => {
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
-  it('should display invitation key component on clicking Create account on login page ', () => {
+  /*it('should display invitation key component on clicking Create account on login page ', () => {
     const wrapper = component();
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
@@ -61,5 +61,5 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="template"]');
     expect(templateImage.prop('style').backgroundImage)
       .toBe('url(\'' + pageImages.invitationKey.smallerBackgroundImgSrc + '\')');
-  });
+  });*/
 });
