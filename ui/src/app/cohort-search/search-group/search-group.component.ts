@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions, CohortSearchState, groupError} from 'app/cohort-search/redux';
 import {environment} from 'environments/environment';
@@ -16,7 +16,7 @@ import {Subscription} from 'rxjs/Subscription';
     '../../styles/buttons.css',
   ]
 })
-export class SearchGroupComponent implements OnInit, OnDestroy {
+export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -40,6 +40,19 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.ngRedux.select(groupError(this.group.get('id')))
       .subscribe(error => this.error = error);
+  }
+
+  ngAfterViewInit() {
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(() => {
+        if (this.status === 'hidden' || this.status === 'pending') {
+          this.setOverlayPosition();
+        }
+      });
+      const groupDiv = document.getElementById(this.group.get('id'));
+      console.log(groupDiv);
+      ro.observe(groupDiv);
+    }
   }
 
   ngOnDestroy() {
