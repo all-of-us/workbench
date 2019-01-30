@@ -141,6 +141,17 @@ export class CohortSearchActions {
       .isEmpty();
   }
 
+  otherGroupsWithActiveItems(ingoreGroupId: string) {
+    return !groupList('includes')(this.state)
+      .merge(groupList('excludes')(this.state))
+      .filter(
+        grp => grp.get('status') === 'active'
+          && grp.get('id') !== ingoreGroupId
+          && this.hasActiveItems(grp)
+      )
+      .isEmpty();
+  }
+
   get state() {
     return this.ngRedux.getState();
   }
@@ -184,6 +195,13 @@ export class CohortSearchActions {
     }
   }
 
+  cancelTotalIfRequesting(): void {
+    const searchRequest = getSearchRequest(SR_ID)(this.state);
+    if (searchRequest.get('isRequesting', false)) {
+      this.cancelChartsRequest('searchRequests', SR_ID);
+    }
+  }
+
   removeGroup(role: keyof SearchRequest, groupId: string, status?: string): void {
     const group = getGroup(groupId)(this.state);
     this.cancelIfRequesting('groups', groupId);
@@ -201,17 +219,10 @@ export class CohortSearchActions {
       }
     });
     if (this.hasActiveItems(group)) {
-      const activeGroupsWithItems = !groupList('includes')(this.state)
-        .merge(groupList('excludes')(this.state))
-        .filter(
-          grp => grp.get('status') === 'active'
-            && grp.get('id') !== groupId
-            && this.hasActiveItems(grp)
-        )
-        .isEmpty();
-      if (activeGroupsWithItems) {
+      if (this.otherGroupsWithActiveItems(groupId)) {
         this.requestTotalCount();
       } else {
+        this.cancelTotalIfRequesting();
         this.clearTotalCount();
       }
     }
@@ -253,7 +264,12 @@ export class CohortSearchActions {
       /* If this was the only item in the group, the group no longer has a
        * count, not really. */
       if (isOnlyActiveChild) {
-        this.requestTotalCount(groupId);
+        if (this.otherGroupsWithActiveItems(groupId)) {
+          this.requestTotalCount(groupId);
+        } else {
+          this.cancelTotalIfRequesting();
+          this.clearTotalCount();
+        }
         if (!status && !hasHiddenItems) {
           this.removeGroup(role, groupId);
         }
@@ -431,11 +447,7 @@ export class CohortSearchActions {
    * @param outdatedGroup: string
    */
   requestTotalCount(outdatedGroupId?: string): void {
-    const searchRequest = getSearchRequest(SR_ID)(this.state);
-    if (searchRequest.get('isRequesting', false)) {
-      this.cancelChartsRequest('searchRequests', SR_ID);
-    }
-
+    this.cancelTotalIfRequesting();
     const included = includeGroups(this.state);
 
     /* If there are no members of an intersection, the intersection is the null
