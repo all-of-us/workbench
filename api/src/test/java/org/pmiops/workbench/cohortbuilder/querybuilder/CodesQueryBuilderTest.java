@@ -25,14 +25,14 @@ public class CodesQueryBuilderTest {
 
     @Test
     public void getMappedParameters() throws Exception {
-        final SearchParameter searchParam1 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.CM.name()).group(false).domainId("Condition").value("001").conceptId(1L);
-        final SearchParameter searchParam2 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("002").conceptId(1L);
-        final SearchParameter searchParam3 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("003").conceptId(1L);
-        final SearchParameter searchParam4 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(true).domainId("Procedure").value("0").conceptId(1L);
-        final SearchParameter searchParam5 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.CM.name()).group(false).domainId("Condition").value("A001").conceptId(1L);
-        final SearchParameter searchParam6 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("A002").conceptId(1L);
-        final SearchParameter searchParam7 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).domainId("Procedure").value("A003").conceptId(1L);
-        final SearchParameter searchParam8 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(true).domainId("Procedure").value("A0").conceptId(1L);
+        final SearchParameter searchParam1 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.CM.name()).group(false).value("001").conceptId(1L);
+        final SearchParameter searchParam2 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).value("002").conceptId(1L);
+        final SearchParameter searchParam3 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(false).value("003").conceptId(1L);
+        final SearchParameter searchParam4 = new SearchParameter().type(TreeType.ICD9.name()).subtype(TreeSubType.PROC.name()).group(true).value("0").conceptId(1L);
+        final SearchParameter searchParam5 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.CM.name()).group(false).value("A001").conceptId(1L);
+        final SearchParameter searchParam6 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).value("A002").conceptId(1L);
+        final SearchParameter searchParam7 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(false).value("A003").conceptId(1L);
+        final SearchParameter searchParam8 = new SearchParameter().type(TreeType.ICD10.name()).subtype(TreeSubType.PROC.name()).group(true).value("A0").conceptId(1L);
         SearchGroupItem item = new SearchGroupItem()
           .type(TreeType.ICD9.name())
           .searchParameters(
@@ -48,24 +48,17 @@ public class CodesQueryBuilderTest {
 
         ListMultimap<CodesQueryBuilder.MultiKey, SearchParameter> mappedParemeters =
           queryBuilder.getMappedParameters(item.getSearchParameters());
-        assertEquals(6, mappedParemeters.keySet().size());
-        assertEquals(
-          new HashSet<CodesQueryBuilder.MultiKey>(
-            Arrays.asList(
-              queryBuilder.new MultiKey(searchParam1),
-              queryBuilder.new MultiKey(searchParam2),
-              queryBuilder.new MultiKey(searchParam4),
-              queryBuilder.new MultiKey(searchParam5),
-              queryBuilder.new MultiKey(searchParam6),
-              queryBuilder.new MultiKey(searchParam8)
-            )
-          ), mappedParemeters.keySet());
-        assertEquals(Arrays.asList(searchParam1), mappedParemeters.get(queryBuilder.new MultiKey(searchParam1)));
-        assertEquals(Arrays.asList(searchParam2, searchParam3), mappedParemeters.get(queryBuilder.new MultiKey(searchParam2)));
-        assertEquals(Arrays.asList(searchParam4), mappedParemeters.get(queryBuilder.new MultiKey(searchParam4)));
-        assertEquals(Arrays.asList(searchParam5), mappedParemeters.get(queryBuilder.new MultiKey(searchParam5)));
-        assertEquals(Arrays.asList(searchParam6, searchParam7), mappedParemeters.get(queryBuilder.new MultiKey(searchParam6)));
-        assertEquals(Arrays.asList(searchParam8), mappedParemeters.get(queryBuilder.new MultiKey(searchParam8)));
+        assertEquals(3, mappedParemeters.keySet().size());
+        for (CodesQueryBuilder.MultiKey key : mappedParemeters.keySet()) {
+            if (key.equals(CodesQueryBuilder.PARENT)) {
+                assertEquals(Arrays.asList(searchParam8), mappedParemeters.get(key));
+            } else if (key.equals(CodesQueryBuilder.CHILD)) {
+                assertEquals(Arrays.asList(searchParam1, searchParam2, searchParam3, searchParam5, searchParam6, searchParam7),
+                  mappedParemeters.get(queryBuilder.new MultiKey(searchParam2)));
+            } else {
+                assertEquals(Arrays.asList(searchParam4), mappedParemeters.get(queryBuilder.new MultiKey(searchParam4)));
+            }
+        }
     }
 
     @Test

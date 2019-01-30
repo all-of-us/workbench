@@ -23,18 +23,25 @@ public final class QueryBuilderConstants {
   public static final String CATEGORICAL_MESSAGE = "Bad Request: Attribute Categorical must provide In operator.";
   public static final String BP_TWO_ATTRIBUTE_MESSAGE =
     "Bad Request: Attribute Blood Pressure must provide two attributes(systolic and diastolic).";
+  public static final String TEMPORAL_GROUP_MESSAGE =
+    "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).";
 
   //Exception Message parameters
   public static final String PARAMETERS = "Parameters";
   public static final String ATTRIBUTES = "Attributes";
   public static final String PARAMETER = "Search Parameter";
+  public static final String SEARCH_GROUP_ITEM = "Search Group Item";
+  public static final String SEARCH_GROUP = "Search Group";
+  public static final String TEMPORAL_GROUP = "Temporal Group";
+  public static final String MENTION = "Which Mention";
+  public static final String TIME = "Define Time";
+  public static final String TIME_VALUE = "Time Value";
   public static final String ATTRIBUTE = "Attribute";
   public static final String MODIFIER = "Modifier";
   public static final String OPERANDS = "Operands";
   public static final String OPERATOR = "Operator";
   public static final String TYPE = "Type";
   public static final String SUBTYPE = "Subtype";
-  public static final String DOMAIN = "Domain";
   public static final String CONCEPT_ID = "Concept Id";
   public static final String CODE = "Code";
   public static final String NAME = "Name";
@@ -43,6 +50,7 @@ public final class QueryBuilderConstants {
   public static final String CATEGORICAL = "CAT";
   public static final String BOTH = "BOTH";
   public static final String LAB = "LAB";
+  public static final String ANY = "ANY";
 
   //Display text for modifiers
   public static ImmutableMap<ModifierType, String> modifierText = ImmutableMap.<ModifierType, String>builder()
@@ -75,7 +83,6 @@ public final class QueryBuilderConstants {
       TreeSubType.WC.name(),
       TreeSubType.HC.name());
 
-  public static final String ANY = "ANY";
 
   private QueryBuilderConstants(){}
 }
