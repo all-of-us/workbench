@@ -42,8 +42,8 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
 
   async componentDidMount() {
     // Assumes callback url has format of `/nih-callback?token=XYZ`
-    const token = window.location.search.replace('?token=', '');
-    if (token.length > 1) {
+    const token = (new URL(window.location.href)).searchParams.get('token');
+    if (token && token.length > 1) {
       try {
         await profileApi().updateNihToken({ jwt: token });
         this.navigateHome();
