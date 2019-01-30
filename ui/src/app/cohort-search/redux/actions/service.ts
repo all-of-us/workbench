@@ -205,25 +205,23 @@ export class CohortSearchActions {
   removeGroup(role: keyof SearchRequest, groupId: string, status?: string): void {
     const group = getGroup(groupId)(this.state);
     this.cancelIfRequesting('groups', groupId);
-    if (status) {
-      this.hideGroup(groupId, status);
-    } else {
+    if (!status) {
       this._removeGroup(role, groupId);
       this.removeId(groupId);
-    }
-    group.get('items', List()).forEach(itemId => {
-      this.cancelIfRequesting('items', itemId);
-      if (!status) {
+      group.get('items', List()).forEach(itemId => {
+        this.cancelIfRequesting('items', itemId);
         this._removeGroupItem(groupId, itemId);
         this.removeId(itemId);
-      }
-    });
-    if (this.hasActiveItems(group)) {
-      if (this.otherGroupsWithActiveItems(groupId)) {
-        this.requestTotalCount();
-      } else {
-        this.cancelTotalIfRequesting();
-        this.clearTotalCount();
+      });
+    } else {
+      this.hideGroup(groupId, status);
+      if (this.hasActiveItems(group)) {
+        if (this.otherGroupsWithActiveItems(groupId)) {
+          this.requestTotalCount();
+        } else {
+          this.cancelTotalIfRequesting();
+          this.clearTotalCount();
+        }
       }
     }
   }
@@ -234,12 +232,6 @@ export class CohortSearchActions {
     itemId: string,
     status?: string
   ): void {
-    const item = getItem(itemId)(this.state);
-    const hasItems = !item.get('searchParameters', List()).isEmpty();
-    const countIsNonZero = item.get('count') !== 0;
-    // The optimization wherein we only fire the request if the item
-    // has a non-zero count (i.e. it affects its group and hence the total
-    // counts) ONLY WORKS if the item is NOT an only child.
     const otherItems = (getGroup(groupId)(this.state))
       .get('items', List())
       .map(id => getItem(id)(this.state))
@@ -250,32 +242,33 @@ export class CohortSearchActions {
     const hasHiddenItems = !otherItems
       .filter(it => it.get('status') === 'hidden')
       .isEmpty();
-
-    this.cancelIfRequesting('items', itemId);
-    this.cancelIfRequesting('groups', groupId);
-    if (status) {
-      this.hideGroupItem(groupId, itemId, status);
-    } else {
+    if (!status) {
       this._removeGroupItem(groupId, itemId);
       this.removeId(itemId);
-    }
+      if (isOnlyActiveChild && !hasHiddenItems) {
+        this.removeGroup(role, groupId);
+      }
+    } else {
+      const item = getItem(itemId)(this.state);
+      const hasItems = !item.get('searchParameters', List()).isEmpty();
+      const countIsNonZero = item.get('count') !== 0;
 
-    if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
-      /* If this was the only item in the group, the group no longer has a
-       * count, not really. */
-      if (isOnlyActiveChild) {
-        if (this.otherGroupsWithActiveItems(groupId)) {
-          this.requestTotalCount(groupId);
+      this.cancelIfRequesting('items', itemId);
+      this.cancelIfRequesting('groups', groupId);
+      this.hideGroupItem(groupId, itemId, status);
+
+      if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
+        if (isOnlyActiveChild) {
+          if (this.otherGroupsWithActiveItems(groupId)) {
+            this.requestTotalCount(groupId);
+          } else {
+            this.cancelTotalIfRequesting();
+            this.clearTotalCount();
+          }
         } else {
-          this.cancelTotalIfRequesting();
-          this.clearTotalCount();
+          this.requestTotalCount();
+          this.requestGroupCount(role, groupId);
         }
-        if (!status && !hasHiddenItems) {
-          this.removeGroup(role, groupId);
-        }
-      } else {
-        this.requestTotalCount();
-        this.requestGroupCount(role, groupId);
       }
     }
   }
