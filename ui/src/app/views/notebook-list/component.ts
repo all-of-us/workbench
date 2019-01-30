@@ -19,7 +19,7 @@ import {
   WorkspacesService
 } from 'generated';
 
-import {workspacesApi} from "app/services/swagger-fetch-clients"
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',

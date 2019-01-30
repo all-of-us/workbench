@@ -6,7 +6,7 @@ import {
   Domain,
   UpdateConceptSetRequest
 } from 'generated/fetch';
-import {ConceptSetsApi, EmptyResponse} from "../../generated/fetch/api";
+import {ConceptSetsApi, EmptyResponse} from 'generated/fetch/api';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptSets?: ConceptSet[];
@@ -54,7 +54,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public getConceptSetsInWorkspace(
-      workspaceNamespace: string, workspaceId: string): Promise<ConceptSetListResponse> {
+    workspaceNamespace: string, workspaceId: string): Promise<ConceptSetListResponse> {
     return new Promise<ConceptSetListResponse>(resolve => {
       setTimeout(() => {
         resolve({items: this.conceptSets});
@@ -63,11 +63,11 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   }
 
   public updateConceptSet(
-      workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-      req: ConceptSet): Promise<ConceptSet> {
+    workspaceNamespace: string, workspaceId: string, conceptSetId: number,
+    req: ConceptSet): Promise<ConceptSet> {
     return new Promise<ConceptSet>(resolve => {
       setTimeout(() => {
-        let target = this.mustFindConceptSet(conceptSetId);
+        const target = this.mustFindConceptSet(conceptSetId);
         target.name = req.name;
         target.description = req.description;
         console.log(target.name);
@@ -76,8 +76,9 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     });
   }
 
-  // public createConceptSet(workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
-  //                         extraHttpRequestParams?: any): Promise<ConceptSet> {
+  // public createConceptSet(
+  //     workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
+  //     extraHttpRequestParams?: any): Promise<ConceptSet> {
   //   return new Promise<ConceptSet>(resolve => {
   //     setTimeout(() => {
   //       resolve(this.conceptSets[0]);
@@ -117,8 +118,8 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   // }
 
   public deleteConceptSet(
-      workspaceNamespace: string, workspaceId: string,
-      conceptSetId: number): Promise<EmptyResponse> {
+    workspaceNamespace: string, workspaceId: string,
+    conceptSetId: number): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       setTimeout(() => {
         const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);

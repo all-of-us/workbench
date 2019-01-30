@@ -7,8 +7,8 @@ import {
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {CohortListResponse} from 'generated/fetch/api';
 import {WorkspaceStubVariables} from './workspace-service-stub';
-import {CohortListResponse} from "../../generated/fetch/api";
 
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;

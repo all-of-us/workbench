@@ -23,7 +23,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   getNoteBookList(workspaceNamespace: string,
-                  workspaceId: string, extraHttpRequestParams?: any): Promise<Array<FileDetail>> {
+    workspaceId: string, extraHttpRequestParams?: any): Promise<Array<FileDetail>> {
     return new Promise<Array<FileDetail>>(resolve => {
       setTimeout(() => {
         resolve(this.notebookList);
@@ -32,7 +32,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
-                notebookName: String): Promise<any> {
+    notebookName: String): Promise<any> {
     return new Promise<any>(resolve => {
       setTimeout(() => {
         const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
@@ -47,7 +47,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   deleteNotebook(workspaceNamespace: string, workspaceId: string,
-                 notebookName: String): Promise<any> {
+    notebookName: String): Promise<any> {
     return new Promise<any>(resolve => {
       setTimeout(() => {
         this.notebookList.pop();
