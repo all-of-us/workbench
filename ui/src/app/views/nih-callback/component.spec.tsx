@@ -1,4 +1,4 @@
-import {shallow} from 'enzyme';
+import {mount, shallow} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -24,19 +24,25 @@ describe('NihCallback', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should not redirect without search argument', () => {
+  it('should show an error without a search argument', () => {
     pushHistory(endpoint);
-    shallow(<NihCallback/>);
+    const wrapper = mount(<NihCallback/>);
     expect(window.location.pathname).toBe(endpoint);
+    expect(wrapper.text()).toContain('Error');
+  });
+
+  it('should show an error with an empty search argument', () => {
+    pushHistory(endpoint + '?token=');
+    const wrapper = mount(<NihCallback/>);
+    expect(window.location.pathname).toBe(endpoint);
+    expect(wrapper.text()).toContain('Error');
   });
 
   it('should redirect with a valid search argument', () => {
     // Trigger a call to the profile service for NIH token update
-    pushHistory(endpoint + '?valid-search-arg');
-    // window.location is not implemented in jest - mock here.
-    window.location.assign = jest.fn();
-    const wrapper = shallow(<NihCallback/>);
-    expect(wrapper.exists()).toBeTruthy();
+    pushHistory(endpoint + '?token=valid-search-arg');
+    const wrapper = mount(<NihCallback/>);
+    expect(wrapper.text()).not.toContain('Error');
   });
 
 });
