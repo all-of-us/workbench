@@ -7,7 +7,7 @@ import {
   getTemporalGroupItems,
   groupError
 } from 'app/cohort-search/redux';
-import {SearchRequest, TemporalMention, TemporalTime} from 'generated';
+import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -41,6 +41,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
+  treeType= [];
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -53,6 +54,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.itemSubscription = this.ngRedux.select(getTemporalGroupItems(this.group.get('id')))
       .filter(temporal => !!temporal)
       .subscribe(i => {
+        console.log(i.type);
+        this.treeType = i.type;
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
       });
@@ -63,6 +66,15 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.itemSubscription.unsubscribe();
   }
 
+  get typeFlag () {
+    let flag = true;
+    this.treeType.map(m => {
+      if( m === TreeType[TreeType.PM]) {
+          flag = false;
+      }
+    });
+    return flag;
+  }
 
   get isRequesting() {
     return this.group.get('isRequesting', false);
@@ -108,9 +120,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-    console.log(this.group.get('mention'));
-    e.target.checked? this.getMentionTitle(this.whichMention[0]): this.getMentionTitle(this.group.get('mention'));
-    e.target.checked? this.getTimeTitle(this.timeDropDown[0]): this.getTimeTitle('');
+    e.target.checked && this.mention === ''?
+      this.getMentionTitle(this.whichMention[0]): this.getMentionTitle(this.mention);
+    e.target.checked && this.time === '' ?
+      this.getTimeTitle(this.timeDropDown[0]): this.getTimeTitle(this.time);
+
     this.actions.updateTemporal(e.target.checked, this.groupId);
   }
 

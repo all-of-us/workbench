@@ -4,12 +4,23 @@
   box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
   margin: 0.6rem 0;
 }
-
+/*1px solid #eee*/
 .card-header {
   display: flex;
   justify-content: space-between;
   min-width: 100%;
 }
+/*::ng-deep .card-block:last-child {*/
+  /*border-bottom: none!important;*/
+  /*!*background-color: red;*!*/
+/*}*/
+/*[class~='card-test']:last-of-type  {*/
+  /*background-color: red;*/
+/*}*/
+
+/*.card-test:last-child {*/
+  /*background-color: red;*/
+/*}*/
 
 .temporal-sub-card-header {
   display: flex;
@@ -155,7 +166,15 @@ clr-icon[shape^=error-standard] {
 /*::ng-deep .card .card-block:last-child {*/
   /*border: none;*/
 /*}*/
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
 
-/*:host::ng-deep .card-block .test:last-child{*/
-  /*border: none;*/
-/*}*/
+li:last-child{
+  border: none!important;
+}
+.toggle-switch-disable {
+  pointer-events: none;
+}

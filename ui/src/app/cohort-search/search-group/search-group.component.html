@@ -5,7 +5,7 @@
   (click)="remove($event)">
   DELETE GROUP
 </button>
-hi{{mention}}
+
 <div class="card bg-faded">
   <!--********************************Temporal changes start***************************************-->
   <div class="card-header" *ngIf="temporalFlag">
@@ -31,8 +31,8 @@ hi{{mention}}
   </div>
 
   <!--**********************************Temporal changes end******************************************-->
-
-  <div id="non{{groupId}}" *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block">
+<ul>
+  <li id="non{{groupId}}" *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block card-test">
     <app-search-group-item
       (temporalGroupValue)="getTemporalGroup($event)"
       [role]="role"
@@ -40,9 +40,10 @@ hi{{mention}}
       [itemId]="itemId"
       [itemIndex]="itemIndex">
     </app-search-group-item>
-  </div>
-  <ng-container *ngIf="!temporalFlag">
-    <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
+  </li>
+</ul>
+  <ul *ngIf="!temporalFlag">
+    <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block card-border">
       <app-search-group-item
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
@@ -50,8 +51,8 @@ hi{{mention}}
         [itemId]="itemId"
         [itemIndex]="itemIndex">
       </app-search-group-item>
-    </div>
-  </ng-container>
+    </li>
+  </ul>
   <div class="card-header">
     <ng-template #groupDropDown>
       <clr-dropdown>
@@ -120,11 +121,11 @@ hi{{mention}}
           clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <input class="time-inputBox" type="number" [(ngModel)]="timeValue" placeholder="X"  (keyup)="getTimeValue($event)">
+    <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'" class="time-inputBox" type="number" [(ngModel)]="timeValue" placeholder="X"  (keyup)="getTimeValue($event)">
   </div>
 
-  <ng-container *ngIf="temporalFlag">
-    <div *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
+  <ul *ngIf="temporalFlag">
+    <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
       <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
@@ -133,8 +134,8 @@ hi{{mention}}
         [itemId]="itemId"
         [itemIndex]="itemIndex">
       </app-search-group-item>
-    </div>
-  </ng-container>
+    </li>
+  </ul>
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
@@ -154,9 +155,10 @@ hi{{mention}}
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
+<!--hi{{typeFlag}}-->
   <div class="container card-footer">
     <div class="row">
-      <div class="toggle-switch col-sm-1">
+      <div class="toggle-switch col-sm-1" [ngClass]="typeFlag? 'toggle-switch' :'toggle-switch-disable'">
         <input class="" id="{{groupId}}" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
         <label class="" for="{{groupId}}">
           <span class="solid-preview-label"></span>
