@@ -205,15 +205,14 @@
           </button>
         </div>
         <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded" #chartElement>
-          <button *ngFor="let g of ['Gender','Age','Sources']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}} <clr-tooltip>
+          <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}} <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
             <clr-tooltip-content clrPosition=right
                                  clrSize="lg" *clrIfOpen>
               <div class="tooltip-label">{{showToolTip(g)}}</div>
             </clr-tooltip-content>
           </clr-tooltip></button>
-          <app-concept-charts [concept]="r" [showMeasurementGenderBins]="showMeasurementGenderBins" [showAgeGraph]="showAgeGraph" [showGenderGraph]="showGenderGraph"
-                            [showSourcesGraph]="showSourcesGraph" [backgroundColor]="'#ECF1F4'">
+          <app-concept-charts [concept]="r" [showGraph]="graphToShow" [backgroundColor]="'#ECF1F4'">
           </app-concept-charts>
         </div>
         </div>
