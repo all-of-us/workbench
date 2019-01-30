@@ -2,12 +2,15 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
-ConceptSet,
-ConceptSetsService,
-RecentResource,
-Workspace,
-WorkspaceAccessLevel,
+  ConceptSet,
+  ConceptSetsService,
+  Domain,
+  RecentResource,
+  Workspace,
+  WorkspaceAccessLevel,
 } from 'generated';
+
+// import {Domain} from 'generated/fetch';
 
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 
@@ -15,6 +18,8 @@ import {WorkspaceData} from 'app/services/workspace-storage.service';
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {ToolTipComponent} from 'app/views/tooltip/component';
+
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -54,6 +59,7 @@ export class ConceptSetListComponent implements OnInit {
     this.loadConceptSets();
   }
 
+  // TODO: this should use the API?
   loadConceptSets() {
     this.conceptSetsLoading = true;
     this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId)

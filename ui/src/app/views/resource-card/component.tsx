@@ -361,7 +361,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           this.props.resourceCard.cohort.id)
           .then(() => {
             this.closeConfirmDelete();
-            console.log('deleted cohort');
             this.props.onUpdate();
           });
         break;

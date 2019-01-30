@@ -1,7 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -37,7 +36,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-// import {CohortsApi} from "../../../generated/fetch/api";
 
 
 const activatedRouteStub  = {

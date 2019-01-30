@@ -8,6 +8,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {WorkspaceStubVariables} from './workspace-service-stub';
+import {CohortListResponse} from "../../generated/fetch/api";
 
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;
@@ -86,8 +87,25 @@ export class CohortsApiStub extends CohortsApi {
   }
 
   updateCohort(ns: string, wsid: string, cid: number, newCohort: Cohort): Promise<Cohort> {
-    return new Promise<Cohort>(observer => {
+    return new Promise<Cohort>((resolve, reject) => {
+      setTimeout(() => {
 
+        const index = this.cohorts.findIndex((cohort: CohortStub) => {
+          if (cohort.id === cid && cohort.workspaceId) {
+            return true;
+          }
+          return false;
+        });
+        if (index !== -1) {
+          const newCohortStub = new CohortStub(newCohort, wsid);
+          this.cohorts[index] = newCohortStub;
+          resolve(newCohortStub);
+        } else {
+          reject(new Error(`Error updating. No cohort with id: ${cid} `
+              + `exists in workspace ${ns}, ${wsid} `
+              + `in cohort service stub`));
+        }
+      }, 0);
     });
   }
 
@@ -100,6 +118,24 @@ export class CohortsApiStub extends CohortsApi {
         }
         this.cohorts.splice(cohortIndex, 1);
         resolve({});
+      }, 0);
+    });
+  }
+
+  getCohortsInWorkspace(ns: string, wsid: string): Promise<CohortListResponse> {
+    return new Promise<CohortListResponse>((resolve, reject) => {
+      setTimeout(() => {
+        const cohortsInWorkspace: Cohort[] = [];
+        this.cohorts.forEach(cohort => {
+          if (cohort.workspaceId === wsid) {
+            cohortsInWorkspace.push(cohort);
+          }
+        });
+        if (cohortsInWorkspace.length === 0) {
+          reject('No cohorts in workspace.');
+        } else {
+          resolve({items: cohortsInWorkspace});
+        }
       }, 0);
     });
   }
