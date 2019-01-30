@@ -1204,6 +1204,47 @@ Common.register_command({
   :fn => ->(*args) { connect_to_cloud_db("connect-to-cloud-db", *args) }
 })
 
+def connect_to_cloud_db_binlog(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  env = read_db_vars(gcc)
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.status "\n" + "*" * 80
+    common.status "Listing available journal files: "
+
+    # "root" is required for binlog access.
+    password = env["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+      "echo 'SHOW BINARY LOGS;' | " +
+      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "--database=#{env['DB_NAME']} --password=#{password}", password)
+    common.status "*" * 80
+
+    common.status "\n" + "*" * 80
+    common.status "mysql login has been configured. Pick a journal file from " +
+                  "above and run commands like: "
+    common.status "  mysqlbinlog -R mysql-bin.xxxxxx\n"
+    common.status "See the Workbench playbook for more details."
+    common.status "*" * 80
+
+    # Work out of /tmp for easy local file redirection. We don't want binlogs
+    # winding up back in Workbench source control accidentally.
+    run_with_redirects(
+      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "cd /tmp; /bin/bash", password)
+  end
+end
+
+Common.register_command({
+  :invocation => "connect-to-cloud-db-binlog",
+  :description => "Connect to a Cloud SQL database for mysqlbinlog access",
+  :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
+})
+
 
 def deploy_gcs_artifacts(cmd_name, args)
   ensure_docker cmd_name, args
