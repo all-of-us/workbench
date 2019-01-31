@@ -309,8 +309,10 @@ paths:
           schema:
             $ref: "#/definitions/NihToken"
       responses:
-        204:
-          description: Request received.
+        200:
+          description: The user's updated profile.
+          schema:
+            $ref: "#/definitions/Profile"
         400:
           description: Bad request
           schema:

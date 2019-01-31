@@ -673,14 +673,15 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> updateNihToken(NihToken token) {
+  public ResponseEntity<Profile> updateNihToken(NihToken token) {
     if (token == null || token.getJwt() == null) {
       throw new BadRequestException("Token is required.");
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
       fireCloudService.postNihCallback(wrapper);
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+      User user = initializeUserIfNeeded();
+      return getProfileResponse(user);
     } catch (Exception e) {
       throw new ServerErrorException("Unable to update NIH token", e);
     }
