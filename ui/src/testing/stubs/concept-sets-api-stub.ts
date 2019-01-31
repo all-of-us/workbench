@@ -70,7 +70,6 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         const target = this.mustFindConceptSet(conceptSetId);
         target.name = req.name;
         target.description = req.description;
-        console.log(target.name);
         resolve(target);
       }, 0);
     });

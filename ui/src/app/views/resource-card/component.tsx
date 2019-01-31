@@ -378,13 +378,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
-  receiveEdit(): void {
+  receiveEdit(resource: RecentResource): void {
     if (this.isCohort) {
       cohortsApi().updateCohort(
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.cohort.id,
-        this.props.resourceCard.cohort
+        resource.cohort
       ).then( () => {
         this.closeEditModal();
         this.props.onUpdate();
@@ -394,7 +394,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.conceptSet.id,
-        ResourceCard.castConceptSet(this.props.resourceCard).conceptSet
+        ResourceCard.castConceptSet(resource).conceptSet
       ).then( () => {
         this.closeEditModal();
         this.props.onUpdate();
