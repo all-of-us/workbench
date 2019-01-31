@@ -63,7 +63,9 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
 
   render() {
     const error = <Error>Error Linking NIH Username: {this.state.errorMessage}
-      <div onClick={this.navigateHome} style={{cursor: 'pointer'}}>Please try linking again.</div>
+      <a href={'#'} style={{marginLeft: '.25rem'}} onClick={this.navigateHome}>
+        Please try linking again.
+      </a>
     </Error>;
 
     return (this.state.errorMessage ? error : spinner);
