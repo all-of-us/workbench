@@ -102,12 +102,12 @@ export class ConceptsServiceStub {
 
   public getDomainInfo(
     workspaceNamespace: string, workspaceId: string): Observable<DomainInfoResponse> {
-      return new Observable<DomainInfoResponse>(observer => {
-        setTimeout(() => {
-          observer.next({items: DomainStubVariables.STUB_DOMAINS});
-          observer.complete();
-        }, 0);
-      });
+    return new Observable<DomainInfoResponse>(observer => {
+      setTimeout(() => {
+        observer.next({items: DomainStubVariables.STUB_DOMAINS});
+        observer.complete();
+      }, 0);
+    });
   }
 
   // This just returns static values rather than doing a real search.
@@ -116,50 +116,50 @@ export class ConceptsServiceStub {
   public searchConcepts(
     workspaceNamespace: string, workspaceId: string,
     request?: SearchConceptsRequest): Observable<ConceptListResponse> {
-      return new Observable<ConceptListResponse>(observer => {
-        setTimeout(() => {
-          const response = {
-            items: [],
-            standardConcepts: [],
-            vocabularyCounts: [],
-            domainCounts: undefined
-          };
-          if (request.includeDomainCounts) {
-            response.domainCounts = DomainStubVariables.STUB_DOMAINS.map((domainInfo) => {
-              return {
-                domain: domainInfo.domain,
-                name: domainInfo.name,
-                conceptCount: domainInfo.allConceptCount
-              };
-            });
-          }
-          const foundDomain =
-            DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
-          this.concepts.forEach((concept) => {
-            if (concept.domainId !== foundDomain.name) {
-              return;
-            }
-            if (request.standardConceptFilter === StandardConceptFilter.ALLCONCEPTS) {
-              response.items.push(concept);
-              if (concept.standardConcept) {
-                response.standardConcepts.push(concept);
-              }
-            } else if (
-              request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
-                if (concept.standardConcept) {
-                  response.items.push(concept);
-                  response.standardConcepts.push(concept);
-                }
-            } else if (request.standardConceptFilter
-              === StandardConceptFilter.NONSTANDARDCONCEPTS) {
-                if (!concept.standardConcept) {
-                  response.items.push(concept);
-                }
-            }
+    return new Observable<ConceptListResponse>(observer => {
+      setTimeout(() => {
+        const response = {
+          items: [],
+          standardConcepts: [],
+          vocabularyCounts: [],
+          domainCounts: undefined
+        };
+        if (request.includeDomainCounts) {
+          response.domainCounts = DomainStubVariables.STUB_DOMAINS.map((domainInfo) => {
+            return {
+              domain: domainInfo.domain,
+              name: domainInfo.name,
+              conceptCount: domainInfo.allConceptCount
+            };
           });
-          observer.next(response);
-          observer.complete();
-        }, 0);
-      });
+        }
+        const foundDomain =
+          DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
+        this.concepts.forEach((concept) => {
+          if (concept.domainId !== foundDomain.name) {
+            return;
+          }
+          if (request.standardConceptFilter === StandardConceptFilter.ALLCONCEPTS) {
+            response.items.push(concept);
+            if (concept.standardConcept) {
+              response.standardConcepts.push(concept);
+            }
+          } else if (
+            request.standardConceptFilter === StandardConceptFilter.STANDARDCONCEPTS) {
+            if (concept.standardConcept) {
+              response.items.push(concept);
+              response.standardConcepts.push(concept);
+            }
+          } else if (request.standardConceptFilter
+            === StandardConceptFilter.NONSTANDARDCONCEPTS) {
+            if (!concept.standardConcept) {
+              response.items.push(concept);
+            }
+          }
+        });
+        observer.next(response);
+        observer.complete();
+      }, 0);
+    });
   }
 }

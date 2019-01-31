@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -16,8 +16,8 @@ import {
 @Component({
   selector: 'app-workspace-nav-bar',
   styleUrls: ['../../styles/buttons.css',
-              '../../styles/headers.css',
-              './component.css'],
+    '../../styles/headers.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
@@ -48,6 +48,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const handleData = (data) => {
       const workspace = <WorkspaceData> data.workspace;
+      currentWorkspaceStore.next(workspace);
       this.workspace = workspace;
       this.accessLevel = workspace.accessLevel;
     };
@@ -72,6 +73,7 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    currentWorkspaceStore.next(undefined);
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
@@ -102,9 +104,9 @@ export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
     this.workspacesService.deleteWorkspace(
       workspace.namespace, workspace.id).subscribe(() => {
         this.router.navigate(['/workspaces']);
-    }, () => {
-      this.workspaceDeletionError = true;
-    });
+      }, () => {
+        this.workspaceDeletionError = true;
+      });
   }
 
   receiveDelete(): void {

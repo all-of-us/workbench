@@ -22,7 +22,6 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
   simulateClick,
-  simulateClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -32,10 +31,7 @@ import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
-import {LeftScrollLightComponent} from 'app/icons/left-scroll-light/component';
-import {LeftScrollComponent} from 'app/icons/left-scroll/component';
-import {RightScrollLightComponent} from 'app/icons/right-scroll-light/component';
-import {RightScrollComponent} from 'app/icons/right-scroll/component';
+import {ScrollComponent} from 'app/icons/scroll/component';
 
 
 describe('RecentWorkComponent', () => {
@@ -52,11 +48,8 @@ describe('RecentWorkComponent', () => {
       ],
       declarations: [
         RecentWorkComponent,
-        LeftScrollComponent,
-        LeftScrollLightComponent,
-        RightScrollComponent,
-        RightScrollLightComponent,
         ResourceCardComponent,
+        ScrollComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         RenameModalComponent,
@@ -98,7 +91,7 @@ describe('RecentWorkComponent', () => {
     const cardNames = fixture.debugElement.queryAll(By.css('.name'))
       .map((card) => card.nativeElement.innerText);
     expect(cardNames).toEqual(
-        ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
+      ['Mock Concept Set Measurement', 'sample name', 'Mock Concept Set for condition' ,
         'sample name 2']);
   }));
 

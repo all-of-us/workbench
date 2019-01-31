@@ -2,9 +2,7 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.api.DomainLookupService;
 import org.pmiops.workbench.cohortbuilder.querybuilder.FactoryKey;
-import org.pmiops.workbench.cohortbuilder.querybuilder.QueryParameters;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -37,11 +35,11 @@ public class CohortQueryBuilder {
       "${mainTable}.person_id not in\n" +
           "(${excludeSql})\n";
 
-  private final DomainLookupService domainLookupService;
+  private final TemporalQueryBuilder temporalQueryBuilder;
 
   @Autowired
-  public CohortQueryBuilder(DomainLookupService domainLookupService) {
-    this.domainLookupService = domainLookupService;
+  public CohortQueryBuilder(TemporalQueryBuilder temporalQueryBuilder) {
+    this.temporalQueryBuilder = temporalQueryBuilder;
   }
 
   public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
@@ -66,9 +64,6 @@ public class CohortQueryBuilder {
       params.put(PERSON_ID_WHITELIST_PARAM, QueryParameterValue.array(
           participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
     } else {
-      domainLookupService.findCodesForEmptyDomains(request.getIncludes());
-      domainLookupService.findCodesForEmptyDomains(request.getExcludes());
-
       if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
         throw new BadRequestException(
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
@@ -98,15 +93,18 @@ public class CohortQueryBuilder {
     StringJoiner joiner = new StringJoiner("and ");
     List<String> queryParts = new ArrayList<>();
     for (SearchGroup includeGroup : groups) {
-      for (SearchGroupItem includeItem : includeGroup.getItems()) {
-        String query = QueryBuilderFactory
-            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQuery(params, new QueryParameters()
-                .type(includeItem.getType())
-                .parameters(includeItem.getSearchParameters())
-                .modifiers(includeItem.getModifiers()));
+      if (includeGroup.getTemporal()) {
+        String query = temporalQueryBuilder.buildQuery(params, includeGroup);
         queryParts.add(query);
+      } else {
+        for (SearchGroupItem includeItem : includeGroup.getItems()) {
+          String query = QueryBuilderFactory
+            .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
+            .buildQuery(params, includeItem, includeGroup.getMention());
+          queryParts.add(query);
+        }
       }
+
       if (excludeSQL) {
         joiner.add(EXCLUDE_SQL_TEMPLATE.replace("${mainTable}", mainTable)
             .replace("${excludeSql}", String.join(UNION_TEMPLATE, queryParts)));

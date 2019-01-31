@@ -2,13 +2,10 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
-import {Participant} from './participant.model';
-
 import {
   Cohort,
   CohortAnnotationDefinition,
   CohortReview,
-  ParticipantCohortAnnotation,
 } from 'generated';
 
 @Injectable()

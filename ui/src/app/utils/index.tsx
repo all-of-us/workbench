@@ -1,12 +1,15 @@
-import {ElementRef, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+
+import {DataAccessLevel} from 'generated';
 import {fromJS} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
-import {DataAccessLevel} from 'generated';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -76,26 +79,24 @@ window.addEventListener('resize', throttleAnimation(() => {
 }));
 
 const getWindowSize = () => {
-  return { height: window.innerHeight, width: window.innerWidth };
+  return {height: window.innerHeight, width: window.innerWidth};
 };
 
 export const withWindowSize = () => WrappedComponent => {
-  class Wrapper extends React.Component<
-    any,
-    { windowSize: { width: number, height: number } }
-  > {
+  class Wrapper extends React.Component<any,
+    { windowSize: { width: number, height: number } }> {
     constructor(props) {
       super(props);
-      this.state = { windowSize: getWindowSize() };
+      this.state = {windowSize: getWindowSize()};
     }
 
     static displayName = 'withWindowSize()';
 
     resize = () => {
-      const { windowSize } = this.state;
+      const {windowSize} = this.state;
       const newSize = getWindowSize();
       if (!fp.isEqual(windowSize, newSize)) {
-        this.setState({ windowSize: newSize });
+        this.setState({windowSize: newSize});
       }
     }
 
@@ -108,17 +109,18 @@ export const withWindowSize = () => WrappedComponent => {
     }
 
     render() {
-      const { windowSize } = this.state;
+      const {windowSize} = this.state;
       return <WrappedComponent windowSize={windowSize} {...this.props} />;
     }
   }
+
   return Wrapper as any;
 };
 
-export const nextSort = ({ field, direction }, newField) => {
+export const nextSort = ({field, direction}, newField) => {
   return newField === field ?
-    { field, direction: direction === 'asc' ? 'desc' : 'asc' } :
-    { field: newField, direction: 'asc' };
+    {field, direction: direction === 'asc' ? 'desc' : 'asc'} :
+    {field: newField, direction: 'asc'};
 };
 
 /**
@@ -135,16 +137,16 @@ export const nextSort = ({ field, direction }, newField) => {
  * or in sandboxed iframes (depending on flags/context)
  */
 export function cookiesEnabled(): boolean {
-    try {
-        // Create cookie
-        document.cookie = 'cookietest=1';
-        const ret = document.cookie.indexOf('cookietest=') !== -1;
-        // Delete cookie
-        document.cookie = 'cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT';
-        return ret;
-    } catch (e) {
-        return false;
-    }
+  try {
+    // Create cookie
+    document.cookie = 'cookietest=1';
+    const ret = document.cookie.indexOf('cookietest=') !== -1;
+    // Delete cookie
+    document.cookie = 'cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT';
+    return ret;
+  } catch (e) {
+    return false;
+  }
 }
 
 type ReactStyles<T> = {
@@ -172,7 +174,7 @@ type ReactStyles<T> = {
  *   style2: {color: 'blue', position: 'relative'} as React.CssProperties
  * };
  */
-export function reactStyles<T extends {[key: string]: React.CSSProperties}>(t: T): ReactStyles<T> {
+export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: T): ReactStyles<T> {
   return t;
 }
 
@@ -215,9 +217,9 @@ export function decamelize(str: string, separator: string) {
   separator = typeof separator === 'undefined' ? '_' : separator;
 
   return str
-      .replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
-      .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
-      .toLowerCase();
+    .replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
+    .replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')
+    .toLowerCase();
 }
 
 export const withStyle = styleObj => WrappedComponent => {
@@ -226,4 +228,51 @@ export const withStyle = styleObj => WrappedComponent => {
   });
   Wrapper.displayName = 'withStyle';
   return Wrapper;
+};
+
+export const summarizeErrors = errors => {
+  const errorList = fp.cond([
+    [fp.isPlainObject, fp.flatMap(fp.values)],
+    [fp.isArray, fp.identity],
+    [() => true, () => []]
+  ])(errors);
+  if (errorList.length) {
+    return errorList.map((v, i) => {
+      return <div key={i} style={{marginTop: i !== 0 ? '0.25rem' : undefined}}>{v}</div>;
+    });
+  }
+};
+
+export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>, name: string) => {
+  return (WrappedComponent) => {
+    class Wrapper extends React.Component<any, {value: T}> {
+      static displayName = 'connectBehaviorSubject()';
+      private subscription;
+
+      constructor(props) {
+        super(props);
+        this.state = {value: subject.getValue()};
+      }
+
+      componentDidMount() {
+        this.subscription = subject.subscribe(v => this.setState({value: v}));
+      }
+
+      componentWillUnmount() {
+        this.subscription.unsubscribe();
+      }
+
+      render() {
+        const {value} = this.state;
+        return <WrappedComponent {...this.props} {...{[name]: value}} />;
+      }
+    }
+
+    return Wrapper;
+  };
+};
+
+// HOC that provides a 'workspace' prop with current WorkspaceData
+export const withCurrentWorkspace = () => {
+  return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };

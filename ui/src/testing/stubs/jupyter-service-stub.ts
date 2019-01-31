@@ -5,8 +5,8 @@ import {JupyterContents, Model} from 'notebooks-generated';
 export class JupyterServiceStub {
 
   public postContents(
-      googleProject: string, clusterName: string, workspaceDir: string,
-      model?: Model, extraHttpRequestParams?: any): Observable<JupyterContents> {
+    googleProject: string, clusterName: string, workspaceDir: string,
+    model?: Model, extraHttpRequestParams?: any): Observable<JupyterContents> {
     return new Observable<JupyterContents>(observer => {
       setTimeout(() => {
         observer.next({
@@ -26,8 +26,8 @@ export class JupyterServiceStub {
   }
 
   public putContents(
-      googleProject: string, clusterName: string, workspaceDir: string,
-      newName: string, model?: Model, extraHttpRequestParams?: any): Observable<JupyterContents> {
+    googleProject: string, clusterName: string, workspaceDir: string,
+    newName: string, model?: Model, extraHttpRequestParams?: any): Observable<JupyterContents> {
     return new Observable<JupyterContents>(observer => {
       setTimeout(() => {
         observer.next({

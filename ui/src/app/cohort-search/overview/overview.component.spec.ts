@@ -7,7 +7,7 @@ import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
-import {CohortSearchActions} from '../redux';
+import {CohortSearchActions} from 'app/cohort-search/redux';
 import {OverviewComponent} from './overview.component';
 
 import {CohortBuilderService, CohortsService} from 'generated';

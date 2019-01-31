@@ -1,11 +1,7 @@
 import {select} from '@angular-redux/store';
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {DomainType, TreeSubType, TreeType} from 'generated';
-import {Map} from 'immutable';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {ModifierPageComponent} from '../modifier-page/modifier-page.component';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -15,10 +11,15 @@ import {
   CohortSearchActions,
   nodeAttributes,
   previewStatus,
+  scrollId,
   subtreeSelected,
   wizardOpen,
-} from '../redux';
-import {stripHtml, subtypeToTitle, typeToTitle} from '../utils';
+} from 'app/cohort-search/redux';
+import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
+import {DomainType, TreeSubType, TreeType} from 'generated';
+import {Map} from 'immutable';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
@@ -37,7 +38,8 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(activeItem) item$: Observable<any>;
   @select(activeParameterList) selection$: Observable<any>;
   @select(nodeAttributes) attributes$: Observable<any>;
-  @select(subtreeSelected) scrollTo$: Observable<any>;
+  @select(scrollId) scrollTo$: Observable<any>;
+  @select(subtreeSelected) subtree$: Observable<any>;
   @select(previewStatus) preview$;
   @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
@@ -94,9 +96,9 @@ export class ModalComponent implements OnInit, OnDestroy {
         });
       })
     );
-      this.subscription.add(this.selection$
-        .map(sel => sel.size === 0)
-        .subscribe(sel => this.noSelection = sel)
+    this.subscription.add(this.selection$
+      .map(sel => sel.size === 0)
+      .subscribe(sel => this.noSelection = sel)
       );
     this.subscription.add(this.attributes$
       .subscribe(node => {
@@ -110,9 +112,16 @@ export class ModalComponent implements OnInit, OnDestroy {
     );
 
     this.subscription.add(this.scrollTo$
+      .filter(nodeId => !!nodeId)
+      .subscribe(nodeId => {
+        this.setScroll(nodeId);
+      })
+    );
+
+    this.subscription.add(this.subtree$
       .filter(nodeIds => !!nodeIds)
       .subscribe(nodeIds => {
-        this.setScroll(nodeIds[0]);
+        this.disableCursor = nodeIds.length > 0;
       })
     );
 
@@ -150,21 +159,11 @@ export class ModalComponent implements OnInit, OnDestroy {
     }
   }
   setScroll(nodeId: string) {
-    let node: any;
-    this.disableCursor = true;
-    Observable.interval(100)
-      .takeWhile((val, index) => !node && index < 30)
-      .subscribe(i => {
-        node = document.getElementById('node' + nodeId.toString());
-        if (node) {
-          setTimeout(() => {
-            node.scrollIntoView({behavior: 'smooth'});
-            this.disableCursor = false;
-          }, 200);
-        } else if (i === 29) {
-          this.disableCursor = false;
-        }
-      });
+    const node = document.getElementById('node' + nodeId.toString());
+    if (node) {
+      setTimeout(() => node.scrollIntoView({behavior: 'smooth'}), 200);
+    }
+    this.disableCursor = false;
   }
 
   ngOnDestroy() {

@@ -1,6 +1,10 @@
-import { shallow } from 'enzyme';
+import {shallow} from 'enzyme';
 import * as React from 'react';
-import {ChartReactProps, IndividualParticipantsChartsComponent, IndividualParticipantsReactCharts} from '../individual-participants-charts/individual-participants-charts';
+import {
+  ChartReactProps,
+  IndividualParticipantsChartsComponent,
+  IndividualParticipantsReactCharts
+} from './individual-participants-charts';
 
 describe('IndividualParticipantsChartsComponent', () => {
 
@@ -14,8 +18,8 @@ describe('IndividualParticipantsChartsComponent', () => {
     props = {
       chartData: {
         loading: true,
-    conditionTitle: '',
-    items: [],
+        conditionTitle: '',
+        items: [],
       },
       chartKey: 0,
     };

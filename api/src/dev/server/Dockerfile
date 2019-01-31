@@ -38,6 +38,7 @@ RUN gcloud components install app-engine-java
 
 RUN apk --no-cache add gettext
 
+RUN apk --no-cache add mysql
 RUN apk --no-cache add mysql-client
 RUN curl https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 \
   > /usr/local/bin/cloud_sql_proxy && chmod +x /usr/local/bin/cloud_sql_proxy
@@ -65,6 +66,7 @@ WORKDIR /
 
 RUN gem install --no-document googleauth
 
+COPY with-mysql-login.sh /usr/local/bin
 COPY with-uid.sh /usr/local/bin
 
 ENTRYPOINT ["with-uid.sh"]

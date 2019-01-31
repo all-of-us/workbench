@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
   CohortAnnotationDefinition,

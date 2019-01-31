@@ -1,9 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {TreeSubType, TreeType} from 'generated';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaSubtype,
   activeCriteriaType,
@@ -14,7 +11,10 @@ import {
   ingredientsForBrand,
   isAutocompleteLoading,
   subtreeSelected,
-} from '../redux';
+} from 'app/cohort-search/redux';
+import {TreeSubType, TreeType} from 'generated';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 const trigger = 2;
 
@@ -31,13 +31,11 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   searchTerm: FormControl = new FormControl('');
   typedTerm: string;
   options = [];
-  multiples: any;
   loading = false;
   noResults = false;
   optionSelected = false;
   error = false;
   subscription: Subscription;
-  numMatches: number;
   ingredientList = [];
   highlightedOption: number;
   subtype: string;
@@ -73,7 +71,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       .subscribe(options => {
         if (this.triggerSearch) {
           this.options = [];
-          this.multiples = {};
           const optionNames = [];
           if (options !== null) {
             options.forEach(option => {
@@ -81,12 +78,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
               if (optionNames.indexOf(option.name) === -1) {
                 optionNames.push(option.name);
                 this.options.push(option);
-              } else {
-                if (this.multiples[option.name]) {
-                  this.multiples[option.name].push({id: option.id, path: option.path});
-                } else {
-                  this.multiples[option.name] = [{id: option.id, path: option.path}];
-                }
               }
             });
           }
@@ -103,19 +94,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         ingredients.forEach(item => {
           if (!this.ingredientList.includes(item.name)) {
             this.ingredientList.push(item.name);
+            ids.push(item.id);
+            path = path.concat(item.path.split('.'));
           }
-          ids.push(item.id);
-          path = path.concat(item.path.split('.'));
         });
         if (this.ingredientList.length) {
           this.actions.setCriteriaSearchTerms(this.ingredientList);
           this.actions.loadCriteriaSubtree(this._type, TreeSubType[TreeSubType.BRAND], ids, path);
         }
       });
-
-    const subtreeSelectSub = this.selected$
-      .filter(selectedIds => !!selectedIds)
-      .subscribe(selectedIds => this.numMatches = selectedIds.length);
 
     const typeSub = this.type$
       .subscribe(subtype => {
@@ -146,7 +133,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.subscription.add(loadingSub);
     this.subscription.add(optionsSub);
     this.subscription.add(ingredientSub);
-    this.subscription.add(subtreeSelectSub);
     this.subscription.add(typeSub);
     this.subscription.add(subtypeSub);
     this.subscription.add(inputSub);
@@ -164,7 +150,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     } else {
       this.optionSelected = false;
       this.ingredientList = [];
-      this.numMatches = 0;
       this.noResults = false;
       const subtype = this.codes ? this.subtype : null;
       this.actions.fetchAutocompleteOptions(this._type, subtype, this.searchTerm.value);
@@ -189,13 +174,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       } else {
         this.actions.setCriteriaSearchTerms([option.name]);
         const ids = [option.id];
-        let path = option.path.split('.');
-        if (this.multiples[option.name]) {
-          this.multiples[option.name].forEach(multiple => {
-            ids.push(multiple.id);
-            path = path.concat(multiple.path.split('.'));
-          });
-        }
+        const path = option.path.split('.');
         this.actions.loadCriteriaSubtree(this._type, option.subtype, ids, path);
       }
     }

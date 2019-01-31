@@ -9,18 +9,18 @@ import {ClarityModule} from '@clr/angular';
 import {
   ConceptSet, ConceptsService, CreateConceptSetRequest, Domain, WorkspaceResponse,
   WorkspacesService
-} from '../../../generated';
-import {ConceptSetsService} from '../../../generated/api/conceptSets.service';
-import {ConceptSetsServiceStub} from '../../../testing/stubs/concept-sets-service-stub';
+} from 'generated';
+import {ConceptSetsService} from 'generated/api/conceptSets.service';
+import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {
   ConceptsServiceStub,
   DomainStubVariables
-} from '../../../testing/stubs/concepts-service-stub';
+} from 'testing/stubs/concepts-service-stub';
 import {
   WorkspacesServiceStub,
   WorkspaceStubVariables
-} from '../../../testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from '../../../testing/test-helpers';
+} from 'testing/stubs/workspace-service-stub';
+import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 import {CreateConceptSetModalComponent} from './component';
 
 class ConceptSetCreatePage {
@@ -45,11 +45,11 @@ class ConceptSetCreatePage {
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
 
     this.workspacesService.getWorkspace(
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
-      this.fixture.componentInstance.wsId = response.workspace.id;
-      this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
-    });
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID).subscribe((response: WorkspaceResponse) => {
+        this.fixture.componentInstance.wsId = response.workspace.id;
+        this.fixture.componentInstance.wsNamespace = response.workspace.namespace;
+      });
     tick();
     this.readPageData();
   }
@@ -74,19 +74,19 @@ class ConceptSetCreatePage {
     }
   }
 }
-  const activatedRouteStub  = {
-    snapshot: {
-      url: [
+const activatedRouteStub  = {
+  snapshot: {
+    url: [
         {path: 'workspaces'},
         {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
         {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      ],
-      params: {
-        'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-      }
+    ],
+    params: {
+      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     }
-  };
+  }
+};
 
 describe('ConceptSetComponent', () => {
   let conceptSetCreatePage: ConceptSetCreatePage;
@@ -146,7 +146,7 @@ describe('ConceptSetComponent', () => {
       conceptSet: concepts
     };
     expect(spyObj).toHaveBeenCalledWith(WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-        WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, request);
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID, request);
   }));
 });
 

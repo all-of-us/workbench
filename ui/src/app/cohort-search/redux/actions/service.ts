@@ -1,9 +1,19 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
-import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {environment} from 'environments/environment';
-import {stripHtml} from '../../utils';
+
+import {
+  SearchGroup,
+  SearchGroupItem,
+  SearchParameter,
+  SearchRequest,
+  TreeSubType,
+  TreeType
+} from 'generated';
+
+import {stripHtml} from 'app/cohort-search/utils';
+import {fromJS, isImmutable, List, Map, Set} from 'immutable';
 
 import {
   activeGroupId,
@@ -21,18 +31,8 @@ import {
   isCriteriaLoading,
   isRequesting,
   SR_ID,
-} from '../store';
+} from 'app/cohort-search/redux/store';
 import * as ActionFuncs from './creators';
-
-import {
-    SearchGroup,
-    SearchGroupItem,
-    SearchParameter,
-    SearchRequest,
-    TreeSubType,
-    TreeType
-} from 'generated';
-
 
 @Injectable()
 export class CohortSearchActions {
@@ -130,8 +130,17 @@ export class CohortSearchActions {
     return this.ngRedux.getState();
   }
 
-  debugDir(obj) {if (environment.debug) { console.dir(obj); }}
-  debugLog(msg) {if (environment.debug) { console.log(msg); }}
+  debugDir(obj) {
+    if (environment.debug) {
+      console.dir(obj);
+    }
+  }
+
+  debugLog(msg) {
+    if (environment.debug) {
+      console.log(msg);
+    }
+  }
 
 
   /* Higher order actions - actions composed of other actions or providing
@@ -398,7 +407,7 @@ export class CohortSearchActions {
     if (nullIntersection || emptyIntersection) {
       this.debugLog('Not making request');
       this.setChartData('searchRequests', SR_ID, []);
-      return ;
+      return;
     }
 
     const request = this.mapAll();
@@ -472,7 +481,7 @@ export class CohortSearchActions {
       .map(this.mapParameter)
       .toJS();
 
-    const searchGroupItem =  <SearchGroupItem>{
+    const searchGroupItem = <SearchGroupItem>{
       id: itemId,
       type: item.get('type', '').toUpperCase(),
       searchParameters: params,
@@ -496,9 +505,6 @@ export class CohortSearchActions {
 
     if (immParam.get('conceptId')) {
       param.conceptId = immParam.get('conceptId');
-    }
-    if (immParam.get('domainId')) {
-      param.domainId = immParam.get('domainId');
     }
     if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
