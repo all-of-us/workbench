@@ -2,7 +2,8 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
+
+import * as React from 'react';
 
 import {
   BillingProjectStatus,
@@ -11,6 +12,70 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {reactStyles, ReactWrapperBase} from "app/utils";
+
+
+const styles = reactStyles({
+  mainHeader: {
+    color: '#FFFFFF',
+    fontSize: 28,
+    fontWeight: 400,
+    width: '25.86%',
+    display: 'flex',
+    minWidth: '18.2rem',
+    marginLeft: '3%',
+    marginTop: '2.58%',
+    letterSpacing: 'normal'
+  },
+  minorHeader: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 300,
+    display: 'flex',
+    marginTop: '1rem',
+    lineHeight: '22px'
+  },
+  text: {
+    color: '#FFFFFF',
+    contSize: 16,
+    lineHeight: '22px',
+    fontWeight: 100
+  }
+});
+
+export class AccountLinking extends React.Component<{}, {}> {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return <React.Fragment>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <div style={{display: 'flex', flexDirection: 'column'}}>
+          <div style={styles.mainHeader}>Researcher Workbench</div>
+          <div style={{marginLeft: '2rem'}}>
+            <div style={styles.minorHeader}>In order to get access to data and tools
+              please complete the following:</div>
+            <div style={styles.text}>Please login to your ERA Commons account and complete
+              the online training courses in order to gain full access to the Researcher
+              Workbench data and tools.</div>
+          </div>
+        </div>
+      </div>
+    </React.Fragment>;
+  }
+}
+
+@Component({
+  selector: 'app-account-linking',
+  template: '<div #root></div>',
+})
+export class AccountLinkingComponent extends ReactWrapperBase {
+  constructor() {
+    super(AccountLinking, []);
+  }
+}
+
 
 @Component({
   styleUrls: ['./component.css'],
@@ -66,9 +131,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
     }];
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
-  @ViewChild(QuickTourModalComponent)
-  quickTourModal: QuickTourModalComponent;
   quickTour: boolean;
+  linkAccount: boolean;
 
   constructor(
     private profileService: ProfileService,
@@ -107,6 +171,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.reloadSpinner();
     });
     this.profileStorageService.reload();
+    this.linkAccount = true;
   }
 
   public closeQuickTour(): void {
