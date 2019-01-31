@@ -323,7 +323,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         }
 
         List<DomainInfo> domains = domainInfoDao.findStandardOrCodeMatchConceptCounts(domainKeyword, query, toMatchConceptIds);
-        System.out.println(domains);
         List<SurveyModule> surveyModules = surveyModuleDao.findSurveyModuleQuestionCounts(surveyKeyword);
         DomainInfosAndSurveyModulesResponse response = new DomainInfosAndSurveyModulesResponse();
         response.setDomainInfos(domains.stream()
