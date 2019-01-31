@@ -6,12 +6,7 @@
         Loading...
       </span>
       <span class="count-header" *ngIf="!(isRequesting$ | async)">
-        <ng-container *ngIf="(total$ | async) === null">
-          --
-        </ng-container>
-        <ng-container *ngIf="(total$ | async) !== null">
-          {{ total$ | async | number }}
-        </ng-container>
+        {{ total$ | async | number }}
       </span>
       <span *ngIf="(error$ | async)">
         <clr-icon

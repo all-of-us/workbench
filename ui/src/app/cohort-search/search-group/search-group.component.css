@@ -178,3 +178,7 @@ clr-icon[shape=error-standard] {
   background: #ffffff;
   color: rgb(195, 195, 195);
 }
+
+clr-icon[shape=warning-standard] {
+  color: #E28327;
+}

@@ -158,7 +158,7 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="group.get('count') !== null && !envFlag">
+  <div class="card-footer text-right" *ngIf="group.get('count') !== -1 && !envFlag">
     Group Count:
     <span *ngIf="isRequesting"
           class="spinner spinner-inline"
@@ -166,7 +166,20 @@
       Loading...
     </span>
     <span *ngIf="!isRequesting">
-      {{ group.get('count') | number }}
+      <ng-container *ngIf="group.get('count') !== null; else countWarning">
+        {{ group.get('count') | number }}
+      </ng-container>
+      <ng-template #countWarning>
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+          <clr-tooltip-content clrSize="lg" *clrIfOpen>
+            <span>
+              This group has no count since there are no active items
+            </span>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </ng-template>
+
     </span>
     <span *ngIf="error">
       <clr-icon

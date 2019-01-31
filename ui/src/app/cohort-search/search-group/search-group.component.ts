@@ -50,7 +50,6 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       });
       const groupDiv = document.getElementById(this.group.get('id'));
-      console.log(groupDiv);
       ro.observe(groupDiv);
     }
   }
@@ -101,11 +100,13 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
 
   setOverlayPosition() {
     const groupCard = document.getElementById(this.group.get('id'));
-    const {marginBottom, width, height} = window.getComputedStyle(groupCard);
-    const overlay = document.getElementById('overlay_' + this.group.get('id'));
-    const styles = 'width:' + width + '; height:' + height + '; margin: -'
-      + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
-    overlay.setAttribute('style', styles);
+    if (groupCard) {
+      const {marginBottom, width, height} = window.getComputedStyle(groupCard);
+      const overlay = document.getElementById('overlay_' + this.group.get('id'));
+      const styles = 'width:' + width + '; height:' + height + '; margin: -'
+        + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
+      overlay.setAttribute('style', styles);
+    }
   }
 
   launchWizard(criteria: any) {
