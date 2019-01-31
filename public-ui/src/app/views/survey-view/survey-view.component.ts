@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import 'rxjs/add/operator/debounceTime';
@@ -10,6 +10,7 @@ import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
+import {GraphType} from "../../utils/graphtypes";
 
 @Component({
   selector: 'app-survey-view',
@@ -18,7 +19,7 @@ import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 })
 
 export class SurveyViewComponent implements OnInit, OnDestroy {
-
+  graphToShow = GraphType.BiologicalSex;
   domainId: string;
   title ;
   subTitle;
@@ -43,6 +44,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   /* Show answers toggle */
   showAnswer = {};
+  @ViewChild('chartElement') chartEl: ElementRef;
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -75,6 +77,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
+          q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
@@ -200,10 +203,29 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  public showAnswerGraphs(q, a: AchillesResult) {
-    q.selectedAnswer = a;
+  public showAnswerGraphs(a: any) {
+    if (a.expanded) {
+      a.expanded = false;
+      return;
+    }
+    a.expanded = true;
   }
-
+  public resetSelectedGraphs() {
+    this.graphToShow = GraphType.None;
+  }
+  public selectGraph(g, q: any) {
+    this.chartEl.nativeElement.scrollIntoView(
+      { behavior: 'smooth', block: 'nearest', inline: 'start' });
+    this.resetSelectedGraphs();
+    this.graphToShow = g;
+    if (g === GraphType.GenderIdentity) {
+      q.selectedAnalysis = q.genderIdentityAnalysis;
+    } else if (g === GraphType.Age) {
+      q.selectedAnalysis = q.ageAnalysis;
+    } else {
+      q.selectedAnalysis = q.genderAnalysis;
+    }
+  }
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
