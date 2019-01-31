@@ -10,6 +10,9 @@ import {
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
+import {FormArray, FormControl, FormGroup} from "@angular/forms";
+import {integerAndRangeValidator, numberAndNegativeValidator} from 'app/cohort-search/validators';
+import { Validators } from '@angular/forms';
 
 
 
@@ -43,6 +46,10 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   itemId: any;
   treeType = [];
 
+  timeForm = new FormGroup({
+    timeValue: new FormControl(1),
+  });
+
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
@@ -54,7 +61,6 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     this.itemSubscription = this.ngRedux.select(getTemporalGroupItems(this.group.get('id')))
       .filter(temporal => !!temporal)
       .subscribe(i => {
-        console.log(i.type);
         this.treeType = i.type;
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
@@ -101,7 +107,9 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   get timeValue() {
+    // console.log(this.group.get('timeValue'));
     return this.group.get('timeValue');
+
   }
 
   get items() {
@@ -120,11 +128,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
+    console.log(this.group.get('timeValue'));
     e.target.checked && this.mention === '' ?
       this.getMentionTitle(this.whichMention[0]) : this.getMentionTitle(this.mention);
     e.target.checked && this.time === '' ?
       this.getTimeTitle(this.timeDropDown[0]) : this.getTimeTitle(this.time);
-
+    // e.target.checked && this.timeValue === 0 ?
+    //   this.getTimeValue(1) : this.getTimeValue(this.timeValue);
     this.actions.updateTemporal(e.target.checked, this.groupId);
   }
 
@@ -137,6 +147,9 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTimeValue(e) {
+   //  console.log(e);
+   // const value = e.target.value? e.target.value : e;
+   // console.log(value);
     this.actions.updateTemporalTimeValue(e.target.value, this.groupId);
   }
 

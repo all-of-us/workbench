@@ -51,13 +51,13 @@ public class TemporalQueryBuilder {
     "temp1.person_id = temp2.person_id and temp1.entry_date between " +
       "DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY) and DATE_ADD(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String TEMPORAL_EXIST_TEMPLATE =
-    "select count(distinct temp1.person_id)\n" +
+    "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "where exists (select 1\n" +
       "from (${query2}) temp2\n" +
       "where (${conditions}))\n";
   private static final String TEMPORAL_JOIN_TEMPLATE =
-    "select count(distinct temp1.person_id)\n" +
+    "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
       "join (select person_id, visit_concept_id, entry_date\n" +
       "from (${query2})\n" +
@@ -78,7 +78,7 @@ public class TemporalQueryBuilder {
         String query = QueryBuilderFactory
           .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
           .buildQuery(params, tempGroup,
-            isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION.name());
+            isFirstGroup ? includeGroup.getMention().name() : TemporalMention.ANY_MENTION.name());
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {

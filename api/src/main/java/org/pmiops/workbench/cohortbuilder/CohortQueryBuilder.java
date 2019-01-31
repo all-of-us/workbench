@@ -100,7 +100,7 @@ public class CohortQueryBuilder {
         for (SearchGroupItem includeItem : includeGroup.getItems()) {
           String query = QueryBuilderFactory
             .getQueryBuilder(FactoryKey.getType(includeItem.getType()))
-            .buildQuery(params, includeItem, includeGroup.getMention());
+            .buildQuery(params, includeItem, null);
           queryParts.add(query);
         }
       }
