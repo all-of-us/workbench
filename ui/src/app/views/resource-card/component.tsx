@@ -218,7 +218,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         domain: resourceCard.conceptSet.domain as Domain};
       return {...resourceCard, conceptSet: myTempConceptSet};
     }
-    return resourceCard
+    return resourceCard;
   }
 
   get resourceType(): ResourceType {
