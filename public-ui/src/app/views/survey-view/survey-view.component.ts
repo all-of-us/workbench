@@ -218,12 +218,16 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
     this.graphToShow = g;
-    if (g === GraphType.GenderIdentity) {
-      q.selectedAnalysis = q.genderIdentityAnalysis;
-    } else if (g === GraphType.Age) {
-      q.selectedAnalysis = q.ageAnalysis;
-    } else {
-      q.selectedAnalysis = q.genderAnalysis;
+    switch (g) {
+      case GraphType.GenderIdentity:
+        q.selectedAnalysis = q.genderIdentityAnalysis;
+        break;
+      case GraphType.Age:
+        q.selectedAnalysis = q.ageAnalysis;
+        break;
+      default:
+        q.selectedAnalysis = q.genderAnalysis;
+        break;
     }
   }
   public graphAnswerClicked(achillesResult) {
