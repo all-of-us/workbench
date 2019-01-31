@@ -76,7 +76,7 @@ export class ChartComponent implements OnChanges {
       title: options.title,
       subtitle: {},
       tooltip: {
-        pointFormat: '<b>{point.y} </b><br>{series.name}'
+        pointFormat: '<b>{point.y} </b><br>'
       },
       plotOptions: {
         series: {
@@ -373,7 +373,11 @@ export class ChartComponent implements OnChanges {
       }
       return 0;
     });
-    const series = {name: seriesName, colorByPoint: true, data: data};
+    const series = {name: seriesName, colorByPoint: true, data: data,
+      tooltip: {
+        headerFormat: '<span style="font-size: 10px"><br/>',
+        pointFormat: '<b> {point.y} </b> {point.name}</span>'
+      }};
     return {
       chart: {type: (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID
           || this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID)
