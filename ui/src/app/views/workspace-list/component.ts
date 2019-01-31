@@ -52,8 +52,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   deleting = false;
   confirmDeleting = false;
   workspaceDeletionError = false;
-  resource: Workspace;
-  // TODO This is necessary to placate the delete error template - figure out how to remove it
   workspace: Workspace = {name: ''};
 
   @ViewChild(BugReportComponent)
@@ -140,11 +138,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   receiveDelete(): void {
-    this.delete(this.resource);
+    this.delete(this.workspace);
   }
 
   openConfirmDelete(workspace: Workspace): void {
-    this.resource = workspace;
+    this.workspace = workspace;
     this.confirmDeleting = true;
   }
 

@@ -12,10 +12,8 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {NotebookListComponent} from 'app/views/notebook-list/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
@@ -39,7 +37,12 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {WorkspacesApi} from 'generated/fetch';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+
 import {
+  findElementsReact,
   setupModals,
   simulateClick,
   simulateClickReact,
@@ -60,6 +63,7 @@ class NotebookListPage {
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(NotebookListComponent);
     setupModals(this.fixture);
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.readPageData();
@@ -71,7 +75,7 @@ class NotebookListPage {
     this.workspaceNamespace = this.route[1].path;
     this.workspaceId = this.route[2].path;
     const de = this.fixture.debugElement;
-    this.notebookCards = de.queryAll(By.css('.item-card'));
+    this.notebookCards = findElementsReact(this.fixture, '[data-test-id="card-name"]');
     this.addCard = de.queryAll((By.css('.add-card')))[0];
   }
 }
@@ -110,13 +114,11 @@ describe('NotebookListComponent', () => {
       ],
       declarations: [
         BugReportComponent,
-        EditModalComponent,
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
         NotebookListComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
-        RenameModalComponent,
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceNavBarComponent,
@@ -156,27 +158,26 @@ describe('NotebookListComponent', () => {
 
   it('displays correct information when notebook cloned', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="copy"]');
     fixture.componentInstance.updateList();
     tick();
     updateAndTick(fixture);
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
-    expect(notebooksOnPage.map((nb) => nb.nativeElement.innerText)).toMatch('mockFile Clone');
+    const notebooksOnPage = findElementsReact(fixture, '[data-test-id="card"]');
+    expect(notebooksOnPage.map((nb) => nb.innerText)).toMatch('mockFile Clone');
     expect(fixture.componentInstance.resourceList.map(nb => nb.notebook.name))
       .toContain('mockFile Clone.ipynb');
   }));
 
   it('displays correct information when notebook deleted', fakeAsync(() => {
     const fixture = notebookListPage.fixture;
-    const de = fixture.debugElement;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     simulateClickReact(fixture, '[data-test-id="trash"]');
     updateAndTick(fixture);
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
-    const notebooksOnPage = de.queryAll(By.css('.item-card'));
+    updateAndTick(fixture);
+    const notebooksOnPage = findElementsReact(fixture, '[data-test-id="card"]');
     expect(notebooksOnPage.length).toBe(0);
   }));
 });
