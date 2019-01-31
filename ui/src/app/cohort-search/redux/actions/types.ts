@@ -55,7 +55,6 @@ export const ENABLE_ENTITY = 'ENABLE_ENTITY';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
 export const SET_ENTITY_TIMEOUT = 'SET_ENTITY_TIMEOUT';
-export const PAUSE_PENDING_ITEMS = 'PAUSE_PENDING_ITEMS';
 export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
 export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 
@@ -352,12 +351,6 @@ export interface ActionTypes {
     entity: string;
     entityId: string;
     timeoutId: number;
-    start: number;
-    duration: number;
-  };
-  PAUSE_PENDING_ITEMS: {
-    type: typeof PAUSE_PENDING_ITEMS;
-    groupId: string;
   };
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
@@ -450,7 +443,6 @@ export type RootAction =
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
   | ActionTypes[typeof SET_ENTITY_TIMEOUT]
-  | ActionTypes[typeof PAUSE_PENDING_ITEMS]
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
