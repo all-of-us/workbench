@@ -745,6 +745,7 @@ public class ProfileControllerTest {
   public void testUpdateNihToken() {
     doNothing().when(fireCloudService).postNihCallback(any());
     try {
+      createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
     } catch (Exception e) {
       fail();
