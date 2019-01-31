@@ -4,8 +4,6 @@ import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 
 import {SearchRequest} from 'generated';
-import {Simulate} from 'react-dom/test-utils';
-import drop = Simulate.drop;
 
 @Component({
   selector: 'app-search-group-select',
