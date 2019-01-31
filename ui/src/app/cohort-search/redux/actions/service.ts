@@ -121,16 +121,22 @@ export class CohortSearchActions {
     this._updatedTemporal(flag, groupId);
   }
 
-  updateWhichMention(mention: any, groupId: string) {
+  updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
     this._updateWhichMention(mention, groupId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
-  updateTemporalTime(time: any, groupId: string) {
+  updateTemporalTime(time: any, groupId: string, role: keyof SearchRequest) {
     this._updateTemporalTime(time, groupId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
-  updateTemporalTimeValue(timeValue: any, groupId: string) {
+  updateTemporalTimeValue(timeValue: any, groupId: string, role: keyof SearchRequest) {
     this._updateTemporalTimeValue(timeValue, groupId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
   genSuffix(): string {

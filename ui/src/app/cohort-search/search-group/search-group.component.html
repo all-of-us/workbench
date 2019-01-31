@@ -103,8 +103,11 @@
   </div>
 
   <!--********************************Temporal changes start***************************************-->
+  <!--hi  <app-validator-errors [form]="timeForm"></app-validator-errors>-->
 
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
+
+    <!--hi   {{timeForm.controls[0].timeValue.get(value)}}-->
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="time; else defineTime"> {{formatStatus(time)}}</div>
@@ -121,12 +124,22 @@
           clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <!--<form [formGroup]="timeForm">-->
-      <!--&lt;!&ndash;<app-validator-errors [form]="form"></app-validator-errors>&ndash;&gt;-->
-      <!--&lt;!&ndash;<input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  formControlName="timeValue"  class="time-inputBox" type="text" placeholder="X"  min="0" (keyup)="getTimeValue($event)">&ndash;&gt;-->
-    <!--</form>-->
-    <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox" type="text" placeholder="X"  min="0" [(ngModel)] = "timeValue" (keyup)="getTimeValue($event)">
 
+
+    <!--<form [formGroup]="timeForm">-->
+
+      <!--<input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  name="inputTimeValue" formControlName="inputTimeValue"-->
+             <!--class="time-inputBox"-->
+             <!--type="number"-->
+             <!--[min]="0"-->
+             <!--[max]="100"-->
+             <!--[(ngModel)] = "timeValue"-->
+             <!--(ngModelChange)="getTimeValue($event)">-->
+    <!--</form>-->
+    <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox" type="number"
+           min="0" max="500"
+           [(ngModel)] = "timeValue"
+           (ngModelChange)="getTimeValue($event)">
   </div>
 
   <ul *ngIf="temporalFlag">
