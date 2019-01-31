@@ -24,8 +24,8 @@
       </div>
       <div style="display: flex; flex-wrap: wrap;">
         <div *ngFor="let cohort of resourceList">
-          <app-resource-card [resourceCard]="cohort" [cssClass]="'for-list'"
-                             (onUpdate)="reloadCohorts()">
+          <app-resource-card [resourceCard]="cohort"
+                             [onUpdate]="reloadCohorts.bind(this)">
           </app-resource-card>
         </div>
       </div>

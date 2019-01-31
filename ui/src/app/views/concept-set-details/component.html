@@ -79,7 +79,7 @@
 </app-top-box>
 
 <app-confirm-delete-modal [resourceType]="'Concept Set'"
-                          [resource]=conceptSet
+                          [resourceName]=conceptSet.name
                           [receiveDelete]=receiveDelete.bind(this)
                           [deleting]="confirmDeleting"
                           [closeFunction]="closeConfirmDelete.bind(this)">

@@ -70,7 +70,7 @@
 
 <app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
 <app-confirm-delete-modal [resourceType]="'workspace'"
-                          [resource]="workspace"
+                          [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete.bind(this)"
                           [closeFunction]="closeConfirmDelete.bind(this)"
                           [deleting]="confirmDeleting"></app-confirm-delete-modal>

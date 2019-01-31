@@ -1,6 +1,7 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import {DataAccessLevel} from 'generated';
+import {DataAccessLevel, Domain} from 'generated';
+import {Domain as FetchDomain} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -276,3 +277,9 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
+
+// Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
+export function generateDomain(domain: FetchDomain): Domain {
+  const d = fp.capitalize(FetchDomain[domain]);
+  return Domain[d];
+}
