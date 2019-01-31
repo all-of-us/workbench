@@ -3,16 +3,12 @@ import {ActivatedRoute} from '@angular/router';
 
 import {
   ConceptSet,
-  ConceptSetsService,
-  Domain,
   RecentResource,
   Workspace,
   WorkspaceAccessLevel,
 } from 'generated';
 
 import {generateDomain} from 'app/utils/index';
-
-// import {Domain} from 'generated/fetch';
 
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 
@@ -44,7 +40,6 @@ export class ConceptSetListComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private conceptSetsService: ConceptSetsService
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;

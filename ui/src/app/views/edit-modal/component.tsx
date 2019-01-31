@@ -103,7 +103,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
         <ModalFooter>
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
-          <Button disabled={!(this.state.resourceName.length > 0)}
+          <Button disabled={!(this.state.resourceName.length > 0) || this.state.loading}
                   data-test-id='save-edit'
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>

@@ -25,33 +25,27 @@ export class WorkspacesApiStub extends WorkspacesApi {
   getNoteBookList(workspaceNamespace: string,
     workspaceId: string, extraHttpRequestParams?: any): Promise<Array<FileDetail>> {
     return new Promise<Array<FileDetail>>(resolve => {
-      setTimeout(() => {
-        resolve(this.notebookList);
-      }, 0);
+      resolve(this.notebookList);
     });
   }
 
   cloneNotebook(workspaceNamespace: string, workspaceId: string,
     notebookName: String): Promise<any> {
     return new Promise<any>(resolve => {
-      setTimeout(() => {
-        const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
-        this.notebookList.push({
-          'name': cloneName,
-          'path': 'gs://bucket/notebooks/' + cloneName,
-          'lastModifiedTime': 100
-        });
-        resolve({});
+      const cloneName = notebookName.replace('.ipynb', '') + ' Clone.ipynb';
+      this.notebookList.push({
+        'name': cloneName,
+        'path': 'gs://bucket/notebooks/' + cloneName,
+        'lastModifiedTime': 100
       });
+      resolve({});
     });
   }
 
   deleteNotebook(workspaceNamespace: string, workspaceId: string,
     notebookName: String): Promise<any> {
     return new Promise<any>(resolve => {
-      setTimeout(() => {
-        this.notebookList.pop();
-      });
+      this.notebookList.pop();
       resolve({});
     });
   }

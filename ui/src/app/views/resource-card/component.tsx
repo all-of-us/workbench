@@ -186,27 +186,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   constructor(props: ResourceCardProps) {
     super(props);
-    const defaultState = {
+    this.state = {
       editing: false,
       renaming: false,
-      confirmDeleting: false
+      confirmDeleting: false,
+      invalidResourceError: !(props.resourceCard.notebook ||
+          props.resourceCard.cohort ||
+          props.resourceCard.conceptSet)
     };
-    if (props.resourceCard) {
-      if ((props.resourceCard.notebook) ||
-          (props.resourceCard.cohort) ||
-          (props.resourceCard.conceptSet)) {
-        this.state = {
-          invalidResourceError: false,
-          ...defaultState
-        };
-      } else {
-        this.state = {
-          invalidResourceError: true,
-          ...defaultState
-        };
-      }
-    }
-
   }
 
   // TODO [1/31/19] This method is only necessary until the parent components
@@ -283,19 +270,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     }
   }
 
-  editCohort(): void {
-    // This ensures the cohort binding is picked up before the open resolves.
-    setTimeout(_ => this.editConceptSet(), 0);
-  }
-
-  editConceptSet(): void {
+  edit(): void {
     this.setState({editing: true});
   }
 
   reviewCohort(): void {
-    navigateByUrl('/workspaces/' + this.props.resourceCard.workspaceNamespace
-        + '/' + this.props.resourceCard.workspaceFirecloudName + '/cohorts/'
-        + this.props.resourceCard.cohort.id + '/review');
+    const {resourceCard: {workspaceNamespace, workspaceFirecloudName, cohort: {id}}} = this.props;
+    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
   }
 
   closeEditModal(): void {
@@ -457,8 +438,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onCloneResource={this.cloneResource.bind(this)}
                               onDeleteResource={this.openConfirmDelete.bind(this)}
                               onRenameNotebook={this.renameNotebook.bind(this)}
-                              onEditCohort={this.editCohort.bind(this)}
-                              onEditConceptSet={this.editConceptSet.bind(this)}
+                              onEditCohort={this.edit.bind(this)}
+                              onEditConceptSet={this.edit.bind(this)}
                               onReviewCohort={this.reviewCohort.bind(this)}
                               onOpenJupyterLabNotebook={this.openResource.bind(this, true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>

@@ -56,9 +56,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
   public getConceptSetsInWorkspace(
     workspaceNamespace: string, workspaceId: string): Promise<ConceptSetListResponse> {
     return new Promise<ConceptSetListResponse>(resolve => {
-      setTimeout(() => {
-        resolve({items: this.conceptSets});
-      }, 0);
+      resolve({items: this.conceptSets});
     });
   }
 
@@ -66,68 +64,23 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     workspaceNamespace: string, workspaceId: string, conceptSetId: number,
     req: ConceptSet): Promise<ConceptSet> {
     return new Promise<ConceptSet>(resolve => {
-      setTimeout(() => {
-        const target = this.mustFindConceptSet(conceptSetId);
-        target.name = req.name;
-        target.description = req.description;
-        resolve(target);
-      }, 0);
+      const target = this.mustFindConceptSet(conceptSetId);
+      target.name = req.name;
+      target.description = req.description;
+      resolve(target);
     });
   }
-
-  // public createConceptSet(
-  //     workspaceNamespace: string, workspaceId: string, conceptSet?: ConceptSet,
-  //     extraHttpRequestParams?: any): Promise<ConceptSet> {
-  //   return new Promise<ConceptSet>(resolve => {
-  //     setTimeout(() => {
-  //       resolve(this.conceptSets[0]);
-  //     });
-  //   });
-  // }
-
-  // public updateConceptSetConcepts(
-  //     workspaceNamespace: string, workspaceId: string, conceptSetId: number,
-  //     req: UpdateConceptSetRequest): Observable<ConceptSet> {
-  //   return new Observable<ConceptSet>(obs => {
-  //     setTimeout(() => {
-  //       const target = this.conceptSets.find(cs => cs.id === conceptSetId);
-  //       if (!target) {
-  //         throw Error(`concept set ${conceptSetId} not found`);
-  //       }
-  //       if (!target.concepts) {
-  //         target.concepts = [];
-  //       }
-  //       for (const id of req.removedIds || []) {
-  //         const index = target.concepts.findIndex(c => c.conceptId === id);
-  //         if (index >= 0) {
-  //           target.concepts.splice(index, 1);
-  //         }
-  //       }
-  //       for (const id of req.addedIds || []) {
-  //         const concept = this.conceptsStub.concepts.find(c => c.conceptId === id);
-  //         if (!concept) {
-  //           throw Error(`concept ${id} not found`);
-  //         }
-  //         target.concepts.push(concept);
-  //       }
-  //       obs.next(target);
-  //       obs.complete();
-  //     }, 0);
-  //   });
-  // }
 
   public deleteConceptSet(
     workspaceNamespace: string, workspaceId: string,
     conceptSetId: number): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
-      setTimeout(() => {
-        const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);
-        if (index < 0) {
-          throw Error(`concept set ${conceptSetId} not found`);
-        }
-        this.conceptSets.splice(index, 1);
-        resolve({});
-      }, 0);
+      const index = this.conceptSets.findIndex(cs => cs.id === conceptSetId);
+      if (index < 0) {
+        throw Error(`concept set ${conceptSetId} not found`);
+      }
+      this.conceptSets.splice(index, 1);
+      resolve({});
     });
   }
 }
