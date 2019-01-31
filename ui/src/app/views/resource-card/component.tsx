@@ -276,7 +276,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   reviewCohort(): void {
     const {resourceCard: {workspaceNamespace, workspaceFirecloudName, cohort: {id}}} = this.props;
-    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
+    navigateByUrl(
+        `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
   }
 
   closeEditModal(): void {
