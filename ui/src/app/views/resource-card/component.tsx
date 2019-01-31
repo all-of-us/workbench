@@ -176,8 +176,6 @@ export interface ResourceCardProps {
 }
 
 export interface ResourceCardState {
-  resourceType: ResourceType;
-  resourceCard: RecentResource;
   renaming: boolean;
   editing: boolean;
   confirmDeleting: boolean;
@@ -194,37 +192,15 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       confirmDeleting: false
     };
     if (props.resourceCard) {
-      if (props.resourceCard.notebook) {
+      if ((props.resourceCard.notebook) ||
+          (props.resourceCard.cohort) ||
+          (props.resourceCard.conceptSet)) {
         this.state = {
-          resourceType: ResourceType.NOTEBOOK,
-          resourceCard: props.resourceCard,
           invalidResourceError: false,
           ...defaultState
         };
-      } else if (props.resourceCard.cohort) {
-        this.state  = {
-          resourceType: ResourceType.COHORT,
-          resourceCard: props.resourceCard,
-          invalidResourceError: false,
-          ...defaultState
-        };
-      } else if (props.resourceCard.conceptSet) {
-        // TODO [1/29/19]: Need to thread generated/fetch model types through for API calls
-        //  once parent components (notebook-list, cohort-list, concept-set-list) are converted
-        //  this should go away and resourceCard can be used as what comes through the props
-        const myTempConceptSet = {...this.props.resourceCard.conceptSet,
-          domain: props.resourceCard.conceptSet.domain as Domain};
-        this.state = {
-          resourceType: ResourceType.CONCEPT_SET,
-          resourceCard: {...props.resourceCard, conceptSet: myTempConceptSet},
-          invalidResourceError: false,
-          ...defaultState
-        };
-
       } else {
         this.state = {
-          resourceType: ResourceType.INVALID,
-          resourceCard: props.resourceCard,
           invalidResourceError: true,
           ...defaultState
         };
@@ -233,16 +209,40 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   }
 
+  // TODO [1/31/19] This method is only necessary until the parent components
+  //    (notebook-list, cohort-list, conceptSet-list) have been converted and use the
+  //    fetch API models.
+  static castConceptSet(resourceCard: RecentResource): RecentResource {
+    if (resourceCard.conceptSet) {
+      const myTempConceptSet = {...resourceCard.conceptSet,
+        domain: resourceCard.conceptSet.domain as Domain};
+      return {...resourceCard, conceptSet: myTempConceptSet};
+    }
+    return resourceCard
+  }
+
+  get resourceType(): ResourceType {
+    if (this.props.resourceCard.notebook) {
+      return ResourceType.NOTEBOOK;
+    } else if (this.props.resourceCard.cohort) {
+      return ResourceType.COHORT;
+    } else if (this.props.resourceCard.conceptSet) {
+      return ResourceType.CONCEPT_SET;
+    } else {
+      return ResourceType.INVALID;
+    }
+  }
+
   get isCohort(): boolean {
-    return this.state.resourceType === ResourceType.COHORT;
+    return this.resourceType === ResourceType.COHORT;
   }
 
   get isConceptSet(): boolean {
-    return this.state.resourceType === ResourceType.CONCEPT_SET;
+    return this.resourceType === ResourceType.CONCEPT_SET;
   }
 
   get isNotebook(): boolean {
-    return this.state.resourceType === ResourceType.NOTEBOOK;
+    return this.resourceType === ResourceType.NOTEBOOK;
   }
 
   get actionsDisabled(): boolean {
@@ -319,7 +319,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   cloneResource(): void {
-    switch (this.state.resourceType) {
+    switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().cloneNotebook(
           this.props.resourceCard.workspaceNamespace,
@@ -342,7 +342,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   receiveDelete(): void {
-    switch (this.state.resourceType) {
+    switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
         workspacesApi().deleteNotebook(
           this.props.resourceCard.workspaceNamespace,
@@ -394,9 +394,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         this.props.resourceCard.workspaceNamespace,
         this.props.resourceCard.workspaceFirecloudName,
         this.props.resourceCard.conceptSet.id,
-        // TODO [1/29/19]: change back to prop once parent components
-        //  (notebook-list, cohort-list, concept-set-list) are converted
-        this.state.resourceCard.conceptSet
+        ResourceCard.castConceptSet(this.props.resourceCard).conceptSet
       ).then( () => {
         this.closeEditModal();
         this.props.onUpdate();
@@ -410,7 +408,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   openResource(jupyterLab?: boolean): void {
-    switch (this.state.resourceType) {
+    switch (this.resourceType) {
       case ResourceType.COHORT: {
         this.reviewCohort();
         break;
@@ -455,7 +453,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
-                              resourceType={this.state.resourceType}
+                              resourceType={this.resourceType}
                               onCloneResource={this.cloneResource.bind(this)}
                               onDeleteResource={this.openConfirmDelete.bind(this)}
                               onRenameNotebook={this.renameNotebook.bind(this)}
@@ -475,15 +473,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
             Last Modified: {this.displayDate}</div>
-          <div style={{...styles.resourceType, ...resourceTypeStyles[this.state.resourceType]}}
+          <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
-            {fp.startCase(fp.camelCase(this.state.resourceType))}</div>
+            {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
         </div>
       </Card>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
-      // TODO [1/29/19]: change back to this.prop.resourceCard once parent components
-      //  (notebook-list, cohort-list, concept-set-list) are converted
-        <EditModal resource={this.state.resourceCard}
+        <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
                    onEdit={this.receiveEdit.bind(this)}
                    onCancel={this.closeEditModal.bind(this)}/>}
       {this.state.renaming && this.isNotebook &&
@@ -497,7 +493,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       {this.state.confirmDeleting &&
         <ConfirmDeleteModal resourceName={this.displayName}
                             deleting={this.state.confirmDeleting}
-                            resourceType={this.state.resourceType}
+                            resourceType={this.resourceType}
                             receiveDelete={this.receiveDelete.bind(this)}
                             closeFunction={this.closeConfirmDelete.bind(this)}/>}
     </React.Fragment>;
