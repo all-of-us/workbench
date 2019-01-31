@@ -126,8 +126,6 @@ export class NodeComponent implements OnInit, OnDestroy {
         .filter(selectedIds => !!selectedIds)
         .subscribe(selectedIds => {
           if (parentId !== 0) {
-            if (selectedIds.includes(parentId)) {
-            }
             const displayName = selectedIds.includes(parentId)
               ? highlightMatches(this.searchTerms, this.node.get('name'), false)
               : stripHtml(this.node.get('name'));
