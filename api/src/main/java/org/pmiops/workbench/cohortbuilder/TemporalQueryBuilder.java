@@ -78,7 +78,7 @@ public class TemporalQueryBuilder {
         String query = QueryBuilderFactory
           .getQueryBuilder(FactoryKey.getType(tempGroup.getType()))
           .buildQuery(params, tempGroup,
-            isFirstGroup ? includeGroup.getMention().name() : TemporalMention.ANY_MENTION.name());
+            isFirstGroup ? includeGroup.getMention() : TemporalMention.ANY_MENTION);
         if (isFirstGroup) {
           temporalQueryParts1.add(query);
         } else {
@@ -87,13 +87,17 @@ public class TemporalQueryBuilder {
       }
     }
     String conditions = SAME_ENC;
-    String parameterName = "p" + params.size();
-    params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
-    if (includeGroup.getTime().equals(TemporalTime.WITHIN_X_DAYS_OF.name())) {
+    if (TemporalTime.WITHIN_X_DAYS_OF.equals(includeGroup.getTime())) {
+      String parameterName = "p" + params.size();
+      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
       conditions = WITHIN_X_DAYS_OF.replace("${timeValue}", "@" + parameterName);
-    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_BEFORE.name())) {
+    } else if (TemporalTime.X_DAYS_BEFORE.equals(includeGroup.getTime())) {
+      String parameterName = "p" + params.size();
+      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
       conditions = X_DAYS_BEFORE.replace("${timeValue}", "@" + parameterName);
-    } else if (includeGroup.getTime().equals(TemporalTime.X_DAYS_AFTER.name())) {
+    } else if (TemporalTime.X_DAYS_AFTER.equals(includeGroup.getTime())) {
+      String parameterName = "p" + params.size();
+      params.put(parameterName, QueryParameterValue.int64(includeGroup.getTimeValue()));
       conditions = X_DAYS_AFTER.replace("${timeValue}", "@" + parameterName);
     }
     return (temporalQueryParts2.size() == 1 ?

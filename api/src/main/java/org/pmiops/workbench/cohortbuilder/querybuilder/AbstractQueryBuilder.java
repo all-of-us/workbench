@@ -81,7 +81,7 @@ public abstract class AbstractQueryBuilder {
    */
   public abstract String buildQuery(Map<String, QueryParameterValue> queryParams,
                                     SearchGroupItem searchGroupItem,
-                                    String temporalMention);
+                                    TemporalMention temporalMention);
 
   public abstract FactoryKey getType();
 
@@ -100,16 +100,16 @@ public abstract class AbstractQueryBuilder {
                                  String conceptIdsSql,
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
-                                 String mention) {
+                                 TemporalMention mention) {
     if (mention != null) {
       String temporalSql = TEMPORAL_SQL_TEMPLATE
         .replace("${tableId}", tableId)
         .replace("${innerSql}", innerSql)
         .replace("${conceptIdSql}", conceptIdsSql)
         .replace("${ageDateAndEncounterSql}", getAgeDateAndEncounterSql(queryParams, modifiers));
-      if (TemporalMention.ANY_MENTION.name().equals(mention)) {
+      if (TemporalMention.ANY_MENTION.equals(mention)) {
         return temporalSql.replace("${rank1Sql}", "");
-      } else if (TemporalMention.FIRST_MENTION.name().equals(mention)) {
+      } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
         temporalSql = temporalSql.replace("${rank1Sql}", RANK_1_SQL_TEMPLATE.replace("${descSql}", ""));
         return TEMPORAL_RANK_1_SQL_TEMPLATE.replace("${innerTemporalSql}", temporalSql);
       } else {

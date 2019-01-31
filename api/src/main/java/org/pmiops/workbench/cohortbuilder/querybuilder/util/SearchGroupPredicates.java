@@ -29,11 +29,11 @@ public class SearchGroupPredicates {
   }
 
   public static Predicate<SearchGroup> mentionInvalid() {
-    return sg -> TemporalMention.fromValue(sg.getMention().name()) == null;
+    return sg -> sg.getMention() == null;
   }
 
   public static Predicate<SearchGroup> timeInvalid() {
-    return sg -> TemporalTime.fromValue(sg.getTime().name()) == null;
+    return sg -> sg.getTime() == null;
   }
 
   public static Predicate<SearchGroup> timeValueNull() {
