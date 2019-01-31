@@ -10,7 +10,6 @@ import {
   CohortSearchActions,
   OPEN_WIZARD,
   openWizard,
-  pausePendingItems,
   REMOVE_GROUP,
   removeGroup,
 } from 'app/cohort-search/redux';
@@ -48,7 +47,6 @@ const group = fromJS({
 class MockActions {
   @dispatch() removeGroup = removeGroup;
   @dispatch() openWizard = openWizard;
-  @dispatch() pausePendingItems = pausePendingItems;
 
   generateId(prefix?: string): string {
     return 'TestId';
