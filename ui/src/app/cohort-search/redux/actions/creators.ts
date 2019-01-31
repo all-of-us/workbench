@@ -32,6 +32,7 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   CLEAR_TOTAL_COUNT,
+  CLEAR_GROUP_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -229,6 +230,11 @@ export const countRequestError =
 export const clearTotalCount =
   (): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
   ({type: CLEAR_TOTAL_COUNT});
+
+export const clearGroupCount =
+  (groupId: string
+  ): ActionTypes[typeof CLEAR_GROUP_COUNT] =>
+  ({type: CLEAR_GROUP_COUNT, groupId});
 
 export const requestPreview =
   (cdrVersionId: number, request: SearchRequest

@@ -32,6 +32,7 @@ export const LOAD_COUNT_RESULTS = 'LOAD_COUNT_RESULTS';
 export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
 export const CLEAR_TOTAL_COUNT = 'CLEAR_TOTAL_COUNT';
+export const CLEAR_GROUP_COUNT = 'CLEAR_GROUP_COUNT';
 
 export const BEGIN_PREVIEW_REQUEST = 'BEGIN_PREVIEW_REQUEST';
 export const LOAD_PREVIEW_RESULTS = 'LOAD_PREVIEW_RESULTS';
@@ -242,7 +243,10 @@ export interface ActionTypes {
   CLEAR_TOTAL_COUNT: {
     type: typeof CLEAR_TOTAL_COUNT;
   };
-
+  CLEAR_GROUP_COUNT: {
+    type: typeof CLEAR_GROUP_COUNT;
+    groupId: string;
+  };
   BEGIN_PREVIEW_REQUEST: {
     type: typeof BEGIN_PREVIEW_REQUEST;
     cdrVersionId: number;
@@ -420,6 +424,7 @@ export type RootAction =
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
   | ActionTypes[typeof CLEAR_TOTAL_COUNT]
+  | ActionTypes[typeof CLEAR_GROUP_COUNT]
 
   | ActionTypes[typeof BEGIN_PREVIEW_REQUEST]
   | ActionTypes[typeof LOAD_PREVIEW_RESULTS]

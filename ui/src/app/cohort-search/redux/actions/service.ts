@@ -72,6 +72,7 @@ export class CohortSearchActions {
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
   @dispatch() clearTotalCount = ActionFuncs.clearTotalCount;
+  @dispatch() clearGroupCount = ActionFuncs.clearGroupCount;
 
   @dispatch() _requestPreview = ActionFuncs.requestPreview;
 
@@ -226,22 +227,16 @@ export class CohortSearchActions {
     itemId: string,
     status?: string
   ): void {
-    const otherItems = (getGroup(groupId)(this.state))
+    const groupItems = (getGroup(groupId)(this.state))
       .get('items', List())
       .map(id => getItem(id)(this.state))
-      .filterNot(it => it.get('id') === itemId);
-    const isOnlyActiveChild = otherItems
-      .filter(it => it.get('status') === 'active')
+      .filterNot(it => it.get('status') === 'deleted');
+    const isOnlyActiveChild = groupItems
+      .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
       .isEmpty();
-    // const hasHiddenItems = !otherItems
-    //   .filter(it => it.get('status') === 'hidden')
-    //   .isEmpty();
     if (!status) {
       this._removeGroupItem(groupId, itemId);
       this.removeId(itemId);
-      // if (isOnlyActiveChild && !hasHiddenItems) {
-      //   this.removeGroup(role, groupId);
-      // }
     } else {
       const item = getItem(itemId)(this.state);
       const hasItems = !item.get('searchParameters', List()).isEmpty();
@@ -253,6 +248,9 @@ export class CohortSearchActions {
 
       if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
         if (isOnlyActiveChild) {
+          if (groupItems.size === 1 && status === 'pending') {
+            this.clearGroupCount(groupId);
+          }
           if (this.otherGroupsWithActiveItems(groupId)) {
             this.requestTotalCount(groupId);
           } else {

@@ -47,6 +47,7 @@ import {
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
   CLEAR_TOTAL_COUNT,
+  CLEAR_GROUP_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -292,7 +293,10 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case CLEAR_TOTAL_COUNT:
-        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
+        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
+
+      case CLEAR_GROUP_COUNT:
+        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1);
 
       case LOAD_CHARTS_RESULTS:
         return state
