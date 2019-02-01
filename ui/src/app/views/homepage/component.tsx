@@ -281,7 +281,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
           if (profile.linkExpireTime > Date.now()) {
             this.accountsLinked = true;
           } else {
-            this.eraCommonsError = 'ERA Commons account is expired.  Please re-link.'
+            this.eraCommonsError = 'ERA Commons account is expired.  Please re-link.';
           }
         }
       }
