@@ -205,6 +205,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   public showAnswerGraphs(a: any) {
     a.expanded = !a.expanded;
   }
+  
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
