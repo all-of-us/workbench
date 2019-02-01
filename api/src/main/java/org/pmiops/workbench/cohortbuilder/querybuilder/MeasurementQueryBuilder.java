@@ -2,8 +2,11 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
@@ -47,49 +50,59 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String UNION_ALL = " union all\n";
-  private static final String AND = " and ";
-  private static final String OR = " or ";
+  private static final String TABLE_ID = "search_measurement";
   private static final String MEASUREMENT_SQL_TEMPLATE =
-    "select person_id, measurement_date as entry_date, measurement_source_concept_id\n" +
-      "from `${projectId}.${dataSetId}.measurement`\n" +
-      "where measurement_concept_id = ${conceptId}\n" +
-      "${encounterSql}";
+    "select person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where ";
+  private static final String CONCEPT_ID_EQUAL_TEMPLATE =
+    "concept_id = ${conceptId}";
+  private static final String CONCEPT_ID_IN_TEMPLATE =
+    "concept_id in unnest(${conceptIds})";
   private static final String VALUE_AS_NUMBER =
-    "value_as_number ${operator} ${value}\n";
+    " and value_as_number ${operator} ${value}";
   private static final String VALUE_AS_CONCEPT_ID =
-    "value_as_concept_id ${operator} unnest(${values})\n";
+    " and value_as_concept_id ${operator} unnest(${values})";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           String mention) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    for (SearchParameter parameter : parameters.getParameters()) {
+    List<Long> conceptIds = new ArrayList<>();
+
+    for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
-      String baseSql = MEASUREMENT_SQL_TEMPLATE.replace("${conceptId}", parameter.getConceptId().toString());
-      List<String> tempQueryParts = new ArrayList<String>();
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
         if (attribute.getName().equals(ANY)) {
-          queryParts.add(baseSql);
+          conceptIds.add(parameter.getConceptId());
+          if (!queryParts.contains("(" + CONCEPT_ID_IN_TEMPLATE + ")\n")) {
+            queryParts.add("(" + CONCEPT_ID_IN_TEMPLATE + ")\n");
+          }
         } else {
+          String namedParameter = addQueryParameterValue(queryParams,
+            QueryParameterValue.int64(parameter.getConceptId()));
+          String queryPartSql = CONCEPT_ID_EQUAL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
           if (attribute.getName().equals(NUMERICAL)) {
-            processNumericalSql(queryParts, queryParams, baseSql + AND + VALUE_AS_NUMBER, attribute);
+            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
           } else if (attribute.getName().equals(CATEGORICAL)) {
-            processCategoricalSql(queryParts, queryParams, baseSql + AND + VALUE_AS_CONCEPT_ID, attribute);
+            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
           } else if (attribute.getName().equals(BOTH) && attribute.getOperator().equals(Operator.IN)) {
-            processCategoricalSql(tempQueryParts, queryParams, VALUE_AS_CONCEPT_ID, attribute);
+            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
           } else {
-            processNumericalSql(tempQueryParts, queryParams, VALUE_AS_NUMBER, attribute);
+            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
           }
         }
       }
-      if (!tempQueryParts.isEmpty()) {
-        queryParts.add(baseSql + AND + "(" + String.join(OR, tempQueryParts) + ")");
-      }
     }
-    String measurementSql = String.join(UNION_ALL, queryParts);
-    return buildModifierSql(measurementSql, queryParams, parameters.getModifiers());
+    List<Modifier> modifiers = searchGroupItem.getModifiers();
+    String idParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class));
+    String conceptIdSql = String.join(OR, queryParts).replace("${conceptIds}", "@" + idParameter) + AGE_DATE_AND_ENCOUNTER_VAR;
+    String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql;
+    String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
+    return buildTemporalSql(TABLE_ID, modifiedSql, conceptIdSql, queryParams, modifiers, mention);
   }
 
   @Override
@@ -116,35 +129,33 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     }
   }
 
-  private void processNumericalSql(List<String> queryParts,
-                                   Map<String, QueryParameterValue> queryParams,
-                                   String baseSql,
-                                   Attribute attribute) {
+  private String processNumericalSql(Map<String, QueryParameterValue> queryParams,
+                                     String baseSql,
+                                     Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
-        QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
+      QueryParameterValue.float64(new Double(attribute.getOperands().get(0))));
     String valueExpression;
     if (attribute.getOperator().equals(Operator.BETWEEN)) {
       String namedParameter2 = addQueryParameterValue(queryParams,
-          QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
-      valueExpression =  "@" + namedParameter1 + " and " + "@" + namedParameter2;
+        QueryParameterValue.float64(new Double(attribute.getOperands().get(1))));
+      valueExpression = "@" + namedParameter1 + AND + "@" + namedParameter2;
     } else {
       valueExpression = "@" + namedParameter1;
     }
 
-    queryParts.add(baseSql
+    return baseSql
       .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-      .replace("${value}", valueExpression));
+      .replace("${value}", valueExpression);
   }
 
-  private void processCategoricalSql(List<String> queryParts,
-                                     Map<String, QueryParameterValue> queryParams,
-                                     String baseSql,
-                                     Attribute attribute) {
+  private String processCategoricalSql(Map<String, QueryParameterValue> queryParams,
+                                       String baseSql,
+                                       Attribute attribute) {
     String namedParameter1 = addQueryParameterValue(queryParams,
-        QueryParameterValue.array(attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
-            Long.class));
-    queryParts.add(baseSql
+      QueryParameterValue.array(attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
+        Long.class));
+    return baseSql
       .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-      .replace("${values}", "@" + namedParameter1));
+      .replace("${values}", "@" + namedParameter1);
   }
 }

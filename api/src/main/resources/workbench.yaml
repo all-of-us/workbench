@@ -294,6 +294,30 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/update-nih-token:
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Updates a users NIH token
+      operationId: updateNihToken
+      parameters:
+        - in: body
+          name: token
+          description: the token retrieved from NIH
+          schema:
+            $ref: "#/definitions/NihToken"
+      responses:
+        200:
+          description: The user's updated profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   /v1/page-visits:
     post:
       tags:
@@ -1927,6 +1951,15 @@ definitions:
     type: string
     description: Possible value for bug reports
     enum: [APPLICATION, DATA]
+
+  NihToken:
+    required:
+      - jwt
+    type: object
+    properties:
+      jwt:
+        type: string
+        description: the encoded/signed JWT
 
   Profile:
     type: object
