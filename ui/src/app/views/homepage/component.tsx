@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
-import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {NihCallback} from 'app/views/nih-callback/component';
 
 import * as React from 'react';
 
@@ -14,7 +14,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {reactStyles, ReactWrapperBase} from "app/utils";
+import {reactStyles, ReactWrapperBase, withStyle} from "app/utils";
 import {
   Clickable,
   styles as buttonStyles
@@ -72,8 +72,19 @@ const styles = reactStyles({
     borderRadius: '5px',
     marginLeft: '1rem',
     maxWidth: '20rem'
+  },
+  error: {
+    fontWeight: 300,
+    color: '#DC5030',
+    fontSize: '14px',
+    marginTop: '.3rem',
+    backgroundColor: '#FFF1F0',
+    borderRadius: '5px',
+    padding: '.3rem',
   }
 });
+
+export const Error = withStyle(styles.error)('div');
 
 const AccountLinkingButton: React.FunctionComponent<{
   failed: boolean, completed: boolean, failedText: string,
@@ -98,24 +109,21 @@ const AccountLinkingButton: React.FunctionComponent<{
   }
 };
 
-export interface AccountLinkingState {
+export interface AccountLinkingProps {
   eraCommonsLinked: boolean;
   trainingCompleted: boolean;
+  eraCommonsError: string;
 }
 
-export class AccountLinking extends React.Component<{}, AccountLinkingState> {
+export class AccountLinking extends React.Component<AccountLinkingProps, {}> {
 
-  constructor(props: {}) {
+  constructor(props: AccountLinkingProps) {
     super(props);
-    this.state = {
-      eraCommonsLinked: false,
-      trainingCompleted: false
-    }
   }
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
+        encodeURIComponent(window.location.href + 'nih-callback?token=baddd{token}');
     window.location.assign(url);
   }
 
@@ -134,31 +142,35 @@ export class AccountLinking extends React.Component<{}, AccountLinkingState> {
           </div>
         </div>
         <div style={{flexDirection: 'column', width: '50%', padding: '1rem'}}>
-          <div style={styles.infoBox}>
-            <div style={{flexDirection: 'column', width: '70%'}}>
-              <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
-              <div style={styles.infoBoxBody}>Vel illum dolore eu feugiat nulla facilisis at vero
-                eros et accumsan et iusto odio dignissim.
-                Ullamcorper suscipit lortis nisl ex.</div>
+          <div style={{...styles.infoBox, flexDirection: 'column'}}>
+            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+              <div style={{flexDirection: 'column', width: '70%'}}>
+                <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
+                <div style={styles.infoBoxBody}>Clicking the login link will bring you
+                  to the ERA Commons Portal and redirect you back to the
+                  Workbench once you are logged in.</div>
+              </div>
+              <AccountLinkingButton failed={false}
+                                    completed={this.props.eraCommonsLinked}
+                                    defaultText='Login'
+                                    completedText='Linked'
+                                    failedText='Error Linking Accounts'
+                                    onClick={AccountLinking.redirectToNiH}/>
             </div>
-            <AccountLinkingButton failed={false}
-                                  completed={this.state.eraCommonsLinked}
-                                  defaultText='Login'
-                                  completedText='Linked'
-                                  failedText='Error Linking Accounts'
-                                  onClick={AccountLinking.redirectToNiH}/>
+            {this.props.eraCommonsError && <Error>
+              <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
+            </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
             <div style={{flexDirection: 'column', width: '70%'}}>
               <div style={styles.infoBoxHeader}>Complete Online Training</div>
-              <div style={styles.infoBoxBody}>Wisi enim ad minim veniam quis nod
-                exerci tation ullamcorper suscipit lortis nisl ex. Vel illum dolore
-                eu feugiat nulla facilisis at vero eros et accumsan et.
-                <br/><br/>If you have completed the training,
-                click here to update the page.</div>
+              <div style={styles.infoBoxBody}>Clicking the training link will bring you to
+                the All of Us Compliance Training Portal, which will show you any
+                outstanding training material to be completed.</div>
             </div>
             <AccountLinkingButton failed={false}
-                                  completed={this.state.trainingCompleted}
+                                  completed={this.props.trainingCompleted}
                                   defaultText='Complete Training'
                                   completedText='Completed'
                                   failedText=''
@@ -175,8 +187,12 @@ export class AccountLinking extends React.Component<{}, AccountLinkingState> {
   template: '<div #root></div>',
 })
 export class AccountLinkingComponent extends ReactWrapperBase {
+  @Input('eraCommonsLinked') eraCommonsLinked: AccountLinkingProps['eraCommonsLinked'];
+  @Input('trainingCompleted') trainingCompleted: AccountLinkingProps['trainingCompleted'];
+  @Input('eraCommonsError') eraCommonsError: AccountLinkingProps['eraCommonsError'];
   constructor() {
-    super(AccountLinking, []);
+    super(AccountLinking,
+        ['eraCommonsLinked', 'trainingCompleted', 'eraCommonsError']);
   }
 }
 
@@ -237,6 +253,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
   accountsLinked = false;
+  // TODO RW-1184; defaulting to true
+  trainingCompleted = true;
 
   constructor(
     private profileService: ProfileService,
