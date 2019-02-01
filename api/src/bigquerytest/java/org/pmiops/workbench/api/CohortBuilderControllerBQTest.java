@@ -1836,21 +1836,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsPPI() throws Exception {
     //Survey
     Criteria ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name(null);
+      createCriteriaParent(TreeType.PPI.name(), TreeSubType.BASICS.name());
     SearchParameter ppi = createSearchParameter(ppiCriteria, "7");
     SearchRequest searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     //Question
     ppiCriteria =
-      createCriteriaParent(TreeType.PPI.name(), TreeSubType.BASICS.name(),null).domainId(DomainType.OBSERVATION.name()).conceptId("1585899");
+      createCriteriaParent(TreeType.PPI.name(), TreeSubType.BASICS.name()).conceptId("1585899");
     ppi = createSearchParameter(ppiCriteria, null);
     searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     //value as concept id
     ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "7", DomainType.OBSERVATION.name(), "5").name(null);
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name(null);
     ppi = createSearchParameter(ppiCriteria, "7");
     searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);

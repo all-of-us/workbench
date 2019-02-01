@@ -6,5 +6,13 @@
     "subtype":"BASICS",
     "value_as_number":7,
     "value_as_concept_id":7
+  },
+  {
+    "person_id":1,
+    "entry_date":"2009-12-03",
+    "source_concept_id":1585899,
+    "subtype":"BASICS",
+    "value_as_number":7,
+    "value_as_concept_id":7
   }
 ]
