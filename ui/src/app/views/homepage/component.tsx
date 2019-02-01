@@ -2,6 +2,8 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {environment} from 'environments/environment';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 
 import * as React from 'react';
 
@@ -102,13 +104,19 @@ export interface AccountLinkingState {
 }
 
 export class AccountLinking extends React.Component<{}, AccountLinkingState> {
-  constructor(props) {
+
+  constructor(props: {}) {
     super(props);
     this.state = {
       eraCommonsLinked: false,
       trainingCompleted: false
     }
+  }
 
+  static redirectToNiH(): void {
+    const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
+        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
+    window.location.assign(url);
   }
 
   render() {
@@ -137,7 +145,8 @@ export class AccountLinking extends React.Component<{}, AccountLinkingState> {
                                   completed={this.state.eraCommonsLinked}
                                   defaultText='Login'
                                   completedText='Linked'
-                                  failedText='Error Linking Accounts'/>
+                                  failedText='Error Linking Accounts'
+                                  onClick={AccountLinking.redirectToNiH}/>
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
             <div style={{flexDirection: 'column', width: '70%'}}>
@@ -152,7 +161,8 @@ export class AccountLinking extends React.Component<{}, AccountLinkingState> {
                                   completed={this.state.trainingCompleted}
                                   defaultText='Complete Training'
                                   completedText='Completed'
-                                  failedText=''/>
+                                  failedText=''
+                                  onClick={() => {}}/>
           </div>
         </div>
       </div>
@@ -226,7 +236,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
-  linkAccount: boolean;
+  accountsLinked = false;
 
   constructor(
     private profileService: ProfileService,
@@ -244,6 +254,11 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
       }
+      if (profile.linkedNihUsername) {
+        if (profile.linkExpireTime > Date.now()) {
+          this.accountsLinked = true;
+        }
+      }
     },
       e => {},
       () => {
@@ -252,6 +267,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
         }
         this.profileService.updatePageVisits(this.newPageVisit).subscribe();
       });
+
     this.profileStorageService.profile$.subscribe((profile) => {
       // This will block workspace creation until the billing project is initialized
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
@@ -265,7 +281,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.reloadSpinner();
     });
     this.profileStorageService.reload();
-    this.linkAccount = true;
+
   }
 
   public closeQuickTour(): void {

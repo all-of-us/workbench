@@ -12,6 +12,7 @@ export const environment: Environment = {
   debug: false,
   gaId: 'UA-112406425-4',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including

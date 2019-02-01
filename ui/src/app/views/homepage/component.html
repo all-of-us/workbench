@@ -1,7 +1,7 @@
 <div class="background-image">
   <div style="display:flex; justify-content:center">
     <div class="card single">
-      <div *ngIf="!linkAccount">
+      <div *ngIf="accountsLinked">
         <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem; justify-content: flex-start; flex-wrap: nowrap;">
           <div class="col main-heading">Researcher Workbench</div>
           <div class="heading-links" style="display: flex; flex-wrap: nowrap; overflow: hidden;">
@@ -21,7 +21,7 @@
           <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
         </div>
       </div>
-      <app-account-linking *ngIf="linkAccount"></app-account-linking>
+      <app-account-linking *ngIf="!accountsLinked"></app-account-linking>
     </div>
   </div>
   <div style="display:flex; justify-content:center;flex-direction:row">

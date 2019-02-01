@@ -37,6 +37,8 @@ export interface Environment {
   // The base URL for the Zendesk help center / user forum.
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
+  // The Shibboleth URL for linking ERA Commons accounts
+  shibbolethUrl: string;
 
   // Transient client-side flags.
   //
