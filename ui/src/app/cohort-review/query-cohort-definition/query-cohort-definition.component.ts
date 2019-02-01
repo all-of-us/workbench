@@ -22,15 +22,15 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
   mapDefinition() {
     const definition = JSON.parse(this.cohort.criteria);
-      this.definition = ['includes', 'excludes'].map(role => {
-        if (definition[role].length) {
-          const roleObj = {role, groups: []};
-          definition[role].forEach(group => {
-            roleObj.groups.push(this.mapGroup(group));
-          });
-          return roleObj;
-        }
-      });
+    this.definition = ['includes', 'excludes'].map(role => {
+      if (definition[role].length) {
+        const roleObj = {role, groups: []};
+        definition[role].forEach(group => {
+          roleObj.groups.push(this.mapGroup(group));
+        });
+        return roleObj;
+      }
+    });
   }
 
   mapGroup(group: any) {
@@ -140,9 +140,9 @@ export class QueryCohortDefinitionComponent implements OnInit {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
     } else if (d.type === 'PPI') {
       if (!d.group) {
-      return  acc === '' ? `${d.name}` :
+        return  acc === '' ? `${d.name}` :
            `${acc}, ${d.name}`;
-      } else if(d.group && !d.conceptId){
+      } else if (d.group && !d.conceptId) {
         return acc === '' ? `Survey - ${d.name}` :
           `${acc}, Survey - ${d.name}`;
       } else {
