@@ -35,9 +35,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  @ViewChild(WorkspaceNavBarComponent)
-  workspaceNavBarComponent: WorkspaceNavBarComponent;
-
   private subscriptions = [];
 
   constructor(

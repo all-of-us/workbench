@@ -49,7 +49,7 @@ export class ConfirmDeleteModal
   }
 
   render() {
-    return <Modal className='confirmDeleteModal'>
+    return <Modal>
         <ModalTitle style={{lineHeight: '28px'}}>
           Are you sure you want to
           delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
