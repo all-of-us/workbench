@@ -1,6 +1,3 @@
-import {ClrIcon} from 'app/components/icons';
-import {TooltipTrigger} from 'app/components/popups';
-import colors from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
@@ -78,25 +75,4 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
     disabled={disabled} {...props}
     {...fp.merge(computeStyle(buttonVariants[type], {disabled}), {style})}
   />;
-};
-
-export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...props}) => {
-  return <TooltipTrigger side='left' content={tooltip}>
-    <Clickable
-      data-test-id={icon}
-      disabled={disabled}
-      style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'start',
-        fontSize: 12, minWidth: 125, height: 32,
-        color: disabled ? colors.gray[2] : 'black',
-        padding: '0 12px',
-        cursor: disabled ? 'not-allowed' : 'pointer'
-      }}
-      hover={!disabled ? {backgroundColor: colors.blue[3]} : undefined}
-      {...props}
-    >
-      <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
-      {children}
-    </Clickable>
-  </TooltipTrigger>;
 };

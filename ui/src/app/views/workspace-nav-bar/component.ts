@@ -5,7 +5,6 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -15,21 +14,24 @@ import {
 } from 'generated';
 
 @Component({
+  selector: 'app-workspace-nav-bar',
   styleUrls: ['../../styles/buttons.css',
-    '../../styles/headers.css'],
+    '../../styles/headers.css',
+    './component.css'],
   templateUrl: './component.html',
 })
-export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
+export class WorkspaceNavBarComponent implements OnInit, OnDestroy {
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
 
   workspace: Workspace;
+  wsId: string;
+  wsNamespace: string;
   accessLevel: WorkspaceAccessLevel;
   deleting = false;
-  sharing = false;
   workspaceDeletionError = false;
   tabPath: string;
-  displayNavBar = true;
+  display = true;
   confirmDeleting = false;
 
   @ViewChild(BugReportComponent)
@@ -53,14 +55,20 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     handleData(this.route.snapshot.data);
     this.subscriptions.push(this.route.data.subscribe(handleData));
 
-    this.tabPath = this.getTabPath();
+    const handleParams = (params) => {
+      this.wsNamespace = params['ns'];
+      this.wsId = params['wsid'];
+    };
+    handleParams(this.route.snapshot.params);
+    this.subscriptions.push(this.route.params.subscribe(handleParams));
 
-    this.displayNavBar = this.shouldDisplay();
+    this.tabPath = this.getTabPath();
+    this.display = this.shouldDisplay();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
-          this.displayNavBar = this.shouldDisplay();
+          this.display = this.shouldDisplay();
         }));
   }
 
@@ -115,6 +123,15 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   share(): void {
     this.shareModal.open();
+  }
+
+  get writePermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER
+      || this.accessLevel === WorkspaceAccessLevel.WRITER;
+  }
+
+  get ownerPermission(): boolean {
+    return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
   submitWorkspaceDeleteBugReport(): void {
