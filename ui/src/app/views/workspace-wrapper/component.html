@@ -14,7 +14,7 @@
 <app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'workspace'"
-                          [resource]="workspace"
+                          [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete.bind(this)"
                           [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
 <app-bug-report></app-bug-report>

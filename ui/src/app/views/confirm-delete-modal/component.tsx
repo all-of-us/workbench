@@ -24,7 +24,7 @@ export interface ConfirmDeleteModalProps {
   closeFunction: Function;
   resourceType: string;
   receiveDelete: Function;
-  resource: { name: string };
+  resourceName: string;
 }
 
 export interface ConfirmDeleteModalState {
@@ -53,7 +53,7 @@ export class ConfirmDeleteModal
         <ModalTitle style={{lineHeight: '28px'}}>
           Are you sure you want to
           delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
-          : {this.props.resource.name}?
+          : {this.props.resourceName}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           This will permanently delete
@@ -81,11 +81,12 @@ export class ConfirmDeleteModal
 })
 export class ConfirmDeleteModalComponent extends ReactWrapperBase {
   @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
-  @Input('resource') resource: ConfirmDeleteModalProps['resource'];
+  @Input('resourceName') resourceName: ConfirmDeleteModalProps['resourceName'];
   @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
   @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
   constructor() {
-    super(ConfirmDeleteModal, ['resourceType', 'resource', 'closeFunction', 'receiveDelete']);
+    super(ConfirmDeleteModal, ['resourceType', 'resourceName',
+      'closeFunction', 'receiveDelete']);
   }
 }

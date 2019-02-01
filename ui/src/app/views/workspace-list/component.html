@@ -130,6 +130,6 @@
 </clr-modal>
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'workspace'"
-                          [resource]="resource"
+                          [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete.bind(this)"
                           [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>

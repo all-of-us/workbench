@@ -80,7 +80,7 @@
 
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'Concept Set'"
-                          [resource]=conceptSet
+                          [resourceName]=conceptSet.name
                           [receiveDelete]=receiveDelete.bind(this)
                           [closeFunction]="closeConfirmDelete.bind(this)">
 </app-confirm-delete-modal>
