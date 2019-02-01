@@ -97,7 +97,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
       } else if (param.type === 'VISIT') {
         return {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
           type: param.type};
-      }  else {
+      } else {
         return _type === 'CONDITION' || _type === 'PROCEDURE' ?
         {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
           type: param.type} :
@@ -136,7 +136,6 @@ export class QueryCohortDefinitionComponent implements OnInit {
         return acc === '' ? `ATC | ${d.value}` : `${acc}, ${d.value}`;
       }
     } else if (d.type === 'PM' || d.type === 'VISIT') {
-
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
     } else if (d.type === 'PPI') {
       if (!d.group) {

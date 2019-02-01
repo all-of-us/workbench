@@ -114,7 +114,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get selectAllChildren() {
-    // console.log(this.node.toJS());
     return (this.isDrug
       || this.node.get('type') === TreeType.ICD9
       || this.node.get('type') === TreeType.PPI
@@ -148,7 +147,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
        */
 
       if (this.selectAllChildren) {
-        // console.log(this.node);
         this.actions.fetchAllChildren(this.node);
       } else {
         let modifiedName = this.node.get('name');
