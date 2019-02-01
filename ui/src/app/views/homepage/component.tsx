@@ -13,6 +13,11 @@ import {
   ProfileService
 } from 'generated';
 import {reactStyles, ReactWrapperBase} from "app/utils";
+import {
+  Clickable,
+  styles as buttonStyles
+} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 
 
 const styles = reactStyles({
@@ -23,42 +28,131 @@ const styles = reactStyles({
     width: '25.86%',
     display: 'flex',
     minWidth: '18.2rem',
-    marginLeft: '3%',
-    marginTop: '2.58%',
+    marginLeft: '4%',
+    marginTop: '4%',
     letterSpacing: 'normal'
   },
   minorHeader: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontWeight: 300,
+    fontWeight: 600,
     display: 'flex',
     marginTop: '1rem',
-    lineHeight: '22px'
+    lineHeight: '24px'
   },
   text: {
     color: '#FFFFFF',
-    contSize: 16,
+    fontSize: 16,
     lineHeight: '22px',
-    fontWeight: 100
+    fontWeight: 150,
+    marginTop: '3%'
+  },
+  infoBox: {
+    padding: '1rem',
+    backgroundColor: '#FFFFFF',
+    borderRadius: '5px',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  infoBoxHeader: {
+    fontSize: 16,
+    color: '#262262',
+    fontWeight: 600
+  },
+  infoBoxBody: {
+    color: '#000',
+    lineHeight: '18px'
+  },
+  infoBoxButton: {
+    color: '#FFFFFF',
+    height: '49px',
+    borderRadius: '5px',
+    marginLeft: '1rem',
+    maxWidth: '20rem'
   }
 });
 
-export class AccountLinking extends React.Component<{}, {}> {
+const AccountLinkingButton: React.FunctionComponent<{
+  failed: boolean, completed: boolean, failedText: string,
+  completedText: string, defaultText: string, onClick: Function
+}> = ({failed, completed, defaultText, completedText, failedText, onClick}) => {
+  if (failed) {
+    return <Clickable style={{...buttonStyles.base,
+      ...styles.infoBoxButton, backgroundColor: '#f27376'}} disabled={true}>
+      <ClrIcon shape='exclamation-triangle'/>{failedText}
+    </Clickable>;
+  } else if (completed) {
+    return <Clickable style={{...buttonStyles.base,
+      ...styles.infoBoxButton, backgroundColor: '#8BC990'}} disabled={true}>
+      <ClrIcon shape='check'/>{completedText}
+    </Clickable>;
+  } else {
+    return <Clickable style={{...buttonStyles.base,
+      ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
+                      onClick={onClick}>
+      {defaultText}
+    </Clickable>;
+  }
+};
+
+export interface AccountLinkingState {
+  eraCommonsLinked: boolean;
+  trainingCompleted: boolean;
+}
+
+export class AccountLinking extends React.Component<{}, AccountLinkingState> {
   constructor(props) {
     super(props);
+    this.state = {
+      eraCommonsLinked: false,
+      trainingCompleted: false
+    }
+
   }
 
   render() {
     return <React.Fragment>
       <div style={{display: 'flex', flexDirection: 'row'}}>
-        <div style={{display: 'flex', flexDirection: 'column'}}>
+        <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
-          <div style={{marginLeft: '2rem'}}>
+          <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
+            {/*<ClrIcon shape='exclamation-triangle' class='is-solid'/>*/}
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
             <div style={styles.text}>Please login to your ERA Commons account and complete
               the online training courses in order to gain full access to the Researcher
               Workbench data and tools.</div>
+          </div>
+        </div>
+        <div style={{flexDirection: 'column', width: '50%', padding: '1rem'}}>
+          <div style={styles.infoBox}>
+            <div style={{flexDirection: 'column', width: '70%'}}>
+              <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
+              <div style={styles.infoBoxBody}>Vel illum dolore eu feugiat nulla facilisis at vero
+                eros et accumsan et iusto odio dignissim.
+                Ullamcorper suscipit lortis nisl ex.</div>
+            </div>
+            <AccountLinkingButton failed={false}
+                                  completed={this.state.eraCommonsLinked}
+                                  defaultText='Login'
+                                  completedText='Linked'
+                                  failedText='Error Linking Accounts'/>
+          </div>
+          <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
+            <div style={{flexDirection: 'column', width: '70%'}}>
+              <div style={styles.infoBoxHeader}>Complete Online Training</div>
+              <div style={styles.infoBoxBody}>Wisi enim ad minim veniam quis nod
+                exerci tation ullamcorper suscipit lortis nisl ex. Vel illum dolore
+                eu feugiat nulla facilisis at vero eros et accumsan et.
+                <br/><br/>If you have completed the training,
+                click here to update the page.</div>
+            </div>
+            <AccountLinkingButton failed={false}
+                                  completed={this.state.trainingCompleted}
+                                  defaultText='Complete Training'
+                                  completedText='Completed'
+                                  failedText=''/>
           </div>
         </div>
       </div>
