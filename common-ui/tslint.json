@@ -144,10 +144,6 @@
     ],
     "directive-class-suffix": true,
     "space-before-function-paren": [true, "never"],
-    "space-before-blocks": [
-      true,
-      {
-        "functions": "always"
-      }]
+    "space-before-blocks": [true, "always"]
   }
 }
