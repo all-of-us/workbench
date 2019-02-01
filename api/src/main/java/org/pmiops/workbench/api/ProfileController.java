@@ -39,6 +39,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -54,6 +55,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
+import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
@@ -669,4 +671,20 @@ public class ProfileController implements ProfileApiDelegate {
     );
     return getIdVerificationsForReview();
   }
+
+  @Override
+  public ResponseEntity<Profile> updateNihToken(NihToken token) {
+    if (token == null || token.getJwt() == null) {
+      throw new BadRequestException("Token is required.");
+    }
+    JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
+    try {
+      fireCloudService.postNihCallback(wrapper);
+      User user = initializeUserIfNeeded();
+      return getProfileResponse(user);
+    } catch (Exception e) {
+      throw new ServerErrorException("Unable to update NIH token", e);
+    }
+  }
+
 }

@@ -37,6 +37,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -53,6 +54,7 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
+import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
@@ -737,6 +739,33 @@ public class ProfileControllerTest {
     profileController.reviewIdVerification(
         user.getUserId(), request);
     verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
+  }
+
+  @Test
+  public void testUpdateNihToken() {
+    doNothing().when(fireCloudService).postNihCallback(any());
+    try {
+      createUser();
+      profileController.updateNihToken(new NihToken().jwt("test"));
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateNihToken_badRequest_1() {
+    profileController.updateNihToken(null);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateNihToken_badRequest_2() {
+    profileController.updateNihToken(new NihToken());
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testUpdateNihToken_serverError() {
+    doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
+    profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
   private Profile createUser() throws Exception {

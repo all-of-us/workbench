@@ -20,7 +20,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
       "d.domain, d.domainId, d.name, d.description,\n" +
-      "d.conceptId, 0L, COUNT(*), 0L)\n" +
+      "d.conceptId, 0L, COUNT(*), d.participantCount)\n" +
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) and \n" +
@@ -39,7 +39,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
       "d.domain, d.domainId, d.name, d.description,\n" +
-      "d.conceptId, 0L, COUNT(*), 0L)\n" +
+      "d.conceptId, 0L, COUNT(*), d.participantCount)\n" +
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +
@@ -58,7 +58,7 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(value="select new org.pmiops.workbench.cdr.model.DomainInfo(\n" +
       "d.domain, d.domainId, d.name, d.description,\n" +
-      "d.conceptId, COUNT(*), 0L, 0L)\n" +
+      "d.conceptId, COUNT(*), 0L, d.participantCount)\n" +
       "from DomainInfo d\n" +
       "join Concept c ON d.domainId = c.domainId\n" +
       "where (c.countValue > 0 or c.sourceCountValue > 0) \n" +

@@ -14,14 +14,13 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
@@ -94,16 +93,15 @@ describe('WorkspaceComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
-        EditModalComponent,
         NewNotebookModalComponent,
         RecentWorkComponent,
-        RenameModalComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
+        WorkspaceWrapperComponent,
         WorkspaceShareComponent
       ],
       providers: [

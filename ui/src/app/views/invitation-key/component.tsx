@@ -11,6 +11,10 @@ function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
 }
 
+function isValidKeyFormat(k: string): boolean {
+  return /^[\sa-zA-Z0-9]*$/.test(k);
+}
+
 interface InvitationKeyProps {
   onInvitationKeyVerify: (invitationKey: any) => void;
 }
@@ -45,6 +49,16 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
     if (isBlank(this.state.invitationKey)) {
       this.setState({
         invitationKeyReq: true
+      });
+      if (input) {
+        input.focus();
+      }
+      return;
+    }
+
+    if (!isValidKeyFormat(this.state.invitationKey)) {
+      this.setState({
+        invitationKeyInvalid: true
       });
       if (input) {
         input.focus();

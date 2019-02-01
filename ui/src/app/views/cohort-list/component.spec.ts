@@ -1,7 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
@@ -12,6 +11,7 @@ import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
+  findElementsReact,
   setupModals,
   simulateClickReact,
   simulateInputReact,
@@ -21,11 +21,13 @@ import {
 import {SignInService} from 'app/services/sign-in.service';
 import {CohortListComponent} from 'app/views/cohort-list/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
+
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {CohortsApi} from 'generated/fetch';
+import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 
 import {
   CohortsService,
@@ -85,10 +87,8 @@ describe('CohortListComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        EditModalComponent,
         CohortListComponent,
         ConfirmDeleteModalComponent,
-        RenameModalComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,
@@ -103,6 +103,7 @@ describe('CohortListComponent', () => {
       ] }).compileComponents().then(() => {
         cohortListPage = new CohortListPage(TestBed);
       });
+    registerApiClient(CohortsApi, new CohortsApiStub());
     tick();
   }));
 
@@ -113,7 +114,7 @@ describe('CohortListComponent', () => {
     setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    const firstCohortName = findElementsReact(fixture, '[data-test-id="card-name"]')[0].innerText;
     const deletedResource: RecentResource = app.resourceList.find(
       (r: RecentResource) => r.cohort.name === firstCohortName);
     expect(deletedResource).toBeTruthy();
@@ -136,7 +137,7 @@ describe('CohortListComponent', () => {
     setupModals(fixture);
     updateAndTick(fixture);
     updateAndTick(fixture);
-    const firstCohortName = fixture.debugElement.query(By.css('.name')).nativeNode.innerText;
+    const firstCohortName = findElementsReact(fixture, '[data-test-id="card-name"]')[0].innerText;
     simulateClickReact(fixture, '[data-test-id="resource-menu"]');
     updateAndTick(fixture);
     updateAndTick(fixture);
@@ -148,8 +149,8 @@ describe('CohortListComponent', () => {
     updateAndTick(fixture);
     expect(app).toBeTruthy();
     expect(app.resourceList.length).toBe(2);
-    const listOfNames = fixture.debugElement
-      .queryAll(By.css('.name')).map(el => el.nativeNode.innerText);
+    const listOfNames = findElementsReact(fixture, '[data-test-id="card-name"]')
+        .map(el => el.innerText);
     expect(listOfNames).toContain(editValue);
     expect(listOfNames).not.toContain(firstCohortName);
   }));

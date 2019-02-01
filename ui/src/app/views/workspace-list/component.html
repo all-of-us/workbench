@@ -128,8 +128,8 @@
     <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
   </div>
 </clr-modal>
-<app-confirm-delete-modal [resourceType]="'workspace'"
-                          [resource]="resource"
+<app-confirm-delete-modal *ngIf="confirmDeleting"
+                          [resourceType]="'workspace'"
+                          [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete.bind(this)"
-                          [deleting]="confirmDeleting"
                           [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>

@@ -2,7 +2,9 @@ package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -149,13 +152,24 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihCallback() throws Exception {
-    JWTWrapper wrapper = new JWTWrapper().jwt("random");
-    doNothing().when(nihApi).nihCallback(wrapper);
+    doNothing().when(nihApi).nihCallback(any());
     try {
-      service.postNihCallback(wrapper);
+      service.postNihCallback(any());
     } catch (Exception e) {
       fail();
     }
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testNihCallbackBadRequest() throws Exception {
+    doThrow(new ApiException(400, "Bad Request")).when(nihApi).nihCallback(any());
+    service.postNihCallback(any());
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testNihCallbackServerError() throws Exception {
+    doThrow(new ApiException(500, "Internal Server Error")).when(nihApi).nihCallback(any());
+    service.postNihCallback(any());
   }
 
 }

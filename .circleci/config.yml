@@ -226,7 +226,7 @@ jobs:
           name: Run React tests (Jest)
           working_directory: ~/workbench/ui
           command: |
-            npx jest
+            yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build with strict compilation
           working_directory: ~/workbench/ui

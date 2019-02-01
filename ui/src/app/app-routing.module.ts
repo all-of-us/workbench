@@ -11,6 +11,7 @@ import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
+import {NihCallbackComponent} from './views/nih-callback/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
@@ -20,7 +21,7 @@ import {StigmatizationPageComponent} from './views/stigmatization-page/component
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
+import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
@@ -56,6 +57,12 @@ const routes: Routes = [
           title: 'Awaiting ID Verification'
         }
       }, {
+        path: 'nih-callback',
+        component: NihCallbackComponent,
+        data: {
+          title: 'NIH Authentication'
+        }
+      }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
         data: {
@@ -80,7 +87,7 @@ const routes: Routes = [
              * provided by the route rather than double-requesting it.
              */
             path: ':ns/:wsid',
-            component: WorkspaceNavBarComponent,
+            component: WorkspaceWrapperComponent,
             data: {
               title: 'View Workspace Details',
               breadcrumb: {
