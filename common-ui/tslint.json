@@ -105,7 +105,7 @@
         "parameter": "nospace",
         "property-declaration": "nospace",
         "variable-declaration": "nospace",
-        "method": "space"
+        "method-declaration": "space"
       }
     ],
     "unified-signatures": true,
