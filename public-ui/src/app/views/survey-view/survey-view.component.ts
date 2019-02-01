@@ -33,7 +33,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
   surveyName: string;
   conceptCodeTooltip: any;
-  genderGraph: string;
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
 
@@ -204,15 +203,13 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public showAnswerGraphs(a: any) {
-    if (a.expanded) {
-      a.expanded = false;
-      return;
-    }
-    a.expanded = true;
+    a.expanded = !a.expanded;
   }
+  
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
+  
   public selectGraph(g, q: any) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -230,17 +227,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         break;
     }
   }
+  
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
-
-  public selectSurveyGenderGraph(g) {
-      if (g === 'Gender Identity') {
-        this.genderGraph = 'GI';
-      } else {
-        this.genderGraph = 'BS';
-      }
-  }
+  
   public convertToNum(s) {
     return Number(s);
   }
