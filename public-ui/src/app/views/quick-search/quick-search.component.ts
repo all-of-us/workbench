@@ -160,6 +160,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.surveyResults = results.surveyModules;
     this.loading = false;
   }
+  
   public searchDomains(query: string) {
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
