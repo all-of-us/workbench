@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +121,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    String matchExp = modifyKeywordMatch(value);
+    String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
     if (subtype == null) {
       criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
@@ -286,7 +286,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(participantDemographics);
   }
 
-  private String modifyKeywordMatch(String value) {
+  private String modifyKeywordMatch(String value, String type) {
     if (value == null || value.trim().isEmpty()) {
       throw new BadRequestException(
         String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
@@ -295,6 +295,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0] + "\"+\"[rank1]\"";
     }
+    String rank1 = TreeType.PPI.equals(type) ? "" : "+\"[rank1]\"";
 
     return IntStream
       .range(0, keywords.length)
@@ -306,7 +307,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return "+" + keywords[i] + "*";
       })
       .collect(Collectors.joining())
-      + "+\"[rank1]\"";
+      + rank1;
   }
 
 }
