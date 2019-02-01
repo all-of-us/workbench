@@ -116,7 +116,6 @@
       "check-operator",
       "check-separator",
       "check-type",
-      "check-module",
       "check-preblock"
     ],
     "directive-selector": [
