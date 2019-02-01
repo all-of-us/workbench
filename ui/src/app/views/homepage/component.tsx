@@ -254,8 +254,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
       }
-      if (profile.linkedNihUsername) {
-        if (profile.linkExpireTime > Date.now()) {
+      if (environment.enableComplianceLockout) {
+        if (profile.linkedNihUsername && profile.linkExpireTime > Date.now()) {
           this.accountsLinked = true;
         }
       }

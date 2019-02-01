@@ -55,4 +55,6 @@ export interface Environment {
   // See RW-1966 for details.
   // Exit criteria: remove flag for Athens release.
   enableJupyterLab: boolean;
+
+  enableComplianceLockout: boolean;
 }

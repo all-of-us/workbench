@@ -15,5 +15,6 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   enableTemporal: false,
   useZendeskForSupport: false,
-  enableJupyterLab: false
+  enableJupyterLab: false,
+  enableComplianceLockout: false
 };

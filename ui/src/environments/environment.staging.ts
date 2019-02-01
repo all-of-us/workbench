@@ -15,5 +15,6 @@ export const environment: Environment = {
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   enableTemporal: false,
   useZendeskForSupport: false,
-  enableJupyterLab: false
+  enableJupyterLab: false,
+  enableComplianceLockout: false,
 };
