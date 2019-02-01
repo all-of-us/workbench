@@ -143,7 +143,6 @@
       "Layout"
     ],
     "directive-class-suffix": true,
-    "space-before-function-paren": [true, "never"],
-    "space-before-blocks": [true, "always"]
+    "space-before-function-paren": [true, "never"]
   }
 }
