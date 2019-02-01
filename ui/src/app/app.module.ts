@@ -20,7 +20,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AccountLinkingComponent} from './views/homepage/component';
 import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
@@ -36,6 +35,7 @@ import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/co
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
+import {AccountLinkingComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NihCallbackComponent} from './views/nih-callback/component';

@@ -2,11 +2,17 @@ import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {environment} from 'environments/environment';
 import {NihCallback} from 'app/views/nih-callback/component';
+import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
+import {
+  Clickable,
+  styles as buttonStyles
+} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
 import {
   BillingProjectStatus,
   IdVerificationStatus,
@@ -14,12 +20,6 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {reactStyles, ReactWrapperBase, withStyle} from "app/utils";
-import {
-  Clickable,
-  styles as buttonStyles
-} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
 
 
 const styles = reactStyles({
@@ -123,7 +123,7 @@ export class AccountLinking extends React.Component<AccountLinkingProps, {}> {
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(window.location.href + 'nih-callback?token=baddd{token}');
+        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
     window.location.assign(url);
   }
 
@@ -255,6 +255,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   accountsLinked = false;
   // TODO RW-1184; defaulting to true
   trainingCompleted = true;
+  eraCommonsError = '';
 
   constructor(
     private profileService: ProfileService,
@@ -273,8 +274,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
         v.page === HomepageComponent.pageId);
       }
       if (environment.enableComplianceLockout) {
-        if (profile.linkedNihUsername && profile.linkExpireTime > Date.now()) {
-          this.accountsLinked = true;
+        // TODO: work out this date stuff
+        console.log(new Date(Number(profile.linkExpireTime)));
+        console.log(Date.now());
+        if (profile.linkedNihUsername) {
+          if (profile.linkExpireTime > Date.now()) {
+            this.accountsLinked = true;
+          } else {
+            this.eraCommonsError = 'ERA Commons account is expired.  Please re-link.'
+          }
         }
       }
     },
