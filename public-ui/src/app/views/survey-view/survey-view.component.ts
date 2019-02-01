@@ -225,9 +225,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         break;
     }
   }
+  
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
+  
   public convertToNum(s) {
     return Number(s);
   }
