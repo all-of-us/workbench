@@ -115,7 +115,9 @@
       "check-decl",
       "check-operator",
       "check-separator",
-      "check-type"
+      "check-type",
+      "check-module",
+      "check-preblock"
     ],
     "directive-selector": [
       true,
