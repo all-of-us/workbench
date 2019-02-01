@@ -205,9 +205,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   public showAnswerGraphs(a: any) {
     a.expanded = !a.expanded;
   }
+  
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
+  
   public selectGraph(g, q: any) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
