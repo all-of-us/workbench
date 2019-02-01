@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable, MenuItem} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -18,6 +18,19 @@ import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {environment} from 'environments/environment';
+
+const MenuItem = ({icon, children, ...props}) => {
+  return <Clickable
+    {...props}
+    data-test-id={icon}
+    style={{
+      display: 'flex', alignItems: 'center',
+      minWidth: '5rem', height: '1.3333rem',
+      padding: '0 1rem', color: '#4A4A4A'
+    }}
+    hover={{backgroundColor: '#E0EAF1'}}
+  ><ClrIcon shape={icon}/>&nbsp;{children}</Clickable>;
+};
 
 const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
@@ -461,6 +474,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                      onCancel={this.cancelRename.bind(this)}/>}
       {this.state.confirmDeleting &&
         <ConfirmDeleteModal resourceName={this.displayName}
+                            deleting={this.state.confirmDeleting}
                             resourceType={this.resourceType}
                             receiveDelete={this.receiveDelete.bind(this)}
                             closeFunction={this.closeConfirmDelete.bind(this)}/>}

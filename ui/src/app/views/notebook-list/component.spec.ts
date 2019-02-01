@@ -19,7 +19,6 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 
 import {
@@ -45,7 +44,9 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {
   findElementsReact,
   setupModals,
+  simulateClick,
   simulateClickReact,
+  simulateInputReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -121,7 +122,6 @@ describe('NotebookListComponent', () => {
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceNavBarComponent,
-        WorkspaceWrapperComponent,
         WorkspaceShareComponent
       ],
       providers: [

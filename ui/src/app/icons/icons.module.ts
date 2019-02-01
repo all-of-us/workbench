@@ -1,19 +1,17 @@
 import {NgModule} from '@angular/core';
 
-import {CardMenuIconComponent} from 'app/icons/card-menu-icon/component';
-import {EditComponent} from 'app/icons/edit/component';
-import {ExpandComponent} from 'app/icons/expand/component';
-import {NotebookComponent} from 'app/icons/notebook/component';
-import {ScrollComponent} from 'app/icons/scroll/component';
-import {ShareComponent} from 'app/icons/share/component';
-import {ShrinkComponent} from 'app/icons/shrink/component';
-import {TrashComponent} from 'app/icons/trash/component';
+import {EditComponent} from './edit/component';
+import {ExpandComponent} from './expand/component';
+import {NotebookComponent} from './notebook/component';
+import {ScrollComponent} from './scroll/component';
+import {ShareComponent} from './share/component';
+import {ShrinkComponent} from './shrink/component';
+import {TrashComponent} from './trash/component';
 
 @NgModule({
   imports: [],
   declarations: [
     TrashComponent,
-    CardMenuIconComponent,
     EditComponent,
     ExpandComponent,
     NotebookComponent,
@@ -23,7 +21,6 @@ import {TrashComponent} from 'app/icons/trash/component';
   ],
   exports: [
     TrashComponent,
-    CardMenuIconComponent,
     EditComponent,
     ExpandComponent,
     NotebookComponent,

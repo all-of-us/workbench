@@ -49,12 +49,6 @@
       }
     }
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "private": true,
   "dependencies": {
     "@angular-redux/store": "^6.6.0",

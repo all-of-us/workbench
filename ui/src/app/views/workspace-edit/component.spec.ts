@@ -15,7 +15,6 @@ import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/compon
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
@@ -34,7 +33,7 @@ import {
 
 
 describe('WorkspaceEditComponent', () => {
-  let activatedRouteStub: any;
+  let activatedRouteStub;
   let router: Router;
   let testComponent: WorkspaceEditComponent;
   let fixture: ComponentFixture<WorkspaceEditComponent>;
@@ -79,7 +78,6 @@ describe('WorkspaceEditComponent', () => {
         ToolTipComponent,
         WorkspaceEditComponent,
         WorkspaceNavBarComponent,
-        WorkspaceWrapperComponent,
         WorkspaceShareComponent
       ],
       imports: [
