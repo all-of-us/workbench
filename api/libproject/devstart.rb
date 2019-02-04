@@ -962,9 +962,9 @@ def update_user_registered_status(cmd_name, args)
     "Project to update registered status for"
   )
   op.add_option(
-    "--action [action]",
-    ->(opts, v) { opts.action = v},
-    "Action to perform: add/remove."
+    "--disabled [disabled]",
+    ->(opts, v) { opts.disabled = v},
+    "Disabled state to set: true/false."
   )
   op.add_option(
     "--account [account]",
@@ -984,23 +984,16 @@ def update_user_registered_status(cmd_name, args)
   common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\"}"
+  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
   domain_name = get_auth_domain(op.opts.project)
-  if op.opts.action == "add"
-    common.run_inline %W{curl -H #{header} -H #{content_type}
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
       -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
-
-  if op.opts.action == "remove"
-    common.run_inline %W{curl -X DELETE -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
 end
 
 Common.register_command({
   :invocation => "update-user-registered-status",
   :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
 })
 

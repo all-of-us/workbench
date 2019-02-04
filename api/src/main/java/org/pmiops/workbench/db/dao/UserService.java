@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,16 +90,26 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    if (DataAccessLevel.UNREGISTERED.equals(user.getDataAccessLevelEnum())
-        && user.getIdVerificationIsValid() != null
-        && user.getIdVerificationIsValid()
+    boolean isRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
         && user.getDemographicSurveyCompletionTime() != null
         && user.getEthicsTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
-        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum())) {
-      this.fireCloudService.addUserToGroup(user.getEmail(),
-          configProvider.get().firecloud.registeredDomainName);
+        && !user.getDisabled()
+        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
+    boolean isInGroup = this.fireCloudService.
+            isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
+    if (isRegistered) {
+      if (!isInGroup) {
+        this.fireCloudService.addUserToGroup(user.getEmail(),
+            configProvider.get().firecloud.registeredDomainName);
+      }
       user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
+    } else {
+      if (isInGroup) {
+        this.fireCloudService.removeUserFromGroup(user.getEmail(),
+            configProvider.get().firecloud.registeredDomainName);
+      }
+      user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     }
   }
 
@@ -218,6 +229,17 @@ public class UserService {
         return user;
       }
     });
+  }
+
+  public User setDisabledStatus(Long userId, boolean disabled) {
+    User user = userDao.findUserByUserId(userId);
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setDisabled(disabled);
+        return user;
+      }
+    }, user);
   }
 
   public List<User> getNonVerifiedUsers() {
