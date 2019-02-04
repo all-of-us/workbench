@@ -1,7 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
 
@@ -146,8 +145,8 @@ export interface WorkspaceShareProps {
   userEmail: string;
   closeFunction: Function;
   sharing: boolean;
-  onInit: () => void;
 }
+
 export class WorkspaceShare extends React.Component<WorkspaceShareProps, WorkspaceShareState> {
 
   constructor(props: WorkspaceShareProps) {
@@ -177,10 +176,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        this.setState({usersLoading: false, toShare: '', searchTerm: ''});
-        this.setState(({workspace}) =>
-          ({workspace: fp.set('etag', resp.workspaceEtag, workspace)}));
-        this.setState(({workspace}) => ({workspace: fp.set('userRoles', resp.items, workspace)}));
+        let updatedWorkspace = this.state.workspace;
+        fp.set('etag', resp.workspaceEtag, updatedWorkspace);
+        fp.set('userRoles', resp.items, updatedWorkspace);
+        this.setState({usersLoading: false, toShare: '', searchTerm: '', workspace: updatedWorkspace});
         this.props.closeFunction();
       }).catch(error => {
         if (error.status === 400) {
@@ -200,8 +199,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       const position = this.state.userRolesList.findIndex((userRole) => {
         return user.email === userRole.email;
       });
-      this.state.userRolesList.splice(position, 1);
-      this.setState({userRolesList: this.state.userRolesList, usersLoading: false});
+      this.setState(({userRolesList}) => ({userRolesList: fp.pullAt(position, userRolesList), usersLoading: false}));
     }
   }
 
@@ -237,7 +235,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
 
   userSearch(value: string): void {
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
-    if (!this.state.searchTerm.trim()) {
+    if (!value.trim()) {
       this.setState({autocompleteLoading: false});
       return;
     }
@@ -248,10 +246,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           return;
         }
         this.setState({autocompleteLoading: false});
-        const userResponse = response;
-        userResponse.users = fp.uniqBy(user =>
-          [user.email, user.familyName, user.givenName].join(), response.users);
-        this.setState({autocompleteUsers: userResponse.users.splice(0, 4)});
+        response.users = fp.differenceWith((a, b) => {
+          return (a.email === b.email && a.givenName === b.givenName && a.familyName === b.familyName)
+        }, response.users, this.state.userRolesList);
+        this.setState({autocompleteUsers: response.users.splice(0, 4)});
       });
   }
 
@@ -325,7 +323,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                     <div style={styles.userName}>{user.email}</div>
                   </div>
                   <div style={styles.collaboratorIcon}>
-                    <ClrIcon shape='plus-circle' style={{height: '21px', width: '21px'}}
+                    <ClrIcon shape='plus-circle' data-test-id={'add-collab-' + user.email}
+                             style={{height: '21px', width: '21px'}}
                              onClick={() => { this.addCollaborator(user); }}/>
                   </div>
                 </div>; })}
@@ -347,9 +346,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
               return <div key={i}>
                 <div style={styles.wrapper}>
                   <div style={styles.box}>
-                    <h5 style={{...styles.userName, ...styles.collabUser}}>{user.givenName}
-                    {user.familyName}</h5>
-                    <div style={styles.userName}>{user.email}</div>
+                    <h5 data-test-id='collab-user-name'
+                        style={{...styles.userName, ...styles.collabUser}}>
+                      {user.givenName} {user.familyName}
+                    </h5>
+                    <div data-test-id='collab-user-email'
+                         style={styles.userName}>{user.email}</div>
                     <label>
                       <select style={{width: '6rem'}}
                               disabled={!this.hasPermission || user.email === this.props.userEmail}>
@@ -362,9 +364,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                 <div style={styles.box}>
                   <div style={styles.collaboratorIcon}>
                     {(this.hasPermission && (user.email !== this.props.userEmail)) &&
-                    <ClrIcon shape='minus-circle' style={{height: '21px', width: '21px'}}
-                             onClick={() => this.removeCollaborator(user)}/>
-                    }
+                    <ClrIcon data-test-id={'remove-collab-' + user.email} shape='minus-circle'
+                             style={{height: '21px', width: '21px'}}
+                             onClick={() => this.removeCollaborator(user)}/>}
                   </div>
                 </div>
                 </div>
@@ -409,7 +411,7 @@ export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit 
   @Input('sharing') sharing: boolean;
   @Input('closeFunction') closeFunction: WorkspaceShareProps['closeFunction'];
 
-  constructor(public profileStorageService: ProfileStorageService) {
+  constructor() {
     super(WorkspaceShare, ['workspace', 'accessLevel', 'sharing', 'closeFunction', 'userEmail']);
   }
 
