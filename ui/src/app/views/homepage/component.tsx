@@ -20,6 +20,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {profileApi} from "../../services/swagger-fetch-clients";
 
 
 const styles = reactStyles({
@@ -112,19 +113,34 @@ const AccountLinkingButton: React.FunctionComponent<{
 export interface AccountLinkingProps {
   eraCommonsLinked: boolean;
   trainingCompleted: boolean;
-  eraCommonsError: string;
 }
 
-export class AccountLinking extends React.Component<AccountLinkingProps, {}> {
+export class AccountLinking extends
+    React.Component<AccountLinkingProps, {eraCommonsError: string}> {
 
   constructor(props: AccountLinkingProps) {
     super(props);
+
+    this.state = {eraCommonsError: ''}
   }
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
+        encodeURIComponent(window.location.href + '?token={token}');
     window.location.assign(url);
+  }
+
+  async componentDidMount() {
+    // Assumes callback url has format of `/nih-callback?token=XYZ`
+    const token = (new URL(window.location.href)).searchParams.get('token');
+    if (token) {
+      try {
+        console.log('here');
+        await profileApi().updateNihToken({ jwt: token });
+      } catch (e) {
+        this.setState({eraCommonsError: 'Error saving NIH Authentication status'});
+      }
+    }
   }
 
   render() {
@@ -157,9 +173,9 @@ export class AccountLinking extends React.Component<AccountLinkingProps, {}> {
                                     failedText='Error Linking Accounts'
                                     onClick={AccountLinking.redirectToNiH}/>
             </div>
-            {this.props.eraCommonsError && <Error>
+            {this.state.eraCommonsError && <Error>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
+              Error Linking NIH Username: {this.state.eraCommonsError} Please try again!
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
@@ -189,10 +205,9 @@ export class AccountLinking extends React.Component<AccountLinkingProps, {}> {
 export class AccountLinkingComponent extends ReactWrapperBase {
   @Input('eraCommonsLinked') eraCommonsLinked: AccountLinkingProps['eraCommonsLinked'];
   @Input('trainingCompleted') trainingCompleted: AccountLinkingProps['trainingCompleted'];
-  @Input('eraCommonsError') eraCommonsError: AccountLinkingProps['eraCommonsError'];
   constructor() {
     super(AccountLinking,
-        ['eraCommonsLinked', 'trainingCompleted', 'eraCommonsError']);
+        ['eraCommonsLinked', 'trainingCompleted']);
   }
 }
 
@@ -205,6 +220,8 @@ export class AccountLinkingComponent extends ReactWrapperBase {
 export class HomepageComponent implements OnInit, OnDestroy {
   private static pageId = 'homepage';
   @ViewChild('myVideo') myVideo: any;
+  // @Input('accountsLinked') accountsLinked: boolean;
+  // @Input('accountsLinkingError') accountsLinkingError: string;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -255,7 +272,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   accountsLinked = false;
   // TODO RW-1184; defaulting to true
   trainingCompleted = true;
-  eraCommonsError = '';
 
   constructor(
     private profileService: ProfileService,
@@ -274,15 +290,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
         v.page === HomepageComponent.pageId);
       }
       if (environment.enableComplianceLockout) {
-        // TODO: work out this date stuff
-        console.log(new Date(Number(profile.linkExpireTime)));
-        console.log(Date.now());
         if (profile.linkedNihUsername) {
-          if (profile.linkExpireTime > Date.now()) {
-            this.accountsLinked = true;
-          } else {
-            this.eraCommonsError = 'ERA Commons account is expired.  Please re-link.';
-          }
+          this.accountsLinked = true;
         }
       }
     },

@@ -21,10 +21,10 @@
           <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
         </div>
       </div>
-      <app-account-linking *ngIf="!accountsLinked"
+      <div *ngIf="accountsLinked === unknown">???</div>
+      <app-account-linking *ngIf="accountsLinked===false"
                            [eraCommonsLinked]="accountsLinked"
-                           [trainingCompleted]="trainingCompleted"
-                           [eraCommonsError]="eraCommonsError"></app-account-linking>
+                           [trainingCompleted]="trainingCompleted"></app-account-linking>
     </div>
   </div>
   <div style="display:flex; justify-content:center;flex-direction:row">
