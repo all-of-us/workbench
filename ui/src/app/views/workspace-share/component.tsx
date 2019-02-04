@@ -176,10 +176,11 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        let updatedWorkspace = this.state.workspace;
+        const updatedWorkspace = this.state.workspace;
         fp.set('etag', resp.workspaceEtag, updatedWorkspace);
         fp.set('userRoles', resp.items, updatedWorkspace);
-        this.setState({usersLoading: false, toShare: '', searchTerm: '', workspace: updatedWorkspace});
+        this.setState({usersLoading: false, toShare: '',
+          searchTerm: '', workspace: updatedWorkspace});
         this.props.closeFunction();
       }).catch(error => {
         if (error.status === 400) {
@@ -195,11 +196,11 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
 
   removeCollaborator(user: UserRole): void {
     if (!this.state.usersLoading) {
-      this.setState({usersLoading: true});
       const position = this.state.userRolesList.findIndex((userRole) => {
         return user.email === userRole.email;
       });
-      this.setState(({userRolesList}) => ({userRolesList: fp.pullAt(position, userRolesList), usersLoading: false}));
+      this.setState(({userRolesList}) => (
+        {userRolesList: fp.pullAt(position, userRolesList)}));
     }
   }
 
@@ -247,7 +248,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         }
         this.setState({autocompleteLoading: false});
         response.users = fp.differenceWith((a, b) => {
-          return (a.email === b.email && a.givenName === b.givenName && a.familyName === b.familyName)
+          return (a.email === b.email && a.givenName === b.givenName
+            && a.familyName === b.familyName);
         }, response.users, this.state.userRolesList);
         this.setState({autocompleteUsers: response.users.splice(0, 4)});
       });
