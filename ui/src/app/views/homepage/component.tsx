@@ -116,12 +116,15 @@ export interface AccountLinkingProps {
 }
 
 export class AccountLinking extends
-    React.Component<AccountLinkingProps, {eraCommonsError: string}> {
+    React.Component<AccountLinkingProps, {eraCommonsLinked: boolean, eraCommonsError: string}> {
 
   constructor(props: AccountLinkingProps) {
     super(props);
 
-    this.state = {eraCommonsError: ''};
+    this.state = {
+      eraCommonsError: '',
+      eraCommonsLinked: props.eraCommonsLinked
+    };
   }
 
   static redirectToNiH(): void {
@@ -167,7 +170,7 @@ export class AccountLinking extends
                   Workbench once you are logged in.</div>
               </div>
               <AccountLinkingButton failed={false}
-                                    completed={this.props.eraCommonsLinked}
+                                    completed={this.state.eraCommonsLinked}
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
