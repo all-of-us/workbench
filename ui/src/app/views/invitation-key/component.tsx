@@ -15,7 +15,7 @@ function isValidKeyFormat(k: string): boolean {
   return /^[\sa-zA-Z0-9]*$/.test(k);
 }
 
-interface InvitationKeyProps {
+export interface InvitationKeyProps {
   onInvitationKeyVerify: (invitationKey: any) => void;
 }
 
@@ -45,14 +45,13 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       invitationKeyInvalid: false
     });
     const input = this.inputElement.current;
-
+    if (input) {
+      input.focus();
+    }
     if (isBlank(this.state.invitationKey)) {
       this.setState({
         invitationKeyReq: true
       });
-      if (input) {
-        input.focus();
-      }
       return;
     }
 
@@ -75,14 +74,11 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
         this.setState({
           invitationKeyInvalid: true
         });
-        if (input) {
-          input.focus();
-        }
       });
   }
 
   render() {
-    return <div style={{padding: '3rem 3rem 0 3rem'}}>
+    return <div data-test-id='invitationKey' style={{padding: '3rem 3rem 0 3rem'}}>
       <div style={{marginTop: '0', paddingTop: '.5rem'}}>
         <BoldHeader>
           Enter your Invitation Key:
@@ -93,9 +89,9 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
           onChange={v => this.setState({invitationKey: v})}
                    ref={this.inputElement} autoFocus/>
         {this.state.invitationKeyReq &&
-        <AlertDanger>
-            <div style={{fontWeight: 'bolder'}}> Invitation Key is required.</div>
-        </AlertDanger>
+         <AlertDanger>
+           <div style={{fontWeight: 'bolder'}}>Invitation Key is required.</div>
+         </AlertDanger>
         }
         {this.state.invitationKeyInvalid &&
         <AlertDanger>
