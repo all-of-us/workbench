@@ -90,7 +90,7 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    boolean isRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
+    boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
         && user.getDemographicSurveyCompletionTime() != null
         && user.getEthicsTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
@@ -98,7 +98,7 @@ public class UserService {
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
-    if (isRegistered) {
+    if (shouldBeRegistered) {
       if (!isInGroup) {
         this.fireCloudService.addUserToGroup(user.getEmail(),
             configProvider.get().firecloud.registeredDomainName);
