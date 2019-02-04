@@ -20,6 +20,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {navigateByUrl} from "app/utils/navigation";
 
 
 const styles = reactStyles({
@@ -125,7 +126,7 @@ export class AccountLinking extends
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(environment.rootUrl + 'nih-callback?token={token}');
+        encodeURIComponent(environment.rootUrl + '/nih-callback?token={token}');
     window.location.assign(url);
   }
 
@@ -135,8 +136,8 @@ export class AccountLinking extends
       try {
         await profileApi().updateNihToken({ jwt: token });
         this.setState({eraCommonsError: ''});
+        navigateByUrl('/');
       } catch (e) {
-        console.log('catching error');
         this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
       }
     }
@@ -287,7 +288,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
         v.page === HomepageComponent.pageId);
       }
       if (environment.enableComplianceLockout) {
-        console.log(profile.linkedNihUsername);
         this.accountsLinked = !!profile.linkedNihUsername;
       }
     },

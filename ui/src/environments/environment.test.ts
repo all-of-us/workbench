@@ -3,6 +3,7 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 
 export const environment: Environment = {
   ...testEnvironmentBase,
+  rootUrl: 'http://localhost:4200',
   displayTag: 'Test',
   debug: false,
   enableTemporal: false,
