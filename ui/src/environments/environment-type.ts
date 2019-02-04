@@ -40,6 +40,8 @@ export interface Environment {
   // The Shibboleth URL for linking ERA Commons accounts
   shibbolethUrl: string;
 
+  rootUrl: string;
+
   // Transient client-side flags.
   //
   // Whether temporal queries should be enabled in the cohort builder UI. See

@@ -13,6 +13,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-4',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
+  rootUrl: 'https://workbench.researchallofus.org',
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including

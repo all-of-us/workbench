@@ -124,10 +124,9 @@ export class AccountLinking extends
     this.state = {eraCommonsError: ''};
   }
 
-  redirectToNiH(): void {
-    this.setState({eraCommonsError: ''});
+  static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
+        encodeURIComponent(environment.rootUrl + 'nih-callback?token={token}');
     window.location.assign(url);
   }
 
@@ -136,11 +135,12 @@ export class AccountLinking extends
     if (token) {
       try {
         await profileApi().updateNihToken({ jwt: token });
+        this.setState({eraCommonsError: ''});
       } catch (e) {
+        console.log('catching error');
         this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
       }
     }
-    navigateByUrl('/');
   }
 
   render() {
@@ -171,7 +171,7 @@ export class AccountLinking extends
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
-                                    onClick={this.redirectToNiH.bind(this)}/>
+                                    onClick={AccountLinking.redirectToNiH}/>
             </div>
             {this.state.eraCommonsError && <Error>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
@@ -288,9 +288,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
         v.page === HomepageComponent.pageId);
       }
       if (environment.enableComplianceLockout) {
-        if (profile.linkedNihUsername) {
-          this.accountsLinked = true;
-        }
+        console.log(profile.linkedNihUsername);
+        this.accountsLinked = !!profile.linkedNihUsername;
       }
     },
       e => {},

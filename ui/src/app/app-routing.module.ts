@@ -62,6 +62,10 @@ const routes: Routes = [
           title: 'Stigmatization Definition'
         }
       }, {
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
         path: 'workspaces',
         data: {
           breadcrumb: {
