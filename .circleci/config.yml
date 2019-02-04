@@ -212,7 +212,6 @@ jobs:
       - save_cache:
           paths:
             - ~/.cache/yarn
-            - ~/workbench/ui/node_modules
           key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
           name: Lint Angular app
