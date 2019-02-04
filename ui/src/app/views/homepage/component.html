@@ -21,7 +21,10 @@
           <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
         </div>
       </div>
-      <div *ngIf="accountsLinked === unknown">???</div>
+      <!--TODO: this logic will be removed when RW-1969 is complete-->
+      <div *ngIf="accountsLinked === unknown" class="spinner-container">
+        <span class="spinner spinner-lg"></span>
+      </div>
       <app-account-linking *ngIf="accountsLinked===false"
                            [eraCommonsLinked]="accountsLinked"
                            [trainingCompleted]="trainingCompleted"></app-account-linking>

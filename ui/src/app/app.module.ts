@@ -38,7 +38,6 @@ import {HomepageComponent} from './views/homepage/component';
 import {AccountLinkingComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
-import {NihCallbackComponent} from './views/nih-callback/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -149,7 +148,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
-    NihCallbackComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,

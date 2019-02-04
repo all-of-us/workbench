@@ -11,7 +11,6 @@ import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
-import {NihCallbackComponent} from './views/nih-callback/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
@@ -55,12 +54,6 @@ const routes: Routes = [
         component: UnregisteredComponent,
         data: {
           title: 'Awaiting ID Verification'
-        }
-      }, {
-        path: 'nih-callback',
-        component: NihCallbackComponent,
-        data: {
-          title: 'NIH Authentication'
         }
       }, {
         path: 'definitions/stigmatization',

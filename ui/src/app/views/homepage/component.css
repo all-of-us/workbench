@@ -387,3 +387,11 @@
     margin: 0rem;
   }
 }
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+  margin-top: 5rem;
+  width: 100%;
+}

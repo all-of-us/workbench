@@ -2,7 +2,6 @@ import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {NihCallback} from 'app/views/nih-callback/component';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
@@ -20,7 +19,8 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {profileApi} from "../../services/swagger-fetch-clients";
+import {profileApi} from '../../services/swagger-fetch-clients';
+import {navigateByUrl} from '../../utils/navigation';
 
 
 const styles = reactStyles({
@@ -121,26 +121,26 @@ export class AccountLinking extends
   constructor(props: AccountLinkingProps) {
     super(props);
 
-    this.state = {eraCommonsError: ''}
+    this.state = {eraCommonsError: ''};
   }
 
-  static redirectToNiH(): void {
+  redirectToNiH(): void {
+    this.setState({eraCommonsError: ''});
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(window.location.href + '?token={token}');
+        encodeURIComponent(window.location.href + 'nih-callback?token={token}');
     window.location.assign(url);
   }
 
   async componentDidMount() {
-    // Assumes callback url has format of `/nih-callback?token=XYZ`
     const token = (new URL(window.location.href)).searchParams.get('token');
     if (token) {
       try {
-        console.log('here');
         await profileApi().updateNihToken({ jwt: token });
       } catch (e) {
-        this.setState({eraCommonsError: 'Error saving NIH Authentication status'});
+        this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
       }
     }
+    navigateByUrl('/');
   }
 
   render() {
@@ -171,7 +171,7 @@ export class AccountLinking extends
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
-                                    onClick={AccountLinking.redirectToNiH}/>
+                                    onClick={this.redirectToNiH.bind(this)}/>
             </div>
             {this.state.eraCommonsError && <Error>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
@@ -220,8 +220,6 @@ export class AccountLinkingComponent extends ReactWrapperBase {
 export class HomepageComponent implements OnInit, OnDestroy {
   private static pageId = 'homepage';
   @ViewChild('myVideo') myVideo: any;
-  // @Input('accountsLinked') accountsLinked: boolean;
-  // @Input('accountsLinkingError') accountsLinkingError: string;
   profile: Profile;
   view: any[] = [180, 180];
   numberOfTotalTasks = 4;
@@ -269,7 +267,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
-  accountsLinked = false;
+  accountsLinked: boolean;
   // TODO RW-1184; defaulting to true
   trainingCompleted = true;
 
