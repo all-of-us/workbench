@@ -13,6 +13,7 @@ import {
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {
   BillingProjectStatus,
   IdVerificationStatus,
@@ -20,7 +21,6 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {navigateByUrl} from "app/utils/navigation";
 
 
 const styles = reactStyles({
