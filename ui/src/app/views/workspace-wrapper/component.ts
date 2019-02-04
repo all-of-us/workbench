@@ -31,6 +31,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
+  username: string;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -38,6 +39,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
+    private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
     private workspacesService: WorkspacesService
@@ -113,6 +115,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   share(): void {
     this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
   }
 
   submitWorkspaceDeleteBugReport(): void {

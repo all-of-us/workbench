@@ -378,9 +378,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           </div>
         </ModalBody>
       </Modal>}
-      {/* TODO: fill in workspace name here once routing is available to React*/}
-      {/* ?? Possibly work when nav bar conversion done?? */}
-      {!this.state.workspaceFound && <div><h3>Workspace could not be found</h3></div>}
+      {!this.state.workspaceFound && <div>
+        <h3>The workspace {this.state.workspace.id} could not be found</h3></div>}
       {this.state.workspaceUpdateConflictError && <Modal>
         <ModalTitle>Conflicting update:</ModalTitle>
         <ModalBody>
