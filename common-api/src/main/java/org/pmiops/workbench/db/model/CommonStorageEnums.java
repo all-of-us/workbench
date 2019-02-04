@@ -53,7 +53,6 @@ public class CommonStorageEnums {
           .put(DataAccessLevel.UNREGISTERED, (short) 0)
           .put(DataAccessLevel.REGISTERED, (short) 1)
           .put(DataAccessLevel.PROTECTED, (short) 2)
-          .put(DataAccessLevel.REVOKED, (short) 3)
           .build();
 
   public static DataAccessLevel dataAccessLevelFromStorage(Short level) {
