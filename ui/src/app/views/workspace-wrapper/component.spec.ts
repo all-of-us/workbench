@@ -9,9 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
@@ -24,7 +22,9 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {updateAndTick} from 'testing/test-helpers';
+import {signedInDependencies, updateAndTick} from 'testing/test-helpers';
+
+import * as fp from 'lodash/fp';
 
 @Component({
   selector: 'app-test',
@@ -39,6 +39,9 @@ describe('WorkspaceWrapperComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        // This has a specific router testing module, so we need to exclude that to avoid
+        // import clashes.
+        ...fp.without([RouterTestingModule], signedInDependencies.imports),
         FormsModule,
         ClarityModule.forRoot(),
         RouterTestingModule.withRoutes([{
@@ -53,16 +56,15 @@ describe('WorkspaceWrapperComponent', () => {
           children: []
         }])
       ],
-      declarations: [
-        BugReportComponent,
+      declarations: [...signedInDependencies.declarations,
         ConfirmDeleteModalComponent,
         FakeAppComponent,
-        SignedInComponent,
         WorkspaceWrapperComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent,
       ],
       providers: [
+        ...signedInDependencies.providers,
         {provide: BugReportService, useValue: new BugReportServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: UserService, useValue: new UserServiceStub()},

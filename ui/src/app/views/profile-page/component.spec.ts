@@ -4,6 +4,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -22,6 +23,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
+  signedInDependencies,
   simulateInput,
   updateAndTick
 } from 'testing/test-helpers';
@@ -30,9 +32,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ProfilePageComponent} from 'app/views/profile-page/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 /* tslint:disable */
 // We need to disable tslint so it does not complain about the selector we use for the mock.
 @Component({
@@ -53,18 +53,20 @@ describe('ProfilePageComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...signedInDependencies.imports,
         FormsModule,
         IconsModule,
         ClarityModule.forRoot(),
         BrowserAnimationsModule,
+        RouterTestingModule,
       ],
       declarations: [
-        BugReportComponent,
+        ...signedInDependencies.declarations,
         ProfilePageComponent,
-        SignedInComponent,
         MockPieChartComponent
       ],
       providers: [
+        ...signedInDependencies.providers,
         {provide: BugReportService, useValue: new BugReportServiceStub()},
         {provide: APP_BASE_HREF, useValue: '/my/app'},
         {provide: ProfileService, useValue: new ProfileServiceStub()},

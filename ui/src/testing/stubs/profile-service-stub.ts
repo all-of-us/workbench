@@ -3,6 +3,7 @@ import {InvitationVerificationRequest} from 'generated/model/invitationVerificat
 import {Observable} from 'rxjs/Observable';
 
 import {
+  Authority,
   BillingProjectStatus,
   DataAccessLevel,
   IdVerificationListResponse,
@@ -23,6 +24,7 @@ export class ProfileStubVariables {
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
+    authorities: [Authority.REVIEWIDVERIFICATION],
   };
 }
 

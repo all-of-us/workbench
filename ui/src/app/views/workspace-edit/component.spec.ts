@@ -10,9 +10,7 @@ import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
@@ -24,7 +22,12 @@ import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  signedInDependencies,
+  simulateClick,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 import {
   DataAccessLevel,
@@ -70,14 +73,14 @@ describe('WorkspaceEditComponent', () => {
           }
         }
       },
-      routeConfig: {data: {}}
+      routeConfig: {data: {}},
+      root: {children: []}
     };
     workspacesService = new WorkspacesServiceStub();
     TestBed.configureTestingModule({
       declarations: [
-        BugReportComponent,
+        ...signedInDependencies.declarations,
         ConfirmDeleteModalComponent,
-        SignedInComponent,
         ToolTipComponent,
         WorkspaceEditComponent,
         WorkspaceNavBarComponent,
@@ -85,12 +88,14 @@ describe('WorkspaceEditComponent', () => {
         WorkspaceShareComponent
       ],
       imports: [
+        ...signedInDependencies.imports,
         BrowserAnimationsModule,
         RouterTestingModule,
         FormsModule,
         ClarityModule.forRoot()
       ],
       providers: [
+        ...signedInDependencies.providers,
         { provide: WorkspacesService, useValue: workspacesService },
         { provide: WorkspaceStorageService, useClass: WorkspaceStorageService },
         // Wrap in a factory function so we can later mutate the value if needed

@@ -10,9 +10,7 @@ import {ClarityModule} from '@clr/angular';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -24,6 +22,7 @@ import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
+  signedInDependencies,
   simulateClick,
   simulateClickReact,
   updateAndTick
@@ -34,6 +33,8 @@ import {
   UserService,
   WorkspacesService
 } from 'generated';
+
+import * as fp from 'lodash/fp';
 
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
@@ -78,6 +79,7 @@ describe('WorkspaceListComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...fp.without([RouterTestingModule], signedInDependencies.imports),
         BrowserAnimationsModule,
         FormsModule,
         RouterTestingModule.withRoutes([
@@ -88,16 +90,16 @@ describe('WorkspaceListComponent', () => {
         ClarityModule
       ],
       declarations: [
-        BugReportComponent,
+        ...signedInDependencies.declarations,
         ConfirmDeleteModalComponent,
         FakeCloneComponent,
         FakeEditComponent,
-        SignedInComponent,
         TopBoxComponent,
         WorkspaceListComponent,
         WorkspaceShareComponent,
       ],
       providers: [
+        ...signedInDependencies.providers,
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },

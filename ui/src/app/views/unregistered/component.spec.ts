@@ -11,6 +11,9 @@ import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {BreadcrumbComponent} from 'app/views/breadcrumb/component';
+import {BugReportComponent} from 'app/views/bug-report/component';
+import {RoutingSpinnerComponent} from 'app/views/routing-spinner/component';
 import {SignedInComponent} from 'app/views/signed-in/component';
 import {UnregisteredComponent} from 'app/views/unregistered/component';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
@@ -23,6 +26,10 @@ import {
   Profile,
   ProfileService,
 } from 'generated';
+
+import {signedInDependencies} from 'testing/test-helpers';
+
+import * as fp from 'lodash/fp';
 
 
 class FailingProfileStub extends ProfileServiceStub {
@@ -74,12 +81,13 @@ describe('UnregisteredComponent', () => {
     profileStorageStub = new ProfileStorageServiceStub();
     TestBed.configureTestingModule({
       declarations: [
+        ...signedInDependencies.declarations,
         FakeAppComponent,
         FakeRootComponent,
-        SignedInComponent,
         UnregisteredComponent,
       ],
       imports: [
+        ...fp.without([RouterTestingModule], signedInDependencies.imports),
         BrowserAnimationsModule,
         RouterTestingModule.withRoutes([
           {path: '', component: FakeRootComponent},
@@ -88,6 +96,7 @@ describe('UnregisteredComponent', () => {
         ClarityModule.forRoot()
       ],
       providers: [
+        ...signedInDependencies.providers,
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({

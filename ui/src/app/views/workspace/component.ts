@@ -4,12 +4,10 @@ import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {SignInService} from 'app/services/sign-in.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
@@ -113,7 +111,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cohortsService: CohortsService,
     private router: Router,
-    private signInService: SignInService,
     private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,

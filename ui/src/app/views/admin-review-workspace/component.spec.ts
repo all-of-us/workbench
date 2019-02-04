@@ -1,8 +1,6 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 
-import {ClarityModule} from '@clr/angular';
-
 import {
   BugReportService,
   ProfileService,
@@ -16,6 +14,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {
+  signedInDependencies,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -23,23 +22,21 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
 import {AdminReviewWorkspaceComponent} from 'app/views/admin-review-workspace/component';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 
 describe('AdminReviewWorkspaceComponent', () => {
   let fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...signedInDependencies.imports,
         FormsModule,
-        ClarityModule.forRoot()
       ],
       declarations: [
+        ...signedInDependencies.declarations,
         AdminReviewWorkspaceComponent,
-        BugReportComponent,
-        SignedInComponent
       ],
       providers: [
+        ...signedInDependencies.providers,
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },

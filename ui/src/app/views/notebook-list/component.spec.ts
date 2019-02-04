@@ -45,6 +45,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {
   findElementsReact,
   setupModals,
+  signedInDependencies,
   simulateClickReact,
   updateAndTick
 } from 'testing/test-helpers';
@@ -104,6 +105,7 @@ describe('NotebookListComponent', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        ...signedInDependencies.imports,
         BrowserAnimationsModule,
         FormsModule,
         ReactiveFormsModule,
@@ -112,6 +114,7 @@ describe('NotebookListComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
+        ...signedInDependencies.declarations,
         BugReportComponent,
         ConfirmDeleteModalComponent,
         NewNotebookModalComponent,
@@ -125,6 +128,7 @@ describe('NotebookListComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
+        ...signedInDependencies.providers,
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: CohortsService },
         { provide: ConceptSetsService },

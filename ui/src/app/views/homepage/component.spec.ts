@@ -14,7 +14,6 @@ import {HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
 import {ScrollComponent} from 'app/icons/scroll/component';
@@ -34,7 +33,7 @@ import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-s
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {signedInDependencies, simulateClick, updateAndTick} from 'testing/test-helpers';
 
 describe('HomepageComponent', () => {
   let fixture: ComponentFixture<HomepageComponent>;
@@ -43,12 +42,14 @@ describe('HomepageComponent', () => {
     profileStub = new ProfileServiceStub();
     TestBed.configureTestingModule({
       imports: [
+        ...signedInDependencies.imports,
         RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
         ClarityModule.forRoot()
       ],
       declarations: [
+        ...signedInDependencies.declarations,
         ConfirmDeleteModalComponent,
         ExpandComponent,
         HomepageComponent,
@@ -58,9 +59,9 @@ describe('HomepageComponent', () => {
         ResourceCardMenuComponent,
         ScrollComponent,
         ShrinkComponent,
-        SignedInComponent
       ],
       providers: [
+        ...signedInDependencies.providers,
         {provide: CohortsService},
         {provide: ConceptSetsService, useVale: new ConceptSetsServiceStub()},
         {provide: ProfileService, useValue: profileStub},

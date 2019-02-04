@@ -1,7 +1,5 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
-import {ClarityModule} from '@clr/angular';
-
 import {
   ProfileService,
 } from 'generated';
@@ -11,24 +9,23 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {
+  signedInDependencies,
   updateAndTick
 } from 'testing/test-helpers';
 
 import {AdminReviewIdVerificationComponent} from 'app/views/admin-review-id-verification/component';
-import {SignedInComponent} from 'app/views/signed-in/component';
 
 describe('AdminReviewIdVerificationComponent', () => {
   let fixture: ComponentFixture<AdminReviewIdVerificationComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
-      imports: [
-        ClarityModule.forRoot()
-      ],
+      imports: signedInDependencies.imports,
       declarations: [
+        ...signedInDependencies.declarations,
         AdminReviewIdVerificationComponent,
-        SignedInComponent
       ],
       providers: [
+        ...signedInDependencies.providers,
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,

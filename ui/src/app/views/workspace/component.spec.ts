@@ -20,7 +20,6 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
@@ -101,7 +100,6 @@ describe('WorkspaceComponent', () => {
         TopBoxComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
-        WorkspaceWrapperComponent,
         WorkspaceShareComponent
       ],
       providers: [
