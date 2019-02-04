@@ -16,7 +16,7 @@ import {integerAndRangeValidator, numberAndNegativeValidator} from 'app/cohort-s
 
 
 
-
+// React bootstrap replaces the Bootstrap javascript.
 @Component({
   selector: 'app-search-group',
   templateUrl: './search-group.component.html',
@@ -76,7 +76,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   get typeFlag() {
     let flag = true;
     this.treeType.map(m => {
-      if ( m === TreeType[TreeType.PM]) {
+      if ( m === TreeType[TreeType.PM] || m === TreeType[TreeType.DEMO] ||
+        m === TreeType[TreeType.PPI]) {
         flag = false;
       }
     });
@@ -127,11 +128,8 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-    e.target.checked && this.mention === '' ?
-      this.getMentionTitle(this.whichMention[0]) : this.getMentionTitle(this.mention);
-    e.target.checked && this.time === '' ?
-      this.getTimeTitle(this.timeDropDown[0]) : this.getTimeTitle(this.time);
-    this.actions.updateTemporal(e.target.checked, this.groupId);
+
+    this.actions.updateTemporal(e.target.checked, this.groupId, this.role);
   }
 
   getMentionTitle(mentionName) {
@@ -139,11 +137,12 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTimeTitle(timeName) {
-    timeName === 'DURING_SAME_ENCOUNTER_AS' ? this.getTimeValue(0) : this.getTimeValue(1);
+     // timeName !== 'DURING_SAME_ENCOUNTER_AS' ? this.group.get('timeValue', 1) : this.group.get('timeValue', 0);
     this.actions.updateTemporalTime(timeName, this.groupId, this.role );
   }
 
   getTimeValue(e) {
+    // this.time === 'DURING_SAME_ENCOUNTER_AS' ? e = '' : e;
     this.actions.updateTemporalTimeValue(e, this.groupId, this.role);
   }
 

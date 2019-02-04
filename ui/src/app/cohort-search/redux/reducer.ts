@@ -1,4 +1,4 @@
-import {TreeSubType} from 'generated';
+import {TemporalMention, TemporalTime, TreeSubType} from 'generated';
 import {fromJS, List, Map, Set} from 'immutable';
 import {Reducer} from 'redux';
 
@@ -89,7 +89,6 @@ import {
 export const rootReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = initialState, action: RootAction): CohortSearchState => {
     switch (action.type) {
-
       case BEGIN_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -452,25 +451,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           ...action.context
         }));
 
-      case UPDATE_TEMPORAL: {
-        const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
-        return state.setIn(groupItems, action.flag);
-      }
 
-      case UPDATE_MENTION: {
-        const groupItems = ['entities', 'groups', action.groupId, 'mention'];
-        return state.setIn(groupItems, action.mention);
-      }
-
-      case UPDATE_TEMPORAL_TIME: {
-        const groupItems = ['entities', 'groups', action.groupId, 'time'];
-        return state.setIn(groupItems, action.time);
-      }
-
-      case UPDATE_TEMPORAL_TIME_VALUE: {
-        const groupItems = ['entities', 'groups', action.groupId, 'timeValue'];
-        return state.setIn(groupItems, action.timeValue);
-      }
 
       case WIZARD_FINISH: {
         const item = activeItem(state);
@@ -525,6 +506,47 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .mergeDeepIn(['wizard'], action.context)
           .deleteIn(['criteria', 'subtree']);
+
+      case UPDATE_TEMPORAL: {
+        const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
+        const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
+        const time = ['entities', 'groups', action.groupId, 'time'];
+        const mention = ['entities', 'groups', action.groupId, 'mention'];
+        const group = getGroup(action.groupId)(state);
+        // below if is to set the state in default values
+        if (group.get('timeValue') === 0 && group.get('time') === '' && group.get('mention') === '') {
+          return state
+            .setIn(timeValue, '')
+            .setIn(time, TemporalTime.DURINGSAMEENCOUNTERAS)
+            .setIn(mention, TemporalMention.ANYMENTION)
+            .setIn(groupItems, action.flag);
+        }
+        return state
+          .setIn(groupItems, action.flag);
+      }
+
+      case UPDATE_MENTION: {
+        const groupItems = ['entities', 'groups', action.groupId, 'mention'];
+        return state.setIn(groupItems, action.mention);
+      }
+
+      case UPDATE_TEMPORAL_TIME: {
+        const groupItems = ['entities', 'groups', action.groupId, 'time'];
+        const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
+        if((action.time) !== TemporalTime.DURINGSAMEENCOUNTERAS) {
+          return state
+            .setIn(timeValue, 1)
+            .setIn(groupItems, action.time);
+        }
+        return state
+          .setIn(groupItems, action.time)
+          .setIn(timeValue, '');
+      }
+
+      case UPDATE_TEMPORAL_TIME_VALUE: {
+        const groupItems = ['entities', 'groups', action.groupId, 'timeValue'];
+        return state.setIn(groupItems, action.timeValue);
+      }
 
       case LOAD_ENTITIES:
         return state.set('entities', action.entities);

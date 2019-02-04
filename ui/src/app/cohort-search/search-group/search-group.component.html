@@ -12,8 +12,6 @@
 
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <!--<div *ngIf="mention; else mentionTitle"> {{formatStatus(mention)}}</div>-->
-        <!--<ng-template #mentionTitle> </ng-template>-->
         <span>{{formatStatus(mention)}}</span>
         <clr-icon shape="caret down"></clr-icon>
       </button>
@@ -42,17 +40,17 @@
     </app-search-group-item>
   </li>
 </ul>
-  <ul *ngIf="!temporalFlag">
-    <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block card-border">
-      <app-search-group-item
-        (temporalGroupValue)="getTemporalGroup($event)"
-        [role]="role"
-        [groupId]="groupId"
-        [itemId]="itemId"
-        [itemIndex]="itemIndex">
-      </app-search-group-item>
-    </li>
-  </ul>
+  <!--<ul *ngIf="!temporalFlag">-->
+    <!--<li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block card-border">-->
+     <!--temporal <app-search-group-item-->
+        <!--(temporalGroupValue)="getTemporalGroup($event)"-->
+        <!--[role]="role"-->
+        <!--[groupId]="groupId"-->
+        <!--[itemId]="itemId"-->
+        <!--[itemIndex]="itemIndex">-->
+      <!--</app-search-group-item>-->
+    <!--</li>-->
+  <!--</ul>-->
   <div class="card-header">
     <ng-template #groupDropDown>
       <clr-dropdown>
@@ -106,12 +104,9 @@
   <!--hi  <app-validator-errors [form]="timeForm"></app-validator-errors>-->
 
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
-
-    <!--hi   {{timeForm.controls[0].timeValue.get(value)}}-->
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="time; else defineTime"> {{formatStatus(time)}}</div>
-        <ng-template #defineTime>{{formatStatus(time)}}</ng-template>
+        <span>{{formatStatus(time)}}</span>
          <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -136,6 +131,7 @@
              <!--[(ngModel)] = "timeValue"-->
              <!--(ngModelChange)="getTimeValue($event)">-->
     <!--</form>-->
+
     <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox" type="number"
            min="0" max="500"
            [(ngModel)] = "timeValue"
@@ -144,7 +140,7 @@
 
   <ul *ngIf="temporalFlag">
     <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
-      <app-search-group-item
+    temporal  <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
@@ -207,5 +203,7 @@
 </div>
 
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="error && this.temporalItems.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="!this.temporalItems.length"  [style.margin]="'0'">Please select criteria from dropdown to get count</p>
 </popper-content>
+

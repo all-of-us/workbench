@@ -7,7 +7,7 @@ import {
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
-  SearchRequest,
+  SearchRequest, TemporalMention, TemporalTime,
   TreeSubType,
   TreeType
 } from 'generated';
@@ -117,8 +117,10 @@ export class CohortSearchActions {
     this.addId(newId);
     return newId;
   }
-  updateTemporal(flag: boolean, groupId: string) {
+  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
     this._updatedTemporal(flag, groupId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount(groupId);
   }
 
   updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
@@ -481,15 +483,22 @@ export class CohortSearchActions {
   mapGroup = (groupId: string): SearchGroup => {
     const group = getGroup(groupId)(this.state);
     const temporal = group.get('temporal');
+    // console.log(group);
     let items = group.get('items', List()).map(item => this.mapGroupItem(item, temporal));
     if (isImmutable(items)) {
       items = items.toJS();
     }
     const searchGroup = <SearchGroup>{id: groupId, items, temporal};
     if (temporal) {
-      searchGroup.mention = group.get('mention');
+      // searchGroup.mention = group.get('mention') === '' ?
+      //   TemporalMention.ANYMENTION : group.get('mention') ;
+      // // searchGroup.time = group.get('time') === '' ?
+      //   TemporalTime.DURINGSAMEENCOUNTERAS : group.get('time');
+      // searchGroup.timeValue = group.get('time') !==
+      // TemporalTime.DURINGSAMEENCOUNTERAS ? 1 : group.get('timeValue');
+      searchGroup.mention = group.get('mention') ;
       searchGroup.time = group.get('time');
-      searchGroup.timeValue = group.get('timeValue');
+      searchGroup.timeValue =  group.get('timeValue');
       searchGroup.timeFrame = group.get('timeFrame');
     }
     return searchGroup;
