@@ -21,7 +21,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 export interface ConfirmDeleteModalProps {
-  deleting: boolean;
   closeFunction: Function;
   resourceType: string;
   receiveDelete: Function;
@@ -50,9 +49,7 @@ export class ConfirmDeleteModal
   }
 
   render() {
-    return <React.Fragment>
-      {this.props.deleting &&
-      <Modal className='confirmDeleteModal'>
+    return <Modal>
         <ModalTitle style={{lineHeight: '28px'}}>
           Are you sure you want to
           delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
@@ -74,8 +71,7 @@ export class ConfirmDeleteModal
               Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>
         </ModalFooter>
-      </Modal>}
-    </React.Fragment>;
+      </Modal>;
   }
 }
 
@@ -86,12 +82,11 @@ export class ConfirmDeleteModal
 export class ConfirmDeleteModalComponent extends ReactWrapperBase {
   @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
   @Input('resourceName') resourceName: ConfirmDeleteModalProps['resourceName'];
-  @Input('deleting') deleting: ConfirmDeleteModalProps['deleting'];
   @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
   @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
   constructor() {
-    super(ConfirmDeleteModal, ['resourceType', 'resourceName', 'deleting',
+    super(ConfirmDeleteModal, ['resourceType', 'resourceName',
       'closeFunction', 'receiveDelete']);
   }
 }

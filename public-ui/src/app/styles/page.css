@@ -13,8 +13,14 @@ p {
     line-height: 20px;
 }
 
-.title, .view-title, .box-title, .box-heading, .survey-graph-answer {
+.title, .view-title, .box-heading, .box-title, .survey-graph-answer {
     color: #302C71;
+}
+
+.box-title-text {
+    font-weight: 300;
+    font-size: 20px;
+    line-height: 18px;
 }
 
 .view-title {
@@ -27,6 +33,10 @@ p {
     color: rgba(0,0,0,0.87);
     font-weight: 300;
     line-height: 20px;
+}
+
+.info-icon {
+    color: #2691D0;
 }
 
 .white-box {
