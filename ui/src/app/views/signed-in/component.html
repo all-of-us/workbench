@@ -45,7 +45,7 @@
 
 <div class="content-container">
   <div class="background-image"></div>
-  <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
+  <nav #sidenav class="sidenav" [ngClass]="{'sidenavVisible': sidenavToggle}">
     <section class="sidenav-content">
       <button class="btn btn-primary nav-link"
           [class.active]="homeActive"
@@ -89,7 +89,7 @@
       Angular's builtin Router module will attach specific views here
       based on clicking routerLink elements (above) or router.navigate calls.
     -->
-    <router-outlet></router-outlet>
+    <ng-content></ng-content>
     <app-routing-spinner></app-routing-spinner>
   </div>
 </div>

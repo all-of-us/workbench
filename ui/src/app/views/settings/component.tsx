@@ -135,7 +135,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
 }
 
 @Component({
-  template: '<div #root></div>'
+  template: '<app-signed-in><div #root></div></app-signed-in>'
 })
 export class SettingsComponent extends ReactWrapperBase {
   constructor() {

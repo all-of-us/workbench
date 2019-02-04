@@ -1,21 +1,23 @@
-<app-workspace-nav-bar *ngIf="displayNavBar"
-                       [shareFunction]="share.bind(this)"
-                       [deleteFunction]="openConfirmDelete.bind(this)"
-                       [tabPath]="tabPath"></app-workspace-nav-bar>
+<app-signed-in>
+  <app-workspace-nav-bar *ngIf="displayNavBar"
+                         [shareFunction]="share.bind(this)"
+                         [deleteFunction]="openConfirmDelete.bind(this)"
+                         [tabPath]="tabPath"></app-workspace-nav-bar>
 
-<clr-modal [(clrModalOpen)]="workspaceDeletionError">
-  <h3 class="modal-title">Error:</h3>
-  <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
-  </div>
-</clr-modal>
+  <clr-modal [(clrModalOpen)]="workspaceDeletionError">
+    <h3 class="modal-title">Error:</h3>
+    <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
+    </div>
+  </clr-modal>
 
-<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
-<app-confirm-delete-modal *ngIf="confirmDeleting"
-                          [resourceType]="'workspace'"
-                          [resourceName]="workspace.name"
-                          [receiveDelete]="receiveDelete.bind(this)"
-                          [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
-<app-bug-report></app-bug-report>
-<router-outlet></router-outlet>
+  <app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
+  <app-confirm-delete-modal *ngIf="confirmDeleting"
+                            [resourceType]="'workspace'"
+                            [resourceName]="workspace.name"
+                            [receiveDelete]="receiveDelete.bind(this)"
+                            [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
+  <app-bug-report></app-bug-report>
+  <router-outlet></router-outlet>
+</app-signed-in>

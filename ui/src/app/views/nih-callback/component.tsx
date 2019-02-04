@@ -82,7 +82,7 @@ export class NihCallback extends React.Component<{}, NihCallbackState> {
  *  5. Display any errors
  */
 @Component({
-  template: '<div #root></div>'
+  template: '<app-signed-in><div #root></div></app-signed-in>'
 })
 export class NihCallbackComponent extends ReactWrapperBase {
 
