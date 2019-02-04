@@ -19,8 +19,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {profileApi} from '../../services/swagger-fetch-clients';
-import {navigateByUrl} from '../../utils/navigation';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 
 
 const styles = reactStyles({
