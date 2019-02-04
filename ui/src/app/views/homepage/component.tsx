@@ -11,6 +11,7 @@ import {
   styles as buttonStyles
 } from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
 import {
   BillingProjectStatus,
@@ -19,7 +20,6 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {profileApi} from 'app/services/swagger-fetch-clients';
 
 
 const styles = reactStyles({
