@@ -82,8 +82,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
   @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
   sharing = false;
   showTip: boolean;
   workspace: Workspace;

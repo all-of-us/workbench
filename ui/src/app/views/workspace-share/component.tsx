@@ -128,8 +128,7 @@ const styles = reactStyles( {
 export interface WorkspaceShareState {
   autocompleteLoading: boolean;
   autocompleteUsers: User[];
-  userNotFound: boolean;
-  toShare: string;
+  userNotFound: string;
   workspaceShareError: boolean;
   usersLoading: boolean;
   userRolesList: UserRole[];
@@ -154,8 +153,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     this.state = {
       autocompleteLoading: false,
       autocompleteUsers: [],
-      userNotFound: false,
-      toShare: '',
+      userNotFound: '',
       workspaceShareError: false,
       usersLoading: false,
       userRolesList: this.props.workspace.userRoles,
@@ -179,12 +177,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         const updatedWorkspace = this.state.workspace;
         fp.set('etag', resp.workspaceEtag, updatedWorkspace);
         fp.set('userRoles', resp.items, updatedWorkspace);
-        this.setState({usersLoading: false, toShare: '',
+        this.setState({usersLoading: false, userNotFound: '',
           searchTerm: '', workspace: updatedWorkspace});
         this.props.closeFunction();
       }).catch(error => {
         if (error.status === 400) {
-          this.setState({userNotFound: true});
+          this.setState({userNotFound: error});
         } else if (error.status === 409) {
           this.setState({workspaceUpdateConflictError: true});
         } else {
@@ -218,16 +216,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   addCollaborator(user: User): void {
-    this.setState({toShare: user.email, searchTerm: '',
-      autocompleteLoading: false, autocompleteUsers: []});
-    const userRole: UserRole = {
-      givenName: user.givenName,
-      familyName: user.familyName,
-      email: user.email,
-      role: WorkspaceAccessLevel.READER
-    };
-    this.state.userRolesList.splice(0, 0, userRole);
-    this.setState({userRolesList: this.state.userRolesList});
+    const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
+      email: user.email, role: WorkspaceAccessLevel.READER};
+    this.setState(({userRolesList}) => (
+      {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [],
+        userRolesList: fp.concat(userRolesList, [userRole])}
+    ));
   }
 
   searchTermChangedEvent($event: string) {
@@ -257,7 +251,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
 
   resetModalState(): void {
     this.setState({
-      userNotFound: false,
+      userNotFound: '',
       workspaceShareError: false,
       workspaceUpdateConflictError: false,
       usersLoading: false,
@@ -333,7 +327,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
             </div>}
           </div>
           {this.state.userNotFound && <div style={{color: 'red'}}>
-            User {this.state.toShare} not found.
+            {this.state.userNotFound}
           </div>}
           {this.state.workspaceShareError && <div style={{color: 'red'}}>
             Failed to share workspace. Please try again.
