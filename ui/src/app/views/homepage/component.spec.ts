@@ -8,6 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {HomepageComponent, WorkbenchAccessTasksComponent} from 'app/views/homepage/component';
@@ -16,18 +17,19 @@ import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
-import {ScrollComponent} from 'app/icons/scroll/component';
 import {ShrinkComponent} from 'app/icons/shrink/component';
 import {ProfileService} from 'generated';
 import {CohortsService} from 'generated/api/cohorts.service';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {UserMetricsService} from 'generated/api/userMetrics.service';
 import {WorkspacesService} from 'generated/api/workspaces.service';
+import {UserMetricsApi} from 'generated/fetch';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -52,7 +54,6 @@ describe('HomepageComponent', () => {
         RecentWorkComponent,
         QuickTourModalComponent,
         ResourceCardComponent,
-        ScrollComponent,
         ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         ExpandComponent,
@@ -78,6 +79,7 @@ describe('HomepageComponent', () => {
       fixture = TestBed.createComponent(HomepageComponent);
       registerApiClient(ProfileApi, new ProfileApiStub());
     });
+    registerApiClient(UserMetricsApi, new UserMetricsApiStub());
   }));
 
   const loadProfileWithPageVisits = (p: any) => {
