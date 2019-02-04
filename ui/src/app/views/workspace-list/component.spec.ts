@@ -151,7 +151,7 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
     updateAndTick(workspaceListPage.fixture);
     expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
-    expect(workspaceListPage.fixture.componentInstance.resource)
+    expect(workspaceListPage.fixture.componentInstance.workspace)
       .toEqual(firstWorkspace);
     simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
     expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);

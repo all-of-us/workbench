@@ -5,6 +5,10 @@
     padding: .25rem;
 }
 
+.view-sub-title {
+    font-size: 14px;
+}
+
 .search-result p.card-text {
     min-height: 2rem;
     padding-bottom: .5rem;
@@ -34,5 +38,44 @@
     font-weight: bold;
     font-size: 16px;
 }
+.db-logo {
+    margin-top: 1rem;
+    height: 43px;
+    width: 316px;
+    color: #262262;
+    font-family: "Gotham HTF";
+    font-size: 36px;
+    font-weight: bold;
+    line-height: 43px;
+    /* the logo has a little padding in it not lining up with text so move it left a hair */
+    margin-left: -.20rem;
+}
 
+.pm-text {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
 
+.box-title {
+    color: #6CABE4;
+}
+
+.search-input-full{
+    border: none;
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    height: 3rem;
+    width: 75%;
+    background-color: #A3D3F232;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
+    color: #000000;
+}
+
+.search-icon {
+    margin-top: 1%;
+}
+
+#search-db {
+    margin-top: 3%;
+}

@@ -254,31 +254,6 @@ paths:
           schema:
             $ref: "#/definitions/DemoChartInfoListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Quick search for criteria that matches on code and name.
-      operationId: "getCriteriaTreeQuickSearch"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: value
-          type: string
-          required: true
-          description: value that should match code or name
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
   /v1/cohortbuilder/{cdrVersionId}/demographics:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -558,9 +533,6 @@ definitions:
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
-      domainId:
-        description: clue to determine which tables to search
-        type: string
       conceptId:
         description: The concept id that maps to concept table.
         type: integer
@@ -649,6 +621,16 @@ definitions:
       enum: [CM, PROC, PCS, CPT4, AGE, DEC, GEN, RACE, ETH, BP, HR,
       HR-DETAIL, HR-IRR, HR-NOIRR, HEIGHT, WEIGHT, BMI, WC, HC, PREG, WHEEL, ATC,
       BRAND, CLIN, LAB, BASICS, LIFESTYLE, OVERALLHEALTH]
+
+  TemporalMention:
+    type: string
+    description: Mentions refer to occurrences of entry date per person
+    enum: [ANY_MENTION, FIRST_MENTION, LAST_MENTION]
+
+  TemporalTime:
+    type: string
+    description: time refers to the amount of time in reference to temporal mentions
+    enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
 
   DemoChartInfoListResponse:
     type: object

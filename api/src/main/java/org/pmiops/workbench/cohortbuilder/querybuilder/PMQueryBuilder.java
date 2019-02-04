@@ -1,9 +1,9 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.pmiops.workbench.cdm.DomainTableEnum;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
@@ -24,8 +24,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.attributesEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainBlank;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.domainNotMeasurement;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notAnyAttr;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notSystolicAndDiastolic;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notTwoAttributes;
@@ -41,7 +39,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.BP_TWO_ATTRIBUTE_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.DOMAIN;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NAME;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
@@ -58,7 +55,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
@@ -68,15 +64,15 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER = "and value_as_number ${operator} ${value}\n";
 
   private static final String BP_INNER_SQL_TEMPLATE =
-    "select person_id, ${tableDate} from `${projectId}.${dataSetId}.${tableName}`\n" +
-    "   where ${tableConceptId} = ${conceptId}\n";
+    "select person_id from `${projectId}.${dataSetId}.search_pm`\n" +
+    "   where source_concept_id = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
     "select person_id from( ${bpInnerSqlTemplate} )\n";
 
   private static final String BASE_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.${tableName}`\n" +
-      "where ${tableConceptId} = ${conceptId}\n";
+    "select person_id from `${projectId}.${dataSetId}.search_pm`\n" +
+      "where source_concept_id = ${conceptId}\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
@@ -85,26 +81,24 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     BASE_SQL_TEMPLATE + "and value_as_concept_id = ${value}\n";
 
   @Override
-  public String buildQuery(Map<String, QueryParameterValue> queryParams, QueryParameters parameters) {
-    from(parametersEmpty()).test(parameters.getParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
+  public String buildQuery(Map<String, QueryParameterValue> queryParams,
+                           SearchGroupItem searchGroupItem,
+                           String temporalMention) {
+    from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
-    for (SearchParameter parameter : parameters.getParameters()) {
+    for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
       List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       if (PM_TYPES_WITH_ATTR.contains(parameter.getSubtype())) {
         for (Attribute attribute : parameter.getAttributes()) {
           validateAttribute(attribute);
-          String domain = parameter.getDomainId().toLowerCase();
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             String namedParameterConceptId = addQueryParameterValue(queryParams,
                 QueryParameterValue.int64(attribute.getConceptId()));
             tempQueryParts.add(tempSql
-              .replace("${conceptId}", "@" + namedParameterConceptId)
-              .replace("${tableName}", DomainTableEnum.getTableName(domain))
-              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
-              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain)));
+              .replace("${conceptId}", "@" + namedParameterConceptId));
           } else {
             boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE + VALUE_AS_NUMBER : VALUE_AS_NUMBER_SQL_TEMPLATE;
@@ -123,9 +117,6 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId)
               .replace("${operator}", OperatorUtils.getSqlOperator(attribute.getOperator()))
-              .replace("${tableName}", DomainTableEnum.getTableName(domain))
-              .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain))
-              .replace("${tableDate}", DomainTableEnum.getEntryDate(domain))
               .replace("${value}", valueExpression));
           }
         }
@@ -139,11 +130,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
             QueryParameterValue.int64(parameter.getConceptId()));
         String namedParameter = addQueryParameterValue(queryParams,
             QueryParameterValue.int64(new Long(parameter.getValue())));
-        String domain = parameter.getDomainId().toLowerCase();
         queryParts.add(VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${conceptId}", "@" + namedParameterConceptId)
-          .replace("${value}","@" + namedParameter)
-          .replace("${tableName}", DomainTableEnum.getTableName(domain))
-          .replace("${tableConceptId}", DomainTableEnum.getSourceConceptId(domain)));
+          .replace("${value}","@" + namedParameter));
       }
     }
     return String.join(UNION_ALL, queryParts);
@@ -170,10 +158,8 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
         from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
       }
     } else {
-      String domain = param.getDomainId();
       String value = param.getValue();
       Long conceptId = param.getConceptId();
-      from(domainBlank().or(domainNotMeasurement())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, DOMAIN, domain);
       from(valueNull().or(valueNotNumber())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, value);
       from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
     }

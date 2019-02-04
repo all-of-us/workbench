@@ -115,6 +115,7 @@ public class ReviewQueryBuilder {
       "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "and standard_concept_id != 0 \n" +
       "group by standard_code\n" +
       "LIMIT @" + NAMED_LIMIT_PARAM + ") b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +

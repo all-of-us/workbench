@@ -309,7 +309,8 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <img src={panels[selected].image} style={{height: '100%', width: '100%'}}/>
           <div onClick={() => this.toggleImage()}
                data-test-id='shrink-icon'
-               style={{position: 'absolute', right: '5%', bottom: '5%', cursor: 'pointer'}}>
+               style={{position: 'absolute', right: '5%', bottom: '5%',
+                 cursor: 'pointer', width: '28px'}}>
             <img src={this.shrinkIcon}/>
           </div>
         </div>
@@ -360,7 +361,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
                 position: 'absolute', right: '5%',
                 bottom: '5%', height: '1rem', width: '1rem'
               }}>
-                  <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer'}}
+                  <div style={{position: 'absolute', zIndex: 2, cursor: 'pointer', width: '28px'}}
                        data-test-id='expand-icon'
                        onClick={() => this.toggleImage()}>
                       <img src={this.expandIcon}/>

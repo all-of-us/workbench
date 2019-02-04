@@ -112,8 +112,8 @@ export function highlightMatches(
 ) {
   id = id || '';
   const _class = (id !== '' ? 'match' + id + ' ' : '') + 'search-keyword';
+  name = stripHtml(name);
   terms.forEach(term => {
-    name = stripHtml(name);
     if (fullText) {
       const searchTerms = term.trim().split(new RegExp(',| '));
       searchTerms

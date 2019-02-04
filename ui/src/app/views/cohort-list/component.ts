@@ -12,6 +12,9 @@ import {
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 
+import {cohortsApi} from 'app/services/swagger-fetch-clients';
+
+
 @Component({
   styleUrls: ['../../styles/buttons.css',
     '../../styles/cards.css',
@@ -46,8 +49,8 @@ export class CohortListComponent implements OnInit {
   reloadCohorts(): void {
     this.cohortsLoading = true;
     this.resourceList = [];
-    this.cohortsService.getCohortsInWorkspace(this.wsNamespace, this.wsId)
-      .subscribe(
+    cohortsApi().getCohortsInWorkspace(this.wsNamespace, this.wsId)
+      .then(
         resp => {
           this.resourceList = convertToResources(resp.items, this.wsNamespace,
             this.wsId, this.accessLevel, ResourceType.COHORT);

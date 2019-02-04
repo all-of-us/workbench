@@ -14,8 +14,9 @@ import {
   CohortSearchActions,
   CohortSearchState,
   isParameterActive,
+  ppiAnswers,
   selectedGroups,
-  subtreeSelected
+  subtreeSelected,
 } from 'app/cohort-search/redux';
 import {stripHtml} from 'app/cohort-search/utils';
 import {TreeSubType, TreeType} from 'generated';
@@ -34,6 +35,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   private isSelected: boolean;
   private isSelectedChild: boolean;
   private subscription: Subscription;
+  private ppiSubscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
   matched = false;
@@ -53,7 +55,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe(val => {
         this.isSelected = val;
       });
-
     this.subscription.add(this.groups$
       .filter(groupIds => !!groupIds)
       .subscribe(groupIds => {
@@ -115,6 +116,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   get selectAllChildren() {
     return (this.isDrug
       || this.node.get('type') === TreeType.ICD9
+      || this.node.get('type') === TreeType.PPI
       || this.node.get('type') === TreeType.ICD10)
       && this.node.get('group');
   }
@@ -147,6 +149,11 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.selectAllChildren) {
         this.actions.fetchAllChildren(this.node);
       } else {
+        let modifiedName = this.node.get('name');
+        if (this.node.get('type') === TreeType[TreeType.PPI]) {
+          const parent = ppiAnswers(this.node.get('path'))(this.ngRedux.getState()).toJS();
+          modifiedName = parent.name + ' - ' + modifiedName;
+        }
         let attributes = [];
         if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
           const name = stripHtml(this.node.get('name'));
@@ -156,7 +163,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           });
         }
-        const param = this.node.set('parameterId', this.paramId).set('attributes', attributes);
+        const param = this.node.set('parameterId', this.paramId)
+          .set('attributes', attributes).set('name', modifiedName);
         this.actions.addParameter(param);
       }
     }
