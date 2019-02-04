@@ -32,6 +32,7 @@ import {SignInService} from 'app/services/sign-in.service';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ProfilePageComponent} from 'app/views/profile-page/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 /* tslint:disable */
 // We need to disable tslint so it does not complain about the selector we use for the mock.
 @Component({
@@ -60,6 +61,7 @@ describe('ProfilePageComponent', () => {
       declarations: [
         BugReportComponent,
         ProfilePageComponent,
+        SignedInComponent,
         MockPieChartComponent
       ],
       providers: [

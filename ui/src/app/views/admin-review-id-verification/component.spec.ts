@@ -15,6 +15,7 @@ import {
 } from 'testing/test-helpers';
 
 import {AdminReviewIdVerificationComponent} from 'app/views/admin-review-id-verification/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 
 describe('AdminReviewIdVerificationComponent', () => {
   let fixture: ComponentFixture<AdminReviewIdVerificationComponent>;
@@ -24,7 +25,8 @@ describe('AdminReviewIdVerificationComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AdminReviewIdVerificationComponent
+        AdminReviewIdVerificationComponent,
+        SignedInComponent
       ],
       providers: [
         { provide: ProfileService, useValue: new ProfileServiceStub() },

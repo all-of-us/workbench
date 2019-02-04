@@ -24,6 +24,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 
 import {AdminReviewWorkspaceComponent} from 'app/views/admin-review-workspace/component';
 import {BugReportComponent} from 'app/views/bug-report/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 
 describe('AdminReviewWorkspaceComponent', () => {
   let fixture: ComponentFixture<AdminReviewWorkspaceComponent>;
@@ -35,7 +36,8 @@ describe('AdminReviewWorkspaceComponent', () => {
       ],
       declarations: [
         AdminReviewWorkspaceComponent,
-        BugReportComponent
+        BugReportComponent,
+        SignedInComponent
       ],
       providers: [
         { provide: BugReportService, useValue: new BugReportServiceStub() },

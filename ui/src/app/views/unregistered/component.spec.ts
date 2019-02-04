@@ -11,6 +11,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {SignedInComponent} from 'app/views/signed-in/component';
 import {UnregisteredComponent} from 'app/views/unregistered/component';
 import {ProfileServiceStub, ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
@@ -75,6 +76,7 @@ describe('UnregisteredComponent', () => {
       declarations: [
         FakeAppComponent,
         FakeRootComponent,
+        SignedInComponent,
         UnregisteredComponent,
       ],
       imports: [

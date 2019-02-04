@@ -12,6 +12,8 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -24,7 +26,6 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
-import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   DataAccessLevel,
   UnderservedPopulationEnum,
@@ -76,6 +77,7 @@ describe('WorkspaceEditComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
+        SignedInComponent,
         ToolTipComponent,
         WorkspaceEditComponent,
         WorkspaceNavBarComponent,

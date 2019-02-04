@@ -14,6 +14,7 @@ import {HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 
 import {ExpandComponent} from 'app/icons/expand/component';
 import {ScrollComponent} from 'app/icons/scroll/component';
@@ -48,15 +49,16 @@ describe('HomepageComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        HomepageComponent,
-        RecentWorkComponent,
-        QuickTourModalComponent,
-        ResourceCardComponent,
-        ScrollComponent,
-        ResourceCardMenuComponent,
         ConfirmDeleteModalComponent,
         ExpandComponent,
-        ShrinkComponent
+        HomepageComponent,
+        QuickTourModalComponent,
+        RecentWorkComponent,
+        ResourceCardComponent,
+        ResourceCardMenuComponent,
+        ScrollComponent,
+        ShrinkComponent,
+        SignedInComponent
       ],
       providers: [
         {provide: CohortsService},

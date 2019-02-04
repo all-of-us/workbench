@@ -12,6 +12,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceListComponent} from 'app/views/workspace-list/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -91,6 +92,7 @@ describe('WorkspaceListComponent', () => {
         ConfirmDeleteModalComponent,
         FakeCloneComponent,
         FakeEditComponent,
+        SignedInComponent,
         TopBoxComponent,
         WorkspaceListComponent,
         WorkspaceShareComponent,

@@ -8,6 +8,7 @@ import {
 
 import {ServerConfigService} from 'app/services/server-config.service';
 
+import {SignedInComponent} from 'app/views/signed-in/component';
 import {StigmatizationPageComponent} from 'app/views/stigmatization-page/component';
 
 describe('StigmatizationPageComponent', () => {
@@ -16,6 +17,7 @@ describe('StigmatizationPageComponent', () => {
     TestBed.configureTestingModule({
       imports: [],
       declarations: [
+        SignedInComponent,
         StigmatizationPageComponent,
       ],
       providers: [

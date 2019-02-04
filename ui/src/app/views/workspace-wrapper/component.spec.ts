@@ -11,6 +11,7 @@ import {ServerConfigService} from 'app/services/server-config.service';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
+import {SignedInComponent} from 'app/views/signed-in/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
@@ -56,6 +57,7 @@ describe('WorkspaceWrapperComponent', () => {
         BugReportComponent,
         ConfirmDeleteModalComponent,
         FakeAppComponent,
+        SignedInComponent,
         WorkspaceWrapperComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent,
