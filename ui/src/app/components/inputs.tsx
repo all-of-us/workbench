@@ -57,9 +57,12 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
-export const TextInput = ({style = {}, onChange, invalid = false, ...props}) => {
+export const TextInput = React.forwardRef(({style = {}, onChange, invalid = false, ...props}:
+      {style?: React.CSSProperties, onChange: Function, invalid?: boolean, [key: string]: any},
+                                           ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
+    ref = {ref}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%', height: '1.5rem',
@@ -70,7 +73,7 @@ export const TextInput = ({style = {}, onChange, invalid = false, ...props}) => 
       ...style
     }}
   />;
-};
+});
 
 export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
   return <textarea

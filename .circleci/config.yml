@@ -204,15 +204,15 @@ jobs:
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
       - restore_cache:
           keys:
-          - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
           - ui-cache-
       - run:
           working_directory: ~/workbench/ui
-          command: yarn install && yarn codegen
+          command: yarn install --frozen-lockfile && yarn codegen
       - save_cache:
           paths:
-            - ~/workbench/ui/node_modules
-          key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+            - ~/.cache/yarn
+          key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
           name: Lint Angular app
           working_directory: ~/workbench/ui
@@ -245,6 +245,10 @@ jobs:
       # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
+      - restore_cache:
+          keys:
+          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+          - ui-cache-
       - deploy:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui
