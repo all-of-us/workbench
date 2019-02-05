@@ -13,7 +13,6 @@ import {
 import {ClrIcon} from 'app/components/icons';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
-import {navigateByUrl} from 'app/utils/navigation';
 import {
   BillingProjectStatus,
   IdVerificationStatus,
@@ -21,7 +20,6 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {ServerConfigService} from "../../services/server-config.service";
 
 
 const styles = reactStyles({
@@ -128,7 +126,7 @@ export class AccountLinking extends
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
         encodeURIComponent(
-            window.location.origin.toString() + '/nih-callback?token={token}');
+          window.location.origin.toString() + '/nih-callback?token={token}');
     window.location.assign(url);
   }
 
@@ -265,7 +263,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
-    private serverConfigService: ServerConfigService,
     private route: ActivatedRoute,
     private router: Router,
   ) {
