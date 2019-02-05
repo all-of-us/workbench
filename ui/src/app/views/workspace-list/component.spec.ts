@@ -20,24 +20,23 @@ import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stu
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {
   setupModals,
   simulateClick,
+  simulateClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 
 import {
   BugReportService,
-  UserService, WorkspacesService,
+  UserService,
+  WorkspacesService
 } from 'generated';
-
-import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {WorkspacesApi} from 'generated/fetch';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 class WorkspaceListPage {
   fixture: ComponentFixture<WorkspaceListComponent>;
+  workspacesService: WorkspacesService;
   routerStub: Router;
   route: UrlSegment[];
   workspaceCards: DebugElement[];
@@ -46,6 +45,7 @@ class WorkspaceListPage {
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(WorkspaceListComponent);
     setupModals(this.fixture);
+    this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.routerStub = this.fixture.debugElement.injector.get(Router);
     this.readPageData();
   }
@@ -99,7 +99,6 @@ describe('WorkspaceListComponent', () => {
         { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
-        { provide: WorkspacesApi, useValue: new WorkspacesApiStub() },
         { provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         {
@@ -109,7 +108,6 @@ describe('WorkspaceListComponent', () => {
           })
         },
       ] }).compileComponents().then(() => {
-        registerApiClient(WorkspacesApi, new WorkspacesApiStub());
         workspaceListPage = new WorkspaceListPage(TestBed);
       });
     tick();
@@ -118,8 +116,8 @@ describe('WorkspaceListComponent', () => {
 
   it('displays correct number of workspaces in home-page', fakeAsync(() => {
     let expectedWorkspaces: number;
-    workspacesApi().getWorkspaces()
-      .then(workspaces => {
+    workspaceListPage.workspacesService.getWorkspaces()
+      .subscribe(workspaces => {
         expectedWorkspaces = workspaces.items.length;
       });
     tick();
@@ -142,25 +140,23 @@ describe('WorkspaceListComponent', () => {
   }));
 
   it('enables deleting workspaces', fakeAsync(() => {
-    // TODO: These tests should be included on conversion to React
-    // const de = workspaceListPage.fixture.debugElement;
-    // const deleteSpy = spyOn(TestBed.get(WorkspacesApi), 'deleteWorkspace')
-    //   .and.callThrough();
-    // const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0]
-    // .workspace;
-    // const numWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
-    // updateAndTick(workspaceListPage.fixture);
-    // simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
-    // updateAndTick(workspaceListPage.fixture);
-    // expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
-    // expect(workspaceListPage.fixture.componentInstance.workspace)
-    //   .toEqual(firstWorkspace);
-    // simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
-    // expect(deleteSpy).toHaveBeenCalled();
-    // const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
-    // expect(numNewWorkspaces).toEqual(numWorkspaces - 1);
+    const de = workspaceListPage.fixture.debugElement;
+    const deleteSpy = spyOn(TestBed.get(WorkspacesService), 'deleteWorkspace')
+      .and.callThrough();
+    const firstWorkspace = workspaceListPage.fixture.componentInstance.workspaceList[0].workspace;
+    const numWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
+    updateAndTick(workspaceListPage.fixture);
+    expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.workspace)
+      .toEqual(firstWorkspace);
+    simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
+    expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);
+    const numNewWorkspaces = workspaceListPage.fixture.componentInstance.workspaceList.length;
+    expect(numNewWorkspaces).toEqual(numWorkspaces - 1);
 
   }));
 
@@ -178,18 +174,17 @@ describe('WorkspaceListComponent', () => {
   }));
 
   it('enables sharing workspaces', fakeAsync(() => {
-    // TODO: These tests should be included upon conversion to React
-    // const firstWorkspace = workspaceListPage.fixture.componentInstance
-    // .workspaceList[0].workspace;
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
-    // updateAndTick(workspaceListPage.fixture);
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.share-item')));
-    // updateAndTick(workspaceListPage.fixture);
-    // expect(workspaceListPage.fixture.componentInstance.sharing).toBeTruthy();
-    // expect(workspaceListPage.fixture.componentInstance.workspace)
-    //   .toEqual(firstWorkspace);
+    const firstWorkspace = workspaceListPage.fixture.componentInstance
+    .workspaceList[0].workspace;
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
+    updateAndTick(workspaceListPage.fixture);
+    simulateClick(workspaceListPage.fixture,
+      workspaceListPage.workspaceCards[0].query(By.css('.share-item')));
+    updateAndTick(workspaceListPage.fixture);
+    expect(workspaceListPage.fixture.componentInstance.shareModal.sharing).toBeTruthy();
+    expect(workspaceListPage.fixture.componentInstance.shareModal.workspace)
+      .toEqual(firstWorkspace);
     // Further tests in the workspace share component
   }));
 
