@@ -121,14 +121,14 @@
     </clr-dropdown>
 
 
-    <form [formGroup]="timeForm">
+    <form [formGroup]="timeForm" class="form-padding">
       <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox"
-             (change)="getTimeValue($event)"
-             type="number"
-             [name]="timeValue"
-             [id]="timeValue"
-             [ngModel] = "timeValue"
-             formControlName="inputTimeValue">
+          type="number"
+          [name]="timeValue"
+          [id]="timeValue"
+          [ngModel] = "timeValue"
+          (change)="getTimeValue($event)"
+          formControlName="inputTimeValue">
     </form>
   </div>
 
@@ -163,10 +163,9 @@
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
-<!--hi{{typeFlag}}-->
   <div class="container card-footer">
-    <div class="row">
-      <div class="toggle-switch col-sm-1" [ngClass]="typeFlag? 'toggle-switch' :'toggle-switch-disable'">
+    <div class="row"  [ngClass]="{'toggle-no-cursor' : !typeFlag}">
+      <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
         <input class="" id="{{groupId}}" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
         <label class="" for="{{groupId}}">
           <span class="solid-preview-label"></span>

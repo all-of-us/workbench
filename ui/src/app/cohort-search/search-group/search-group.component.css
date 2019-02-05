@@ -147,7 +147,7 @@
 }
 
 .time-inputBox {
-  width: 3rem;
+  width: 3.4rem;
   border: 1px solid #9a9a9a;
   padding: 0.6rem;
   border-radius: 0.1rem;
@@ -163,9 +163,6 @@ clr-icon[shape^=error-standard] {
   color: #d9534f;
 }
 
-/*::ng-deep .card .card-block:last-child {*/
-  /*border: none;*/
-/*}*/
 ul {
   list-style-type: none;
   margin: 0;
@@ -175,6 +172,15 @@ ul {
 li:last-child{
   border: none!important;
 }
+.toggle-no-cursor {
+  cursor: not-allowed;
+}
+
 .toggle-switch-disable {
   pointer-events: none;
 }
+
+.form-padding {
+  padding-top: 0rem;
+}
+

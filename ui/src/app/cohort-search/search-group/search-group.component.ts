@@ -8,7 +8,7 @@ import {
   getTemporalGroupItems,
   groupError
 } from 'app/cohort-search/redux';
-import {numberAndNegativeValidator} from 'app/cohort-search/validators';
+import {integerAndRangeValidator, numberAndNegativeValidator} from 'app/cohort-search/validators';
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
@@ -44,7 +44,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   treeType = [];
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
-      [numberAndNegativeValidator('Form')]),
+      [integerAndRangeValidator('Form', 0, 9999)]),
   });
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
@@ -138,9 +138,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   getTimeValue(e) {
     if (e.target.value >= 0) {
-      setTimeout(() =>
        this.actions.updateTemporalTimeValue(e.target.value, this.groupId, this.role)
-       , 1000);
     }
   }
 
