@@ -1,10 +1,20 @@
 import {Component, Input} from '@angular/core';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {Paginator} from 'primereact/paginator';
 import * as React from 'react';
+
+const styles = reactStyles({
+  pDatatable: {
+    fontSize: '12px'
+  },
+  pDatatableTbody: {
+    padding: 0
+  }
+});
 
 export interface DetailTabTableProps {
   tabname: string;
@@ -22,6 +32,7 @@ export interface DetailTabTableState {
   data: Array<any>;
   loading: boolean;
   totalCount: number;
+  start: number;
 }
 
 export class DetailTabTable extends React.Component<DetailTabTableProps, DetailTabTableState> {
@@ -31,8 +42,16 @@ export class DetailTabTable extends React.Component<DetailTabTableProps, DetailT
     this.state = {
       data: [],
       loading: true,
-      totalCount: null
+      totalCount: null,
+      start: 0
     };
+  }
+
+  onPageChange = (event: any) => {
+    console.log(event);
+    this.setState({
+      start: event.first
+    });
   }
 
   componentDidMount() {
@@ -60,12 +79,25 @@ export class DetailTabTable extends React.Component<DetailTabTableProps, DetailT
 
   render() {
     const dynamicColumns = this.props.columns.map((col) => {
-      return <Column key={col.name} field={col.name} header={col.displayName}  sortable={true} filter={true} filterMatchMode='contains' />;
+      return <Column style={styles.pDatatableTbody} key={col.name} field={col.name} header={col.displayName}  sortable={true} filter={true} filterMatchMode='contains' />;
     });
 
+    const footer = <Paginator
+      first={this.state.start} rows={25} totalRecords={this.state.data.length} onPageChange={this.onPageChange}
+      template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink'></Paginator>;
+
     return <React.Fragment>
-      <DataTable ref={(el) => this.dt = el} value={this.state.data} loading={this.state.loading}
-                 paginator={true} rows={25} totalRecords={this.state.data.length}>
+      <DataTable
+        footer={footer}
+        style={styles.pDatatable}
+        ref={(el) => this.dt = el}
+        value={this.state.data}
+        loading={this.state.loading}
+        first={this.state.start}
+        rows={25}
+        totalRecords={this.state.data.length}
+        scrollable={true}
+        scrollHeight='calc(100vh - 380px)'>
         {dynamicColumns}
       </DataTable>
     </React.Fragment>;
