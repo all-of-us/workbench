@@ -28,6 +28,8 @@ export interface Environment {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://public-ui-dot-all-of-us-rw-stable.appspot.com'
   publicUiUrl: string;
+  // The Shibboleth URL for linking ERA Commons accounts
+  shibbolethUrl: string;
   // The TCell API key. See RW-1682 for details.
   // Example value: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE'
   tcellapikey: string;
@@ -37,10 +39,6 @@ export interface Environment {
   // The base URL for the Zendesk help center / user forum.
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
-  // The Shibboleth URL for linking ERA Commons accounts
-  shibbolethUrl: string;
-  // The URL of the UI
-  rootUrl: string;
 
   // Transient client-side flags.
   //

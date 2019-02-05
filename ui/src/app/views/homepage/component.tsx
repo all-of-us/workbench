@@ -21,6 +21,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {ServerConfigService} from "../../services/server-config.service";
 
 
 const styles = reactStyles({
@@ -126,7 +127,8 @@ export class AccountLinking extends
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(environment.rootUrl + '/nih-callback?token={token}');
+        encodeURIComponent(
+            window.location.origin.toString() + '/nih-callback?token={token}');
     window.location.assign(url);
   }
 
@@ -263,6 +265,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
+    private serverConfigService: ServerConfigService,
     private route: ActivatedRoute,
     private router: Router,
   ) {
@@ -324,7 +327,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
 
   async validateNihToken() {
     const token = (new URL(window.location.href)).searchParams.get('token');
-    console.log(token);
     if (token) {
       try {
         await profileApi().updateNihToken({ jwt: token });

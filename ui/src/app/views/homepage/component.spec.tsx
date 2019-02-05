@@ -33,7 +33,7 @@ describe('AccountLinking', () => {
     const errorMessage = 'error message!';
     props.eraCommonsError = errorMessage;
     const wrapper = component();
-    expect(wrapper.find('[data-test-id="era-commons-error"]').text())
+    expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
         .toContain(errorMessage);
   });
 
