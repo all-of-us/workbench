@@ -104,7 +104,8 @@ const AccountLinkingButton: React.FunctionComponent<{
   } else {
     return <Clickable style={{...buttonStyles.base,
       ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
-                      onClick={onClick}>
+                      onClick={onClick}
+                      data-test-id={defaultText}>
       {defaultText}
     </Clickable>;
   }
@@ -112,38 +113,21 @@ const AccountLinkingButton: React.FunctionComponent<{
 
 export interface AccountLinkingProps {
   eraCommonsLinked: boolean;
+  eraCommonsError: string;
   trainingCompleted: boolean;
 }
 
 export class AccountLinking extends
-    React.Component<AccountLinkingProps, {eraCommonsLinked: boolean, eraCommonsError: string}> {
+    React.Component<AccountLinkingProps, {}> {
 
   constructor(props: AccountLinkingProps) {
     super(props);
-
-    this.state = {
-      eraCommonsError: '',
-      eraCommonsLinked: props.eraCommonsLinked
-    };
   }
 
   static redirectToNiH(): void {
     const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
         encodeURIComponent(environment.rootUrl + '/nih-callback?token={token}');
     window.location.assign(url);
-  }
-
-  async componentDidMount() {
-    const token = (new URL(window.location.href)).searchParams.get('token');
-    if (token) {
-      try {
-        await profileApi().updateNihToken({ jwt: token });
-        this.setState({eraCommonsError: ''});
-        navigateByUrl('/');
-      } catch (e) {
-        this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
-      }
-    }
   }
 
   render() {
@@ -170,15 +154,15 @@ export class AccountLinking extends
               </div>
               {/*TODO: RW-1184 Moodle training UI */}
               <AccountLinkingButton failed={false}
-                                    completed={this.state.eraCommonsLinked}
+                                    completed={this.props.eraCommonsLinked}
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
                                     onClick={AccountLinking.redirectToNiH}/>
             </div>
-            {this.state.eraCommonsError && <Error>
+            {this.props.eraCommonsError && <Error data-test-id='era-commons-error'>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {this.state.eraCommonsError} Please try again!
+              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
@@ -207,9 +191,10 @@ export class AccountLinking extends
 })
 export class AccountLinkingComponent extends ReactWrapperBase {
   @Input('eraCommonsLinked') eraCommonsLinked: AccountLinkingProps['eraCommonsLinked'];
+  @Input('eraCommonsError') eraCommonsError: AccountLinkingProps['eraCommonsError'];
   @Input('trainingCompleted') trainingCompleted: AccountLinkingProps['trainingCompleted'];
   constructor() {
-    super(AccountLinking, ['eraCommonsLinked', 'trainingCompleted']);
+    super(AccountLinking, ['eraCommonsLinked', 'eraCommonsError', 'trainingCompleted']);
   }
 }
 
@@ -271,6 +256,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
   eraCommonsLinked: boolean;
+  eraCommonsError = '';
   // TODO RW-1184; defaulting to true
   trainingCompleted = true;
 
@@ -285,6 +271,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.validateNihToken();
+
     // TODO: combine these two profile() requests
     this.profileService.getMe().subscribe(profile => {
       if (profile.pageVisits) {
@@ -332,6 +320,18 @@ export class HomepageComponent implements OnInit, OnDestroy {
       this.src = '/assets/videos/Workbench Tutorial - Notebooks.mp4';
     }
     this.open = true;
+  }
+
+  async validateNihToken() {
+    const token = (new URL(window.location.href)).searchParams.get('token');
+    console.log(token);
+    if (token) {
+      try {
+        await profileApi().updateNihToken({ jwt: token });
+      } catch (e) {
+        this.eraCommonsError = 'Error saving NIH Authentication status.';
+      }
+    }
   }
 
   // TODO [RW-1887] Dead code, please remove
