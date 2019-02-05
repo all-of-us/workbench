@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 
 import {
@@ -32,17 +32,14 @@ export class CohortListComponent implements OnInit {
   deleteModal: ConfirmDeleteModalComponent;
 
   constructor(
-    private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private router: Router,
-  ) {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.accessLevel = wsData.accessLevel;
-  }
+  ) {}
 
   ngOnInit(): void {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+    const ws = currentWorkspaceStore.getValue();
+    this.accessLevel = ws.accessLevel;
+    this.wsNamespace = ws.namespace;
+    this.wsId = ws.id;
     this.reloadCohorts();
   }
 
@@ -62,7 +59,7 @@ export class CohortListComponent implements OnInit {
   }
 
   buildCohort(): void {
-    this.router.navigate(['build'], {relativeTo: this.route});
+    navigate(['/workspaces', this.wsNamespace, this.wsId, 'cohorts', 'build']);
   }
 
   get writePermission(): boolean {
