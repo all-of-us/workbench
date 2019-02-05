@@ -448,6 +448,12 @@ create and delete BigQuery datasets), run:
 
 By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
 
+To filter tests, use the [--tests flag](https://docs.gradle.org/current/userguide/java_testing.html#simple_name_pattern) on any test command:
+
+```
+./project.rb bigquerytest --tests "org.pmiops.workbench.api.CohortBuilderControllerBQTest.countSubjectsNotValidMessageException"
+```
+
 ## Manual Testing
 
 ### Backend Swagger Portals
