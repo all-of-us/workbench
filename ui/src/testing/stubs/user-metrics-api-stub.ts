@@ -6,6 +6,15 @@ export class UserMetricsApiStub extends UserMetricsApi {
   }
 
   getUserRecentResources() {
-    return Promise.resolve([]);
+    return Promise.resolve([
+      {
+        modifiedTime: '2019-01-28 20:13:58.0',
+        notebook: {lastModifiedTime: null, name: 'a.ipynb', path: 'gs://q/notebooks/'},
+        permission: 'OWNER',
+        workspaceFirecloudName: 'q',
+        workspaceId: 1,
+        workspaceNamespace: 'z'
+      }
+    ]);
   }
 }
