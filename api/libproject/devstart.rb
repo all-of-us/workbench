@@ -78,9 +78,17 @@ def get_cdr_sql_project(project)
   return ENVIRONMENTS[project][:cdr_sql_instance].split(":")[0]
 end
 
-def ensure_docker(cmd_name, args)
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
+  end
+end
+
+def ensure_docker_with_cdr(cmd_name, args=nil)
+  args = (args or [])
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm cdr-scripts ./project.rb #{cmd_name}} + args))
   end
 end
 
@@ -144,9 +152,9 @@ def dev_up()
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  common.run_inline %W{docker-compose run db-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
+  common.run_inline %W{docker-compose run db-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -187,9 +195,9 @@ def run_local_migrations()
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
   end
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
@@ -612,12 +620,15 @@ Common.register_command({
 
 def run_local_all_migrations()
   common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_cdr = ->(args) {
+    common.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
+  }
+  init_cdr.(%W{--cdr-db-name cdr})
+  init_cdr.(%W{--cdr-db-name public})
+  init_cdr.(%W{--cdr-db-name cdr --run-list data --context local})
+  init_cdr.(%W{--cdr-db-name public --run-list data --context local})
 end
 
 Common.register_command({
@@ -627,28 +638,36 @@ Common.register_command({
 })
 
 
-def run_local_data_migrations()
+def run_local_data_migrations(cmd)
+  ensure_docker_with_cdr(cmd)
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+  Dir.chdir('generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --run-list data --context local}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public --run-list data --context local}
+  end
 end
 
 Common.register_command({
   :invocation => "run-local-data-migrations",
   :description => "Runs local data migrations for cdr/workbench schemas.",
-  :fn => ->() { run_local_data_migrations() }
+  :fn => ->() { run_local_data_migrations("run-local-data-migrations") }
 })
 
-def run_local_public_data_migrations()
+def run_local_public_data_migrations(cmd)
+  ensure_docker_with_cdr(cmd)
+
   common = Common.new
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public --run-list data --context local}
+  end
 end
 
 Common.register_command({
   :invocation => "run-local-public-data-migrations",
   :description => "Runs local data migrations for public schemas.",
-  :fn => ->() { run_local_public_data_migrations() }
+  :fn => ->() { run_local_public_data_migrations("run-local-public-data-migrations") }
 })
 
 def make_bq_denormalized_tables(*args)
@@ -795,7 +814,6 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
     common.run_inline %W{docker-compose run db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
@@ -878,7 +896,7 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   common = Common.new
-  common.run_inline %W{docker-compose run drop-cdr-db}
+  common.run_inline %W{docker-compose run db-scripts db-cdr/run-drop-db.sh}
 end
 
 Common.register_command({
