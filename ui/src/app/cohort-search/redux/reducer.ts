@@ -514,8 +514,8 @@ export const rootReducer: Reducer<CohortSearchState> =
         const mention = ['entities', 'groups', action.groupId, 'mention'];
         const group = getGroup(action.groupId)(state);
         // below if is to set the state in default values
-        // group.get('timeValue') === 0 &&
-        if (group.get('time') === '' && group.get('mention') === '') {
+        if (group.get('timeValue') === 0 && group.get('time') === ''
+          && group.get('mention') === '') {
           return state
             // .setIn(timeValue, '')
             .setIn(time, TemporalTime.DURINGSAMEENCOUNTERAS)
@@ -534,14 +534,14 @@ export const rootReducer: Reducer<CohortSearchState> =
       case UPDATE_TEMPORAL_TIME: {
         const groupItems = ['entities', 'groups', action.groupId, 'time'];
         const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
-        // if((action.time) !== TemporalTime.DURINGSAMEENCOUNTERAS) {
-        //   return state
-        //     .setIn(timeValue, 1)
-        //     .setIn(groupItems, action.time);
-        // }
+        if ((action.time) !== TemporalTime.DURINGSAMEENCOUNTERAS) {
+          return state
+            .setIn(timeValue, 1)
+            .setIn(groupItems, action.time);
+        }
         return state
           .setIn(groupItems, action.time)
-          // .setIn(timeValue, '');
+          .setIn(timeValue, '');
       }
 
       case UPDATE_TEMPORAL_TIME_VALUE: {
