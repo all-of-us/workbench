@@ -156,7 +156,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       userNotFound: '',
       workspaceShareError: false,
       usersLoading: false,
-      userRolesList: this.props.workspace.userRoles,
+      userRolesList: this.props.workspace.userRoles || [],
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
       workspace: this.props.workspace,
@@ -338,6 +338,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           </div>}
             <h3>Current Collaborators</h3>
           <div style={{overflowY: 'auto'}}>
+            {console.log(JSON.stringify(this.state))}
             {this.state.userRolesList.map((user, i) => {
               return <div key={i}>
                 <div style={styles.wrapper}>

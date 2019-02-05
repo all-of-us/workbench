@@ -85,6 +85,7 @@ export class ConfirmDeleteModalComponent extends ReactWrapperBase {
   @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
   @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
+
   constructor() {
     super(ConfirmDeleteModal, ['resourceType', 'resourceName',
       'closeFunction', 'receiveDelete']);

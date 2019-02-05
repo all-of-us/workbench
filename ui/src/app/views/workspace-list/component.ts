@@ -10,6 +10,7 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   BillingProjectStatus,
@@ -113,19 +114,18 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   reloadWorkspaces(): void {
-    this.workspacesService.getWorkspaces()
-      .subscribe(
-        workspacesReceived => {
-          workspacesReceived.items.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
-          this.workspaceList = workspacesReceived
-            .items
-            .map(w => new WorkspacePermissions(w));
-          this.workspacesLoading = false;
-        },
-        error => {
-          const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
-          this.errorText = (response.message) ? response.message : '';
-        });
+    workspacesApi().getWorkspaces()
+      .then((workspacesReceived) => {
+        workspacesReceived.items.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
+        this.workspaceList = workspacesReceived
+          .items
+          .map(w => new WorkspacePermissions(w));
+        this.workspacesLoading = false;
+      })
+      .catch(error => {
+        const response: ErrorResponse = ErrorHandlingService.convertAPIError(error);
+        this.errorText = (response.message) ? response.message : '';
+      });
   }
 
   delete(workspace: Workspace): void {
@@ -134,11 +134,13 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.workspaceList = [];
     this.workspacesLoading = true;
     this.closeConfirmDelete();
-    this.workspacesService.deleteWorkspace(workspace.namespace, workspace.id).subscribe(() => {
-      this.reloadWorkspaces();
-    }, (error) => {
-      this.workspaceDeletionError = true;
-    });
+    workspacesApi().deleteWorkspace(workspace.namespace, workspace.id)
+      .then(() => {
+        this.reloadWorkspaces();
+      })
+      .catch(error => {
+        this.workspaceDeletionError = true;
+      });
   }
 
   receiveDelete(): void {
