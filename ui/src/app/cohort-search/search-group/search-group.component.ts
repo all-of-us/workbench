@@ -45,12 +45,15 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
+  test: 4;
   treeType = [];
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([0, Validators.required],
       [numberAndNegativeValidator('Form')]),
   });
-
+  // timeForm = new FormGroup({
+  //   inputTimeValue: new FormControl('')
+  // });
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
@@ -137,13 +140,18 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTimeTitle(timeName) {
-     // timeName !== 'DURING_SAME_ENCOUNTER_AS' ? this.group.get('timeValue', 1) : this.group.get('timeValue', 0);
     this.actions.updateTemporalTime(timeName, this.groupId, this.role );
   }
 
   getTimeValue(e) {
-    // this.time === 'DURING_SAME_ENCOUNTER_AS' ? e = '' : e;
-    this.actions.updateTemporalTimeValue(e, this.groupId, this.role);
+    // // console.log(e)
+    // let form1 = this.timeForm.controls.inputTimeValue
+    // console.log(form1);
+    // // console.log(form1.get('value').setValue(e));
+    //  console.log(this.timeForm.controls.inputTimeValue.get('value').value)
+    setTimeout(() =>
+        this.actions.updateTemporalTimeValue(e, this.groupId, this.role)
+      , 1000);
   }
 
   formatStatus(options) {

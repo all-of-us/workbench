@@ -123,12 +123,12 @@
 
     <!--<form [formGroup]="timeForm">-->
 
-      <!--<input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  name="inputTimeValue" formControlName="inputTimeValue"-->
+      <!--<input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  formControlName="inputTimeValue"-->
              <!--class="time-inputBox"-->
              <!--type="number"-->
              <!--[min]="0"-->
              <!--[max]="100"-->
-             <!--[(ngModel)] = "timeValue"-->
+             <!--[ngModel] = "timeValue"-->
              <!--(ngModelChange)="getTimeValue($event)">-->
     <!--</form>-->
 
@@ -140,7 +140,7 @@
 
   <ul *ngIf="temporalFlag">
     <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
-    temporal  <app-search-group-item
+     <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
