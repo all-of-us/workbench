@@ -101,7 +101,7 @@
   </div>
 
   <!--********************************Temporal changes start***************************************-->
-  <!--hi  <app-validator-errors [form]="timeForm"></app-validator-errors>-->
+  <app-validator-errors [form]="timeForm"></app-validator-errors>
 
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
@@ -121,21 +121,15 @@
     </clr-dropdown>
 
 
-    <!--<form [formGroup]="timeForm">-->
-
-      <!--<input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  formControlName="inputTimeValue"-->
-             <!--class="time-inputBox"-->
-             <!--type="number"-->
-             <!--[min]="0"-->
-             <!--[max]="100"-->
-             <!--[ngModel] = "timeValue"-->
-             <!--(ngModelChange)="getTimeValue($event)">-->
-    <!--</form>-->
-
-    <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox" type="number"
-           min="0" max="500"
-           [(ngModel)] = "timeValue"
-           (ngModelChange)="getTimeValue($event)">
+    <form [formGroup]="timeForm">
+      <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox"
+             (change)="getTimeValue($event)"
+             type="number"
+             [name]="timeValue"
+             [id]="timeValue"
+             [ngModel] = "timeValue"
+             formControlName="inputTimeValue">
+    </form>
   </div>
 
   <ul *ngIf="temporalFlag">

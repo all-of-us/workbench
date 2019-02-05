@@ -54,7 +54,7 @@ import {
   REOPEN_WIZARD,
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
-  UPDATE_MENTION,
+  UPDATE_WHICH_MENTION,
   UPDATE_TEMPORAL_TIME,
   UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
@@ -342,8 +342,8 @@ export const updatedTemporal =
     ({type: UPDATE_TEMPORAL, flag, groupId});
 
 export const updateWhichMention =
-  (mention: any, groupId: any): ActionTypes[typeof UPDATE_MENTION] =>
-    ({type: UPDATE_MENTION, mention, groupId});
+  (mention: any, groupId: any): ActionTypes[typeof UPDATE_WHICH_MENTION] =>
+    ({type: UPDATE_WHICH_MENTION, mention, groupId});
 
 export const updateTemporalTime =
   (time: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME] =>

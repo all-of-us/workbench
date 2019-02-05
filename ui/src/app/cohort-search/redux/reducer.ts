@@ -68,7 +68,7 @@ import {
   REOPEN_WIZARD,
   WIZARD_FINISH,
   UPDATE_TEMPORAL,
-  UPDATE_MENTION,
+  UPDATE_WHICH_MENTION,
   UPDATE_TEMPORAL_TIME,
   UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
@@ -517,7 +517,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         if (group.get('timeValue') === 0 && group.get('time') === ''
           && group.get('mention') === '') {
           return state
-            // .setIn(timeValue, '')
+            .setIn(timeValue, '')
             .setIn(time, TemporalTime.DURINGSAMEENCOUNTERAS)
             .setIn(mention, TemporalMention.ANYMENTION)
             .setIn(groupItems, action.flag);
@@ -526,7 +526,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(groupItems, action.flag);
       }
 
-      case UPDATE_MENTION: {
+      case UPDATE_WHICH_MENTION: {
         const groupItems = ['entities', 'groups', action.groupId, 'mention'];
         return state.setIn(groupItems, action.mention);
       }
@@ -536,9 +536,10 @@ export const rootReducer: Reducer<CohortSearchState> =
         const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
         if ((action.time) !== TemporalTime.DURINGSAMEENCOUNTERAS) {
           return state
-            .setIn(timeValue, 1)
-            .setIn(groupItems, action.time);
+            .setIn(groupItems, action.time)
+            .setIn(timeValue, 1);
         }
+        console.log('i am from reducer');
         return state
           .setIn(groupItems, action.time)
           .setIn(timeValue, '');

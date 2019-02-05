@@ -1,6 +1,6 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {
   CohortSearchActions,
@@ -8,15 +8,11 @@ import {
   getTemporalGroupItems,
   groupError
 } from 'app/cohort-search/redux';
+import {numberAndNegativeValidator} from 'app/cohort-search/validators';
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
-import {List, Map} from 'immutable';
+import {List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {integerAndRangeValidator, numberAndNegativeValidator} from 'app/cohort-search/validators';
-
-
-
-// React bootstrap replaces the Bootstrap javascript.
 @Component({
   selector: 'app-search-group',
   templateUrl: './search-group.component.html',
@@ -45,15 +41,12 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
-  test: 4;
   treeType = [];
   timeForm = new FormGroup({
-    inputTimeValue: new FormControl([0, Validators.required],
+    inputTimeValue: new FormControl([Validators.required],
       [numberAndNegativeValidator('Form')]),
   });
-  // timeForm = new FormGroup({
-  //   inputTimeValue: new FormControl('')
-  // });
+
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
   ngOnInit() {
@@ -144,14 +137,11 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
   }
 
   getTimeValue(e) {
-    // // console.log(e)
-    // let form1 = this.timeForm.controls.inputTimeValue
-    // console.log(form1);
-    // // console.log(form1.get('value').setValue(e));
-    //  console.log(this.timeForm.controls.inputTimeValue.get('value').value)
-    setTimeout(() =>
-        this.actions.updateTemporalTimeValue(e, this.groupId, this.role)
-      , 1000);
+    if (e.target.value >= 0) {
+      setTimeout(() =>
+       this.actions.updateTemporalTimeValue(e.target.value, this.groupId, this.role)
+       , 1000);
+    }
   }
 
   formatStatus(options) {

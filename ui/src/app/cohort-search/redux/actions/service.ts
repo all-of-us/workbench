@@ -130,6 +130,7 @@ export class CohortSearchActions {
   }
 
   updateTemporalTime(time: any, groupId: string, role: keyof SearchRequest) {
+    console.log('I am here');
     this._updateTemporalTime(time, groupId);
     this.requestGroupCount(role, groupId);
     this.requestTotalCount(groupId);

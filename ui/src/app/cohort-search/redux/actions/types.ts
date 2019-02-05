@@ -57,7 +57,7 @@ export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
 export const UPDATE_TEMPORAL = 'UPDATE_TEMPORAL';
-export const UPDATE_MENTION = 'UPDATE_MENTION';
+export const UPDATE_WHICH_MENTION = 'UPDATE_WHICH_MENTION';
 export const UPDATE_TEMPORAL_TIME = 'UPDATE_TEMPORAL_TIME';
 export const UPDATE_TEMPORAL_TIME_VALUE = 'UPDATE_TEMPORAL_TIME_VALUE';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
@@ -359,8 +359,8 @@ export interface ActionTypes {
     groupId: string;
   };
 
-  UPDATE_MENTION: {
-    type: typeof UPDATE_MENTION;
+  UPDATE_WHICH_MENTION: {
+    type: typeof UPDATE_WHICH_MENTION;
     mention: any;
     groupId: string;
   };
@@ -373,7 +373,7 @@ export interface ActionTypes {
 
   UPDATE_TEMPORAL_TIME_VALUE: {
     type: typeof UPDATE_TEMPORAL_TIME_VALUE;
-    timeValue: any;
+    timeValue: number;
     groupId: string;
   };
 
@@ -445,7 +445,7 @@ export type RootAction =
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
   | ActionTypes[typeof UPDATE_TEMPORAL]
-  | ActionTypes[typeof UPDATE_MENTION]
+  | ActionTypes[typeof UPDATE_WHICH_MENTION]
   | ActionTypes[typeof UPDATE_TEMPORAL_TIME]
   | ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE]
   | ActionTypes[typeof WIZARD_CANCEL]
