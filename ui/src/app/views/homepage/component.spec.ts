@@ -121,19 +121,19 @@ describe('HomepageComponent', () => {
 
   it('should show the era commons linking page if the user has no nih username',
     fakeAsync(() => {
-        updateAndTick(fixture);
-        updateAndTick(fixture);
-        expect(findElementsReact(fixture, '[data-test-id="Login"]')
+      updateAndTick(fixture);
+      updateAndTick(fixture);
+      expect(findElementsReact(fixture, '[data-test-id="Login"]')
         [0].innerText).toEqual('LOGIN');
-      }));
+    }));
 
   it('should not show the era commons linking page if user has an nih username',
     fakeAsync(() => {
-        loadProfileWithNihUsername({linkedNihUsername: 'testusername'});
-        updateAndTick(fixture);
-        updateAndTick(fixture);
-        expect(findElementsReact(fixture, '[data-test-id="Login"]')
-      .length).toEqual(0);
-      }));
+      loadProfileWithNihUsername({linkedNihUsername: 'testusername'});
+      updateAndTick(fixture);
+      updateAndTick(fixture);
+      expect(findElementsReact(fixture, '[data-test-id="Login"]')
+        .length).toEqual(0);
+    }));
 
 });
