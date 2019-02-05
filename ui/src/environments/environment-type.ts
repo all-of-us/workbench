@@ -39,7 +39,7 @@ export interface Environment {
   zendeskHelpCenterUrl: string;
   // The Shibboleth URL for linking ERA Commons accounts
   shibbolethUrl: string;
-
+  // The URL of the UI
   rootUrl: string;
 
   // Transient client-side flags.
@@ -58,5 +58,9 @@ export interface Environment {
   // Exit criteria: remove flag for Athens release.
   enableJupyterLab: boolean;
 
+  // Whether users should be redirected to link their NiH account before
+  // accessing any resources.
+  // See RW-1697 for details
+  // Exit criteria: remove flag for Athens release.
   enableComplianceLockout: boolean;
 }

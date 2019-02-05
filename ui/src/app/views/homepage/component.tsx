@@ -152,7 +152,6 @@ export class AccountLinking extends
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
-            {/*<ClrIcon shape='exclamation-triangle' class='is-solid'/>*/}
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
             <div style={styles.text}>Please login to your ERA Commons account and complete
@@ -169,6 +168,7 @@ export class AccountLinking extends
                   to the ERA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
+              {/*TODO: RW-1184 Moodle training UI */}
               <AccountLinkingButton failed={false}
                                     completed={this.state.eraCommonsLinked}
                                     defaultText='Login'
@@ -209,8 +209,7 @@ export class AccountLinkingComponent extends ReactWrapperBase {
   @Input('eraCommonsLinked') eraCommonsLinked: AccountLinkingProps['eraCommonsLinked'];
   @Input('trainingCompleted') trainingCompleted: AccountLinkingProps['trainingCompleted'];
   constructor() {
-    super(AccountLinking,
-        ['eraCommonsLinked', 'trainingCompleted']);
+    super(AccountLinking, ['eraCommonsLinked', 'trainingCompleted']);
   }
 }
 
@@ -219,12 +218,13 @@ export class AccountLinkingComponent extends ReactWrapperBase {
   styleUrls: ['./component.css'],
   templateUrl: './component.html',
 })
-
 export class HomepageComponent implements OnInit, OnDestroy {
   private static pageId = 'homepage';
   @ViewChild('myVideo') myVideo: any;
   profile: Profile;
   view: any[] = [180, 180];
+  // TODO [RW-1887]: this task completion state is (probably unused)
+  // Clean it up when converting this page to React.
   numberOfTotalTasks = 4;
   completedTasksName = 'Completed';
   unfinishedTasksName = 'Unfinished';
@@ -270,7 +270,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
-  accountsLinked: boolean;
+  eraCommonsLinked: boolean;
   // TODO RW-1184; defaulting to true
   trainingCompleted = true;
 
@@ -285,13 +285,17 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // TODO: combine these two profile() requests
     this.profileService.getMe().subscribe(profile => {
       if (profile.pageVisits) {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
       }
       if (environment.enableComplianceLockout) {
-        this.accountsLinked = !!profile.linkedNihUsername;
+        this.eraCommonsLinked = !!profile.linkedNihUsername;
+      } else {
+        // Default to true when feature flag is off
+        this.eraCommonsLinked = true;
       }
     },
       e => {},
@@ -330,6 +334,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     this.open = true;
   }
 
+  // TODO [RW-1887] Dead code, please remove
   public get completedTasks() {
     let completedTasks = 0;
     if (this.profile === undefined) {
@@ -354,6 +359,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     return this.completedTasks / this.numberOfTotalTasks * 100;
   }
 
+  // TODO [RW-1887] Dead code, please remove
   reloadSpinner(): void {
     this.spinnerValues = [
       {
