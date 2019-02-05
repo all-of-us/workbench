@@ -425,7 +425,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     ppiParam.type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
+      PARAMETER, NAME, ppiParam.getName());
 
     //ppi no value as number
     ppiParam.conceptId(1L);

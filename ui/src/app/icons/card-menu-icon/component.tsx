@@ -1,7 +1,3 @@
-import {Component} from '@angular/core';
-
-import {ReactWrapperBase} from 'app/utils';
-
 import * as React from 'react';
 
 
@@ -18,15 +14,3 @@ export const CardMenuIconComponentReact = () => <svg
       .5.4 1 1 1s1-.5 1-1zm0 3c0-.5-.4-1-1-1a1 1 0 0 0-1 1c0 .6.4 1 1 1s1-.4 1-1z'/>
   </g>
 </svg>;
-
-@Component({
-  selector: 'app-card-menu-icon',
-  template: '<div #root></div>',
-})
-export class CardMenuIconComponent extends ReactWrapperBase {
-
-  constructor() {
-    super(CardMenuIconComponentReact, []);
-  }
-
-}
