@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
@@ -11,17 +13,32 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.model.AuthDomainDisableUserRequest;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.test.Providers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.inject.Provider;
+import java.time.Instant;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
+@DataJpaTest
+@Import(LiquibaseAutoConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 public class AuthDomainControllerTest {
 
   private static final String GIVEN_NAME = "Bob";
@@ -33,22 +50,30 @@ public class AuthDomainControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
 
   @Mock
+  private AdminActionHistoryDao adminActionHistoryDao;
+  @Mock
   private FireCloudService fireCloudService;
   @Mock
+  private Provider<User> userProvider;
+  @Autowired
   private UserDao userDao;
-  @Mock
-  private UserService userService;
 
   private AuthDomainController authDomainController;
 
   @Before
   public void setUp() {
-    User user = createUser();
+    User adminUser = new User();
+    adminUser.setUserId(0L);
     doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
     doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
     when(fireCloudService.createGroup(any())).thenReturn(new ManagedGroupWithMembers());
-    when(userDao.findUserByEmail(any())).thenReturn(user);
-    when(userService.setDisabledStatus(any(), anyBoolean())).thenReturn(user);
+    when(userProvider.get()).thenReturn(adminUser);
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new WorkbenchConfig.FireCloudConfig();
+    config.firecloud.registeredDomainName = "";
+    FakeClock clock = new FakeClock(Instant.now());
+    UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
+        new FakeLongRandom(12345), fireCloudService, Providers.of(config));
     this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
   }
 
@@ -60,16 +85,30 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testDisableUser() {
+    createUser(false);
     AuthDomainDisableUserRequest request = new AuthDomainDisableUserRequest().
         email(PRIMARY_EMAIL).
         disabled(true);
     ResponseEntity<Void> response = this.authDomainController.disableUser("", request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    assertThat(updatedUser.getDisabled());
   }
 
-  private User createUser() {
+  @Test
+  public void testEnableUser() {
+    createUser(true);
+    AuthDomainDisableUserRequest request = new AuthDomainDisableUserRequest().
+        email(PRIMARY_EMAIL).
+        disabled(false);
+    ResponseEntity<Void> response = this.authDomainController.disableUser("", request);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    assertThat(!updatedUser.getDisabled());
+  }
+
+  private void createUser(boolean disabled) {
     User user = new User();
-    user.setUserId(1L);
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
     user.setEmail(PRIMARY_EMAIL);
@@ -77,8 +116,8 @@ public class AuthDomainControllerTest {
     user.setOrganization(ORGANIZATION);
     user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
-    user.setDisabled(false);
-    return user;
+    user.setDisabled(disabled);
+    userDao.save(user);
   }
 
 }
