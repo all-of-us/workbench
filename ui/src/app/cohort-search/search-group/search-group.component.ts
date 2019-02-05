@@ -138,7 +138,7 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
 
   getTimeValue(e) {
     if (e.target.value >= 0) {
-       this.actions.updateTemporalTimeValue(e.target.value, this.groupId, this.role)
+      this.actions.updateTemporalTimeValue(e.target.value, this.groupId, this.role);
     }
   }
 

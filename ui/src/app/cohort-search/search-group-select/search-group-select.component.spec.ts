@@ -78,8 +78,9 @@ describe('SearchGroupSelectComponent', () => {
         groupId: 'Testincludes',
         itemId: 'Testitems',
         fullTree: false,
-        codes: false
+        codes: false,
       },
+      tempGroup: undefined,
     });
   });
 
