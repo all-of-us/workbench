@@ -51,7 +51,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(p_all_events p_condition p_drug p_measurement p_observation p_procedure p_physical_measure)
+create_tables=(person_all_events p_condition p_drug p_measurement p_observation p_procedure p_physical_measure)
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
@@ -280,37 +280,34 @@ left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_I
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 ################################################
-# insert condition data into p_all_events #
+# insert condition data into person_all_events #
 ################################################
-echo "Inserting conditions data into p_all_events"
+echo "Inserting conditions data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
- (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
- source_concept_id, source_vocabulary, age_at_event, visit_type, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION)
- select person_id, data_id, 'Condition' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
- source_concept_id, source_vocabulary, age_at_event, b.concept_name as visit_type, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION
- from \`$BQ_PROJECT.$BQ_DATASET.p_condition\` a
- join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+ (person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code, source_vocabulary,
+ source_name, domain, age_at_event, num_mentions, first_mention, last_mention)
+ select person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code,
+ source_vocabulary, source_name, 'Condition' as domain, age_at_event, num_mentions, first_mention, last_mention
+ from \`$BQ_PROJECT.$BQ_DATASET.p_condition\` a"
 
 ###########################################
-# insert drug data into p_all_events #
+# insert drug data into person_all_events #
 ###########################################
-echo "Inserting drug data into p_all_events"
+echo "Inserting drug data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
- (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
- source_concept_id, source_vocabulary, age_at_event, visit_type)
- select person_id, data_id, 'Drug' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
- source_concept_id, source_vocabulary, age_at_event, b.concept_name as visit_type
- from \`$BQ_PROJECT.$BQ_DATASET.p_drug\` a
- join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+ (person_id, data_id, start_datetime, standard_name, route, dose, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
+ select person_id, data_id, start_datetime, standard_name, route, dose, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
+ last_mention, visit_type
+ from \`$BQ_PROJECT.$BQ_DATASET.p_drug\` a"
 
 ##################################################
-# insert measurement data into p_all_events #
+# insert measurement data into person_all_events #
 ##################################################
-echo "Inserting measurement data into p_all_events"
+echo "Inserting measurement data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
  (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
  source_concept_id, source_vocabulary, age_at_event, visit_type, source_value)
  select person_id, data_id, 'Measurement' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
@@ -319,11 +316,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
 
 ##################################################
-# insert observation data into p_all_events #
+# insert observation data into person_all_events #
 ##################################################
-echo "Inserting observation data into p_all_events"
+echo "Inserting observation data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
  (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
  source_concept_id, source_vocabulary, age_at_event, visit_type)
  select person_id, data_id, 'Observation' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
@@ -332,11 +329,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
 
 ################################################
-# insert procedure data into p_all_events #
+# insert procedure data into person_all_events #
 ################################################
-echo "Inserting procedure data into p_all_events"
+echo "Inserting procedure data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_all_events\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
  (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
  source_concept_id, source_vocabulary, source_value, age_at_event, visit_type, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION)
  select person_id, data_id, 'Procedure' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
