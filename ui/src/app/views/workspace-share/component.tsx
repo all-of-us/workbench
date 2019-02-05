@@ -174,9 +174,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        const updatedWorkspace = this.state.workspace;
-        fp.set('etag', resp.workspaceEtag, updatedWorkspace);
-        fp.set('userRoles', resp.items, updatedWorkspace);
+        let updatedWorkspace = this.state.workspace;
+        updatedWorkspace.etag = resp.workspaceEtag;
+        updatedWorkspace.userRoles = resp.items;
         this.setState({usersLoading: false, userNotFound: '',
           searchTerm: '', workspace: updatedWorkspace});
         this.props.closeFunction();
@@ -193,13 +193,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   removeCollaborator(user: UserRole): void {
-    if (!this.state.usersLoading) {
-      const position = this.state.userRolesList.findIndex((userRole) => {
-        return user.email === userRole.email;
-      });
-      this.setState(({userRolesList}) => (
-        {userRolesList: fp.pullAt(position, userRolesList)}));
-    }
+    this.setState(({userRolesList}) => (
+      {userRolesList: fp.remove(({email}) => user.email === email, userRolesList)}
+    ));
   }
 
   reloadWorkspace(): void {
@@ -242,10 +238,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         }
         this.setState({autocompleteLoading: false});
         response.users = fp.differenceWith((a, b) => {
-          return (a.email === b.email && a.givenName === b.givenName
-            && a.familyName === b.familyName);
+          return a.email === b.email;
         }, response.users, this.state.userRolesList);
-        this.setState({autocompleteUsers: response.users.splice(0, 4)});
+        this.setState({
+          autocompleteUsers: response.users.splice(0, 4),
+          autocompleteLoading: false
+        });
       });
   }
 
