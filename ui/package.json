@@ -96,6 +96,8 @@
     "nouislider": "10.0.0",
     "popper.js": "^1.13.0",
     "portable-fetch": "^3.0.0",
+    "primeicons": "^1.0.0",
+    "primereact": "^3.0.0",
     "react": "^16.6.3",
     "react-addons-test-utils": "^15.6.2",
     "react-dom": "^16.6.3",
