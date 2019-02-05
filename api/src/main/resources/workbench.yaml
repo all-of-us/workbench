@@ -427,7 +427,7 @@ paths:
           type: string
         - in: body
           name: request
-          description: request carrying user email to add
+          description: Request containing user email to update and a disabled status to update the user to.
           schema:
             $ref: "#/definitions/AuthDomainDisableUserRequest"
       summary: enable/disable a user to an auth domain if you have manage groups permission
