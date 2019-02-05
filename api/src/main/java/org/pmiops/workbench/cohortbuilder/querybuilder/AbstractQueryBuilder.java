@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -81,7 +82,7 @@ public abstract class AbstractQueryBuilder {
    */
   public abstract String buildQuery(Map<String, QueryParameterValue> queryParams,
                                     SearchGroupItem searchGroupItem,
-                                    TemporalMention temporalMention);
+                                    String temporalMention);
 
   public abstract FactoryKey getType();
 
@@ -100,16 +101,16 @@ public abstract class AbstractQueryBuilder {
                                  String conceptIdsSql,
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
-                                 TemporalMention mention) {
-    if (mention != null) {
+                                 String mention) {
+    if (!StringUtils.isBlank(mention)) {
       String temporalSql = TEMPORAL_SQL_TEMPLATE
         .replace("${tableId}", tableId)
         .replace("${innerSql}", innerSql)
         .replace("${conceptIdSql}", conceptIdsSql)
         .replace("${ageDateAndEncounterSql}", getAgeDateAndEncounterSql(queryParams, modifiers));
-      if (TemporalMention.ANY_MENTION.equals(mention)) {
+      if (TemporalMention.ANY_MENTION.name().equals(mention)) {
         return temporalSql.replace("${rank1Sql}", "");
-      } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
+      } else if (TemporalMention.FIRST_MENTION.name().equals(mention)) {
         temporalSql = temporalSql.replace("${rank1Sql}", RANK_1_SQL_TEMPLATE.replace("${descSql}", ""));
         return TEMPORAL_RANK_1_SQL_TEMPLATE.replace("${innerTemporalSql}", temporalSql);
       } else {
