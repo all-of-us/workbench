@@ -295,7 +295,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0] + "\"+\"[rank1]\"";
     }
-    String rank1 = TreeType.PPI.equals(type) ? "" : "+\"[rank1]\"";
+    String rank1 = TreeType.PPI.name().equals(type) ? "" : "+\"[rank1]\"";
 
     return IntStream
       .range(0, keywords.length)
