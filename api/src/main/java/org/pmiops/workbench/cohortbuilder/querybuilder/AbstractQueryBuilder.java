@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -101,7 +102,7 @@ public abstract class AbstractQueryBuilder {
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
                                  String mention) {
-    if (mention != null) {
+    if (!StringUtils.isBlank(mention)) {
       String temporalSql = TEMPORAL_SQL_TEMPLATE
         .replace("${tableId}", tableId)
         .replace("${innerSql}", innerSql)
