@@ -81,6 +81,7 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "angular2-highcharts": "^0.5.5",
     "bootstrap": "4.1.2",
+    "classnames": "^2.2.6",
     "core-js": "^2.5.3",
     "d3": "^4.12.2",
     "dom-to-image": "^2.6.0",

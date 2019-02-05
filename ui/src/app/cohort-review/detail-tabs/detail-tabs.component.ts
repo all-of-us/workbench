@@ -124,6 +124,10 @@ const labRefRange = {
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   data;
+  ns: string;
+  wsid: string;
+  cid: number;
+  cdrid: number;
   participantsId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -320,13 +324,22 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    this.ns = ns;
+    this.wsid = wsid;
+    this.cid = +cid;
+    this.cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     this.getSubscribedData();
   }
 
 
   getDomainsParticipantsData() {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    // const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    // this.ns = ns;
+    // this.wsid = wsid;
+    // this.cid = cid;
+    // const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    // this.cdrid = cdrid;
     const limit = 10;
 
     this.domainList.map(domainName => {
@@ -335,7 +348,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
         loading: true,
         items: []
       };
-      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
+      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(this.ns, this.wsid, this.cid, this.cdrid,
         this.participantsId , domainName, limit)
         .subscribe(data => {
           const participantsData = data;
