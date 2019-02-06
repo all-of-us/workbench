@@ -1,7 +1,7 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {navigate} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 
@@ -265,8 +265,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private serverConfigService: ServerConfigService,
-    private route: ActivatedRoute,
-    private router: Router,
   ) {
     // create bound methods to use as callbacks
     this.closeQuickTour = this.closeQuickTour.bind(this);
@@ -380,15 +378,15 @@ export class HomepageComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build'], {relativeTo : this.route});
+    navigate(['workspaces/build']);
   }
 
   navigateToProfile(): void {
-    this.router.navigate(['profile']);
+    navigate(['profile']);
   }
 
   listWorkspaces(): void {
-    this.router.navigate(['workspaces']);
+    navigate(['workspaces']);
   }
 
   get twoFactorBannerEnabled() {
