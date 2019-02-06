@@ -47,7 +47,7 @@ function finish {
 }
 trap finish EXIT
 
-envsubst < create_db.sql > $CREATE_DB_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
 
 # Drop and create new cdr database
 if [ "${DROP_IF_EXISTS}" == "Y" ]

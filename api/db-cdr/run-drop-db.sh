@@ -11,7 +11,7 @@ function finish {
 }
 trap finish EXIT
 
-envsubst < drop_db.sql > $DROP_DB_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/drop_db.sql" > $DROP_DB_FILE
 
 echo "Dropping database..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${DROP_DB_FILE}

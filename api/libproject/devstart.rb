@@ -188,6 +188,7 @@ def setup_local_environment()
   ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
 end
 
+# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
