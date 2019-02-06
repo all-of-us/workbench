@@ -57,7 +57,6 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     onPageChange = (event: any) => {
-      console.log(event);
       const startIndex = event.first;
       const endIndex = event.first + this.state.rows;
       this.setState({
@@ -67,7 +66,10 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      console.log(this.props);
+      this.getParticipantData();
+    }
+
+    getParticipantData() {
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const pageFilterRequest = {
         page: 0,
@@ -95,6 +97,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
+      const {data, loading, rows, rowsData, start} = this.state;
       const columns = this.props.columns.map((col) => {
         return <Column
           style={styles.pDatatableTbody}
@@ -106,23 +109,22 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
 
       const footer = <Paginator
-        first={this.state.start}
-        rows={this.state.rows}
-        totalRecords={this.state.data.length}
+        first={start}
+        rows={rows}
+        totalRecords={data.length}
         onPageChange={this.onPageChange}
-        template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink'>
-      </Paginator>;
+        template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink' />
 
       return <React.Fragment>
         <DataTable
           footer={footer}
           style={styles.pDatatable}
           ref={(el) => this.dt = el}
-          value={this.state.rowsData}
-          loading={this.state.loading}
-          first={this.state.start}
-          rows={this.state.rows}
-          totalRecords={this.state.data.length}
+          value={rowsData}
+          loading={loading}
+          first={start}
+          rows={rows}
+          totalRecords={data.length}
           scrollable={true}
           scrollHeight='calc(100vh - 380px)'>
           {columns}
