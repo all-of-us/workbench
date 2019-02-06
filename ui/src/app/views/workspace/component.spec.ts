@@ -12,6 +12,7 @@ import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
@@ -35,6 +36,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {UserMetricsApi} from 'generated/fetch';
 import {
   JupyterService,
   NotebooksService,
@@ -51,6 +53,7 @@ import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
@@ -141,6 +144,7 @@ describe('WorkspaceComponent', () => {
         fixture = TestBed.createComponent(WorkspaceComponent);
         updateAndTick(fixture);
       });
+    registerApiClient(UserMetricsApi, new UserMetricsApiStub());
   }));
 
   it('displays research purpose', fakeAsync(() => {

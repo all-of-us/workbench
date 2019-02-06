@@ -50,8 +50,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -135,8 +135,6 @@ public class ClusterControllerTest {
   UserRecentResourceService userRecentResourceService;
   @Autowired
   Clock clock;
-  @Mock
-  private Provider<WorkbenchConfig> configProvider;
 
   private CdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
@@ -144,6 +142,9 @@ public class ClusterControllerTest {
 
   @Before
   public void setUp() {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new WorkbenchConfig.FireCloudConfig();
+    config.firecloud.registeredDomainName = "";
     User user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
@@ -154,7 +155,7 @@ public class ClusterControllerTest {
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, configProvider);
+        fireCloudService, Providers.of(config));
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();
