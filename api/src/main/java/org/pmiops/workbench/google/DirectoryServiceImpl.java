@@ -1,3 +1,7 @@
+/**
+ * Note: this file is tested with integration tests rather than unit tests. See
+ * src/integration/.../DirectoryServiceImplIntegrationTest.java for test cases.
+ */
 package org.pmiops.workbench.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -166,6 +170,12 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
+  }
+
+  // Updates a user in GSuite. The Directory API follows patch semantics, so only non-empty fields
+  // will overwrite existing values (and a null value will clear a field).
+  public User updateUser(String email, User user) {
+    return retryHandler.run((context) -> getGoogleDirectoryService().users().update(email, user).execute());
   }
 
   @Override
