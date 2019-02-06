@@ -172,12 +172,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     return user;
   }
 
-  // Updates a user in GSuite. The Directory API follows patch semantics, so only non-empty fields
-  // will overwrite existing values (and a null value will clear a field).
-  public User updateUser(String email, User user) {
-    return retryHandler.run((context) -> getGoogleDirectoryService().users().update(email, user).execute());
-  }
-
   @Override
   public User resetUserPassword(String email) {
     User user = getUser(email);
