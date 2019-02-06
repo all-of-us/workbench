@@ -60,7 +60,7 @@ mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREAT
 
 # Use liquibase to generate the schema and data
 echo "Running liquibase "
-"$(dirname "${BASH_SOURCE}")/../../gradlew" update -PrunList=${RUN_LIST} ${CONTEXT}
+(cd "$(dirname "${BASH_SOURCE}")/.." && ../gradlew update -PrunList=${RUN_LIST} ${CONTEXT}
 
 # Success
 exit 0
