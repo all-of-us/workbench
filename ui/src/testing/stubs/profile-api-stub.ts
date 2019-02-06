@@ -1,6 +1,7 @@
 import {
   BillingProjectStatus,
   DataAccessLevel,
+  InvitationVerificationRequest,
   NihToken,
   Profile,
   ProfileApi
@@ -26,8 +27,18 @@ export class ProfileApiStub extends ProfileApi {
     };
   }
 
+  public invitationKeyVerification(request?: InvitationVerificationRequest, options?: any) {
+    if (request.invitationKey === 'dummy') {
+      const mockResponse = new Response(
+          JSON.stringify({result: 'valid'}), {status: 200});
+      return Promise.resolve(mockResponse);
+    } else {
+      const err = new Error('Invalid invitation code');
+      return Promise.reject(response => { throw err; });
+    }
+  }
+
   public updateNihToken(token?: NihToken, options?: any) {
     return Promise.resolve(this.profile);
   }
-
 }

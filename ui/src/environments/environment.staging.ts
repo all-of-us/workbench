@@ -13,7 +13,6 @@ export const environment: Environment = {
   gaId: 'UA-112406425-2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  rootUrl: 'https://all-of-us-workbench-staging.appspot.com',
   enableTemporal: false,
   useZendeskForSupport: false,
   enableJupyterLab: false,

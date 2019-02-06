@@ -5,7 +5,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.AuthDomainRequest;
+import org.pmiops.workbench.model.AuthDomainDisableUserRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -41,38 +41,16 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.MANAGE_GROUP})
-  public ResponseEntity<Void> removeUserFromAuthDomain(String groupName, AuthDomainRequest request) {
+  public ResponseEntity<Void> disableUser(String groupName, AuthDomainDisableUserRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
-    fireCloudService.removeUserFromGroup(request.getEmail(), groupName);
-    user.setDataAccessLevelEnum(DataAccessLevel.REVOKED);
-    user.setDisabled(true);
-    userDao.save(user);
-
+    User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
     userService.logAdminUserAction(
         user.getUserId(),
         "user access to  " + groupName + " domain",
         previousAccess,
-        DataAccessLevel.REVOKED);
+        updatedUser.getDataAccessLevel());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
-  @Override
-  @AuthorityRequired({Authority.MANAGE_GROUP})
-  public ResponseEntity<Void> addUserToAuthDomain(String groupName, AuthDomainRequest request) {
-    User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
-    fireCloudService.addUserToGroup(request.getEmail(), groupName);
-    // TODO(blrubenstein): Parameterize this.
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    user.setDisabled(false);
-    userDao.save(user);
-
-    userService.logAdminUserAction(
-        user.getUserId(),
-        "user access to  " + groupName + " domain",
-        previousAccess,
-        DataAccessLevel.REGISTERED);
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
 }

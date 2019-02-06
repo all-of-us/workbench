@@ -5,6 +5,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
@@ -35,7 +36,7 @@ import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/co
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
-import {AccountLinkingComponent} from './views/homepage/component';
+import {WorkbenchAccessTasksComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -131,7 +132,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
-    AccountLinkingComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
@@ -165,11 +165,13 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
+    WorkbenchAccessTasksComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
+    WorkspaceWrapperComponent,
     HomepageComponent,
     HighlightSearchComponent,
   ],

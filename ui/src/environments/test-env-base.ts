@@ -12,5 +12,4 @@ export const testEnvironmentBase = {
   gaId: 'UA-112406425-1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  rootUrl: 'https://all-of-us-workbench-test.appspot.com',
 };
