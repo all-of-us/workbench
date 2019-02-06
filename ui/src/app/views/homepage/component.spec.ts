@@ -69,7 +69,8 @@ describe('HomepageComponent', () => {
         {
           provide: ServerConfigService,
           useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
+            gsuiteDomain: 'fake-research-aou.org',
+            enforceRegistered: true,
           })
         },
       ]
