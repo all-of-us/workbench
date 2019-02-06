@@ -127,7 +127,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     return getUserByUsername(username) != null;
   }
 
-  // Returns a user's contact email address, stored as a custom schema field via the directory API.
+  // Returns a user's contact email address via the custom schema in the directory API.
   public String getContactEmailAddress(String username) {
     return (String) getUserByUsername(username)
         .getCustomSchemas()
