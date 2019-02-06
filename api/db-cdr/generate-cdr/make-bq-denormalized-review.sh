@@ -51,7 +51,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(person_all_events p_condition p_drug p_measurement p_observation p_procedure p_physical_measure)
+create_tables=(person_all_events person_condition person_drug person_measurement p_observation p_procedure p_physical_measure)
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
@@ -61,42 +61,29 @@ done
 # Populate some tables from cdr data
 
 ################################################
-# insert condition data into p_condition #
+# insert condition data into person_condition #
 ################################################
-echo "Inserting conditions data into p_condition"
+echo "Inserting conditions data into person_condition"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_condition\`
- (person_id, data_id, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name,
- source_code, source_concept_id, source_vocabulary, VISIT_ID, visit_concept_id, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION)
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_condition\`
+ (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_name,
+ source_code, source_vocabulary, age_at_event, visit_type)
 SELECT P.PERSON_ID,
-	t.CONDITION_OCCURRENCE_ID AS DATA_ID,
-	t.CONDITION_START_DATETIME as START_DATETIME,
-	case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+	a.CONDITION_OCCURRENCE_ID AS DATA_ID,
+	a.CONDITION_START_DATETIME as START_DATETIME,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
-    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
+	case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
     case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
 	case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
 	case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
-    case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
     case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
-	CASE WHEN t.VISIT_OCCURRENCE_ID is null then 0 else t.VISIT_OCCURRENCE_ID end as VISIT_ID,
-	CASE WHEN v.visit_concept_id is null then 0 else v.visit_concept_id end as visit_concept_id,
-	CAST(FLOOR(DATE_DIFF(t.CONDITION_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-	T.NUM_MENTIONS,
-	T.FIRST_MENTION,
-	T.LAST_MENTION
-FROM
-(SELECT CONDITION_OCCURRENCE_ID, a.PERSON_ID, a.CONDITION_CONCEPT_ID, CONDITION_START_DATE, CONDITION_START_DATETIME, VISIT_OCCURRENCE_ID,
-a.CONDITION_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION
-FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` A,
-(SELECT PERSON_ID, CONDITION_CONCEPT_ID, CONDITION_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
-min(CONDITION_START_DATETIME) as FIRST_MENTION, max(CONDITION_START_DATETIME) as LAST_MENTION
-FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\`
-GROUP BY PERSON_ID, CONDITION_CONCEPT_ID, CONDITION_SOURCE_CONCEPT_ID) B
-WHERE a.PERSON_ID = b.PERSON_ID and a.CONDITION_CONCEPT_ID = b.CONDITION_CONCEPT_ID and a.CONDITION_SOURCE_CONCEPT_ID = b.CONDITION_SOURCE_CONCEPT_ID) t
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.CONDITION_CONCEPT_ID = c1.CONCEPT_ID
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.CONDITION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
+	CAST(FLOOR(DATE_DIFF(a.CONDITION_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
+	case when c3.concept_name is null then 'No matching concept' else c3.concept_name end as visit_type
+FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.CONDITION_CONCEPT_ID = c1.CONCEPT_ID
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.CONDITION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 #####################################
@@ -286,10 +273,10 @@ echo "Inserting conditions data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
  (person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code, source_vocabulary,
- source_name, domain, age_at_event, num_mentions, first_mention, last_mention)
+ source_name, domain, age_at_event)
  select person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code,
- source_vocabulary, source_name, 'Condition' as domain, age_at_event, num_mentions, first_mention, last_mention
- from \`$BQ_PROJECT.$BQ_DATASET.p_condition\` a"
+ source_vocabulary, source_name, 'Condition' as domain, age_at_event
+ from \`$BQ_PROJECT.$BQ_DATASET.person_condition\` a"
 
 ###########################################
 # insert drug data into person_all_events #
