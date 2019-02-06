@@ -28,6 +28,6 @@ echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Upgrading database..."
-../gradlew update $activity $context
+"$(dirname "${BASH_SOURCE}")/../gradlew" update $activity $context
 
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${GRANT_PERMISSIONS_FILE}
