@@ -32,7 +32,6 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch/api';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {findElementsReact, simulateClick, updateAndTick} from 'testing/test-helpers';
