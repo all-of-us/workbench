@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
 
-const styles = {
+export const styles = {
   base: {
     display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
     height: '1.5rem', minWidth: '3rem', maxWidth: '15rem',

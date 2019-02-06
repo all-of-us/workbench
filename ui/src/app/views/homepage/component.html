@@ -1,24 +1,34 @@
 <div class="background-image">
   <div style="display:flex; justify-content:center">
     <div class="card single">
-      <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem; justify-content: flex-start; flex-wrap: nowrap;">
-        <div class="col main-heading">Researcher Workbench</div>
-        <div class="heading-links" style="display: flex; flex-wrap: nowrap; overflow: hidden;">
-          <a class="links" (click)="listWorkspaces()">See All
-            Workspaces</a>
-        </div>
-      </div>
-      <div class="row" style="flex-direction: row; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap;">
-        <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-bottom-left"
-             [class.disabled]="!billingProjectInitialized" (click)="!billingProjectInitialized || addWorkspace()">
-          <div class="card-text" [class.disabled]="!billingProjectInitialized">
-            Create a <br/> New Workspace <br/>
-            <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+      <div *ngIf="eraCommonsLinked">
+        <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem; justify-content: flex-start; flex-wrap: nowrap;">
+          <div class="col main-heading">Researcher Workbench</div>
+          <div class="heading-links" style="display: flex; flex-wrap: nowrap; overflow: hidden;">
+            <a class="links" (click)="listWorkspaces()">See All
+              Workspaces</a>
           </div>
-          <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
         </div>
-        <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
+        <div class="row" style="flex-direction: row; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap;">
+          <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-bottom-left"
+               [class.disabled]="!billingProjectInitialized" (click)="!billingProjectInitialized || addWorkspace()">
+            <div class="card-text" [class.disabled]="!billingProjectInitialized">
+              Create a <br/> New Workspace <br/>
+              <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
+            </div>
+            <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
+          </div>
+          <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
+        </div>
       </div>
+      <!--TODO: this logic will be removed when RW-1969 is complete-->
+      <div *ngIf="eraCommonsLinked === undefined" class="spinner-container">
+        <span class="spinner spinner-lg"></span>
+      </div>
+      <app-workbench-access-tasks *ngIf="eraCommonsLinked===false"
+                           [eraCommonsLinked]="eraCommonsLinked"
+                           [eraCommonsError]="eraCommonsError"
+                           [trainingCompleted]="trainingCompleted"></app-workbench-access-tasks>
     </div>
   </div>
   <div style="display:flex; justify-content:center;flex-direction:row">
