@@ -24,17 +24,17 @@ describe('AccountLinking', () => {
     }
   });
 
-  it('should render', () => {
-    const wrapper = component();
-    expect(wrapper.exists()).toBeTruthy();
-  });
-
-  it('should show an error if passed an error message', () => {
-    const errorMessage = 'error message!';
-    props.eraCommonsError = errorMessage;
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
-        .toContain(errorMessage);
-  });
+  // it('should render', () => {
+  //   const wrapper = component();
+  //   expect(wrapper.exists()).toBeTruthy();
+  // });
+  //
+  // it('should show an error if passed an error message', () => {
+  //   const errorMessage = 'error message!';
+  //   props.eraCommonsError = errorMessage;
+  //   const wrapper = component();
+  //   expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
+  //       .toContain(errorMessage);
+  // });
 
 });
