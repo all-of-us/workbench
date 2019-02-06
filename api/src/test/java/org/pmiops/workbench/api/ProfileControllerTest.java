@@ -130,6 +130,7 @@ public class ProfileControllerTest {
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
+    config.firecloud.registeredDomainName = "";
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
 
@@ -157,7 +158,7 @@ public class ProfileControllerTest {
 
     doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
-        new FakeLongRandom(NONCE_LONG), fireCloudService, configProvider);
+        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config));
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,

@@ -27,21 +27,25 @@ DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
   TEST_PROJECT => {
+    :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json"
   },
   "all-of-us-rw-staging" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json"
   },
   "all-of-us-rw-stable" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json"
   },
   "all-of-us-rw-prod" => {
+    :api_endpoint_host => "api.workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json"
@@ -962,9 +966,9 @@ def update_user_registered_status(cmd_name, args)
     "Project to update registered status for"
   )
   op.add_option(
-    "--action [action]",
-    ->(opts, v) { opts.action = v},
-    "Action to perform: add/remove."
+    "--disabled [disabled]",
+    ->(opts, v) { opts.disabled = v},
+    "Disabled state to set: true/false."
   )
   op.add_option(
     "--account [account]",
@@ -984,23 +988,16 @@ def update_user_registered_status(cmd_name, args)
   common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\"}"
+  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
   domain_name = get_auth_domain(op.opts.project)
-  if op.opts.action == "add"
-    common.run_inline %W{curl -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
-
-  if op.opts.action == "remove"
-    common.run_inline %W{curl -X DELETE -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
 end
 
 Common.register_command({
   :invocation => "update-user-registered-status",
   :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
 })
 
