@@ -2,7 +2,7 @@ import {
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResponse
-} from 'generated/fetch';
+} from 'generated';
 
 export class WorkspacePermissions {
   workspace: Workspace;

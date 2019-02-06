@@ -14,6 +14,8 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
+  Workspace,
+  WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
 
@@ -42,8 +44,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   // All the things related to sharing a workspace
   @ViewChild(WorkspaceShareComponent)
   shareModal: WorkspaceShareComponent;
-  // TODO This is necessary to placate the sharing template - figure out how to remove it
-  selectedWorkspace: Workspace = {name: ''};
   accessLevel: WorkspaceAccessLevel;
   username: string;
 
@@ -155,7 +155,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   openShare(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
-    this.selectedWorkspace = workspace;
+    this.workspace = workspace;
     this.accessLevel = accessLevel;
     this.sharing = true;
   }
