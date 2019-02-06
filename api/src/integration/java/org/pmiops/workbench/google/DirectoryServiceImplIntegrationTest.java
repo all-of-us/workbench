@@ -47,8 +47,14 @@ public class DirectoryServiceImplIntegrationTest {
   @Test
   public void testCreateAndDeleteTestUser() {
     String userName = String.format("integration.test.%d", Clock.systemUTC().millis());
-    service.createUser("Integration", "Test", userName, "notasecret");
+    service.createUser("Integration", "Test", userName, "notasecret@gmail.com");
     assertThat(service.isUsernameTaken(userName)).isTrue();
+    // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
+    assertThat(service.getContactEmailAddress(userName).equals("notasecret@gmail.com"));
+    assertThat(
+            service.getUserByUsername(userName).getCustomSchemas()
+                    .get("All_of_Us_Workbench")
+                    .get("Institution").equals("All of Us Research Workbench"));
     service.deleteUser(userName);
     assertThat(service.isUsernameTaken(userName)).isFalse();
   }
