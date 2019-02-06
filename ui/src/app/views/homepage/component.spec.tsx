@@ -5,14 +5,14 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
-import {AccountLinking, AccountLinkingProps} from './component';
+import {WorkbenchAccessTasks, WorkbenchAccessTasksProps} from './component';
 
-describe('AccountLinking', () => {
-  let props: AccountLinkingProps;
+describe('WorkbenchAccessTasks', () => {
+  let props: WorkbenchAccessTasksProps;
 
   const component = () => {
-    return mount<AccountLinking, AccountLinkingProps, {}>
-    (<AccountLinking {...props}/>);
+    return mount<WorkbenchAccessTasks, WorkbenchAccessTasksProps, {}>
+    (<WorkbenchAccessTasks {...props}/>);
   };
 
   beforeEach(() => {

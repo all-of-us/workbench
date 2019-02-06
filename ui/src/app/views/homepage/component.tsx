@@ -111,16 +111,16 @@ const AccountLinkingButton: React.FunctionComponent<{
   }
 };
 
-export interface AccountLinkingProps {
+export interface WorkbenchAccessTasksProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
 }
 
-export class AccountLinking extends
-    React.Component<AccountLinkingProps, {}> {
+export class WorkbenchAccessTasks extends
+    React.Component<WorkbenchAccessTasksProps, {}> {
 
-  constructor(props: AccountLinkingProps) {
+  constructor(props: WorkbenchAccessTasksProps) {
     super(props);
   }
 
@@ -159,7 +159,7 @@ export class AccountLinking extends
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
-                                    onClick={AccountLinking.redirectToNiH}/>
+                                    onClick={WorkbenchAccessTasks.redirectToNiH}/>
             </div>
             {this.props.eraCommonsError && <Error data-test-id='era-commons-error'>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
@@ -187,15 +187,15 @@ export class AccountLinking extends
 }
 
 @Component({
-  selector: 'app-account-linking',
+  selector: 'app-workbench-access-tasks',
   template: '<div #root></div>',
 })
-export class AccountLinkingComponent extends ReactWrapperBase {
-  @Input('eraCommonsLinked') eraCommonsLinked: AccountLinkingProps['eraCommonsLinked'];
-  @Input('eraCommonsError') eraCommonsError: AccountLinkingProps['eraCommonsError'];
-  @Input('trainingCompleted') trainingCompleted: AccountLinkingProps['trainingCompleted'];
+export class WorkbenchAccessTasksComponent extends ReactWrapperBase {
+  @Input('eraCommonsLinked') eraCommonsLinked: WorkbenchAccessTasksProps['eraCommonsLinked'];
+  @Input('eraCommonsError') eraCommonsError: WorkbenchAccessTasksProps['eraCommonsError'];
+  @Input('trainingCompleted') trainingCompleted: WorkbenchAccessTasksProps['trainingCompleted'];
   constructor() {
-    super(AccountLinking, ['eraCommonsLinked', 'eraCommonsError', 'trainingCompleted']);
+    super(WorkbenchAccessTasks, ['eraCommonsLinked', 'eraCommonsError', 'trainingCompleted']);
   }
 }
 

@@ -10,7 +10,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {AccountLinkingComponent, HomepageComponent} from 'app/views/homepage/component';
+import {WorkbenchAccessTasksComponent, HomepageComponent} from 'app/views/homepage/component';
 import {QuickTourModalComponent} from 'app/views/quick-tour-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
@@ -57,7 +57,7 @@ describe('HomepageComponent', () => {
         ConfirmDeleteModalComponent,
         ExpandComponent,
         ShrinkComponent,
-        AccountLinkingComponent
+        WorkbenchAccessTasksComponent
       ],
       providers: [
         {provide: CohortsService},

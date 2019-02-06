@@ -25,10 +25,10 @@
       <div *ngIf="eraCommonsLinked === undefined" class="spinner-container">
         <span class="spinner spinner-lg"></span>
       </div>
-      <app-account-linking *ngIf="eraCommonsLinked===false"
+      <app-workbench-access-tasks *ngIf="eraCommonsLinked===false"
                            [eraCommonsLinked]="eraCommonsLinked"
                            [eraCommonsError]="eraCommonsError"
-                           [trainingCompleted]="trainingCompleted"></app-account-linking>
+                           [trainingCompleted]="trainingCompleted"></app-workbench-access-tasks>
     </div>
   </div>
   <div style="display:flex; justify-content:center;flex-direction:row">
