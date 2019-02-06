@@ -18,7 +18,11 @@ import org.springframework.stereotype.Service;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -97,7 +101,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   public User getUserByUsername(String username) {
-    return getUser(username+"@" + gSuiteDomain());
+    return getUser(username + "@" + gSuiteDomain());
   }
 
   @Override
@@ -126,9 +130,9 @@ public class DirectoryServiceImpl implements DirectoryService {
   // Returns a user's contact email address, stored as a custom schema field via the directory API.
   public String getContactEmailAddress(String username) {
     return (String) getUserByUsername(username)
-            .getCustomSchemas()
-            .get(GSUITE_AOU_SCHEMA_NAME)
-            .get(GSUITE_FIELD_CONTACT_EMAIL);
+        .getCustomSchemas()
+        .get(GSUITE_AOU_SCHEMA_NAME)
+        .get(GSUITE_FIELD_CONTACT_EMAIL);
   }
 
   @Override
@@ -141,7 +145,8 @@ public class DirectoryServiceImpl implements DirectoryService {
     // was primarily set up for Moodle SSO integration.
     Map<String, Object> aouCustomFields = new HashMap<String, Object>();
     // The value of this field must match one of the allowed values in the Moodle installation.
-    // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env variable.
+    // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
+    // variable.
     aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
     // This gives us a structured place to store researchers' contact email addresses, in
     // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
@@ -152,10 +157,11 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
         // In addition to the custom schema value, we store each user's contact email as a secondary
-        // email address with type "work"
+        // email address with type "home". This makes it show up nicely in GSuite admin as the
+        // user's "Secondary email".
         .setEmails(Lists.newArrayList(
-                new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
-                new UserEmail().setType("home").setAddress(contactEmail)))
+            new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
+            new UserEmail().setType("home").setAddress(contactEmail)))
         .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields))
         .setChangePasswordAtNextLogin(true);
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
