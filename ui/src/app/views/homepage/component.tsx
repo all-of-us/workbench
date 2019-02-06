@@ -1,6 +1,7 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {ServerConfigService} from 'app/services/server-config.service';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 
@@ -263,6 +264,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   constructor(
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
+    private serverConfigService: ServerConfigService,
     private route: ActivatedRoute,
     private router: Router,
   ) {
@@ -279,12 +281,13 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
       }
-      if (environment.enableComplianceLockout) {
-        this.eraCommonsLinked = !!profile.linkedNihUsername;
-      } else {
-        // Default to true when feature flag is off
-        this.eraCommonsLinked = true;
-      }
+      this.serverConfigService.getConfig().subscribe((config) => {
+        if (environment.enableComplianceLockout && config.enforceRegistered) {
+          this.eraCommonsLinked = !!profile.linkedNihUsername;
+        } else {
+          this.eraCommonsLinked = true;
+        }
+      });
     },
       e => {},
       () => {
