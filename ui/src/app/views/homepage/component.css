@@ -66,9 +66,8 @@
   font-size: 28px;
   font-weight: 400;
   line-height: 34px;
-  width: 25.86%;
+  width: 18rem;
   display: flex;
-  min-width: 18.2rem;
   margin-left: 3%;
   margin-top: 2.58%;
   letter-spacing: normal;
@@ -242,6 +241,7 @@
   align-content: left;
   margin-left: 3%;
   margin-top: 1.9rem;
+  margin-right: 106px;
   cursor: pointer;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12);
   border-radius: 5px;

@@ -18,7 +18,12 @@
             </div>
             <span *ngIf="!billingProjectInitialized" class="tooltip-content">Your Firecloud billing project is still being initialized. Workspace creation will be available in a few minutes.</span>
           </div>
-          <app-recent-work [headerText]="'Your Last Accessed Items'" style="margin-left: 3rem; margin-right: 3rem; display: flex; flex-grow: 1; justify-content: flex-end;"></app-recent-work>
+          <div style="margin-right: 3%; flex-grow: 1; min-width: 0;">
+            <div style="color: #fff; margin-left: 1rem;">
+              Your Last Accessed Items
+            </div>
+            <app-recent-work></app-recent-work>
+          </div>
         </div>
       </div>
       <!--TODO: this logic will be removed when RW-1969 is complete-->
