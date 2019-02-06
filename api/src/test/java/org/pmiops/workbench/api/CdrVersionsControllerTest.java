@@ -106,12 +106,6 @@ public class CdrVersionsControllerTest {
     cdrVersionsController.getCdrVersions();
   }
 
-  @Test(expected = ForbiddenException.class)
-  public void testGetCdrVersionsRevoked() {
-    user.setDataAccessLevelEnum(DataAccessLevel.REVOKED);
-    cdrVersionsController.getCdrVersions();
-  }
-
   private void assertResponse(CdrVersionListResponse response, CdrVersion... versions) {
     assertThat(response.getItems()).containsExactly(
         Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray()).inOrder();

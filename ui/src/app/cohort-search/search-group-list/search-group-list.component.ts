@@ -20,6 +20,6 @@ export class SearchGroupListComponent {
 
   get title() {
     const prefix = this.role === 'excludes' ? 'And ' : '';
-    return prefix + this.role.slice(0, -1) + ` Participants Where`;
+    return prefix + this.role.slice(0, -1) + ` Participants`;
   }
 }
