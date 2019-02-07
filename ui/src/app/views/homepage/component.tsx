@@ -7,6 +7,7 @@ import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
+import {ActivatedRoute} from '@angular/router';
 import {
   Clickable,
   styles as buttonStyles
@@ -266,6 +267,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private serverConfigService: ServerConfigService,
+    private route: ActivatedRoute,
   ) {
     // create bound methods to use as callbacks
     this.closeQuickTour = this.closeQuickTour.bind(this);
