@@ -7,6 +7,7 @@ import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
+import {ActivatedRoute} from '@angular/router';
 import {
   Clickable,
   styles as buttonStyles
@@ -21,7 +22,6 @@ import {
   Profile,
   ProfileService
 } from 'generated';
-import {ActivatedRoute} from "@angular/router";
 
 
 const styles = reactStyles({
