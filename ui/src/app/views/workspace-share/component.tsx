@@ -147,6 +147,7 @@ export interface WorkspaceShareProps {
 }
 
 export class WorkspaceShare extends React.Component<WorkspaceShareProps, WorkspaceShareState> {
+  searchTermChangedEvent: Function;
 
   constructor(props: WorkspaceShareProps) {
     super(props);
@@ -204,8 +205,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         this.setState({workspace: workspaceResponse.workspace});
         this.resetModalState();
       })
-      .catch(error => {
-        if (error.status === 404) {
+      .catch(({status}) => {
+        if (status === 404) {
           this.setState({workspaceFound: false});
         }
       });
@@ -218,10 +219,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [],
         userRolesList: fp.concat(userRolesList, [userRole])}
     ));
-  }
-
-  searchTermChangedEvent($event: string) {
-    this.userSearch($event);
   }
 
   userSearch(value: string): void {
@@ -299,22 +296,25 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         <ModalBody style={styles.sharingBody}>
           <div style={styles.dropdown}>
             <ClrIcon shape='search' style={{width: '21px', height: '21px'}}/>
-            <input style={styles.noBorder} type='text' placeholder='Find Collaborators'
-                   disabled={!this.hasPermission} onChange={
-                     e => this.searchTermChangedEvent(e.target.value)}/>
+            <input data-test-id='search' style={styles.noBorder} type='text'
+                   placeholder='Find Collaborators'
+                   disabled={!this.hasPermission}
+                   onChange={e => this.searchTermChangedEvent(e.target.value)}/>
             {/* TODO: US 1/29/19 should use new spinner? */}
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
-            {this.showAutocompleteNoResults && <div style={{...styles.dropdownMenu, ...styles.open,
-              overflowY: 'hidden'}}>
+            {this.showAutocompleteNoResults &&
+              <div data-test-id='drop-down'
+                   style={{...styles.dropdownMenu, ...styles.open, overflowY: 'hidden'}}>
               <div style={{height: '60px'}}>
                 <em>No results based on your search</em>
               </div></div>}
-            {this.showSearchResults && <div style={{...styles.dropdownMenu, ...styles.open}}>
+            {this.showSearchResults &&
+              <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
               {this.state.autocompleteUsers.map((user, i) => {
                 return <div style={styles.wrapper} key={i}>
                   <div style={styles.box}>
                     <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
-                    <div style={styles.userName}>{user.email}</div>
+                    <div data-test-id='user-email' style={styles.userName}>{user.email}</div>
                   </div>
                   <div style={styles.collaboratorIcon}>
                     <ClrIcon shape='plus-circle' data-test-id={'add-collab-' + user.email}
@@ -336,7 +336,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           </div>}
             <h3>Current Collaborators</h3>
           <div style={{overflowY: 'auto'}}>
-            {console.log(JSON.stringify(this.state))}
             {this.state.userRolesList.map((user, i) => {
               return <div key={i}>
                 <div style={styles.wrapper}>

@@ -9,6 +9,8 @@ import {
 
 import {UserServiceStub} from './user-service-stub';
 
+import * as fp from 'lodash/fp';
+
 import {EmptyResponse} from 'generated';
 
 export class WorkspaceStubVariables {
@@ -21,52 +23,17 @@ export class WorkspaceStubVariables {
 
 export class WorkspacesApiStub extends WorkspacesApi {
   workspaces: Workspace[];
-  userService: UserServiceStub;
+  userRoles: UserRole[];
   // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
-  workspacesForReview: Workspace[];
-  sharingProfilesList: UserRole[] = [
-    {
-      email: 'sampleuser1@fake-research-aou.org',
-      givenName: 'Sample',
-      familyName: 'User1',
-      role: WorkspaceAccessLevel.OWNER
-    },
-    {
-      email: 'sampleuser2@fake-research-aou.org',
-      givenName: 'Sample',
-      familyName: 'User2',
-      role: WorkspaceAccessLevel.WRITER
-    },
-    {
-      email: 'sampleuser3@fake-research-aou.org',
-      givenName: 'Sample',
-      familyName: 'User3',
-      role: WorkspaceAccessLevel.READER
-    },
-    {
-      email: 'sampleuser4@fake-research-aou.org',
-      givenName: 'Sample',
-      familyName: 'User4',
-      role: WorkspaceAccessLevel.WRITER
-    }
-  ];
   notebookList: FileDetail[];
 
-  constructor() {
+  constructor(workspaces?: Workspace[], userRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.userService = new UserServiceStub();
-    this.workspaces = [WorkspacesApiStub.stubWorkspace()];
+    this.workspaces = fp.defaults([WorkspacesApiStub.stubWorkspace()], workspaces);
+    this.userRoles = fp.defaults([], userRoles);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
-    this.workspacesForReview = WorkspacesApiStub.stubWorkspacesForReview();
-
     this.notebookList = WorkspacesApiStub.stubNotebookList();
-  }
-
-  static stubWorkspacesForReview(): Workspace[] {
-    const stubWorkspace = this.stubWorkspace();
-    stubWorkspace.researchPurpose.reviewRequested = true;
-    return [stubWorkspace];
   }
 
   static stubNotebookList(): FileDetail[] {
