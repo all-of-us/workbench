@@ -13,6 +13,14 @@ export const styles = {
     overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
     userSelect: 'none',
     margin: 0, padding: '0rem 0.77rem',
+  },
+  baseNeue: {
+    display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
+    minWidth: '3rem', maxWidth: '15rem',
+    fontWeight: 500, fontSize: 14, textTransform: 'uppercase', lineHeight: '18px',
+    overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+    userSelect: 'none',
+    margin: 0, padding: '16px 22px',
   }
 };
 
@@ -21,31 +29,31 @@ const buttonVariants = {
     style: {
       ...styles.base,
       borderRadius: '0.3rem',
-      backgroundColor: '#262262', color: '#fff',
+      backgroundColor: colors.purple[0], color: '#fff',
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
-    hover: {backgroundColor: '#4356A7'}
+    disabledStyle: {backgroundColor: colors.gray[4]},
+    hover: {backgroundColor: colors.purple[1]}
   },
   secondary: {
     style: {
       ...styles.base,
-      border: '2px solid', borderRadius: '0.2rem', borderColor: '#262262',
+      border: '2px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
       backgroundColor: 'transparent',
-      color: '#262262',
+      color: colors.purple[0],
     },
     disabledStyle: {
-      borderColor: '#c3c3c3',
-      backgroundColor: '#f1f2f2', color: '#c3c3c3'
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
-    hover: {backgroundColor: '#262262', color: '#ffffff'}
+    hover: {backgroundColor: colors.purple[0], color: '#ffffff'}
   },
   darklingPrimary: {
     style: {
       ...styles.base,
       borderRadius: '0.2rem',
-      backgroundColor: '#262262', color: '#ffffff'
+      backgroundColor: colors.purple[0], color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
+    disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
   },
   darklingSecondary: {
@@ -54,8 +62,29 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: '#0079b8', color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
+    disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: '#50ACE1'}
+  },
+  bluePrimary: {
+    style: {
+      ...styles.baseNeue,
+      borderRadius: 5,
+      backgroundColor: colors.blue[0], color: '#fff',
+      fontSize: 14,
+    },
+    disabledStyle: {backgroundColor: colors.gray[4]},
+    hover: {backgroundColor: colors.blue[1]}
+  },
+  text: {
+    style: {
+      ...styles.baseNeue,
+      padding: 0, margin: '16px 0',
+      minWidth: 0,
+      backgroundColor: 'transparent', color: colors.blue[0],
+      fontSize: 14,
+    },
+    disabledStyle: {color: colors.gray[4]},
+    hover: {color: colors.blue[1]}
   }
 };
 

@@ -10,7 +10,7 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -276,6 +276,11 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
+};
+
+// HOC that provides a 'profile' prop with current WorkspaceData
+export const withUserProfile = () => {
+  return connectBehaviorSubject(userProfileStore, 'profile');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
