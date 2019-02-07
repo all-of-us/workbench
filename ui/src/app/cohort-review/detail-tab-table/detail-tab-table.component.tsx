@@ -34,7 +34,6 @@ export interface DetailTabTableProps {
 }
 
 export interface DetailTabTableState {
-  participantId: number;
   data: Array<any>;
   rowsData: Array<any>;
   loading: boolean;
@@ -49,7 +48,6 @@ export const DetailTabTable = withCurrentWorkspace()(
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
-        participantId: this.props.participantId,
         data: null,
         rowsData: [],
         loading: true,
@@ -59,23 +57,16 @@ export const DetailTabTable = withCurrentWorkspace()(
       };
     }
 
-    static getDerivedStateFromProps(props, state) {
-      if (props.participantId !== state.participantId) {
-        return {
-          data: null,
-          loading: true,
-          participantId: props.participantId,
-        };
-      }
-      return null;
-    }
-
     componentDidMount() {
       this.getParticipantData();
     }
 
-    componentDidUpdate() {
-      if (this.state.data === null) {
+    componentDidUpdate(prevProps) {
+      if (prevProps.participantId !== this.props.participantId) {
+        this.setState({
+          data: null,
+          loading: true
+        });
         this.getParticipantData();
       }
     }
@@ -135,7 +126,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         rows={rows}
         totalRecords={data.length}
         onPageChange={this.onPageChange}
-        template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink' />
+        template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink' />;
 
       return <div style={{position: 'relative'}}>
         {data && <DataTable

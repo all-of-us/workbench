@@ -124,10 +124,7 @@ const labRefRange = {
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  ns: string;
-  wsid: string;
   cid: number;
-  cdrid: number;
   participantsId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -324,22 +321,14 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    this.ns = ns;
-    this.wsid = wsid;
-    this.cid = +cid;
-    this.cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    this.cid = this.route.parent.snapshot.params.cid;
     this.getSubscribedData();
   }
 
 
   getDomainsParticipantsData() {
-    // const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    // this.ns = ns;
-    // this.wsid = wsid;
-    // this.cid = cid;
-    // const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    // this.cdrid = cdrid;
+    const {ns, wsid} = this.route.parent.snapshot.params;
+    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
     const limit = 10;
 
     this.domainList.map(domainName => {
@@ -348,14 +337,20 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
         loading: true,
         items: []
       };
-      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(this.ns, this.wsid, this.cid, this.cdrid,
-        this.participantsId , domainName, limit)
-        .subscribe(data => {
-          const participantsData = data;
-          this.chartData[domainName].items = participantsData.items;
-          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
-          this.chartData[domainName].loading = false;
-        });
+      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(
+        ns,
+        wsid,
+        this.cid,
+        cdrid,
+        this.participantsId,
+        domainName,
+        limit
+      ).subscribe(data => {
+        const participantsData = data;
+        this.chartData[domainName].items = participantsData.items;
+        this.chartData[domainName].conditionTitle = typeToTitle(domainName);
+        this.chartData[domainName].loading = false;
+      });
       this.subscription.add(getParticipantsDomainData);
     });
   }
