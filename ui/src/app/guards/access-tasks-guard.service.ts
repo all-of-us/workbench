@@ -8,7 +8,7 @@ import {ServerConfigService} from "app/services/server-config.service";
 import {Observable} from 'rxjs/Observable';
 
 @Injectable()
-export class EraCommonGuard implements CanActivate, CanActivateChild {
+export class AccessTasksGuard implements CanActivate, CanActivateChild {
 
   constructor(
       private router: Router,

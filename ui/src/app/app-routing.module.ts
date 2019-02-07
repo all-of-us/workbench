@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {EraCommonGuard} from './guards/era-common-guard.service';
+import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -43,7 +43,7 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard, EraCommonGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -263,7 +263,7 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     ConceptSetResolver,
-    EraCommonGuard,
+    AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
