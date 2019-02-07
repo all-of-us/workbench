@@ -63,6 +63,7 @@ describe('WorkspaceShareComponent', () => {
     clock.tick(401);
     await waitOneTickAndUpdate(wrapper);
     wrapper.update();
+    console.log(wrapper.debug());
     clock.uninstall();
     wrapper.find('[data-test-id="add-collab-luna.lovegood@hogwarts.edu"]').first().simulate('click');
     const expectedNames = [harry, hermione, ron, luna].map(u => u.givenName + ' ' + u.familyName);

@@ -300,7 +300,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                    placeholder='Find Collaborators'
                    disabled={!this.hasPermission}
                    onChange={e => this.searchTermChangedEvent(e.target.value)}/>
-            {/* TODO: US 1/29/19 should use new spinner? */}
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
             {this.showAutocompleteNoResults &&
               <div data-test-id='drop-down'

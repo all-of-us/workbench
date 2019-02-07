@@ -14,7 +14,7 @@ export class UserApiStub extends UserApi {
       let usersToReturn: User[] = [];
       if (this.existingUsers) {
         usersToReturn = this.existingUsers.filter((userRole) => {
-          fp.includes(searchTerm, fp.values(userRole).join(' '));
+          return fp.includes(searchTerm, fp.values(userRole).join(' '));
         });
       } else {
         usersToReturn.push(<User>{
