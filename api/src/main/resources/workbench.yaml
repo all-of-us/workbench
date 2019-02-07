@@ -368,6 +368,20 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/sync-training-status:
+    post:
+      tags:
+        - profile
+      description: Check moodle badge/training status
+      operationId: syncTrainingStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
@@ -2032,7 +2046,7 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
-      ethicsTrainingCompletionTime:
+      trainingCompletionTime:
         type: integer
         format: int64
         description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.

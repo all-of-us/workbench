@@ -61,6 +61,8 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.compliance.ComplianceTrainingService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -107,6 +109,8 @@ public class ProfileController implements ProfileApiDelegate {
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
+  private static final String COMPLIANCE_BADGE_NAME = "All of Us Data Workbench";
+
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
@@ -121,6 +125,8 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
+  private final Provider<ComplianceTrainingService> complianceServiceProvider;
+
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -132,7 +138,8 @@ public class ProfileController implements ProfileApiDelegate {
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
-      Provider<MailService> mailServiceProvider) {
+      Provider<MailService> mailServiceProvider,
+      Provider<ComplianceTrainingService> complianceServiceProvider) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -146,6 +153,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
+    this.complianceServiceProvider = complianceServiceProvider;
   }
 
   @Override
@@ -479,6 +487,40 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> submitTermsOfService() {
     User user = userService.submitTermsOfService();
     return getProfileResponse(saveUserWithConflictHandling(user));
+  }
+
+  /**
+   * This methods updates logged in user's training status from Moodle.
+   * Check if user have moodle_id, if not retrieve it from MOODLE API and save it in the Database
+   * using the MOODLE_ID get all of the user's Badge
+   * If user has earned All of Us badge, update the database with
+   * training completion time as current time and
+   * training expiration date with as returned from MOODLE.
+   * @return Profile updated with training completion time
+   */
+  @Override
+  public ResponseEntity<Profile> syncTrainingStatus() {
+    ComplianceTrainingService trainingService = complianceServiceProvider.get();
+    User user = userProvider.get();
+    Profile profile = profileService.getProfile(user);
+    try {
+      Integer moodleId = user.getMoodleId();
+      if (moodleId == null) {
+        moodleId = trainingService.getMoodleId(user.getEmail());
+        user.setMoodleId(moodleId);
+      }
+      Map<String, Timestamp> badge = trainingService.getUserBadge(moodleId);
+      if (badge.containsKey(COMPLIANCE_BADGE_NAME)) {
+        user.setTrainingExpirationTime(badge.get(COMPLIANCE_BADGE_NAME));
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        user.setTrainingCompletionTime(now);
+        profile.setTrainingCompletionTime(now.getTime());
+      }
+      userDao.save(user);
+    } catch (ApiException ex) {
+      System.out.print(ex);
+    }
+    return ResponseEntity.ok(profile);
   }
 
   @Override

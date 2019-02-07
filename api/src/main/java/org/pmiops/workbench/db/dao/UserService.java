@@ -93,7 +93,7 @@ public class UserService {
         && user.getIdVerificationIsValid() != null
         && user.getIdVerificationIsValid()
         && user.getDemographicSurveyCompletionTime() != null
-        && user.getEthicsTrainingCompletionTime() != null
+        && user.getTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum())) {
       this.fireCloudService.addUserToGroup(user.getEmail(),
@@ -172,7 +172,7 @@ public class UserService {
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setEthicsTrainingCompletionTime(timestamp);
+        user.setTrainingCompletionTime(timestamp);
         return user;
       }
     });
