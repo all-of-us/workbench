@@ -153,8 +153,8 @@ def dev_up()
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
-  common.run_inline %W{docker-compose run db-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
-  common.run_inline %W{docker-compose run db-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  common.run_inline %W{docker-compose run cdr-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
+  common.run_inline %W{docker-compose run cdr-scripts ./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -897,7 +897,7 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   common = Common.new
-  common.run_inline %W{docker-compose run db-scripts db-cdr/run-drop-db.sh}
+  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({
