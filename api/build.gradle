@@ -288,6 +288,10 @@ dependencies {
   compile 'com.google.guava:guava:26.0-jre'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
+  // Elasticsearch client
+  compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.6.0'
+  compile 'org.elasticsearch:elasticsearch:6.6.0'
+
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
 
