@@ -292,7 +292,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.accessTasksRemaining = true;
       } else {
         this.serverConfigService.getConfig().subscribe((config) => {
-          if (environment.enableComplianceLockout || config.enforceRegistered) {
+          if (environment.enableComplianceLockout && config.enforceRegistered) {
             this.accessTasksRemaining = !this.eraCommonsLinked;
           } else {
             this.accessTasksRemaining = false;
