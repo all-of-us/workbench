@@ -42,5 +42,10 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "hostname": "localhost",
+    "port": 9200,
+    "schema": "http"
   }
 }
