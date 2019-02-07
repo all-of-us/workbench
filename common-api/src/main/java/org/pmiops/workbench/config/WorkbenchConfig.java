@@ -78,8 +78,6 @@ public class WorkbenchConfig {
   }
 
   public static class ElasticsearchConfig {
-    public String hostname;
-    public int port;
-    public String schema;
+    public String host;
   }
 }
