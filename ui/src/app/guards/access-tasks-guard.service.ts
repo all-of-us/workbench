@@ -5,6 +5,7 @@ import {
 } from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {environment} from 'environments/environment';
 import {Observable} from 'rxjs/Observable';
 
 @Injectable()
@@ -25,7 +26,7 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
     this.serverConfigService.getConfig().subscribe((config) => {
       return this.profileStorageService.profile$.flatMap((profile) => {
         if ((profile.linkedNihUsername === null || profile.linkedNihUsername === '')
-            && config.enforceRegistered) {
+            && config.enforceRegistered && environment.enableComplianceLockout) {
           this.router.navigate(['/']);
           return Observable.from([false]);
         }
