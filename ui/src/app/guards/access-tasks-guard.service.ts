@@ -4,16 +4,16 @@ import {
   RouterStateSnapshot
 } from '@angular/router';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from "app/services/server-config.service";
+import {ServerConfigService} from 'app/services/server-config.service';
 import {Observable} from 'rxjs/Observable';
 
 @Injectable()
 export class AccessTasksGuard implements CanActivate, CanActivateChild {
 
   constructor(
-      private router: Router,
-      private profileStorageService: ProfileStorageService,
-      private serverConfigService: ServerConfigService,
+    private router: Router,
+    private profileStorageService: ProfileStorageService,
+    private serverConfigService: ServerConfigService,
   ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
@@ -30,8 +30,8 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
     return this.profileStorageService.profile$.flatMap((profile) => {
       if ((profile.linkedNihUsername === null || profile.linkedNihUsername === '')
           && enforceRegistered) {
-          this.router.navigate(['/']);
-          return Observable.from([false]);
+        this.router.navigate(['/']);
+        return Observable.from([false]);
       }
       return Observable.from([true]);
     });
