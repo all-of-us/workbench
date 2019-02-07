@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -33,6 +34,7 @@ export interface DetailTabTableProps {
 }
 
 export interface DetailTabTableState {
+  participantId: number;
   data: Array<any>;
   rowsData: Array<any>;
   loading: boolean;
@@ -47,13 +49,35 @@ export const DetailTabTable = withCurrentWorkspace()(
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
-        data: [],
+        participantId: this.props.participantId,
+        data: null,
         rowsData: [],
         loading: true,
         totalCount: null,
         start: 0,
         rows: 25
       };
+    }
+
+    static getDerivedStateFromProps(props, state) {
+      if (props.participantId !== state.participantId) {
+        return {
+          data: null,
+          loading: true,
+          participantId: props.participantId,
+        };
+      }
+      return null;
+    }
+
+    componentDidMount() {
+      this.getParticipantData();
+    }
+
+    componentDidUpdate() {
+      if (this.state.data === null) {
+        this.getParticipantData();
+      }
     }
 
     onPageChange = (event: any) => {
@@ -63,10 +87,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: event.first,
         rowsData: this.state.data.slice(startIndex, endIndex)
       });
-    }
-
-    componentDidMount() {
-      this.getParticipantData();
     }
 
     getParticipantData() {
@@ -97,7 +117,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, rows, rowsData, start} = this.state;
+      const {loading, rows, rowsData, start} = this.state;
+      const data = this.state.data || [];
+
       const columns = this.props.columns.map((col) => {
         return <Column
           style={styles.pDatatableTbody}
@@ -115,21 +137,21 @@ export const DetailTabTable = withCurrentWorkspace()(
         onPageChange={this.onPageChange}
         template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink' />
 
-      return <React.Fragment>
-        <DataTable
+      return <div style={{position: 'relative'}}>
+        {data && <DataTable
           footer={footer}
           style={styles.pDatatable}
           ref={(el) => this.dt = el}
           value={rowsData}
-          loading={loading}
           first={start}
           rows={rows}
           totalRecords={data.length}
           scrollable={true}
           scrollHeight='calc(100vh - 380px)'>
           {columns}
-        </DataTable>
-      </React.Fragment>;
+        </DataTable>}
+        {loading && <SpinnerOverlay />}
+      </div>;
     }
   }
 );
