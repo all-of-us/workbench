@@ -51,7 +51,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(person_all_events person_condition person_drug person_measurement p_observation person_procedure person_physical_measure)
+create_tables=(person_all_events person_condition person_drug person_measurement p_observation person_procedure person_physical_measure person_survey)
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
@@ -187,6 +187,14 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.OBSERVATION_CONCEPT_ID = c
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
+
+###################################################
+# insert survey data into person_survey #
+###################################################
+echo "Inserting survey data into person_survey"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
+   (person_id, data_id, survey, question, answer)
 
 #################################################
 # insert drug data into person_physical_measure #
