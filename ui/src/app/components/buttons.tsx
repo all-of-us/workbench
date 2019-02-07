@@ -1,3 +1,4 @@
+import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -59,7 +60,7 @@ const buttonVariants = {
   }
 };
 
-const computeStyle = ({style, hover, disabledStyle}, {disabled}) => {
+const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) => {
   return {
     style: {...style, ...(disabled ? disabledStyle : {})},
     hover: disabled ? undefined : hover
@@ -99,4 +100,19 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
       {children}
     </Clickable>
   </TooltipTrigger>;
+};
+
+const cardButtonStyle = {
+  style: {
+    ...cardStyles.card,
+    justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+  },
+  disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
+};
+
+export const CardButton = ({disabled = false, style = {}, children, ...props}) => {
+  return <Clickable
+    disabled={disabled} {...props}
+    {...fp.merge(computeStyle(cardButtonStyle, {disabled}), {style})}
+  >{children}</Clickable>;
 };

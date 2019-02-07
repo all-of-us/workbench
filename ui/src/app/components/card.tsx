@@ -1,7 +1,7 @@
 import {reactStyles, withStyle} from 'app/utils';
 import * as React from 'react';
 
-const styles = reactStyles({
+export const styles = reactStyles({
   card: {
     padding: '1rem',
     borderRadius: '0.2rem',
