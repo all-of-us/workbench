@@ -16,7 +16,22 @@ services:
       - db/vars.env
     volumes:
       - db:/var/lib/mysql
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2
+    ports:
+      - 9200:9200
+    environment:
+      # Disable bootstrap checks so users don't have to fiddle with
+      # vm.max_map_count. Note that this file is not used in production
+      # deployments; bootstrap checks are still enabled for production
+      # deployments.
+      - "transport.host=localhost"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
   api:
+    depends_on:
+      - db
+      - elastic
     build:
       context: ./src/dev/server
     user: ${UID}
@@ -235,5 +250,6 @@ services:
         - db/vars.env
 volumes:
   db:
+  esdata:
   gradle-cache:
   gradle-public-api-cache:
