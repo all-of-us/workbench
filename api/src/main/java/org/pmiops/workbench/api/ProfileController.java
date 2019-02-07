@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -518,6 +519,9 @@ public class ProfileController implements ProfileApiDelegate {
       }
       userDao.save(user);
     } catch (ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        throw new NotFoundException(ex.getMessage());
+      }
       System.out.print(ex);
     }
     return ResponseEntity.ok(profile);

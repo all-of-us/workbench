@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.compliance.ComplianceTrainingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -114,6 +115,8 @@ public class ProfileControllerTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
+  private Provider<ComplianceTrainingService> complianceTrainingServiceProvider;
+  @Mock
   private MailService mailService;
 
   private ProfileController profileController;
@@ -163,11 +166,11 @@ public class ProfileControllerTest {
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config), environment,
-        Providers.of(mailService));
+        Providers.of(mailService), complianceTrainingServiceProvider);
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService));
+        cloudEnvironment, Providers.of(mailService), complianceTrainingServiceProvider);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -198,7 +201,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+    assertThat(profile.getTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -209,7 +212,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+    assertThat(profile.getTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -220,7 +223,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
   @Test
@@ -245,7 +248,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
 
@@ -768,7 +771,7 @@ public class ProfileControllerTest {
     doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
   }
-
+  
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
