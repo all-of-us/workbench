@@ -1,7 +1,7 @@
 <div class="background-image">
   <div style="display:flex; justify-content:center">
     <div class="card single">
-      <div *ngIf="eraCommonsLinked">
+      <div *ngIf="accessTasksRemaining===false">
         <div class="row" style="flex-direction: row; height: 17.47%; margin-bottom: 0.5rem; justify-content: flex-start; flex-wrap: nowrap;">
           <div class="col main-heading">Researcher Workbench</div>
           <div class="heading-links" style="display: flex; flex-wrap: nowrap; overflow: hidden;">
@@ -27,10 +27,10 @@
         </div>
       </div>
       <!--TODO: this logic will be removed when RW-1969 is complete-->
-      <div *ngIf="eraCommonsLinked === undefined" class="spinner-container">
+      <div *ngIf="accessTasksRemaining === undefined" class="spinner-container">
         <span class="spinner spinner-lg"></span>
       </div>
-      <app-workbench-access-tasks *ngIf="eraCommonsLinked===false"
+      <app-workbench-access-tasks *ngIf="accessTasksRemaining"
                            [eraCommonsLinked]="eraCommonsLinked"
                            [eraCommonsError]="eraCommonsError"
                            [trainingCompleted]="trainingCompleted"></app-workbench-access-tasks>
