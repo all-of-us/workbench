@@ -421,9 +421,9 @@ paths:
         - application/json
       responses:
         204:
-          description: Successfully Added User To Group
+          description: Successfully Updated User In Group
         403:
-          description: You must be an admin of this group in order to remove members
+          description: You must be an admin of this group in order to enable/disable members
           schema:
             $ref: '#/definitions/ErrorResponse'
         404:
@@ -441,41 +441,11 @@ paths:
           type: string
         - in: body
           name: request
-          description: request carrying user email to add
+          description: Request containing user email to update and a disabled status to update the user to.
           schema:
-            $ref: "#/definitions/AuthDomainRequest"
-      summary: add a user to an auth domain if you have manage groups permission
-      operationId: addUserToAuthDomain
-    delete:
-      responses:
-        204:
-          description: Successfully Removed User From Group
-        403:
-          description: You must be an admin of this group in order to remove members
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: User not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: FireCloud Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      parameters:
-        - in: path
-          name: groupName
-          required: true
-          type: string
-        - in: body
-          name: request
-          description: request carrying user email to add
-          schema:
-            $ref: "#/definitions/AuthDomainRequest"
-      tags:
-        - authDomain
-      summary: remove a user from an auth domain if you have manage groups permission
-      operationId: removeUserFromAuthDomain
+            $ref: "#/definitions/AuthDomainDisableUserRequest"
+      summary: enable/disable a user to an auth domain if you have manage groups permission
+      operationId: disableUser
 
   /v1/user/{term}:
     get:
@@ -2261,13 +2231,16 @@ definitions:
         items:
           $ref: "#/definitions/Profile"
 
-  AuthDomainRequest:
+  AuthDomainDisableUserRequest:
     type: object
     required:
       - email
     properties:
       email:
         type: string
+      disabled:
+        description: Set to true to disable user in auth domain, false otherwise
+        type: boolean
 
   AuditBigQueryResponse:
     type: object

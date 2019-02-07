@@ -7,5 +7,6 @@ export const environment: Environment = {
   debug: true,
   enableTemporal: false,
   useZendeskForSupport: false,
-  enableJupyterLab: true
+  enableJupyterLab: true,
+  enableComplianceLockout: true
 };
