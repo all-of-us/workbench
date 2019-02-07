@@ -266,6 +266,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private serverConfigService: ServerConfigService,
+    private route: ActivatedRoute,
   ) {
     // create bound methods to use as callbacks
     this.closeQuickTour = this.closeQuickTour.bind(this);
