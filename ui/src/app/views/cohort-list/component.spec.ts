@@ -2,8 +2,6 @@ import {DebugElement} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, UrlSegment} from '@angular/router';
-import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
@@ -26,6 +24,7 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortsApi} from 'generated/fetch';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 
@@ -38,29 +37,8 @@ import {
 } from 'generated';
 
 
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    },
-    data: {
-      workspace: {
-        ...WorkspacesServiceStub.stubWorkspace(),
-        accessLevel: WorkspaceAccessLevel.OWNER,
-      }
-    }
-  }
-};
-
 class CohortListPage {
   fixture: ComponentFixture<CohortListComponent>;
-  route: UrlSegment[];
   form: DebugElement;
 
   constructor(testBed: typeof TestBed) {
@@ -81,7 +59,6 @@ describe('CohortListComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
-        RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
         ClarityModule.forRoot()
@@ -95,7 +72,6 @@ describe('CohortListComponent', () => {
         TopBoxComponent
       ],
       providers: [
-        { provide: ActivatedRoute, useValue: activatedRouteStub},
         { provide: CohortsService, useValue: new CohortsServiceStub()},
         { provide: ConceptSetsService },
         { provide: SignInService, useValue: new SignInServiceStub()},
@@ -103,6 +79,14 @@ describe('CohortListComponent', () => {
       ] }).compileComponents().then(() => {
         cohortListPage = new CohortListPage(TestBed);
       });
+    urlParamsStore.next({
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+    });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
     registerApiClient(CohortsApi, new CohortsApiStub());
     tick();
   }));
