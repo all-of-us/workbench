@@ -3,7 +3,6 @@ package org.pmiops.workbench.elasticsearch;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
-import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
