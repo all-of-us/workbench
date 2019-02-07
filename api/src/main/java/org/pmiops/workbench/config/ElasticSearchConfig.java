@@ -15,6 +15,11 @@ public class ElasticSearchConfig {
   @Autowired
   private Provider<WorkbenchConfig> configProvider;
 
+  /**
+   * Create a RestHighLevelClient
+   * Docs: https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/_changing_the_client_8217_s_initialization_code.html
+   * @return
+   */
   @Bean
   public RestHighLevelClient client() {
     String[] vars = configProvider.get().elasticsearch.host.split(":");
