@@ -71,7 +71,9 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
+      <ClrIcon shape='ellipsis-vertical' size={21}
+               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                 cursor: disabled ? 'auto' : 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };
