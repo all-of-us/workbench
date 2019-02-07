@@ -479,12 +479,6 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> completeEthicsTraining() {
-    User user = userService.submitEthicsTraining();
-    return getProfileResponse(saveUserWithConflictHandling(user));
-  }
-
-  @Override
   public ResponseEntity<Profile> submitTermsOfService() {
     User user = userService.submitTermsOfService();
     return getProfileResponse(saveUserWithConflictHandling(user));

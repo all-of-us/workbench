@@ -39,8 +39,8 @@ class FailingProfileStub extends ProfileServiceStub {
 }
 
 class TrainingCompletesRegistrationStub extends ProfileServiceStub {
-  completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    const obs = super.completeEthicsTraining(extraHttpRequestParams);
+  completeTraining(extraHttpRequestParams?: any): Observable<Profile> {
+    const obs = super.completeTraining(extraHttpRequestParams);
     this.profile.dataAccessLevel = DataAccessLevel.Registered;
     return obs;
   }
@@ -130,7 +130,7 @@ describe('UnregisteredComponent', () => {
   const expectAllRegistrationSubmitted = (p: Profile) => {
     expect(p.requestedIdVerification).toBeTruthy();
     expect(p.termsOfServiceCompletionTime).toBeTruthy();
-    expect(p.ethicsTrainingCompletionTime).toBeTruthy();
+    expect(p.trainingCompletionTime).toBeTruthy();
     expect(p.demographicSurveyCompletionTime).toBeTruthy();
   };
 

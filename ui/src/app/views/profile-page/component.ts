@@ -191,7 +191,7 @@ export class ProfilePageComponent implements OnInit {
     if (this.profile.demographicSurveyCompletionTime !== null) {
       completedTasks += 1;
     }
-    if (this.profile.ethicsTrainingCompletionTime !== null) {
+    if (this.profile.trainingCompletionTime !== null) {
       completedTasks += 1;
     }
     if (this.profile.termsOfServiceCompletionTime !== null) {
@@ -228,10 +228,10 @@ export class ProfilePageComponent implements OnInit {
   }
 
 
-  completeEthicsTraining(): void {
-    this.profileService.completeEthicsTraining().subscribe((profile) => {
-      this.profile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
-      this.workingProfile.ethicsTrainingCompletionTime = profile.ethicsTrainingCompletionTime;
+  completeTraining(): void {
+    this.profileService.completetraining().subscribe((profile) => {
+      this.profile.trainingCompletionTime = profile.trainingCompletionTime;
+      this.workingProfile.trainingCompletionTime = profile.trainingCompletionTime;
       this.reloadSpinner();
     }, () => {
       this.ethicsTrainingError = true;
