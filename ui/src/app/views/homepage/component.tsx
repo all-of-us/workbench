@@ -21,6 +21,7 @@ import {
   Profile,
   ProfileService
 } from 'generated';
+import {ActivatedRoute} from "@angular/router";
 
 
 const styles = reactStyles({
