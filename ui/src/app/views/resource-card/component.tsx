@@ -452,7 +452,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                    onEdit={this.receiveEdit.bind(this)}
                    onCancel={this.closeEditModal.bind(this)}/>}
       {this.state.renaming && this.isNotebook &&
-        <RenameModal notebookName={this.displayName}
+        <RenameModal notebookName={this.props.resourceCard.notebook.name}
                      workspace={{
                        namespace: this.props.resourceCard.workspaceNamespace,
                        name: this.props.resourceCard.workspaceFirecloudName
