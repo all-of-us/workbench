@@ -26,7 +26,7 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   private static final String MOODLE_ERROR_CODE = "guestsarenotallowed";
 
   @Override
-  public int getMoodleId(String email) throws ApiException, InvalidProtocolBufferException {
+  public int getMoodleId(String email) throws ApiException {
     api.getApiClient().setDebugging(true);
     List<MoodleUserResponse> response = api.getMoodleId(GET_MOODLE_ID_FUNCTION, RESPONSE_FORMAT,
         TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
