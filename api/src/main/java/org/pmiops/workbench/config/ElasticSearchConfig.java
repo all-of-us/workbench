@@ -15,15 +15,12 @@ public class ElasticSearchConfig {
   @Autowired
   private Provider<WorkbenchConfig> configProvider;
 
-  //Is Singleton scope appropriate here? or should we use another scope for elasticsearch?
-  //If a scope beside Singleton is used we need to make sure we close this client when finished.
   @Bean
   public RestHighLevelClient client() {
-    HttpHost httpHost = new HttpHost(
-      configProvider.get().elasticsearch.hostname,
-      configProvider.get().elasticsearch.port,
-      configProvider.get().elasticsearch.schema
-    );
-    return new RestHighLevelClient(RestClient.builder(httpHost));
+    String[] vars = configProvider.get().elasticsearch.host.split(":");
+    String host = vars[0];
+    int port = Integer.parseInt(vars[1]);
+    String scheme = vars[2];
+    return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)));
   }
 }
