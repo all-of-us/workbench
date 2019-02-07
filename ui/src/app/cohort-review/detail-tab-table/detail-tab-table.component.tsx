@@ -6,6 +6,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {InputText} from 'primereact/inputtext';
 import {Paginator} from 'primereact/paginator';
 import * as React from 'react';
 
@@ -107,18 +108,29 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
     }
 
+    columnFilter = (event) => {
+      // TODO adjust layout to match current table and update pagination to match filtered data
+      this.dt.filter(event.target.value, event.target.id, 'contains');
+    }
+
     render() {
       const {loading, rows, rowsData, start} = this.state;
       const data = this.state.data || [];
 
       const columns = this.props.columns.map((col) => {
+        const filter = <InputText
+          className='p-inputtext p-column-filter'
+          id={col.name}
+          onChange={this.columnFilter}/>;
+
         return <Column
           style={styles.pDatatableTbody}
-          key={col.name} field={col.name}
+          key={col.name}
+          field={col.name}
           header={col.displayName}
           sortable={true}
           filter={true}
-          filterMatchMode='contains' />;
+          filterElement={filter} />;
       });
 
       const footer = <Paginator
