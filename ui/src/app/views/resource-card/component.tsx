@@ -71,7 +71,9 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
+      <ClrIcon shape='ellipsis-vertical' size={21}
+               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                 cursor: disabled ? 'auto' : 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -452,7 +454,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                    onEdit={this.receiveEdit.bind(this)}
                    onCancel={this.closeEditModal.bind(this)}/>}
       {this.state.renaming && this.isNotebook &&
-        <RenameModal notebookName={this.displayName}
+        <RenameModal notebookName={this.props.resourceCard.notebook.name}
                      workspace={{
                        namespace: this.props.resourceCard.workspaceNamespace,
                        name: this.props.resourceCard.workspaceFirecloudName
