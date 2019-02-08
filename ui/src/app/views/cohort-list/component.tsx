@@ -50,6 +50,11 @@ const styles = reactStyles({
     marginLeft: '0.2rem',
     height: '16px',
     width: '16px'
+  },
+  addCard: {
+    width: 200, height: 105,
+    marginTop: '1rem', marginRight: '1rem',
+    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   }
 });
 
@@ -112,13 +117,11 @@ const CohortList = withCurrentWorkspace()(
         <div style={styles.pageArea}>
           <TooltipTrigger content={!writePermission &&
               `Write permission required to create cohorts`} side='top'>
-            <CardButton style={{marginRight: '1rem', marginTop: '1rem'}}
+            <CardButton style={styles.addCard}
                         onClick={() => this.navigateToCohortBuilder()}
                         disabled={!writePermission}>
-              <div>
-                Create a <br/>New Cohort
-                <ClrIcon shape='plus-circle'/>
-              </div>
+              Create a <br/>New Cohort
+              <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}}/>
             </CardButton>
           </TooltipTrigger>
           <div style={styles.resourceCardArea}>
