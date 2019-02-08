@@ -17,12 +17,12 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
 import * as React from 'react';
-import {Clickable} from 'app/components/buttons';
+import {CardButton, Clickable} from 'app/components/buttons';
 import {navigate} from 'app/utils/navigation';
 
 import {ReactWrapperBase, withCurrentWorkspace, reactStyles} from 'app/utils/index';
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {ActionCard, styles as CardStyles} from 'app/components/card';
+import {styles as CardStyles} from 'app/components/card';
 
 const styles = reactStyles({
   pageArea: {
@@ -112,16 +112,14 @@ const CohortList = withCurrentWorkspace()(
         <div style={styles.pageArea}>
           <TooltipTrigger content={!writePermission &&
               `Write permission required to create cohorts`} side='top'>
-            <Clickable style={{marginRight: '1rem', marginTop: '1rem'}}
-                       onClick={() => this.navigateToCohortBuilder()}
-                       disabled={!writePermission}>
-              <ActionCard>
-                <div style={CardStyles.actionText}>
-                  Create a <br/>New Cohort
-                  <ClrIcon shape='plus-circle' style={CardStyles.actionIcon}/>
-                </div>
-              </ActionCard>
-            </Clickable>
+            <CardButton style={{marginRight: '1rem', marginTop: '1rem'}}
+                        onClick={() => this.navigateToCohortBuilder()}
+                        disabled={!writePermission}>
+              <div>
+                Create a <br/>New Cohort
+                <ClrIcon shape='plus-circle'/>
+              </div>
+            </CardButton>
           </TooltipTrigger>
           <div style={styles.resourceCardArea}>
             {cohortList && cohortList.map((cohort: RecentResource) => {
