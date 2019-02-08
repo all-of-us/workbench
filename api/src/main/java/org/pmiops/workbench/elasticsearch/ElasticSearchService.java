@@ -17,7 +17,7 @@ public class ElasticSearchService {
 
   private static final String INDEX = "index";
   private static final String TYPE = "type";
-  private RestHighLevelClient client;
+  private final RestHighLevelClient client;
 
   @Autowired
   public ElasticSearchService(RestHighLevelClient client) {
