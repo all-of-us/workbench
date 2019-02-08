@@ -112,7 +112,6 @@ public class ProfileController implements ProfileApiDelegate {
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
   private static final String COMPLIANCE_BADGE_NAME = "All of Us Data Workbench";
 
-
   private final ProfileService profileService;
   private final Provider<User> userProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
@@ -127,7 +126,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
   private final Provider<ComplianceTrainingService> complianceServiceProvider;
-
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -522,7 +520,7 @@ public class ProfileController implements ProfileApiDelegate {
       if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
         throw new NotFoundException(ex.getMessage());
       }
-      System.out.print(ex);
+      throw new ServerErrorException(ex);
     }
     return ResponseEntity.ok(profile);
   }
