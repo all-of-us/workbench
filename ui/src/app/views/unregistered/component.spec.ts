@@ -39,8 +39,8 @@ class FailingProfileStub extends ProfileServiceStub {
 }
 
 class TrainingCompletesRegistrationStub extends ProfileServiceStub {
-  completeTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    const obs = super.completeTraining(extraHttpRequestParams);
+  completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
+    const obs = super.completeEthicsTraining(extraHttpRequestParams);
     this.profile.dataAccessLevel = DataAccessLevel.Registered;
     return obs;
   }

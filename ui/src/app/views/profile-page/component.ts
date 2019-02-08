@@ -229,7 +229,7 @@ export class ProfilePageComponent implements OnInit {
 
 
   completeTraining(): void {
-    this.profileService.completetraining().subscribe((profile) => {
+    this.profileService.completeEthicsTraining().subscribe((profile) => {
       this.profile.trainingCompletionTime = profile.trainingCompletionTime;
       this.workingProfile.trainingCompletionTime = profile.trainingCompletionTime;
       this.reloadSpinner();
