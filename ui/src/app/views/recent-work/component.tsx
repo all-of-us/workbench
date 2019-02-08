@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {withContentRect} from 'react-measure';
@@ -19,7 +19,8 @@ export const RecentWork = (fp.flow as any)(
 )(class extends React.Component<{
   workspace: WorkspaceData,
   measureRef: React.Ref<any>,
-  contentRect: {client: {width: number}}
+  contentRect: {client: {width: number}},
+  dark: boolean,
 }, {
   loading: boolean,
   offset: number,
@@ -72,7 +73,7 @@ export const RecentWork = (fp.flow as any)(
     const limit = (contentRect.client.width - 24) / 224;
     const shade = workspace ? 'light' : 'dark';
     return <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
-      <div style={{display: 'flex', position: 'relative', paddingLeft: '1rem'}}>
+      <div style={{display: 'flex', position: 'relative', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
         {resources.slice(offset, offset + limit).map((resource, i) => {
           return <ResourceCard key={i}
             resourceCard={resource} onUpdate={() => this.loadResources()}
@@ -89,7 +90,7 @@ export const RecentWork = (fp.flow as any)(
           style={{position: 'absolute', top: 110, right: 0}}
         />}
       </div>
-      {loading && <SpinnerOverlay />}
+      {loading && <SpinnerOverlay dark={this.props.dark} />}
     </div>;
   }
 });
@@ -99,7 +100,8 @@ export const RecentWork = (fp.flow as any)(
   template: '<div #root></div>',
 })
 export class RecentWorkComponent extends ReactWrapperBase {
+  @Input('dark') dark: boolean;
   constructor() {
-    super(RecentWork, []);
+    super(RecentWork, ['dark']);
   }
 }
