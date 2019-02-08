@@ -66,7 +66,7 @@ export const TextInput = React.forwardRef(({style = {}, onChange, invalid = fals
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%', height: '1.5rem',
-      border: '1px solid #9a9a9a', borderRadius: 4,
+      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
       padding: '0 0.5rem',
       backgroundColor: '#fff',
       ...(invalid ? styles.unsuccessfulInput : {}),
@@ -81,7 +81,7 @@ export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%',
-      border: '1px solid #9a9a9a', borderRadius: 4,
+      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
       padding: '0.25rem 0.5rem',
       backgroundColor: '#fff',
       ...(invalid ? styles.unsuccessfulInput : {}),

@@ -3,16 +3,16 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {Profile, ProfileApi} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 
-
-declare const gapi: any;
 
 const styles = reactStyles({
   h1: {
@@ -31,7 +31,8 @@ const styles = reactStyles({
     marginRight: 20
   },
   longInputStyle: {
-    height: 175, width: 420
+    height: 175, width: 420,
+    resize: 'both'
   },
   box: {
     backgroundColor: '#fff',
@@ -59,7 +60,7 @@ const validators = {
   lastName: {...required, ...notTooLong(80)},
   currentPosition: {...required, ...notTooLong(255)},
   organization: {...required, ...notTooLong(255)},
-  currentResearch: {...required},
+  currentResearch: required,
 };
 
 export const ProfilePageReact = withUserProfile()
@@ -78,20 +79,24 @@ export const ProfilePageReact = withUserProfile()
 
   componentDidUpdate(prevProps) {
     const {profile} = this.props;
-    if (!prevProps.profile && profile) {
+    if (!fp.isEqual(prevProps.profile, profile)) {
       this.setState({profileEdits: profile});
     }
   }
 
   saveProfile() {
-    this.setState({updating: true})
-    profileApi().updateProfile(this.state.profileEdits);
+    this.setState({updating: true});
+    profileApi().updateProfile(this.state.profileEdits)
+      .then(() => this.setState({updating: false}));
   }
 
   render() {
     const {profile} = this.props;
     const {profileEdits, updating} = this.state;
-    const {givenName, familyName, currentPosition, organization, areaOfResearch} = profileEdits;
+    const {
+      givenName, familyName, currentPosition, organization, areaOfResearch,
+      institutionalAffiliations = []
+    } = profileEdits;
     const errors = validate({
       firstName: givenName,
       lastName: familyName,
@@ -100,15 +105,12 @@ export const ProfilePageReact = withUserProfile()
       currentResearch: areaOfResearch
     }, validators);
 
-    const profileImageUrl =
-      gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
-
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
       const errorText = profile && errors && errors[labelSubstitutions[valueKey]];
 
       const inputProps = {
-        value: profileEdits[valueKey] || '',
-        onChange: v => this.setState(fp.set(['profileEdits', valueKey], v)),
+        value: fp.get(valueKey, profileEdits) || '',
+        onChange: v => this.setState(fp.set(`profileEdits.${valueKey}`, v)),
         invalid: !!errorText,
         ...props
       };
@@ -128,84 +130,169 @@ export const ProfilePageReact = withUserProfile()
       </div>;
     };
 
-    console.log(JSON.stringify(profile))
-
     return <div style={{margin: '35px 35px 100px 45px'}}>
       {(!profile || updating) && <SpinnerOverlay/>}
-        <div style={{...styles.h1, marginBottom: 30}}>Profile</div>
-        <div style={{display: 'flex'}}>
-          <div style={{flex: 'none'}}>
-            <img src={profileImageUrl} alt='Profile image' style={{
-              borderRadius: '100%',
-              // width: '50%'
-            }}/>
+      <div style={{...styles.h1, marginBottom: 30}}>Profile</div>
+      <div style={{display: 'flex'}}>
+
+        <div style={{flex: '1 0 520px', paddingRight: 26}}>
+          <div style={{display: 'flex'}}>
+            {makeProfileInput({
+              title: 'First Name',
+              valueKey: 'givenName'
+            })}
+            {makeProfileInput({
+              title: 'Last Name',
+              valueKey: 'familyName'
+            })}
           </div>
-          <div style={{flex: '1 0 520px', padding: '0 26px'}}>
-            <div style={{display: 'flex'}}>
-              {makeProfileInput({
-                title: 'First Name',
-                valueKey: 'givenName'
-              })}
-              {makeProfileInput({
-                title: 'Last Name',
-                valueKey: 'familyName'
-              })}
-            </div>
-            {makeProfileInput({
-              title: 'Contact Email',
-              valueKey: 'contactEmail',
-              disabled: true
-            })}
-            <div style={styles.inputLabel}>Username</div>
-            <div style={{
-              paddingLeft: '0.5rem', marginBottom: 20,
-              height: '1.5rem',
-              color: '#000'
-            }}
-            >
-              {profile && profile.username}
-            </div>
-            {makeProfileInput({
-              title: 'Your Current Position',
-              valueKey: 'currentPosition'
-            })}
-            {makeProfileInput({
-              title: 'Your Organization',
-              valueKey: 'organization'
-            })}
-            {makeProfileInput({
-              title: 'Current Research Work',
-              valueKey: 'areaOfResearch',
-              isLong: true
-            })}
-            {makeProfileInput({
-              title: 'About You',
-              valueKey: 'aboutYou',
-              isLong: true
-            })}
-            <div style={{marginTop: 100}}>
-              <Button
-                type='text'
-                onClick={() => this.setState({profileEdits: profile})}
+          {makeProfileInput({
+            title: 'Contact Email',
+            valueKey: 'contactEmail',
+            disabled: true
+          })}
+          <div style={styles.inputLabel}>Username</div>
+          <div style={{
+            paddingLeft: '0.5rem', marginBottom: 20,
+            height: '1.5rem',
+            color: '#000'
+          }}>
+            {profile && profile.username}
+          </div>
+          {makeProfileInput({
+            title: 'Your Current Position',
+            valueKey: 'currentPosition'
+          })}
+          {makeProfileInput({
+            title: 'Your Organization',
+            valueKey: 'organization'
+          })}
+          {makeProfileInput({
+            title: <React.Fragment>
+              Current Research Work
+              <TooltipTrigger
+                side='right'
+                content='You are required to describe your current research in order to help
+                  All of Us improve the Researcher Workbench.'
               >
-                Discard Changes
-              </Button>
+                <ClrIcon
+                  shape='info-standard'
+                  className='is-solid'
+                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[0]}}
+                />
+              </TooltipTrigger>
+            </React.Fragment>,
+            valueKey: 'areaOfResearch',
+            isLong: true
+          })}
+          {makeProfileInput({
+            title: 'About You',
+            valueKey: 'aboutYou',
+            isLong: true
+          })}
+          <div style={{...styles.h1, marginBottom: 24}}>Institution Affiliations</div>
+          {institutionalAffiliations.map((v, i) =>
+            <div style={{display: 'flex'}} key={`institution${i}`}>
+              {makeProfileInput({
+                title: 'Institution',
+                valueKey: `institutionalAffiliations.${i}.institution`
+              })}
+              {makeProfileInput({
+                title: 'Role',
+                valueKey: `institutionalAffiliations.${i}.role`
+              })}
+              <Clickable
+                style={{alignSelf: 'center'}}
+                onClick={() => this.setState(fp.set('profileEdits.institutionalAffiliations',
+                  fp.without([v], institutionalAffiliations)))}
+              >
+                <ClrIcon
+                  shape='times'
+                  size='24'
+                  style={{color: colors.red}}
+                />
+              </Clickable>
+            </div>
+          )}
+          <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
+            <div style={{borderTop: `2px solid ${colors.gray[4]}`, flex: 1}}/>
+            <Clickable
+              onClick={() => this.setState(fp.set('profileEdits.institutionalAffiliations',
+                fp.concat(institutionalAffiliations, {institution: '', role: ''})))}
+            >
+              <ClrIcon
+                shape='plus-circle'
+                size='19'
+                style={{color: colors.purple[0], margin: '0 14px', flex: 'none'}}
+              />
+            </Clickable>
+            <div style={{borderTop: `2px solid ${colors.gray[4]}`, flex: 1}}/>
+          </div>
+          <div style={{marginTop: 100}}>
+            <Button
+              type='text'
+              onClick={() => this.setState({profileEdits: profile})}
+            >
+              Discard Changes
+            </Button>
+            <TooltipTrigger
+              side='top'
+              content={!!errors && 'You must correct errors before saving.'}
+            >
               <Button
-                type='bluePrimary'
+                type='purplePrimary'
                 style={{marginLeft: 40}}
                 onClick={() => this.saveProfile()}
+                disabled={!!errors}
               >
                 Save Profile
               </Button>
-            </div>
-          </div>
-          <div style={{flex: '0 0 420px'}}>
-            <div style={styles.box}>
-              <div style={styles.h1}>All of Us Training</div>
-            </div>
+            </TooltipTrigger>
           </div>
         </div>
-      </div>;
+
+        <div style={{flex: '0 0 420px'}}>
+          <div style={styles.box}>
+            <div style={{...styles.h1, marginBottom: 12}}>
+              All of Us Training
+              <TooltipTrigger
+                side='left'
+                content=''
+              >
+                <ClrIcon
+                  shape='info-standard'
+                  className='is-solid'
+                  style={{marginLeft: 10, verticalAlign: 'middle', color: colors.blue[0]}}
+                />
+              </TooltipTrigger>
+            </div>
+            {profile && (!!profile.ethicsTrainingCompletionTime ?
+                <Button
+                  type='purplePrimary'
+                  disabled={true}
+                  style={{
+                    backgroundColor: colors.green,
+                    border: 'none',
+                    cursor: 'initial'
+                  }}
+                >
+                  <ClrIcon shape='check' style={{marginRight: 4}}/>Completed
+                </Button> :
+                <Button
+                  type='purplePrimary'
+                  onClick={() => {
+                    this.setState({updating: true});
+                    profileApi().completeEthicsTraining()
+                      .then(() => this.setState({updating: false}));
+                  }}
+                >
+                  Complete Training
+                </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>;
   }
 });
 

@@ -65,26 +65,25 @@ const buttonVariants = {
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: '#50ACE1'}
   },
-  bluePrimary: {
+  purplePrimary: {
     style: {
       ...styles.baseNeue,
       borderRadius: 5,
-      backgroundColor: colors.blue[0], color: '#fff',
+      backgroundColor: colors.purple[0], color: '#fff',
       fontSize: 14,
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
-    hover: {backgroundColor: colors.blue[1]}
+    hover: {backgroundColor: colors.purple[1]}
   },
   text: {
     style: {
       ...styles.baseNeue,
       padding: 0, margin: '16px 0',
       minWidth: 0,
-      backgroundColor: 'transparent', color: colors.blue[0],
+      backgroundColor: 'transparent', color: '#000',
       fontSize: 14,
     },
-    disabledStyle: {color: colors.gray[4]},
-    hover: {color: colors.blue[1]}
+    disabledStyle: {color: colors.gray[4]}
   }
 };
 
