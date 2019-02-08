@@ -1,7 +1,5 @@
 package org.pmiops.workbench.compliance;
 
-import com.google.protobuf.Api;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;

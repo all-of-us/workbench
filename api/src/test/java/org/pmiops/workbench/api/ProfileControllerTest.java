@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -795,7 +793,6 @@ public class ProfileControllerTest {
   @Test
   public void testSynTrainingWithNoBadge() throws Exception {
     HashMap<String, Timestamp> badgeDetail = new HashMap();
-    Timestamp time = new Timestamp(123);
 
     when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
     when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
