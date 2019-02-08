@@ -125,7 +125,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
-  private final Provider<ComplianceTrainingService> complianceServiceProvider;
+  private final ComplianceTrainingService complianceService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -152,7 +152,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
-    this.complianceServiceProvider = complianceServiceProvider;
+    this.complianceService = complianceServiceProvider.get();
   }
 
   @Override
@@ -499,16 +499,15 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
-    ComplianceTrainingService trainingService = complianceServiceProvider.get();
     User user = userProvider.get();
     Profile profile = profileService.getProfile(user);
     try {
       Integer moodleId = user.getMoodleId();
       if (moodleId == null) {
-        moodleId = trainingService.getMoodleId(user.getEmail());
+        moodleId = complianceService.getMoodleId(user.getEmail());
         user.setMoodleId(moodleId);
       }
-      Map<String, Timestamp> badge = trainingService.getUserBadge(moodleId);
+      Map<String, Timestamp> badge = complianceService.getUserBadge(moodleId);
       if (badge.containsKey(COMPLIANCE_BADGE_NAME)) {
         user.setTrainingExpirationTime(badge.get(COMPLIANCE_BADGE_NAME));
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());

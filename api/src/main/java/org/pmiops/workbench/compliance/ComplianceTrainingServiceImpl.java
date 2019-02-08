@@ -27,7 +27,6 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public int getMoodleId(String email) throws ApiException {
-    api.getApiClient().setDebugging(true);
     List<MoodleUserResponse> response = api.getMoodleId(GET_MOODLE_ID_FUNCTION, RESPONSE_FORMAT,
         TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
     if (response.size() == 0) {
@@ -39,21 +38,22 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public Map<String, Timestamp> getUserBadge(int userId) throws ApiException {
-    api.getApiClient().setDebugging(true);
     UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
-    if (response.getException().equals(MOODLE_EXCEPTION)) {
+    if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_ERROR_CODE))
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
       else
         throw new ApiException(response.getMessage());
     }
     Map<String, Timestamp> badgeDateExpiryMap = new HashMap<>();
-    response.getBadges().forEach(badge -> {
-      badgeDateExpiryMap.put(
-        badge.getName(),
-        badge.getDateexpire() !=null ? new Timestamp(Long.parseLong(badge.getDateexpire())) : null
-      );
-    });
+    if (response.getBadges() != null ) {
+      response.getBadges().forEach(badge -> {
+        badgeDateExpiryMap.put(
+            badge.getName(),
+            badge.getDateexpire() != null ? new Timestamp(Long.parseLong(badge.getDateexpire())) : null
+        );
+      });
+    }
 
     return badgeDateExpiryMap;
   }

@@ -12,10 +12,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
@@ -59,6 +62,7 @@ import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -115,7 +119,7 @@ public class ProfileControllerTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
-  private Provider<ComplianceTrainingService> complianceTrainingServiceProvider;
+  private ComplianceTrainingService complianceTrainingService;
   @Mock
   private MailService mailService;
 
@@ -166,11 +170,11 @@ public class ProfileControllerTest {
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config), environment,
-        Providers.of(mailService), complianceTrainingServiceProvider);
+        Providers.of(mailService), Providers.of(complianceTrainingService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService), complianceTrainingServiceProvider);
+        cloudEnvironment, Providers.of(mailService), Providers.of(complianceTrainingService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -771,7 +775,36 @@ public class ProfileControllerTest {
     doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
   }
-  
+
+  @Test
+  public void testSynTraining() throws Exception {
+    HashMap<String, Timestamp> badgeDetail = new HashMap();
+    Timestamp time = new Timestamp(123);
+    badgeDetail.put("All of Us Data Workbench", time);
+
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
+
+    createUser();
+
+    profileController.syncTrainingStatus();
+    verify(complianceTrainingService).getMoodleId(PRIMARY_EMAIL);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isEqualTo(time);
+  }
+
+  @Test
+  public void testSynTrainingWithNoBadge() throws Exception {
+    HashMap<String, Timestamp> badgeDetail = new HashMap();
+    Timestamp time = new Timestamp(123);
+
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
+
+    createUser();
+
+    profileController.syncTrainingStatus();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
+  }
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
