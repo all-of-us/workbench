@@ -362,9 +362,6 @@ swaggerSources {
   jira {
     inputFile = file("$projectDir/$jiraApiFile")
   }
-  moodle {
-    inputFile = file("$projectDir/$moodleApiFile")
-  }
 }
 
 compileJava {
