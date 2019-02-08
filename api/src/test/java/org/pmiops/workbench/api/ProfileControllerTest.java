@@ -30,7 +30,7 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
-import org.pmiops.workbench.compliance.ComplianceTrainingService;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -117,7 +117,7 @@ public class ProfileControllerTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
-  private ComplianceTrainingService complianceTrainingService;
+  private ComplianceService complianceTrainingService;
   @Mock
   private MailService mailService;
 
@@ -775,7 +775,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSynTraining() throws Exception {
+  public void testSyncTraining() throws Exception {
     HashMap<String, Timestamp> badgeDetail = new HashMap();
     Timestamp time = new Timestamp(123);
     badgeDetail.put("All of Us Data Workbench", time);

@@ -2,18 +2,16 @@ package org.pmiops.workbench.compliance;
 
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;
 import org.pmiops.workbench.moodle.model.UserBadgeResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
-public class ComplianceTrainingServiceImpl implements ComplianceTrainingService {
+public class ComplianceServiceImpl implements ComplianceService {
 
   private MoodleApi api = new MoodleApi();
   private static final String RESPONSE_FORMAT = "json";
@@ -25,8 +23,8 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
 
   @Override
   public int getMoodleId(String email) throws ApiException {
-    List<MoodleUserResponse> response = api.getMoodleId(GET_MOODLE_ID_FUNCTION, RESPONSE_FORMAT,
-        TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
+    api.getApiClient().setDebugging(true);
+    List<MoodleUserResponse> response = api.getMoodleId(TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
     if (response.size() == 0) {
       throw new ApiException(HttpStatus.NOT_FOUND.value(),
           "User not found while trying to retrieve moodle Id");
@@ -35,24 +33,17 @@ public class ComplianceTrainingServiceImpl implements ComplianceTrainingService 
   }
 
   @Override
-  public Map<String, Timestamp> getUserBadge(int userId) throws ApiException {
+  public List<BadgeDetails>  getUserBadge(int userId) throws ApiException {
+    api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
     UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
-      if (response.getErrorcode().equals(MOODLE_ERROR_CODE))
+      if (response.getErrorcode().equals(MOODLE_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
-      else
+      }
+      else {
         throw new ApiException(response.getMessage());
+      }
     }
-    Map<String, Timestamp> badgeDateExpiryMap = new HashMap<>();
-    if (response.getBadges() != null ) {
-      response.getBadges().forEach(badge -> {
-        badgeDateExpiryMap.put(
-            badge.getName(),
-            badge.getDateexpire() != null ? new Timestamp(Long.parseLong(badge.getDateexpire())) : null
-        );
-      });
-    }
-
-    return badgeDateExpiryMap;
+    return response.getBadges();
   }
 }

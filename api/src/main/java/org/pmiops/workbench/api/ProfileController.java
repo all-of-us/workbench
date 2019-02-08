@@ -63,7 +63,9 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.compliance.ComplianceTrainingService;
+import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.moodle.model.UserBadgeResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -110,7 +112,6 @@ public class ProfileController implements ProfileApiDelegate {
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
-  private static final String COMPLIANCE_BADGE_NAME = "All of Us Data Workbench";
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
@@ -125,7 +126,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
-  private final ComplianceTrainingService complianceService;
+  private final ComplianceService complianceService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -138,7 +139,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider,
-      Provider<ComplianceTrainingService> complianceServiceProvider) {
+      Provider<ComplianceService> complianceServiceProvider) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -490,11 +491,12 @@ public class ProfileController implements ProfileApiDelegate {
 
   /**
    * This methods updates logged in user's training status from Moodle.
-   * Check if user have moodle_id, if not retrieve it from MOODLE API and save it in the Database
-   * using the MOODLE_ID get all of the user's Badge
-   * If user has earned All of Us badge, update the database with
-   * training completion time as current time and
-   * training expiration date with as returned from MOODLE.
+   * 1. Check if user have moodle_id,
+   *    a. if not retrieve it from MOODLE API and save it in the Database
+   * 2. Using the MOODLE_ID get all of the user's Badge
+   * 3. If user has earned All of Us badge, update the database with
+   *    a. training completion time as current time
+   *    b. training expiration date with as returned from MOODLE.
    * @return Profile updated with training completion time
    */
   @Override
@@ -507,9 +509,15 @@ public class ProfileController implements ProfileApiDelegate {
         moodleId = complianceService.getMoodleId(user.getEmail());
         user.setMoodleId(moodleId);
       }
-      Map<String, Timestamp> badge = complianceService.getUserBadge(moodleId);
-      if (badge.containsKey(COMPLIANCE_BADGE_NAME)) {
-        user.setTrainingExpirationTime(badge.get(COMPLIANCE_BADGE_NAME));
+      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      if (badgeResponse != null && badgeResponse.size() > 0) {
+        BadgeDetails badge = badgeResponse.get(0);
+        if (badge.getDateexpire() == null) {
+          //This can happen if date expire is set to never
+          user.setTrainingExpirationTime(null);
+        } else {
+          user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+        }
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         user.setTrainingCompletionTime(now);
         profile.setTrainingCompletionTime(now.getTime());

@@ -23,7 +23,7 @@ produces:
 ##########################################################################################
 
 paths:
-  /server.php:
+  /server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json:
     get:
       summary: Retrieves user information from Moodle.
       description: "Get user moodle information"
@@ -33,16 +33,6 @@ paths:
         - application/json
       operationId: getMoodleId
       parameters:
-        - name: wsfunction
-          in: query
-          description: Moodle component method name
-          type: string
-          required: true
-        - name: moodlewsrestformat
-          in: query
-          description: Format of the response
-          type: string
-          required: true
         - name: field
           in: query
           description: Input field eg email on the basis of which information is received
@@ -84,17 +74,18 @@ paths:
      parameters:
        - name: moodlewsrestformat
          in: query
-         description: Format of the response
-         type: string
-         required: true
-       - name: wstoken
-         in: query
-         description: Unique Token
+         description: Format of the response which will be json
          type: string
          required: true
        - name: userid
          in: query
          type: integer
+       - name: wstoken
+         in: query
+         description: Unique Token
+         type: string
+         required: true
+
      responses:
        200:
          description: Badge /error response
