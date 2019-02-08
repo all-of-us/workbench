@@ -156,7 +156,6 @@ task generateMoodleClient {
   }
 }
 
-
 task generate_local_appengine_web_xml(type: Exec) {
   executable "bash"
   args "libproject/generate_appengine_web_xml.sh"
