@@ -44,7 +44,7 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "localhost:9200",
-    "enableElasticsearchBackend": false
+    "host": "elastic:9200",
+    "enableElasticsearchBackend": true
   }
 }

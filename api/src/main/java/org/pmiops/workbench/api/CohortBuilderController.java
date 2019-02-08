@@ -184,6 +184,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         count = elasticSearchService.elasticCount(request);
       } catch (IOException ioe) {
         //do something
+        System.out.println(ioe.getMessage());
       }
     } else {
       QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
