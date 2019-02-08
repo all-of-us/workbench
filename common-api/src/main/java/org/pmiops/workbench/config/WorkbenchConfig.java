@@ -79,5 +79,6 @@ public class WorkbenchConfig {
 
   public static class ElasticsearchConfig {
     public String host;
+    public boolean enableElasticsearchBackend;
   }
 }
