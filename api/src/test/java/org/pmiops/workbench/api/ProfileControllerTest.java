@@ -61,6 +61,7 @@ import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -776,10 +777,12 @@ public class ProfileControllerTest {
 
   @Test
   public void testSyncTraining() throws Exception {
-    HashMap<String, Timestamp> badgeDetail = new HashMap();
-    Timestamp time = new Timestamp(123);
-    badgeDetail.put("All of Us Data Workbench", time);
-
+    List<BadgeDetails> badgeDetail = new ArrayList<>();
+    Timestamp time = new Timestamp(12543);
+    BadgeDetails badge = new BadgeDetails();
+    badge.setName("All of us badge");
+    badge.setDateexpire("12543");
+    badgeDetail.add(badge);
     when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
     when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
 
@@ -788,11 +791,13 @@ public class ProfileControllerTest {
     profileController.syncTrainingStatus();
     verify(complianceTrainingService).getMoodleId(PRIMARY_EMAIL);
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isEqualTo(time);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNotNull();
+
   }
 
   @Test
   public void testSynTrainingWithNoBadge() throws Exception {
-    HashMap<String, Timestamp> badgeDetail = new HashMap();
+    List<BadgeDetails> badgeDetail = new ArrayList<>();
 
     when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
     when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
@@ -800,6 +805,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.syncTrainingStatus();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTermsOfServiceCompletionTime()).isNull();
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
   }
   private Profile createUser() throws Exception {
