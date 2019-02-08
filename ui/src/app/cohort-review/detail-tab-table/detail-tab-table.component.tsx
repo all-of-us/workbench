@@ -5,6 +5,7 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
+import {Inplace, InplaceContent, InplaceDisplay} from 'primereact/components/inplace/Inplace';
 import {DataTable} from 'primereact/datatable';
 import {InputText} from 'primereact/inputtext';
 import {Paginator} from 'primereact/paginator';
@@ -118,10 +119,17 @@ export const DetailTabTable = withCurrentWorkspace()(
       const data = this.state.data || [];
 
       const columns = this.props.columns.map((col) => {
-        const filter = <InputText
-          className='p-inputtext p-column-filter'
-          id={col.name}
-          onChange={this.columnFilter}/>;
+        const filter = <Inplace closable={true}>
+          <InplaceDisplay>
+            <i className='pi pi-filter' />
+          </InplaceDisplay>
+          <InplaceContent>
+            <InputText
+              className='p-inputtext p-column-filter'
+              id={col.name}
+              onChange={this.columnFilter} />
+          </InplaceContent>
+        </Inplace>;
 
         return <Column
           style={styles.pDatatableTbody}
