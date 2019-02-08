@@ -17,7 +17,7 @@ services:
     volumes:
       - db:/var/lib/mysql
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2
     ports:
       - 9200:9200
     environment:

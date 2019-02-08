@@ -18,14 +18,15 @@ public class ElasticSearchConfig {
   /**
    * Create a RestHighLevelClient
    * Docs: https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/_changing_the_client_8217_s_initialization_code.html
-   * @return
    */
   @Bean
   public RestHighLevelClient client() {
-    String[] vars = configProvider.get().elasticsearch.host.split(":");
-    String host = vars[0];
-    int port = Integer.parseInt(vars[1]);
-    String scheme = vars[2];
-    return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, scheme)));
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      String[] vars = configProvider.get().elasticsearch.host.split(":");
+      String host = vars[0];
+      int port = Integer.parseInt(vars[1]);
+      return new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
+    }
+    return null;
   }
 }
