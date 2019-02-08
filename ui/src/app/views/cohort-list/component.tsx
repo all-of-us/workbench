@@ -16,13 +16,13 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 
-import * as React from 'react';
-import {CardButton, Clickable} from 'app/components/buttons';
+import {CardButton} from 'app/components/buttons';
 import {navigate} from 'app/utils/navigation';
+import * as React from 'react';
 
-import {ReactWrapperBase, withCurrentWorkspace, reactStyles} from 'app/utils/index';
+import {FadeBox} from 'app/components/containers';
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {styles as CardStyles} from 'app/components/card';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 
 const styles = reactStyles({
   pageArea: {
@@ -58,7 +58,7 @@ const styles = reactStyles({
   }
 });
 
-const CohortList = withCurrentWorkspace()(
+export const CohortList = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
       {cohortList: RecentResource[], cohortsLoading: boolean}> {
     constructor(props) {
@@ -79,7 +79,7 @@ const CohortList = withCurrentWorkspace()(
         this.setState({
           cohortsLoading: true
         });
-        const resp = await cohortsApi().getCohortsInWorkspace(namespace, id)
+        const resp = await cohortsApi().getCohortsInWorkspace(namespace, id);
         this.setState({
           cohortList: convertToResources(resp.items, namespace,
             id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT),
@@ -105,7 +105,7 @@ const CohortList = withCurrentWorkspace()(
       const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
         accessLevel === WorkspaceAccessLevel.WRITER;
 
-      return <React.Fragment>
+      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <h3 style={styles.cohortsHeader}>
           Cohorts
           <TooltipTrigger content={`A “Cohort” is a group of participants you
@@ -126,19 +126,19 @@ const CohortList = withCurrentWorkspace()(
           </TooltipTrigger>
           <div style={styles.resourceCardArea}>
             {cohortList && cohortList.map((cohort: RecentResource) => {
-              return <ResourceCard resourceCard={cohort}
+              return <ResourceCard resourceCard={cohort} key={cohort.cohort.id}
                  onUpdate={() => this.reloadCohorts()}>
-              </ResourceCard>
+              </ResourceCard>;
             })}
           </div>
           {cohortsLoading && <SpinnerOverlay />}
         </div>
-      </React.Fragment>;
+      </FadeBox>;
     }
-});
+  });
 
 @Component({
-  template: '<app-top-box><div #root></div></app-top-box>'
+  template: '<div #root></div>'
 })
 export class CohortListComponent extends ReactWrapperBase {
   constructor() {
