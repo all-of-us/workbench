@@ -43,7 +43,7 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
