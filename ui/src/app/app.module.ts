@@ -132,7 +132,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
-    WorkbenchAccessTasksComponent,
     AdminReviewWorkspaceComponent,
     AdminReviewIdVerificationComponent,
     AppComponent,
@@ -166,6 +165,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
+    WorkbenchAccessTasksComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,

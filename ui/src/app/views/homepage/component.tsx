@@ -7,6 +7,7 @@ import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
+import {ActivatedRoute} from '@angular/router';
 import {
   Clickable,
   styles as buttonStyles
@@ -256,6 +257,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
   quickTour: boolean;
+  accessTasksRemaining: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError = '';
   // TODO RW-1184; defaulting to true
@@ -265,6 +267,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private serverConfigService: ServerConfigService,
+    private route: ActivatedRoute,
   ) {
     // create bound methods to use as callbacks
     this.closeQuickTour = this.closeQuickTour.bind(this);
@@ -279,13 +282,23 @@ export class HomepageComponent implements OnInit, OnDestroy {
         this.firstVisit = !profile.pageVisits.some(v =>
         v.page === HomepageComponent.pageId);
       }
-      this.serverConfigService.getConfig().subscribe((config) => {
-        if (environment.enableComplianceLockout && config.enforceRegistered) {
-          this.eraCommonsLinked = !!profile.linkedNihUsername;
-        } else {
-          this.eraCommonsLinked = true;
-        }
-      });
+
+      // Set Access Tasks flags
+      // TODO RW-1184 set trainingCompleted flag
+      this.eraCommonsLinked = !!profile.linkedNihUsername;
+
+      if (this.route.snapshot.queryParams.workbenchAccessTasks) {
+        // To reach the access tasks component from dev use /?workbenchAccessTasks=true
+        this.accessTasksRemaining = true;
+      } else {
+        this.serverConfigService.getConfig().subscribe((config) => {
+          if (environment.enableComplianceLockout && config.enforceRegistered) {
+            this.accessTasksRemaining = !this.eraCommonsLinked;
+          } else {
+            this.accessTasksRemaining = false;
+          }
+        });
+      }
     },
       e => {},
       () => {
