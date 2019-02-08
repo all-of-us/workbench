@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,9 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
@@ -50,6 +53,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CdrVersionDao cdrVersionDao;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private ElasticSearchService elasticSearchService;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -103,7 +108,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           CriteriaAttributeDao criteriaAttributeDao,
                           CdrVersionDao cdrVersionDao,
                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
-                          CdrVersionService cdrVersionService) {
+                          CdrVersionService cdrVersionService,
+                          Provider<WorkbenchConfig> workbenchConfigProvider,
+                          ElasticSearchService elasticSearchService) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.criteriaDao = criteriaDao;
@@ -111,6 +118,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.elasticSearchService = elasticSearchService;
   }
 
   @Override
@@ -168,14 +177,24 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    Long count = 0L;
 
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
-      new ParticipantCriteria(request)));
-    TableResult result = bigQueryService.executeQuery(qjc);
-    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    if (workbenchConfigProvider.get().elasticsearch.enableElasticsearchBackend) {
+      try {
+        count = elasticSearchService.elasticCount(request);
+      } catch (IOException ioe) {
+        //do something
+      }
+    } else {
+      QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
+        new ParticipantCriteria(request)));
+      TableResult result = bigQueryService.executeQuery(qjc);
+      Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-    List<FieldValue> row = result.iterateAll().iterator().next();
-    return ResponseEntity.ok(bigQueryService.getLong(row, rm.get("count")));
+      List<FieldValue> row = result.iterateAll().iterator().next();
+      count = bigQueryService.getLong(row, rm.get("count"));
+    }
+    return ResponseEntity.ok(count);
   }
 
   @Override
