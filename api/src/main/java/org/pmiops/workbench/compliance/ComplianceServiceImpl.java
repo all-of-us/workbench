@@ -17,9 +17,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   private static final String RESPONSE_FORMAT = "json";
   private static final String TOKEN = "d106acbb7eb050a10e9b200eb82b8be8";
   private static final String GET_MOODLE_ID_SEARCH_FIELD = "email";
-  private static final String GET_MOODLE_ID_FUNCTION = "core_user_get_users_by_field";
   private static final String MOODLE_EXCEPTION = "moodle_exception";
-  private static final String MOODLE_ERROR_CODE = "guestsarenotallowed";
+  private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
 
   @Override
   public int getMoodleId(String email) throws ApiException {
@@ -37,7 +36,7 @@ public class ComplianceServiceImpl implements ComplianceService {
     api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
     UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
-      if (response.getErrorcode().equals(MOODLE_ERROR_CODE)) {
+      if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
       }
       else {

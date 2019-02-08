@@ -65,7 +65,6 @@ import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
-import org.pmiops.workbench.moodle.model.UserBadgeResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
