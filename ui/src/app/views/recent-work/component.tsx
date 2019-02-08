@@ -73,7 +73,8 @@ export const RecentWork = (fp.flow as any)(
     const limit = (contentRect.client.width - 24) / 224;
     const shade = workspace ? 'light' : 'dark';
     return <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
-      <div style={{display: 'flex', position: 'relative', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
+      <div style={{display: 'flex', position: 'relative',
+        paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
         {resources.slice(offset, offset + limit).map((resource, i) => {
           return <ResourceCard key={i}
             resourceCard={resource} onUpdate={() => this.loadResources()}
