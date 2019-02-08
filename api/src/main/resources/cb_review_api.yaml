@@ -279,6 +279,11 @@ paths:
           description: request body for getting list of participant data.
           schema:
             $ref: "#/definitions/PageFilterRequest"
+        - in: query
+          name: newData
+          type: string
+          required: false
+          description: remove this when done with review refactor
       responses:
         200:
           description: A collection of ParticipantConditions.
@@ -780,7 +785,7 @@ definitions:
         type: integer
         description: the rank of the data
 
-  ParticipantData:
+  ParticipantDataOld:
     discriminator: domainType
     required:
       - itemDate
@@ -795,9 +800,27 @@ definitions:
       domainType:
         $ref: "#/definitions/DomainType"
 
-  Condition:
+  ParticipantData:
+    discriminator: domainType
+    required:
+    - itemDate
+    - domainType # required for inheritance to work
+    properties:
+      itemDate:
+        type: string
+        description: The date of the event
+      standardName:
+        type: string
+        description: The standard name of this data
+      ageAtEvent:
+        type: integer
+        description: The age at event for the participant
+      domainType:
+        $ref: "#/definitions/DomainType"
+
+  ConditionOld:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardVocabulary:
             type: string
@@ -834,9 +857,32 @@ definitions:
             format: int64
             description: The visit Id of this data
 
-  Procedure:
+  Condition:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+    - $ref: '#/definitions/ParticipantData'
+    - properties: # extra properties
+        standardVocabulary:
+          type: string
+          description: The standard vocabulary of this data
+        standardCode:
+          type: string
+          description: The standard code of this data
+        sourceVocabulary:
+          type: string
+          description: The source vocabulary type of this data
+        sourceName:
+          type: string
+          description: The source name of this data
+        sourceCode:
+          type: string
+          description: The source code of this data
+        visitType:
+          type: string
+          description: The visit type of this data
+
+  ProcedureOld:
+    allOf:
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardVocabulary:
             type: string
@@ -875,7 +921,7 @@ definitions:
 
   Observation:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardVocabulary:
             type: string
@@ -903,9 +949,9 @@ definitions:
             format: int64
             description: The visit Id of this data
 
-  Drug:
+  DrugOld:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardName:
             type: string
@@ -952,9 +998,9 @@ definitions:
             description: The visit Id of this data
 
 
-  AllEvents:
+  AllEventsOld:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           dataId:
             type: integer
@@ -1000,9 +1046,9 @@ definitions:
             type: string
             description: The visit type of this data
 
-  Measurement:
+  MeasurementOld:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardVocabulary:
             type: string
@@ -1042,9 +1088,9 @@ definitions:
             format: int64
             description: The visit Id of this data
 
-  PhysicalMeasurement:
+  PhysicalMeasurementOld:
     allOf:
-      - $ref: '#/definitions/ParticipantData'
+      - $ref: '#/definitions/ParticipantDataOld'
       - properties: # extra properties
           standardVocabulary:
             type: string

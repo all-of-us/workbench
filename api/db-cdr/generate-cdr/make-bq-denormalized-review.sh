@@ -51,7 +51,7 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(person_all_events person_condition person_drug person_measurement p_observation person_procedure person_physical_measure person_survey)
+create_tables=(person_all_events person_condition person_drug person_measurement person_lab person_vital person_procedure person_physical_measure person_survey p_observation)
 for t in "${create_tables[@]}"
 do
     bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
@@ -114,6 +114,7 @@ min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATE
 FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
 GROUP BY PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID) B
 WHERE a.PERSON_ID = b.PERSON_ID and a.DRUG_CONCEPT_ID = b.DRUG_CONCEPT_ID and a.DRUG_SOURCE_CONCEPT_ID = b.DRUG_SOURCE_CONCEPT_ID) t
+
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.DRUG_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.DRUG_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on t.ROUTE_CONCEPT_ID = c3.CONCEPT_ID
@@ -160,6 +161,83 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on t.VALUE_AS_CONCEPT_ID = c4.C
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
+
+###################################################
+# insert survey data into person_lab #
+###################################################
+echo "Inserting survey data into person_lab"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_lab\`
+   (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
+select a.person_id as PERSON_ID,
+    a.DATA_ID,
+    a.date,
+    a.time,
+    a.unit,
+    case when c.CONCEPT_NAME is null then 'No matching concept' else c.CONCEPT_NAME end as STANDARD_NAME,
+    case when a.VALUE_AS_NUMBER is null then 0.0 else a.VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
+	CASE WHEN a.RANGE_LOW IS NULL AND a.RANGE_HIGH IS NULL THEN NULL
+          WHEN a.RANGE_LOW IS NULL AND a.RANGE_HIGH iS NOT NULL THEN CAST(a.RANGE_HIGH AS STRING)
+          WHEN a.RANGE_LOW IS NOT NULL AND a.RANGE_HIGH IS NULL THEN CAST(a.RANGE_LOW AS STRING)
+          ELSE CONCAT(CAST(a.RANGE_LOW AS STRING) ,'-',CAST(a.RANGE_HIGH AS STRING) )
+          END as REF_RANGE,
+    CAST(FLOOR(DATE_DIFF(a.date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
+	case when c.concept_name is null then 'No matching concept' else c.concept_name end as visit_type
+FROM (SELECT a1.person_id as PERSON_ID,
+    a1.measurement_id as DATA_ID,
+    a1.measurement_date as date,
+    a1.measurement_datetime as time,
+    a1.unit_source_value	 as unit,
+    a1.VALUE_AS_NUMBER as VALUE_AS_NUMBER,
+    a1.RANGE_LOW as RANGE_LOW,
+    a1.RANGE_HIGH as RANGE_HIGH,
+    a1.VISIT_OCCURRENCE_ID as VISIT_OCCURRENCE_ID
+FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a1
+left join \`$BQ_PROJECT.$BQ_DATASET..concept\` b1 on a1.measurement_concept_id = b1.concept_id
+where concept_class_id = 'Lab Test') a
+left join \`$BQ_PROJECT.$BQ_DATASET..visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+left join \`$BQ_PROJECT.$BQ_DATASET._20181116.concept\` c on v.visit_concept_id = c.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET..person\` p on a.PERSON_ID = p.PERSON_ID
+
+###################################################
+# insert survey data into person_vital #
+###################################################
+echo "Inserting survey data into person_vital"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_vital\`
+   (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
+select a.person_id as PERSON_ID,
+    a.DATA_ID,
+    a.date,
+    a.time,
+    a.unit,
+    case when c.CONCEPT_NAME is null then 'No matching concept' else c.CONCEPT_NAME end as STANDARD_NAME,
+    case when a.VALUE_AS_NUMBER is null then 0.0 else a.VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
+	CASE WHEN a.RANGE_LOW IS NULL AND a.RANGE_HIGH IS NULL THEN NULL
+          WHEN a.RANGE_LOW IS NULL AND a.RANGE_HIGH iS NOT NULL THEN CAST(a.RANGE_HIGH AS STRING)
+          WHEN a.RANGE_LOW IS NOT NULL AND a.RANGE_HIGH IS NULL THEN CAST(a.RANGE_LOW AS STRING)
+          ELSE CONCAT(CAST(a.RANGE_LOW AS STRING) ,'-',CAST(a.RANGE_HIGH AS STRING) )
+          END as REF_RANGE,
+    CAST(FLOOR(DATE_DIFF(a.date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
+	case when c.concept_name is null then 'No matching concept' else c.concept_name end as visit_type
+FROM (SELECT a1.person_id as PERSON_ID,
+    a1.measurement_id as DATA_ID,
+    a1.measurement_date as date,
+    a1.measurement_datetime as time,
+    a1.unit_source_value	 as unit,
+    a1.VALUE_AS_NUMBER as VALUE_AS_NUMBER,
+    a1.RANGE_LOW as RANGE_LOW,
+    a1.RANGE_HIGH as RANGE_HIGH,
+    a1.VISIT_OCCURRENCE_ID as VISIT_OCCURRENCE_ID
+FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a1
+left join \`$BQ_PROJECT.$BQ_DATASET..concept\` b1 on a1.measurement_concept_id = b1.concept_id
+where concept_class_id = 'Lab Test') a
+left join \`$BQ_PROJECT.$BQ_DATASET..visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+left join \`$BQ_PROJECT.$BQ_DATASET._20181116.concept\` c on v.visit_concept_id = c.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET..person\` p on a.PERSON_ID = p.PERSON_ID
+
+
+
 ###################################################
 # insert observation data into p_observation #
 ###################################################
@@ -194,7 +272,35 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 echo "Inserting survey data into person_survey"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
-   (person_id, data_id, survey, question, answer)
+   (person_id, data_id, start_datetime, survey, question, answer)
+SELECT PERSON_ID,
+    DATA_ID,
+    START_DATETIME,
+    survey,
+    question,
+    answer
+FROM
+(SELECT person_id,
+    observation_id as DATA_ID,
+    observation_datetime as START_DATETIME,
+    observation_source_concept_id as concept_id,
+    case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer
+FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a.value_as_concept_id = b1.concept_id
+where a.observation_source_concept_id in
+(select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1)) x
+join
+(select b2.name as survey,
+    c1.name as question,
+    c1.concept_id,
+    b2.id as s_id,
+    c1.id as q_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\` a1
+left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
+left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
+where ancestor_id in
+(select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and parent_id = 0)) y on x.concept_id = y.concept_id
+order by person_id, s_id, q_id
 
 #################################################
 # insert drug data into person_physical_measure #
