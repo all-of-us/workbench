@@ -28,7 +28,7 @@ public class TestWebMvcConfig extends WebMvcConfig {
      * to handle such scoping.
      * @return
      */
-    @Bean
+//    @Bean
     public static CustomScopeConfigurer customScopeConfigurer(){
         CustomScopeConfigurer scopeConfigurer = new CustomScopeConfigurer();
 
