@@ -20,6 +20,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartType: string;
   @Input() sources = false;
   @Input() genderId: string; // Hack until measurement design of graphs gender overlay
+  @Input() component: string;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
@@ -437,7 +438,8 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
+      title: {text: this.getAgeChartTitle(this.component),
+        style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -527,6 +529,15 @@ export class ChartComponent implements OnChanges {
       xAxisTitle: unit
     };
 
+  }
+  public getAgeChartTitle(component: string) {
+    if (component === 'ehr') {
+      return 'Age At First Occurrence';
+    } else if (component === 'surveys') {
+      return 'Age When Survey Was Taken';
+    } else if (component === 'physical measurements') {
+      return 'Age When Physical Measurement Was Taken';
+    }
   }
 
 }
