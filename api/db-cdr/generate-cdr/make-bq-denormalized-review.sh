@@ -93,21 +93,20 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 echo "Inserting drug data into person_drug"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
- (person_id, data_id, start_datetime, standard_name, route, quantity, strength, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, visit_type)
+ (person_id, data_id, start_datetime, standard_name, route, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, visit_type)
 SELECT P.PERSON_ID,
     t.DRUG_EXPOSURE_ID AS DATA_ID,
     t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
     case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+    case when c4.concept_name is null then 'No matching concept' else c4.concept_name end as visit_type,
     CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
     T.NUM_MENTIONS,
     T.FIRST_MENTION,
     T.LAST_MENTION,
-    T.QUANTITY,
-    '' as strength,
     C3.CONCEPT_NAME AS ROUTE
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
-a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, QUANTITY, ROUTE_CONCEPT_ID
+a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, ROUTE_CONCEPT_ID
 FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` A,
 (SELECT PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
 min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATETIME) as LAST_MENTION
@@ -123,11 +122,11 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID
 
 ###################################################
-# insert measurement data into p_measurement #
+# insert measurement data into person_measurement #
 ###################################################
-echo "Inserting measurement data into p_measurement"
+echo "Inserting measurement data into person_measurement"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.p_measurement\`
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_measurement\`
    (person_id, data_id, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name,
  source_code, source_concept_id, source_vocabulary, VISIT_ID, visit_concept_id, age_at_event, value_concept, value_as_number, value_source_value, units, ref_range)
 SELECT P.PERSON_ID,
@@ -163,9 +162,9 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 
 ###################################################
-# insert survey data into person_lab #
+# insert lab data into person_lab #
 ###################################################
-echo "Inserting survey data into person_lab"
+echo "Inserting lab data into person_lab"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_lab\`
    (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
@@ -193,16 +192,16 @@ FROM (SELECT a1.person_id as PERSON_ID,
     a1.RANGE_HIGH as RANGE_HIGH,
     a1.VISIT_OCCURRENCE_ID as VISIT_OCCURRENCE_ID
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a1
-left join \`$BQ_PROJECT.$BQ_DATASET..concept\` b1 on a1.measurement_concept_id = b1.concept_id
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a1.measurement_concept_id = b1.concept_id
 where concept_class_id = 'Lab Test') a
-left join \`$BQ_PROJECT.$BQ_DATASET..visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
-left join \`$BQ_PROJECT.$BQ_DATASET._20181116.concept\` c on v.visit_concept_id = c.concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET..person\` p on a.PERSON_ID = p.PERSON_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on v.visit_concept_id = c.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID
 
 ###################################################
-# insert survey data into person_vital #
+# insert vital data into person_vital #
 ###################################################
-echo "Inserting survey data into person_vital"
+echo "Inserting vital data into person_vital"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_vital\`
    (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
@@ -230,11 +229,11 @@ FROM (SELECT a1.person_id as PERSON_ID,
     a1.RANGE_HIGH as RANGE_HIGH,
     a1.VISIT_OCCURRENCE_ID as VISIT_OCCURRENCE_ID
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` a1
-left join \`$BQ_PROJECT.$BQ_DATASET..concept\` b1 on a1.measurement_concept_id = b1.concept_id
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a1.measurement_concept_id = b1.concept_id
 where concept_class_id = 'Lab Test') a
-left join \`$BQ_PROJECT.$BQ_DATASET..visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
-left join \`$BQ_PROJECT.$BQ_DATASET._20181116.concept\` c on v.visit_concept_id = c.concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET..person\` p on a.PERSON_ID = p.PERSON_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on v.visit_concept_id = c.concept_id
+JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID
 
 
 
@@ -303,12 +302,13 @@ where ancestor_id in
 order by person_id, s_id, q_id
 
 #################################################
-# insert drug data into person_physical_measure #
+# insert physicalMeasurement data into person_physical_measure #
 #################################################
 echo "Inserting drug data into person_physical_measure"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_physical_measure\`
-   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, value_as_number, units, age_at_event)
+   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, value_as_number,
+   units, age_at_event)
 SELECT P.PERSON_ID,
 	 t.MEASUREMENT_ID AS DATA_ID,
      t.MEASUREMENT_DATETIME as START_DATETIME,
@@ -373,10 +373,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting drug data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, start_datetime, standard_name, route, dose, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
- select person_id, data_id, start_datetime, standard_name, route, dose, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
+ (person_id, data_id, start_datetime, standard_name, route, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
+ select person_id, data_id, start_datetime, standard_name, route, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
  last_mention, visit_type
- from \`$BQ_PROJECT.$BQ_DATASET.p_drug\` a"
+ from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` a"
 
 ##################################################
 # insert measurement data into person_all_events #
@@ -388,8 +388,28 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  source_concept_id, source_vocabulary, age_at_event, visit_type, source_value)
  select person_id, data_id, 'Measurement' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
  source_concept_id, source_vocabulary, age_at_event, b.concept_name as visit_type, CAST(value_as_number AS STRING) as source_value
- from \`$BQ_PROJECT.$BQ_DATASET.p_measurement\` a
+ from \`$BQ_PROJECT.$BQ_DATASET.person_measurement\` a
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
+
+ ###########################################
+ # insert lab data into person_all_events #
+ ###########################################
+ echo "Inserting lab data into person_all_events"
+ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+ "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+  (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
+  select person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type,'LAB' as domain
+  from \`$BQ_PROJECT.$BQ_DATASET.person_lab\` a"
+
+ ###########################################
+ # insert vital data into person_all_events #
+ ###########################################
+ echo "Inserting vital data into person_all_events"
+ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+ "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+  (person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
+  select person_id, data_id, date, time, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type,'LAB' as domain
+  from \`$BQ_PROJECT.$BQ_DATASET.person_vital\` a"
 
 ##################################################
 # insert observation data into person_all_events #
