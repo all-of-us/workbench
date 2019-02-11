@@ -46,7 +46,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     this.loadNotebooks();
   }
 
-  async loadNotebooks() {
+  private async loadNotebooks() {
     try {
       const {workspace: {namespace, id}} = this.props;
       this.setState({loading: true});
