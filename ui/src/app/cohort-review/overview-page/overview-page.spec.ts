@@ -6,12 +6,14 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
-import {CohortBuilderService, CohortReviewService} from 'generated';
+import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {CohortBuilderService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {OverviewPage} from './overview-page';
 
 
@@ -20,51 +22,11 @@ describe('OverviewPage', () => {
   let component: OverviewPage;
   let fixture: ComponentFixture<OverviewPage>;
   const activatedRouteStub = {
-    data: Observable.of({
-      participant: {},
-      annotations: [],
-    }),
     snapshot: {
       data: {
-        workspace: {
-          cdrVersionId: 1
-        },
-        cohort: {
-          name: '',
-          criteria: '{}'
-        },
-        review: {},
-        params: {
-          ns: 'workspaceNamespace',
-          wsid: 'workspaceId',
-          cid: 1
-        }
-      },
-    },
-    parent: {
-      snapshot: {
-        data: {
-          workspace: {
-            cdrVersionId: 1
-          },
-          cohort: {
-            name: ''
-          },
-          params: {
-            ns: 'workspaceNamespace',
-            wsid: 'workspaceId',
-            cid: 1
-          }
-        },
-        params: {
-          ns: 'workspaceNamespace',
-          wsid: 'workspaceId',
-          cid: 1
-        }
-      },
-
-    },
-
+        review: {}
+      }
+    }
   };
 
   let route;
@@ -82,6 +44,21 @@ describe('OverviewPage', () => {
       ],
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
+    currentCohortStore.next({
+      name: '',
+      criteria: '{}',
+      type: '',
+    });
+    urlParamsStore.next({
+      ns: 'workspaceNamespace',
+      wsid: 'workspaceId',
+      cid: 1
+    });
   }));
 
   beforeEach(() => {
