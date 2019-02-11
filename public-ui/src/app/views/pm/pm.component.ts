@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
@@ -6,7 +7,6 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {ConceptGroup} from '../../utils/conceptGroup';
 import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
-import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-physical-measurements',
