@@ -114,8 +114,6 @@
 
 .answer-text {
     cursor: pointer;
-    text-align: left;
-    padding-left: 10px;
 }
 
 .answer-box {
@@ -137,8 +135,4 @@
     padding-top: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #C8C8C8;
-}
-
-.sub-question {
-    overflow: auto;
 }
