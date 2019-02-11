@@ -13,7 +13,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
-import {SpinnerOverlay} from 'app/components/spinners';
 import {
   decamelize,
   ReactWrapperBase

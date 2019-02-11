@@ -5,7 +5,6 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
 
 import {
