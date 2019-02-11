@@ -29,7 +29,7 @@
           <div style="width: 200px; margin-right: 1rem;">
             <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
               <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
-              <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || navigateToCohortBuilder()">
+              <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
                 <div class="create-text">
                   Create a <br/>New Cohort
                   <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
