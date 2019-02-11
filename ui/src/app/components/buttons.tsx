@@ -17,10 +17,13 @@ export const styles = {
   baseNeue: {
     display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
     minWidth: '3rem', maxWidth: '15rem',
+    height: 50,
     fontWeight: 500, fontSize: 14, textTransform: 'uppercase', lineHeight: '18px',
     overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
     userSelect: 'none',
-    margin: 0, padding: '16px 22px',
+    margin: 0, padding: '0 22px',
+    borderRadius: 5,
+    boxSizing: 'border-box'
   }
 };
 
@@ -68,22 +71,23 @@ const buttonVariants = {
   purplePrimary: {
     style: {
       ...styles.baseNeue,
-      borderRadius: 5,
       backgroundColor: colors.purple[0], color: '#fff',
-      fontSize: 14,
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: colors.purple[1]}
   },
-  text: {
+  purpleSecondary: {
     style: {
       ...styles.baseNeue,
-      padding: 0, margin: '16px 0',
-      minWidth: 0,
-      backgroundColor: 'transparent', color: '#000',
-      fontSize: 14,
+      border: '1px solid', borderColor: colors.purple[0],
+      backgroundColor: 'transparent',
+      color: colors.purple[0],
     },
-    disabledStyle: {color: colors.gray[4]}
+    disabledStyle: {
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+    },
+    hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
   }
 };
 

@@ -118,7 +118,7 @@ export const ProfilePageReact = withUserProfile()
         ...props
       };
 
-      return <div style={{marginBottom: isLong ? 40 : 20}}>
+      return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
         {isLong ?
           <TextArea
@@ -212,13 +212,13 @@ export const ProfilePageReact = withUserProfile()
                 <ClrIcon
                   shape='times'
                   size='24'
-                  style={{color: colors.red}}
+                  style={{color: colors.red, marginBottom: 17}}
                 />
               </Clickable>
             </div>
           )}
           <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
-            <div style={{borderTop: `2px solid ${colors.gray[4]}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colors.gray[4]}`, flex: 1}}/>
             <Clickable
               onClick={() => this.setState(fp.set('profileEdits.institutionalAffiliations',
                 fp.concat(institutionalAffiliations, {institution: '', role: ''})))}
@@ -226,14 +226,18 @@ export const ProfilePageReact = withUserProfile()
               <ClrIcon
                 shape='plus-circle'
                 size='19'
-                style={{color: colors.purple[0], margin: '0 14px', flex: 'none'}}
+                style={{
+                  color: colors.purple[0],
+                  margin: '0 14px',
+                  flex: 'none', verticalAlign: 'text-bottom' // text-bottom makes it centered...?
+                }}
               />
             </Clickable>
-            <div style={{borderTop: `2px solid ${colors.gray[4]}`, flex: 1}}/>
+            <div style={{border: `1px solid ${colors.gray[4]}`, flex: 1}}/>
           </div>
           <div style={{marginTop: 100}}>
             <Button
-              type='text'
+              type='purpleSecondary'
               onClick={() => this.setState({profileEdits: profile})}
             >
               Discard Changes
