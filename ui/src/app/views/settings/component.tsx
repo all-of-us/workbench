@@ -5,6 +5,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {clusterApi} from 'app/services/swagger-fetch-clients';
 
 import {
@@ -89,8 +90,10 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                   data-test-id='cancel-button'>Cancel</Button>
           <Button disabled={this.state.resetClusterPending}
                   onClick={() => this.resetCluster()}
+                  style={{marginLeft: '0.5rem'}}
                   data-test-id='reset-cluster-send'>Send</Button>
         </ModalFooter>
+        {this.state.resetClusterPending && <SpinnerOverlay/>}
       </Modal>}
     </React.Fragment>;
   }

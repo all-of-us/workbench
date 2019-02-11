@@ -13,6 +13,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
+import {SpinnerOverlay} from 'app/components/spinners';
 import {
   decamelize,
   ReactWrapperBase
@@ -71,6 +72,7 @@ export class ConfirmDeleteModal
               Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>
         </ModalFooter>
+      {this.state.loading && <SpinnerOverlay/>}
       </Modal>;
   }
 }

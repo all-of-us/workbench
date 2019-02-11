@@ -10,6 +10,7 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
+import {SpinnerOverlay} from 'app/components/spinners';
 import {reactStyles} from 'app/utils';
 
 import {
@@ -83,6 +84,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
   render() {
     return <React.Fragment>
       <Modal className='editModal'>
+        {this.state.loading && <SpinnerOverlay/>}
         <ModalTitle style={{fontSize: 16}}>
           Edit {this.state.resourceType} Information
         </ModalTitle>
