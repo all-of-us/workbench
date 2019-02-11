@@ -8,7 +8,6 @@ import {Column} from 'primereact/column';
 import {Inplace, InplaceContent, InplaceDisplay} from 'primereact/components/inplace/Inplace';
 import {DataTable} from 'primereact/datatable';
 import {InputText} from 'primereact/inputtext';
-import {Paginator} from 'primereact/paginator';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -37,11 +36,7 @@ export interface DetailTabTableProps {
 
 export interface DetailTabTableState {
   data: Array<any>;
-  filteredData: Array<any>;
-  rowsData: Array<any>;
   loading: boolean;
-  totalCount: number;
-  pageCount: number;
   filters: any;
   start: number;
   rows: number;
@@ -54,15 +49,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
-        filteredData: null,
-        rowsData: [],
         loading: true,
-        totalCount: null,
-        pageCount: null,
-        filters: props.columns.reduce((acc, cur) => {
-          acc[cur.name] = '';
-          return acc;
-        }, {}),
+        filters: {},
         start: 0,
         rows: 25
       };
@@ -76,19 +64,11 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
-          loading: true
+          loading: true,
+          filters: {}
         });
         this.getParticipantData();
       }
-    }
-
-    onPageChange = (event: any) => {
-      const startIndex = event.first;
-      const endIndex = event.first + this.state.rows;
-      this.setState({
-        start: event.first,
-        rowsData: this.state.filteredData.slice(startIndex, endIndex)
-      });
     }
 
     getParticipantData() {
@@ -112,51 +92,23 @@ export const DetailTabTable = withCurrentWorkspace()(
       ).then(response => {
         this.setState({
           data: response.items,
-          filteredData: response.items,
-          rowsData: response.items.slice(0, this.state.rows),
           loading: false,
-          pageCount: response.items.length
         });
       });
     }
 
+    onFilter = (event) => {
+      this.setState({filters: event.filters});
+    }
+
     columnFilter = (event) => {
-      /*
-      * TODO adjust layout to match current table
-      * commented line below is primereact's built-in filter but there doesn't seem to be a way to
-      * access the filtered results. May need to revisit at some point.
-      * */
-      // this.dt.filter(event.target.value, event.target.id, 'contains');
-      const {filters, rows} = this.state;
-      let start = this.state.start;
-      filters[event.target.id] = event.target.value;
-      const filtered = this.state.data.filter(row => {
-        for (const field in filters) {
-          if (filters.hasOwnProperty(field)) {
-            if (filters[field]
-              && row[field].toLowerCase().indexOf(filters[field].toLowerCase()) === -1) {
-              return false;
-            }
-          }
-        }
-        return true;
-      });
-      const maxPage = filtered.length / rows;
-      if (maxPage < (start / rows)) {
-        start = Math.floor(maxPage) * rows;
-      }
-      this.setState({
-        filteredData: filtered,
-        rowsData: filtered.slice(start, start + rows),
-        pageCount: filtered.length,
-        filters: filters,
-        start: start
-      });
+      const {id, value} = event.target;
+      this.dt.filter(value, id, 'contains');
     }
 
     render() {
-      const {filters, loading, pageCount, rows, rowsData, start} = this.state;
-      const data = this.state.filteredData || [];
+      const {filters, loading, rows, start} = this.state;
+      const data = this.state.data || [];
 
       const columns = this.props.columns.map((col) => {
         const filter = <Inplace
@@ -166,7 +118,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </InplaceDisplay>
           <InplaceContent>
             <InputText
-              value={filters[col.name]}
+              value={filters[col.name] ? filters[col.name].value : ''}
               className='p-inputtext p-column-filter'
               id={col.name}
               onChange={this.columnFilter} />
@@ -183,19 +135,15 @@ export const DetailTabTable = withCurrentWorkspace()(
           filterElement={filter} />;
       });
 
-      const footer = <Paginator
-        first={start}
-        rows={rows}
-        totalRecords={pageCount}
-        onPageChange={this.onPageChange}
-        template='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink' />;
-
       return <div style={{position: 'relative'}}>
         {data && <DataTable
-          footer={footer}
           style={styles.pDatatable}
           ref={(el) => this.dt = el}
-          value={rowsData}
+          value={data}
+          filters={filters}
+          onFilter={this.onFilter}
+          paginator={true}
+          paginatorTemplate='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink'
           first={start}
           rows={rows}
           totalRecords={data.length}
