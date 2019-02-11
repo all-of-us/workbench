@@ -174,12 +174,12 @@
           </div>
         </ng-template>
         <div class="col-md flex-xs-middle hand-cursor" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
-          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.slice(0,2).join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
+          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.join(', ').substring(0,110)" [searchTerm]="prevSearchText"></app-highlight-search>
           <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
+          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.join(', ').length > 110 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
           </a>
           <ng-template #seeMore>
-            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2"> See More
+            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.join(', ').length > 110"> See More
               <clr-icon shape="ellipsis-horizontal"></clr-icon>
             </a>
           </ng-template>
