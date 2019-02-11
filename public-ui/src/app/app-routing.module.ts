@@ -51,7 +51,7 @@ const routes: Routes = [
         data: {title: 'View Full Results'}
       },
       {
-        path: 'physical-measurements',
+        path: 'physical-measurements/:searchString',
         component: PhysicalMeasurementsComponent,
         data: {title: 'Physical Measurements from Enrollment'}
       }

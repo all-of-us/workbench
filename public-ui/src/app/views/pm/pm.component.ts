@@ -6,6 +6,7 @@ import {Analysis} from '../../../publicGenerated/model/analysis';
 import {ConceptGroup} from '../../utils/conceptGroup';
 import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-physical-measurements',
@@ -35,8 +36,13 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   femaleCount = 0;
   maleCount = 0;
   otherCount = 0;
+  searchString = '';
 
-  constructor(private api: DataBrowserService, public dbc: DbConfigService) {
+  constructor(private api: DataBrowserService, public dbc: DbConfigService,
+              private route: ActivatedRoute) {
+    this.route.params.subscribe(params => {
+      this.searchString = params.searchString;
+    });
 
   }
 
@@ -48,6 +54,10 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     this.loadingStack.push(true);
     this.dbc.getPmGroups().subscribe(results => {
       this.conceptGroups = results;
+      if (this.searchString) {
+        this.conceptGroups = this.conceptGroups.filter(conceptgroup =>
+          conceptgroup.groupName.toLowerCase().includes(this.searchString));
+      }
       this.selectedGroup = this.conceptGroups[0];
       this.selectedConcept = this.selectedGroup.concepts[0];
       this.loadingStack.pop();

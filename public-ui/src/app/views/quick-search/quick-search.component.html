@@ -128,8 +128,8 @@
 
     </div>
 
-    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && !searchText.value"> Program Phyiscal Measurements:  </h5>
-    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && !searchText.value">
+    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0"> Program Phyiscal Measurements:  </h5>
+    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0">
       <div class="col col-xl-5 col-lg-6 col-md-6 col-sm-6 col-xs-12">
         <div class="white-card-box search-result">
           <p class="box-title box-title-text">
@@ -141,9 +141,16 @@
             Use this tool to browse distributions of measurement values and counts,
             grouped by age at occurrence and gender, for each program physical measurement.</span>
           </p>
-
+          <div class="card-stat">
+            {{matchPhysicalMeasurements(searchText.value)}}
+          </div>
+          <p class="card-text bigger">
+            <span *ngIf="searchText.value; else no_search_value_pm">matching physical measurements</span>
+            <ng-template #no_search_value_pm><span>physical measurements</span></ng-template>
+            <br><br>
+          </p>
           <div class="card-text bottom">
-            <button class="btn btn-link" [routerLink]="['physical-measurements']"> View Program Physical Measurements </button>
+            <button class="btn btn-link" (click)="viewPhysicalMeasurements(searchText.value)"> View Program Physical Measurements </button>
           </div>
         </div>
       </div>
