@@ -23,7 +23,7 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
         route.routeConfig.path.startsWith('nih-callback')) {
       return Observable.from([true]);
     }
-    this.serverConfigService.getConfig().subscribe((config) => {
+    return this.serverConfigService.getConfig().flatMap((config) => {
       return this.profileStorageService.profile$.flatMap((profile) => {
         if ((profile.linkedNihUsername === null || profile.linkedNihUsername === '')
             && config.enforceRegistered && environment.enableComplianceLockout) {
@@ -32,7 +32,6 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
         }
         return Observable.from([true]);
       });
-
     });
 
 
