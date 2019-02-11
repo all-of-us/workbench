@@ -13,6 +13,29 @@ import {WorkspaceStubVariables} from './workspace-service-stub';
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;
 
+export const exampleCohortStubs = [
+  {
+    id: DEFAULT_COHORT_ID,
+    name: 'sample name',
+    description: 'sample description',
+    criteria: '',
+    type: '',
+    workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    creationTime: new Date().getTime(),
+    lastModifiedTime: new Date().getTime() - 1000,
+  },
+  {
+    id: DEFAULT_COHORT_ID_2,
+    name: 'sample name 2',
+    description: 'sample description 2',
+    criteria: '',
+    type: '',
+    workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    creationTime: new Date().getTime(),
+    lastModifiedTime: new Date().getTime() - 4000,
+  }
+];
+
 class CohortStub implements Cohort {
   id?: number;
 
@@ -59,28 +82,7 @@ export class CohortsApiStub extends CohortsApi {
       namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
     };
 
-    const exampleCohort: CohortStub = {
-      id: DEFAULT_COHORT_ID,
-      name: 'sample name',
-      description: 'sample description',
-      criteria: '',
-      type: '',
-      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime() - 1000,
-    };
-
-    const exampleCohortTwo: CohortStub = {
-      id: DEFAULT_COHORT_ID_2,
-      name: 'sample name 2',
-      description: 'sample description 2',
-      criteria: '',
-      type: '',
-      workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime() - 4000,
-    };
-    this.cohorts = [exampleCohort, exampleCohortTwo];
+    this.cohorts = exampleCohortStubs;
     this.workspaces = [stubWorkspace];
     this.resourceList = convertToResources(this.cohorts, stubWorkspace.namespace,
       stubWorkspace.id, WorkspaceAccessLevel.OWNER, ResourceType.COHORT);
