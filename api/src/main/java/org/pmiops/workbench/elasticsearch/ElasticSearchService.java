@@ -1,56 +1,96 @@
 package org.pmiops.workbench.elasticsearch;
 
+import com.google.cloud.bigquery.FieldValue;
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
+import jnr.ffi.annotations.Synchronized;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.AbstractQueryBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Provider;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 @Service
 public class ElasticSearchService {
 
-  private static final String INDEX = "index";
-  private static final String TYPE = "type";
+  private static final Logger log = Logger.getLogger(ElasticSearchService.class.getName());
   private RestHighLevelClient client;
-  @Autowired
   private Provider<WorkbenchConfig> configProvider;
+  private BigQueryService bigQueryService;
+  private ParticipantCounter participantCounter;
+
+  @Autowired
+  public ElasticSearchService(Provider<WorkbenchConfig> configProvider,
+                              BigQueryService bigQueryService,
+                              ParticipantCounter participantCounter) {
+    this.configProvider = configProvider;
+    this.bigQueryService = bigQueryService;
+    this.participantCounter = participantCounter;
+  }
 
   /**
-   * This method will be used to generate counts from a
-   * org.pmiops.workbench.model.SearchRequest.
+   * This method will generate counts per the
+   * org.pmiops.workbench.model.SearchRequest
+   * using elasticsearch with BigQuery being
+   * the fallback.
    *
    * @param userRequest
    * @return
    */
-  public Long elasticCount(org.pmiops.workbench.model.SearchRequest userRequest) throws IOException {
-//    CountRequest countRequest = new CountRequest()
-//      .indices(INDEX, TYPE)
-//      .source(new SearchSourceBuilder().query(createQueryBuilder(userRequest)));
-//    return client().count(countRequest, RequestOptions.DEFAULT).getCount();
-    return new Long(client().info().getVersion().id);
+  public Long elasticCount(org.pmiops.workbench.model.SearchRequest userRequest) {
+    //For now if enableElasticsearchBackend is true
+    //we get the cluster name and log it then run the bigquery count.
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      try {
+        MainResponse response = client().info();
+        log.info("Cluser Name: " + response.getClusterName().toString());
+        log.info("Cluster Uuid: " + response.getClusterUuid());
+        log.info("Node Name: " + response.getNodeName());
+        log.info("Version: " + response.getVersion().toString());
+        log.info("Build: " + response.getBuild().toString());
+      } catch (IOException e) {
+        log.severe(e.getMessage());
+      }
+    }
+    return getBigQueryCount(userRequest);
   }
 
-  //Is it reasonable to user QueryBuilders for this? Or do we need something more flexible to
-  //to accomplish all of our query needs?
-  private AbstractQueryBuilder createQueryBuilder(org.pmiops.workbench.model.SearchRequest userRequest) {
-    //Convert cohort definition into a QueryBuilder?
-    //May need to generate different QueryBuilders depending on the cohort definition complexity???
-    //Need to gather more knowledge about what needs to happen to get counts from elasticsearch
-
-    //This is an example of what might get returned from this conversion??
-    BoolQueryBuilder queryBuilder = new BoolQueryBuilder();
-    queryBuilder.must(new TermQueryBuilder("concept_id", "1001"));
-    queryBuilder.must(new TermQueryBuilder("age_at_event", "33"));
-    return queryBuilder;
+  /**
+   * Get count with Elasticsearch.
+   * @param userRequest
+   * @return
+   */
+  private Long getElasticCount(org.pmiops.workbench.model.SearchRequest userRequest) {
+    return 0L;
   }
 
+  /**
+   * Get the count with BigQuery.
+   * @param userRequest
+   * @return
+   */
+  private Long getBigQueryCount(org.pmiops.workbench.model.SearchRequest userRequest) {
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
+      new ParticipantCriteria(userRequest)));
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<FieldValue> row = result.iterateAll().iterator().next();
+    return bigQueryService.getLong(row, rm.get("count"));
+  }
+
+  @Synchronized
   private RestHighLevelClient client() {
     if (configProvider.get().elasticsearch.enableElasticsearchBackend && client == null) {
       String[] vars = configProvider.get().elasticsearch.host.split(":");
