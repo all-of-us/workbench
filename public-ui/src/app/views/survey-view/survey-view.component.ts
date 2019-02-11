@@ -36,6 +36,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
   component = 'surveys';
+  
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];
@@ -45,6 +46,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   /* Show answers toggle */
   showAnswer = {};
   @ViewChild('chartElement') chartEl: ElementRef;
+  @ViewChild('subChartElement') subChartEl: ElementRef;
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -77,8 +79,36 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
-          q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
+            if (q.subQuestions) {
+              let matchedQuestionConcepts: QuestionConcept[] = [];
+              matchedQuestionConcepts = q.subQuestions.filter(
+                w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
+              if (matchedQuestionConcepts.length === 0) {
+                const missingQuestionConcept = {
+                  conceptId: a.stratum3,
+                  conceptName: a.stratum4,
+                  domainId: 'ppi',
+                  conceptCode: '',
+                  countValue: a.countValue,
+                  prevalence: a.prevalence,
+                  subQuestionCount: 0,
+                  countAnalysis: this.makeAnalysis(q.countAnalysis),
+                  genderAnalysis: this.makeAnalysis(q.genderAnalysis),
+                  ageAnalysis: this.makeAnalysis(q.ageAnalysis),
+                  genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
+                  subQuestions: null
+                };
+                q.subQuestions.push(missingQuestionConcept);
+                q.subQuestionCount = q.subQuestionCount + 1;
+              }
+              for (const sq of q.subQuestions) {
+                // Removing the sub questions which does not have count analysis object
+                if (sq.countAnalysis.results.length === 0) {
+                  q.subQuestions = q.subQuestions.filter(s => s.conceptId !== sq.conceptId);
+                }
+              }
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -203,8 +233,9 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  public showAnswerGraphs(a: any) {
+  public showAnswerGraphs(a: any, q: any) {
     a.expanded = !a.expanded;
+    q.selectedAnalysis = q.genderAnalysis;
   }
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
@@ -231,6 +262,19 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
   public convertToNum(s) {
     return Number(s);
+  }
+  public makeAnalysis(a) {
+    const analysis = {
+      ...a,
+      results: a.results.filter(w => w.stratum3 === a.stratum3)
+    };
+    return analysis;
+  }
+  public removeDescribingWords(text) {
+    if (text && text.toLowerCase().includes('none of these describe me')) {
+      text = text.substring(text.toLowerCase().indexOf('none of these describe me'));
+    }
+    return text;
   }
 
 }
