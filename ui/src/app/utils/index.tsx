@@ -280,7 +280,7 @@ export const withCurrentWorkspace = () => {
 
 // HOC that provides a 'profile' prop with current WorkspaceData
 export const withUserProfile = () => {
-  return connectBehaviorSubject(userProfileStore, 'profile');
+  return connectBehaviorSubject(userProfileStore, 'profileState');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain

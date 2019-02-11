@@ -58,7 +58,7 @@ export class ProfileStorageService {
       .retryWhen(ProfileStorageService.conflictRetryPolicy())
       .subscribe((profile) => {
         this.profile.next(profile);
-        userProfileStore.next(profile);
+        userProfileStore.next({profile, reload: () => this.reload()});
         this.activeCall = false;
       }, (err) => {
         this.errorHandlingService.profileLoadError = true;

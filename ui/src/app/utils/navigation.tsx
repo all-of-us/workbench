@@ -10,7 +10,7 @@ export const NavStore = {
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>(undefined);
-export const userProfileStore = new BehaviorSubject<Profile>(undefined);
+export const userProfileStore = new BehaviorSubject<any>({});
 
 
 // NOTE: Because these are wired up directly to the router component,

@@ -65,7 +65,7 @@ const validators = {
 
 export const ProfilePageReact = withUserProfile()
 (class ProfilePageReactComponent extends React.Component<
-  { profile: Profile },
+  { profileState: {profile: Profile, reload: Function} },
   { profileEdits: Profile, updating: boolean }
 > {
   constructor(props) {
@@ -78,20 +78,23 @@ export const ProfilePageReact = withUserProfile()
   }
 
   componentDidUpdate(prevProps) {
-    const {profile} = this.props;
-    if (!fp.isEqual(prevProps.profile, profile)) {
+    const {profileState: {profile}} = this.props;
+    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
       this.setState({profileEdits: profile});
     }
   }
 
   saveProfile() {
+    const {profileState: {reload}} = this.props;
+
     this.setState({updating: true});
     profileApi().updateProfile(this.state.profileEdits)
+      .then(() => reload())
       .then(() => this.setState({updating: false}));
   }
 
   render() {
-    const {profile} = this.props;
+    const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
