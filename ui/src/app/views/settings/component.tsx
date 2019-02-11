@@ -72,7 +72,8 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
         </TooltipTrigger>
       </div>
       {this.state.resetClusterModal &&
-      <Modal data-test-id='reset-notebook-modal'>
+      <Modal data-test-id='reset-notebook-modal'
+             loading={this.state.resetClusterPending}>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
           <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
@@ -93,7 +94,6 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                   style={{marginLeft: '0.5rem'}}
                   data-test-id='reset-cluster-send'>Send</Button>
         </ModalFooter>
-        {this.state.resetClusterPending && <SpinnerOverlay/>}
       </Modal>}
     </React.Fragment>;
   }
