@@ -7,9 +7,9 @@ import {
     ViewChild
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {
     CohortAnnotationDefinition,
@@ -32,7 +32,6 @@ export class SetAnnotationItemComponent {
   @ViewChild('nameInput') nameInput;
 
   constructor(
-    private route: ActivatedRoute,
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
     private ngZone: NgZone,
@@ -69,7 +68,7 @@ export class SetAnnotationItemComponent {
     }
 
     const request = <ModifyCohortAnnotationDefinitionRequest>{columnName};
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
     const id = this.definition.cohortAnnotationDefinitionId;
     this.isPosting.emit(true);
 
@@ -95,7 +94,7 @@ export class SetAnnotationItemComponent {
   }
 
   delete(): void {
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
     const id = this.definition.cohortAnnotationDefinitionId;
     this.isPosting.emit(true);
 
