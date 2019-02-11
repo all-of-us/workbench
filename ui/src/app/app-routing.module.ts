@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -11,7 +12,6 @@ import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {HomepageComponent} from './views/homepage/component';
-import {NihCallbackComponent} from './views/nih-callback/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {ProfilePageComponent} from './views/profile-page/component';
@@ -43,7 +43,7 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -57,17 +57,15 @@ const routes: Routes = [
           title: 'Awaiting ID Verification'
         }
       }, {
-        path: 'nih-callback',
-        component: NihCallbackComponent,
-        data: {
-          title: 'NIH Authentication'
-        }
-      }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
         data: {
           title: 'Stigmatization Definition'
         }
+      }, {
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
       }, {
         path: 'workspaces',
         data: {
@@ -265,6 +263,7 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     ConceptSetResolver,
+    AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,

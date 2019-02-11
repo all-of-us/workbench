@@ -36,9 +36,9 @@ import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/co
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
+import {WorkbenchAccessTasksComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
-import {NihCallbackComponent} from './views/nih-callback/component';
 import {NotebookListComponent} from './views/notebook-list/component';
 import {NotebookRedirectComponent} from './views/notebook-redirect/component';
 import {PageTemplateSignedOutComponent} from './views/page-template-signed-out/component';
@@ -148,7 +148,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
-    NihCallbackComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
@@ -166,6 +165,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
+    WorkbenchAccessTasksComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,
