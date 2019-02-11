@@ -10,7 +10,8 @@ import {QueryDescriptiveStatsComponent} from 'app/cohort-review/query-descriptiv
 import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {CohortBuilderService, CohortReviewService, DataAccessLevel} from 'generated';
+import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {CohortBuilderService, CohortReviewService, DataAccessLevel, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
@@ -45,55 +46,11 @@ describe('QueryReportComponent', () => {
     excludes: []
   };
   const activatedRouteStub = {
-    data: Observable.of({
-      participant: {},
-      annotations: [],
-    }),
     snapshot: {
       data: {
-        workspace: {
-          cdrVersionId: 1
-        },
-        cohort: {
-          name: '',
-          criteria: JSON.stringify(criteria)
-        },
-        review: {},
-        params: {
-          ns: 'workspaceNamespace',
-          wsid: 'workspaceId',
-          cid: 1
-        }
-      },
-      params: {
-        ns: 'workspaceNamespace',
-        wsid: 'workspaceId',
-        cid: 1
+        review: {}
       }
-    },
-    parent: {
-      snapshot: {
-        data: {
-          workspace: {
-            cdrVersionId: 1
-          },
-          cohort: {
-            name: ''
-          },
-          params: {
-            ns: 'workspaceNamespace',
-            wsid: 'workspaceId',
-            cid: 1
-          }
-        },
-        params: {
-          ns: 'workspaceNamespace',
-          wsid: 'workspaceId',
-          cid: 1
-        }
-      },
-
-    },
+    }
   };
   let route;
 
@@ -130,6 +87,21 @@ describe('QueryReportComponent', () => {
       ]
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
+    currentCohortStore.next({
+      name: '',
+      criteria: JSON.stringify(criteria),
+      type: '',
+    });
+    urlParamsStore.next({
+      ns: 'workspaceNamespace',
+      wsid: 'workspaceId',
+      cid: 1
+    });
   }));
 
   beforeEach(() => {
