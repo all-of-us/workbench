@@ -4,7 +4,6 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -177,24 +176,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Long count = 0L;
-
-    if (workbenchConfigProvider.get().elasticsearch.enableElasticsearchBackend) {
-      try {
-        count = elasticSearchService.elasticCount(request);
-      } catch (IOException ioe) {
-        //do something
-        System.out.println(ioe.getMessage());
-      }
-    } else {
-      QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
-        new ParticipantCriteria(request)));
-      TableResult result = bigQueryService.executeQuery(qjc);
-      Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
-      List<FieldValue> row = result.iterateAll().iterator().next();
-      count = bigQueryService.getLong(row, rm.get("count"));
-    }
+    Long count = elasticSearchService.elasticCount(request);
     return ResponseEntity.ok(count);
   }
 
