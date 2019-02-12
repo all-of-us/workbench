@@ -106,6 +106,7 @@ const cardButtonStyle = {
   style: {
     ...cardStyles.card,
     justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
 };
