@@ -72,6 +72,7 @@ public class ElasticSearchService {
    * @return
    */
   private Long getElasticCount(org.pmiops.workbench.model.SearchRequest userRequest) {
+    //implement this in a future story
     return 0L;
   }
 
