@@ -54,7 +54,6 @@ const styles = reactStyles({
   addCard: {
     width: 200, height: 105,
     marginTop: '1rem', marginRight: '1rem',
-    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   }
 });
 
