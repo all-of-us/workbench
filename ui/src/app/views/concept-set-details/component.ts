@@ -40,6 +40,8 @@ export class ConceptSetDetailsComponent {
     private router: Router,
     private route: ActivatedRoute,
   ) {
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
     this.wsNamespace = this.route.snapshot.params['ns'];
     this.wsId = this.route.snapshot.params['wsid'];
     this.accessLevel = this.route.snapshot.data.workspace.accessLevel;

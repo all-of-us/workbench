@@ -16,3 +16,19 @@
 .card {
   border-color: rgba(215, 215, 215, 0.5);
 }
+
+.card-header {
+  background-color: rgb(226, 226, 233);
+  min-width: 100%;
+}
+
+.card-header > span {
+  margin-left: calc(16px + 0.5rem);
+  color: rgb(38, 34, 98);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+clr-icon[shape=ellipsis-vertical] {
+  margin-right: 0.5rem;
+}

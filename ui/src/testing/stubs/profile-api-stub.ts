@@ -50,4 +50,8 @@ export class ProfileApiStub extends ProfileApi {
   public getMe(options?: any) {
     return Promise.resolve(this.profile);
   }
+
+  public updatePageVisits(pageVisit) {
+    return Promise.resolve(this.profile);
+  }
 }

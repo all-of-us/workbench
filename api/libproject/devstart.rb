@@ -492,16 +492,19 @@ Common.register_command({
 def docker_clean()
   common = Common.new
 
-  docker_images = `docker ps -aq`.gsub(/\s+/, " ")
-  unless docker_images.empty?
-    common.run_inline("docker rm -f #{docker_images}")
-  end
-  common.run_inline %W{docker-compose down --volumes}
+  # --volumes clears out any cached data between runs, e.g. MySQL database or Elasticsearch.
+  # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
+  #   still be cached and this is fast.
+  common.run_inline %W{docker-compose down --volumes --rmi local}
+
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+
+  # See https://github.com/docker/compose/issues/3447
+  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
