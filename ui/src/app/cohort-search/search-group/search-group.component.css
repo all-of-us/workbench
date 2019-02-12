@@ -171,6 +171,10 @@ clr-icon[shape=error-standard] {
   letter-spacing: 0;
 }
 
+.overlay-text > .btn.btn-link:focus {
+  border: 1px solid transparent;
+}
+
 .item-or {
   float: right;
   margin-right: 50%;

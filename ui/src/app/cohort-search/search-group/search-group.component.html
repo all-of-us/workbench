@@ -170,11 +170,12 @@
         {{ group.get('count') | number }}
       </ng-container>
       <ng-template #countWarning>
+        --
         <clr-tooltip>
           <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
           <clr-tooltip-content clrSize="lg" *clrIfOpen>
             <span>
-              This group has no count since there are no active items
+              All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
             </span>
           </clr-tooltip-content>
         </clr-tooltip>
