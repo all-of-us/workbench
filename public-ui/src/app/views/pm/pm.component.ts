@@ -54,8 +54,8 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
     this.dbc.getPmGroups().subscribe(results => {
       this.conceptGroups = results;
       if (this.searchString) {
-        this.conceptGroups = this.conceptGroups.filter(conceptgroup =>
-          conceptgroup.groupName.toLowerCase().includes(this.searchString.toLowerCase()));
+        this.conceptGroups = this.conceptGroups.filter(conceptGroup =>
+          conceptGroup.groupName.toLowerCase().includes(this.searchString.toLowerCase()));
       }
       this.selectedGroup = this.conceptGroups[0];
       this.selectedConcept = this.selectedGroup.concepts[0];
