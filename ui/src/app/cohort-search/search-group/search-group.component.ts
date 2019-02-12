@@ -62,13 +62,13 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
         this.treeType = i.type;
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
-        if(this.temporalItems.length) {
+        // if(this.temporalItems.length) {
           this.temporalLength.emit( {
             tempLength: this.temporalItems.length,
               flag: this.temporalFlag,
               length: this.nonTemporalItems.length}
             );
-        }
+        // }
         // else {
         //   this.temporalLength.emit({tempLength: this.temporalItems.length, flag: this.temporalFlag, length: this.nonTemporalItems.length});
         // }

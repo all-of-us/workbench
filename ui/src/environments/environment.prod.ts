@@ -17,7 +17,6 @@ export const environment: Environment = {
   //
   // See environment-type.ts for more details on transient flags, including
   // exit criteria and Jira ticket links.
-  enableTemporal: false,
   useZendeskForSupport: false,
   enableJupyterLab: false,
   enableComplianceLockout: false

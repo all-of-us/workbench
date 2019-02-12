@@ -11,15 +11,14 @@
       <span class="count-header" *ngIf="!(isRequesting$ | async)">
         {{ total$ | async | number }}
       </span>
-      <span *ngIf="(error$ | async) && temporal.length">
+      <span *ngIf="(error$ | async) && !temporal.flag">
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
           shape="error-standard"
           size="18"></clr-icon>
       </span>
-
-      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && !temporal?.length"> - -
+      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length)"> - -
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
@@ -74,8 +73,8 @@
 </div>
 
 <popper-content #errorPopper>
-  <p   *ngIf="temporal?.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
-  <p  *ngIf="!temporal?.length" [style.margin]="'0'">hello testing</p>
+  <p   *ngIf="temporal?.tempLength" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="!temporal?.tempLength" [style.margin]="'0'">hello testing</p>
 </popper-content>
 
 

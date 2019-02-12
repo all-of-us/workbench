@@ -182,14 +182,14 @@
         <span *ngIf="!isRequesting">
           {{ group.get('count') | number }}
         </span>
-        <span *ngIf="error && temporalItems.length">
+        <span *ngIf="error && !temporalFlag">
           <clr-icon
             [popper]="errorPopper"
             [popperTrigger]="'hover'"
             shape="error-standard"
             size="18"></clr-icon>
         </span>
-        <span *ngIf="!isRequesting && temporalFlag && !temporalItems.length"> - -
+        <span *ngIf="!isRequesting && temporalFlag && (!temporalItems.length || !nonTemporalItems.length)"> - -
           <clr-icon
             [popper]="errorPopper"
             [popperTrigger]="'hover'"
