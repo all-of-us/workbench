@@ -5,7 +5,6 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 
 
-
 def swaggerTemplateDir = 'src/main/resources'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
 def clientApiSourceFile = 'src/main/resources/client_api.yaml'
