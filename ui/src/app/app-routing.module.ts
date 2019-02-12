@@ -5,7 +5,7 @@ import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
@@ -237,9 +237,9 @@ const routes: Routes = [
         component: AdminReviewWorkspaceComponent,
         data: {title: 'Review Workspaces'}
       }, {
-        path: 'admin/review-id-verification',
-        component: AdminReviewIdVerificationComponent,
-        data: {title: 'Review ID Verifications'}
+        path: 'admin/user',
+        component: AdminUserComponent,
+        data: {title: 'User Admin Table'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,

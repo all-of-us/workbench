@@ -21,7 +21,7 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
@@ -133,7 +133,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminReviewWorkspaceComponent,
-    AdminReviewIdVerificationComponent,
+    AdminUserComponent,
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
