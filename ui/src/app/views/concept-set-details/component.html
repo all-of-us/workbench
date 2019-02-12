@@ -81,8 +81,8 @@
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'Concept Set'"
                           [resourceName]=conceptSet.name
-                          [receiveDelete]=receiveDelete.bind(this)
-                          [closeFunction]="closeConfirmDelete.bind(this)">
+                          [receiveDelete]=receiveDelete
+                          [closeFunction]="closeConfirmDelete">
 </app-confirm-delete-modal>
 
 <clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">

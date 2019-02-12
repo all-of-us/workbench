@@ -137,6 +137,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
+    this.closeNotebookModal = this.closeNotebookModal.bind(this);
   }
 
   ngOnInit(): void {

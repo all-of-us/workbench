@@ -1,6 +1,6 @@
 <app-workspace-nav-bar *ngIf="displayNavBar"
-                       [shareFunction]="share.bind(this)"
-                       [deleteFunction]="openConfirmDelete.bind(this)"
+                       [shareFunction]="share"
+                       [deleteFunction]="openConfirmDelete"
                        [tabPath]="tabPath"></app-workspace-nav-bar>
 
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
@@ -15,7 +15,7 @@
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'workspace'"
                           [resourceName]="workspace.name"
-                          [receiveDelete]="receiveDelete.bind(this)"
-                          [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
+                          [receiveDelete]="receiveDelete"
+                          [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
 <app-bug-report></app-bug-report>
 <router-outlet></router-outlet>
