@@ -31,6 +31,8 @@ import {
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+  CLEAR_TOTAL_COUNT,
+  CLEAR_GROUP_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -48,8 +50,12 @@ import {
   REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
+  HIDE_ITEM,
+  HIDE_GROUP,
+  ENABLE_ENTITY,
   REMOVE_ITEM,
   REMOVE_GROUP,
+  SET_ENTITY_TIMEOUT,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -225,6 +231,15 @@ export const countRequestError =
   ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
+export const clearTotalCount =
+  (): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
+  ({type: CLEAR_TOTAL_COUNT});
+
+export const clearGroupCount =
+  (groupId: string
+  ): ActionTypes[typeof CLEAR_GROUP_COUNT] =>
+  ({type: CLEAR_GROUP_COUNT, groupId});
+
 export const requestPreview =
   (cdrVersionId: number, request: SearchRequest
   ): ActionTypes[typeof BEGIN_PREVIEW_REQUEST] =>
@@ -295,6 +310,21 @@ export const clearWizardFocus =
   (): ActionTypes[typeof CLEAR_WIZARD_FOCUS] =>
   ({type: CLEAR_WIZARD_FOCUS});
 
+export const hideGroup =
+  (groupId: string, status: string
+  ): ActionTypes[typeof HIDE_GROUP] =>
+    ({type: HIDE_GROUP, groupId, status});
+
+export const hideGroupItem =
+  (groupId: string, itemId: string, status: string
+  ): ActionTypes[typeof HIDE_ITEM] =>
+    ({type: HIDE_ITEM, groupId, itemId, status});
+
+export const enableEntity =
+  (entity: string, entityId: string,
+  ): ActionTypes[typeof ENABLE_ENTITY] =>
+    ({type: ENABLE_ENTITY, entity, entityId});
+
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string
   ): ActionTypes[typeof REMOVE_GROUP] =>
@@ -304,6 +334,11 @@ export const removeGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
+
+export const setTimeoutId =
+  (entity: string, entityId: string, timeoutId: any
+  ): ActionTypes[typeof SET_ENTITY_TIMEOUT] =>
+  ({type: SET_ENTITY_TIMEOUT, entity, entityId, timeoutId});
 
 export const requestAttributes =
   (cdrVersionId: number, node: any

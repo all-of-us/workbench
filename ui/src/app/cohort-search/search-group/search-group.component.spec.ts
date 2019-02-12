@@ -1,13 +1,12 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-
 
 import {
   CohortSearchActions,
@@ -44,6 +43,7 @@ const group = fromJS({
   count: null,
   isRequesting: false,
   items: ['itemA', 'itemB'],
+  status: 'active',
 });
 
 class MockActions {
@@ -106,8 +106,7 @@ describe('SearchGroupComponent', () => {
     const items = fixture.debugElement.queryAll(By.css('app-search-group-item'));
     expect(items.length).toBe(0);
   });
-  // const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
-  // this.actions.openWizard(itemId, criteria.type, context, tempGroup);
+
   it('Should dispatch WIZARD_OPEN when a Criteria is selected', () => {
     const spy = spyOn(mockReduxInst, 'dispatch');
     comp.launchWizard({type: TreeType[TreeType.ICD9]});
@@ -128,16 +127,24 @@ describe('SearchGroupComponent', () => {
     });
   });
 
-  it('Should dispatch REMOVE_GROUP on remove button click', () => {
+  it('Should dispatch REMOVE_GROUP on remove button click', fakeAsync(() => {
+    fixture.detectChanges();
     const spy = spyOn(mockReduxInst, 'dispatch');
-    const button = fixture.debugElement.query(By.css('button#close-button'));
-    button.triggerEventHandler('click', null);
+
+    const dropdown = fixture.debugElement.query(By.css('.dropdown-toggle'));
+    dropdown.triggerEventHandler('click', null);
+
+    const removeButton = fixture.debugElement
+      .query(By.css('button[clrdropdownitem]:nth-of-type(2)'));
+    removeButton.triggerEventHandler('click', null);
+    jasmine.clock().tick(10000);
+    fixture.detectChanges();
     expect(spy).toHaveBeenCalledWith({
       type: REMOVE_GROUP,
       role: 'includes',
       groupId: 'include0'
     });
-  });
+  }));
 
   it('Should render group count if group count', () => {
     comp.group = group.set('count', 25);
@@ -152,7 +159,7 @@ describe('SearchGroupComponent', () => {
   });
 
   it('Should render a spinner if requesting', () => {
-    comp.group = group.set('isRequesting', true);
+    comp.group = group.set('isRequesting', true).set('count', 1);
     fixture.detectChanges();
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     expect(spinner).not.toBeNull();

@@ -39,6 +39,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @ViewChild('wrapper') wrapper;
   tempLength: boolean;
 
+  includeSize: number;
   private subscription;
 
   constructor(
@@ -70,6 +71,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
           });
       }
     });
+    this.subscription.add(
+      this.includeGroups$.subscribe(groups => this.includeSize = groups.size + 1)
+    );
     this.updateWrapperDimensions();
   }
 

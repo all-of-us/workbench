@@ -4,6 +4,7 @@
       <app-search-group-list
         [role]="'includes'"
         [groups$]="includeGroups$"
+        [index]="0">
       (tempLength) = "getTempLength($event)">
       </app-search-group-list>
     </div>
@@ -12,7 +13,8 @@
       <app-search-group-list
         *ngIf="(initShowChart$ | async)"
         [role]="'excludes'"
-        [groups$]="excludeGroups$">
+        [groups$]="excludeGroups$"
+        [index]="includeSize">
       </app-search-group-list>
     </div>
 

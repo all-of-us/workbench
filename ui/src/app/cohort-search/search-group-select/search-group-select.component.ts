@@ -12,6 +12,7 @@ import {SearchRequest} from 'generated';
 })
 export class SearchGroupSelectComponent {
   @Input() role: keyof SearchRequest;
+  @Input() index: number;
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;

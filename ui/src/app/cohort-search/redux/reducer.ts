@@ -9,6 +9,7 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
+  getItem,
   initialState,
   SR_ID
 } from './store';
@@ -45,6 +46,8 @@ import {
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+  CLEAR_TOTAL_COUNT,
+  CLEAR_GROUP_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -62,8 +65,12 @@ import {
   REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
+  HIDE_ITEM,
+  HIDE_GROUP,
+  ENABLE_ENTITY,
   REMOVE_ITEM,
   REMOVE_GROUP,
+  SET_ENTITY_TIMEOUT,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
@@ -288,6 +295,12 @@ export const rootReducer: Reducer<CohortSearchState> =
             fromJS({error: action.error})
           );
 
+      case CLEAR_TOTAL_COUNT:
+        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
+
+      case CLEAR_GROUP_COUNT:
+        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1);
+
       case LOAD_CHARTS_RESULTS:
         return state
           .set('chartData', fromJS(action.chartData))
@@ -320,7 +333,8 @@ export const rootReducer: Reducer<CohortSearchState> =
               time: '',
               timeValue: 0,
               timeFrame: '',
-              isRequesting: false
+              isRequesting: false,
+              status: 'active'
             })
           )
           .updateIn(
@@ -334,7 +348,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['wizard', 'selections', action.parameter.get('parameterId')],
-            action.parameter
+            action.parameter.set('status', 'active')
           )
           .updateIn(
             ['wizard', 'item', 'searchParameters'],
@@ -391,6 +405,25 @@ export const rootReducer: Reducer<CohortSearchState> =
           .setIn(['wizard', 'item', 'attributes', 'node'], Map())
           .deleteIn(['wizard', 'calculate', 'count']);
 
+      case HIDE_ITEM: {
+        const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
+          .filter(itemId => {
+            const item = getItem(itemId)(state);
+            return item.get('id') !== action.itemId && item.get('status') === 'active';
+          });
+        if (!activeItems.size) {
+          state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
+        }
+        return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
+      }
+
+      case HIDE_GROUP:
+        return state.setIn(['entities', 'groups', action.groupId, 'status'], action.status);
+
+      case ENABLE_ENTITY: {
+        return state.setIn(['entities', action.entity, action.entityId, 'status'], 'active');
+      }
+
       case REMOVE_ITEM: {
         state = state
           .updateIn(
@@ -398,7 +431,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             List(),
             itemList => itemList.filterNot(id => id === action.itemId)
           )
-          .deleteIn(['entities', 'items', action.itemId]);
+          .setIn(['entities', 'items', action.itemId, 'status'], 'deleted');
 
         const paramsInUse = state
           .getIn(['entities', 'items'], Map())
@@ -420,7 +453,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             List(),
             groupList => groupList.filterNot(id => id === action.groupId)
           )
-          .deleteIn(['entities', 'groups', action.groupId]);
+          .setIn(['entities', 'groups', action.groupId, 'status'], 'deleted');
 
       case OPEN_WIZARD:
         return state.mergeIn(['wizard'], fromJS({
@@ -434,10 +467,16 @@ export const rootReducer: Reducer<CohortSearchState> =
             count: null,
             temporalGroup: action.tempGroup ? action.tempGroup : 0,
             isRequesting: false,
+            status: 'active'
           },
           selections: {},
           ...action.context
         }));
+
+      case SET_ENTITY_TIMEOUT:
+        return state.setIn(
+          ['entities', action.entity, action.entityId, 'timeout'], action.timeoutId
+        );
 
       case REOPEN_WIZARD:
         const selections = state.getIn(['entities', 'parameters'], Map()).filter(

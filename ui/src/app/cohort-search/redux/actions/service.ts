@@ -71,6 +71,8 @@ export class CohortSearchActions {
   @dispatch() _requestAttributePreview = ActionFuncs.requestAttributePreview;
   @dispatch() cancelCountRequest = ActionFuncs.cancelCountRequest;
   @dispatch() setCount = ActionFuncs.loadCountRequestResults;
+  @dispatch() clearTotalCount = ActionFuncs.clearTotalCount;
+  @dispatch() clearGroupCount = ActionFuncs.clearGroupCount;
 
   @dispatch() _requestPreview = ActionFuncs.requestPreview;
 
@@ -85,8 +87,12 @@ export class CohortSearchActions {
   @dispatch() removeModifier = ActionFuncs.removeModifier;
   @dispatch() setWizardFocus = ActionFuncs.setWizardFocus;
   @dispatch() clearWizardFocus = ActionFuncs.clearWizardFocus;
+  @dispatch() hideGroup = ActionFuncs.hideGroup;
+  @dispatch() hideGroupItem = ActionFuncs.hideGroupItem;
+  @dispatch() enableEntity = ActionFuncs.enableEntity;
   @dispatch() _removeGroup = ActionFuncs.removeGroup;
   @dispatch() _removeGroupItem = ActionFuncs.removeGroupItem;
+  @dispatch() setTimeoutId = ActionFuncs.setTimeoutId;
   @dispatch() requestAttributes = ActionFuncs.requestAttributes;
   @dispatch() loadAttributes = ActionFuncs.loadAttributes;
   @dispatch() hideAttributesPage = ActionFuncs.hideAttributesPage;
@@ -154,22 +160,28 @@ export class CohortSearchActions {
     this.idsInUse = this.idsInUse.add(newId);
   }
 
+  hasActiveItems(group: any) {
+    return !group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filter(it => it.get('status') === 'active')
+      .isEmpty();
+  }
+
+  otherGroupsWithActiveItems(ingoreGroupId: string) {
+    return !groupList('includes')(this.state)
+      .merge(groupList('excludes')(this.state))
+      .filter(
+        grp => grp.get('status') === 'active'
+          && grp.get('id') !== ingoreGroupId
+          && this.hasActiveItems(grp)
+      )
+      .isEmpty();
+  }
+
   get state() {
     return this.ngRedux.getState();
   }
-
-  debugDir(obj) {
-    if (environment.debug) {
-      console.dir(obj);
-    }
-  }
-
-  debugLog(msg) {
-    if (environment.debug) {
-      console.log(msg);
-    }
-  }
-
 
   /* Higher order actions - actions composed of other actions or providing
    * alternate interfaces for a simpler action.
@@ -206,60 +218,93 @@ export class CohortSearchActions {
     }
   }
 
-  removeGroup(role: keyof SearchRequest, groupId: string): void {
+  cancelTotalIfRequesting(): void {
+    const searchRequest = getSearchRequest(SR_ID)(this.state);
+    if (searchRequest.get('isRequesting', false)) {
+      this.cancelChartsRequest('searchRequests', SR_ID);
+    }
+  }
+
+  removeGroup(role: keyof SearchRequest, groupId: string, status?: string): void {
     const group = getGroup(groupId)(this.state);
-    this.debugLog(`Removing ${groupId} of ${role}:`);
-    this.debugDir(group);
-
     this.cancelIfRequesting('groups', groupId);
+    if (!status) {
+      this._removeGroup(role, groupId);
+      this.removeId(groupId);
+      group.get('items', List()).forEach(itemId => {
+        this.cancelIfRequesting('items', itemId);
+        this._removeGroupItem(groupId, itemId);
+        this.removeId(itemId);
+      });
+    } else {
+      this.hideGroup(groupId, status);
+      if (this.hasActiveItems(group)) {
+        if (this.otherGroupsWithActiveItems(groupId)) {
+          this.requestTotalCount();
+        } else {
+          this.cancelTotalIfRequesting();
+          this.clearTotalCount();
+        }
+      }
+    }
+  }
 
-    this._removeGroup(role, groupId);
-    this.removeId(groupId);
-
-    group.get('items', List()).forEach(itemId => {
-      this.cancelIfRequesting('items', itemId);
+  removeGroupItem(
+    role: keyof SearchRequest,
+    groupId: string,
+    itemId: string,
+    status?: string
+  ): void {
+    const groupItems = (getGroup(groupId)(this.state))
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    const isOnlyActiveChild = groupItems
+      .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
+      .isEmpty();
+    if (!status) {
       this._removeGroupItem(groupId, itemId);
       this.removeId(itemId);
-    });
+    } else {
+      const item = getItem(itemId)(this.state);
+      const hasItems = !item.get('searchParameters', List()).isEmpty();
+      const countIsNonZero = item.get('count') !== 0;
 
-    const hasItems = !group.get('items', List()).isEmpty();
-    if (hasItems) {
+      this.cancelIfRequesting('items', itemId);
+      this.cancelIfRequesting('groups', groupId);
+      this.hideGroupItem(groupId, itemId, status);
+
+      if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
+        if (isOnlyActiveChild) {
+          if (groupItems.size === 1 && status === 'pending') {
+            this.clearGroupCount(groupId);
+          }
+          if (this.otherGroupsWithActiveItems(groupId)) {
+            this.requestTotalCount(groupId);
+          } else {
+            this.cancelTotalIfRequesting();
+            this.clearTotalCount();
+          }
+        } else {
+          this.requestTotalCount();
+          this.requestGroupCount(role, groupId);
+        }
+      }
+    }
+  }
+
+  enableGroup(group: any) {
+    const groupId = group.get('id');
+    this.enableEntity('groups', groupId);
+    if (this.hasActiveItems(group)) {
       this.requestTotalCount();
     }
   }
 
-  removeGroupItem(role: keyof SearchRequest, groupId: string, itemId: string): void {
-    const item = getItem(itemId)(this.state);
-    const hasItems = !item.get('searchParameters', List()).isEmpty();
-    const countIsNonZero = item.get('count') !== 0;
-    // The optimization wherein we only fire the request if the item
-    // has a non-zero count (i.e. it affects its group and hence the total
-    // counts) ONLY WORKS if the item is NOT an only child.
-    const isOnlyChild = (getGroup(groupId)(this.state))
-      .get('items', List())
-      .equals(List([itemId]));
-
-    this.debugLog(`Removing ${itemId} of ${groupId}:`);
-    this.debugDir(item);
-    this.debugLog(
-      `hasItems: ${hasItems}, countIsNonZero: ${countIsNonZero}, isOnlyChild: ${isOnlyChild}`
-    );
-
-    this.cancelIfRequesting('items', itemId);
-    this._removeGroupItem(groupId, itemId);
-    this.removeId(itemId);
-
-    if (hasItems && (countIsNonZero || isOnlyChild)) {
-      /* If this was the only item in the group, the group no longer has a
-       * count, not really. */
-      if (isOnlyChild) {
-        this.requestTotalCount(groupId);
-        this.removeGroup(role, groupId);
-      } else {
-        this.requestTotalCount();
-        this.requestGroupCount(role, groupId);
-      }
-    }
+  enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
+    this.enableEntity('items', itemId);
+    this.requestGroupCount(role, groupId);
+    this.requestTotalCount();
   }
 
   fetchCriteria(kind: string, parentId: number): void {
@@ -404,21 +449,23 @@ export class CohortSearchActions {
    * @param outdatedGroup: string
    */
   requestTotalCount(outdatedGroupId?: string): void {
-    const searchRequest = getSearchRequest(SR_ID)(this.state);
-    if (searchRequest.get('isRequesting', false)) {
-      this.cancelChartsRequest('searchRequests', SR_ID);
-    }
-
+    this.cancelTotalIfRequesting();
     const included = includeGroups(this.state);
-    this.debugLog('Making a request for Total with included groups: ');
-    this.debugDir(included);
 
     /* If there are no members of an intersection, the intersection is the null
      * set
      */
-    const noGroups = included.size === 0;
-    const noGroupsWithItems = included.every(group => group.get('items').size === 0);
-    const emptyIntersection = noGroups || noGroupsWithItems;
+    const noActiveGroups = included.filter(group => group.get('status') === 'active').size === 0;
+    const noGroupsWithActiveItems = included.every(group => {
+      return group.get('items')
+        .filter(itemId => (getItem(itemId)(this.state)).get('status') === 'active')
+        .size === 0;
+    });
+
+    if (noActiveGroups || noGroupsWithActiveItems) {
+      this.clearTotalCount();
+      return;
+    }
 
     /* If any member of an intersection is the null set, the intersection is
      * the null set - unless the member in question is itself outdated (i.e.
@@ -432,8 +479,7 @@ export class CohortSearchActions {
     /* In either case the total count is provably zero without needing to ask
      * the API
      */
-    if (nullIntersection || emptyIntersection) {
-      this.debugLog('Not making request');
+    if (nullIntersection) {
       this.setChartData('searchRequests', SR_ID, []);
       return;
     }
@@ -472,7 +518,7 @@ export class CohortSearchActions {
         .get(kind, List())
         .map(this.mapGroup)
         // By this point, unlike almost everywhere else, we're back in vanilla JS land
-        .filterNot(grp => grp.items.length === 0)
+        .filterNot(grp => !grp || grp.items.length === 0)
         .toJS();
 
     const includes = getGroups('includes');
@@ -483,23 +529,21 @@ export class CohortSearchActions {
 
   mapGroup = (groupId: string): SearchGroup => {
     const group = getGroup(groupId)(this.state);
+    if (group.get('status') !== 'active') {
+      return;
+    }
     const temporal = group.get('temporal');
-    // console.log(group);
-    let items = group.get('items', List()).map(item => this.mapGroupItem(item, temporal));
+    let items = group.get('items', List())
+      .map(item => this.mapGroupItem(item, temporal))
+      .filter(item => !!item);
     if (isImmutable(items)) {
       items = items.toJS();
     }
     const searchGroup = <SearchGroup>{id: groupId, items, temporal};
     if (temporal) {
-      // searchGroup.mention = group.get('mention') === '' ?
-      //   TemporalMention.ANYMENTION : group.get('mention') ;
-      // // searchGroup.time = group.get('time') === '' ?
-      //   TemporalTime.DURINGSAMEENCOUNTERAS : group.get('time');
-      // searchGroup.timeValue = group.get('time') !==
-      // TemporalTime.DURINGSAMEENCOUNTERAS ? 1 : group.get('timeValue');
-      searchGroup.mention = group.get('mention') ;
+      searchGroup.mention = group.get('mention');
       searchGroup.time = group.get('time');
-      searchGroup.timeValue =  group.get('timeValue');
+      searchGroup.timeValue = group.get('timeValue');
       searchGroup.timeFrame = group.get('timeFrame');
     }
     return searchGroup;
@@ -507,6 +551,9 @@ export class CohortSearchActions {
 
   mapGroupItem = (itemId: string, temporal?: boolean): SearchGroupItem => {
     const item = getItem(itemId)(this.state);
+    if (item.get('status') !== 'active') {
+      return;
+    }
     const critIds = item.get('searchParameters', List());
 
     const params = this.state
@@ -581,12 +628,14 @@ export class CohortSearchActions {
           });
           item.count = 0;
           item.isRequesting = false;
+          item.status = 'active';
           entities.items[item.id] = item;
           this.addId(item.id);
           return item.id;
         });
         group.count = 0;
         group.isRequesting = false;
+        group.status = 'active';
         entities.groups[group.id] = group;
         this.addId(group.id);
         return group.id;

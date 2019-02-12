@@ -41,4 +41,8 @@ export class ProfileApiStub extends ProfileApi {
   public updateNihToken(token?: NihToken, options?: any) {
     return Promise.resolve(this.profile);
   }
+
+  public updatePageVisits(pageVisit) {
+    return Promise.resolve(this.profile);
+  }
 }
