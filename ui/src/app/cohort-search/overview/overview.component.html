@@ -18,7 +18,8 @@
           shape="error-standard"
           size="18"></clr-icon>
       </span>
-      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length)"> - -
+      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length) &&  (total$ | async) !== 0 "> - -
+      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length) &&  (total$ | async) !== 0 "> - -
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
