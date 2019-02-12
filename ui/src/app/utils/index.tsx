@@ -278,7 +278,7 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
-// HOC that provides a 'profile' prop with current WorkspaceData
+// HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
 };

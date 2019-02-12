@@ -12,7 +12,10 @@ export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefine
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>(undefined);
-export const userProfileStore = new BehaviorSubject<any>({});
+export const userProfileStore = new BehaviorSubject<{ profile: Profile, reload: Function }>({
+  profile: {} as Profile,
+  reload: () => {}
+});
 
 
 // NOTE: Because these are wired up directly to the router component,

@@ -48,6 +48,8 @@ const labelSubstitutions = {
   organization: 'organization',
   areaOfResearch: 'currentResearch'
 };
+
+// validators for validate.js
 const required = {presence: {allowEmpty: false}};
 const notTooLong = maxLength => ({
   length: {
@@ -63,11 +65,12 @@ const validators = {
   currentResearch: required,
 };
 
-export const ProfilePageReact = withUserProfile()
-(class ProfilePageReactComponent extends React.Component<
-  { profileState: {profile: Profile, reload: Function} },
+export const ProfilePage = withUserProfile()(class extends React.Component<
+  { profileState: { profile: Profile, reload: Function } },
   { profileEdits: Profile, updating: boolean }
 > {
+  static displayName = 'ProfilePage';
+
   constructor(props) {
     super(props);
 
@@ -309,6 +312,6 @@ export const ProfilePageReact = withUserProfile()
 })
 export class ProfilePageComponent extends ReactWrapperBase {
   constructor() {
-    super(ProfilePageReact, []);
+    super(ProfilePage, []);
   }
 }
