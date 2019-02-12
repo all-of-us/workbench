@@ -8,8 +8,8 @@ import {Profile} from 'generated';
 import {ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfilePage} from './component';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+import {ProfilePage} from './component';
 
 
 describe('ProfilePageComponent', () => {
@@ -27,7 +27,7 @@ describe('ProfilePageComponent', () => {
 
     registerApiClient(ProfileApi, profileApi);
     // mocking because we don't have access to the angular service
-    reload.mockImplementation(async() => {
+    reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
       userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     });
@@ -40,7 +40,7 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('value')).toMatch(profile.givenName);
   });
 
-  it('should save correctly', async() => {
+  it('should save correctly', async () => {
     const wrapper = component();
     expect(userProfileStore.getValue().profile.givenName).toEqual(profile.givenName);
 
