@@ -34,8 +34,4 @@ export class SearchGroupListComponent implements OnInit {
   get emptyIndex() {
     return this.listSize + this.index + 1;
   }
-
-  get emptyIndex() {
-    return this.listSize + this.index + 1;
-  }
 }
