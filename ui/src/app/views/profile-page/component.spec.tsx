@@ -2,7 +2,7 @@ import {userProfileStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {ProfilePageReact} from './component';
+import {ProfilePage} from './component';
 
 
 describe('ProfilePageComponent', () => {
@@ -10,11 +10,11 @@ describe('ProfilePageComponent', () => {
   const profile = ProfileStubVariables.PROFILE_STUB;
 
   const component = () => {
-    return mount(<ProfilePageReact/>);
+    return mount(<ProfilePage/>);
   };
 
   beforeEach(() => {
-    userProfileStore.next({profile});
+    userProfileStore.next({profile, reload: () => {}});
   });
 
   it('should render the profile', () => {

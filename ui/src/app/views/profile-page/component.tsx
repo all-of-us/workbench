@@ -254,7 +254,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 type='purplePrimary'
                 style={{marginLeft: 40}}
                 onClick={() => this.saveProfile()}
-                disabled={!!errors}
+                disabled={!!errors || fp.isEqual(profile, profileEdits)}
               >
                 Save Profile
               </Button>
