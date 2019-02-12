@@ -40,10 +40,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService,
               private route: ActivatedRoute) {
-    this.route.params.subscribe(params => {
-      this.searchString = params.searchString;
-    });
-
   }
 
   loading() {
@@ -51,12 +47,15 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.searchString = params.searchString || null;
+    });
     this.loadingStack.push(true);
     this.dbc.getPmGroups().subscribe(results => {
       this.conceptGroups = results;
       if (this.searchString) {
         this.conceptGroups = this.conceptGroups.filter(conceptgroup =>
-          conceptgroup.groupName.toLowerCase().includes(this.searchString));
+          conceptgroup.groupName.toLowerCase().includes(this.searchString.toLowerCase()));
       }
       this.selectedGroup = this.conceptGroups[0];
       this.selectedConcept = this.selectedGroup.concepts[0];

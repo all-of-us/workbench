@@ -196,18 +196,16 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     localStorage.setItem('searchText', this.prevSearchText);
     this.router.navigateByUrl('/ehr/' + r.domain.toLowerCase());
   }
-  public viewPhysicalMeasurements(searchString: string) {
-    this.router.navigateByUrl('/physical-measurements/' + searchString.toLowerCase());
-  }
+  
   public matchPhysicalMeasurements(searchString: string) {
-      if (searchString) {
-        return this.pmConceptGroups.filter(conceptgroup =>
-          conceptgroup.groupName.toLowerCase().includes(searchString.toLowerCase())).length;
-      } else {
-        if (this.pmConceptGroups) {
-          return this.pmConceptGroups.length;
-        }
-      }
+    if (!this.pmConceptGroups) {
+      return 0;
+    }
+    if (!searchString) {
+      return this.pmConceptGroups.length;
+    }
+    return this.pmConceptGroups.filter(conceptgroup =>
+      conceptgroup.groupName.toLowerCase().includes(searchString.toLowerCase())).length;
   }
 
 }

@@ -150,7 +150,7 @@
             <br><br>
           </p>
           <div class="card-text bottom">
-            <button class="btn btn-link" (click)="viewPhysicalMeasurements(searchText.value)"> View Program Physical Measurements </button>
+            <button class="btn btn-link" [routerLink]="['physical-measurements']" [queryParams]="{searchString: searchText.value}"> View Program Physical Measurements </button>
           </div>
         </div>
       </div>
