@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
@@ -12,6 +11,7 @@ import {
   styles as buttonStyles,
 } from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
@@ -20,9 +20,7 @@ import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
 import {
   BillingProjectStatus,
-  PageVisit,
 } from 'generated/fetch';
-import {Modal, ModalFooter} from "../../components/modals";
 
 
 const styles = reactStyles({
@@ -204,11 +202,11 @@ const homepageStyles = reactStyles({
     display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
   },
   footerTitle: {
-    height: '34px', opacity: '0.87', color: '#fff', fontSize: 28,
+    height: '34px', opacity: 0.87, color: '#fff', fontSize: 28,
     fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
   },
   footerText: {
-    height: '176px', opacity: '0.87', color: '#83C3EC', fontSize: '16px',
+    height: '176px', opacity: 0.87, color: '#83C3EC', fontSize: '16px',
     fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
     flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'scroll'
   },
@@ -243,14 +241,12 @@ export class Homepage extends React.Component<{}, {
   billingProjectInitialized: boolean,
   eraCommonsError: string,
   eraCommonsLinked: boolean,
-  firstVisit: boolean;
   quickTour: boolean,
   trainingCompleted: boolean,
   videoOpen: boolean,
-  videoLink: ''
+  videoLink: string
 }> {
   private static pageId = 'homepage';
-  // private route: ActivatedRoute;
 
   constructor(props: Object) {
     super(props);
@@ -260,7 +256,6 @@ export class Homepage extends React.Component<{}, {
       billingProjectInitialized: false,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
-      firstVisit: undefined,
       quickTour: false,
       trainingCompleted: true,
       videoOpen: false,
@@ -268,7 +263,6 @@ export class Homepage extends React.Component<{}, {
     };
   }
 
-  // TODO: this probably needs to check falsy more explicitly for loading case
   get accessTasksRemaining(): boolean {
     return !!(this.state.eraCommonsLinked && this.state.trainingCompleted);
   }
@@ -293,8 +287,10 @@ export class Homepage extends React.Component<{}, {
     try {
       const profile = await profileApi().getMe();
       if (profile.pageVisits) {
-        this.setState({firstVisit: !profile.pageVisits.some(v =>
-          v.page === Homepage.pageId)});
+        if (!profile.pageVisits.some(v => v.page === Homepage.pageId)) {
+          this.setState({quickTour: true});
+          profileApi().updatePageVisits({ page: Homepage.pageId});
+        }
       }
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
 
@@ -321,15 +317,14 @@ export class Homepage extends React.Component<{}, {
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
         this.setState({billingProjectInitialized: true});
       } else {
+        console.log('billing project not ready');
         // todo
         // this.billingProjectQuery = setTimeout(() => {
         //   this.profileStorageService.reload();
         // }, 10000);
       }
     } catch (e) {
-      console.log('error fetching profile');
-    } finally {
-      await profileApi().updatePageVisits({ page: Homepage.pageId});
+      console.log('error fetching profile ' + e.toString());
     }
   }
 
@@ -339,7 +334,7 @@ export class Homepage extends React.Component<{}, {
 
 
   render() {
-    const {billingProjectInitialized, firstVisit, videoOpen, accessTasksLoaded,
+    const {billingProjectInitialized, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
         quickTour, videoLink} = this.state;
     const quickTourResources = [
@@ -383,8 +378,8 @@ export class Homepage extends React.Component<{}, {
             {accessTasksLoaded ?
               (accessTasksRemaining ?
                 (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
-                                eraCommonsError={eraCommonsError}
-                                trainingCompleted={trainingCompleted}/>
+                                       eraCommonsError={eraCommonsError}
+                                       trainingCompleted={trainingCompleted}/>
                 ) : (
                   <div>
                     <div style={{flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
@@ -488,96 +483,3 @@ export class HomepageComponent extends ReactWrapperBase {
     super(Homepage, []);
   }
 }
-
-
-// export class HomepageComponent implements OnInit, OnDestroy {
-//   private static pageId = 'homepage';
-//   @ViewChild('myVideo') myVideo: any;
-//   open = false;
-//   src = '';
-//   billingProjectInitialized = false;
-//   billingProjectQuery: NodeJS.Timer;
-//   firstSignIn: Date;
-//   firstVisit = true;
-//   newPageVisit: PageVisit = { page: HomepageComponent.pageId};
-//   quickTour: boolean;
-//   accessTasksRemaining: boolean;
-//   eraCommonsLinked: boolean;
-//   eraCommonsError = '';
-//   // TODO RW-1184; defaulting to true
-//   trainingCompleted = true;
-//
-//   constructor(
-//     private profileStorageService: ProfileStorageService,
-//     private serverConfigService: ServerConfigService,
-//     private route: ActivatedRoute,
-//   ) {
-//     // create bound methods to use as callbacks
-//     this.closeQuickTour = this.closeQuickTour.bind(this);
-//   }
-//
-//   ngOnInit(): void {
-//     // this.validateNihToken();
-//     //
-//     // // TODO: combine these two profile() requests
-//     // this.profileService.getMe().subscribe(profile => {
-//     //   if (profile.pageVisits) {
-//     //     this.firstVisit = !profile.pageVisits.some(v =>
-//     //     v.page === HomepageComponent.pageId);
-//     //   }
-//     //
-//     //   // Set Access Tasks flags
-//     //   // TODO RW-1184 set trainingCompleted flag
-//     //   this.eraCommonsLinked = !!profile.linkedNihUsername;
-//     //
-//     //   if (this.route.snapshot.queryParams.workbenchAccessTasks) {
-//     //     // To reach the access tasks component from dev use /?workbenchAccessTasks=true
-//     //     this.accessTasksRemaining = true;
-//     //   } else {
-//     //     this.serverConfigService.getConfig().subscribe((config) => {
-//     //       if (environment.enableComplianceLockout && config.enforceRegistered) {
-//     //         this.accessTasksRemaining = !this.eraCommonsLinked;
-//     //       } else {
-//     //         this.accessTasksRemaining = false;
-//     //       }
-//     //     });
-//     //   }
-//     // },
-//     //   e => {},
-//     //   () => {
-//     //     if (this.firstVisit) {
-//     //       this.quickTour = true;
-//     //     }
-//     //     this.profileService.updatePageVisits(this.newPageVisit).subscribe();
-//     //   });
-//     //
-//     // this.profileStorageService.profile$.subscribe((profile) => {
-//     //   // This will block workspace creation until the billing project is initialized
-//     //   if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-//     //     this.billingProjectInitialized = true;
-//     //   } else {
-//     //     this.billingProjectQuery = setTimeout(() => {
-//     //       this.profileStorageService.reload();
-//     //     }, 10000);
-//     //   }
-//     // });
-//
-//   }
-//
-//   // ngOnDestroy(): void {
-//   //   clearTimeout(this.billingProjectQuery);
-//   // }
-//   //
-//   // navigateToProfile(): void {
-//   //   navigate(['profile']);
-//   // }
-//   //
-//   // get twoFactorBannerEnabled() {
-//   //   if (this.firstSignIn == null) {
-//   //     return false;
-//   //   }
-//   //   // Don't show the banner after 1 week as their account would
-//   //   // have been disabled had they not enabled 2-factor auth.
-//   //   return !(new Date().getTime() - this.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000);
-//   // }
-// }
