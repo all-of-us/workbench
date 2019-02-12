@@ -1,14 +1,13 @@
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {navigate} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
-import {ActivatedRoute} from '@angular/router';
 import {
   Button,
+  CardButton,
   Clickable,
   styles as buttonStyles,
 } from 'app/components/buttons';
@@ -17,72 +16,46 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
+import {QuickTourReact} from 'app/views/quick-tour-modal/component';
+import {RecentWork} from 'app/views/recent-work/component';
 import {
   BillingProjectStatus,
   PageVisit,
 } from 'generated/fetch';
-import {QuickTourReact} from '../quick-tour-modal/component';
+import {Modal, ModalFooter} from "../../components/modals";
 
 
 const styles = reactStyles({
   mainHeader: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: 400,
-    width: '25.86%',
-    display: 'flex',
-    minWidth: '18.2rem',
-    marginLeft: '4%',
-    marginTop: '4%',
+    color: '#FFFFFF', fontSize: 28, fontWeight: 400, width: '25.86%',
+    display: 'flex', minWidth: '17.4rem', marginLeft: '4%', marginTop: '4%',
     letterSpacing: 'normal'
   },
   minorHeader: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 600,
-    display: 'flex',
-    marginTop: '1rem',
-    lineHeight: '24px'
+    color: '#FFFFFF', fontSize: 18, fontWeight: 600, display: 'flex',
+    marginTop: '1rem', lineHeight: '24px'
   },
   text: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    lineHeight: '22px',
-    fontWeight: 150,
+    color: '#FFFFFF', fontSize: 16, lineHeight: '22px', fontWeight: 150,
     marginTop: '3%'
   },
   infoBox: {
-    padding: '1rem',
-    backgroundColor: '#FFFFFF',
-    borderRadius: '5px',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between'
+    padding: '1rem', backgroundColor: '#FFFFFF', borderRadius: '5px', display: 'flex',
+    flexDirection: 'row', justifyContent: 'space-between'
   },
   infoBoxHeader: {
-    fontSize: 16,
-    color: '#262262',
-    fontWeight: 600
+    fontSize: 16, color: '#262262', fontWeight: 600
   },
   infoBoxBody: {
-    color: '#000',
-    lineHeight: '18px'
+    color: '#000', lineHeight: '18px'
   },
   infoBoxButton: {
-    color: '#FFFFFF',
-    height: '49px',
-    borderRadius: '5px',
-    marginLeft: '1rem',
+    color: '#FFFFFF', height: '49px', borderRadius: '5px', marginLeft: '1rem',
     maxWidth: '20rem'
   },
   error: {
-    fontWeight: 300,
-    color: '#DC5030',
-    fontSize: '14px',
-    marginTop: '.3rem',
-    backgroundColor: '#FFF1F0',
-    borderRadius: '5px',
-    padding: '.3rem',
+    fontWeight: 300, color: '#DC5030', fontSize: '14px', marginTop: '.3rem',
+    backgroundColor: '#FFF1F0', borderRadius: '5px', padding: '.3rem',
   }
 });
 
@@ -203,12 +176,9 @@ export class WorkbenchAccessTasksComponent extends ReactWrapperBase {
 const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
-    backgroundRepeat: 'no-repeat',
-    // -webkit-background-size: cover;
-    // -moz-background-size: cover;
-    // -o-background-size: cover;
-    backgroundSize: 'cover', height: '100%', marginLeft: '-1rem', marginRight: '-0.6rem',
-    display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
+    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
+    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
+    flexDirection: 'column', justifyContent: 'space-between'
   },
   singleCard: {
     height: '33.4%', width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
@@ -217,16 +187,13 @@ const homepageStyles = reactStyles({
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
-  headingLinks: {
-    marginTop: '2.74%', height: '2.68%', fontSize: '14px', color: '#FFFFFF'
-  },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
     flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
   },
   quickTourLabel: {
     fontSize: 28, lineHeight: '34px', color: '#fff', paddingRight: '2.3rem',
-    marginTop: '2rem', width: '31%'
+    marginTop: '2rem', width: '33%'
   },
   footer: {
     height: '300px', width: '100%', backgroundColor: '#262262',
@@ -260,6 +227,13 @@ const homepageStyles = reactStyles({
   bottomLinks: {
     color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
     top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
+  },
+  addCard: {
+    display: 'flex', height: '223px', width: '300px', alignItems: 'flex-start',
+    backgroundColor: '#fff', alignContent: 'left', marginLeft: '3%',
+    marginTop: '1.9rem', marginRight: '106px', cursor: 'pointer',
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    borderRadius: '5px', fontSize: '20px', lineHeight: '28px'
   }
 });
 
@@ -276,7 +250,7 @@ export class Homepage extends React.Component<{}, {
   videoLink: ''
 }> {
   private static pageId = 'homepage';
-  private route: ActivatedRoute;
+  // private route: ActivatedRoute;
 
   constructor(props: Object) {
     super(props);
@@ -324,23 +298,24 @@ export class Homepage extends React.Component<{}, {
       }
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
 
-      if (this.route.snapshot.queryParams.workbenchAccessTasks) {
-        // To reach the access tasks component from dev use /?workbenchAccessTasks=true
-        this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
-      } else {
-        try {
-          const config = await configApi().getConfig();
-          if (environment.enableComplianceLockout && config.enforceRegistered) {
-            this.setState({
-              accessTasksRemaining: this.accessTasksRemaining,
-              accessTasksLoaded: true});
-          } else {
-            this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
-          }
-
-        } catch (ex) {
-          console.error('error fetching config: ' + ex.toString());
+      // TODO
+      // if (this.route.snapshot.queryParams.workbenchAccessTasks) {
+      //   // To reach the access tasks component from dev use /?workbenchAccessTasks=true
+      //   this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
+      // }
+      // this.setState({accessTasksRemaining: this.accessTasksRemaining, accessTasksLoaded: true})
+      try {
+        const config = await configApi().getConfig();
+        if (environment.enableComplianceLockout && config.enforceRegistered) {
+          this.setState({
+            accessTasksRemaining: this.accessTasksRemaining,
+            accessTasksLoaded: true});
+        } else {
+          this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
         }
+
+      } catch (ex) {
+        console.error('error fetching config: ' + ex.toString());
       }
 
       if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
@@ -411,11 +386,33 @@ export class Homepage extends React.Component<{}, {
                                 eraCommonsError={eraCommonsError}
                                 trainingCompleted={trainingCompleted}/>
                 ) : (
-                <div style={{flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
-                  justifyContent: 'flex-start', flexWrap: 'nowrap'}}>
-                  <div style={styles.mainHeader}>Researcher Workbench</div>
-                  <div style={homepageStyles.headingLinks}>Create a Workspace</div>
-                </div>)
+                  <div>
+                    <div style={{flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
+                      justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'}}>
+                      <div style={styles.mainHeader}>Researcher Workbench</div>
+                      <a onClick={() => navigate(['workspaces'])}
+                         style={{marginTop: '2.3rem', fontSize: '14px', color: '#FFFFFF'}}>
+                        See All Workspaces</a>
+
+                    </div>
+                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+                      {/*<TooltipTrigger content='Your Firecloud billing project is still being
+                      initialized. Workspace creation will be available in a few minutes.'>*/}
+                        <CardButton disabled={!billingProjectInitialized}
+                                    onClick={() => navigate(['workspaces/build'])}
+                                    style={homepageStyles.addCard}>
+                          Create a <br/> New Workspace
+                          <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                        </CardButton>
+                      {/*<TooltipTrigger/>*/}
+                      <div style={{marginRight: '3%', flexGrow: 1, minWidth: 0}}>
+                        <div style={{color: '#fff', marginLeft: '1rem'}}>
+                          Your Last Accessed Items</div>
+                        <RecentWork dark={true}/>
+                      </div>
+                    </div>
+                  </div>
+                )
                 ) :
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
@@ -424,20 +421,23 @@ export class Homepage extends React.Component<{}, {
           <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
           {quickTourResources.map(thumbnail => {
             return <Clickable onClick={thumbnail.onClick}>
-              <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}} src={thumbnail.src}/>
+              <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                   src={thumbnail.src}/>
             </Clickable>;
           })}
         </div>
         <div>
           <div style={homepageStyles.footer}>
             <div style={homepageStyles.footerInner}>
-              <div style={homepageStyles.footerTitle}>How to Use the All of Us Researcher Workbench</div>
+              <div style={homepageStyles.footerTitle}>
+                How to Use the All of Us Researcher Workbench</div>
               <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                 <TooltipTrigger content='Coming Soon' side='left'>
                   <a href='#' style={{color: '#fff'}}>See all documentation</a>
                 </TooltipTrigger>
               </div>
-              <div style={{display: 'flex', flexDirection: 'row', width: '87.34%', justifyContent: 'space-between'}}>
+              <div style={{display: 'flex', flexDirection: 'row',
+                width: '87.34%', justifyContent: 'space-between'}}>
                 {footerLinks.map(col => {
                   return <div style={homepageStyles.linksBlock}>
                     <div style={homepageStyles.footerText}>
@@ -465,7 +465,16 @@ export class Homepage extends React.Component<{}, {
 
       {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
-      {videoOpen && <div>{videoLink}</div>}
+      {videoOpen && <Modal width={900}>
+        <video width='100%' controls autoPlay>
+          <source src={videoLink} type='video/mp4'/>
+        </video>
+        <ModalFooter>
+          <Button type='secondary'
+                  onClick={() => this.setState({videoOpen: false})}>
+            Close</Button>
+        </ModalFooter>
+      </Modal>}
     </React.Fragment>;
   }
 
@@ -555,25 +564,12 @@ export class HomepageComponent extends ReactWrapperBase {
 //
 //   }
 //
-//   public closeQuickTour(): void {
-//     this.quickTour = false;
-//   }
-//
-//
 //   // ngOnDestroy(): void {
 //   //   clearTimeout(this.billingProjectQuery);
 //   // }
 //   //
-//   // addWorkspace(): void {
-//   //   navigate(['workspaces/build']);
-//   // }
-//   //
 //   // navigateToProfile(): void {
 //   //   navigate(['profile']);
-//   // }
-//   //
-//   // listWorkspaces(): void {
-//   //   navigate(['workspaces']);
 //   // }
 //   //
 //   // get twoFactorBannerEnabled() {

@@ -278,6 +278,8 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
+// todo: add withQueryParams
+
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {
   const d = fp.capitalize(FetchDomain[domain]);
