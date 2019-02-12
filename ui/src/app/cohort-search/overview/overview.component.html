@@ -1,6 +1,9 @@
 <div>
   <div class="overview-header">
     <h2 class="count-header" id="total-count">
+     hi1 {{temporal?.flag}}
+     hi2 {{temporal?.tempLength}}
+     hi3 {{temporal?.length}}
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
@@ -8,11 +11,19 @@
       <span class="count-header" *ngIf="!(isRequesting$ | async)">
         {{ total$ | async | number }}
       </span>
-      <span *ngIf="(error$ | async)">
+      <span *ngIf="(error$ | async) && temporal.length">
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
           shape="error-standard"
+          size="18"></clr-icon>
+      </span>
+
+      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && !temporal?.length"> - -
+        <clr-icon
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          shape="warning-standard"
           size="18"></clr-icon>
       </span>
     </h2>
@@ -63,8 +74,10 @@
 </div>
 
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p   *ngIf="temporal?.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="!temporal?.length" [style.margin]="'0'">hello testing</p>
 </popper-content>
+
 
 <clr-modal #saveModal
   [clrModalSize]="'md'"

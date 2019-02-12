@@ -184,3 +184,6 @@ li:last-child{
   padding-top: 0rem;
 }
 
+clr-icon[shape^=warning-standard] {
+  color: #F57600;
+}

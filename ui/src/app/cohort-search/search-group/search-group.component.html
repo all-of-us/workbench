@@ -173,7 +173,7 @@
       </div>
       <div class="col-sm-5">Temporal</div>
       <div class="col-sm-6 text-right">
-        Group Count:
+        Group Count: {{!temporalItems.length}}
         <span *ngIf="isRequesting"
               class="spinner spinner-inline"
               [style.vertical-align]="'middle'">
@@ -182,11 +182,18 @@
         <span *ngIf="!isRequesting">
           {{ group.get('count') | number }}
         </span>
-        <span *ngIf="error">
+        <span *ngIf="error && temporalItems.length">
           <clr-icon
             [popper]="errorPopper"
             [popperTrigger]="'hover'"
             shape="error-standard"
+            size="18"></clr-icon>
+        </span>
+        <span *ngIf="!isRequesting && temporalFlag && !temporalItems.length"> - -
+          <clr-icon
+            [popper]="errorPopper"
+            [popperTrigger]="'hover'"
+            shape="warning-standard"
             size="18"></clr-icon>
         </span>
       </div>
@@ -196,7 +203,7 @@
 </div>
 
 <popper-content #errorPopper>
-  <p  *ngIf="error && this.temporalItems.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
-  <p  *ngIf="!this.temporalItems.length"  [style.margin]="'0'">Please select criteria from dropdown to get count</p>
+  <p  *ngIf="error && temporalItems.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="!isRequesting && temporalFlag && !temporalItems.length"  [style.margin]="'0'">Please complete the criteria selections before saving temporal relationship.</p>
 </popper-content>
 

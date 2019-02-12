@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {
@@ -24,6 +24,7 @@ import {Subscription} from 'rxjs/Subscription';
 export class SearchGroupComponent implements OnInit, OnDestroy {
   @Input() group;
   @Input() role: keyof SearchRequest;
+  @Output() temporalLength = new EventEmitter<any>();
   nonTemporalItems = [];
   temporalItems = [];
   error: boolean;
@@ -61,6 +62,17 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
         this.treeType = i.type;
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
+        if(this.temporalItems.length) {
+          this.temporalLength.emit( {
+            tempLength: this.temporalItems.length,
+              flag: this.temporalFlag,
+              length: this.nonTemporalItems.length}
+            );
+        }
+        // else {
+        //   this.temporalLength.emit({tempLength: this.temporalItems.length, flag: this.temporalFlag, length: this.nonTemporalItems.length});
+        // }
+
       });
   }
 
