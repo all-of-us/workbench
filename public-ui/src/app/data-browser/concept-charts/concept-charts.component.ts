@@ -43,7 +43,6 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   displayMeasurementGraphs = false;
   toDisplayMeasurementGenderAnalysis: Analysis;
   graphType = GraphType;
-  component = 'ehr';
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
 
