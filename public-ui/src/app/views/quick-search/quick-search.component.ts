@@ -152,6 +152,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       this.subscriptions.push(this.searchText.valueChanges.subscribe(
         (query) => this.loading = true ));
   }
+
   ngOnDestroy() {
     for (const s of this.subscriptions) {
         s.unsubscribe();
@@ -167,7 +168,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.surveyResults = results.surveyModules;
     this.loading = false;
   }
-  
+
   public searchDomains(query: string) {
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);

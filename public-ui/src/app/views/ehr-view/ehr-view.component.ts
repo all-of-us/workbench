@@ -157,6 +157,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
     this.initSearchSubscription.unsubscribe();
   }
+
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
@@ -168,6 +169,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     localStorage.setItem('searchText', '');
     this.loading = false;
   }
+
   private searchDomain(query: string) {
     // Unsubscribe from our initial search subscription if this is called again
     if (this.initSearchSubscription) {
@@ -186,6 +188,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.prevSearchText = query;
     return this.api.searchConcepts(this.searchRequest);
   }
+
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
@@ -195,6 +198,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       row.viewSynonyms = true;
     }
   }
+
   public selectGraph(g) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -204,9 +208,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.graphToShow = GraphType.MeasurementBins;
     }
   }
+
   public toggleSynonyms(conceptId) {
     this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
   }
+
   public showToolTip(g) {
     if (g === 'Biological Sex' || g === 'Gender Identity') {
       return 'Gender chart';
@@ -216,9 +222,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       return this.sourcesChartHelpText;
     }
   }
+
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
+
   public expandRow(concepts: any[], r: any) {
     if (r.expanded) {
       r.expanded = false;
@@ -235,6 +243,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
   }
+
   public toggleTopConcepts() {
     this.showTopConcepts = !this.showTopConcepts;
   }
