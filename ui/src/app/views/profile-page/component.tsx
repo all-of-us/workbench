@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {validate} from 'validate.js';
+import * as validate from 'validate.js';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -41,14 +41,6 @@ const styles = reactStyles({
   }
 });
 
-const labelSubstitutions = {
-  givenName: 'firstName',
-  familyName: 'lastName',
-  currentPosition: 'currentPosition',
-  organization: 'organization',
-  areaOfResearch: 'currentResearch'
-};
-
 // validators for validate.js
 const required = {presence: {allowEmpty: false}};
 const notTooLong = maxLength => ({
@@ -58,11 +50,11 @@ const notTooLong = maxLength => ({
   }
 });
 const validators = {
-  firstName: {...required, ...notTooLong(80)},
-  lastName: {...required, ...notTooLong(80)},
+  givenName: {...required, ...notTooLong(80)},
+  familyName: {...required, ...notTooLong(80)},
   currentPosition: {...required, ...notTooLong(255)},
   organization: {...required, ...notTooLong(255)},
-  currentResearch: required,
+  areaOfResearch: required,
 };
 
 export const ProfilePage = withUserProfile()(class extends React.Component<
@@ -88,36 +80,44 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     }
   }
 
-  saveProfile() {
+  async saveProfile() {
     const {profileState: {reload}} = this.props;
 
     this.setState({updating: true});
-    profileApi().updateProfile(this.state.profileEdits)
-      .then(() => reload())
-      .then(() => this.setState({updating: false}));
+
+    try {
+      await profileApi().updateProfile(this.state.profileEdits);
+      await reload();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.setState({updating: false});
+    }
   }
 
   render() {
-    const {profileState: {profile}} = this.props;
+    const {profileState: {profile, reload}} = this.props;
     const {profileEdits, updating} = this.state;
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
       institutionalAffiliations = []
     } = profileEdits;
     const errors = validate({
-      firstName: givenName,
-      lastName: familyName,
-      currentPosition,
-      organization,
-      currentResearch: areaOfResearch
-    }, validators);
+      givenName, familyName, currentPosition, organization, areaOfResearch
+    }, validators, {
+      prettify: v => ({
+        givenName: 'First Name',
+        familyName: 'Last Name',
+        areaOfResearch: 'Current Research'
+      }[v] || validate.prettify(v))
+    });
 
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
-      const errorText = profile && errors && errors[labelSubstitutions[valueKey]];
+      const errorText = profile && errors && errors[valueKey];
 
       const inputProps = {
         value: fp.get(valueKey, profileEdits) || '',
-        onChange: v => this.setState(fp.set(`profileEdits.${valueKey}`, v)),
+        onChange: v => this.setState(fp.set(['profileEdits', ...valueKey], v)),
         invalid: !!errorText,
         ...props
       };
@@ -202,16 +202,18 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             <div style={{display: 'flex'}} key={`institution${i}`}>
               {makeProfileInput({
                 title: 'Institution',
-                valueKey: `institutionalAffiliations.${i}.institution`
+                valueKey: ['institutionalAffiliations', i, 'institution']
               })}
               {makeProfileInput({
                 title: 'Role',
-                valueKey: `institutionalAffiliations.${i}.role`
+                valueKey: ['institutionalAffiliations', i, 'role']
               })}
               <Clickable
                 style={{alignSelf: 'center'}}
-                onClick={() => this.setState(fp.set('profileEdits.institutionalAffiliations',
-                  fp.without([v], institutionalAffiliations)))}
+                onClick={() => this.setState(fp.update(
+                  ['profileEdits', 'institutionalAffiliations'],
+                  fp.pull(v)
+                ))}
               >
                 <ClrIcon
                   shape='times'
@@ -224,8 +226,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           <div style={{display: 'flex', width: 520, alignItems: 'center'}}>
             <div style={{border: `1px solid ${colors.gray[4]}`, flex: 1}}/>
             <Clickable
-              onClick={() => this.setState(fp.set('profileEdits.institutionalAffiliations',
-                fp.concat(institutionalAffiliations, {institution: '', role: ''})))}
+              onClick={() => this.setState(fp.update(
+                ['profileEdits', 'institutionalAffiliations'],
+                v => fp.concat(v, {institution: '', role: ''})
+              ))}
             >
               <ClrIcon
                 shape='plus-circle'
@@ -291,10 +295,17 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 </Button> :
                 <Button
                   type='purplePrimary'
-                  onClick={() => {
+                  onClick={async() => {
                     this.setState({updating: true});
-                    profileApi().completeEthicsTraining()
-                      .then(() => this.setState({updating: false}));
+
+                    try {
+                      await profileApi().completeEthicsTraining();
+                      await reload();
+                    } catch (e) {
+                      console.error(e);
+                    } finally {
+                      this.setState({updating: false});
+                    }
                   }}
                 >
                   Complete Training
