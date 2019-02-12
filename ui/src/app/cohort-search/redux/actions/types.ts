@@ -31,6 +31,8 @@ export const LOAD_ATTR_PREVIEW_RESULTS = 'LOAD_ATTR_PREVIEW_RESULTS';
 export const LOAD_COUNT_RESULTS = 'LOAD_COUNT_RESULTS';
 export const CANCEL_COUNT_REQUEST = 'CANCEL_COUNT_REQUEST';
 export const COUNT_REQUEST_ERROR = 'COUNT_REQUEST_ERROR';
+export const CLEAR_TOTAL_COUNT = 'CLEAR_TOTAL_COUNT';
+export const CLEAR_GROUP_COUNT = 'CLEAR_GROUP_COUNT';
 
 export const BEGIN_PREVIEW_REQUEST = 'BEGIN_PREVIEW_REQUEST';
 export const LOAD_PREVIEW_RESULTS = 'LOAD_PREVIEW_RESULTS';
@@ -48,8 +50,12 @@ export const ADD_MODIFIER = 'ADD_MODIFIER';
 export const REMOVE_MODIFIER = 'REMOVE_MODIFIER';
 export const SET_WIZARD_FOCUS = 'SET_WIZARD_FOCUS';
 export const CLEAR_WIZARD_FOCUS = 'CLEAR_WIZARD_FOCUS';
+export const HIDE_ITEM = 'HIDE_ITEM';
+export const HIDE_GROUP = 'HIDE_GROUP';
+export const ENABLE_ENTITY = 'ENABLE_ENTITY';
 export const REMOVE_ITEM = 'REMOVE_ITEM';
 export const REMOVE_GROUP = 'REMOVE_GROUP';
+export const SET_ENTITY_TIMEOUT = 'SET_ENTITY_TIMEOUT';
 export const SHOW_ATTRIBUTES_PAGE = 'SHOW_ATTRIBUTES_PAGE';
 export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 
@@ -234,7 +240,13 @@ export interface ActionTypes {
     entityId: string;
     error?: any;
   };
-
+  CLEAR_TOTAL_COUNT: {
+    type: typeof CLEAR_TOTAL_COUNT;
+  };
+  CLEAR_GROUP_COUNT: {
+    type: typeof CLEAR_GROUP_COUNT;
+    groupId: string;
+  };
   BEGIN_PREVIEW_REQUEST: {
     type: typeof BEGIN_PREVIEW_REQUEST;
     cdrVersionId: number;
@@ -312,18 +324,38 @@ export interface ActionTypes {
   HIDE_ATTRIBUTES_PAGE: {
     type: typeof HIDE_ATTRIBUTES_PAGE;
   };
-
+  HIDE_ITEM: {
+    type: typeof HIDE_ITEM;
+    itemId: string;
+    groupId: string;
+    status: string;
+  };
+  HIDE_GROUP: {
+    type: typeof HIDE_GROUP;
+    groupId: string;
+    status: string;
+  };
+  ENABLE_ENTITY: {
+    type: typeof ENABLE_ENTITY;
+    entity: string;
+    entityId: string;
+  };
   REMOVE_ITEM: {
     type: typeof REMOVE_ITEM;
     itemId: string;
-    groupId: string
+    groupId: string;
   };
   REMOVE_GROUP: {
     type: typeof REMOVE_GROUP;
     groupId: string;
     role: keyof SearchRequest;
   };
-
+  SET_ENTITY_TIMEOUT: {
+    type: typeof SET_ENTITY_TIMEOUT;
+    entity: string;
+    entityId: string;
+    timeoutId: number;
+  };
   OPEN_WIZARD: {
     type: typeof OPEN_WIZARD;
     itemId: string;
@@ -391,6 +423,8 @@ export type RootAction =
   | ActionTypes[typeof LOAD_COUNT_RESULTS]
   | ActionTypes[typeof CANCEL_COUNT_REQUEST]
   | ActionTypes[typeof COUNT_REQUEST_ERROR]
+  | ActionTypes[typeof CLEAR_TOTAL_COUNT]
+  | ActionTypes[typeof CLEAR_GROUP_COUNT]
 
   | ActionTypes[typeof BEGIN_PREVIEW_REQUEST]
   | ActionTypes[typeof LOAD_PREVIEW_RESULTS]
@@ -408,8 +442,12 @@ export type RootAction =
   | ActionTypes[typeof REMOVE_MODIFIER]
   | ActionTypes[typeof SET_WIZARD_FOCUS]
   | ActionTypes[typeof CLEAR_WIZARD_FOCUS]
+  | ActionTypes[typeof HIDE_ITEM]
+  | ActionTypes[typeof HIDE_GROUP]
+  | ActionTypes[typeof ENABLE_ENTITY]
   | ActionTypes[typeof REMOVE_ITEM]
   | ActionTypes[typeof REMOVE_GROUP]
+  | ActionTypes[typeof SET_ENTITY_TIMEOUT]
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
