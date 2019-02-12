@@ -28,6 +28,7 @@ export class SurveysComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
+
   public viewSurvey(r) {
     localStorage.setItem('surveyModule', JSON.stringify(r));
     localStorage.setItem('searchText', '');

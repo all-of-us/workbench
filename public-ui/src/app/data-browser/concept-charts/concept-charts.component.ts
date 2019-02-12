@@ -75,6 +75,7 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
       this.loadingStack.pop();
       }));
   }
+
   public fetchMeasurementGenderResults() {
     if (!this.analyses) {
       return;
