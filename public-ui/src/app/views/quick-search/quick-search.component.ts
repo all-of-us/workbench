@@ -196,7 +196,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     localStorage.setItem('searchText', this.prevSearchText);
     this.router.navigateByUrl('/ehr/' + r.domain.toLowerCase());
   }
-  
+
   public matchPhysicalMeasurements(searchString: string) {
     if (!this.pmConceptGroups) {
       return 0;
@@ -207,5 +207,4 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     return this.pmConceptGroups.filter(conceptgroup =>
       conceptgroup.groupName.toLowerCase().includes(searchString.toLowerCase())).length;
   }
-
 }
