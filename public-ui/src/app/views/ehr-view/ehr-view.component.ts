@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
@@ -41,6 +42,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private initSearchSubscription: ISubscription = null;
   /* Show more synonyms when toggled */
   showMoreSynonyms = {};
+  synonymString = {};
   ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
     'distribution for participants at the time the medical concept ' +
     'being queried occurred in their records. \n' +
@@ -160,6 +162,9 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
+    for (const concept of this.items) {
+      this.synonymString[concept.conceptId] = concept.conceptSynonyms.join(', ');
+    }
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
     }
