@@ -30,7 +30,6 @@ export class PhysicalMeasurementsComponent implements OnInit, OnDestroy {
   // Initialize to first group and concept, adjust order in groups array above
   selectedGroup: ConceptGroup;
   selectedConcept: ConceptWithAnalysis;
-  componentType = 'physical measurements';
 
   // we save the total gender counts
   femaleCount = 0;

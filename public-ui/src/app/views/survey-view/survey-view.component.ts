@@ -10,7 +10,7 @@ import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
-import {GraphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-survey-view',
@@ -35,7 +35,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   conceptCodeTooltip: any;
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
-  component = 'surveys';
 
   /* Have questions array for filtering and keep track of what answers the pick  */
   questions: any = [];

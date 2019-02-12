@@ -57,7 +57,7 @@
     <div class="col-md-4 col-xs-12">
     </div>
     <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
-      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor" [component]="component"> </app-chart>
+      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor" [domainType]="component"> </app-chart>
     </div>
     <div class="col-md-4 col-xs-12">
     </div>
