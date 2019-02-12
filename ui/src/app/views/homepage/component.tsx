@@ -7,19 +7,21 @@ import {environment} from 'environments/environment';
 import * as React from 'react';
 
 import {ActivatedRoute} from '@angular/router';
-import {Spinner} from "app/components/spinners";
 import {
+  Button,
   Clickable,
-  styles as buttonStyles
+  styles as buttonStyles,
 } from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
 import {
   BillingProjectStatus,
   PageVisit,
 } from 'generated/fetch';
-import {QuickTourReact} from "../quick-tour-modal/component";
+import {QuickTourReact} from '../quick-tour-modal/component';
 
 
 const styles = reactStyles({
@@ -205,32 +207,18 @@ const homepageStyles = reactStyles({
     // -webkit-background-size: cover;
     // -moz-background-size: cover;
     // -o-background-size: cover;
-    backgroundSize: 'cover',
-    height: '100%',
-    marginLeft: '-1rem',
-    marginRight: '-0.6rem',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between'
+    backgroundSize: 'cover', height: '100%', marginLeft: '-1rem', marginRight: '-0.6rem',
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between'
   },
   singleCard: {
-    height: '33.4%',
-    width: '87.34%',
-    minHeight: '18rem',
-    maxHeight: '26rem',
-    display: 'flex',
-    flexDirection: 'column',
-    borderRadius: '5px',
+    height: '33.4%', width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
+    display: 'flex', flexDirection: 'column', borderRadius: '5px',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    border: 'none',
-    marginTop: '1rem'
+    border: 'none', marginTop: '1rem'
   },
   headingLinks: {
-    marginTop: '2.74%',
-    height: '2.68%',
-    fontSize: '14px',
-    color: '#FFFFFF'
+    marginTop: '2.74%', height: '2.68%', fontSize: '14px', color: '#FFFFFF'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -239,19 +227,53 @@ const homepageStyles = reactStyles({
   quickTourLabel: {
     fontSize: 28, lineHeight: '34px', color: '#fff', paddingRight: '2.3rem',
     marginTop: '2rem', width: '31%'
+  },
+  footer: {
+    height: '300px', width: '100%', backgroundColor: '#262262',
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    marginTop: '2%',
+  },
+  footerInner: {
+    display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
+  },
+  footerTitle: {
+    height: '34px', opacity: '0.87', color: '#fff', fontSize: 28,
+    fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
+  },
+  footerText: {
+    height: '176px', opacity: '0.87', color: '#83C3EC', fontSize: '16px',
+    fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
+    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'scroll'
+  },
+  linksBlock: {
+    display: 'flex', marginBottom: '1.4rem', marginLeft: '1.4rem',
+    flexDirection: 'column', flexShrink: 1, minWidth: 0
+  },
+  bottomBanner: {
+    borderTopColor: '#5DAEE1', borderStyle: 'solid', borderWidth: '0.3rem 0 0 0',
+    width: '100%', display: 'flex', backgroundColor: '#483F4B', height: '5rem',
+  },
+  logo: {
+    top: '1rem', left: '6.25rem', height: '3.5rem', width: '7rem',
+    position: 'relative', lineHeight: '85px'
+  },
+  bottomLinks: {
+    color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
+    top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
   }
 });
 
 export class Homepage extends React.Component<{}, {
-  billingProjectInitialized: boolean,
-  firstVisit: boolean;
-  videoOpen: boolean,
   accessTasksLoaded: boolean,
   accessTasksRemaining: boolean,
-  eraCommonsLinked: boolean,
+  billingProjectInitialized: boolean,
   eraCommonsError: string,
+  eraCommonsLinked: boolean,
+  firstVisit: boolean;
+  quickTour: boolean,
   trainingCompleted: boolean,
-  quickTour: boolean
+  videoOpen: boolean,
+  videoLink: ''
 }> {
   private static pageId = 'homepage';
   private route: ActivatedRoute;
@@ -259,22 +281,23 @@ export class Homepage extends React.Component<{}, {
   constructor(props: Object) {
     super(props);
     this.state = {
-      billingProjectInitialized: false,
-      firstVisit: undefined,
-      eraCommonsLinked: undefined,
+      accessTasksLoaded: false,
       accessTasksRemaining: undefined,
+      billingProjectInitialized: false,
       eraCommonsError: '',
+      eraCommonsLinked: undefined,
+      firstVisit: undefined,
+      quickTour: false,
       trainingCompleted: true,
       videoOpen: false,
-      accessTasksLoaded: false,
-      quickTour: false
-    }
+      videoLink: '',
+    };
   }
 
   // TODO: this probably needs to check falsy more explicitly for loading case
-   get accessTasksRemaining(): boolean {
+  get accessTasksRemaining(): boolean {
     return !!(this.state.eraCommonsLinked && this.state.trainingCompleted);
-   }
+  }
 
   componentDidMount() {
     this.validateNihToken();
@@ -315,7 +338,7 @@ export class Homepage extends React.Component<{}, {
             this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
           }
 
-        } catch(ex) {
+        } catch (ex) {
           console.error('error fetching config: ' + ex.toString());
         }
       }
@@ -328,38 +351,55 @@ export class Homepage extends React.Component<{}, {
         //   this.profileStorageService.reload();
         // }, 10000);
       }
-    } catch(e) {
+    } catch (e) {
       console.log('error fetching profile');
     } finally {
       await profileApi().updatePageVisits({ page: Homepage.pageId});
     }
   }
 
-  openVideo(type: string): string {
-    this.setState({videoOpen: true});
-    if (type === 'notebook') {
-      return '/assets/videos/Workbench Tutorial - Notebooks.mp4';
-    } else {
-      return '/assets/videos/Workbench Tutorial - Cohorts.mp4';
-    }
+  openVideo(videoLink: string): void {
+    this.setState({videoOpen: true, videoLink: videoLink});
   }
 
 
   render() {
     const {billingProjectInitialized, firstVisit, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted} = this.state;
+        accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
+        quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
-        //onClick: () => this.setState({quickTour: true})
+        onClick: () => this.setState({quickTour: true})
       }, {
         src: '/assets/images/cohorts-thumbnail.png',
-        //onClick: () => this.openVideo('cohort')
+        onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Cohorts.mp4')
       }, {
         src: '/assets/images/notebooks-thumbnail.png',
-        //onClick: () => this.openVideo('notebook')
+        onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Notebooks.mp4')
       }
     ];
+    const footerLinks = [{
+      title: 'Working Within Researcher Workbench',
+      links: ['Researcher Workbench Mission',
+        'User interface components',
+        'What to do when things go wrong',
+        'Contributing to the Workbench']
+    },
+      {
+        title: 'Workspace',
+        links: ['Workspace interface components',
+          'User interface components',
+          'Collaborating with other researchers',
+          'Sharing and Publishing Workspaces']
+      },
+      {
+        title: 'Working with Notebooks',
+        links: ['Notebook interface components',
+          'Notebooks and data',
+          'Collaborating with other researchers',
+          'Sharing and Publishing Notebooks']
+      }];
 
     return <React.Fragment>
       <div style={homepageStyles.backgroundImage}>
@@ -379,20 +419,53 @@ export class Homepage extends React.Component<{}, {
                 ) :
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
-
         </div>
         <div style={homepageStyles.quickRow}>
           <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
-            {quickTourResources.map(thumbnail => {
-              return <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}} src={thumbnail.src}/>;
-              {/*<Clickable onClick={this.setState({quickTour: true})}>*/}
-                {/*<img src={thumbnail.src}/>*/}
-              {/*</Clickable>*/}
+          {quickTourResources.map(thumbnail => {
+            return <Clickable onClick={thumbnail.onClick}>
+              <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}} src={thumbnail.src}/>
+            </Clickable>;
           })}
         </div>
+        <div>
+          <div style={homepageStyles.footer}>
+            <div style={homepageStyles.footerInner}>
+              <div style={homepageStyles.footerTitle}>How to Use the All of Us Researcher Workbench</div>
+              <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <TooltipTrigger content='Coming Soon' side='left'>
+                  <a href='#' style={{color: '#fff'}}>See all documentation</a>
+                </TooltipTrigger>
+              </div>
+              <div style={{display: 'flex', flexDirection: 'row', width: '87.34%', justifyContent: 'space-between'}}>
+                {footerLinks.map(col => {
+                  return <div style={homepageStyles.linksBlock}>
+                    <div style={homepageStyles.footerText}>
+                      <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
+                      <ul style={{color: '#83C3EC'}}>
+                        {col.links.map(link => {
+                          return <li><a href='#' style={{color: '#83C3EC'}}>{link}</a></li>;
+                        } )}
+                      </ul>
+                    </div>
+                  </div>;
+                })}
+              </div>
+            </div>
+          </div>
+          <div style={homepageStyles.bottomBanner}>
+            <div style={homepageStyles.logo}>
+              <img src='/assets/images/all-of-us-logo-footer.svg'/>
+            </div>
+            <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
+            <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+          </div>
+        </div>
       </div>
-      {/*{firstVisit &&*/}
-        {/*<QuickTourReact closeFunction={() => this.setState({firstVisit: false})} />}*/}
+
+      {quickTour &&
+        <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
+      {videoOpen && <div>{videoLink}</div>}
     </React.Fragment>;
   }
 
@@ -408,10 +481,6 @@ export class HomepageComponent extends ReactWrapperBase {
 }
 
 
-// @Component({
-//   styleUrls: ['./component.css'],
-//   templateUrl: './component.html',
-// })
 // export class HomepageComponent implements OnInit, OnDestroy {
 //   private static pageId = 'homepage';
 //   @ViewChild('myVideo') myVideo: any;
@@ -422,28 +491,6 @@ export class HomepageComponent extends ReactWrapperBase {
 //   firstSignIn: Date;
 //   firstVisit = true;
 //   newPageVisit: PageVisit = { page: HomepageComponent.pageId};
-//   footerLinks = [
-//     {
-//       title: 'Working Within Researcher Workbench',
-//       links: ['Researcher Workbench Mission',
-//         'User interface components',
-//         'What to do when things go wrong',
-//         'Contributing to the Workbench']
-//     },
-//     {
-//       title: 'Workspace',
-//       links: ['Workspace interface components',
-//         'User interface components',
-//         'Collaborating with other researchers',
-//         'Sharing and Publishing Workspaces']
-//     },
-//     {
-//       title: 'Working with Notebooks',
-//       links: ['Notebook interface components',
-//         'Notebooks and data',
-//         'Collaborating with other researchers',
-//         'Sharing and Publishing Notebooks']
-//     }];
 //   quickTour: boolean;
 //   accessTasksRemaining: boolean;
 //   eraCommonsLinked: boolean;
