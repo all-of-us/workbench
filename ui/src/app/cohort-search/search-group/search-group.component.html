@@ -123,7 +123,7 @@
     </clr-dropdown>
   </div>
 
-  <div class="container card-footer" *ngIf="envFlag">
+  <div class="container card-footer" *ngIf="group.get('count') !== -1 && envFlag">
     <div class="row">
       <div class="toggle-switch col-sm-1">
         <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" (click)="getTemporal($event)">
@@ -141,7 +141,20 @@
         </span>
 
         <span *ngIf="!isRequesting">
-          {{ group.get('count') | number }}
+          <ng-container *ngIf="group.get('count') !== null; else countWarning">
+            {{ group.get('count') | number }}
+          </ng-container>
+          <ng-template #countWarning>
+            --
+            <clr-tooltip>
+              <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+              <clr-tooltip-content clrSize="lg" *clrIfOpen>
+                <span>
+                  All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+                </span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </ng-template>
         </span>
         <span *ngIf="error">
           <clr-icon
@@ -180,7 +193,6 @@
           </clr-tooltip-content>
         </clr-tooltip>
       </ng-template>
-
     </span>
     <span *ngIf="error">
       <clr-icon
