@@ -52,7 +52,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CdrVersionDao cdrVersionDao;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ElasticSearchService elasticSearchService;
 
   /**
@@ -108,7 +107,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           CdrVersionDao cdrVersionDao,
                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                           CdrVersionService cdrVersionService,
-                          Provider<WorkbenchConfig> workbenchConfigProvider,
                           ElasticSearchService elasticSearchService) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
@@ -117,7 +115,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.elasticSearchService = elasticSearchService;
   }
 
