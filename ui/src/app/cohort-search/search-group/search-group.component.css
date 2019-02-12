@@ -193,21 +193,21 @@ ul {
   padding: 0;
 }
 
-li:last-child{
-  border: none!important;
-}
+/*li:last-child{*/
+  /*border: none!important;*/
+/*}*/
 .toggle-no-cursor {
   cursor: not-allowed;
 }
 
-.toggle-switch-disable {
-  pointer-events: none;
-}
+/*.toggle-switch-disable {*/
+  /*pointer-events: none;*/
+/*}*/
 
 .form-padding {
   padding-top: 0rem;
 }
 
-clr-icon[shape^=warning-standard] {
-  color: #F57600;
-}
+/*clr-icon[shape^=warning-standard] {*/
+  /*color: #F57600;*/
+/*}*/

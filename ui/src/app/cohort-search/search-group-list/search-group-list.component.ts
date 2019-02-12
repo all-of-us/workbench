@@ -36,6 +36,7 @@ export class SearchGroupListComponent implements OnInit {
     return this.listSize + this.index + 1;
   }
   getTemporalLength(e) {
+    console.log(e)
       this.tempLength.emit(e);
   }
 }

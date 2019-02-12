@@ -37,7 +37,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
-  tempLength: boolean;
+  tempLength: any;
 
   includeSize: number;
   private subscription;
@@ -82,6 +82,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  getTempObj(e) {
+    this.tempLength = e;
+  }
+
   @HostListener('window:resize')
   onResize() {
     this.updateWrapperDimensions();
@@ -94,7 +98,5 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     wrapper.style.minHeight = pixel(window.innerHeight - top - ONE_REM);
   }
 
-  getTempLength(e) {
-    this.tempLength = e;
-  }
+
 }

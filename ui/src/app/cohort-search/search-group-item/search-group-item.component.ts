@@ -18,7 +18,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() itemId: string;
-
+  @Input() itemIndex: number;
 
   error: boolean;
   private item: Map<any, any> = Map();

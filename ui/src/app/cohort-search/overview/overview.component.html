@@ -1,9 +1,6 @@
 <div>
   <div class="overview-header">
     <h2 class="count-header" id="total-count">
-     hi1 {{temporal?.flag}}
-     hi2 {{temporal?.tempLength}}
-     hi3 {{temporal?.length}}
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
@@ -18,7 +15,6 @@
           shape="error-standard"
           size="18"></clr-icon>
       </span>
-      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length) &&  (total$ | async) !== 0 "> - -
       <span *ngIf="!(isRequesting$ | async) && temporal?.flag && (!temporal?.tempLength || !temporal?.length) &&  (total$ | async) !== 0 "> - -
         <clr-icon
           [popper]="errorPopper"

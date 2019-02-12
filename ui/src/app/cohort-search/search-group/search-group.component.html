@@ -22,7 +22,6 @@
     Group {{index + 1}}
   </div>
   <!--********************************Temporal changes start***************************************-->
-
   <div class="card-block" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
@@ -41,21 +40,20 @@
     </clr-dropdown>
     <span class="of-text"> of </span>
   </div>
-
   <!--**********************************Temporal changes end******************************************-->
-<ul>
-  <li *ngFor="let itemId of nonTemporalItems;" class="card-block search-item">
+
+  <div *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block search-item">
     <app-search-group-item
-      (temporalGroupValue)="getTemporalGroup($event)"
       [role]="role"
       [groupId]="groupId"
-      [itemId]="itemId">
+      [itemId]="itemId"
+      [itemIndex]="itemIndex">
     </app-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
-  </li>
-</ul>
+  </div>
 
   <div class="card-block">
+    <ng-template #groupDropDown>
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -81,11 +79,28 @@
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
+    </ng-template>
+    <clr-dropdown *ngIf="temporalFlag; else groupDropDown">
+      <button type="button" class="btn selection-button" clrDropdownTrigger>
+        Add Criteria <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <ng-container *ngFor="let criteria of domainTypes">
+          <button *ngIf="criteria.name !== 'Demographics'"
+                  id="criteria.type domain"
+                  class="dropdown-item"
+                  type="button"
+                  [disabled]="criteria.disabled"
+                  (click)="launchWizard(criteria)"
+                  clrDropdownItem>{{criteria.name}}</button>
+        </ng-container>
+
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </div>
 
   <!--********************************Temporal changes start***************************************-->
   <app-validator-errors [form]="timeForm"></app-validator-errors>
-
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
@@ -102,22 +117,20 @@
           clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
-
-
     <form [formGroup]="timeForm" class="form-padding">
       <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox"
-          type="number"
-          [name]="timeValue"
-          [id]="timeValue"
-          [ngModel] = "timeValue"
-          (change)="getTimeValue($event)"
-          formControlName="inputTimeValue">
+             type="number"
+             [name]="timeValue"
+             [id]="timeValue"
+             [ngModel] = "timeValue"
+             (change)="getTimeValue($event)"
+             formControlName="inputTimeValue">
     </form>
   </div>
 
   <ul *ngIf="temporalFlag">
     <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
-     <app-search-group-item
+      <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
@@ -127,6 +140,7 @@
       </app-search-group-item>
     </li>
   </ul>
+
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
@@ -148,10 +162,10 @@
   </div>
 
   <div class="container card-footer" *ngIf="group.get('count') !== -1">
-    <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
-      <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
-        <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
-        <label class="" for="{{groupId}}">
+    <div class="row">
+      <div class="toggle-switch col-sm-1">
+        <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
+        <label class="" [for]="'toggle'+ index">
           <span class="solid-preview-label"></span>
          </label>
       </div>
@@ -202,37 +216,37 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="group.get('count') !== -1 && !envFlag">
-    Group Count:
-    <span *ngIf="isRequesting"
-          class="spinner spinner-inline"
-          [style.vertical-align]="'middle'">
-      Loading...
-    </span>
-    <span *ngIf="!isRequesting">
-      <ng-container *ngIf="group.get('count') !== null; else countWarning">
-        {{ group.get('count') | number }}
-      </ng-container>
-      <ng-template #countWarning>
-        --
-        <clr-tooltip>
-          <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
-          <clr-tooltip-content clrSize="lg" *clrIfOpen>
-            <span>
-              All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
-            </span>
-          </clr-tooltip-content>
-        </clr-tooltip>
-      </ng-template>
-    </span>
-    <span *ngIf="error">
-      <clr-icon
-        [popper]="errorPopper"
-        [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="18"></clr-icon>
-    </span>
-  </div>
+  <!--<div class="card-footer text-right" *ngIf="group.get('count') !== -1 && !envFlag">-->
+    <!--Group Count:-->
+    <!--<span *ngIf="isRequesting"-->
+          <!--class="spinner spinner-inline"-->
+          <!--[style.vertical-align]="'middle'">-->
+      <!--Loading...-->
+    <!--</span>-->
+    <!--<span *ngIf="!isRequesting">-->
+      <!--<ng-container *ngIf="group.get('count') !== null; else countWarning">-->
+        <!--{{ group.get('count') | number }}-->
+      <!--</ng-container>-->
+      <!--<ng-template #countWarning>-->
+        <!--&#45;&#45;-->
+        <!--<clr-tooltip>-->
+          <!--<clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>-->
+          <!--<clr-tooltip-content clrSize="lg" *clrIfOpen>-->
+            <!--<span>-->
+              <!--All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.-->
+            <!--</span>-->
+          <!--</clr-tooltip-content>-->
+        <!--</clr-tooltip>-->
+      <!--</ng-template>-->
+    <!--</span>-->
+    <!--<span *ngIf="error">-->
+      <!--<clr-icon-->
+        <!--[popper]="errorPopper"-->
+        <!--[popperTrigger]="'hover'"-->
+        <!--shape="error-standard"-->
+        <!--size="18"></clr-icon>-->
+    <!--</span>-->
+  <!--</div>-->
 </div>
 
 <div

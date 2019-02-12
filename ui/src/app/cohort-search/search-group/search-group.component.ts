@@ -63,17 +63,13 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
         this.treeType = i.type;
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
+        // console.log(this.temporalFlag);
         // if(this.temporalItems.length) {
           this.temporalLength.emit( {
             tempLength: this.temporalItems.length,
               flag: this.temporalFlag,
               length: this.nonTemporalItems.length}
             );
-        // }
-        // else {
-        //   this.temporalLength.emit({tempLength: this.temporalItems.length, flag: this.temporalFlag, length: this.nonTemporalItems.length});
-        // }
-
       });
   }
 
@@ -172,10 +168,6 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
     return this.group.get('timeValue');
   }
 
-  get items() {
-    return this.group.get('items', List());
-  }
-
   launchWizard(criteria: any, tempGroup?: number) {
     const itemId = this.actions.generateId('items');
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
@@ -188,7 +180,6 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-
     this.actions.updateTemporal(e.target.checked, this.groupId, this.role);
   }
 
