@@ -103,10 +103,12 @@ SELECT P.PERSON_ID,
     T.NUM_MENTIONS,
     T.FIRST_MENTION,
     T.LAST_MENTION,
+    T.QUANTITY,
+    '' as strength,
     C3.CONCEPT_NAME AS ROUTE
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
-a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, ROUTE_CONCEPT_ID
+a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, QUANTITY, ROUTE_CONCEPT_ID
 FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` A,
 (SELECT PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
 min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATETIME) as LAST_MENTION
@@ -373,10 +375,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting drug data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, start_datetime, standard_name, route, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
- select person_id, data_id, start_datetime, standard_name, route, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
+ (person_id, data_id, start_datetime, standard_name, route, dose, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
+ select person_id, data_id, start_datetime, standard_name, route, dose, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
  last_mention, visit_type
- from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` a"
+ from \`$BQ_PROJECT.$BQ_DATASET.p_drug\` a"
 
 ##################################################
 # insert measurement data into person_all_events #

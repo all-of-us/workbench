@@ -24,11 +24,11 @@
 	"name": "standard_code",
 	"type": "STRING"
 	},
-	{
-	"mode": "NULLABLE",
-	"name": "standard_concept_id",
-	"type": "integer"
-	},
+//	{
+//	"mode": "NULLABLE",
+//	"name": "standard_concept_id",
+//	"type": "integer"
+//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "standard_vocabulary",
@@ -39,21 +39,21 @@
 	"name": "age_at_event",
 	"type": "INTEGER"
 	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "value_concept",
-	"type": "STRING"
-	}, 
+//	{
+//	"mode": "NULLABLE",
+//	"name": "value_concept",
+//	"type": "STRING"
+//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "value_as_number",
 	"type": "FLOAT"
 	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "value_source_value",
-	"type": "STRING"
-	}, 
+//	{
+//	"mode": "NULLABLE",
+//	"name": "value_source_value",
+//	"type": "STRING"
+//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "units",
