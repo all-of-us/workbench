@@ -4,7 +4,7 @@ import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.servi
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {GraphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/enum-defs';
 
 import { FormControl } from '@angular/forms';
 import {
