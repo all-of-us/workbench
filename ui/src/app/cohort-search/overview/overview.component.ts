@@ -4,7 +4,9 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
+
 import {CohortSearchActions, searchRequestError} from 'app/cohort-search/redux';
+
 import {Cohort, CohortsService, Workspace} from 'generated';
 
 const COHORT_TYPE = 'AoU_Discover';
