@@ -617,6 +617,10 @@ export class CohortSearchActions {
       entities.searchRequests[SR_ID][role] = data[role].map(group => {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
+            group.mention = '';
+            group.time= '';
+            group.timeValue= 0;
+            group.timeFrame= '';
             param.code = param.value;
             if (param.attributes) {
               param.hasAttributes = param.attributes.length > 0;
