@@ -1,8 +1,15 @@
-import {userProfileStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import * as React from 'react';
-import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
+
+import {TextInput} from 'app/components/inputs';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {userProfileStore} from 'app/utils/navigation';
+import {Profile} from 'generated';
+import {ProfileApi} from 'generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfilePage} from './component';
+import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
 
 
 describe('ProfilePageComponent', () => {
@@ -13,13 +20,40 @@ describe('ProfilePageComponent', () => {
     return mount(<ProfilePage/>);
   };
 
+  const reload = jest.fn();
+
   beforeEach(() => {
-    userProfileStore.next({profile, reload: () => {}});
+    const profileApi = new ProfileApiStub();
+
+    registerApiClient(ProfileApi, profileApi);
+    // mocking because we don't have access to the angular service
+    reload.mockImplementation(async() => {
+      const newProfile = await profileApi.getMe();
+      userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    });
+
+    userProfileStore.next({profile, reload});
   });
 
   it('should render the profile', () => {
     const wrapper = component();
-    expect(wrapper.find('input').first().props().value).toMatch(profile.givenName);
+    expect(wrapper.find(TextInput).first().prop('value')).toMatch(profile.givenName);
+  });
+
+  it('should save correctly', async() => {
+    const wrapper = component();
+    expect(userProfileStore.getValue().profile.givenName).toEqual(profile.givenName);
+
+    wrapper.find(TextInput).first().simulate('change', {target: {value: 'x'}});
+    wrapper.find('[data-test-id="save profile"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(reload).toHaveBeenCalled();
+  });
+
+  it('should invalidate inputs correctly', () => {
+    const wrapper = component();
+    wrapper.find(TextInput).first().simulate('change', {target: {value: ''}});
+    expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
 });

@@ -76,7 +76,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     const {profileState: {profile}} = this.props;
 
     if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-      this.setState({profileEdits: profile});
+      this.setState({profileEdits: profile}); // for when profile loads after component load
     }
   }
 
@@ -255,6 +255,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               content={!!errors && 'You must correct errors before saving.'}
             >
               <Button
+                data-test-id='save profile'
                 type='purplePrimary'
                 style={{marginLeft: 40}}
                 onClick={() => this.saveProfile()}

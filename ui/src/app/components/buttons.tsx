@@ -15,7 +15,7 @@ export const styles = {
     userSelect: 'none',
     margin: 0, padding: '0rem 0.77rem',
   },
-  baseNeue: {
+  baseNew: {
     display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
     minWidth: '3rem', maxWidth: '15rem',
     height: 50,
@@ -71,7 +71,7 @@ const buttonVariants = {
   },
   purplePrimary: {
     style: {
-      ...styles.baseNeue,
+      ...styles.baseNew,
       backgroundColor: colors.purple[0], color: '#fff',
     },
     disabledStyle: {backgroundColor: colors.gray[4]},
@@ -79,7 +79,7 @@ const buttonVariants = {
   },
   purpleSecondary: {
     style: {
-      ...styles.baseNeue,
+      ...styles.baseNew,
       border: '1px solid', borderColor: colors.purple[0],
       backgroundColor: 'transparent',
       color: colors.purple[0],

@@ -24,6 +24,9 @@ export class ProfileStubVariables {
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
     linkedNihUsername: null,
+    currentPosition: 'some',
+    organization: 'here',
+    areaOfResearch: 'things',
   };
 }
 
