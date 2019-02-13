@@ -816,7 +816,7 @@ public class ProfileControllerTest {
 
     createUser();
 
-    Profile responseProfile = profileController.syncTrainingStatus().getBody();
+    profileController.syncTrainingStatus().getBody();
   }
 
   @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
