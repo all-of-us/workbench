@@ -30,10 +30,8 @@ public class ElasticSearchService {
 
   /**
    * This method will generate counts per the org.pmiops.workbench.model.SearchRequest using elasticsearch.
-   *
-   * @param userRequest
    */
-  public Long elasticCount(SearchRequest userRequest) {
+  public Long elasticCount() {
     //For now if enableElasticsearchBackend is true
     //we get the cluster name, status and log it
     try {
@@ -41,18 +39,17 @@ public class ElasticSearchService {
       ClusterHealthResponse response = client().cluster().health(healthRequest, RequestOptions.DEFAULT);
 
       log.info(String.format("Cluster Name: %s - Cluster Status: %s", response.getClusterName(), response.getStatus().name()));
+      log.info(String.format("Cluster Name: %s - Cluster Status: %s", response.getClusterName(), response.getStatus().name()));
     } catch (IOException e) {
       log.severe(e.getMessage());
     }
-    return getElasticCount(userRequest);
+    return getElasticCount();
   }
 
   /**
    * Get count with Elasticsearch.
-   *
-   * @param userRequest
    */
-  private Long getElasticCount(SearchRequest userRequest) {
+  private Long getElasticCount() {
     //TODO: implement this in a future story
     //Will probably use elasticsearch querybuilders
     //https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-query-builders.html
