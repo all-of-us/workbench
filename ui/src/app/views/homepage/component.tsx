@@ -391,15 +391,16 @@ export class Homepage extends React.Component<{}, {
 
                     </div>
                     <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
-                      {/*<TooltipTrigger content='Your Firecloud billing project is still being
-                      initialized. Workspace creation will be available in a few minutes.'>*/}
+                      <TooltipTrigger content={<div>Your Firecloud billing project is still being
+                        initialized. Workspace creation will be available in a few minutes.</div>}
+                                      disabled={billingProjectInitialized}>
                         <CardButton disabled={!billingProjectInitialized}
                                     onClick={() => navigate(['workspaces/build'])}
                                     style={homepageStyles.addCard}>
                           Create a <br/> New Workspace
                           <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                         </CardButton>
-                      {/*<TooltipTrigger/>*/}
+                      </TooltipTrigger>
                       <div style={{marginRight: '3%', flexGrow: 1, minWidth: 0}}>
                         <div style={{color: '#fff', marginLeft: '1rem'}}>
                           Your Last Accessed Items</div>
@@ -458,7 +459,7 @@ export class Homepage extends React.Component<{}, {
         </div>
       </div>
 
-      {quickTour &&
+      {quickTour && !accessTasksRemaining &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
         <video width='100%' controls autoPlay>
