@@ -827,9 +827,7 @@ public class ProfileControllerTest {
             (HttpStatus.NOT_FOUND.value(), "user not found"));
 
     createUser();
-
-    Profile responseProfile = profileController.syncTrainingStatus().getBody();
-
+    profileController.syncTrainingStatus().getBody();
   }
 
   private Profile createUser() throws Exception {
