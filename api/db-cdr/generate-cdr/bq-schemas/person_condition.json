@@ -14,17 +14,11 @@
 	"name": "start_datetime",
 	"type": "TIMESTAMP"
 	},
-
 	{
 	"mode": "NULLABLE",
 	"name": "standard_code",
 	"type": "STRING"
 	},
-//	{
-//	"mode": "NULLABLE",
-//	"name": "standard_concept_id",
-//	"type": "integer"
-//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "standard_vocabulary",
@@ -40,12 +34,6 @@
 	"name": "source_code",
 	"type": "STRING"
 	},
-
-//	{
-//	"mode": "NULLABLE",
-//	"name": "source_concept_id",
-//	"type": "integer"
-//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "source_vocabulary",
@@ -56,36 +44,11 @@
 	"name": "source_name",
 	"type": "STRING"
 	},
-//	{
-//	"mode": "NULLABLE",
-//	"name": "visit_id",
-//	"type": "INTEGER"
-//	},
-//	{
-//	"mode": "NULLABLE",
-//	"name": "visit_concept_id",
-//	"type": "INTEGER"
-//	},
 	{
 	"mode": "NULLABLE", 
 	"name": "age_at_event",
 	"type": "INTEGER"
-	}, 
-//	{
-//	"mode": "NULLABLE",
-//	"name": "num_mentions",
-//	"type": "INTEGER"
-//	},
-//	{
-//	"mode": "NULLABLE",
-//	"name": "first_mention",
-//	"type": "TIMESTAMP"
-//	},
-//	{
-//	"mode": "NULLABLE",
-//	"name": "last_mention",
-//	"type": "TIMESTAMP"
-//	},
+	},
 	{
 	"mode": "NULLABLE",
 	"name": "visit_type",
