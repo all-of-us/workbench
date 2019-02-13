@@ -1,7 +1,8 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
 import {
   DomainType,
@@ -294,7 +295,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   constructor(
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    private router: Router,
     private reviewAPI: CohortReviewService,
   ) {}
 
@@ -325,8 +325,8 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
 
 
   getDomainsParticipantsData() {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const limit = 10;
 
     this.domainList.map(domainName => {
@@ -351,4 +351,3 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 }
-
