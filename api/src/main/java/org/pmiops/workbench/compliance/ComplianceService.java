@@ -13,7 +13,7 @@ public interface ComplianceService {
      * @return Moodle Id
      * @throws ApiException
      */
-    int getMoodleId(String email) throws ApiException;
+    Integer getMoodleId(String email) throws ApiException;
 
     /**
      * Get the list of badges earned by User

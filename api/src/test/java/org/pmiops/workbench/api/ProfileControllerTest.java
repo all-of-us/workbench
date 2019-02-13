@@ -808,15 +808,13 @@ public class ProfileControllerTest {
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
   }
 
-  @Test(expected = ServerErrorException.class)
   public void testSyncTrainingMoodleIdNotFound() throws Exception {
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL))
-        .thenThrow(new org.pmiops.workbench.moodle.ApiException
-            (HttpStatus.NOT_FOUND.value(), "user not found"));
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(null);
 
     createUser();
 
-    profileController.syncTrainingStatus().getBody();
+    profileController.syncTrainingStatus();
+    verify(complianceTrainingService, never()).getUserBadge(any());
   }
 
   @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)

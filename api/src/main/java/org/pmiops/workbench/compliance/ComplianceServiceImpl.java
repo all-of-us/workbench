@@ -21,11 +21,10 @@ public class ComplianceServiceImpl implements ComplianceService {
   private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
 
   @Override
-  public int getMoodleId(String email) throws ApiException {
+  public Integer getMoodleId(String email) throws ApiException {
     List<MoodleUserResponse> response = api.getMoodleId(TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
     if (response.size() == 0) {
-      throw new ApiException(HttpStatus.NOT_FOUND.value(),
-          "User not found while trying to retrieve moodle Id");
+      return null;
     }
     return response.get(0).getId();
   }

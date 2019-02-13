@@ -507,15 +507,14 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       Integer moodleId = user.getMoodleId();
       if (moodleId == null) {
-        try {
-          moodleId = complianceService.getMoodleId(user.getEmail());
-          user.setMoodleId(moodleId);
-        } catch (ApiException ex) {
-          log.severe(String.format(" Error while retrieving Moodle Id %s ", ex.getMessage()));
-          throw new ServerErrorException(ex);
+        moodleId = complianceService.getMoodleId(user.getEmail());
+        if (moodleId == null) {
+          return ResponseEntity.ok(profile);
         }
+        user.setMoodleId(moodleId);
       }
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
         BadgeDetails badge = badgeResponse.get(0);
         if (badge.getDateexpire() == null) {
