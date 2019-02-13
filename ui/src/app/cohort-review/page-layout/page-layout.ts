@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {currentCohortStore} from 'app/utils/navigation';
 import {ReviewStatus} from 'generated';
 
 @Component({
@@ -10,6 +11,7 @@ import {ReviewStatus} from 'generated';
 })
 export class PageLayout implements OnInit {
 
+  subscription: any;
   create = false;
   constructor(
     private state: ReviewStateService,
@@ -18,8 +20,7 @@ export class PageLayout implements OnInit {
   ) {}
 
   ngOnInit() {
-    const {cohort, review} = this.route.snapshot.data;
-    this.state.cohort.next(cohort);
+    const {review} = this.route.snapshot.data;
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {

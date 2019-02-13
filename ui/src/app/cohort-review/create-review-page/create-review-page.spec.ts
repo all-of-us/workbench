@@ -5,6 +5,7 @@ import {ActivatedRoute} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {currentCohortStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
 import {CreateReviewPage} from './create-review-page';
 
@@ -15,7 +16,6 @@ describe('CreateReviewPage', () => {
     snapshot: {
       data: {
         review: {},
-        cohort: {}
       }
     }
   };
@@ -37,6 +37,11 @@ describe('CreateReviewPage', () => {
       ],
     })
       .compileComponents();
+    currentCohortStore.next({
+      name: '',
+      criteria: '',
+      type: '',
+    });
   }));
 
   beforeEach(() => {

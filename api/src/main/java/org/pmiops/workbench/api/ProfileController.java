@@ -406,6 +406,8 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
     verifyInvitationKey(request.getInvitationKey());
+    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
+    validateProfileFields(request.getProfile());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(), request.getProfile().getUsername(),
@@ -422,8 +424,6 @@ public class ProfileController implements ProfileApiDelegate {
     // It's possible for the profile information to become out of sync with the user's Google
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
-
-    validateProfileFields(request.getProfile());
     User user = userService.createUser(
         request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
@@ -510,7 +510,7 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    String username = updateContactEmailRequest.getUsername();
+    String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
@@ -531,7 +531,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
-    String username = resendRequest.getUsername();
+    String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);

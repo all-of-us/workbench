@@ -71,7 +71,9 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
+      <ClrIcon shape='ellipsis-vertical' size={21}
+               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                 cursor: disabled ? 'auto' : 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -423,13 +425,13 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
                               resourceType={this.resourceType}
-                              onCloneResource={this.cloneResource.bind(this)}
-                              onDeleteResource={this.openConfirmDelete.bind(this)}
-                              onRenameNotebook={this.renameNotebook.bind(this)}
-                              onEditCohort={this.edit.bind(this)}
-                              onEditConceptSet={this.edit.bind(this)}
-                              onReviewCohort={this.reviewCohort.bind(this)}
-                              onOpenJupyterLabNotebook={this.openResource.bind(this, true)}/>
+                              onCloneResource={() => this.cloneResource()}
+                              onDeleteResource={() => this.openConfirmDelete()}
+                              onRenameNotebook={() => this.renameNotebook()}
+                              onEditCohort={() => this.edit()}
+                              onEditConceptSet={() => this.edit()}
+                              onReviewCohort={() => this.reviewCohort()}
+                              onOpenJupyterLabNotebook={() => this.openResource(true)}/>
             <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
               <div style={styles.cardName}
                    data-test-id='card-name'
@@ -449,21 +451,21 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       </Card>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
         <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
-                   onEdit={this.receiveEdit.bind(this)}
-                   onCancel={this.closeEditModal.bind(this)}/>}
+                   onEdit={v => this.receiveEdit(v)}
+                   onCancel={() => this.closeEditModal()}/>}
       {this.state.renaming && this.isNotebook &&
-        <RenameModal notebookName={this.displayName}
+        <RenameModal notebookName={this.props.resourceCard.notebook.name}
                      workspace={{
                        namespace: this.props.resourceCard.workspaceNamespace,
                        name: this.props.resourceCard.workspaceFirecloudName
                      }}
-                     onRename={this.receiveNotebookRename.bind(this)}
-                     onCancel={this.cancelRename.bind(this)}/>}
+                     onRename={() => this.receiveNotebookRename()}
+                     onCancel={() => this.cancelRename()}/>}
       {this.state.confirmDeleting &&
         <ConfirmDeleteModal resourceName={this.displayName}
                             resourceType={this.resourceType}
-                            receiveDelete={this.receiveDelete.bind(this)}
-                            closeFunction={this.closeConfirmDelete.bind(this)}/>}
+                            receiveDelete={() => this.receiveDelete()}
+                            closeFunction={() => this.closeConfirmDelete()}/>}
     </React.Fragment>;
   }
 }

@@ -11,6 +11,7 @@ import {
 
 
 import {cookiesEnabled} from 'app/utils';
+import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -93,6 +94,12 @@ export class AppComponent implements OnInit {
         // Terminal navigation events.
         this.initialSpinner = false;
       }
+      if (e instanceof NavigationEnd) {
+        const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+        urlParamsStore.next(params);
+        queryParamsStore.next(queryParams);
+        routeConfigDataStore.next(routeConfig.data);
+      }
     });
 
     this.setGTagManager();
@@ -100,6 +107,10 @@ export class AppComponent implements OnInit {
     if (this.cookiesEnabled) {
       this.setTCellAgent();
     }
+  }
+
+  getLeafRoute(route = this.activatedRoute) {
+    return route.firstChild ? this.getLeafRoute(route.firstChild) : route;
   }
 
   /**

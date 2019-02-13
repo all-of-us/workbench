@@ -97,7 +97,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md grid-header flex-xs-middle info-text col-border"> Synonyms
+          <div class="col-md grid-header flex-xs-middle info-text col-border"> Also Known As
             <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
@@ -174,12 +174,12 @@
           </div>
         </ng-template>
         <div class="col-md flex-xs-middle hand-cursor" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
-          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.slice(0,2).join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
+          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="synonymString[r.conceptId].substring(0,110)" [searchTerm]="prevSearchText"></app-highlight-search>
+          <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="synonymString[r.conceptId]" [searchTerm]="prevSearchText"></app-highlight-search>
+          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="synonymString[r.conceptId].length > 110 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
           </a>
           <ng-template #seeMore>
-            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2"> See More
+            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="synonymString[r.conceptId].length > 100"> See More
               <clr-icon shape="ellipsis-horizontal"></clr-icon>
             </a>
           </ng-template>

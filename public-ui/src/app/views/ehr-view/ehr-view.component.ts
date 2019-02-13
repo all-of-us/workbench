@@ -1,10 +1,11 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {GraphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/enum-defs';
 
 import { FormControl } from '@angular/forms';
 import {
@@ -41,6 +42,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private initSearchSubscription: ISubscription = null;
   /* Show more synonyms when toggled */
   showMoreSynonyms = {};
+  synonymString = {};
   ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
     'distribution for participants at the time the medical concept ' +
     'being queried occurred in their records. \n' +
@@ -157,9 +159,13 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
     this.initSearchSubscription.unsubscribe();
   }
+
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
+    for (const concept of this.items) {
+      this.synonymString[concept.conceptId] = concept.conceptSynonyms.join(', ');
+    }
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
     }
@@ -168,6 +174,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     localStorage.setItem('searchText', '');
     this.loading = false;
   }
+
   private searchDomain(query: string) {
     // Unsubscribe from our initial search subscription if this is called again
     if (this.initSearchSubscription) {
@@ -186,6 +193,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.prevSearchText = query;
     return this.api.searchConcepts(this.searchRequest);
   }
+
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
@@ -195,6 +203,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       row.viewSynonyms = true;
     }
   }
+
   public selectGraph(g) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -204,9 +213,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       this.graphToShow = GraphType.MeasurementBins;
     }
   }
+
   public toggleSynonyms(conceptId) {
     this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
   }
+
   public showToolTip(g) {
     if (g === 'Biological Sex' || g === 'Gender Identity') {
       return 'Gender chart';
@@ -216,9 +227,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       return this.sourcesChartHelpText;
     }
   }
+
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
+
   public expandRow(concepts: any[], r: any) {
     if (r.expanded) {
       r.expanded = false;
@@ -235,6 +248,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
   }
+
   public toggleTopConcepts() {
     this.showTopConcepts = !this.showTopConcepts;
   }

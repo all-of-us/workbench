@@ -23,6 +23,10 @@ export class ProfileStubVariables {
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
+    linkedNihUsername: null,
+    currentPosition: 'some',
+    organization: 'here',
+    areaOfResearch: 'things',
   };
 }
 

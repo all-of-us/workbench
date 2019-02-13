@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 
+import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -59,10 +59,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   constructor(
     private profileStorageService: ProfileStorageService,
-    private route: ActivatedRoute,
-    private router: Router,
     private workspacesService: WorkspacesService,
-  ) {}
+  ) {
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+  }
 
   ngOnInit(): void {
     this.workspacesLoading = true;
@@ -105,7 +106,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build']);
+    navigate(['workspaces/build']);
   }
 
   reloadWorkspaces(): void {

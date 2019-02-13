@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions, CohortSearchState, groupError} from 'app/cohort-search/redux';
 import {environment} from 'environments/environment';
@@ -16,8 +16,9 @@ import {Subscription} from 'rxjs/Subscription';
     '../../styles/buttons.css',
   ]
 })
-export class SearchGroupComponent implements OnInit, OnDestroy {
+export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   @Input() group;
+  @Input() index;
   @Input() role: keyof SearchRequest;
 
   error: boolean;
@@ -41,6 +42,18 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
       .subscribe(error => this.error = error);
   }
 
+  ngAfterViewInit() {
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(() => {
+        if (this.status === 'hidden' || this.status === 'pending') {
+          this.setOverlayPosition();
+        }
+      });
+      const groupDiv = document.getElementById(this.group.get('id'));
+      ro.observe(groupDiv);
+    }
+  }
+
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -53,12 +66,47 @@ export class SearchGroupComponent implements OnInit, OnDestroy {
     return this.group.get('id');
   }
 
+  get status() {
+    return this.group.get('status');
+  }
+
   get items() {
     return this.group.get('items', List());
   }
 
-  remove(event) {
-    this.actions.removeGroup(this.role, this.groupId);
+  remove() {
+    this.hide('pending');
+    const timeoutId = setTimeout(() => {
+      this.actions.removeGroup(this.role, this.groupId);
+    }, 10000);
+    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
+    // have to keep in the redux store
+    this.actions.setTimeoutId('groups', this.groupId, timeoutId);
+  }
+
+  hide(status: string) {
+    setTimeout(() => this.setOverlayPosition());
+    this.actions.removeGroup(this.role, this.groupId, status);
+  }
+
+  enable() {
+    this.actions.enableGroup(this.group);
+  }
+
+  undo() {
+    clearTimeout(this.group.get('timeout'));
+    this.enable();
+  }
+
+  setOverlayPosition() {
+    const groupCard = document.getElementById(this.group.get('id'));
+    if (groupCard) {
+      const {marginBottom, width, height} = window.getComputedStyle(groupCard);
+      const overlay = document.getElementById('overlay_' + this.group.get('id'));
+      const styles = 'width:' + width + '; height:' + height + '; margin: -'
+        + (parseFloat(height) + parseFloat(marginBottom)) + 'px 0 ' + marginBottom + ';';
+      overlay.setAttribute('style', styles);
+    }
   }
 
   launchWizard(criteria: any) {
