@@ -16,11 +16,6 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "time",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "standard_name",
     "type": "STRING"
   },
