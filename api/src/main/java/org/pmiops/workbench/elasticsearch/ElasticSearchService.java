@@ -39,7 +39,6 @@ public class ElasticSearchService {
       ClusterHealthResponse response = client().cluster().health(healthRequest, RequestOptions.DEFAULT);
 
       log.info(String.format("Cluster Name: %s - Cluster Status: %s", response.getClusterName(), response.getStatus().name()));
-      log.info(String.format("Cluster Name: %s - Cluster Status: %s", response.getClusterName(), response.getStatus().name()));
     } catch (IOException e) {
       log.severe(e.getMessage());
     }
