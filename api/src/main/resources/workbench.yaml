@@ -1327,6 +1327,14 @@ definitions:
       username:
         type: string
 
+  # Authorities are a tool used to add discrete permissions to users. We currently
+  # have three authorities that are used:
+  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+  #      the user has requested review to approve or reject.
+  #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
+  #      and is mainly an internal authority for devs to use when setting up an environment.
+  #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
+  #      to perform actions on a user's enabled status and manual verification.
   Authority:
     type: string
     description: actions a user can have authority/permission to perform

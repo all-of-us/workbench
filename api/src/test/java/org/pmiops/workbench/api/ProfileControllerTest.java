@@ -264,20 +264,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testGetIdVerificationsForReview() throws Exception {
-    createUser();
-
-    IdVerificationListResponse response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList().size()).isEqualTo(1);
-
-    IdVerificationReviewRequest request =
-        new IdVerificationReviewRequest().newStatus(IdVerificationStatus.VERIFIED);
-    profileController.reviewIdVerification(user.getUserId(), request);
-    response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList()).isEmpty();
-  }
-
-  @Test
   public void testMe_success() throws Exception {
     createUser();
 

@@ -3,6 +3,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {ClarityModule} from '@clr/angular';
 
 import {
+  AuthDomainService,
   ProfileService,
 } from 'generated';
 
@@ -14,19 +15,20 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {AdminReviewIdVerificationComponent} from 'app/views/admin-review-id-verification/component';
+import {AdminUserComponent} from 'app/views/admin-user/component';
 
-describe('AdminReviewIdVerificationComponent', () => {
-  let fixture: ComponentFixture<AdminReviewIdVerificationComponent>;
+describe('AdminUserComponent', () => {
+  let fixture: ComponentFixture<AdminUserComponent>;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ClarityModule.forRoot()
       ],
       declarations: [
-        AdminReviewIdVerificationComponent
+        AdminUserComponent
       ],
       providers: [
+        { provide: AuthDomainService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
@@ -36,7 +38,7 @@ describe('AdminReviewIdVerificationComponent', () => {
         }
       ]
     }).compileComponents().then(() => {
-      fixture = TestBed.createComponent(AdminReviewIdVerificationComponent);
+      fixture = TestBed.createComponent(AdminUserComponent);
       tick();
     });
   }));

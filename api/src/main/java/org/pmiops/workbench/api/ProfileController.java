@@ -695,7 +695,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<>();
-    for (User user : userService.getNonVerifiedUsers()) {
+    for (User user : userDao.findUsers()) {
       responseList.add(profileService.getProfile(user));
     }
     response.setProfileList(responseList);
@@ -709,7 +709,6 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userDao.findUserByUserId(userId);
     Boolean oldVerification = user.getIdVerificationIsValid();
     String newValue;
-
     if (status == IdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
       newValue = "true";

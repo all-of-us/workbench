@@ -72,6 +72,7 @@ public class ProfileService {
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
+    profile.setDisabled(user.getDisabled());
     if (user.getIdVerificationIsValid() == null) {
       profile.setIdVerificationStatus(IdVerificationStatus.UNVERIFIED);
     } else if (!user.getIdVerificationIsValid()) {
