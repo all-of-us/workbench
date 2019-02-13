@@ -113,13 +113,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    ElasticSearchService elasticSearchService = new ElasticSearchService(configProvider,
-      bigQueryService, participantCounter);
+    ElasticSearchService elasticSearchService = new ElasticSearchService(configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
       participantCounter, criteriaDao, criteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
-      configProvider, elasticSearchService);
+      elasticSearchService, configProvider);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setCdrVersionId(1L);
