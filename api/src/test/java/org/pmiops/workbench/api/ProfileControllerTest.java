@@ -813,8 +813,9 @@ public class ProfileControllerTest {
 
     createUser();
 
-    profileController.syncTrainingStatus();
+    Profile profile = profileController.syncTrainingStatus().getBody();
     verify(complianceTrainingService, never()).getUserBadge(any());
+    assertThat(profile.getTrainingCompletionTime()).isNull();
   }
 
   @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
