@@ -531,8 +531,7 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format");
       throw new ServerErrorException(e);
-    }
-     catch (ApiException ex) {
+    } catch (ApiException ex) {
       if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
         throw new NotFoundException(ex.getMessage());
       }
