@@ -3,6 +3,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {ClarityModule} from '@clr/angular';
 
 import {
+  AuthDomainService,
   ProfileService,
 } from 'generated';
 
@@ -27,6 +28,7 @@ describe('AdminUserComponent', () => {
         AdminUserComponent
       ],
       providers: [
+        { provide: AuthDomainService, useValue: {} },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         {
           provide: ServerConfigService,
