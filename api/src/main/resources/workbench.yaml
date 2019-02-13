@@ -372,7 +372,9 @@ paths:
     post:
       tags:
         - profile
-      description: Check moodle badge/training status
+      summary: Sync moodle badge/training status
+      description: Retrieves moodleId(either from DB or call from Moodle API)
+                   and get Training status on the basis of that
       operationId: syncTrainingStatus
       responses:
         200:

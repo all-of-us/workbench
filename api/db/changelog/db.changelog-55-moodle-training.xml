@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="nehasaxena" id="db.changelog-54-moodle">
+    <changeSet author="nehasaxena" id="db.changelog-55-moodle-training">
       <dropColumn columnName="ethics_training_completion_time" tableName="user"/>         
       <addColumn tableName="user">
         <column name="moodle_id" type="bigint"/>

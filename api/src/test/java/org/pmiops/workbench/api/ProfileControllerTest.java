@@ -30,8 +30,6 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -40,7 +38,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -795,7 +792,7 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSynTrainingWithNoBadge() throws Exception {
+  public void testSyncTrainingWithNoBadge() throws Exception {
     List<BadgeDetails> badgeDetail = new ArrayList<>();
 
     when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
@@ -807,6 +804,31 @@ public class ProfileControllerTest {
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTermsOfServiceCompletionTime()).isNull();
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
   }
+
+  @Test(expected = ServerErrorException.class)
+  public void testSyncTrainingMoodleIdNotFound() throws Exception {
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL))
+        .thenThrow(new org.pmiops.workbench.moodle.ApiException
+            (HttpStatus.NOT_FOUND.value(), "user not found"));
+
+    createUser();
+
+    Profile responseProfile = profileController.syncTrainingStatus().getBody();
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSyncTrainingMoodleIdNotFoundWhileGetUserBadge() throws Exception {
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12))
+        .thenThrow(new org.pmiops.workbench.moodle.ApiException
+            (HttpStatus.NOT_FOUND.value(), "user not found"));
+
+    createUser();
+
+    Profile responseProfile = profileController.syncTrainingStatus().getBody();
+
+  }
+
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))

@@ -492,8 +492,8 @@ public class ProfileController implements ProfileApiDelegate {
    * This methods updates logged in user's training status from Moodle.
    * 1. Check if user have moodle_id,
    *    a. if not retrieve it from MOODLE API and save it in the Database
-   * 2. Using the MOODLE_ID get all of the user's Badge
-   * 3. If user has earned All of Us badge, update the database with
+   * 2. Using the MOODLE_ID get user's Badge
+   * 3. Update the database with
    *    a. training completion time as current time
    *    b. training expiration date with as returned from MOODLE.
    * @return Profile updated with training completion time
@@ -501,12 +501,19 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
     User user = userProvider.get();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     Profile profile = profileService.getProfile(user);
+
     try {
       Integer moodleId = user.getMoodleId();
       if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(user.getEmail());
-        user.setMoodleId(moodleId);
+        try {
+          moodleId = complianceService.getMoodleId(user.getEmail());
+          user.setMoodleId(moodleId);
+        } catch (ApiException ex) {
+          log.severe(String.format(" Error while retrieving Moodle Id %s ", ex.getMessage()));
+          throw new ServerErrorException(ex);
+        }
       }
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
       if (badgeResponse != null && badgeResponse.size() > 0) {
@@ -517,18 +524,21 @@ public class ProfileController implements ProfileApiDelegate {
         } else {
           user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
         }
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         user.setTrainingCompletionTime(now);
         profile.setTrainingCompletionTime(now.getTime());
+        userDao.save(user);
       }
-      userDao.save(user);
-    } catch (ApiException ex) {
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format");
+      throw new ServerErrorException(e);
+    }
+     catch (ApiException ex) {
       if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
         throw new NotFoundException(ex.getMessage());
       }
       throw new ServerErrorException(ex);
     }
-    return ResponseEntity.ok(profile);
+   return ResponseEntity.ok(profile);
   }
 
   @Override

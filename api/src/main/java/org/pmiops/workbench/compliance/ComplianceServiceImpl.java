@@ -22,7 +22,6 @@ public class ComplianceServiceImpl implements ComplianceService {
 
   @Override
   public int getMoodleId(String email) throws ApiException {
-    api.getApiClient().setDebugging(true);
     List<MoodleUserResponse> response = api.getMoodleId(TOKEN, GET_MOODLE_ID_SEARCH_FIELD, email);
     if (response.size() == 0) {
       throw new ApiException(HttpStatus.NOT_FOUND.value(),
@@ -32,9 +31,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   }
 
   @Override
-  public List<BadgeDetails>  getUserBadge(int userId) throws ApiException {
-    api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
-    UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userId);
+  public List<BadgeDetails>  getUserBadge(int userMoodleId) throws ApiException {
+    UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, TOKEN, userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());

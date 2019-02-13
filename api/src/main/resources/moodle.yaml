@@ -26,7 +26,7 @@ paths:
   /server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json:
     get:
       summary: Retrieves user information from Moodle.
-      description: "Get user moodle information"
+      description: Get user moodle information
       tags:
         - Moodle
       consumes:
@@ -35,22 +35,22 @@ paths:
       parameters:
         - name: field
           in: query
-          description: Input field eg email on the basis of which information is received
+          description: Input field basis of which information is received. In case of Aou its email
           type: string
           required: false
         - name: values[0]
           in: query
-          description: Value of the input field
+          description: Value of the input field set as query which is user's email in case of Aou
           type: string
           required: false
         - name: wstoken
           in: query
-          description: Token
+          description: Secret Token associated with All of us
           type: string
           required: true
       responses:
         200:
-          description: Response received
+          description: Moodle User Response received
           schema:
             type: array
             items:
@@ -65,7 +65,6 @@ paths:
   /server.php?wsfunction=core_badges_get_user_badges:
    get:
      summary: Get information of badges earned/completed by user.
-     description: "information of badges earned/completed by use"
      tags:
        - Moodle
      consumes:
@@ -74,7 +73,7 @@ paths:
      parameters:
        - name: moodlewsrestformat
          in: query
-         description: Format of the response which will be json
+         description: Format of the response which will be json for AoU
          type: string
          required: true
        - name: userid
@@ -82,7 +81,7 @@ paths:
          type: integer
        - name: wstoken
          in: query
-         description: Unique Token
+         description: Secret Token associated with All of us
          type: string
          required: true
 
@@ -106,6 +105,7 @@ definitions:
       properties:
         id:
           type: integer
+          description: Moodle id
         username:
           type: string
         firstname:
@@ -120,10 +120,6 @@ definitions:
           type: string
         institution:
           type: string
-        firstaccess:
-          type: integer
-        lastaccess:
-          type: integer
         suspended:
           type: boolean
         confirmed:
@@ -148,16 +144,17 @@ definitions:
       properties:
         name:
           type: string
+          description: Name of the badge earned
         description:
           type: string
+          description: Description of the badge earned
         badgeurl:
           type: string
         issuername:
           type: string
-        uniquehash:
-          type: string
         dateissued:
           type: string
+          description: When was the badge issued
         dateexpire:
           type: string
-          
+          description: Expiry date of badge issued, null if set to never
