@@ -14,6 +14,17 @@ export const styles = {
     overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
     userSelect: 'none',
     margin: 0, padding: '0rem 0.77rem',
+  },
+  baseNew: {
+    display: 'inline-flex', justifyContent: 'space-around', alignItems: 'center',
+    minWidth: '3rem', maxWidth: '15rem',
+    height: 50,
+    fontWeight: 500, fontSize: 14, textTransform: 'uppercase', lineHeight: '18px',
+    overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+    userSelect: 'none',
+    margin: 0, padding: '0 22px',
+    borderRadius: 5,
+    boxSizing: 'border-box'
   }
 };
 
@@ -22,31 +33,31 @@ const buttonVariants = {
     style: {
       ...styles.base,
       borderRadius: '0.3rem',
-      backgroundColor: '#262262', color: '#fff',
+      backgroundColor: colors.purple[0], color: '#fff',
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
-    hover: {backgroundColor: '#4356A7'}
+    disabledStyle: {backgroundColor: colors.gray[4]},
+    hover: {backgroundColor: colors.purple[1]}
   },
   secondary: {
     style: {
       ...styles.base,
-      border: '2px solid', borderRadius: '0.2rem', borderColor: '#262262',
+      border: '2px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
       backgroundColor: 'transparent',
-      color: '#262262',
+      color: colors.purple[0],
     },
     disabledStyle: {
-      borderColor: '#c3c3c3',
-      backgroundColor: '#f1f2f2', color: '#c3c3c3'
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
-    hover: {backgroundColor: '#262262', color: '#ffffff'}
+    hover: {backgroundColor: colors.purple[0], color: '#ffffff'}
   },
   darklingPrimary: {
     style: {
       ...styles.base,
       borderRadius: '0.2rem',
-      backgroundColor: '#262262', color: '#ffffff'
+      backgroundColor: colors.purple[0], color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
+    disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: 'rgba(255,255,255,0.3)'}
   },
   darklingSecondary: {
@@ -55,8 +66,29 @@ const buttonVariants = {
       borderRadius: '0.2rem',
       backgroundColor: '#0079b8', color: '#ffffff'
     },
-    disabledStyle: {backgroundColor: '#c3c3c3'},
+    disabledStyle: {backgroundColor: colors.gray[4]},
     hover: {backgroundColor: '#50ACE1'}
+  },
+  purplePrimary: {
+    style: {
+      ...styles.baseNew,
+      backgroundColor: colors.purple[0], color: '#fff',
+    },
+    disabledStyle: {backgroundColor: colors.gray[4]},
+    hover: {backgroundColor: colors.purple[1]}
+  },
+  purpleSecondary: {
+    style: {
+      ...styles.baseNew,
+      border: '1px solid', borderColor: colors.purple[0],
+      backgroundColor: 'transparent',
+      color: colors.purple[0],
+    },
+    disabledStyle: {
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+    },
+    hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
   }
 };
 
@@ -106,6 +138,7 @@ const cardButtonStyle = {
   style: {
     ...cardStyles.card,
     justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
 };

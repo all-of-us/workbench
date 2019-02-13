@@ -1,15 +1,29 @@
-<button
-  type="button"
-  class="btn btn-info-outline btn-sm"
-  id="close-button"
-  (click)="remove($event)">
-  DELETE GROUP
-</button>
-
-<div class="card bg-faded">
+<div [id]="group.get('id')" class="card bg-faded">
+  <div class="card-header">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          type="button"
+          (click)="hide('hidden')"
+          clrDropdownItem>
+          Suppress group from total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete group
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    Group {{index + 1}}
+  </div>
   <!--********************************Temporal changes start***************************************-->
 
-  <div class="card-header" *ngIf="temporalDropdown && envFlag">
+  <div class="card-block" *ngIf="temporalDropdown && envFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
         <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
@@ -30,16 +44,16 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+  <div *ngFor="let itemId of items;" class="card-block search-item">
     <app-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="itemId"
-      [itemIndex]="itemIndex">
+      [itemId]="itemId">
     </app-search-group-item>
+    <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
 
-  <div class="card-header">
+  <div class="card-block">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -109,7 +123,7 @@
     </clr-dropdown>
   </div>
 
-  <div class="container card-footer" *ngIf="envFlag">
+  <div class="container card-footer" *ngIf="group.get('count') !== -1 && envFlag">
     <div class="row">
       <div class="toggle-switch col-sm-1">
         <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" (click)="getTemporal($event)">
@@ -127,7 +141,20 @@
         </span>
 
         <span *ngIf="!isRequesting">
-          {{ group.get('count') | number }}
+          <ng-container *ngIf="group.get('count') !== null; else countWarning">
+            {{ group.get('count') | number }}
+          </ng-container>
+          <ng-template #countWarning>
+            --
+            <clr-tooltip>
+              <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+              <clr-tooltip-content clrSize="lg" *clrIfOpen>
+                <span>
+                  All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+                </span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </ng-template>
         </span>
         <span *ngIf="error">
           <clr-icon
@@ -144,7 +171,7 @@
   <!--********************************Temporal changes End***************************************-->
 
 
-  <div class="card-footer text-right" *ngIf="!envFlag">
+  <div class="card-footer text-right" *ngIf="group.get('count') !== -1 && !envFlag">
     Group Count:
     <span *ngIf="isRequesting"
           class="spinner spinner-inline"
@@ -152,7 +179,20 @@
       Loading...
     </span>
     <span *ngIf="!isRequesting">
-      {{ group.get('count') | number }}
+      <ng-container *ngIf="group.get('count') !== null; else countWarning">
+        {{ group.get('count') | number }}
+      </ng-container>
+      <ng-template #countWarning>
+        --
+        <clr-tooltip>
+          <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+          <clr-tooltip-content clrSize="lg" *clrIfOpen>
+            <span>
+              All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+            </span>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </ng-template>
     </span>
     <span *ngIf="error">
       <clr-icon
@@ -161,6 +201,29 @@
         shape="error-standard"
         size="18"></clr-icon>
     </span>
+  </div>
+</div>
+
+<div
+  [id]="'overlay_' + group.get('id')"
+  class="group-overlay"
+  [class.pending]="status === 'pending'"
+  [class.hidden]="status === 'hidden'">
+  <div class="group-overlay-inner">
+    <ng-container *ngIf="status ==='pending'">
+      <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        This group has been deleted
+        <button class="btn btn-link" (click)="undo()">UNDO</button>
+      </span>
+    </ng-container>
+    <ng-container *ngIf="status ==='hidden'">
+      <clr-icon shape="eye-hide" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        This group has been suppressed
+        <button class="btn btn-link" (click)="enable()">ENABLE</button>
+      </span>
+    </ng-container>
   </div>
 </div>
 

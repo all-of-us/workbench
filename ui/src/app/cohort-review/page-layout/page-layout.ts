@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
@@ -9,7 +9,7 @@ import {ReviewStatus} from 'generated';
   templateUrl: './page-layout.html',
   styleUrls: ['./page-layout.css']
 })
-export class PageLayout implements OnInit, OnDestroy {
+export class PageLayout implements OnInit {
 
   subscription: any;
   create = false;
@@ -21,10 +21,6 @@ export class PageLayout implements OnInit, OnDestroy {
 
   ngOnInit() {
     const {review} = this.route.snapshot.data;
-    this.subscription = this.route.data.subscribe(({cohort}) => {
-      this.state.cohort.next(cohort);
-      currentCohortStore.next(cohort);
-    });
     this.state.review.next(review);
 
     if (review.reviewStatus === ReviewStatus.NONE) {
@@ -32,10 +28,6 @@ export class PageLayout implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['participants'], {relativeTo: this.route});
     }
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 
   reviewCreated(created: boolean) {

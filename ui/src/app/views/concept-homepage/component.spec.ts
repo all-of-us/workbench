@@ -2,11 +2,11 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {HighlightSearchComponent} from 'app/highlight-search/highlight-search.component';
+import {urlParamsStore} from 'app/utils/navigation';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptHomepageComponent} from 'app/views/concept-homepage/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
@@ -27,28 +27,6 @@ import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-s
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateEvent, simulateInput, updateAndTick} from 'testing/test-helpers';
 
-
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      {path: 'concepts'}
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    },
-    data: {
-      workspace: {
-        ...WorkspacesServiceStub.stubWorkspace(),
-        accessLevel: WorkspaceAccessLevel.OWNER,
-      }
-    },
-    queryParams: {}
-  }
-};
 
 function isSelectedDomain(
   domain: DomainInfo, fixture: ComponentFixture<ConceptHomepageComponent>): boolean {
@@ -83,7 +61,6 @@ describe('ConceptHomepageComponent', () => {
       providers: [
         { provide: ConceptsService, useValue: new ConceptsServiceStub() },
         { provide: ConceptSetsService, useValue: new ConceptSetsServiceStub() },
-        { provide: ActivatedRoute, useValue: activatedRouteStub }
       ]}).compileComponents().then(() => {
         fixture = TestBed.createComponent(ConceptHomepageComponent);
         // This tick initializes the component.
@@ -93,6 +70,10 @@ describe('ConceptHomepageComponent', () => {
         // This finishes the page reloading.
         updateAndTick(fixture);
       });
+    urlParamsStore.next({
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
+    });
   }));
 
   it('should have one card per domain.', fakeAsync(() => {
