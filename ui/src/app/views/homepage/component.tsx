@@ -1,7 +1,8 @@
 import {Component, Input} from '@angular/core';
-import {navigate} from 'app/utils/navigation';
+import {navigate, queryParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
@@ -236,7 +237,7 @@ const homepageStyles = reactStyles({
   }
 });
 
-export const Homepage = withUserProfile()(class Homepage extends React.Component<
+export const Homepage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
   { accessTasksLoaded: boolean,
     accessTasksRemaining: boolean,
@@ -248,8 +249,9 @@ export const Homepage = withUserProfile()(class Homepage extends React.Component
     videoOpen: boolean,
     videoLink: string
   }> {
-  private static pageId = 'homepage';
+  private pageId = 'homepage';
   private timer: NodeJS.Timer;
+  private profileTimer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
@@ -276,10 +278,18 @@ export const Homepage = withUserProfile()(class Homepage extends React.Component
     this.checkBillingProjectStatus();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    const {profileState: {profile}} = this.props;
     if (!this.state.billingProjectInitialized) {
       this.checkBillingProjectStatus();
     }
+    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
+      this.callProfile();
+    }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timer);
   }
 
   async validateNihToken() {
@@ -294,33 +304,36 @@ export const Homepage = withUserProfile()(class Homepage extends React.Component
   }
 
   async callProfile() {
-    const {profileState: {profile}} = this.props;
-    if (profile.pageVisits) {
-      if (!profile.pageVisits.some(v => v.page === Homepage.pageId)) {
+    const {profileState: {profile, reload}} = this.props;
+
+    if (fp.isEmpty(profile)) {
+      this.profileTimer = setTimeout(() => {
+        reload();
+      }, 10000);
+    } else {
+      if (!profile.pageVisits.some(v => v.page === this.pageId)) {
         this.setState({quickTour: true});
-        profileApi().updatePageVisits({ page: Homepage.pageId});
+        profileApi().updatePageVisits({ page: this.pageId});
       }
-    }
-    this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
 
-    // TODO
-    // if (this.route.snapshot.queryParams.workbenchAccessTasks) {
-    //   // To reach the access tasks component from dev use /?workbenchAccessTasks=true
-    //   this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
-    // }
-    // this.setState({accessTasksRemaining: this.accessTasksRemaining, accessTasksLoaded: true})
-    try {
-      const config = await configApi().getConfig();
-      if (environment.enableComplianceLockout && config.enforceRegistered) {
-        this.setState({
-          accessTasksRemaining: this.accessTasksRemaining,
-          accessTasksLoaded: true});
+      const {workbenchAccessTasks} = queryParamsStore.getValue();
+      if (workbenchAccessTasks) {
+        this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
-        this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
+        try {
+          const config = await configApi().getConfig();
+          if (environment.enableComplianceLockout && config.enforceRegistered) {
+            this.setState({
+              accessTasksRemaining: this.accessTasksRemaining,
+              accessTasksLoaded: true});
+          } else {
+            this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
+          }
+        } catch (ex) {
+          console.error('error fetching config: ' + ex.toString());
+        }
       }
-
-    } catch (ex) {
-      console.error('error fetching config: ' + ex.toString());
     }
   }
 
