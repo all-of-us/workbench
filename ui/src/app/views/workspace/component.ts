@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -110,15 +110,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   bugReportComponent: BugReportComponent;
 
   constructor(
-    private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,
   ) {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.closeNotebookModal = this.closeNotebookModal.bind(this);
+  }
+
+  ngOnInit(): void {
+    const wsData = currentWorkspaceStore.getValue();
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
     Object.keys(ResearchPurposeItems).forEach((key) => {
@@ -137,12 +139,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
-    this.closeNotebookModal = this.closeNotebookModal.bind(this);
-  }
-
-  ngOnInit(): void {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
     // TODO: RW-1057
     this.profileService.getMe().subscribe(
       profile => {
@@ -203,7 +202,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   buildCohort(): void {
-    this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
+    navigate(['/workspaces', this.wsNamespace, this.wsId, 'cohorts', 'build']);
   }
 
   get workspaceCreationTime(): string {

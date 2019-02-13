@@ -11,7 +11,7 @@ import {
 
 
 import {cookiesEnabled} from 'app/utils';
-import {routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -95,9 +95,10 @@ export class AppComponent implements OnInit {
         this.initialSpinner = false;
       }
       if (e instanceof NavigationEnd) {
-        const leafRoute = this.getLeafRoute();
-        urlParamsStore.next(leafRoute.snapshot.params);
-        routeConfigDataStore.next(leafRoute.snapshot.routeConfig.data);
+        const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+        urlParamsStore.next(params);
+        queryParamsStore.next(queryParams);
+        routeConfigDataStore.next(routeConfig.data);
       }
     });
 

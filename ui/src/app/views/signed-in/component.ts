@@ -1,10 +1,5 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -12,6 +7,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
+import {routeConfigDataStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 import {Authority, BillingProjectStatus} from 'generated';
@@ -76,8 +72,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
-    private router: Router,
-    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -94,7 +88,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
         this.familyName = profile.familyName;
         this.aouAccountEmailAddress = profile.username;
         this.contactEmailAddress = profile.contactEmail;
-        this.minimizeChrome = this.shouldMinimize();
       });
     });
 
@@ -119,12 +112,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.subscriptions.push(
-      this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
-          this.minimizeChrome = this.shouldMinimize();
-        }));
-
+    this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
+      this.minimizeChrome = minimizeChrome;
+    }));
   }
 
   ngOnDestroy() {
@@ -142,14 +132,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
   signOut(): void {
     this.signInService.signOut();
     this.navigateSignOut();
-  }
-
-  shouldMinimize(): boolean {
-    let leaf = this.route.snapshot;
-    while (leaf.firstChild != null) {
-      leaf = leaf.firstChild;
-    }
-    return leaf.data.minimizeChrome;
   }
 
   private navigateSignOut(): void {
