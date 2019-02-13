@@ -14,8 +14,7 @@ public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_LIMIT_PARAM = "limit";
-  private static final String TABLE_PREFIX = "person_";
-  private static final String TABLE_PREFIX_OLD = "p_";
+  private static final String TABLE_PREFIX = "p_";
 
   private static final String VISIT_COLUMNS =
     ", visit_id as visitId\n" +
@@ -123,30 +122,10 @@ public class ReviewQueryBuilder {
       "and rnk <= @" + NAMED_LIMIT_PARAM + "\n" +
       "order by rank, standardName, startDate\n";
 
-  //TODO: remove this
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
     String tableName = TABLE_PREFIX + domain.toString().toLowerCase();
-    String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
-      tableName,
-      pageRequest.getSortColumn(),
-      pageRequest.getSortOrder().toString(),
-      pageRequest.getPageSize(),
-      pageRequest.getPage() * pageRequest.getPageSize());
-    Map<String, QueryParameterValue> params = new HashMap<>();
-    params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
-    return QueryJobConfiguration
-      .newBuilder(finalSql)
-      .setNamedParameters(params)
-      .setUseLegacySql(false)
-      .build();
-  }
-
-  public QueryJobConfiguration buildQueryOld(Long participantId,
-                                             DomainType domain,
-                                             PageRequest pageRequest) {
-    String tableName = TABLE_PREFIX_OLD + domain.toString().toLowerCase();
     String finalSql = String.format(BASE_SQL_TEMPLATE + getSqlTemplate(domain) + FROM + WHERE_TEMPLATE,
       tableName,
       pageRequest.getSortColumn(),
