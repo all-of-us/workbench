@@ -15,11 +15,12 @@ import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withStyle} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withStyle, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
 import {
   BillingProjectStatus,
+  Profile,
 } from 'generated/fetch';
 
 
@@ -235,20 +236,22 @@ const homepageStyles = reactStyles({
   }
 });
 
-export class Homepage extends React.Component<{}, {
-  accessTasksLoaded: boolean,
-  accessTasksRemaining: boolean,
-  billingProjectInitialized: boolean,
-  eraCommonsError: string,
-  eraCommonsLinked: boolean,
-  quickTour: boolean,
-  trainingCompleted: boolean,
-  videoOpen: boolean,
-  videoLink: string
-}> {
+export const Homepage = withUserProfile()(class Homepage extends React.Component<
+  { profileState: { profile: Profile, reload: Function } },
+  { accessTasksLoaded: boolean,
+    accessTasksRemaining: boolean,
+    billingProjectInitialized: boolean,
+    eraCommonsError: string,
+    eraCommonsLinked: boolean,
+    quickTour: boolean,
+    trainingCompleted: boolean,
+    videoOpen: boolean,
+    videoLink: string
+  }> {
   private static pageId = 'homepage';
+  private timer: NodeJS.Timer;
 
-  constructor(props: Object) {
+  constructor(props: any) {
     super(props);
     this.state = {
       accessTasksLoaded: false,
@@ -270,6 +273,13 @@ export class Homepage extends React.Component<{}, {
   componentDidMount() {
     this.validateNihToken();
     this.callProfile();
+    this.checkBillingProjectStatus();
+  }
+
+  componentDidUpdate() {
+    if (!this.state.billingProjectInitialized) {
+      this.checkBillingProjectStatus();
+    }
   }
 
   async validateNihToken() {
@@ -284,47 +294,44 @@ export class Homepage extends React.Component<{}, {
   }
 
   async callProfile() {
+    const {profileState: {profile}} = this.props;
+    if (profile.pageVisits) {
+      if (!profile.pageVisits.some(v => v.page === Homepage.pageId)) {
+        this.setState({quickTour: true});
+        profileApi().updatePageVisits({ page: Homepage.pageId});
+      }
+    }
+    this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+
+    // TODO
+    // if (this.route.snapshot.queryParams.workbenchAccessTasks) {
+    //   // To reach the access tasks component from dev use /?workbenchAccessTasks=true
+    //   this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
+    // }
+    // this.setState({accessTasksRemaining: this.accessTasksRemaining, accessTasksLoaded: true})
     try {
-      const profile = await profileApi().getMe();
-      if (profile.pageVisits) {
-        if (!profile.pageVisits.some(v => v.page === Homepage.pageId)) {
-          this.setState({quickTour: true});
-          profileApi().updatePageVisits({ page: Homepage.pageId});
-        }
-      }
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
-
-      // TODO
-      // if (this.route.snapshot.queryParams.workbenchAccessTasks) {
-      //   // To reach the access tasks component from dev use /?workbenchAccessTasks=true
-      //   this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
-      // }
-      // this.setState({accessTasksRemaining: this.accessTasksRemaining, accessTasksLoaded: true})
-      try {
-        const config = await configApi().getConfig();
-        if (environment.enableComplianceLockout && config.enforceRegistered) {
-          this.setState({
-            accessTasksRemaining: this.accessTasksRemaining,
-            accessTasksLoaded: true});
-        } else {
-          this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
-        }
-
-      } catch (ex) {
-        console.error('error fetching config: ' + ex.toString());
-      }
-
-      if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
-        this.setState({billingProjectInitialized: true});
+      const config = await configApi().getConfig();
+      if (environment.enableComplianceLockout && config.enforceRegistered) {
+        this.setState({
+          accessTasksRemaining: this.accessTasksRemaining,
+          accessTasksLoaded: true});
       } else {
-        console.log('billing project not ready');
-        // todo
-        // this.billingProjectQuery = setTimeout(() => {
-        //   this.profileStorageService.reload();
-        // }, 10000);
+        this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
       }
-    } catch (e) {
-      console.log('error fetching profile ' + e.toString());
+
+    } catch (ex) {
+      console.error('error fetching config: ' + ex.toString());
+    }
+  }
+
+  checkBillingProjectStatus() {
+    const {profileState: {profile, reload}} = this.props;
+    if (profile.freeTierBillingProjectStatus === BillingProjectStatus.Ready) {
+      this.setState({billingProjectInitialized: true});
+    } else {
+      this.timer = setTimeout(() => {
+        reload();
+      }, 10000);
     }
   }
 
@@ -474,7 +481,7 @@ export class Homepage extends React.Component<{}, {
     </React.Fragment>;
   }
 
-}
+});
 
 @Component({
   template: '<div #root></div>'
