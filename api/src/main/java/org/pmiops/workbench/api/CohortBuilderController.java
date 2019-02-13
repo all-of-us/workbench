@@ -53,6 +53,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
   private ElasticSearchService elasticSearchService;
+  private Provider<WorkbenchConfig> configProvider;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -107,7 +108,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           CdrVersionDao cdrVersionDao,
                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
                           CdrVersionService cdrVersionService,
-                          ElasticSearchService elasticSearchService) {
+                          ElasticSearchService elasticSearchService,
+                          Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.criteriaDao = criteriaDao;
@@ -116,6 +118,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
     this.elasticSearchService = elasticSearchService;
+    this.configProvider = configProvider;
   }
 
   @Override
@@ -167,13 +170,24 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   /**
-   * This method will return a count of unique subjects
-   * defined by the provided {@link SearchRequest}.
+   * This method will return a count of unique subjects defined by the provided {@link SearchRequest}.
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Long count = elasticSearchService.elasticCount(request);
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      //for now just log cluster name and status if elastic is enabled
+      elasticSearchService.elasticCount(request);
+    }
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
+      participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
+    );
+    TableResult result = bigQueryService.executeQuery(qjc);
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    List<FieldValue> row = result.iterateAll().iterator().next();
+    Long count = bigQueryService.getLong(row, rm.get("count"));
+
     return ResponseEntity.ok(count);
   }
 
