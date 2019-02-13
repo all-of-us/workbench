@@ -158,6 +158,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
                     org.pmiops.workbench.model.Analysis genderIdentityAnalysis=null;
+                    List<org.pmiops.workbench.model.QuestionConcept> subQuestions = null;
                     if(concept.getCountAnalysis() != null){
                         countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
                     }
@@ -170,7 +171,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     if(concept.getGenderIdentityAnalysis() != null){
                         genderIdentityAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderIdentityAnalysis());
                     }
-
+                    if(concept.getSubQuestions() != null) {
+                        subQuestions = concept.getSubQuestions().stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList());
+                    }
 
                     return new org.pmiops.workbench.model.QuestionConcept()
                             .conceptId(concept.getConceptId())
@@ -179,10 +182,12 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .domainId(concept.getDomainId())
                             .countValue(concept.getCountValue())
                             .prevalence(concept.getPrevalence())
+                            .subQuestionCount(concept.getSubQuestionCount())
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
                             .ageAnalysis(ageAnalysis)
-                            .genderIdentityAnalysis(genderIdentityAnalysis);
+                            .genderIdentityAnalysis(genderIdentityAnalysis)
+                            .subQuestions(subQuestions);
 
                 }
             };
@@ -468,6 +473,13 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // Put ids in array for query to get all results at once
             List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
+                if (q.getSubQuestionCount() > 0) {
+                    List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
+                    List<Long> subQuestionConceptIds = subQuestions.stream().map(QuestionConcept::getConceptId).collect(Collectors.toList());
+                    List<AchillesAnalysis> subQuestionAnalyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestionConceptIds.stream().map(s -> String.valueOf(s)).collect(Collectors.toList()));
+                    QuestionConcept.mapAnalysesToQuestions(subQuestions, subQuestionAnalyses);
+                    q.setSubQuestions(subQuestions);
+                }
                 qlist.add(String.valueOf(q.getConceptId()));
             }
 

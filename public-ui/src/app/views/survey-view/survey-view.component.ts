@@ -78,6 +78,37 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           let didNotAnswerCount  = this.survey.participantCount;
           q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
+            if (q.subQuestions) {
+              let matchedQuestionConcepts: QuestionConcept[] = [];
+              matchedQuestionConcepts = q.subQuestions.filter(
+                w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
+              if (matchedQuestionConcepts.length === 0) {
+                const missingQuestionConcept = {
+                  conceptId: a.stratum3,
+                  conceptName: a.stratum4,
+                  domainId: 'ppi',
+                  conceptCode: '',
+                  countValue: a.countValue,
+                  prevalence: a.prevalence,
+                  subQuestionCount: 0,
+                  countAnalysis: this.makeAnalysis(q.countAnalysis),
+                  genderAnalysis: this.makeAnalysis(q.genderAnalysis),
+                  ageAnalysis: this.makeAnalysis(q.ageAnalysis),
+                  genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
+                  subQuestions: null
+                };
+                q.subQuestions.push(missingQuestionConcept);
+                q.subQuestionCount = q.subQuestionCount + 1;
+              }
+              for (const sq of q.subQuestions) {
+                // Expanding biological sex chart by default
+                sq.selectedAnalysis = sq.genderAnalysis;
+                // Removing the sub questions which does not have count analysis object
+                if (sq.countAnalysis.results.length === 0) {
+                  q.subQuestions = q.subQuestions.filter(s => s.conceptId !== sq.conceptId);
+                }
+              }
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -234,6 +265,21 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public convertToNum(s) {
     return Number(s);
+  }
+
+  public makeAnalysis(a) {
+    const analysis = {
+      ...a,
+      results: a.results.filter(w => w.stratum3 === a.stratum3)
+    };
+    return analysis;
+  }
+
+  public removeDescribingWords(text) {
+    if (text && text.toLowerCase().includes('none of these describe me')) {
+      text = text.substring(text.toLowerCase().indexOf('none of these describe me'));
+    }
+    return text;
   }
 
 }
