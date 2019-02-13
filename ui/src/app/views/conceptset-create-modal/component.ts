@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {urlParamsStore} from 'app/utils/navigation';
 import {ConceptSet, ConceptsService, CreateConceptSetRequest, DomainInfo} from 'generated';
 import {ConceptSetsService} from 'generated/api/conceptSets.service';
 import {Domain} from 'generated/model/domain';
@@ -28,9 +28,10 @@ export class CreateConceptSetModalComponent {
 
   constructor(private conceptsService: ConceptsService,
     private conceptSetService: ConceptSetsService,
-    private route: ActivatedRoute) {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+  ) {
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
   }
 
   open(): void {
@@ -76,4 +77,3 @@ export class CreateConceptSetModalComponent {
       });
   }
 }
-

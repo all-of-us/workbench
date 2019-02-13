@@ -10,6 +10,8 @@ import { Observable } from 'rxjs/Rx';
 import { ISubscription } from 'rxjs/Subscription';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
 import {DomainInfosAndSurveyModulesResponse} from '../../../publicGenerated/model/domainInfosAndSurveyModulesResponse';
+import {ConceptGroup} from '../../utils/conceptGroup';
+import {DbConfigService} from '../../utils/db-config.service';
 
 
 @Component({
@@ -58,18 +60,23 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       'procedure': 'Medical concepts that capture information related to activities or ' +
       'processes that are ordered or carried out on individuals for ' +
       'diagnostic or therapeutic purposes are captured by the procedures domain.'};
+    pmConceptGroups: ConceptGroup[];
 
     private subscriptions: ISubscription[] = [];
 
     constructor(private api: DataBrowserService,
                 private route: ActivatedRoute,
-                private router: Router) {
+                private router: Router,
+                public dbc: DbConfigService) {
       this.route.params.subscribe(params => {
         this.dataType = params.dataType;
       });
     }
 
     ngOnInit() {
+      this.dbc.getPmGroups().subscribe(results => {
+        this.pmConceptGroups = results;
+      });
         // Set title based on datatype
       if (this.dataType === this.EHR_DATATYPE) {
         this.title = 'Electronic Health Data';
@@ -145,6 +152,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
       this.subscriptions.push(this.searchText.valueChanges.subscribe(
         (query) => this.loading = true ));
   }
+
   ngOnDestroy() {
     for (const s of this.subscriptions) {
         s.unsubscribe();
@@ -160,6 +168,7 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.surveyResults = results.surveyModules;
     this.loading = false;
   }
+
   public searchDomains(query: string) {
     this.prevSearchText = query;
     localStorage.setItem('searchText', query);
@@ -190,4 +199,14 @@ export class QuickSearchComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/ehr/' + r.domain.toLowerCase());
   }
 
+  public matchPhysicalMeasurements(searchString: string) {
+    if (!this.pmConceptGroups) {
+      return 0;
+    }
+    if (!searchString) {
+      return this.pmConceptGroups.length;
+    }
+    return this.pmConceptGroups.filter(conceptgroup =>
+      conceptgroup.groupName.toLowerCase().includes(searchString.toLowerCase())).length;
+  }
 }

@@ -60,7 +60,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   constructor(
     private profileStorageService: ProfileStorageService,
     private workspacesService: WorkspacesService,
-  ) {}
+  ) {
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+  }
 
   ngOnInit(): void {
     this.workspacesLoading = true;
