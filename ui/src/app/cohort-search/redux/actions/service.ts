@@ -617,10 +617,11 @@ export class CohortSearchActions {
       entities.searchRequests[SR_ID][role] = data[role].map(group => {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
-            group.mention = '';
-            group.time= '';
-            group.timeValue= 0;
-            group.timeFrame= '';
+            console.log(group);
+            group.mention = group.mention?group.mention:'';
+            group.time= group.time?group.time:'';
+            group.timeValue= group.timeValue?group.timeValue:0;
+            group.timeFrame= group.timeFrame?group.timeFrame:'';
             param.code = param.value;
             if (param.attributes) {
               param.hasAttributes = param.attributes.length > 0;
@@ -644,6 +645,7 @@ export class CohortSearchActions {
         return group.id;
       });
     }
+    console.log(entities);
     return fromJS(entities);
   }
 
