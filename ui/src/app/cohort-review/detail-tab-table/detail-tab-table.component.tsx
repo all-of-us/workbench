@@ -1,29 +1,38 @@
 import {Component, Input} from '@angular/core';
-import {Clickable} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
-import {Inplace, InplaceContent, InplaceDisplay} from 'primereact/components/inplace/Inplace';
 import {DataTable} from 'primereact/datatable';
 import {InputText} from 'primereact/inputtext';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
 const styles = reactStyles({
-  pDatatable: {
+  table: {
     fontSize: '12px',
     border: '1px solid #ccc'
   },
-  pDatatableTbody: {
+  tableBody: {
     padding: '5px',
     verticalAlign: 'top',
+    textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
     lineHeight: '0.6rem'
   },
-  sortIcons: {
+  columnHeader: {
+    color: '#262262',
+    fontWeight: 600
+  },
+  filterIcon: {
+    color: '#0086C1',
+    fontSize: '0.5rem',
+    float: 'right'
+  },
+  sortIcon: {
     color: '#2691D0',
     fontSize: '0.5rem'
   }
@@ -43,6 +52,7 @@ export interface DetailTabTableState {
   data: Array<any>;
   loading: boolean;
   filters: any;
+  overlays: any;
   start: number;
   rows: number;
   sortField: string;
@@ -52,12 +62,14 @@ export interface DetailTabTableState {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
     dt: any;
+    overlays = {};
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
         data: null,
         loading: true,
         filters: {},
+        overlays: {},
         start: 0,
         rows: 25,
         sortField: null,
@@ -69,7 +81,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.getParticipantData();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: any) {
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
@@ -106,18 +118,27 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
     }
 
-    onFilter = (event) => {
+    onFilter = (event: any) => {
       this.setState({filters: event.filters});
     }
 
-    onSort = (event) => {
+    onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
     }
 
-    columnFilter = (event) => {
+    columnFilter = (event: any) => {
       const {id, value} = event.target;
       this.dt.filter(value, id, 'contains');
       console.log(this.dt);
+    }
+
+    columnSort = (sortField: string) => {
+      if (this.state.sortField === sortField) {
+        const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
+        this.setState({sortOrder});
+      } else {
+        this.setState({sortField, sortOrder: 1});
+      }
     }
 
     render() {
@@ -125,29 +146,33 @@ export const DetailTabTable = withCurrentWorkspace()(
       const data = this.state.data || [];
 
       const columns = this.props.columns.map((col) => {
-        const filter = <Inplace
-          closable={true}>
-          <InplaceDisplay>
-            <i className='pi pi-filter' />
-          </InplaceDisplay>
-          <InplaceContent>
+        const filter = <React.Fragment>
+          <i
+            id={col.name + '-filter'}
+            className='pi pi-filter'
+            style={styles.filterIcon}
+            onClick={(e) => this.overlays[col.name].toggle(e)} />
+          <OverlayPanel ref={(el) => this.overlays[col.name] = el} appendTo={document.body}>
             <InputText
               value={filters[col.name] ? filters[col.name].value : ''}
               className='p-inputtext p-column-filter'
               id={col.name}
               onChange={this.columnFilter} />
-          </InplaceContent>
-        </Inplace>;
+          </OverlayPanel>
+        </React.Fragment>;
+
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
-        const header = <div>
+        const header = <span
+          onClick={() => this.columnSort(col.name)}
+          style={styles.columnHeader}>
           {col.displayName}
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcons} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcons} />}
-        </div>;
+          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+        </span>;
 
         return <Column
-          style={styles.pDatatableTbody}
+          style={styles.tableBody}
           key={col.name}
           field={col.name}
           header={header}
@@ -157,9 +182,13 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
 
       const style = `
+        body .p-datatable .p-sortable-column.p-highlight {
+          color: #333333;
+          background-color: #f4f4f4;
+        }
         .pi.pi-sort,
         .pi.pi-sort-up,
-        .pi.pi-sort-down{
+        .pi.pi-sort-down {
           display: none;
         }
       `;
@@ -167,7 +196,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <div style={{position: 'relative'}}>
         <style>{style}</style>
         {data && <DataTable
-          style={styles.pDatatable}
+          style={styles.table}
           ref={(el) => this.dt = el}
           value={data}
           filters={filters}
