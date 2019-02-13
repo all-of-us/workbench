@@ -406,6 +406,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
     verifyInvitationKey(request.getInvitationKey());
+    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(), request.getProfile().getUsername(),
@@ -510,7 +511,7 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    String username = updateContactEmailRequest.getUsername();
+    String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
@@ -531,7 +532,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
-    String username = resendRequest.getUsername();
+    String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
