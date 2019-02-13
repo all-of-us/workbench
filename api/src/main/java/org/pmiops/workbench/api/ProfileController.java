@@ -509,6 +509,7 @@ public class ProfileController implements ProfileApiDelegate {
       if (moodleId == null) {
         moodleId = complianceService.getMoodleId(user.getEmail());
         if (moodleId == null) {
+          // User has not yet created/logged into MOODLE
           return ResponseEntity.ok(profile);
         }
         user.setMoodleId(moodleId);
