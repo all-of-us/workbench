@@ -160,19 +160,6 @@ export class WorkbenchAccessTasks extends
   }
 }
 
-@Component({
-  selector: 'app-workbench-access-tasks',
-  template: '<div #root></div>',
-})
-export class WorkbenchAccessTasksComponent extends ReactWrapperBase {
-  @Input('eraCommonsLinked') eraCommonsLinked: WorkbenchAccessTasksProps['eraCommonsLinked'];
-  @Input('eraCommonsError') eraCommonsError: WorkbenchAccessTasksProps['eraCommonsError'];
-  @Input('trainingCompleted') trainingCompleted: WorkbenchAccessTasksProps['trainingCompleted'];
-  constructor() {
-    super(WorkbenchAccessTasks, ['eraCommonsLinked', 'eraCommonsError', 'trainingCompleted']);
-  }
-}
-
 const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
