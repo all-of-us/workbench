@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -61,6 +62,9 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -121,6 +125,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
+  private final ComplianceService complianceService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -132,7 +137,8 @@ public class ProfileController implements ProfileApiDelegate {
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
-      Provider<MailService> mailServiceProvider) {
+      Provider<MailService> mailServiceProvider,
+      Provider<ComplianceService> complianceServiceProvider) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -146,6 +152,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
+    this.complianceService = complianceServiceProvider.get();
   }
 
   @Override
@@ -479,6 +486,58 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> submitTermsOfService() {
     User user = userService.submitTermsOfService();
     return getProfileResponse(saveUserWithConflictHandling(user));
+  }
+
+  /**
+   * This methods updates logged in user's training status from Moodle.
+   * 1. Check if user have moodle_id,
+   *    a. if not retrieve it from MOODLE API and save it in the Database
+   * 2. Using the MOODLE_ID get user's Badge
+   * 3. Update the database with
+   *    a. training completion time as current time
+   *    b. training expiration date with as returned from MOODLE.
+   * @return Profile updated with training completion time
+   */
+  @Override
+  public ResponseEntity<Profile> syncTrainingStatus() {
+    User user = userProvider.get();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    Profile profile = profileService.getProfile(user);
+
+    try {
+      Integer moodleId = user.getMoodleId();
+      if (moodleId == null) {
+        moodleId = complianceService.getMoodleId(user.getEmail());
+        if (moodleId == null) {
+          // User has not yet created/logged into MOODLE
+          return ResponseEntity.ok(profile);
+        }
+        user.setMoodleId(moodleId);
+      }
+      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      // The assumption here is that the User will always get 1 badge which will be AoU
+      if (badgeResponse != null && badgeResponse.size() > 0) {
+        BadgeDetails badge = badgeResponse.get(0);
+        if (badge.getDateexpire() == null) {
+          //This can happen if date expire is set to never
+          user.setTrainingExpirationTime(null);
+        } else {
+          user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+        }
+        user.setTrainingCompletionTime(now);
+        profile.setTrainingCompletionTime(now.getTime());
+        userDao.save(user);
+      }
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format");
+      throw new ServerErrorException(e);
+    } catch (ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        throw new NotFoundException(ex.getMessage());
+      }
+      throw new ServerErrorException(ex);
+    }
+   return ResponseEntity.ok(profile);
   }
 
   @Override

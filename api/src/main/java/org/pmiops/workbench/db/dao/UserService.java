@@ -92,7 +92,7 @@ public class UserService {
   private void updateDataAccessLevel(User user) {
     boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
         && user.getDemographicSurveyCompletionTime() != null
-        && user.getEthicsTrainingCompletionTime() != null
+        && user.getTrainingCompletionTime() != null
         && user.getTermsOfServiceCompletionTime() != null
         && !user.getDisabled()
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
@@ -183,7 +183,7 @@ public class UserService {
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setEthicsTrainingCompletionTime(timestamp);
+        user.setTrainingCompletionTime(timestamp);
         return user;
       }
     });

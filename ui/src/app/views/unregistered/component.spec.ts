@@ -130,7 +130,7 @@ describe('UnregisteredComponent', () => {
   const expectAllRegistrationSubmitted = (p: Profile) => {
     expect(p.requestedIdVerification).toBeTruthy();
     expect(p.termsOfServiceCompletionTime).toBeTruthy();
-    expect(p.ethicsTrainingCompletionTime).toBeTruthy();
+    expect(p.trainingCompletionTime).toBeTruthy();
     expect(p.demographicSurveyCompletionTime).toBeTruthy();
   };
 
