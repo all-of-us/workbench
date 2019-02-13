@@ -177,7 +177,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
       //for now just log cluster name and status if elastic is enabled
-      elasticSearchService.elasticCount(request);
+      elasticSearchService.elasticCount();
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
       participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
