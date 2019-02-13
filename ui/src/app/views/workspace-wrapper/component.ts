@@ -3,7 +3,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
@@ -60,13 +60,14 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
     this.tabPath = this.getTabPath();
 
-    this.displayNavBar = this.shouldDisplay();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
-          this.displayNavBar = this.shouldDisplay();
         }));
+    this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
+      this.displayNavBar = !minimizeChrome;
+    }));
   }
 
   ngOnDestroy() {
@@ -74,14 +75,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     for (const s of this.subscriptions) {
       s.unsubscribe();
     }
-  }
-
-  private shouldDisplay(): boolean {
-    let leaf = this.route.snapshot;
-    while (leaf.firstChild != null) {
-      leaf = leaf.firstChild;
-    }
-    return !leaf.data.minimizeChrome;
   }
 
   private getTabPath(): string {
@@ -100,7 +93,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.deleting = true;
     this.workspacesService.deleteWorkspace(
       workspace.namespace, workspace.id).subscribe(() => {
-        this.router.navigate(['/workspaces']);
+        navigate(['/workspaces']);
       }, () => {
         this.workspaceDeletionError = true;
       });
