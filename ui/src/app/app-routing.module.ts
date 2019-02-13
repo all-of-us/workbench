@@ -5,8 +5,8 @@ import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AdminUserComponent} from './views/admin-user/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';

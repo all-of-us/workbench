@@ -42,11 +42,6 @@ export class AdminUserComponent implements OnInit {
       .subscribe(
         profilesResp => {
           this.profiles = this.sortProfileList(profilesResp.profileList);
-          this.profiles.forEach((profile) => {
-            if (profile.username === 'brubenst3@fake-research-aou.org') {
-              console.log(profile);
-            }
-          });
           this.contentLoaded = true;
         });
   }

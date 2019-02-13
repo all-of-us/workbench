@@ -21,8 +21,8 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AdminUserComponent} from './views/admin-user/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
