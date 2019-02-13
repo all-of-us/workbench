@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {Clickable} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -21,6 +22,10 @@ const styles = reactStyles({
     borderLeft: 0,
     borderRight: 0,
     lineHeight: '0.6rem'
+  },
+  sortIcons: {
+    color: '#2691D0',
+    fontSize: '0.5rem'
   }
 });
 
@@ -40,6 +45,8 @@ export interface DetailTabTableState {
   filters: any;
   start: number;
   rows: number;
+  sortField: string;
+  sortOrder: number;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -52,7 +59,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         loading: true,
         filters: {},
         start: 0,
-        rows: 25
+        rows: 25,
+        sortField: null,
+        sortOrder: 1
       };
     }
 
@@ -101,13 +110,18 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.setState({filters: event.filters});
     }
 
+    onSort = (event) => {
+      this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
+    }
+
     columnFilter = (event) => {
       const {id, value} = event.target;
       this.dt.filter(value, id, 'contains');
+      console.log(this.dt);
     }
 
     render() {
-      const {filters, loading, rows, start} = this.state;
+      const {filters, loading, rows, start, sortField, sortOrder} = this.state;
       const data = this.state.data || [];
 
       const columns = this.props.columns.map((col) => {
@@ -124,24 +138,43 @@ export const DetailTabTable = withCurrentWorkspace()(
               onChange={this.columnFilter} />
           </InplaceContent>
         </Inplace>;
+        const asc = sortField === col.name && sortOrder === 1;
+        const desc = sortField === col.name && sortOrder === -1;
+        const header = <div>
+          {col.displayName}
+          {asc && <i className='pi pi-arrow-up' style={styles.sortIcons} />}
+          {desc && <i className='pi pi-arrow-down' style={styles.sortIcons} />}
+        </div>;
 
         return <Column
           style={styles.pDatatableTbody}
           key={col.name}
           field={col.name}
-          header={col.displayName}
+          header={header}
           sortable={true}
           filter={true}
           filterElement={filter} />;
       });
 
+      const style = `
+        .pi.pi-sort,
+        .pi.pi-sort-up,
+        .pi.pi-sort-down{
+          display: none;
+        }
+      `;
+
       return <div style={{position: 'relative'}}>
+        <style>{style}</style>
         {data && <DataTable
           style={styles.pDatatable}
           ref={(el) => this.dt = el}
           value={data}
           filters={filters}
           onFilter={this.onFilter}
+          sortField={sortField}
+          sortOrder={sortOrder}
+          onSort={this.onSort}
           paginator={true}
           paginatorTemplate='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink'
           first={start}
