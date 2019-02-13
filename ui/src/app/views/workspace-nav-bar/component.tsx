@@ -25,7 +25,7 @@ const styles = reactStyles({
   },
   tab: {
     minWidth: 140, flexGrow: 0, padding: '0 20px',
-    color: colors.gray[4],
+    color: colors.gray[5],
     alignSelf: 'stretch', display: 'flex', justifyContent: 'center', alignItems: 'center'
   },
   active: {

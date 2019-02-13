@@ -10,7 +10,7 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -278,7 +278,10 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
-// todo: add withQueryParams
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withUserProfile = () => {
+  return connectBehaviorSubject(userProfileStore, 'profileState');
+};
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {

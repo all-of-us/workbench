@@ -41,7 +41,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private workspacesService: WorkspacesService
-  ) {}
+  ) {
+    this.share = this.share.bind(this);
+    this.openConfirmDelete = this.openConfirmDelete.bind(this);
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+  }
 
   ngOnInit(): void {
     const handleData = (data) => {

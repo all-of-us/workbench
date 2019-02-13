@@ -3,7 +3,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
@@ -13,6 +12,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
@@ -61,26 +61,6 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
 
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    },
-    data: {
-      workspace: {
-        ...WorkspacesServiceStub.stubWorkspace(),
-        accessLevel: WorkspaceAccessLevel.OWNER,
-      }
-    }
-  }
-};
-
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;
   beforeEach(fakeAsync(() => {
@@ -119,7 +99,6 @@ describe('WorkspaceComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: UserMetricsService, useValue: new UserMetricsServiceStub() },
-        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         {
@@ -144,6 +123,10 @@ describe('WorkspaceComponent', () => {
         fixture = TestBed.createComponent(WorkspaceComponent);
         updateAndTick(fixture);
       });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
     registerApiClient(UserMetricsApi, new UserMetricsApiStub());
   }));
 
