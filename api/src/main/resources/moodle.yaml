@@ -10,7 +10,7 @@ info:
     Service for Moodle Interactions.
   version: "0.1"
 
-host: "aoudev.nnlm.gov"
+host: "aou.nnlm.gov"
 schemes:
   - "https"
 basePath: /webservice/rest
