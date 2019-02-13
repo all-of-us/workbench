@@ -85,6 +85,9 @@ class CommonUiDevStart
     install_dependencies
 
     ENV["ENV_FLAG"] = "--configuration=#{options.env}"
+    if @ui_name == "public-ui"
+      ENV["ENV_FLAG"] = "--environment=#{options.env}"
+    end
     at_exit { common.run_inline %W{docker-compose down} }
 
     # Can't use swagger_regen here as it enters docker.

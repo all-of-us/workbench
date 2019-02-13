@@ -78,10 +78,15 @@ def get_cdr_sql_project(project)
   return ENVIRONMENTS[project][:cdr_sql_instance].split(":")[0]
 end
 
-def ensure_docker(cmd_name, args)
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
+end
+
+def init_new_cdr_db(args)
+  Common.new.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -144,9 +149,9 @@ def dev_up()
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -180,6 +185,7 @@ def setup_local_environment()
   ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
 end
 
+# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
@@ -187,9 +193,9 @@ def run_local_migrations()
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
   end
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
@@ -486,16 +492,19 @@ Common.register_command({
 def docker_clean()
   common = Common.new
 
-  docker_images = `docker ps -aq`.gsub(/\s+/, " ")
-  unless docker_images.empty?
-    common.run_inline("docker rm -f #{docker_images}")
-  end
-  common.run_inline %W{docker-compose down --volumes}
+  # --volumes clears out any cached data between runs, e.g. MySQL database or Elasticsearch.
+  # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
+  #   still be cached and this is fast.
+  common.run_inline %W{docker-compose down --volumes --rmi local}
+
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+
+  # See https://github.com/docker/compose/issues/3447
+  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
@@ -609,15 +618,14 @@ Common.register_command({
   :fn => ->(*args) { drop_cloud_cdr("drop-cloud-cdr", *args) }
 })
 
-
 def run_local_all_migrations()
   common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -628,9 +636,8 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -640,9 +647,8 @@ Common.register_command({
 })
 
 def run_local_public_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -795,7 +801,6 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
     common.run_inline %W{docker-compose run db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
@@ -878,7 +883,7 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   common = Common.new
-  common.run_inline %W{docker-compose run drop-cdr-db}
+  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({

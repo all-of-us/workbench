@@ -21,13 +21,13 @@ function finish {
 }
 trap finish EXIT
 
-envsubst < create_db.sql > $CREATE_DB_FILE
-envsubst < grant_permissions.sql > $GRANT_PERMISSIONS_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/grant_permissions.sql" > $GRANT_PERMISSIONS_FILE
 
 echo "Creating database if it does not exist..."
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREATE_DB_FILE}
 
 echo "Upgrading database..."
-../gradlew update $activity $context
+(cd "$(dirname "${BASH_SOURCE}")" && ../gradlew update $activity $context)
 
 mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${GRANT_PERMISSIONS_FILE}

@@ -8,7 +8,7 @@ import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptAnalysis} from '../../../publicGenerated/model/conceptAnalysis';
 import {ConceptWithAnalysis} from '../../utils/conceptWithAnalysis';
 import {DbConfigService} from '../../utils/db-config.service';
-import {GraphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-concept-charts',
@@ -75,6 +75,7 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
       this.loadingStack.pop();
       }));
   }
+
   public fetchMeasurementGenderResults() {
     if (!this.analyses) {
       return;

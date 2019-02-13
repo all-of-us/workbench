@@ -47,7 +47,7 @@ function finish {
 }
 trap finish EXIT
 
-envsubst < create_db.sql > $CREATE_DB_FILE
+envsubst < "$(dirname "${BASH_SOURCE}")/create_db.sql" > $CREATE_DB_FILE
 
 # Drop and create new cdr database
 if [ "${DROP_IF_EXISTS}" == "Y" ]
@@ -60,7 +60,7 @@ mysql -h ${DB_HOST} --port ${DB_PORT} -u root -p${MYSQL_ROOT_PASSWORD} < ${CREAT
 
 # Use liquibase to generate the schema and data
 echo "Running liquibase "
-../gradlew update -PrunList=${RUN_LIST} ${CONTEXT}
+(cd "$(dirname "${BASH_SOURCE}")/.." && ../gradlew update -PrunList=${RUN_LIST} ${CONTEXT})
 
 # Success
 exit 0

@@ -6,3 +6,9 @@ export enum GraphType {
   MeasurementBins = 'Measurement Bins',
   None = ''
 }
+
+export enum DomainType {
+  EHR = 'ehr',
+  SURVEYS = 'surveys',
+  PHYSICAL_MEASUREMENTS = 'physical measurements'
+}
