@@ -26,7 +26,7 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
-  TEST_PROJECT => {
+  "all-of-us-workbench-test" => {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
@@ -1004,6 +1004,42 @@ Common.register_command({
   :description => "Adds or removes a specified user from the registered access domain.\n" \
                   "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+})
+
+def backfill_gsuite_user_data(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "RW project name to backfill data for."
+  )
+  op.add_validator ->(opts) { raise ArgumentEror unless opts.project}
+  op.parse.validate
+
+  # This command reads from the AoU database and reads/writes to the associated GSuite API.
+  ServiceAccountContext.new(op.opts.project).run do
+    get_gsuite_admin_key(op.opts.project)
+    common = Common.new
+    common.run_inline %W{
+        gradle --info backfillGSuiteUserData
+       -PappArgs=[#{op.opts.dry_run}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "backfill-gsuite-user-data",
+  :description => "Backfills the Institution and contact email address fields in GSuite.\n",
+  :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
 })
 
 def authority_options(cmd_name, args)
