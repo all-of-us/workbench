@@ -23,13 +23,15 @@ import {SetAnnotationListComponent} from 'app/cohort-review/set-annotation-list/
 import {SetAnnotationModalComponent} from 'app/cohort-review/set-annotation-modal/set-annotation-modal.component';
 import {SidebarContentComponent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
-import {CohortAnnotationDefinitionService, CohortReviewService} from 'generated';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortAnnotationDefinitionService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {DetailPage} from './detail-page';
 
 
@@ -47,31 +49,6 @@ describe('DetailPage', () => {
     snapshot: {
       data: {},
     },
-    parent: {
-      snapshot: {
-        data: {
-          workspace: {
-            cdrVersionId: 1
-          },
-          cohort: {
-            name: ''
-          }
-        },
-        params: {
-          ns: '',
-          wsid: '',
-          cid: ''
-        }
-      }
-    },
-    params: {
-      ns: '',
-      wsid: '',
-      cid: ''
-    }
-
-
-
   };
   let route;
   beforeEach(async(() => {
@@ -114,6 +91,10 @@ describe('DetailPage', () => {
       ],
     })
       .compileComponents();
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   beforeEach(() => {

@@ -358,7 +358,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     if (this.profile.demographicSurveyCompletionTime !== null) {
       completedTasks += 1;
     }
-    if (this.profile.ethicsTrainingCompletionTime !== null) {
+    if (this.profile.trainingCompletionTime !== null) {
       completedTasks += 1;
     }
     if (this.profile.termsOfServiceCompletionTime !== null) {

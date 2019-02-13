@@ -12,7 +12,7 @@ export const environment: Environment = {
   debug: false,
   gaId: 'UA-112406425-2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
-  shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
+  shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   enableTemporal: false,
   useZendeskForSupport: false,
   enableJupyterLab: false,

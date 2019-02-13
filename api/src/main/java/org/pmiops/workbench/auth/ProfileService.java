@@ -83,8 +83,8 @@ public class ProfileService {
     if (user.getTermsOfServiceCompletionTime() != null) {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
     }
-    if (user.getEthicsTrainingCompletionTime() != null) {
-      profile.setEthicsTrainingCompletionTime(user.getEthicsTrainingCompletionTime().getTime());
+    if (user.getTrainingCompletionTime() != null) {
+      profile.setTrainingCompletionTime(user.getTrainingCompletionTime().getTime());
     }
     if (user.getDemographicSurveyCompletionTime() != null) {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
