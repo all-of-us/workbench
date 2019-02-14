@@ -63,7 +63,6 @@ import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -124,7 +123,6 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
-  private final ComplianceService complianceService;
 
   @Autowired
   ProfileController(ProfileService profileService, Provider<User> userProvider,
@@ -136,8 +134,7 @@ public class ProfileController implements ProfileApiDelegate {
       NotebooksService notebooksService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
-      Provider<MailService> mailServiceProvider,
-      Provider<ComplianceService> complianceServiceProvider) {
+      Provider<MailService> mailServiceProvider) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -151,7 +148,6 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
-    this.complianceService = complianceServiceProvider.get();
   }
 
   @Override

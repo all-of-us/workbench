@@ -169,11 +169,11 @@ public class ProfileControllerTest {
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config), environment,
-        Providers.of(mailService), Providers.of(complianceTrainingService));
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService), Providers.of(complianceTrainingService));
+        cloudStorageService, notebooksService, Providers.of(config), cloudEnvironment,
+        Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
