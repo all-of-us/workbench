@@ -20,6 +20,7 @@ import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.com
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {
   cancelWizard,
+  clearStore,
   CohortSearchActions,
   finishWizard,
   resetStore
@@ -45,6 +46,7 @@ class MockActions {
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
+  @dispatch() clearStore = clearStore;
 }
 
 describe('CohortSearchComponent', () => {

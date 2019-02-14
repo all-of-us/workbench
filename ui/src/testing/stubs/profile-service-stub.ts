@@ -112,7 +112,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.ethicsTrainingCompletionTime = this.now();
+    this.profile.trainingCompletionTime = this.now();
     return Observable.from([this.profile]);
   }
 }
