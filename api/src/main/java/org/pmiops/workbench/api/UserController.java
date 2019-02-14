@@ -52,12 +52,11 @@ public class UserController implements UserApiDelegate {
     allUsers.parallelStream().forEach(user -> {
       try {
         userService.syncUserTraining(user);
-      }  catch (NotFoundException ex){
-        log.severe(String.format("User not found Exception %s for user id: %s",
-            ex.getMessage(), user.getUserId()));
-      }
-      catch (ApiException ex) {
-        log.severe(String.format("Exception %s for user id: %s",
+      } catch (NotFoundException ex){
+        log.severe(String.format("User Not found Exception: %s For user id: %s", ex.getMessage(),
+            user.getUserId()));
+      } catch (ApiException ex) {
+        log.severe(String.format("Exception: %s For user id: %s",
             ex.getMessage(), user.getUserId()));
       }
     });

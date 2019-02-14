@@ -498,7 +498,7 @@ public class ProfileController implements ProfileApiDelegate {
     try {
       userService.syncUserTraining(user);
     } catch(NotFoundException ex) {
-       throw ex;
+      throw ex;
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
