@@ -57,7 +57,7 @@ public class AuthDomainControllerTest {
   private Provider<User> userProvider;
   @Autowired
   private UserDao userDao;
-
+  @Autowired
   private AuthDomainController authDomainController;
 
   @Before
