@@ -20,12 +20,10 @@ def dbProperties = [
   'spring.datasource.password': '${workbench_db_password}'
 ]
 
-println "HELLO WORLD!!"
 println dbProperties.toString()
-println db_host
-println db_port
-println workbench_db_user
-println workbench_db_password
+println "DB host: ${db_host}"
+println "DB port: ${db_port}"
+println "DB user: ${workbench_db_user}"
 
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
@@ -44,7 +42,6 @@ task setAuthority(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.SetAuthority"
   systemProperties = dbProperties
-  systemProperties += ['spring.profiles.active': 'SetAuthority']
   // appArgs must always be defined for :setAuthority. Guard it with a
   // conditional for the sake of other targets' evaluation.
   if (project.hasProperty("appArgs")) {
@@ -132,7 +129,9 @@ sourceSets {
                   'org/pmiops/workbench/notebooks/NotebooksConfig.java',
                   'org/pmiops/workbench/notebooks/NotebooksRetryHandler.java',
                   'org/pmiops/workbench/db/dao/CohortService.java',
-                  'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java']
+                  'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java',
+                  'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
+      ]
     }
   }
 }

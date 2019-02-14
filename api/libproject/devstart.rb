@@ -1035,19 +1035,16 @@ def backfill_gsuite_user_data(cmd_name, *args)
   #ENV.update(read_db_vars(gcc))
 
   # This command reads from the AoU database and reads/writes to the associated GSuite API.
-  ServiceAccountContext.new(op.opts.project).run do
-    with_cloud_proxy_and_db(gcc) do
-      get_gsuite_admin_key(op.opts.project)
-      print "DB HOST is #{ENV['DB_HOST']}\n"
-      print "DB PORT is #{ENV['DB_PORT']}\n"
-      print "DB USER is #{ENV['WORKBENCH_DB_USER']}\n"
+  #ServiceAccountContext.new(op.opts.project).run do
+  with_cloud_proxy_and_db(gcc) do
+    #get_gsuite_admin_key(op.opts.project)
 
-      common = Common.new
-      common.run_inline %W{
-          gradle --info backfillGSuiteUserData
-         -PappArgs=[#{op.opts.dry_run}]}
-    end
+    common = Common.new
+    common.run_inline %W{
+        gradle --info backfillGSuiteUserData
+       -PappArgs=[#{op.opts.dry_run}]}
   end
+  #end
 end
 
 Common.register_command({
@@ -1088,12 +1085,10 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-    Dir.chdir("tools") do
       common = Common.new
       common.run_inline %W{
         gradle --info setAuthority
        -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-    end
   end
 end
 
@@ -1173,7 +1168,7 @@ def list_clusters(cmd_name, *args)
   ServiceAccountContext.new(gcc.project).run do
     common = Common.new
     common.run_inline %W{
-      gradle --info manageClusters2 -PappArgs=['list','#{api_url}']
+      gradle --info manageClusters -PappArgs=['list','#{api_url}']
     }
   end
 end
