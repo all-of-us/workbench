@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
