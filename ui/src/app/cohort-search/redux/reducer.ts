@@ -96,6 +96,7 @@ import {
 export const rootReducer: Reducer<CohortSearchState> =
   (state: CohortSearchState = initialState, action: RootAction): CohortSearchState => {
     switch (action.type) {
+
       case BEGIN_CRITERIA_REQUEST:
         return state
           .deleteIn(['criteria', 'errors', List([action.kind, action.parentId])])
@@ -328,7 +329,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .setIn(
             ['entities', 'groups', action.groupId],
-
             fromJS({
               id: action.groupId,
               items: [],
@@ -346,8 +346,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             ['entities', 'searchRequests', SR_ID, action.role],
             groupList => groupList.push(action.groupId)
           );
-
-
 
       case ADD_PARAMETER:
         return state
@@ -452,6 +450,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           ['entities', 'parameters'], Map(),
           params => params.filter((_, key) => paramsInUse.has(key))
         );
+      // .setIn(['entities', 'groups', action.groupId, 'count'], -1);
       }
 
       case REMOVE_GROUP:
@@ -497,8 +496,6 @@ export const rootReducer: Reducer<CohortSearchState> =
 
           ...action.context
         }));
-
-
 
       case WIZARD_FINISH: {
         const item = activeItem(state);

@@ -37,7 +37,6 @@ export const getTemporalGroupItems = (groupId) => (state) => {
   return itemObj;
 };
 
-
 export const parameterList = itemId => state =>
   state.getIn(['entities', 'items', itemId, 'searchParameters'], List()).map(
     critId => state.getIn(['entities', 'parameters', critId], Map()));
@@ -74,9 +73,6 @@ export const isRequesting = (kind, id) => state =>
 
 export const isRequstingTotal = state =>
   isRequesting('searchRequests', SR_ID)(state);
-
-
-
 
 /**
  * Wizard

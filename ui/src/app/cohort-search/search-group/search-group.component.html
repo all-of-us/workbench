@@ -42,12 +42,11 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let item of nonTemporalItems; let itemIndex = index;" class="card-block search-item">
+  <div *ngFor="let item of nonTemporalItems" class="card-block search-item">
     <app-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="item.get('id')"
-      [itemIndex]="itemIndex">
+      [itemId]="item.get('id')">
     </app-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
@@ -100,10 +99,7 @@
   </div>
 
   <!--********************************Temporal changes start***************************************-->
-  <!--test{{items}}-->
-  <!--test{{group.get('items').toJS().length}}-->
-  test{{group.get('items').toJS().length > 0}}
-  test{{temporalFlag}}
+
   <app-validator-errors [form]="timeForm"></app-validator-errors>
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
@@ -133,14 +129,13 @@
   </div>
 
   <ul *ngIf="temporalFlag">
-    <li *ngFor="let item of temporalItems; let itemIndex = index;" class="card-block">
+    <li *ngFor="let item of temporalItems" class="card-block">
       <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
         [groupId]="groupId"
-        [itemId]="item.get('id')"
-        [itemIndex]="itemIndex">
+        [itemId]="item.get('id')">
       </app-search-group-item>
     </li>
   </ul>
@@ -165,9 +160,9 @@
     </clr-dropdown>
   </div>
   <ng-container>
-    <div class="container card-footer" *ngIf="group.get('count') !== -1">
-      <div class="row">
-        <div class="toggle-switch col-sm-1">
+    <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 && !groupDiasbleFlag">
+      <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
+        <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
           <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
           <label class="" [for]="'toggle'+ index">
             <span class="solid-preview-label"></span>

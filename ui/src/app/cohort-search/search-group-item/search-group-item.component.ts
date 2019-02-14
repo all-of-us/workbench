@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 
 import {SearchRequest, TreeType} from 'generated';
 import {List, Map} from 'immutable';
@@ -18,7 +18,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() itemId: string;
-  @Input() itemIndex: number;
+  // @Input() itemIndex: number;
 
   error: boolean;
   private item: Map<any, any> = Map();
@@ -32,9 +32,7 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.ngRedux.select(getItem(this.itemId))
-      .subscribe(item => {
-        this.item = item
-      });
+      .subscribe(item => this.item = item);
 
     this.subscription.add(this.ngRedux.select(parameterList(this.itemId))
       .subscribe(rawCodes => this.rawCodes = rawCodes));

@@ -37,9 +37,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
 
   @ViewChild('wrapper') wrapper;
-  tempLength = {};
 
   includeSize: number;
+  tempLength = {};
   private subscription;
 
   constructor(

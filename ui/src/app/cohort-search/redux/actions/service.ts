@@ -124,33 +124,9 @@ export class CohortSearchActions {
     return newId;
   }
   updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest, itmLength) {
-    // const group = getGroup(groupId)(this.state);
-    // let isTemporalItemExist = '';
-    // let itemId = ''
-    // const groupItems = group
-    //   .get('items', List())
-    //   .map(id => getItem(id)(this.state))
-    //   .filterNot(it => it.get('status') === 'deleted');
-    //  groupItems
-    //   .map(it => {
-    //     isTemporalItemExist = it.get('temporalGroup');
-    //     itemId = it.get('id');
-    //   }) ;
-    //  this._updatedTemporal(flag, groupId);
-    // if(isTemporalItemExist) {
-    //   this.requestGroupCount(role, groupId);
-    //   this.requestTotalCount(groupId);
-    // } else {
-    //   console.log('from temporal')
-    //   this.cancelIfRequesting('items', itemId);
-    //   this.cancelTotalIfRequesting();
-    // }
-    //
-    // // role: keyof SearchRequest,
-    // //   groupId: string,
-    // //   itemId: string,
     this._updatedTemporal(flag, groupId);
-    if (itmLength > 0 && flag) {
+    if (itmLength > 0) {
+      console.log('here')
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     } else {
@@ -158,12 +134,6 @@ export class CohortSearchActions {
     }
 
   }
-
-
-//   group.get('items', List()).forEach(itemId => {
-//   this.cancelIfRequesting('items', itemId);
-
-// });
 
   updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
     this._updateWhichMention(mention, groupId);
@@ -253,11 +223,9 @@ export class CohortSearchActions {
     }
   }
 
-  cancelTotalIfRequesting(temp?): void {
+  cancelTotalIfRequesting(): void {
     const searchRequest = getSearchRequest(SR_ID)(this.state);
-    if (searchRequest.get('isRequesting', false) && !temp) {
-      this.cancelChartsRequest('searchRequests', SR_ID);
-    } else {
+    if (searchRequest.get('isRequesting', false)) {
       this.cancelChartsRequest('searchRequests', SR_ID);
     }
   }

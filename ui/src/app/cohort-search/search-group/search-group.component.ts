@@ -116,10 +116,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   get items() {
-    // console.log(this.group.get('items').length);
-    // console.log(this.group.get('items', List).toJS().length);
-    // console.log(this.group.get('items', List).toArray().length);
-    return this.group.get('items', List().toArray().length);
+    return this.group.get('items', List());
   }
 
   remove() {
@@ -215,6 +212,15 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
         return 'X Days after';
       case 'WITHIN_X_DAYS_OF' :
         return 'Within X Days of';
+    }
+  }
+
+  get groupDiasbleFlag() {
+    const itemLength = this.group.get('items', List).toJS().length;
+    if(this.temporalFlag === false && !itemLength ) {
+     return  true;
+    } else {
+      return  false;
     }
   }
 
