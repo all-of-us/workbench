@@ -419,7 +419,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /v1/auth-domain/{groupName}/users:
+  /v1/auth-domain/users:
     post:
       tags:
         - authDomain
@@ -441,10 +441,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       parameters:
-        - in: path
-          name: groupName
-          required: true
-          type: string
         - in: body
           name: request
           description: Request containing user email to update and a disabled status to update the user to.
