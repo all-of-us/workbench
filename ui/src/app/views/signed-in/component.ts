@@ -145,8 +145,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
     return this.locationService.path() === '/admin/review-workspace';
   }
 
-  get reviewIdActive(): boolean {
-    return this.locationService.path() === '/admin/review-id-verification';
+  get userAdminActive(): boolean {
+    return this.locationService.path() === '/admin/user';
   }
 
   get homeActive(): boolean {

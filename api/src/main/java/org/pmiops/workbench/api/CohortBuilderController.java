@@ -20,7 +20,9 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
@@ -50,6 +52,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CdrVersionDao cdrVersionDao;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
+  private ElasticSearchService elasticSearchService;
+  private Provider<WorkbenchConfig> configProvider;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -103,7 +107,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           CriteriaAttributeDao criteriaAttributeDao,
                           CdrVersionDao cdrVersionDao,
                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
-                          CdrVersionService cdrVersionService) {
+                          CdrVersionService cdrVersionService,
+                          ElasticSearchService elasticSearchService,
+                          Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.criteriaDao = criteriaDao;
@@ -111,6 +117,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
+    this.elasticSearchService = elasticSearchService;
+    this.configProvider = configProvider;
   }
 
   @Override
@@ -162,20 +170,25 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   /**
-   * This method will return a count of unique subjects
-   * defined by the provided {@link SearchRequest}.
+   * This method will return a count of unique subjects defined by the provided {@link SearchRequest}.
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
-      new ParticipantCriteria(request)));
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      //for now just log cluster name and status if elastic is enabled
+      elasticSearchService.elasticCount();
+    }
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
+      participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
+    );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<FieldValue> row = result.iterateAll().iterator().next();
-    return ResponseEntity.ok(bigQueryService.getLong(row, rm.get("count")));
+    Long count = bigQueryService.getLong(row, rm.get("count"));
+
+    return ResponseEntity.ok(count);
   }
 
   @Override
