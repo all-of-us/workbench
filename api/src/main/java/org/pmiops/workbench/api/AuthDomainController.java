@@ -5,7 +5,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.model.AuthDomainDisableUserRequest;
+import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -41,7 +41,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<Void> disableUser(String groupName, AuthDomainDisableUserRequest request) {
+  public ResponseEntity<Void> updateUserDisabledStatus(String groupName, UpdateUserDisabledRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
     User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());

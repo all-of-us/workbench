@@ -449,9 +449,9 @@ paths:
           name: request
           description: Request containing user email to update and a disabled status to update the user to.
           schema:
-            $ref: "#/definitions/AuthDomainDisableUserRequest"
+            $ref: "#/definitions/UpdateUserDisabledRequest"
       summary: enable/disable a user to an auth domain if you have manage groups permission
-      operationId: disableUser
+      operationId: updateUserDisabledStatus
 
   /v1/user/{term}:
     get:
@@ -2245,7 +2245,7 @@ definitions:
         items:
           $ref: "#/definitions/Profile"
 
-  AuthDomainDisableUserRequest:
+  UpdateUserDisabledRequest:
     type: object
     required:
       - email
