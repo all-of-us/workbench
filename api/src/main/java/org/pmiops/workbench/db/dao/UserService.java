@@ -259,9 +259,7 @@ public class UserService {
   }
 
   public List<User> getAllUsers() {
-    List<User> allUser = new ArrayList<>();
-    userDao.findAll().forEach(allUser::add);
-    return allUser;
+    return userDao.findUsers();
   }
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
