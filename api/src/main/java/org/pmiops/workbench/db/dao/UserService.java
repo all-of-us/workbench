@@ -334,6 +334,7 @@ public class UserService {
    *    a. training completion time as current time
    *    b. training expiration date with as returned from MOODLE.
    * 3. If there are no badges for a user set training completion time and expiration date as null
+   * @param user
    * @return
    */
   public void syncUserTraining(User user) throws ApiException, NotFoundException {

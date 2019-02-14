@@ -43,7 +43,7 @@ public class UserController implements UserApiDelegate {
   }
 
   /**
-   * Updates moodle information for all User
+   * Updates moodle information for all User in user Database
    * @return
    */
   @Override
