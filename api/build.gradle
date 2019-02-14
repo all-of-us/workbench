@@ -488,16 +488,7 @@ task backfillGSuiteUserData(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
   systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
-// See api/project.rb backfill-gsuite-user-data
-task manageClusters2(type: JavaExec) {
-  classpath = sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ManageClusters"
-  systemProperties = commandLineSpringProperties
+  systemProperties += ['spring.profiles.active': 'BackfillGSuiteUserData']
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }

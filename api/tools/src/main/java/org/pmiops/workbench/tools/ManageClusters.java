@@ -23,9 +23,11 @@ import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 /**
  * ManageClusters is an operational utility for interacting with the Leonardo Notebook clusters
@@ -35,7 +37,8 @@ import org.springframework.context.annotation.Configuration;
  * Note: If this utility later needs database access, replace @Configuration with
  * @SpringBootApplication.
  */
-@Configuration
+@SpringBootApplication
+@Profile("ManageClusters")
 public class ManageClusters {
 
   private static final Logger log = Logger.getLogger(ManageClusters.class.getName());
@@ -133,7 +136,6 @@ public class ManageClusters {
     System.out.println(String.format("%sdeleted %d clusters", dryMsg, deleted.get()));
   }
 
-  @Bean
   public CommandLineRunner run() {
     return (args) -> {
       if (args.length < 1) {

@@ -1020,7 +1020,7 @@ def backfill_gsuite_user_data(cmd_name, *args)
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
 
-  print "Project is #{op.opts.project}"
+  print "Project is #{op.opts.project}\n"
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1029,7 +1029,7 @@ def backfill_gsuite_user_data(cmd_name, *args)
   gcc.validate()
 
   if op.opts.dry_run
-    print "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+    print "DRY RUN -- CHANGES WILL NOT BE PERSISTED\n"
   end
 
   #ENV.update(read_db_vars(gcc))
