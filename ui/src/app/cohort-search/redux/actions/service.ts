@@ -126,7 +126,6 @@ export class CohortSearchActions {
   updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest, itmLength) {
     this._updatedTemporal(flag, groupId);
     if (itmLength > 0) {
-      console.log('here')
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     } else {
@@ -262,53 +261,56 @@ export class CohortSearchActions {
   ): void {
     const group = getGroup(groupId)(this.state);
     const temporal = group.get('temporal');
-      const groupItems = group
-        .get('items', List())
-        .map(id => getItem(id)(this.state))
-        .filterNot(it => it.get('status') === 'deleted');
-      let temporalGroupItems;
-      let nonTemporalGroupItems;
-      let isOnlyActiveChild
-      if(temporal) {
-        temporalGroupItems = groupItems
-          .filter(it => it.get('id') !== itemId && it.get('status') === 'active' && it.get('temporalGroup') === 1)
-          .isEmpty();
-        nonTemporalGroupItems = groupItems
-          .filter(it => it.get('id') !== itemId && it.get('status') === 'active' && it.get('temporalGroup') === 0)
-          .isEmpty();
-      } else {
-         isOnlyActiveChild = groupItems
-          .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
-          .isEmpty();
-      }
-      if (!status) {
-        this._removeGroupItem(groupId, itemId);
-        this.removeId(itemId);
-      } else {
-        const item = getItem(itemId)(this.state);
-        const hasItems = !item.get('searchParameters', List()).isEmpty();
-        const countIsNonZero = item.get('count') !== 0;
-        this.cancelIfRequesting('items', itemId);
-        this.cancelIfRequesting('groups', groupId);
-        this.hideGroupItem(groupId, itemId, status);
-        const onlyChild = (!temporal && isOnlyActiveChild) || (temporal && ( temporalGroupItems || nonTemporalGroupItems))
-        if (hasItems && (countIsNonZero || onlyChild)) {
-          if (onlyChild) {
-            if (groupItems.size === 1 && status === 'pending') {
-              this.clearGroupCount(groupId);
-            }
-            if (this.otherGroupsWithActiveItems(groupId)) {
-              this.requestTotalCount(groupId);
-            } else {
-              this.cancelTotalIfRequesting();
-                this.clearTotalCount(groupId);
-            }
-          } else {
-            this.requestTotalCount();
-            this.requestGroupCount(role, groupId);
+    const groupItems = group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    let temporalGroupItems;
+    let nonTemporalGroupItems;
+    let isOnlyActiveChild;
+    if (temporal) {
+      temporalGroupItems = groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 1)
+        .isEmpty();
+      nonTemporalGroupItems = groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 0)
+        .isEmpty();
+    } else {
+      isOnlyActiveChild = groupItems
+      .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
+        .isEmpty();
+    }
+    if (!status) {
+      this._removeGroupItem(groupId, itemId);
+      this.removeId(itemId);
+    } else {
+      const item = getItem(itemId)(this.state);
+      const hasItems = !item.get('searchParameters', List()).isEmpty();
+      const countIsNonZero = item.get('count') !== 0;
+      this.cancelIfRequesting('items', itemId);
+      this.cancelIfRequesting('groups', groupId);
+      this.hideGroupItem(groupId, itemId, status);
+      const onlyChild = (!temporal && isOnlyActiveChild) ||
+        (temporal && ( temporalGroupItems || nonTemporalGroupItems));
+      if (hasItems && (countIsNonZero || onlyChild)) {
+        if (onlyChild) {
+          if (groupItems.size === 1 && status === 'pending') {
+            this.clearGroupCount(groupId);
           }
+          if (this.otherGroupsWithActiveItems(groupId)) {
+            this.requestTotalCount(groupId);
+          } else {
+            this.cancelTotalIfRequesting();
+            this.clearTotalCount(groupId);
+          }
+        } else {
+          this.requestTotalCount();
+          this.requestGroupCount(role, groupId);
         }
       }
+    }
   }
 
   enableGroup(group: any) {

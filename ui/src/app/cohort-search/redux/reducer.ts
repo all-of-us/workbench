@@ -298,7 +298,7 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case CLEAR_TOTAL_COUNT:
         const temporalActive = state.getIn(['entities', 'groups', action.groupId, 'temporal']);
-        if(temporalActive) {
+        if (temporalActive) {
           return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
         } else {
           return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);

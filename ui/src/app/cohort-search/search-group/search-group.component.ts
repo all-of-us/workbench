@@ -217,16 +217,18 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
 
   get groupDiasbleFlag() {
     const itemLength = this.group.get('items', List).toJS().length;
-    if(this.temporalFlag === false && !itemLength ) {
-     return  true;
+    if (this.temporalFlag === false && !itemLength ) {
+      return true;
     } else {
-      return  false;
+      return false;
     }
   }
 
   get warningFlag() {
-   const tempWarningFlag =  !this.temporalItems.filter(t => t.get('status') === 'active').length;
-   const nonTempWarningFlag =  !this.nonTemporalItems.filter(t => t.get('status') === 'active').length;
-   return tempWarningFlag || nonTempWarningFlag;
+    const tempWarningFlag =
+      !this.temporalItems.filter(t => t.get('status') === 'active').length;
+    const nonTempWarningFlag =
+      !this.nonTemporalItems.filter(t => t.get('status') === 'active').length;
+    return tempWarningFlag || nonTempWarningFlag;
   }
 }
