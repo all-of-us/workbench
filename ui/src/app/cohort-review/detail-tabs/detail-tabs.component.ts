@@ -125,7 +125,6 @@ const labRefRange = {
 export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  cid: number;
   participantsId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -321,7 +320,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.cid = this.route.parent.snapshot.params.cid;
     this.getSubscribedData();
   }
 
@@ -337,20 +335,14 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
         loading: true,
         items: []
       };
-      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(
-        ns,
-        wsid,
-        this.cid,
-        cdrid,
-        this.participantsId,
-        domainName,
-        limit
-      ).subscribe(data => {
-        const participantsData = data;
-        this.chartData[domainName].items = participantsData.items;
-        this.chartData[domainName].conditionTitle = typeToTitle(domainName);
-        this.chartData[domainName].loading = false;
-      });
+      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
+        this.participantsId , domainName, limit)
+        .subscribe(data => {
+          const participantsData = data;
+          this.chartData[domainName].items = participantsData.items;
+          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
+          this.chartData[domainName].loading = false;
+        });
       this.subscription.add(getParticipantsDomainData);
     });
   }
