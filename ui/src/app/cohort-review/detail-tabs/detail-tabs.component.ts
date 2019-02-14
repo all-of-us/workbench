@@ -122,7 +122,6 @@ const answer = {
 export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  cid: number;
   participantsId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -316,7 +315,6 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
-        this.cid = +cid;
         return Observable.forkJoin(
           ...this.domainList.map(domainName => {
             this.chartData[domainName] = {

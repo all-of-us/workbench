@@ -3,6 +3,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {urlParamsStore} from 'app/utils/navigation';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -24,8 +25,18 @@ const styles = reactStyles({
     lineHeight: '0.6rem'
   },
   columnHeader: {
+    background: '#f4f4f4',
     color: '#262262',
     fontWeight: 600
+  },
+  columnBody: {
+    background: '#ffffff',
+    padding: '5px',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    lineHeight: '0.6rem'
   },
   filterIcon: {
     color: '#0086C1',
@@ -34,7 +45,7 @@ const styles = reactStyles({
   },
   sortIcon: {
     color: '#2691D0',
-    fontSize: '0.5rem'
+    fontSize: '0.4rem'
   }
 });
 
@@ -44,7 +55,6 @@ export interface DetailTabTableProps {
   domain: string;
   filterType: PageFilterType;
   participantId: number;
-  cohortId: number;
   workspace: WorkspaceData;
 }
 
@@ -52,7 +62,6 @@ export interface DetailTabTableState {
   data: Array<any>;
   loading: boolean;
   filters: any;
-  overlays: any;
   start: number;
   rows: number;
   sortField: string;
@@ -69,7 +78,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         data: null,
         loading: true,
         filters: {},
-        overlays: {},
         start: 0,
         rows: 25,
         sortField: null,
@@ -94,6 +102,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     getParticipantData() {
       const {cdrVersionId, id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
       const pageFilterRequest = {
         page: 0,
         pageSize: 10000,
@@ -106,7 +115,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       cohortReviewApi().getParticipantData(
         namespace,
         id,
-        this.props.cohortId,
+        +cid,
         +cdrVersionId,
         this.props.participantId,
         pageFilterRequest
@@ -173,6 +182,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
         return <Column
           style={styles.tableBody}
+          bodyStyle={styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
@@ -182,6 +192,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
 
       const style = `
+        body .p-datatable .p-sortable-column:not(.p-highlight):hover,
         body .p-datatable .p-sortable-column.p-highlight {
           color: #333333;
           background-color: #f4f4f4;
@@ -229,7 +240,6 @@ export class DetailTabTableComponent extends ReactWrapperBase {
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
-  @Input('cohortId') cohortId: DetailTabTableProps['cohortId'];
 
   constructor() {
     super(DetailTabTable, [
@@ -238,7 +248,6 @@ export class DetailTabTableComponent extends ReactWrapperBase {
       'domain',
       'filterType',
       'participantId',
-      'cohortId',
     ]);
   }
 }
