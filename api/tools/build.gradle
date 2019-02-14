@@ -20,6 +20,13 @@ def dbProperties = [
   'spring.datasource.password': '${workbench_db_password}'
 ]
 
+println "HELLO WORLD!!"
+println dbProperties.toString()
+println db_host
+println db_port
+println workbench_db_user
+println workbench_db_password
+
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
 task loadConfig(type: JavaExec) {

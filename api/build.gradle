@@ -260,6 +260,7 @@ dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:8.0.11'
@@ -325,6 +326,7 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+
 }
 
 swaggerSources {
@@ -432,10 +434,40 @@ incrementalHotSwap.dependsOn compileJava
 
 task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
 
+
+// Define database-related Spring Boot properties required for running
+// command-line tools. These are set up elsewhere for the main App Engine
+// runtime.
+//
+// These system variables will have been set by the project.rb script before
+// this task is executed.
+def db_host = System.getenv("DB_HOST")
+def db_port = System.getenv("DB_PORT")
+
+def commandLineSpringProperties = [
+  'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+  // Our database isn't configured to allow outside connections (which is good),
+  // so our connections are either local or through the encrypted proxy.
+  'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
+  'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
+  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
+]
+
 // See api/project.rb backfill-gsuite-user-data
 task backfillGSuiteUserData(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See api/project.rb backfill-gsuite-user-data
+task manageClusters2(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ManageClusters"
+  systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }

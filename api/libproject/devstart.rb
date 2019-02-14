@@ -113,6 +113,7 @@ def read_db_vars(gcc)
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{vars_path}
   }))
+  print vars
   if vars.empty?
     Common.new.error "Failed to read #{vars_path}"
     exit 1
@@ -1014,25 +1015,38 @@ def backfill_gsuite_user_data(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--dry_run",
+      "--dry_run=[dry_run]",
       TrueClass,
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
-  op.add_option(
-      "--project [project]",
-      ->(opts, v) { opts.project = v},
-      "RW project name to backfill data for."
-  )
-  op.add_validator ->(opts) { raise ArgumentEror unless opts.project}
+
+  print "Project is #{op.opts.project}"
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
   op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    print "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  #ENV.update(read_db_vars(gcc))
 
   # This command reads from the AoU database and reads/writes to the associated GSuite API.
   ServiceAccountContext.new(op.opts.project).run do
-    get_gsuite_admin_key(op.opts.project)
-    common = Common.new
-    common.run_inline %W{
-        gradle --info backfillGSuiteUserData
-       -PappArgs=[#{op.opts.dry_run}]}
+    with_cloud_proxy_and_db(gcc) do
+      get_gsuite_admin_key(op.opts.project)
+      print "DB HOST is #{ENV['DB_HOST']}\n"
+      print "DB PORT is #{ENV['DB_PORT']}\n"
+      print "DB USER is #{ENV['WORKBENCH_DB_USER']}\n"
+
+      common = Common.new
+      common.run_inline %W{
+          gradle --info backfillGSuiteUserData
+         -PappArgs=[#{op.opts.dry_run}]}
+    end
   end
 end
 
@@ -1157,12 +1171,10 @@ def list_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info manageClusters -PappArgs=['list','#{api_url}']
-      }
-    end
+    common = Common.new
+    common.run_inline %W{
+      gradle --info manageClusters2 -PappArgs=['list','#{api_url}']
+    }
   end
 end
 
