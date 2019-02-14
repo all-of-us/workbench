@@ -7,15 +7,21 @@ import org.joda.time.Period;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.*;
@@ -28,6 +34,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,17 +43,17 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
+@Import({QueryBuilderFactory.class, BigQueryService.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
-  @Autowired
   private CohortBuilderController controller;
 
   private CdrVersion cdrVersion;
@@ -55,10 +62,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private BigQueryService bigQueryService;
 
   @Autowired
+  private ParticipantCounter participantCounter;
+
+  @Autowired
   private CdrVersionDao cdrVersionDao;
 
   @Autowired
+  private CriteriaDao criteriaDao;
+
+  @Autowired
+  private CdrVersionService cdrVersionService;
+
+  @Autowired
+  private CriteriaAttributeDao criteriaAttributeDao;
+
+  @Autowired
   private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+
+  @Mock
+  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
+
 
   @Override
   public List<String> getTableNames() {
@@ -82,6 +108,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
+    testConfig.elasticsearch.enableElasticsearchBackend = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    ElasticSearchService elasticSearchService = new ElasticSearchService(configProvider);
+
+    controller = new CohortBuilderController(bigQueryService,
+      participantCounter, criteriaDao, criteriaAttributeDao,
+      cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
+      elasticSearchService, configProvider);
+
     cdrVersion = new CdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

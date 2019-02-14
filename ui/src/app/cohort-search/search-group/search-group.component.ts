@@ -43,8 +43,8 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
-  tempWarningFlag: any;
   treeType = [];
+  hideGroupContainer = false;
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
       [integerAndRangeValidator('Form', 0, 9999)]),
@@ -116,7 +116,10 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   get items() {
-    return this.group.get('items', List());
+    // console.log(this.group.get('items').length);
+    // console.log(this.group.get('items', List).toJS().length);
+    // console.log(this.group.get('items', List).toArray().length);
+    return this.group.get('items', List().toArray().length);
   }
 
   remove() {
@@ -178,7 +181,8 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   getTemporal(e) {
-    this.actions.updateTemporal(e.target.checked, this.groupId, this.role);
+    const itemLength = this.group.get('items', List).toJS().length;
+    this.actions.updateTemporal(e.target.checked, this.groupId, this.role, itemLength);
   }
 
   getMentionTitle(mentionName) {

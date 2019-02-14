@@ -100,6 +100,10 @@
   </div>
 
   <!--********************************Temporal changes start***************************************-->
+  <!--test{{items}}-->
+  <!--test{{group.get('items').toJS().length}}-->
+  test{{group.get('items').toJS().length > 0}}
+  test{{temporalFlag}}
   <app-validator-errors [form]="timeForm"></app-validator-errors>
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
@@ -161,24 +165,28 @@
     </clr-dropdown>
   </div>
 <!--check if temporal on and groupcount is -1 also show groupcount div-->
-  <div class="container card-footer" *ngIf="group.get('count') !== -1 || temporal || !warningFlag">
-    <div class="row">
-      <div class="toggle-switch col-sm-1">
-        <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
-        <label class="" [for]="'toggle'+ index">
-          <span class="solid-preview-label"></span>
-         </label>
-      </div>
-      <div class="col-sm-5">Temporal</div>
-      <div class="col-sm-6 text-right">
-        Group Count:
-        <span *ngIf="isRequesting"
-              class="spinner spinner-inline"
-              [style.vertical-align]="'middle'">
+  <!--&lt;!&ndash;*ngIf="group.get('count') !== -1 || temporalFlag"&ndash;&gt;-->
+  <!--(group.get('items').toJS().length > 0 && !temporalFlag)-->
+  <!--*ngIf="group.get('items').toJS().length > 0 || group.get('count') !== -1 "-->
+  <ng-container>
+    <div class="container card-footer" *ngIf="group.get('count') !== -1">
+      <div class="row">
+        <div class="toggle-switch col-sm-1">
+          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
+          <label class="" [for]="'toggle'+ index">
+            <span class="solid-preview-label"></span>
+          </label>
+        </div>
+        <div class="col-sm-5">Temporal</div>
+        <div class="col-sm-6 text-right">
+          Group Count:
+          <span *ngIf="isRequesting"
+                class="spinner spinner-inline"
+                [style.vertical-align]="'middle'">
         Loading...
         </span>
 
-        <span *ngIf="!isRequesting">
+          <span *ngIf="!isRequesting">
           <ng-container *ngIf="group.get('count') !== null || temporalFlag; else countWarning">
             {{ group.get('count') | number }}
           </ng-container>
@@ -194,14 +202,14 @@
             </clr-tooltip>
           </ng-template>
         </span>
-        <span *ngIf="error && !temporalFlag">
+          <span *ngIf="error && !temporalFlag">
           <clr-icon
             [popper]="errorPopper"
             [popperTrigger]="'hover'"
             shape="error-standard"
             size="18"></clr-icon>
         </span>
-        <span *ngIf="(!isRequesting && temporalFlag && warningFlag)">
+          <span *ngIf="(!isRequesting && temporalFlag && warningFlag)">
         - -
           <clr-icon
             [popper]="errorPopper"
@@ -209,47 +217,13 @@
             shape="warning-standard"
             size="18"></clr-icon>
         </span>
+        </div>
       </div>
+
     </div>
-
-  </div>
-
+  </ng-container>
   <!--********************************Temporal changes End***************************************-->
-
-
-  <!--<div class="card-footer text-right" *ngIf="group.get('count') !== -1 && !envFlag">-->
-    <!--Group Count:-->
-    <!--<span *ngIf="isRequesting"-->
-          <!--class="spinner spinner-inline"-->
-          <!--[style.vertical-align]="'middle'">-->
-      <!--Loading...-->
-    <!--</span>-->
-    <!--<span *ngIf="!isRequesting">-->
-      <!--<ng-container *ngIf="group.get('count') !== null; else countWarning">-->
-        <!--{{ group.get('count') | number }}-->
-      <!--</ng-container>-->
-      <!--<ng-template #countWarning>-->
-        <!--&#45;&#45;-->
-        <!--<clr-tooltip>-->
-          <!--<clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>-->
-          <!--<clr-tooltip-content clrSize="lg" *clrIfOpen>-->
-            <!--<span>-->
-              <!--All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.-->
-            <!--</span>-->
-          <!--</clr-tooltip-content>-->
-        <!--</clr-tooltip>-->
-      <!--</ng-template>-->
-    <!--</span>-->
-    <!--<span *ngIf="error">-->
-      <!--<clr-icon-->
-        <!--[popper]="errorPopper"-->
-        <!--[popperTrigger]="'hover'"-->
-        <!--shape="error-standard"-->
-        <!--size="18"></clr-icon>-->
-    <!--</span>-->
-  <!--</div>-->
 </div>
-
 <div
   [id]="'overlay_' + group.get('id')"
   class="group-overlay"
@@ -274,7 +248,7 @@
 </div>
 
 <popper-content #errorPopper>
-  <p  *ngIf="error && temporalItems.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="error && !temporalFlag" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
   <p  *ngIf="temporalFlag && warningFlag"  [style.margin]="'0'">
     Please complete the criteria selections before saving temporal relationship.
   </p>

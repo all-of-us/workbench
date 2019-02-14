@@ -32,7 +32,9 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.ngRedux.select(getItem(this.itemId))
-      .subscribe(item => this.item = item);
+      .subscribe(item => {
+        this.item = item
+      });
 
     this.subscription.add(this.ngRedux.select(parameterList(this.itemId))
       .subscribe(rawCodes => this.rawCodes = rawCodes));

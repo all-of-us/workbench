@@ -232,8 +232,8 @@ export const countRequestError =
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
 export const clearTotalCount =
-  (): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
-  ({type: CLEAR_TOTAL_COUNT});
+  (groupId?: string): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
+  ({type: CLEAR_TOTAL_COUNT, groupId});
 
 export const clearGroupCount =
   (groupId: string

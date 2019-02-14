@@ -1,10 +1,10 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from 'app/cohort-review/participant.model';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReviewService,
@@ -54,7 +54,6 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
   ) {}
 
   ngOnChanges() {
@@ -86,8 +85,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
   updateStatus(status): Observable<ParticipantCohortStatus> {
     const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }
 

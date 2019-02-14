@@ -123,9 +123,10 @@ export class CohortSearchActions {
     this.addId(newId);
     return newId;
   }
-  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
+  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest, itmLength) {
     // const group = getGroup(groupId)(this.state);
-    // let isTemporalItemExist = ''
+    // let isTemporalItemExist = '';
+    // let itemId = ''
     // const groupItems = group
     //   .get('items', List())
     //   .map(id => getItem(id)(this.state))
@@ -133,6 +134,7 @@ export class CohortSearchActions {
     //  groupItems
     //   .map(it => {
     //     isTemporalItemExist = it.get('temporalGroup');
+    //     itemId = it.get('id');
     //   }) ;
     //  this._updatedTemporal(flag, groupId);
     // if(isTemporalItemExist) {
@@ -140,11 +142,21 @@ export class CohortSearchActions {
     //   this.requestTotalCount(groupId);
     // } else {
     //   console.log('from temporal')
-    //   this.cancelTotalIfRequesting()
+    //   this.cancelIfRequesting('items', itemId);
+    //   this.cancelTotalIfRequesting();
     // }
+    //
+    // // role: keyof SearchRequest,
+    // //   groupId: string,
+    // //   itemId: string,
     this._updatedTemporal(flag, groupId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount(groupId);
+    if (itmLength > 0 && flag) {
+      this.requestGroupCount(role, groupId);
+      this.requestTotalCount(groupId);
+    } else {
+      this.clearGroupCount(groupId);
+    }
+
   }
 
 
@@ -236,17 +248,16 @@ export class CohortSearchActions {
   }
 
   cancelIfRequesting(kind, id): void {
-    console.log('here1');
     if (isRequesting(kind, id)(this.state)) {
       this.cancelCountRequest(kind, id);
     }
   }
 
-  cancelTotalIfRequesting(): void {
-    console.log('here2');
+  cancelTotalIfRequesting(temp?): void {
     const searchRequest = getSearchRequest(SR_ID)(this.state);
-    if (searchRequest.get('isRequesting', false)) {
-      console.log('---------->>>')
+    if (searchRequest.get('isRequesting', false) && !temp) {
+      this.cancelChartsRequest('searchRequests', SR_ID);
+    } else {
       this.cancelChartsRequest('searchRequests', SR_ID);
     }
   }
@@ -302,8 +313,6 @@ export class CohortSearchActions {
           .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
           .isEmpty();
       }
-
-
       if (!status) {
         this._removeGroupItem(groupId, itemId);
         this.removeId(itemId);
@@ -314,7 +323,7 @@ export class CohortSearchActions {
         this.cancelIfRequesting('items', itemId);
         this.cancelIfRequesting('groups', groupId);
         this.hideGroupItem(groupId, itemId, status);
-        const onlyChild = (!temporal && isOnlyActiveChild)|| (temporal && ( temporalGroupItems || nonTemporalGroupItems))
+        const onlyChild = (!temporal && isOnlyActiveChild) || (temporal && ( temporalGroupItems || nonTemporalGroupItems))
         if (hasItems && (countIsNonZero || onlyChild)) {
           if (onlyChild) {
             if (groupItems.size === 1 && status === 'pending') {
@@ -324,7 +333,7 @@ export class CohortSearchActions {
               this.requestTotalCount(groupId);
             } else {
               this.cancelTotalIfRequesting();
-              this.clearTotalCount();
+                this.clearTotalCount(groupId);
             }
           } else {
             this.requestTotalCount();

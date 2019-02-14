@@ -296,10 +296,16 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case CLEAR_TOTAL_COUNT:
-        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
+        const temporalActive = state.getIn(['entities', 'groups', action.groupId, 'temporal']);
+        if(temporalActive) {
+          return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
+        } else {
+          return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
+        }
 
       case CLEAR_GROUP_COUNT:
-        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1);
+        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1)
+          // .setIn(['entities', 'groups', action.groupId, 'temporal'], false)
 
       case LOAD_CHARTS_RESULTS:
         return state
@@ -406,15 +412,18 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ITEM: {
-        const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
-          .filter(itemId => {
-            const item = getItem(itemId)(state);
-            return item.get('id') !== action.itemId && item.get('status') === 'active';
-          });
-        if (!activeItems.size) {
-          state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
-        }
-        return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
+        // const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
+        //   .filter(itemId => {
+        //     const item = getItem(itemId)(state);
+        //     return item.get('id') !== action.itemId && item.get('status') === 'active';
+        //   });
+        // if (!activeItems.size) {
+        //   state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
+        // }
+        // return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
+
+        return state = state.setIn(['entities', 'groups', action.groupId, 'count'], null)
+          .setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }
 
       case HIDE_GROUP:

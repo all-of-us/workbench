@@ -246,6 +246,7 @@ export interface ActionTypes {
   };
   CLEAR_TOTAL_COUNT: {
     type: typeof CLEAR_TOTAL_COUNT;
+    groupId: string;
   };
   CLEAR_GROUP_COUNT: {
     type: typeof CLEAR_GROUP_COUNT;
