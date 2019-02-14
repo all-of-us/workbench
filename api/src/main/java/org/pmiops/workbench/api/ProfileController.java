@@ -413,6 +413,9 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
     verifyInvitationKey(request.getInvitationKey());
+    String userName = request.getProfile().getUsername();
+    if(userName.isEmpty() || userName.length() < 3 )
+      throw new BadRequestException("Username should be of atleast 3 characters");
     request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     validateProfileFields(request.getProfile());
     com.google.api.services.admin.directory.model.User googleUser =
