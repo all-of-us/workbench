@@ -1,6 +1,11 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import java.time.Clock;
@@ -219,25 +224,23 @@ public class UserControllerTest {
 
   @Test
   public void testBulkTrainingSync() throws ApiException, NotFoundException {
-    Mockito.when(complianceService.getMoodleId("judy@lis.org")).thenReturn(1);
-    Mockito.when(complianceService.getMoodleId("will@lis.org")).thenReturn(2);
-    Mockito.when(complianceService.getMoodleId("penny@lis.org")).thenReturn(null);
-    Mockito.when(complianceService.getMoodleId("maureen@lis.org")).thenReturn(3);
-    Mockito.when(complianceService.getMoodleId("john@lis.org")).thenReturn(null);
-    Mockito.when(complianceService.getMoodleId("bob@lis.org")).thenReturn(null);
+    when(complianceService.getMoodleId("judy@lis.org")).thenReturn(1);
+    when(complianceService.getMoodleId("will@lis.org")).thenReturn(2);
+    when(complianceService.getMoodleId("penny@lis.org")).thenReturn(null);
+    when(complianceService.getMoodleId("maureen@lis.org")).thenReturn(3);
+    when(complianceService.getMoodleId("john@lis.org")).thenReturn(null);
+    when(complianceService.getMoodleId("bob@lis.org")).thenReturn(null);
     BadgeDetails badge = new BadgeDetails();
     badge.setName("All of us");
     badge.setDateexpire("1234");
     badge.setDateissued("567");
-    Mockito.when(complianceService.getUserBadge(2)).thenReturn(Arrays.asList(badge));
 
-    Mockito.when(complianceService.getUserBadge(1)).thenReturn(null);
-
-    Mockito.when(complianceService.getUserBadge(3)).thenReturn(null);
+    when(complianceService.getUserBadge(2)).thenReturn(Arrays.asList(badge));
+    when(complianceService.getUserBadge(1)).thenReturn(null);
+    when(complianceService.getUserBadge(3)).thenReturn(null);
     userController.bulkSyncTrainingStatus();
-    Mockito.verify(complianceService, Mockito.times(6)).getMoodleId(Mockito.anyString());
-    Mockito.verify(complianceService, Mockito.times(3)).getUserBadge(Mockito.anyInt());
-
+    verify(complianceService, times(6)).getMoodleId(anyString());
+    verify(complianceService, times(3)).getUserBadge(anyInt());
   }
 
   /*
