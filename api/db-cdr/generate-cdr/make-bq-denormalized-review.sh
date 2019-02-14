@@ -93,7 +93,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 echo "Inserting drug data into person_drug"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
- (person_id, data_id, start_datetime, standard_name, route, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, visit_type)
+ (person_id, data_id, start_datetime, standard_name, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route)
 SELECT P.PERSON_ID,
     t.DRUG_EXPOSURE_ID AS DATA_ID,
     t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
@@ -103,13 +103,13 @@ SELECT P.PERSON_ID,
     T.NUM_MENTIONS,
     T.FIRST_MENTION,
     T.LAST_MENTION,
-    T.QUANTITY,
+    T.QUANTITY as dose,
     '' as strength,
     C3.CONCEPT_NAME AS ROUTE
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
 a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, QUANTITY, ROUTE_CONCEPT_ID
-FROM `all-of-us-ehr-dev.synthetic_cdr20180606.drug_exposure` A,
+FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` A,
 (SELECT PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
 min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATETIME) as LAST_MENTION
 FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
@@ -132,9 +132,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT m.person_id,
     m.measurement_id as data_id,
     m.measurement_datetime as start_datetime,
-    m.unit_source_value as unit,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
     case when m.value_as_number is null then m.value_as_concept_id else value_as_number end as value_as_number,
+    m.unit_source_value as unit,
     case when range_low IS NULL and range_high IS NULL then NULL
               when range_low IS NULL and range_high iS NOT NULL then cast(range_high AS STRING)
               when range_low IS NOT NULL and range_high IS NULL then cast(range_low AS STRING)
@@ -159,9 +159,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SELECT m.person_id,
     m.measurement_id as data_id,
     m.measurement_datetime as start_datetime,
-    m.unit_source_value as unit,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
     case when m.value_as_number is null then m.value_as_concept_id else value_as_number end as value_as_number,
+    m.unit_source_value as unit,
     case when range_low IS NULL and range_high IS NULL then NULL
               when range_low IS NULL and range_high iS NOT NULL then cast(range_high AS STRING)
               when range_low IS NOT NULL and range_high IS NULL then cast(range_low AS STRING)
@@ -247,7 +247,7 @@ echo "Inserting pm data into person_physical_measure"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_physical_measure\`
    (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, value_as_number,
-   units, age_at_event)
+   unit, age_at_event)
 SELECT P.PERSON_ID,
 	 t.MEASUREMENT_ID AS DATA_ID,
      t.MEASUREMENT_DATETIME as START_DATETIME,
@@ -255,7 +255,7 @@ SELECT P.PERSON_ID,
      case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
      case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
      case when VALUE_AS_NUMBER is null then VALUE_AS_CONCEPT_ID else VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
-     C2.CONCEPT_NAME AS UNITS,
+     C2.CONCEPT_NAME AS UNIT,
      CAST(FLOOR(DATE_DIFF(t.MEASUREMENT_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT
 FROM
 (select *
@@ -356,7 +356,19 @@ echo "Inserting procedure data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
-  source_vocabulary, source_name, age_at_event, visit_type)
+  source_vocabulary, source_name, age_at_event, visit_type, domain)
   select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
-  source_vocabulary, source_name, age_at_event, visit_type 'Procedure' as domain
+  source_vocabulary, source_name, age_at_event, visit_type, 'Procedure' as domain
   from \`$BQ_PROJECT.$BQ_DATASET.person_procedure\` a"
+
+################################################
+# insert procedure data into person_all_events #
+################################################
+echo "Inserting procedure data into person_all_events"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
+  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
+  value_as_number, unit, age_at_event, domain)
+  select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
+           value_as_number, unit, age_at_event, 'Procedure' as domain
+  from \`$BQ_PROJECT.$BQ_DATASET.person_physical_measurement\` a"

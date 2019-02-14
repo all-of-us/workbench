@@ -66,12 +66,12 @@
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "value",
-	"type": "STRING"
+	"name": "value_as_number",
+	"type": "FLOAT"
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "units",
+	"name": "unit",
 	"type": "STRING"
 	},
 	{

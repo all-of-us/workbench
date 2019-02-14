@@ -26,7 +26,7 @@
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "quantity",
+	"name": "dose",
 	"type": "FLOAT"
 	},
 	{

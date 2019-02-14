@@ -4,10 +4,13 @@ import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
+import {
+  CohortReviewService, PageFilterRequest, ParticipantData, ParticipantDataOld,
+  SortOrder
+} from 'generated';
 
-class SortByColumn implements ClrDatagridComparatorInterface<ParticipantData> {
-  compare(a: ParticipantData, b: ParticipantData) {
+class SortByColumn implements ClrDatagridComparatorInterface<ParticipantDataOld> {
+  compare(a: ParticipantDataOld, b: ParticipantDataOld) {
     return (a.numMentions === null ? 0 : parseInt(a.numMentions, 10))
         - (b.numMentions === null ? 0 : parseInt(b.numMentions, 10));
   }
@@ -47,7 +50,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
       .do(_ => this.loading = true)
       .switchMap(([participant, cohort, workspace]) => {
         this.data = [];
-        return this.reviewApi.getParticipantData(
+        return this.reviewApi.getParticipantDataOld(
           workspace.namespace,
           workspace.id,
           cohort.id,
