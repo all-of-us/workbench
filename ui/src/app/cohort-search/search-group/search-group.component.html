@@ -42,11 +42,11 @@
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of nonTemporalItems; let itemIndex = index;" class="card-block search-item">
+  <div *ngFor="let item of nonTemporalItems; let itemIndex = index;" class="card-block search-item">
     <app-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="itemId"
+      [itemId]="item.get('id')"
       [itemIndex]="itemIndex">
     </app-search-group-item>
     <div *ngIf="status === 'active'" class="item-or">OR</div>
@@ -129,13 +129,13 @@
   </div>
 
   <ul *ngIf="temporalFlag">
-    <li *ngFor="let itemId of temporalItems; let itemIndex = index;" class="card-block">
+    <li *ngFor="let item of temporalItems; let itemIndex = index;" class="card-block">
       <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
         [role]="role"
         [groupId]="groupId"
-        [itemId]="itemId"
+        [itemId]="item.get('id')"
         [itemIndex]="itemIndex">
       </app-search-group-item>
     </li>
@@ -160,8 +160,8 @@
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
-
-  <div class="container card-footer" *ngIf="group.get('count') !== -1">
+<!--check if temporal on and groupcount is -1 also show groupcount div-->
+  <div class="container card-footer" *ngIf="group.get('count') !== -1 || temporal || !warningFlag">
     <div class="row">
       <div class="toggle-switch col-sm-1">
         <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
@@ -179,7 +179,7 @@
         </span>
 
         <span *ngIf="!isRequesting">
-          <ng-container *ngIf="group.get('count') !== null; else countWarning">
+          <ng-container *ngIf="group.get('count') !== null || temporalFlag; else countWarning">
             {{ group.get('count') | number }}
           </ng-container>
           <ng-template #countWarning>
@@ -201,7 +201,8 @@
             shape="error-standard"
             size="18"></clr-icon>
         </span>
-        <span *ngIf="!isRequesting && temporalFlag && (!temporalItems.length || !nonTemporalItems.length)"> - -
+        <span *ngIf="(!isRequesting && temporalFlag && warningFlag)">
+        - -
           <clr-icon
             [popper]="errorPopper"
             [popperTrigger]="'hover'"
@@ -274,5 +275,7 @@
 
 <popper-content #errorPopper>
   <p  *ngIf="error && temporalItems.length" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
-  <p  *ngIf="!isRequesting && temporalFlag && !temporalItems.length"  [style.margin]="'0'">Please complete the criteria selections before saving temporal relationship.</p>
+  <p  *ngIf="temporalFlag && warningFlag"  [style.margin]="'0'">
+    Please complete the criteria selections before saving temporal relationship.
+  </p>
 </popper-content>

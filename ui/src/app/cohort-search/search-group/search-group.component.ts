@@ -43,6 +43,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
   itemId: any;
+  tempWarningFlag: any;
   treeType = [];
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
@@ -64,9 +65,8 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
         this.nonTemporalItems = i.nonTemporalItems;
         this.temporalItems = i.temporalItems;
         this.temporalLength.emit( {
-          tempLength: this.temporalItems.length,
-          flag: this.temporalFlag,
-          length: this.nonTemporalItems.length}
+          tempLength: this.warningFlag,
+          flag: this.temporalFlag}
           );
       });
   }
@@ -212,5 +212,11 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
       case 'WITHIN_X_DAYS_OF' :
         return 'Within X Days of';
     }
+  }
+
+  get warningFlag() {
+   const tempWarningFlag =  !this.temporalItems.filter(t => t.get('status') === 'active').length;
+   const nonTempWarningFlag =  !this.nonTemporalItems.filter(t => t.get('status') === 'active').length;
+   return tempWarningFlag || nonTempWarningFlag;
   }
 }

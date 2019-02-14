@@ -28,9 +28,9 @@ export const getTemporalGroupItems = (groupId) => (state) => {
   state.getIn(['entities', 'groups', groupId, 'items'], List()).forEach(itemId => {
     const item = state.getIn(['entities', 'items', itemId], Map());
     if (item.get('temporalGroup') === 1 && isTemporal) {
-      itemObj.temporalItems.push(itemId);
+      itemObj.temporalItems.push(item);
     } else {
-      itemObj.nonTemporalItems.push(itemId);
+      itemObj.nonTemporalItems.push(item);
       itemObj.type.push(item.get('type'));
     }
   });

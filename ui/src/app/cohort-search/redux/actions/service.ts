@@ -124,10 +124,34 @@ export class CohortSearchActions {
     return newId;
   }
   updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
+    // const group = getGroup(groupId)(this.state);
+    // let isTemporalItemExist = ''
+    // const groupItems = group
+    //   .get('items', List())
+    //   .map(id => getItem(id)(this.state))
+    //   .filterNot(it => it.get('status') === 'deleted');
+    //  groupItems
+    //   .map(it => {
+    //     isTemporalItemExist = it.get('temporalGroup');
+    //   }) ;
+    //  this._updatedTemporal(flag, groupId);
+    // if(isTemporalItemExist) {
+    //   this.requestGroupCount(role, groupId);
+    //   this.requestTotalCount(groupId);
+    // } else {
+    //   console.log('from temporal')
+    //   this.cancelTotalIfRequesting()
+    // }
     this._updatedTemporal(flag, groupId);
     this.requestGroupCount(role, groupId);
     this.requestTotalCount(groupId);
   }
+
+
+//   group.get('items', List()).forEach(itemId => {
+//   this.cancelIfRequesting('items', itemId);
+
+// });
 
   updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
     this._updateWhichMention(mention, groupId);
@@ -212,14 +236,17 @@ export class CohortSearchActions {
   }
 
   cancelIfRequesting(kind, id): void {
+    console.log('here1');
     if (isRequesting(kind, id)(this.state)) {
       this.cancelCountRequest(kind, id);
     }
   }
 
   cancelTotalIfRequesting(): void {
+    console.log('here2');
     const searchRequest = getSearchRequest(SR_ID)(this.state);
     if (searchRequest.get('isRequesting', false)) {
+      console.log('---------->>>')
       this.cancelChartsRequest('searchRequests', SR_ID);
     }
   }
@@ -254,42 +281,57 @@ export class CohortSearchActions {
     itemId: string,
     status?: string
   ): void {
-    const groupItems = (getGroup(groupId)(this.state))
-      .get('items', List())
-      .map(id => getItem(id)(this.state))
-      .filterNot(it => it.get('status') === 'deleted');
-    const isOnlyActiveChild = groupItems
-      .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
-      .isEmpty();
-    if (!status) {
-      this._removeGroupItem(groupId, itemId);
-      this.removeId(itemId);
-    } else {
-      const item = getItem(itemId)(this.state);
-      const hasItems = !item.get('searchParameters', List()).isEmpty();
-      const countIsNonZero = item.get('count') !== 0;
+    const group = getGroup(groupId)(this.state);
+    const temporal = group.get('temporal');
+      const groupItems = group
+        .get('items', List())
+        .map(id => getItem(id)(this.state))
+        .filterNot(it => it.get('status') === 'deleted');
+      let temporalGroupItems;
+      let nonTemporalGroupItems;
+      let isOnlyActiveChild
+      if(temporal) {
+        temporalGroupItems = groupItems
+          .filter(it => it.get('id') !== itemId && it.get('status') === 'active' && it.get('temporalGroup') === 1)
+          .isEmpty();
+        nonTemporalGroupItems = groupItems
+          .filter(it => it.get('id') !== itemId && it.get('status') === 'active' && it.get('temporalGroup') === 0)
+          .isEmpty();
+      } else {
+         isOnlyActiveChild = groupItems
+          .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
+          .isEmpty();
+      }
 
-      this.cancelIfRequesting('items', itemId);
-      this.cancelIfRequesting('groups', groupId);
-      this.hideGroupItem(groupId, itemId, status);
 
-      if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
-        if (isOnlyActiveChild) {
-          if (groupItems.size === 1 && status === 'pending') {
-            this.clearGroupCount(groupId);
-          }
-          if (this.otherGroupsWithActiveItems(groupId)) {
-            this.requestTotalCount(groupId);
+      if (!status) {
+        this._removeGroupItem(groupId, itemId);
+        this.removeId(itemId);
+      } else {
+        const item = getItem(itemId)(this.state);
+        const hasItems = !item.get('searchParameters', List()).isEmpty();
+        const countIsNonZero = item.get('count') !== 0;
+        this.cancelIfRequesting('items', itemId);
+        this.cancelIfRequesting('groups', groupId);
+        this.hideGroupItem(groupId, itemId, status);
+        const onlyChild = (!temporal && isOnlyActiveChild)|| (temporal && ( temporalGroupItems || nonTemporalGroupItems))
+        if (hasItems && (countIsNonZero || onlyChild)) {
+          if (onlyChild) {
+            if (groupItems.size === 1 && status === 'pending') {
+              this.clearGroupCount(groupId);
+            }
+            if (this.otherGroupsWithActiveItems(groupId)) {
+              this.requestTotalCount(groupId);
+            } else {
+              this.cancelTotalIfRequesting();
+              this.clearTotalCount();
+            }
           } else {
-            this.cancelTotalIfRequesting();
-            this.clearTotalCount();
+            this.requestTotalCount();
+            this.requestGroupCount(role, groupId);
           }
-        } else {
-          this.requestTotalCount();
-          this.requestGroupCount(role, groupId);
         }
       }
-    }
   }
 
   enableGroup(group: any) {
@@ -617,7 +659,6 @@ export class CohortSearchActions {
       entities.searchRequests[SR_ID][role] = data[role].map(group => {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
-            console.log(group);
             group.mention = group.mention ? group.mention : '';
             group.time = group.time ? group.time : '';
             group.timeValue = group.timeValue ? group.timeValue : 0;
@@ -645,7 +686,6 @@ export class CohortSearchActions {
         return group.id;
       });
     }
-    console.log(entities);
     return fromJS(entities);
   }
 

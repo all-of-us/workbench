@@ -31,7 +31,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // console.log(this.itemId);
     this.subscription = this.ngRedux.select(getItem(this.itemId))
       .subscribe(item => this.item = item);
 
