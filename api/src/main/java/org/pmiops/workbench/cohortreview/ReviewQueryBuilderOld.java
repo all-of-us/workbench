@@ -13,7 +13,7 @@ import java.util.Map;
  * TODO: delete when ui work is done.
  */
 @Service
-public class ReviewQueryBuilder {
+public class ReviewQueryBuilderOld {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_LIMIT_PARAM = "limit";
