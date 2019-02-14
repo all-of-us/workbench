@@ -1,12 +1,12 @@
 import {Location} from '@angular/common';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
+import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -102,8 +102,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   creating: boolean;
 
-  kernelType: Kernels;
-
   leoUrl: SafeResourceUrl;
 
   private wsId: string;
@@ -116,7 +114,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   constructor(
     private locationService: Location,
-    private route: ActivatedRoute,
     private clusterService: ClusterService,
     private leoClusterService: LeoClusterService,
     private leoNotebooksService: NotebooksService,
@@ -125,16 +122,15 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
-    this.creating = this.route.snapshot.queryParams['creating'] || false;
-    this.playground = (this.route.snapshot.queryParams['playgroundMode'] === 'true');
-    this.jupyterLabMode = (this.route.snapshot.queryParams['jupyterLabMode'] === 'true');
+    const {ns, wsid} = urlParamsStore.getValue();
+    const {creating, playgroundMode, jupyterLabMode, kernelType} = queryParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
+    this.creating = creating || false;
+    this.playground = playgroundMode === 'true';
+    this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
-    if (this.creating) {
-      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
-    }
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
@@ -215,15 +211,16 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   // this maybe overkill, but should handle all situations
   setNotebookNames(): void {
+    const {nbName} = urlParamsStore.getValue();
     this.notebookName =
-      decodeURIComponent(this.route.snapshot.params['nbName']);
-    if (this.route.snapshot.params['nbName'].endsWith('.ipynb')) {
+      decodeURIComponent(nbName);
+    if (nbName.endsWith('.ipynb')) {
       this.fullNotebookName =
-        decodeURIComponent(this.route.snapshot.params['nbName']);
+        decodeURIComponent(nbName);
       this.notebookName = this.fullNotebookName.replace('.ipynb$', '');
     } else {
       this.notebookName =
-        decodeURIComponent(this.route.snapshot.params['nbName']);
+        decodeURIComponent(nbName);
       this.fullNotebookName = this.notebookName + '.ipynb';
     }
   }
@@ -257,7 +254,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private newNotebook(): Observable<string> {
     const fileContent = commonNotebookFormat;
-    if (this.route.snapshot.queryParamMap.get('kernelType') === Kernels.R.toString()) {
+    const {kernelType} = queryParamsStore.getValue();
+    if (kernelType === Kernels.R.toString()) {
       fileContent.metadata = rNotebookMetadata;
     } else {
       fileContent.metadata = pyNotebookMetadata;

@@ -1,13 +1,12 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
-import {navigate} from 'app/utils/navigation';
+import {navigate, queryParamsStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 
 import * as React from 'react';
 
-import {ActivatedRoute} from '@angular/router';
 import {
   Clickable,
   styles as buttonStyles
@@ -267,7 +266,6 @@ export class HomepageComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private profileStorageService: ProfileStorageService,
     private serverConfigService: ServerConfigService,
-    private route: ActivatedRoute,
   ) {
     // create bound methods to use as callbacks
     this.closeQuickTour = this.closeQuickTour.bind(this);
@@ -287,7 +285,8 @@ export class HomepageComponent implements OnInit, OnDestroy {
       // TODO RW-1184 set trainingCompleted flag
       this.eraCommonsLinked = !!profile.linkedNihUsername;
 
-      if (this.route.snapshot.queryParams.workbenchAccessTasks) {
+      const {workbenchAccessTasks} = queryParamsStore.getValue();
+      if (workbenchAccessTasks) {
         // To reach the access tasks component from dev use /?workbenchAccessTasks=true
         this.accessTasksRemaining = true;
       } else {
@@ -359,7 +358,7 @@ export class HomepageComponent implements OnInit, OnDestroy {
     if (this.profile.demographicSurveyCompletionTime !== null) {
       completedTasks += 1;
     }
-    if (this.profile.ethicsTrainingCompletionTime !== null) {
+    if (this.profile.trainingCompletionTime !== null) {
       completedTasks += 1;
     }
     if (this.profile.termsOfServiceCompletionTime !== null) {

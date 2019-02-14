@@ -10,7 +10,7 @@ import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
-import {GraphType} from '../../utils/graphtypes';
+import {GraphType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-survey-view',
@@ -205,9 +205,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   public showAnswerGraphs(a: any) {
     a.expanded = !a.expanded;
   }
+
   public resetSelectedGraphs() {
     this.graphToShow = GraphType.None;
   }
+
   public selectGraph(g, q: any) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -225,9 +227,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         break;
     }
   }
+
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
+
   public convertToNum(s) {
     return Number(s);
   }

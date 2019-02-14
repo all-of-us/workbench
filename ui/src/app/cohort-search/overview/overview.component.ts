@@ -1,11 +1,11 @@
 import {select} from '@angular-redux/store';
 import {Component, Input} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions, searchRequestError} from 'app/cohort-search/redux';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {Cohort, CohortsService, Workspace} from 'generated';
 
@@ -41,8 +41,6 @@ export class OverviewComponent {
   constructor(
     private actions: CohortSearchActions,
     private cohortApi: CohortsService,
-    private route: ActivatedRoute,
-    private router: Router,
   ) {}
 
   get name() {
@@ -57,15 +55,14 @@ export class OverviewComponent {
   }
 
   submit() {
-    const ns: Workspace['namespace'] = this.route.snapshot.params.ns;
-    const wsid: Workspace['id'] = this.route.snapshot.params.wsid;
+    const {ns, wsid} = urlParamsStore.getValue();
 
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const criteria = JSON.stringify(this.actions.mapAll());
     const cohort = <Cohort>{name, description, criteria, type: COHORT_TYPE};
     this.cohortApi.createCohort(ns, wsid, cohort).subscribe((_) => {
-      this.router.navigate(['workspaces', ns, wsid, 'cohorts']);
+      navigate(['workspaces', ns, wsid, 'cohorts']);
     }, (error) => {
       if (error.status === 400) {
         this.showConflictError = true;

@@ -24,6 +24,9 @@ export class ProfileStubVariables {
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
     linkedNihUsername: null,
+    currentPosition: 'some',
+    organization: 'here',
+    areaOfResearch: 'things',
   };
 }
 
@@ -109,7 +112,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.ethicsTrainingCompletionTime = this.now();
+    this.profile.trainingCompletionTime = this.now();
     return Observable.from([this.profile]);
   }
 }

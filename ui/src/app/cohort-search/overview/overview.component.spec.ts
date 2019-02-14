@@ -2,7 +2,6 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {fromJS} from 'immutable';
 import {Observable} from 'rxjs/Observable';
@@ -40,8 +39,6 @@ describe('OverviewComponent', () => {
           {provide: NgRedux, useValue: mockReduxInst},
           {provide: CohortsService, useValue: {}},
           {provide: CohortBuilderService, useValue: {}},
-          {provide: Router, useValue: {}},
-          {provide: ActivatedRoute, useValue: {}},
           {provide: CohortSearchActions, useValue: new MockActions()},
         ],
         schemas: [NO_ERRORS_SCHEMA],

@@ -64,7 +64,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                           (!this.state.cluster) ?
                             'Your notebook server is still being created' : undefined}
                         side='right'>
-          <Button disabled={!this.state.cluster} onClick={this.openResetClusterModal.bind(this)}
+          <Button disabled={!this.state.cluster} onClick={() => this.openResetClusterModal()}
                   data-test-id='reset-notebook-button' type='secondary'>
             Reset Notebook Server
           </Button>
