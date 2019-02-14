@@ -164,10 +164,6 @@
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
-<!--check if temporal on and groupcount is -1 also show groupcount div-->
-  <!--&lt;!&ndash;*ngIf="group.get('count') !== -1 || temporalFlag"&ndash;&gt;-->
-  <!--(group.get('items').toJS().length > 0 && !temporalFlag)-->
-  <!--*ngIf="group.get('items').toJS().length > 0 || group.get('count') !== -1 "-->
   <ng-container>
     <div class="container card-footer" *ngIf="group.get('count') !== -1">
       <div class="row">
@@ -185,7 +181,6 @@
                 [style.vertical-align]="'middle'">
         Loading...
         </span>
-
           <span *ngIf="!isRequesting">
           <ng-container *ngIf="group.get('count') !== null || temporalFlag; else countWarning">
             {{ group.get('count') | number }}

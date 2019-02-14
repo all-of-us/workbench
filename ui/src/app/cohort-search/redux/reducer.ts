@@ -304,8 +304,7 @@ export const rootReducer: Reducer<CohortSearchState> =
         }
 
       case CLEAR_GROUP_COUNT:
-        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1)
-          // .setIn(['entities', 'groups', action.groupId, 'temporal'], false)
+        return state.setIn(['entities', 'groups', action.groupId, 'count'], -1);
 
       case LOAD_CHARTS_RESULTS:
         return state

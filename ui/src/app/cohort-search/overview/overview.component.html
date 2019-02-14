@@ -1,7 +1,6 @@
 <div>
   <div class="overview-header">
     <h2 class="count-header" id="total-count">
-      {{temporal.tempLength}}
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
@@ -18,7 +17,6 @@
       </span>
       <span *ngIf="!(isRequesting$ | async) && temporal?.flag && temporal.tempLength && (total$ | async) !== 0">
         - -
-      <!--<span *ngIf="(isRequesting$ | async) ||  !(total$ | async) "> - - -->
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
@@ -71,13 +69,14 @@
   </ng-container>
 </ng-container>
 </div>
-error && !temporalFlag"
 <popper-content #errorPopper>
-  <p   *ngIf="(error$ | async) && !temporal?.flag" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
-  <p  *ngIf="temporal?.flag && temporal.tempLength " [style.margin]="'0'">hello testing</p>
+  <p   *ngIf="(error$ | async) && !temporal?.flag" [style.margin]="'0'">
+    A problem occurred and we were not able to retrieve the requested data
+  </p>
+  <p  *ngIf="temporal?.flag && temporal.tempLength " [style.margin]="'0'">
+    Please complete the criteria selections before saving temporal relationship.
+  </p>
 </popper-content>
-
-
 <clr-modal #saveModal
   [clrModalSize]="'md'"
   (clrModalOpenChange)="modalChange($event)">
