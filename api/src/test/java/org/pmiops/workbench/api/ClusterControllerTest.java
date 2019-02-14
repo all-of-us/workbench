@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -129,6 +130,8 @@ public class ClusterControllerTest {
   WorkspaceService workspaceService;
   @Mock
   Provider<User> userProvider;
+  @Mock
+  Provider<ComplianceService> complianceServiceProvider;
   @Autowired
   ClusterController clusterController;
   @Autowired
@@ -155,7 +158,7 @@ public class ClusterControllerTest {
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, Providers.of(config));
+        fireCloudService, Providers.of(config), complianceServiceProvider);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();

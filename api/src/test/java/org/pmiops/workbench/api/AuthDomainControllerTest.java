@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -55,6 +56,8 @@ public class AuthDomainControllerTest {
   private FireCloudService fireCloudService;
   @Mock
   private Provider<User> userProvider;
+  @Mock
+  private Provider<ComplianceService> complianceServiceProvider;
   @Autowired
   private UserDao userDao;
 
@@ -73,7 +76,8 @@ public class AuthDomainControllerTest {
     config.firecloud.registeredDomainName = "";
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
-        new FakeLongRandom(12345), fireCloudService, Providers.of(config));
+        new FakeLongRandom(12345), fireCloudService, Providers.of(config),
+        complianceServiceProvider);
     this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
   }
 

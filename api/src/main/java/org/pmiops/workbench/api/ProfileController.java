@@ -64,7 +64,6 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -490,54 +489,20 @@ public class ProfileController implements ProfileApiDelegate {
 
   /**
    * This methods updates logged in user's training status from Moodle.
-   * 1. Check if user have moodle_id,
-   *    a. if not retrieve it from MOODLE API and save it in the Database
-   * 2. Using the MOODLE_ID get user's Badge
-   * 3. Update the database with
-   *    a. training completion time as current time
-   *    b. training expiration date with as returned from MOODLE.
    * @return Profile updated with training completion time
    */
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
     User user = userProvider.get();
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     Profile profile = profileService.getProfile(user);
-
     try {
-      Integer moodleId = user.getMoodleId();
-      if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(user.getEmail());
-        if (moodleId == null) {
-          // User has not yet created/logged into MOODLE
-          return ResponseEntity.ok(profile);
-        }
-        user.setMoodleId(moodleId);
-      }
-      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
-      // The assumption here is that the User will always get 1 badge which will be AoU
-      if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetails badge = badgeResponse.get(0);
-        if (badge.getDateexpire() == null) {
-          //This can happen if date expire is set to never
-          user.setTrainingExpirationTime(null);
-        } else {
-          user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
-        }
-        user.setTrainingCompletionTime(now);
-        profile.setTrainingCompletionTime(now.getTime());
-        userDao.save(user);
-      }
-    } catch (NumberFormatException e) {
-      log.severe("Incorrect date expire format");
+      userService.syncUserTraining(user);
+    } catch(NotFoundException ex) {
+       throw ex;
+    } catch (ApiException e) {
       throw new ServerErrorException(e);
-    } catch (ApiException ex) {
-      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
-        throw new NotFoundException(ex.getMessage());
-      }
-      throw new ServerErrorException(ex);
     }
-   return ResponseEntity.ok(profile);
+    return ResponseEntity.ok(profile);
   }
 
   @Override

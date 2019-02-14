@@ -488,6 +488,24 @@ paths:
           type: string
           required: false
 
+  /v1/account/bulkSyncTrainingStatus:
+    post:
+      tags:
+        - user
+        - cron
+      description: Check moodle badge/training status
+      operationId: bulkSyncTrainingStatus
+      responses:
+        200:
+          description: The user table is updated with training status.
+        404:
+          description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
   # Notebook clusters ####################################################################
 
   /v1/clusters:

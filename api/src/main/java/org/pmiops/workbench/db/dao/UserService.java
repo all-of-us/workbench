@@ -2,27 +2,36 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Provider;
 
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +50,9 @@ public class UserService {
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
+  private final ComplianceService complianceService;
+  private static final Logger log = Logger.getLogger(UserService.class.getName());
+
 
   @Autowired
   public UserService(Provider<User> userProvider,
@@ -49,7 +61,8 @@ public class UserService {
       Clock clock,
       Random random,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      Provider<ComplianceService> complianceServiceProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -57,6 +70,7 @@ public class UserService {
     this.random = random;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
+    this.complianceService = complianceServiceProvider.get();
   }
 
   /**
@@ -199,6 +213,14 @@ public class UserService {
       }
     });
   }
+  public User saveUserWithConflictHandling(User user) {
+    try {
+      return userDao.save(user);
+    } catch (ObjectOptimisticLockingFailureException e) {
+      log.log(Level.WARNING, "version conflict for user update", e);
+      throw new ConflictException("Failed due to concurrent modification");
+    }
+  }
 
   public User setClusterRetryCount(int clusterRetryCount) {
     return updateWithRetries(new Function<User, User>() {
@@ -244,6 +266,12 @@ public class UserService {
 
   public List<User> getNonVerifiedUsers() {
     return userDao.findUserNotValidated();
+  }
+
+  public List<User> getAllUsers() {
+    List<User> allUser = new ArrayList<>();
+    userDao.findAll().forEach(allUser::add);
+    return allUser;
   }
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
@@ -298,4 +326,51 @@ public class UserService {
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
 
+  /**
+   * This methods updates user's training status from Moodle.
+   * 1. Check if user have moodle_id,
+   *    a. if not retrieve it from MOODLE API and save it in the Database
+   * 2. Using the MOODLE_ID get user's Badge update the database with
+   *    a. training completion time as current time
+   *    b. training expiration date with as returned from MOODLE.
+   * 3. If there are no badges for a user set training completion time and expiration date as null
+   * @return
+   */
+  public void syncUserTraining(User user) throws ApiException, NotFoundException {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    try {
+      Integer moodleId = user.getMoodleId();
+      if (moodleId == null) {
+        moodleId = complianceService.getMoodleId(user.getEmail());
+        if (moodleId == null) {
+          // User has not yet created/logged into MOODLE
+          return;
+        }
+        user.setMoodleId(moodleId);
+      }
+      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      // The assumption here is that the User will always get 1 badge which will be AoU
+      if (badgeResponse != null && badgeResponse.size() > 0) {
+        BadgeDetails badge = badgeResponse.get(0);
+        if (badge.getDateexpire() == null) {
+          //This can happen if date expire is set to never
+          user.setTrainingExpirationTime(null);
+        } else {
+          user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+        }
+        user.setTrainingCompletionTime(now);
+        userDao.save(user);
+      }
+    } catch (NumberFormatException e) {
+      log.severe("Incorrect date expire format from Moodle");
+      throw e;
+    } catch (ApiException ex) {
+      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
+        log.severe(String.format("Error while retrieving Badge for user %s: %s ",
+            user.getUserId(), ex.getMessage()));
+        throw new NotFoundException(ex.getMessage());
+      }
+      throw ex;
+    }
+  }
 }

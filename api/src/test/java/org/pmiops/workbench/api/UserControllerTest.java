@@ -4,6 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.Lists;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -14,15 +17,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserResponse;
+import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +62,16 @@ public class UserControllerTest {
   @Mock
   private FireCloudService fireCloudService;
   @Mock
-  private Clock clock;
-  private UserController userController;
+  private ComplianceService complianceService;
   private UserService userService;
+
+  private UserController userController;
   private Long incrementedUserId = 1L;
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+  public Clock clock() {
+    return CLOCK;
+  }
+
 
   @Before
   public void setUp() {
@@ -64,7 +79,8 @@ public class UserControllerTest {
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.enforceRegistered = false;
     configProvider = Providers.of(config);
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
+        new Random(), fireCloudService, configProvider, Providers.of(complianceService));
     this.userController = new UserController(userService);
     saveFamily();
   }
@@ -77,7 +93,8 @@ public class UserControllerTest {
   @Test
   public void testEnforceRegistered() {
     configProvider.get().firecloud.enforceRegistered = true;
-    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock, new Random(), fireCloudService, configProvider);
+    this.userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock(),
+        new Random(), fireCloudService, configProvider, Providers.of(complianceService));
     this.userController = new UserController(userService);
     User john = userDao.findUserByEmail("john@lis.org");
 
@@ -198,6 +215,29 @@ public class UserControllerTest {
     List<org.pmiops.workbench.model.User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(org.pmiops.workbench.model.User::getEmail));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
+  }
+
+  @Test
+  public void testBulkTrainingSync() throws ApiException, NotFoundException {
+    Mockito.when(complianceService.getMoodleId("judy@lis.org")).thenReturn(1);
+    Mockito.when(complianceService.getMoodleId("will@lis.org")).thenReturn(2);
+    Mockito.when(complianceService.getMoodleId("penny@lis.org")).thenReturn(null);
+    Mockito.when(complianceService.getMoodleId("maureen@lis.org")).thenReturn(3);
+    Mockito.when(complianceService.getMoodleId("john@lis.org")).thenReturn(null);
+    Mockito.when(complianceService.getMoodleId("bob@lis.org")).thenReturn(null);
+    BadgeDetails badge = new BadgeDetails();
+    badge.setName("All of us");
+    badge.setDateexpire("1234");
+    badge.setDateissued("567");
+    Mockito.when(complianceService.getUserBadge(2)).thenReturn(Arrays.asList(badge));
+
+    Mockito.when(complianceService.getUserBadge(1)).thenReturn(null);
+
+    Mockito.when(complianceService.getUserBadge(3)).thenReturn(null);
+    userController.bulkSyncTrainingStatus();
+    Mockito.verify(complianceService, Mockito.times(6)).getMoodleId(Mockito.anyString());
+    Mockito.verify(complianceService, Mockito.times(3)).getUserBadge(Mockito.anyInt());
+
   }
 
   /*
