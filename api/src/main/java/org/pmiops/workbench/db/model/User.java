@@ -51,7 +51,7 @@ public class User {
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
-  private Timestamp ethicsTrainingCompletionTime;
+  private Timestamp trainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
@@ -66,6 +66,8 @@ public class User {
   private Boolean twoFactorEnabled = false;
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
+  private Integer moodleId;
+  private Timestamp trainingExpirationTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -281,13 +283,13 @@ public class User {
     this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
   }
 
-  @Column(name = "ethics_training_completion_time")
-  public Timestamp getEthicsTrainingCompletionTime() {
-    return ethicsTrainingCompletionTime;
+  @Column(name = "training_completion_time")
+  public Timestamp getTrainingCompletionTime() {
+    return trainingCompletionTime;
   }
 
-  public void setEthicsTrainingCompletionTime(Timestamp ethicsTrainingCompletionTime) {
-    this.ethicsTrainingCompletionTime = ethicsTrainingCompletionTime;
+  public void setTrainingCompletionTime(Timestamp trainingCompletionTime) {
+    this.trainingCompletionTime = trainingCompletionTime;
   }
 
   @Column(name = "demographic_survey_completion_time")
@@ -406,5 +408,19 @@ public class User {
 
   public void setIdVerificationRequestTime(Timestamp idVerificationRequestTime) {
     this.idVerificationRequestTime = idVerificationRequestTime;
+  }
+
+  @Column(name = "moodle_id")
+  public Integer getMoodleId() { return moodleId; }
+
+  public void setMoodleId(Integer moodleId) {
+    this.moodleId = moodleId;
+  }
+
+  @Column(name = "training_expiration_time")
+  public Timestamp getTrainingExpirationTime() { return trainingExpirationTime; }
+
+  public void setTrainingExpirationTime( Timestamp trainingExpirationTime) {
+    this.trainingExpirationTime = trainingExpirationTime;
   }
 }

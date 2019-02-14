@@ -282,7 +282,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 />
               </TooltipTrigger>
             </div>
-            {profile && (!!profile.ethicsTrainingCompletionTime ?
+            {profile && (!!profile.trainingCompletionTime ?
                 <Button
                   type='purplePrimary'
                   disabled={true}

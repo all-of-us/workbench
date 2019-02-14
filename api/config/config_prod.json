@@ -41,5 +41,9 @@
   "mandrill": {
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "host": "",
+    "enableElasticsearchBackend": false
   }
 }

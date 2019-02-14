@@ -18,6 +18,7 @@ import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {StatusFilterComponent} from 'app/cohort-review/status-filter/status-filter.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
+import {currentCohortStore} from 'app/utils/navigation';
 import {CohortBuilderService} from 'generated';
 import {CohortReviewService, DataAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
@@ -37,41 +38,12 @@ describe('TablePage', () => {
   const activatedRouteStub = {
     snapshot: {
       data: {
-        cohort: {
-          name: '',
-          criteria: '{}'
-        },
         concepts: {
           raceList: [],
           genderList: [],
           ethnicityList: [],
         },
-        review: {},
-        workspace: {}
       },
-      pathFromRoot: [{data: {workspace: {cdrVersionId: 1}}}]
-    },
-    parent: {
-      snapshot: {
-        data: {
-          workspace: {
-            cdrVersionId: 1
-          },
-          cohort: {
-            name: ''
-          },
-        },
-        params: {
-          ns: 'workspaceNamespace',
-          wsid: 'workspaceId',
-          cid: 1
-        }
-      },
-      params: {
-        ns: 'workspaceNamespace',
-        wsid: 'workspaceId',
-        cid: 1
-      }
     },
   };
   let route;
@@ -117,6 +89,11 @@ describe('TablePage', () => {
       ],
     })
       .compileComponents();
+    currentCohortStore.next({
+      name: '',
+      criteria: '',
+      type: '',
+    });
   }));
 
   beforeEach(() => {
