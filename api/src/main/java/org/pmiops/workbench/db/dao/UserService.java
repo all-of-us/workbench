@@ -212,14 +212,6 @@ public class UserService {
       }
     });
   }
-  public User saveUserWithConflictHandling(User user) {
-    try {
-      return userDao.save(user);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for user update", e);
-      throw new ConflictException("Failed due to concurrent modification");
-    }
-  }
 
   public User setClusterRetryCount(int clusterRetryCount) {
     return updateWithRetries(new Function<User, User>() {

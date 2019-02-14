@@ -493,7 +493,7 @@ paths:
       tags:
         - user
         - cron
-      description: Check moodle badge/training status
+      description: sync moodle badge/training status for all user
       operationId: bulkSyncTrainingStatus
       responses:
         200:
