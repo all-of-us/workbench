@@ -14,14 +14,13 @@ import * as React from 'react';
 const styles = reactStyles({
   table: {
     fontSize: '12px',
-    border: '1px solid #ccc'
   },
   tableBody: {
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',
-    borderLeft: 0,
-    borderRight: 0,
+    border: 0,
+    borderBottom: '1px solid #c8c8c8',
     lineHeight: '0.6rem'
   },
   columnHeader: {
@@ -150,14 +149,22 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
+    onPage = (event: any) => {
+      this.setState({start: event.first});
+    }
+
     render() {
       const {filters, loading, rows, start, sortField, sortOrder} = this.state;
       const data = this.state.data || [];
+      const lastRowOfPage = (start + rows) > data.length
+        ? start + rows - (start + rows - data.length) : start + rows;
+      const pageReportTemplate = (start + 1) + ' - ' + lastRowOfPage + ' of ' + data.length
+        + ' records ';
+      const paginatorTemplate = 'CurrentPageReport PrevPageLink PageLinks NextPageLink';
 
       const columns = this.props.columns.map((col) => {
         const filter = <React.Fragment>
           <i
-            id={col.name + '-filter'}
             className='pi pi-filter'
             style={styles.filterIcon}
             onClick={(e) => this.overlays[col.name].toggle(e)} />
@@ -202,6 +209,42 @@ export const DetailTabTable = withCurrentWorkspace()(
         .pi.pi-sort-down {
           display: none;
         }
+        .p-datatable .p-datatable-scrollable-wrapper {
+          border: 1px solid #c8c8c8;
+        }
+        .p-datatable .p-paginator.p-paginator-bottom {
+          border: 0;
+          margin-top: 20px;
+          background: none;
+          font-size: 12px;
+          text-align: right;
+        }
+        body .p-paginator .p-paginator-prev,
+        body .p-paginator .p-paginator-next,
+        body .p-paginator .p-paginator-pages .p-paginator-page {
+          border: 1px solid #cccccc;
+          border-radius: 3px;
+          background: #fafafa;
+          color: #2691D0;
+          height: auto;
+          width: auto;
+          min-width: 0;
+          padding: 7px;
+          margin: 0 2px;
+          line-height: 0.5rem;
+        }
+        body .p-paginator .p-paginator-prev,
+        body .p-paginator .p-paginator-next {
+          height: 28px;
+          width: 24px;
+        }
+        body .p-paginator .p-paginator-pages .p-paginator-page:focus {
+          box-shadow: 0;
+        }
+        body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+          background: #fafafa;
+          color: rgba(0, 0, 0, .5);
+        }
       `;
 
       return <div style={{position: 'relative'}}>
@@ -216,12 +259,16 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator={true}
-          paginatorTemplate='FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink'
+          paginatorTemplate={data.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          onPage={this.onPage}
           first={start}
           rows={rows}
           totalRecords={data.length}
           scrollable={true}
-          scrollHeight='calc(100vh - 380px)'>
+          scrollHeight='calc(100vh - 350px)'
+          autoLayout={true}
+          emptyMessage=''>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
