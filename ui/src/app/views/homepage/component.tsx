@@ -457,8 +457,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <div style={homepageStyles.footerText}>
                         <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
                         <ul style={{color: '#83C3EC'}}>
-                          {col.links.map((link, i) => {
-                            return <li key={i}><a href='#' style={{color: '#83C3EC'}}>{link}</a></li>;
+                          {col.links.map((link, ii) => {
+                            return <li key={ii}>
+                              <a href='#' style={{color: '#83C3EC'}}>{link}</a>
+                            </li>;
                           } )}
                         </ul>
                       </div>
