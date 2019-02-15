@@ -34,14 +34,13 @@
     </button>
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
       <div>
-        <app-detail-all-events
+        <app-detail-tab-table
           [tabname]="allEvents.name"
           [columns]="allEvents.columns"
           [filterType]="allEvents.filterType"
           [domain]="allEvents.domain"
-          [reverseEnum]="allEvents.reverseEnum"
-          >
-        </app-detail-all-events>
+          [participantId]="participantsId">
+        </app-detail-tab-table>
         <div *ngIf="false" class="details">
           <h4>Details</h4>
           <div *ngIf="detailsLoading" class="spinner">Loading...</div>
@@ -73,8 +72,7 @@
         [columns]="tab.columns"
         [filterType]="tab.filterType"
         [domain]="tab.domain"
-        [participantId]="participantsId"
-        >
+        [participantId]="participantsId">
       </app-detail-tab-table>
     </clr-tab-content>
   </clr-tab>
