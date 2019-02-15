@@ -90,9 +90,17 @@ it('should handle username validity long but has mismatch at end', () => {
   expect(wrapper.exists('#username')).toBeTruthy();
   expect(wrapper.exists('#usernameError')).toBeFalsy();
   // if username is long (not too long) but has a mismatch at end
-  let testInput = fp.repeat(50, 'a');
-  testInput = testInput + ' a';
+  let testInput = fp.repeat(50, 'abc');
+  testInput = testInput + ' abc';
   wrapper.find('input#username').simulate('change', {target: {value: testInput}});
+  expect(wrapper.exists('#usernameError')).toBeTruthy();
+});
+
+it('should handle username validity length less than 3 characters', () => {
+  const wrapper = component();
+  expect(wrapper.exists('#username')).toBeTruthy();
+  expect(wrapper.exists('#usernameError')).toBeFalsy();
+  wrapper.find('input#username').simulate('change', {target: {value: 'a'}});
   expect(wrapper.exists('#usernameError')).toBeTruthy();
 });
 
