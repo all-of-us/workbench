@@ -25,7 +25,7 @@ export class OverviewComponent {
   @Input() chartData$: Observable<List<any>>;
   @Input() total$: Observable<number>;
   @Input() isRequesting$: Observable<boolean>;
-  @Input() temporal: {};
+  @Input() temporal: {flag, tempLength};
   @select(searchRequestError) error$: Observable<boolean>;
 
   cohortForm = new FormGroup({
