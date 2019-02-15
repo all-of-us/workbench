@@ -76,6 +76,7 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload});
+    profileApi.profile.trainingCompletionTime = null;
   });
 
   it('should render the homepage', () => {
@@ -102,9 +103,10 @@ describe('HomepageComponent', () => {
   });
 
   it('should display quick tour if first visit', async () => {
+    profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
       ...profile,
-      linkedNihUsername: 'test'
+      linkedNihUsername: 'test',
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -112,10 +114,24 @@ describe('HomepageComponent', () => {
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
   });
 
-  it('should show the era commons linking page if the user has no nih username', async () => {
+  it('should show access tasks dashboard if the user has no nih username', async () => {
+    profileApi.profile.trainingCompletionTime = 1;
+
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
+  });
+
+  it('should show access tasks dashboard if the user has not completed training', async () => {
+    const newProfile = {
+      ...profile,
+      linkedNihUsername: 'test'
+    };
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="complete-training"]')
+        .first().text()).toEqual('Complete Training');
   });
 
   it('should not display the quick tour if access tasks dashboard is open', async () => {
@@ -124,10 +140,11 @@ describe('HomepageComponent', () => {
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
 
-  it('should not show the era commons linking page if user has an nih username', async () => {
+  it('should not show access tasks dashboard if user has completed all access tasks', async () => {
+    profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
         ...profile,
-      linkedNihUsername: 'test'
+      linkedNihUsername: 'test',
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();

@@ -65,21 +65,25 @@ const AccountLinkingButton: React.FunctionComponent<{
   failed: boolean, completed: boolean, failedText: string,
   completedText: string, defaultText: string, onClick: Function
 }> = ({failed, completed, defaultText, completedText, failedText, onClick}) => {
+  const dataTestId = fp.lowerCase(defaultText)
+      .replace(/\s/g, '-');
   if (failed) {
     return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#f27376'}} disabled={true}>
+      ...styles.infoBoxButton, backgroundColor: '#f27376'}}
+                      disabled={true} data-test-id={dataTestId}>
       <ClrIcon shape='exclamation-triangle'/>{failedText}
     </Clickable>;
   } else if (completed) {
     return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#8BC990'}} disabled={true}>
+      ...styles.infoBoxButton, backgroundColor: '#8BC990'}}
+                      disabled={true} data-test-id={dataTestId}>
       <ClrIcon shape='check'/>{completedText}
     </Clickable>;
   } else {
     return <Clickable style={{...buttonStyles.base,
       ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
                       onClick={onClick}
-                      data-test-id={fp.lowerCase(defaultText)}>
+                      data-test-id={dataTestId}>
       {defaultText}
     </Clickable>;
   }
@@ -131,7 +135,6 @@ export class WorkbenchAccessTasks extends
                   to the ERA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
-              {/*TODO: RW-1184 Moodle training UI */}
               <AccountLinkingButton failed={false}
                                     completed={this.props.eraCommonsLinked}
                                     defaultText='Login'
