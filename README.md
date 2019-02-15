@@ -282,6 +282,8 @@ Description of arguments these scripts take are as follows.
 * instance: Cloud Sql Instance
 
 ###Examples:
+#### Generate criteria tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb generate-criteria-table --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 #### Generate denormalized search tables in the BigQuery cdr only one time when it is released or as needed
 `./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
 ##### Result is
