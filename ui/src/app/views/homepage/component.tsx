@@ -106,7 +106,7 @@ export class WorkbenchAccessTasks extends
   }
 
   static redirectToTraining(): void {
-    window.location.assign('https://aou.nnlm.gov/');
+    window.location.assign('https://aoudev.nnlm.gov/static/data-researcher.html?saml=on');
   }
 
   render() {
