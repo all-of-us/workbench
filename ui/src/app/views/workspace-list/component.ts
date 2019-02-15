@@ -3,12 +3,9 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Workspace, WorkspaceAccessLevel} from 'generated/fetch/api';
-
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
@@ -41,9 +38,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   twoFactorEnabled: boolean;
   private profileSubscription: Subscription;
 
-  // All the things related to sharing a workspace
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
   accessLevel: WorkspaceAccessLevel;
   username: string;
 
@@ -160,9 +154,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.sharing = true;
   }
 
-  closeShare(): void {
+  // not sure if this is the right thing to do.
+  // what's our current strategy, feel like I lost track
+  closeShare = () => {
     this.sharing = false;
-  }
+  };
 
   get twoFactorBannerEnabled() {
     if (this.firstSignIn === undefined) {

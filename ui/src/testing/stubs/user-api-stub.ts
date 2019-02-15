@@ -17,11 +17,11 @@ export class UserApiStub extends UserApi {
           return fp.includes(searchTerm, fp.values(userRole).join(' '));
         });
       } else {
-        usersToReturn.push(<User>{
+        usersToReturn.push({
           familyName: 'User4',
           email: 'sampleuser4@fake-research-aou.org',
           givenName: 'Sample'
-        });
+        } as User);
       }
       const userResponse: UserResponse = {
         users: usersToReturn

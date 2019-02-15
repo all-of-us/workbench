@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -6,6 +6,7 @@ import {isBlank, reactStyles, ReactWrapperBase} from 'app/utils';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import Select from 'react-select';
 
 import {User} from 'generated';
 
@@ -19,6 +20,45 @@ import {
 import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+
+const selectStyles = {
+  option: (styles, {isSelected}) => ({
+    ...styles,
+    lineHeight: '1rem',
+    fontSize: '12px',
+    color: '#000000',
+    backgroundColor: isSelected ? '#E0EAF1' : '#FFFFFF'
+  }),
+  control: (styles, {isDisabled}) => ({
+    color: isDisabled ? '#7f7f7f' : '#000000',
+    display: 'flex',
+    height: '1rem',
+    fontSize: '12px',
+    fontSpacing: '13px'
+  }),
+  menu: (styles) => ({
+    ...styles,
+    top: '-.15rem',
+    position: 'absolute',
+  }),
+  container: (styles, {isDisabled}) => ({
+    color: isDisabled ? '#7f7f7f' : '#000000',
+    borderRadius: '5px',
+    border: isDisabled ? 0 : '1px solid #CCCCCC',
+    borderWidth: '1px',
+    width: '6rem',
+    position: 'relative'
+  }),
+  dropdownIndicator: (styles, {isDisabled}) => ({
+    ...styles,
+    color: '#000000',
+    paddingTop: '12px',
+    display: isDisabled ? 'none' : ''
+  }),
+  indicatorSeparator: () => ({
+    display: 'none'
+  })
+};
 
 const styles = reactStyles( {
   tooltipLabel: {
@@ -47,9 +87,10 @@ const styles = reactStyles( {
 
   dropdown: {
     width: '100%',
+    height: '1.75rem',
     marginTop: '0',
-    borderBottom: '1px solid gray',
-    paddingBottom: '.5rem',
+    backgroundColor: '#E0EAF1',
+    borderRadius: '5px'
   },
 
   open: {
@@ -62,7 +103,8 @@ const styles = reactStyles( {
   noBorder: {
     border: 'none',
     background: 'none',
-    width: '90%'
+    width: '90%',
+    marginTop: '8px'
   },
 
   spinner: {
@@ -78,9 +120,10 @@ const styles = reactStyles( {
     minHeight: '30px',
     visibility: 'visible',
     overflowY: 'scroll',
-    maxWidth: '16rem',
+    maxWidth: 'calc(100% - 2.25rem)',
     width: '100%',
-    marginTop: '.25rem'
+    marginTop: '.25rem',
+    zIndex: 100
   },
 
   wrapper: {
@@ -109,7 +152,7 @@ const styles = reactStyles( {
   },
 
   collaboratorIcon: {
-    margin: '0 0 0 4rem',
+    margin: '0 0 0 5rem',
     color: '#2691D0',
     cursor: 'pointer'
   },
@@ -121,9 +164,15 @@ const styles = reactStyles( {
     padding: '0 .125rem',
     display: 'flex',
     flexDirection: 'column'
-  }
+  },
 
 });
+
+export const UserRoleOptions = [
+  {value: WorkspaceAccessLevel.READER, label: 'Reader'},
+  {value: WorkspaceAccessLevel.WRITER, label: 'Writer'},
+  {value: WorkspaceAccessLevel.OWNER, label: 'Owner'}
+];
 
 export interface WorkspaceShareState {
   autocompleteLoading: boolean;
@@ -136,6 +185,7 @@ export interface WorkspaceShareState {
   workspaceUpdateConflictError: boolean;
   workspace: Workspace;
   searchTerm: string;
+  dropDown: boolean;
 }
 
 export interface WorkspaceShareProps {
@@ -148,6 +198,7 @@ export interface WorkspaceShareProps {
 
 export class WorkspaceShare extends React.Component<WorkspaceShareProps, WorkspaceShareState> {
   searchTermChangedEvent: Function;
+  searchingNode: HTMLElement;
 
   constructor(props: WorkspaceShareProps) {
     super(props);
@@ -162,8 +213,17 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       workspaceUpdateConflictError: false,
       workspace: this.props.workspace,
       searchTerm: '',
+      dropDown: false,
     };
     this.searchTermChangedEvent = fp.debounce(300, this.userSearch);
+  }
+
+  componentWillMount(): void {
+    document.addEventListener('mousedown', this.handleClickOutsideSearch, false);
+  }
+
+  componentWillUnmount(): void {
+    document.removeEventListener('mousedown', this.handleClickOutsideSearch, false);
   }
 
   save(): void {
@@ -194,8 +254,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   removeCollaborator(user: UserRole): void {
-    this.setState(({userRolesList}) => (
-      {userRolesList: fp.remove(({email}) => user.email === email, userRolesList)}
+    this.setState(({userRolesList, workspace}) => (
+      {userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
+      workspace: {...workspace,
+        userRoles: fp.remove(({email}) => user.email === email, workspace.userRoles)} as Workspace}
     ));
   }
 
@@ -215,16 +277,17 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   addCollaborator(user: User): void {
     const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
       email: user.email, role: WorkspaceAccessLevel.READER};
-    this.setState(({userRolesList}) => (
-      {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [],
-        userRolesList: fp.concat(userRolesList, [userRole])}
+    this.setState(({userRolesList, workspace}) => (
+      {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
+        userRolesList: fp.concat(userRolesList, [userRole]),
+      workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
     ));
   }
 
   userSearch(value: string): void {
     this.setState({autocompleteLoading: true, autocompleteUsers: [], searchTerm: value});
     if (!value.trim()) {
-      this.setState({autocompleteLoading: false});
+      this.setState({autocompleteLoading: false, dropDown: false});
       return;
     }
     const searchTerm = this.state.searchTerm;
@@ -239,10 +302,20 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         }, response.users, this.state.userRolesList);
         this.setState({
           autocompleteUsers: response.users.splice(0, 4),
-          autocompleteLoading: false
+          autocompleteLoading: false,
+          dropDown: true
         });
       });
   }
+
+  setRole = (e, user)  => {
+    let oldUserRoles = this.state.userRolesList;
+      const newUserRoleList = fp.map((u) => {
+        return u.email === user.email ? {...u, role: e.value} : u
+      }, oldUserRoles);
+    this.setState(({userRolesList, workspace}) => ({userRolesList: newUserRoleList,
+      workspace: {...workspace, userRoles: newUserRoleList} as Workspace}));
+  };
 
   resetModalState(): void {
     this.setState({
@@ -253,6 +326,27 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     });
   }
 
+  openDropdown(): void {
+    this.setState({dropDown: true});
+  }
+
+  closeDropdown(): void {
+    this.setState({dropDown: false});
+  }
+
+  handleClickOutsideSearch = (e) => {
+    if (this.searchingNode) {
+      if (this.searchingNode.contains(e.target)) {
+        return;
+      }
+      this.closeDropdown();
+    }
+  };
+
+  cleanClassNameForSelect(value: string): string {
+    return (value + '-user-role').replace(/[@\.]/g, '');
+  }
+
   get hasPermission(): boolean {
     return this.props.accessLevel === WorkspaceAccessLevel.OWNER;
   }
@@ -260,12 +354,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   get showSearchResults(): boolean {
     return !this.state.autocompleteLoading &&
       this.state.autocompleteUsers.length > 0 &&
-      !isBlank(this.state.searchTerm);
+      !isBlank(this.state.searchTerm) && this.state.dropDown;
   }
 
   get showAutocompleteNoResults(): boolean {
     return !this.state.autocompleteLoading && (this.state.autocompleteUsers.length === 0) &&
-      !isBlank(this.state.searchTerm);
+      !isBlank(this.state.searchTerm) && this.state.dropDown;
   }
 
   render() {
@@ -294,12 +388,13 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           </div>
         </ModalTitle>
         <ModalBody style={styles.sharingBody}>
-          <div style={styles.dropdown}>
-            <ClrIcon shape='search' style={{width: '21px', height: '21px'}}/>
+          <div ref={node => this.searchingNode = node} style={styles.dropdown} >
+            <ClrIcon shape='search' style={{width: '21px', height: '21px', paddingLeft: '3px'}}/>
             <input data-test-id='search' style={styles.noBorder} type='text'
                    placeholder='Find Collaborators'
                    disabled={!this.hasPermission}
-                   onChange={e => this.searchTermChangedEvent(e.target.value)}/>
+                   onChange={e => this.searchTermChangedEvent(e.target.value)}
+                   onFocus={() => this.openDropdown()}/>
             {this.state.autocompleteLoading && <span style={styles.spinner}/>}
             {this.showAutocompleteNoResults &&
               <div data-test-id='drop-down'
@@ -310,7 +405,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
             {this.showSearchResults &&
               <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
               {this.state.autocompleteUsers.map((user, i) => {
-                return <div style={styles.wrapper} key={i}>
+                return <div><div style={styles.wrapper} key={i}>
                   <div style={styles.box}>
                     <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
                     <div data-test-id='user-email' style={styles.userName}>{user.email}</div>
@@ -320,6 +415,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                              style={{height: '21px', width: '21px'}}
                              onClick={() => { this.addCollaborator(user); }}/>
                   </div>
+                </div>
+                  <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>
                 </div>; })}
             </div>}
           </div>
@@ -334,7 +431,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
             <span>Loading updated user list...</span>
           </div>}
             <h3>Current Collaborators</h3>
-          <div style={{overflowY: 'auto'}}>
+          <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
             {this.state.userRolesList.map((user, i) => {
               return <div key={i}>
                 <div style={styles.wrapper}>
@@ -346,12 +443,17 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                     <div data-test-id='collab-user-email'
                          style={styles.userName}>{user.email}</div>
                     <label>
-                      <select style={{width: '6rem'}}
-                              disabled={!this.hasPermission || user.email === this.props.userEmail}>
-                        <option value='READER'>Reader</option>
-                        <option value='WRITER'>Writer</option>
-                        <option value='OWNER'>Owner</option>
-                      </select>
+                      <Select styles={selectStyles} value={fp.find((u) => {
+                                return u.value === user.role
+                              }, UserRoleOptions)}
+                              // URSA TAKE THIS OUT BEFORE MERGING!!!!
+                              // menuIsOpen={true}
+                              menuPortalTarget={document.getElementById('popup-root')}
+                              isDisabled={user.email === this.props.userEmail}
+                              classNamePrefix={this.cleanClassNameForSelect(user.email)}
+                              data-test-id={user.email + '-user-role'}
+                              onChange={e => this.setRole(e, user)}
+                              options={UserRoleOptions}/>
                     </label>
                   </div>
                 <div style={styles.box}>
@@ -363,17 +465,16 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                   </div>
                 </div>
                 </div>
-                <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>
+                  {(this.state.userRolesList.length != i+ 1) &&
+                  <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
               </div>;
             })}
           </div>
-          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Button type='secondary' style={{margin: '.25rem .5rem .25rem 0', border: '0'}}
-                    onClick={() => this.props.closeFunction()}>Cancel</Button>
-            <Button style={{margin: '.25rem .5rem .25rem 0', backgroundColor: '#2691D0'}}
-                    disabled={!this.hasPermission} onClick={() => this.save()}>Save</Button>
-          </div>
         </ModalBody>
+        <ModalFooter>
+            <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}} onClick={() => this.props.closeFunction()}>Cancel</Button>
+            <Button data-test-id='save' disabled={!this.hasPermission} onClick={() => this.save()}>Save</Button>
+        </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>
         <h3>The workspace {this.state.workspace.id} could not be found</h3></div>}

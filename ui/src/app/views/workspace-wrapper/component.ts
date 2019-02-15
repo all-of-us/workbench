@@ -39,7 +39,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   private subscriptions = [];
 
   constructor(
-    private profileStorageService: ProfileStorageService,
     private route: ActivatedRoute,
     private router: Router,
     private workspacesService: WorkspacesService

@@ -175,17 +175,7 @@ describe('WorkspaceListComponent', () => {
 
   it('enables sharing workspaces', fakeAsync(() => {
     // TODO: add this test back in after workspace list conversion to react
-    // const firstWorkspace = workspaceListPage.fixture.componentInstance
-    // .workspaceList[0].workspace;
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.dropdown-toggle')));
-    // updateAndTick(workspaceListPage.fixture);
-    // simulateClick(workspaceListPage.fixture,
-    //   workspaceListPage.workspaceCards[0].query(By.css('.share-item')));
-    // updateAndTick(workspaceListPage.fixture);
-    // expect(workspaceListPage.fixture.componentInstance.shareModal.sharing).toBeTruthy();
-    // expect(workspaceListPage.fixture.componentInstance.shareModal.workspace)
-    //   .toEqual(firstWorkspace);
+    // TEST: that we can open correct share modal from this component
     // Further tests in the workspace share component
   }));
 

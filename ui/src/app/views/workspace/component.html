@@ -111,9 +111,9 @@
         </span>
       </span>
     </div>
-    <div *ngFor="let user of workspace.userRoles">
-      <div>{{user.role}}: {{user.email}}</div>
-    </div>
+      <div *ngFor="let user of workspace.userRoles">
+        <div>{{user.role}}: {{user.email}}</div>
+      </div>
     <h6>
       Workspace Information
       <app-tooltip [direction]="'top-left'">
@@ -172,7 +172,8 @@
     </a>
   </div>
 </div>
-<app-workspace-share [workspace]="workspace"
+<app-workspace-share (aclUpdate)="updateAclList($event)"
+                     [workspace]="workspace"
                      [accessLevel]="accessLevel"
                      [closeFunction]="closeShare.bind(this)"
                      [userEmail]="username"

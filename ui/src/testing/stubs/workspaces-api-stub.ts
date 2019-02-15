@@ -1,5 +1,5 @@
 import {
-  FileDetail,
+  FileDetail, ShareWorkspaceRequest, ShareWorkspaceResponse,
   UserRole,
   Workspace,
   WorkspaceAccessLevel,
@@ -23,15 +23,12 @@ export class WorkspaceStubVariables {
 
 export class WorkspacesApiStub extends WorkspacesApi {
   workspaces: Workspace[];
-  userRoles: UserRole[];
-  // By default, access is OWNER.
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   notebookList: FileDetail[];
 
-  constructor(workspaces?: Workspace[], userRoles?: UserRole[]) {
+  constructor(workspaces?: Workspace[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
     this.workspaces = fp.defaults([WorkspacesApiStub.stubWorkspace()], workspaces);
-    this.userRoles = fp.defaults([], userRoles);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
   }
@@ -131,6 +128,17 @@ export class WorkspacesApiStub extends WorkspacesApi {
             accessLevel: accessLevel
           };
         })});
+    });
+  }
+
+  shareWorkspace(workspaceNamespace: string, workspaceId: string, body?: ShareWorkspaceRequest,
+                 options?: any): Promise<ShareWorkspaceResponse> {
+    return new Promise<ShareWorkspaceResponse>(resolve => {
+      const newEtag = fp.defaults(2, (body.workspaceEtag + 1));
+      const newItems = fp.defaults({}, body.items);
+      resolve({
+        workspaceEtag: newEtag, items: newItems
+      });
     });
   }
 

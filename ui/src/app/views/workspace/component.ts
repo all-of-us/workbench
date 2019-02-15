@@ -18,6 +18,7 @@ import {
   FileDetail,
   PageVisit,
   ProfileService,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
@@ -229,6 +230,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
+    // only done until this page refactored ot React
+    window.location.reload();
+  }
+
+  updateAclList(userRoleList: UserRole[]): void {
+    this.workspace.userRoles = userRoleList;
+    console.log(this.workspace);
   }
 
   dismissTip(): void {
