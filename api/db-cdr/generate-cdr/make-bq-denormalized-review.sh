@@ -342,8 +342,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting observation data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
- source_concept_id, source_vocabulary, age_at_event, visit_type)
+ (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code,
+ source_vocabulary, age_at_event, visit_type)
  select person_id, data_id, 'Observation' as domain, start_datetime, standard_name, standard_code, standard_concept_id, standard_vocabulary, source_name, source_code,
  source_concept_id, source_vocabulary, age_at_event, b.concept_name as visit_type
  from \`$BQ_PROJECT.$BQ_DATASET.person_observation\` a

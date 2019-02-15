@@ -16,18 +16,8 @@
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "standard_name",
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE",
 	"name": "standard_code",
 	"type": "STRING"
-	},
-	{
-	"mode": "NULLABLE",
-	"name": "standard_concept_id",
-	"type": "integer"
 	},
 	{
 	"mode": "NULLABLE", 
@@ -35,28 +25,33 @@
 	"type": "STRING"
 	},
 	{
+	"mode": "NULLABLE",
+	"name": "standard_name",
+	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "source_code",
+	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE", 
+	"name": "source_vocabulary",
+	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "source_name",
+	"type": "STRING"
+	},
+	{
 	"mode": "NULLABLE", 
 	"name": "age_at_event",
 	"type": "INTEGER"
-	}, 
+	},
 	{
-	"mode": "NULLABLE", 
-	"name": "value_concept",
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "value_as_number",
-	"type": "FLOAT"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "value_source_value",
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "units",
+	"mode": "NULLABLE",
+	"name": "visit_type",
 	"type": "STRING"
 	}
 ]
