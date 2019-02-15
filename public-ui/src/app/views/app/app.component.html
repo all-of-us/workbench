@@ -1,13 +1,11 @@
 <clr-main-container *ngIf="signedIn else login">
   <app-db-header [noMenu]="noHeaderMenu"></app-db-header>
-  <div class="content-container">
-    <div class="app-container">
+    <div class="content-container">
       <router-outlet></router-outlet>
       <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
         <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
       </div>
     </div>
-  </div>
 </clr-main-container>
 <ng-template #login>
   <router-outlet></router-outlet>
