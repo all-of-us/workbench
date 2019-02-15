@@ -78,7 +78,6 @@ describe('HomepageComponent', () => {
     userProfileStore.next({profile, reload});
   });
 
-
   it('should render the homepage', () => {
     const wrapper = component();
     expect(wrapper.exists()).toBeTruthy();
@@ -116,7 +115,7 @@ describe('HomepageComponent', () => {
   it('should show the era commons linking page if the user has no nih username', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="Login"]').first().text()).toEqual('Login');
+    expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
   });
 
   it('should not display the quick tour if access tasks dashboard is open', async () => {
@@ -133,7 +132,6 @@ describe('HomepageComponent', () => {
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="Login"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-id="login"]').exists()).toBeFalsy();
   });
-
 });

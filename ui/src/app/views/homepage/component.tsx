@@ -79,7 +79,7 @@ const AccountLinkingButton: React.FunctionComponent<{
     return <Clickable style={{...buttonStyles.base,
       ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
                       onClick={onClick}
-                      data-test-id={defaultText}>
+                      data-test-id={fp.lowerCase(defaultText)}>
       {defaultText}
     </Clickable>;
   }
@@ -145,7 +145,7 @@ export class WorkbenchAccessTasks extends
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
-            <div style={{flexDirection: 'column', width: '70%'}}>
+            <div style={{flexDirection: 'column', width: '65%'}}>
               <div style={styles.infoBoxHeader}>Complete Online Training</div>
               <div style={styles.infoBoxBody}>Clicking the training link will bring you to
                 the All of Us Compliance Training Portal, which will show you any
@@ -177,6 +177,10 @@ const homepageStyles = reactStyles({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
+  },
+  contentWrapper: {
+    flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
+    justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -220,11 +224,9 @@ const homepageStyles = reactStyles({
     top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
   },
   addCard: {
-    display: 'flex', height: '223px', width: '300px', alignItems: 'flex-start',
-    backgroundColor: '#fff', alignContent: 'left', marginLeft: '3%',
-    marginTop: '1.9rem', marginRight: '106px', cursor: 'pointer',
+    display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    borderRadius: '5px', fontSize: '20px', lineHeight: '28px'
+    fontSize: '20px', lineHeight: '28px'
   }
 });
 
@@ -406,8 +408,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                        trainingCompleted={trainingCompleted}/>
                 ) : (
                   <div>
-                    <div style={{flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
-                      justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'}}>
+                    <div style={homepageStyles.contentWrapper}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
                       <a onClick={() => navigate(['workspaces'])}
                          style={{marginTop: '2.3rem', fontSize: '14px', color: '#FFFFFF'}}>
@@ -468,8 +469,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <div style={homepageStyles.footerText}>
                         <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
                         <ul style={{color: '#83C3EC'}}>
-                          {col.links.map(link => {
-                            return <li><a href='#' style={{color: '#83C3EC'}}>{link}</a></li>;
+                          {col.links.map((link, ii) => {
+                            return <li key={ii}>
+                              <a href='#' style={{color: '#83C3EC'}}>{link}</a>
+                            </li>;
                           } )}
                         </ul>
                       </div>
