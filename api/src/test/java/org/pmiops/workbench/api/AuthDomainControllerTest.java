@@ -57,7 +57,7 @@ public class AuthDomainControllerTest {
   private Provider<User> userProvider;
   @Autowired
   private UserDao userDao;
-  @Autowired
+  
   private AuthDomainController authDomainController;
 
   @Before
@@ -89,7 +89,7 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request = new UpdateUserDisabledRequest().
         email(PRIMARY_EMAIL).
         disabled(true);
-    ResponseEntity<Void> response = this.authDomainController.disableUser(request);
+    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled());
@@ -101,7 +101,7 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request = new UpdateUserDisabledRequest().
         email(PRIMARY_EMAIL).
         disabled(false);
-    ResponseEntity<Void> response = this.authDomainController.disableUser(request);
+    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(!updatedUser.getDisabled());

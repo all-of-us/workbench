@@ -43,13 +43,13 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
-    DataAccessLevel previousAccess = user.getDataAccessLevelEnum();
+    Boolean previousDisabled = user.getDisabled();
     User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
     userService.logAdminUserAction(
         user.getUserId(),
-        "updated user access to registered domain",
-        previousAccess,
-        updatedUser.getDataAccessLevel());
+        "updated user disabled state",
+        previousDisabled,
+        request.getDisabled());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
