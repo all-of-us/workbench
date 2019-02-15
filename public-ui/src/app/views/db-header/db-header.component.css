@@ -42,7 +42,14 @@
 }
 
 .link-list__item:nth-of-type(2) {
+    position: relative;
+}
+.link-list__item:nth-of-type(2)::after {
     border-bottom: solid #262262 .2rem;
+    content: '';
+    position: absolute;
+    bottom:0;
+    width: 100%;
 }
 
 .link-list__item:hover {
