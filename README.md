@@ -282,10 +282,18 @@ Description of arguments these scripts take are as follows.
 * instance: Cloud Sql Instance
 
 ###Examples:
-#### Generate denormalized tables in the BigQuery cdr only one time when it is released or as needed
+#### Generate denormalized search tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
+##### Result is
+1. The BigQuery dataset has new denormalized search tables for cohort builder to work.
+#### Generate denormalized review tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb make-bq-denormalized-review --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
+##### Result is
+1. The BigQuery dataset has new denormalized review tables for cohort builder to work.
+#### Generate all denormalized tables(search and review) in the BigQuery cdr only one time when it is released or as needed
 `./project.rb make-bq-denormalized-tables --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
 ##### Result is
-1. The BigQuery dataset has new denormalized tables for cohort builder to work.
+1. The BigQuery dataset has new denormalized tables(search and review) for cohort builder to work.
 #### Generate cdr count data for use by workbench in BigQuery from a deidentified cdr release
 `./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version 20181107 --bucket all-of-us-workbench-private-cloudsql`
 ##### Result is
@@ -439,6 +447,12 @@ create and delete BigQuery datasets), run:
 ```
 
 By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
+
+To filter tests, use the [--tests flag](https://docs.gradle.org/current/userguide/java_testing.html#simple_name_pattern) on any test command:
+
+```
+./project.rb bigquerytest --tests "org.pmiops.workbench.api.CohortBuilderControllerBQTest.countSubjectsNotValidMessageException"
+```
 
 ## Manual Testing
 

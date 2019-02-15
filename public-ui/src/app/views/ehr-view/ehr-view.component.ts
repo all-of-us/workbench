@@ -1,9 +1,11 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
+import {Concept} from '../../../publicGenerated/model/concept';
 import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
 import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
 import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
+import {GraphType} from '../../utils/enum-defs';
 
 import { FormControl } from '@angular/forms';
 import {
@@ -40,6 +42,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   private initSearchSubscription: ISubscription = null;
   /* Show more synonyms when toggled */
   showMoreSynonyms = {};
+  synonymString = {};
   ageChartHelpText = 'The age at occurrence bar chart provides a binned age \n' +
     'distribution for participants at the time the medical concept ' +
     'being queried occurred in their records. \n' +
@@ -53,14 +56,22 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     'The sources represent the many different ways that the standard medical concept ' +
     'returned in the search results has been recorded in patient records. \n' +
     'The sources bar chart provides the top 10 source concepts from the All of Us data.';
+  matchingConceptsHelptText = 'Medical concepts are similar to medical terms; ' +
+    'they capture medical information\n' +
+    'in an individual’s records and may sometimes have values associated with them.\n' +
+    'For example, “height” is a medical concept that has a measurement value (in centimeters).\n' +
+    'These concepts are categorized into different domains. ' +
+    'Domains are types of medical information.\n' +
+    'The Data Browser searches the All of Us public data for medical concepts that\n' +
+    'match the keyword or code entered in the search bar.\n' +
+    'The Data Browser counts how many participants have at least\n' +
+    'one mention of the matching medical concepts in their records.\n' +
+    'Matching medical concepts that have the highest participant counts ' +
+    'are returned at the top of the list.';
 
   /* Show different graphs depending on domain we are in */
-  // defaults,  most domains
-  showSources = true;
-  showMeasurementGenderBins = false;
-  showGenderGraph = false;
-  showAgeGraph = true;
-  showSourcesGraph = false;
+  graphToShow = GraphType.BiologicalSex;
+  showTopConcepts = false;
   domainHelpText = {'condition': 'Medical concepts that describe the ' +
     'health status of an individual, ' +
     'such as medical diagnoses, are found in the conditions domain.',
@@ -85,7 +96,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   @ViewChild('chartElement') chartEl: ElementRef;
 
 
-  constructor (private route: ActivatedRoute,
+  constructor(private route: ActivatedRoute,
               private api: DataBrowserService
   ) {
     this.route.params.subscribe(params => {
@@ -148,9 +159,13 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     }
     this.initSearchSubscription.unsubscribe();
   }
+
   private searchCallback(results: any) {
     this.searchResult = results;
     this.items = this.searchResult.items;
+    for (const concept of this.items) {
+      this.synonymString[concept.conceptId] = concept.conceptSynonyms.join(', ');
+    }
     if (this.searchResult.standardConcepts) {
       this.standardConcepts = this.searchResult.standardConcepts;
     }
@@ -159,6 +174,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     localStorage.setItem('searchText', '');
     this.loading = false;
   }
+
   private searchDomain(query: string) {
     // Unsubscribe from our initial search subscription if this is called again
     if (this.initSearchSubscription) {
@@ -177,6 +193,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.prevSearchText = query;
     return this.api.searchConcepts(this.searchRequest);
   }
+
   public toggleSources(row) {
     if (row.showSources) {
       row.showSources = false;
@@ -186,50 +203,53 @@ export class EhrViewComponent implements OnInit, OnDestroy {
       row.viewSynonyms = true;
     }
   }
+
   public selectGraph(g) {
     this.chartEl.nativeElement.scrollIntoView(
       { behavior: 'smooth', block: 'nearest', inline: 'start' });
     this.resetSelectedGraphs();
-    if (g === 'Gender') {
-      this.showGenderGraph = true;
-    } else if (g === 'Age') {
-      this.showAgeGraph = true;
-    } else if (g === 'Sources') {
-      this.showSourcesGraph = true;
-    } else {
-      this.showAgeGraph = true;
-    }
-    if (this.ehrDomain.name === 'Measurements' && this.showGenderGraph) {
-      this.showMeasurementGenderBins = true;
-      this.showGenderGraph = false;
+    this.graphToShow = g;
+    if (this.ehrDomain.name === 'Measurements' && this.graphToShow === GraphType.BiologicalSex) {
+      this.graphToShow = GraphType.MeasurementBins;
     }
   }
+
   public toggleSynonyms(conceptId) {
     this.showMoreSynonyms[conceptId] = !this.showMoreSynonyms[conceptId];
   }
+
   public showToolTip(g) {
-    if (g === 'Gender') {
+    if (g === 'Biological Sex' || g === 'Gender Identity') {
       return 'Gender chart';
-    } else if (g === 'Age') {
+    } else if (g === 'Age at Occurrence') {
       return this.ageChartHelpText;
     } else if (g === 'Sources') {
       return this.sourcesChartHelpText;
     }
   }
+
   public resetSelectedGraphs() {
-    this.showGenderGraph = false;
-    this.showAgeGraph = false;
-    this.showSourcesGraph = false;
-    this.showMeasurementGenderBins = false;
+    this.graphToShow = GraphType.None;
   }
+
   public expandRow(concepts: any[], r: any) {
     if (r.expanded) {
       r.expanded = false;
       return;
     }
     this.resetSelectedGraphs();
-    this.showGenderGraph = true;
+    // In the case of measurements we show the histogram of
+    // values in the place of normal gender graph.
+    if (this.ehrDomain.name === 'Measurements') {
+      this.graphToShow = GraphType.MeasurementBins;
+    } else {
+      this.graphToShow = GraphType.BiologicalSex;
+    }
     concepts.forEach(concept => concept.expanded = false);
     r.expanded = true;
+  }
+
+  public toggleTopConcepts() {
+    this.showTopConcepts = !this.showTopConcepts;
   }
 }

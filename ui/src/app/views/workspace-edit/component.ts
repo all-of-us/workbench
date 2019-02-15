@@ -1,13 +1,14 @@
 import {Location} from '@angular/common';
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {deepCopy, isBlank} from 'app/utils';
+import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
   CloneWorkspaceResponse,
@@ -17,7 +18,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
@@ -80,9 +80,9 @@ export const ResearchPurposeItems = {
 
 @Component({
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/inputs.css'],
+    '../../styles/buttons.css',
+    '../../styles/cards.css',
+    '../../styles/inputs.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceEditComponent implements OnInit {
@@ -113,9 +113,9 @@ export class WorkspaceEditComponent implements OnInit {
     'Asian': UnderservedPopulationEnum.RACEASIAN,
     'Middle Eastern or North African': UnderservedPopulationEnum.RACEMIDDLEEASTERNORNORTHAFRICAN,
     'Black, African or African American':
-        UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN,
+    UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN,
     'Native Hawaiian or Pacific Islander':
-        UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER
+    UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER
   };
   ageList = {
     'Children (0-11)': UnderservedPopulationEnum.AGECHILDREN,
@@ -132,17 +132,17 @@ export class WorkspaceEditComponent implements OnInit {
     'Lesbian': UnderservedPopulationEnum.SEXUALORIENTATIONLESBIAN,
     'Bisexual': UnderservedPopulationEnum.SEXUALORIENTATIONBISEXUAL,
     'Polysexual, omnisexual, sapiosexual or pansexual':
-        UnderservedPopulationEnum.SEXUALORIENTATIONPOLYSEXUALOMNISEXUALSAPIOSEXUALORPANSEXUAL,
+    UnderservedPopulationEnum.SEXUALORIENTATIONPOLYSEXUALOMNISEXUALSAPIOSEXUALORPANSEXUAL,
     'Asexual': UnderservedPopulationEnum.SEXUALORIENTATIONASEXUAL,
     'Two-Spirit': UnderservedPopulationEnum.SEXUALORIENTATIONTWOSPIRIT,
     'Have not figured out or are in the process of figuring out their sexuality':
-        UnderservedPopulationEnum.SEXUALORIENTATIONFIGURINGOUTSEXUALITY,
+    UnderservedPopulationEnum.SEXUALORIENTATIONFIGURINGOUTSEXUALITY,
     'Mostly straight, but sometimes attracted to people of their own sex':
-        UnderservedPopulationEnum.SEXUALORIENTATIONMOSTLYSTRAIGHT,
+    UnderservedPopulationEnum.SEXUALORIENTATIONMOSTLYSTRAIGHT,
     'Does not think of themselves as having sexuality':
-        UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTTHINKOFHAVINGSEXUALITY,
+    UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTTHINKOFHAVINGSEXUALITY,
     'Does not use labels to identify themselves':
-        UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTUSELABELS,
+    UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTUSELABELS,
     'Does not know the answer': UnderservedPopulationEnum.SEXUALORIENTATIONDOESNOTKNOWANSWER
   };
   genderIdentityList = {
@@ -158,7 +158,7 @@ export class WorkspaceEditComponent implements OnInit {
   geographyList = {
     'Urban clusters (2,500-50,000 people)': UnderservedPopulationEnum.GEOGRAPHYURBANCLUSTERS,
     'Rural (All population, housing and territory not included within an urban area)':
-        UnderservedPopulationEnum.GEOGRAPHYRURAL
+    UnderservedPopulationEnum.GEOGRAPHYRURAL
   };
   disabilityList = {
     'Physical Disability': UnderservedPopulationEnum.DISABILITYPHYSICAL,
@@ -166,15 +166,15 @@ export class WorkspaceEditComponent implements OnInit {
   };
   accessToCareList = {
     'Have not had a clinic visit in the past 12 months':
-        UnderservedPopulationEnum.ACCESSTOCARENOTPASTTWELVEMONTHS,
+    UnderservedPopulationEnum.ACCESSTOCARENOTPASTTWELVEMONTHS,
     'Cannot easily obtain or pay for medical care':
-        UnderservedPopulationEnum.ACCESSTOCARECANNOTOBTAINORPAYFOR
+    UnderservedPopulationEnum.ACCESSTOCARECANNOTOBTAINORPAYFOR
   };
   educationIncomeList = {
     'Less than a high school graduate':
-        UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANHIGHSCHOOLGRADUATE,
+    UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANHIGHSCHOOLGRADUATE,
     'Less than $25,000 for 4 people':
-        UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANTWENTYFIVETHOUSANDFORFOURPEOPLE
+    UnderservedPopulationEnum.EDUCATIONINCOMELESSTHANTWENTYFIVETHOUSANDFORFOURPEOPLE
   };
 
   underservedCategories = {
@@ -200,13 +200,11 @@ export class WorkspaceEditComponent implements OnInit {
   toolTip: ToolTipComponent;
 
   constructor(
-      private locationService: Location,
-      private route: ActivatedRoute,
-      private workspacesService: WorkspacesService,
-      private workspaceStorageService: WorkspaceStorageService,
-      private cdrVersionStorageService: CdrVersionStorageService,
-      public profileStorageService: ProfileStorageService,
-      private router: Router,
+    private locationService: Location,
+    private workspacesService: WorkspacesService,
+    private workspaceStorageService: WorkspaceStorageService,
+    private cdrVersionStorageService: CdrVersionStorageService,
+    public profileStorageService: ProfileStorageService,
   ) {}
 
   ngOnInit(): void {
@@ -228,8 +226,9 @@ export class WorkspaceEditComponent implements OnInit {
         underservedPopulationDetails: []
       }};
     this.mode = WorkspaceEditMode.Edit;
-    if (this.route.routeConfig.data.mode) {
-      this.mode = this.route.routeConfig.data.mode;
+    const configData = routeConfigDataStore.getValue();
+    if (configData.mode) {
+      this.mode = configData.mode;
     }
 
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
@@ -247,14 +246,15 @@ export class WorkspaceEditComponent implements OnInit {
     }
     if (this.mode === WorkspaceEditMode.Edit || this.mode === WorkspaceEditMode.Clone) {
       // There is an existing workspace referenced in this flow.
-      this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
-      this.oldWorkspaceName = this.route.snapshot.params['wsid'];
+      const ws = currentWorkspaceStore.getValue();
+      this.oldWorkspaceNamespace = ws.namespace;
+      this.oldWorkspaceName = ws.id;
       this.loadWorkspace();
     }
   }
 
   loadWorkspace(): void {
-    const wsData: WorkspaceData = deepCopy(this.route.snapshot.data.workspace) as WorkspaceData;
+    const wsData: WorkspaceData = deepCopy(currentWorkspaceStore.getValue()) as WorkspaceData;
     if (this.mode === WorkspaceEditMode.Edit) {
       this.workspace = wsData;
       this.accessLevel = wsData.accessLevel;
@@ -295,7 +295,7 @@ export class WorkspaceEditComponent implements OnInit {
         this.workspace = workspace;
         this.accessLevel = workspace.accessLevel;
         this.resetWorkspaceEditor();
-    });
+      });
   }
 
   resetWorkspaceEditor(): void {
@@ -327,16 +327,16 @@ export class WorkspaceEditComponent implements OnInit {
     }
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
-        (workspace) => {
-          this.router.navigate(['workspaces', workspace.namespace, workspace.id]);
-        },
-        (error) => {
-          if (error.status === 409) {
-            this.workspaceCreationConflictError = true;
-          } else {
-            this.workspaceCreationError = true;
-          }
-        });
+      (workspace) => {
+        navigate(['workspaces', workspace.namespace, workspace.id]);
+      },
+      (error) => {
+        if (error.status === 409) {
+          this.workspaceCreationConflictError = true;
+        } else {
+          this.workspaceCreationError = true;
+        }
+      });
   }
 
   updateWorkspace(): void {
@@ -354,7 +354,7 @@ export class WorkspaceEditComponent implements OnInit {
             this.workspace.namespace,
             this.workspace.id).then(() => {
               this.navigateBack();
-          });
+            });
         },
         (error) => {
           if (error.status === 409) {
@@ -377,7 +377,7 @@ export class WorkspaceEditComponent implements OnInit {
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
-          this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
+          navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
         (error) => {
           this.resetWorkspaceEditor();
@@ -399,7 +399,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   get hasPermission(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
-        || this.accessLevel === WorkspaceAccessLevel.WRITER;
+      || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
   keys(input: Object): Array<string> {
@@ -465,17 +465,17 @@ export class WorkspaceEditComponent implements OnInit {
 
   clearAllFields() {
     this.workspace.description = '',
-    this.workspace.researchPurpose =  {
-      diseaseFocusedResearch: false,
-      methodsDevelopment: false,
-      controlSet: false,
-      aggregateAnalysis: false,
-      ancestry: false,
-      commercialPurpose: false,
-      population: false,
-      reviewRequested: false,
-      containsUnderservedPopulation: false,
-      underservedPopulationDetails: []
-    };
+      this.workspace.researchPurpose =  {
+        diseaseFocusedResearch: false,
+        methodsDevelopment: false,
+        controlSet: false,
+        aggregateAnalysis: false,
+        ancestry: false,
+        commercialPurpose: false,
+        population: false,
+        reviewRequested: false,
+        containsUnderservedPopulation: false,
+        underservedPopulationDetails: []
+      };
   }
 }

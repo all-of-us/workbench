@@ -9,24 +9,24 @@ import {
   Output
 } from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
-import {fromJS, List, Map} from 'immutable';
-import * as moment from 'moment';
-import {Observable} from 'rxjs/Observable';
-import {Subscription} from 'rxjs/Subscription';
 import {
   activeCriteriaType,
   activeModifierList,
   CohortSearchActions,
   previewStatus,
-} from '../redux';
-import {dateValidator, integerAndRangeValidator} from '../validators';
+} from 'app/cohort-search/redux';
+import {dateValidator, integerAndRangeValidator} from 'app/cohort-search/validators';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
+import {fromJS, List, Map} from 'immutable';
+import * as moment from 'moment';
+import {Observable} from 'rxjs/Observable';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-    selector: 'crit-modifier-page',
-    templateUrl: './modifier-page.component.html',
-    styleUrls: ['./modifier-page.component.css']
+  selector: 'crit-modifier-page',
+  templateUrl: './modifier-page.component.html',
+  styleUrls: ['./modifier-page.component.css']
 })
 export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChecked {
   @select(activeCriteriaType) ctype$;
@@ -95,8 +95,8 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     maxLength: 2,
     modType: ModifierType.NUMOFOCCURRENCES,
     operators: [{
-        name: 'Any',
-        value: undefined,
+      name: 'Any',
+      value: undefined,
     }, {
       name: 'N or More',
       value: 'GREATER_THAN_OR_EQUAL_TO',
@@ -128,11 +128,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
     private cdref: ChangeDetectorRef,
-    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.ctype$
       .filter(ctype => !! ctype)
@@ -248,7 +247,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
           .forEach(mod => this.actions.addModifier(mod));
 
         // update the calculate button
-         this.formChanges = !newMods.every(element => element === undefined);
+        this.formChanges = !newMods.every(element => element === undefined);
         // clear preview/counts
         this.preview = Map();
       })

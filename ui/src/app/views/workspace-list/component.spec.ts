@@ -110,7 +110,7 @@ describe('WorkspaceListComponent', () => {
       ] }).compileComponents().then(() => {
         workspaceListPage = new WorkspaceListPage(TestBed);
       });
-      tick();
+    tick();
   }));
 
 
@@ -119,7 +119,7 @@ describe('WorkspaceListComponent', () => {
     workspaceListPage.workspacesService.getWorkspaces()
       .subscribe(workspaces => {
         expectedWorkspaces = workspaces.items.length;
-    });
+      });
     tick();
     expect(workspaceListPage.workspaceCards.length).toEqual(expectedWorkspaces);
   }));
@@ -151,7 +151,7 @@ describe('WorkspaceListComponent', () => {
     simulateClick(workspaceListPage.fixture, de.query(By.css('.delete-item')));
     updateAndTick(workspaceListPage.fixture);
     expect(workspaceListPage.fixture.componentInstance.confirmDeleting).toBeTruthy();
-    expect(workspaceListPage.fixture.componentInstance.resource)
+    expect(workspaceListPage.fixture.componentInstance.workspace)
       .toEqual(firstWorkspace);
     simulateClickReact(workspaceListPage.fixture, '[data-test-id="confirm-delete"]');
     expect(deleteSpy).toHaveBeenCalledWith(firstWorkspace.namespace, firstWorkspace.id);

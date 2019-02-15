@@ -1,7 +1,11 @@
-import { shallow } from 'enzyme';
+import {shallow} from 'enzyme';
 import * as React from 'react';
 
-import {ConfirmDeleteModal, ConfirmDeleteModalProps, ConfirmDeleteModalState} from '../confirm-delete-modal/component';
+import {
+  ConfirmDeleteModal,
+  ConfirmDeleteModalProps,
+  ConfirmDeleteModalState
+} from './component';
 
 describe('ConfirmDeleteModalComponent', () => {
   let props: ConfirmDeleteModalProps;
@@ -13,9 +17,8 @@ describe('ConfirmDeleteModalComponent', () => {
 
   beforeEach(() => {
     props = {
-      deleting: true,
       resourceType: 'test',
-      resource: {name: 'testResource'},
+      resourceName: 'testResource',
       receiveDelete: () => {},
       closeFunction: () => {}
     };

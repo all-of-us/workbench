@@ -1,10 +1,10 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {Participant} from '../participant.model';
+import {Participant} from 'app/cohort-review/participant.model';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReviewService,
@@ -27,12 +27,12 @@ const validStatuses = [
 })
 export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges {
 
-    participantOption: any;
-    defaultOption = false;
-    test: any;
+  participantOption: any;
+  defaultOption = false;
+  test: any;
 
 
-    readonly cohortStatusList = validStatuses.map(status => ({
+  readonly cohortStatusList = validStatuses.map(status => ({
     value: status,
     display: Participant.formatStatusForText(status),
   }));
@@ -54,20 +54,19 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
   ) {}
 
   ngOnChanges() {
 
     if (this.statusControl.value) {
-        this.defaultOption = true;
-        if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
-            this.participantOption = 'NEEDS FURTHER REVIEW';
-        } else {
-            this.participantOption = this.statusControl.value;
-        }
+      this.defaultOption = true;
+      if (this.statusControl.value === 'NEEDS_FURTHER_REVIEW') {
+        this.participantOption = 'NEEDS FURTHER REVIEW';
+      } else {
+        this.participantOption = this.statusControl.value;
+      }
     } else {
-        this.defaultOption = false;
+      this.defaultOption = false;
     }
   }
 
@@ -86,8 +85,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
   updateStatus(status): Observable<ParticipantCohortStatus> {
     const pid = this.participant.id;
     const request = <ModifyCohortStatusRequest>{status};
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
   }
 

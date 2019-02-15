@@ -2,8 +2,10 @@ package org.pmiops.workbench.firecloud;
 
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -80,4 +82,9 @@ public interface FireCloudService {
   void removeUserFromGroup(String email, String groupName);
 
   boolean isUserMemberOfGroup(String groupName);
+
+  NihStatus getNihStatus();
+
+  void postNihCallback(JWTWrapper wrapper);
+
 }

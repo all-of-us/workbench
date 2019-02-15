@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
-import {Participant} from '../participant.model';
-import {ReviewStateService} from '../review-state.service';
+import {Participant} from 'app/cohort-review/participant.model';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReview,
@@ -31,8 +31,6 @@ export class DetailHeaderComponent implements OnChanges {
   constructor(
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
-    private route: ActivatedRoute,
-    private router: Router,
   ) {}
 
   ngOnChanges(changes) {
@@ -70,7 +68,8 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   backToTable() {
-    this.router.navigate(['..'], {relativeTo: this.route});
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
   }
 
   previous() {
@@ -110,20 +109,21 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const request = {
-        page: page,
-        pageSize: size,
-        sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
-        sortOrder: SortOrder.Asc,
-        pageFilterType: PageFilterType.ParticipantCohortStatuses
+      page: page,
+      pageSize: size,
+      sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
+      sortOrder: SortOrder.Asc,
+      pageFilterType: PageFilterType.ParticipantCohortStatuses
     };
     return this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
   }
 
   private navigateById = (id: number): void => {
-    this.router.navigate(['..', id], {relativeTo: this.route});
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
     this.navigationClicked.emit(id);
   }
 }

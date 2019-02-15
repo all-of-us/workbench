@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,9 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
@@ -50,6 +52,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CdrVersionDao cdrVersionDao;
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
+  private ElasticSearchService elasticSearchService;
+  private Provider<WorkbenchConfig> configProvider;
 
   /**
    * Converter function from backend representation (used with Hibernate) to
@@ -103,7 +107,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                           CriteriaAttributeDao criteriaAttributeDao,
                           CdrVersionDao cdrVersionDao,
                           Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
-                          CdrVersionService cdrVersionService) {
+                          CdrVersionService cdrVersionService,
+                          ElasticSearchService elasticSearchService,
+                          Provider<WorkbenchConfig> configProvider) {
     this.bigQueryService = bigQueryService;
     this.participantCounter = participantCounter;
     this.criteriaDao = criteriaDao;
@@ -111,6 +117,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cdrVersionDao = cdrVersionDao;
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
+    this.elasticSearchService = elasticSearchService;
+    this.configProvider = configProvider;
   }
 
   @Override
@@ -121,7 +129,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
-    String matchExp = modifyKeywordMatch(value);
+    String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
     if (subtype == null) {
       criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(type, matchExp, value, new PageRequest(0, resultLimit.intValue()));
@@ -162,20 +170,25 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   /**
-   * This method will return a count of unique subjects
-   * defined by the provided {@link SearchRequest}.
+   * This method will return a count of unique subjects defined by the provided {@link SearchRequest}.
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-
-    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantCounterQuery(
-      new ParticipantCriteria(request)));
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      //for now just log cluster name and status if elastic is enabled
+      elasticSearchService.elasticCount();
+    }
+    QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
+      participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
+    );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     List<FieldValue> row = result.iterateAll().iterator().next();
-    return ResponseEntity.ok(bigQueryService.getLong(row, rm.get("count")));
+    Long count = bigQueryService.getLong(row, rm.get("count"));
+
+    return ResponseEntity.ok(count);
   }
 
   @Override
@@ -267,18 +280,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CriteriaListResponse> getCriteriaTreeQuickSearch(Long cdrVersionId, String type, String value) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    String nameOrCode = value + "*";
-    final List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeAndNameOrCode(type, nameOrCode);
-
-    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
-    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
-
-    return ResponseEntity.ok(criteriaResponse);
-  }
-
-  @Override
   public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
@@ -298,7 +299,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     return ResponseEntity.ok(participantDemographics);
   }
 
-  private String modifyKeywordMatch(String value) {
+  private String modifyKeywordMatch(String value, String type) {
     if (value == null || value.trim().isEmpty()) {
       throw new BadRequestException(
         String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", value));
@@ -307,6 +308,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (keywords.length == 1 && keywords[0].length() <= 3) {
       return "+\"" + keywords[0] + "\"+\"[rank1]\"";
     }
+    String rank1 = TreeType.PPI.name().equals(type) ? "" : "+\"[rank1]\"";
 
     return IntStream
       .range(0, keywords.length)
@@ -318,7 +320,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return "+" + keywords[i] + "*";
       })
       .collect(Collectors.joining())
-      + "+\"[rank1]\"";
+      + rank1;
   }
 
 }

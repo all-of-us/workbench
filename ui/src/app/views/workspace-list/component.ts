@@ -1,29 +1,28 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {Subscription} from 'rxjs/Subscription';
 
-import {Workspace} from 'generated';
-
+import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
+  Workspace,
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
+import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/tooltip.css',
-              '../../styles/cards.css'],
+    '../../styles/buttons.css',
+    '../../styles/tooltip.css',
+    '../../styles/cards.css'],
   templateUrl: './component.html',
 })
 export class WorkspaceListComponent implements OnInit, OnDestroy {
@@ -53,19 +52,18 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   deleting = false;
   confirmDeleting = false;
   workspaceDeletionError = false;
-  resource: Workspace;
-  // TODO This is necessary to placate the delete error template - figure out how to remove it
   workspace: Workspace = {name: ''};
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
   constructor(
-      private profileStorageService: ProfileStorageService,
-      private route: ActivatedRoute,
-      private router: Router,
-      private workspacesService: WorkspacesService,
-  ) {}
+    private profileStorageService: ProfileStorageService,
+    private workspacesService: WorkspacesService,
+  ) {
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+  }
 
   ngOnInit(): void {
     this.workspacesLoading = true;
@@ -108,19 +106,17 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build']);
+    navigate(['workspaces/build']);
   }
 
   reloadWorkspaces(): void {
     this.workspacesService.getWorkspaces()
       .subscribe(
         workspacesReceived => {
-          workspacesReceived.items.sort(function(a, b) {
-            return a.workspace.name.localeCompare(b.workspace.name);
-          });
+          workspacesReceived.items.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
           this.workspaceList = workspacesReceived
             .items
-            .map( w => new WorkspacePermissions(w) );
+            .map(w => new WorkspacePermissions(w));
           this.workspacesLoading = false;
         },
         error => {
@@ -143,11 +139,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   receiveDelete(): void {
-    this.delete(this.resource);
+    this.delete(this.workspace);
   }
 
   openConfirmDelete(workspace: Workspace): void {
-    this.resource = workspace;
+    this.workspace = workspace;
     this.confirmDeleting = true;
   }
 
@@ -179,6 +175,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     }
     return true;
   }
+
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
     this.bugReportComponent.reportBug();

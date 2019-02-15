@@ -5,9 +5,9 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
+import {CohortCommonModule} from 'app/cohort-common/module';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
-import {CohortCommonModule} from '../cohort-common/module';
 
 /* Components */
 import {AttributesPageComponent} from './attributes-page/attributes-page.component';

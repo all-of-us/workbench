@@ -1,13 +1,10 @@
 import {
   Component, Input,
 } from '@angular/core';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
 
 import {
-  decamelize,
-  ReactWrapperBase
-} from 'app/utils';
+  Button
+} from 'app/components/buttons';
 
 import {
   Modal,
@@ -17,15 +14,17 @@ import {
 } from 'app/components/modals';
 
 import {
-  Button
-} from 'app/components/buttons';
+  decamelize,
+  ReactWrapperBase
+} from 'app/utils';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 export interface ConfirmDeleteModalProps {
-  deleting: boolean;
   closeFunction: Function;
   resourceType: string;
   receiveDelete: Function;
-  resource: {name: string};
+  resourceName: string;
 }
 
 export interface ConfirmDeleteModalState {
@@ -33,7 +32,7 @@ export interface ConfirmDeleteModalState {
 }
 
 export class ConfirmDeleteModal
-    extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
+  extends React.Component<ConfirmDeleteModalProps, ConfirmDeleteModalState> {
 
   static transformResourceTypeName(resourceType: string): string {
     return fp.startCase(decamelize(resourceType, ' '));
@@ -50,29 +49,29 @@ export class ConfirmDeleteModal
   }
 
   render() {
-    return <React.Fragment>
-      {this.props.deleting &&
-      <Modal className='confirmDeleteModal'>
-        <ModalTitle style={{lineHeight: '28px'}}>Are you sure you want to
+    return <Modal loading={this.state.loading}>
+        <ModalTitle style={{lineHeight: '28px'}}>
+          Are you sure you want to
           delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
-          : {this.props.resource.name}?
+          : {this.props.resourceName}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           This will permanently delete
           the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
-          <Button type='secondary'
-                  onClick={() => this.props.closeFunction()}>Cancel</Button>
-          <Button disabled={this.state.loading}
-                  style={{marginLeft: '0.5rem'}}
-                  data-test-id='confirm-delete'
-                  onClick={() => this.emitDelete()}>
-            Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          <Button
+            type='secondary'
+            onClick={() => this.props.closeFunction()}>Cancel</Button>
+          <Button
+            disabled={this.state.loading}
+            style={{marginLeft: '0.5rem'}}
+            data-test-id='confirm-delete'
+            onClick={() => this.emitDelete()}>
+              Delete {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
           </Button>
         </ModalFooter>
-      </Modal>}
-    </React.Fragment>;
+      </Modal>;
   }
 }
 
@@ -82,13 +81,12 @@ export class ConfirmDeleteModal
 })
 export class ConfirmDeleteModalComponent extends ReactWrapperBase {
   @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
-  @Input('resource') resource: ConfirmDeleteModalProps['resource'];
-  @Input('deleting') deleting: ConfirmDeleteModalProps['deleting'];
+  @Input('resourceName') resourceName: ConfirmDeleteModalProps['resourceName'];
   @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
   @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
   constructor() {
-    super(ConfirmDeleteModal, ['resourceType', 'resource', 'deleting',
+    super(ConfirmDeleteModal, ['resourceType', 'resourceName',
       'closeFunction', 'receiveDelete']);
   }
 }

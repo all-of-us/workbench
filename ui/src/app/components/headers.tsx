@@ -1,28 +1,34 @@
 import * as React from 'react';
 
+import colors from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';
 
-const headerColor = '#262262';
 
 export const styles = {
   h1: {
-    color: headerColor,
+    color: colors.purple[0],
     fontWeight: 500,
     fontSize: '1.6rem',
   },
   h2: {
-    color: headerColor,
+    color: colors.purple[0],
     fontWeight: 800,
     fontSize: '1.25rem',
   },
   h3: {
-    color: headerColor,
+    color: colors.purple[0],
     fontWeight: 800,
     fontSize: '1rem',
   },
   h4: {
     fontWeight: 300,
     color: '#000',
+  },
+  formLabel: {
+    color: colors.purple[0],
+    fontWeight: 600,
+    marginTop: '0.5rem',
+    marginBottom: '0.125rem'
   }
 };
 

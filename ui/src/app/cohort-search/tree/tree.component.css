@@ -1,7 +1,7 @@
 /**
  * We have to override this so that the text will truncate correctly
  */
-::ng-deep .clr-treenode-content {
+:host::ng-deep .clr-treenode-content {
   width: 100%!important;
 }
 
@@ -41,7 +41,7 @@
   margin-top: 2.5rem;
 }
 
-.tree-container.multiple {
+.tree-container.ingredients {
   margin-top: 3.5rem;
 }
 
@@ -52,9 +52,4 @@
 
 .alert.alert-warning .alert-icon {
   color: #E28327;
-}
-.match-container {
-  color: #565656;
-  font-weight: bold;
-  padding-bottom: 0.25rem;
 }

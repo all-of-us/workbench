@@ -1,14 +1,13 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 
-import {ReviewStateService} from '../review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {
   AnnotationType,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
-  ModifyCohortAnnotationDefinitionRequest,
 } from 'generated';
 
 @Component({
@@ -37,7 +36,7 @@ export class SetAnnotationCreateComponent {
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
- annotationOptions = '';
+  annotationOptions = '';
 
   form = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -52,12 +51,11 @@ export class SetAnnotationCreateComponent {
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
-    private route: ActivatedRoute,
   ) {}
 
   create(): void {
     this.posting = true;
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
 
     const request = <CohortAnnotationDefinition>{
       cohortId: cid,
@@ -95,12 +93,12 @@ export class SetAnnotationCreateComponent {
         this.addValue.reset();
       });
   }
-   get open() {
+  get open() {
     return this.state.annotationManagerOpen.getValue();
   }
 
   set open(value: boolean) {
-      this.state.annotationManagerOpen.next(value);
+    this.state.annotationManagerOpen.next(value);
   }
 
   cancel() {

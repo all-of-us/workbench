@@ -1,6 +1,6 @@
 import {Http} from '@angular/http';
+import {InvitationVerificationRequest} from 'generated/model/invitationVerificationRequest';
 import {Observable} from 'rxjs/Observable';
-import {InvitationVerificationRequest} from '../../generated/model/invitationVerificationRequest';
 
 import {
   BillingProjectStatus,
@@ -23,6 +23,10 @@ export class ProfileStubVariables {
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
+    linkedNihUsername: null,
+    currentPosition: 'some',
+    organization: 'here',
+    areaOfResearch: 'things',
   };
 }
 
@@ -68,7 +72,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public isUsernameTaken(username: string, extraHttpRequestParams?: any):
-      Observable<UsernameTakenResponse> {
+  Observable<UsernameTakenResponse> {
     return new Observable(observer => {
       observer.next({
         isTaken: username === ProfileStubVariables.PROFILE_STUB.username
@@ -108,7 +112,7 @@ export class ProfileServiceStub extends ProfileService {
   }
 
   public completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.ethicsTrainingCompletionTime = this.now();
+    this.profile.trainingCompletionTime = this.now();
     return Observable.from([this.profile]);
   }
 }

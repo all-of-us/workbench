@@ -1,14 +1,14 @@
 import {ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {Response, ResponseOptions} from '@angular/http';
+import {Response} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
 import {NotebookComponent} from 'app/icons/notebook/component';
+import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
@@ -22,7 +22,6 @@ import {simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {
   ClusterLocalizeRequest,
-  ClusterLocalizeResponse,
   ClusterService,
   ClusterStatus
 } from 'generated';
@@ -45,8 +44,8 @@ class BlockingNotebooksStub extends NotebooksServiceStub {
   }
 
   public setCookieWithHttpInfo(
-      googleProject: string, clusterName: string,
-      extraHttpRequestParams?: any): Observable<Response> {
+    googleProject: string, clusterName: string,
+    extraHttpRequestParams?: any): Observable<Response> {
     return this.blocker.flatMap(() => {
       return super.setCookieWithHttpInfo(
         googleProject, clusterName, extraHttpRequestParams);
@@ -67,7 +66,7 @@ class BlockingClusterStub extends ClusterServiceStub {
   }
 
   localize(projectName: string, clusterName: string,
-      req: ClusterLocalizeRequest, extraHttpRequestParams?: any): Observable<{}> {
+    req: ClusterLocalizeRequest, extraHttpRequestParams?: any): Observable<{}> {
     return this.blocker.flatMap(() => {
       return super.localize(projectName, clusterName, req, extraHttpRequestParams);
     });
@@ -101,28 +100,20 @@ describe('NotebookRedirectComponent', () => {
         { provide: LeoClusterService, useValue: new LeoClusterServiceStub() },
         { provide: NotebooksService, useFactory: () => blockingNotebooksStub },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
-        { provide: ActivatedRoute, useValue: {
-          snapshot: {
-            params: {
-              'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-              'nbName': 'blah blah'
-            },
-            queryParams: {
-              'kernelType': Kernels.R,
-              'creating': true
-            },
-            queryParamMap: convertToParamMap({
-              'kernelType': Kernels.R,
-              'creating': true
-            })
-          }
-        }},
       ]}).compileComponents().then(() => {
-      fixture = TestBed.createComponent(NotebookRedirectComponent);
-      spyOn(window.history, 'replaceState').and.stub();
-      blockingClusterStub.release();
-      blockingNotebooksStub.release();
+        fixture = TestBed.createComponent(NotebookRedirectComponent);
+        spyOn(window.history, 'replaceState').and.stub();
+        blockingClusterStub.release();
+        blockingNotebooksStub.release();
+      });
+    urlParamsStore.next({
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      nbName: 'blah blah'
+    });
+    queryParamsStore.next({
+      kernelType: Kernels.R,
+      creating: true
     });
   }));
 
@@ -358,28 +349,20 @@ describe('NotebookRedirectComponent', () => {
         { provide: LeoClusterService, useValue: new LeoClusterServiceStub() },
         { provide: NotebooksService, useFactory: () => blockingNotebooksStub },
         { provide: JupyterService, useValue: new JupyterServiceStub() },
-        { provide: ActivatedRoute, useValue: {
-          snapshot: {
-            params: {
-              'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-              'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-              'nbName': '1%2B1'
-            },
-            queryParams: {
-              'kernelType': Kernels.R,
-              'creating': true
-            },
-            queryParamMap: convertToParamMap({
-              'kernelType': Kernels.R,
-              'creating': true
-            })
-          }
-        }},
       ]}).compileComponents().then(() => {
-      fixture = TestBed.createComponent(NotebookRedirectComponent);
-      spyOn(window.history, 'replaceState').and.stub();
-      blockingClusterStub.release();
-      blockingNotebooksStub.release();
+        fixture = TestBed.createComponent(NotebookRedirectComponent);
+        spyOn(window.history, 'replaceState').and.stub();
+        blockingClusterStub.release();
+        blockingNotebooksStub.release();
+      });
+    urlParamsStore.next({
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      nbName: '1%2B1'
+    });
+    queryParamsStore.next({
+      kernelType: Kernels.R,
+      creating: true
     });
   }));
 

@@ -4,6 +4,7 @@ import * as highcharts from 'highcharts';
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DbConfigService} from '../../utils/db-config.service';
+import {DomainType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-chart',
@@ -20,6 +21,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartType: string;
   @Input() sources = false;
   @Input() genderId: string; // Hack until measurement design of graphs gender overlay
+  @Input() domainType: DomainType;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
@@ -76,7 +78,7 @@ export class ChartComponent implements OnChanges {
       title: options.title,
       subtitle: {},
       tooltip: {
-        pointFormat: '<b>{point.y} </b><br>{series.name}'
+        pointFormat: '<b>{point.y} </b><br>'
       },
       plotOptions: {
         series: {
@@ -86,7 +88,7 @@ export class ChartComponent implements OnChanges {
           pointWidth: options.pointWidth ? options.pointWidth : null,
           minPointLength: 3,
           events: {
-            click: function (event) {
+            click: event => {
               // Todo handle click and log events in analytics
               // console.log('plot options clicked ', event.point);
             }
@@ -101,7 +103,7 @@ export class ChartComponent implements OnChanges {
             style: this.isGenderIdentityAnalysis()
                 ? this.dbc.GI_DATA_LABEL_STYLE : this.dbc.DATA_LABEL_STYLE,
             distance: this.isGenderIdentityAnalysis() ? 3 : -30,
-            formatter: function () {
+            formatter: function() {
               if (this.percentage < 1) {
                 return this.point.name + ' ' + Number(this.percentage).toFixed(1) + '%';
               }
@@ -147,8 +149,11 @@ export class ChartComponent implements OnChanges {
         categories: options.categories,
         // type: 'category',
         labels: {
+          align: 'right',
+          reserveSpace: true,
           style: {
-            whiteSpace: 'nowrap',
+            whiteSpace: 'wrap',
+            fontSize: '11px',
           },
         },
         lineWidth: 1,
@@ -232,7 +237,7 @@ export class ChartComponent implements OnChanges {
       return 0;
     });
 
-    const seriesClick = function (event) {
+    const seriesClick = event => {
       const thisCtrl = event.point.options.thisCtrl;
       // Todo handle click and log events in analytics
       // console.log('Count plot Clicked point :', event.point);
@@ -296,14 +301,16 @@ export class ChartComponent implements OnChanges {
     };
     return {
       chart: {
-        type: 'column',
+        type: 'bar',
         backgroundColor: this.backgroundColor,
       },
       title: {text: null, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
-      pointWidth: this.pointWidth,
-      xAxisTitle: null
+      pointPadding: 0.25,
+      minPointLength: 3,
+      pointWidth: 5,
+      xAxisTitle: null,
     };
 
   }
@@ -368,9 +375,15 @@ export class ChartComponent implements OnChanges {
       }
       return 0;
     });
-    const series = {name: seriesName, colorByPoint: true, data: data};
+    const series = {name: seriesName, colorByPoint: true, data: data,
+      tooltip: {
+        headerFormat: '<span style="font-size: 10px"><br/>',
+        pointFormat: '<b> {point.y} </b> {point.name}</span>'
+      }};
     return {
-      chart: {type: 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
+      chart: {type: (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID
+          || this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID)
+        ? 'pie' : 'bar', backgroundColor: this.backgroundColor}, // '#D9E4EA'
       title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
@@ -426,7 +439,8 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
+      title: {text: this.getChartTitle(this.domainType),
+        style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -475,7 +489,7 @@ export class ChartComponent implements OnChanges {
     }
 
     // Todo we will use this later in drill downs and such
-    const seriesClick = function(event) {
+    const seriesClick = event => {
       const thisCtrl = event.point.options.thisCtrl;
       // Todo handle click events
       // console.log('Histogram plot Clicked point :',  event.point);
@@ -516,6 +530,15 @@ export class ChartComponent implements OnChanges {
       xAxisTitle: unit
     };
 
+  }
+  public getChartTitle(domainType: string) {
+    if (domainType === DomainType.EHR) {
+      return 'Age At First Occurrence';
+    } else if (domainType === DomainType.SURVEYS) {
+      return 'Age When Survey Was Taken';
+    } else if (domainType === DomainType.PHYSICAL_MEASUREMENTS) {
+      return 'Age When Physical Measurement Was Taken';
+    }
   }
 
 }

@@ -28,6 +28,8 @@ export interface Environment {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://public-ui-dot-all-of-us-rw-stable.appspot.com'
   publicUiUrl: string;
+  // The Shibboleth URL for linking ERA Commons accounts
+  shibbolethUrl: string;
   // The TCell API key. See RW-1682 for details.
   // Example value: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE'
   tcellapikey: string;
@@ -48,4 +50,15 @@ export interface Environment {
   // Exit criteria: remove flag and change all code to use Zendesk after Athens
   // release.
   useZendeskForSupport: boolean;
+
+  // Whether users should be able to use JupyterLab as an option.
+  // See RW-1966 for details.
+  // Exit criteria: remove flag for Athens release.
+  enableJupyterLab: boolean;
+
+  // Whether users should be redirected to link their NiH account before
+  // accessing any resources.
+  // See RW-1697 for details
+  // Exit criteria: remove flag for Athens release.
+  enableComplianceLockout: boolean;
 }

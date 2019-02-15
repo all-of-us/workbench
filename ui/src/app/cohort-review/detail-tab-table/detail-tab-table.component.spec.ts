@@ -2,11 +2,13 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
-import {CohortReviewService} from 'generated';
+import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
+import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
-import {ClearButtonInMemoryFilterComponent} from '../clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {DetailTabTableComponent} from './detail-tab-table.component';
 
 describe('DetailTabTableComponent', () => {
@@ -14,8 +16,6 @@ describe('DetailTabTableComponent', () => {
   let fixture: ComponentFixture<DetailTabTableComponent>;
   const activatedRouteStub = {
     data: Observable.of({
-      workspace: {cdrVersionId: '1'},
-      cohort: {},
       participant: {}
     })
   };
@@ -32,6 +32,16 @@ describe('DetailTabTableComponent', () => {
       ],
     })
       .compileComponents();
+    currentCohortStore.next({
+      name: '',
+      criteria: '',
+      type: '',
+    });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   beforeEach(() => {

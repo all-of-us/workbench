@@ -2,8 +2,8 @@ import {NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {fromJS, List} from 'immutable';
 
+import {CohortSearchState, initialState, SR_ID} from 'app/cohort-search/redux/store';
 import {TreeType} from 'generated';
-import {CohortSearchState, initialState, SR_ID} from '../store';
 import {CohortSearchActions} from './service';
 
 /**
@@ -18,6 +18,7 @@ const dummyItem = fromJS({
   modifiers: [],
   count: null,
   isRequesting: false,
+  status: 'active',
 });
 
 const zeroCrit = fromJS({
@@ -59,6 +60,7 @@ const groups = fromJS({
     items: [],
     count: null,
     isRequesting: false,
+    status: 'active',
   },
   exclude0: {
     id: 'exclude0',
@@ -86,24 +88,24 @@ const expectedSR = {
       id: 'item001',
       type: TreeType[TreeType.ICD9],
       searchParameters: [{
-          parameterId: 'param0',
-          name: 'CodeA',
-          value: 'CodeA',
-          type: TreeType[TreeType.ICD9],
-          subtype: '',
-          group: false,
-          attributes: [],
-          conceptId: 12345
-        }, {
-          parameterId: 'param1',
-          name: 'CodeB',
-          value: 'CodeB',
-          type: TreeType[TreeType.ICD9],
-          subtype: '',
-          group: true,
-          attributes: [],
-          conceptId: 12345
-        }],
+        parameterId: 'param0',
+        name: 'CodeA',
+        value: 'CodeA',
+        type: TreeType[TreeType.ICD9],
+        subtype: '',
+        group: false,
+        attributes: [],
+        conceptId: 12345
+      }, {
+        parameterId: 'param1',
+        name: 'CodeB',
+        value: 'CodeB',
+        type: TreeType[TreeType.ICD9],
+        subtype: '',
+        group: true,
+        attributes: [],
+        conceptId: 12345
+      }],
       modifiers: [],
     }]
   }],
@@ -187,6 +189,7 @@ describe('CohortSearchActions', () => {
       items: ['item002'],
       count: null,
       isRequesting: false,
+      status: 'active',
     });
     const twoGroupState = dummyState
       .updateIn(
@@ -206,23 +209,23 @@ describe('CohortSearchActions', () => {
           id: 'item001',
           type: TreeType[TreeType.ICD9],
           searchParameters: [{
-              parameterId: 'param0',
-              name: 'CodeA',
-              value: 'CodeA',
-              type: TreeType[TreeType.ICD9],
-              subtype: '',
-              group: false,
-              conceptId: 12345,
-              attributes: []
-            }, {
-              parameterId: 'param1',
-              name: 'CodeB',
-              value: 'CodeB',
-              type: TreeType[TreeType.ICD9],
-              subtype: '',
-              group: true,
-              conceptId: 12345,
-              attributes: []
+            parameterId: 'param0',
+            name: 'CodeA',
+            value: 'CodeA',
+            type: TreeType[TreeType.ICD9],
+            subtype: '',
+            group: false,
+            conceptId: 12345,
+            attributes: []
+          }, {
+            parameterId: 'param1',
+            name: 'CodeB',
+            value: 'CodeB',
+            type: TreeType[TreeType.ICD9],
+            subtype: '',
+            group: true,
+            conceptId: 12345,
+            attributes: []
           }],
           modifiers: [],
         }]
@@ -233,23 +236,23 @@ describe('CohortSearchActions', () => {
           id: 'item002',
           type: TreeType[TreeType.ICD9],
           searchParameters: [{
-              parameterId: 'param0',
-              name: 'CodeA',
-              value: 'CodeA',
-              type: TreeType[TreeType.ICD9],
-              subtype: '',
-              group: false,
-              conceptId: 12345,
-              attributes: []
-            }, {
-              parameterId: 'param1',
-              name: 'CodeB',
-              value: 'CodeB',
-              type: TreeType[TreeType.ICD9],
-              subtype: '',
-              group: true,
-              conceptId: 12345,
-              attributes: []
+            parameterId: 'param0',
+            name: 'CodeA',
+            value: 'CodeA',
+            type: TreeType[TreeType.ICD9],
+            subtype: '',
+            group: false,
+            conceptId: 12345,
+            attributes: []
+          }, {
+            parameterId: 'param1',
+            name: 'CodeB',
+            value: 'CodeB',
+            type: TreeType[TreeType.ICD9],
+            subtype: '',
+            group: true,
+            conceptId: 12345,
+            attributes: []
           }],
           modifiers: [],
         }]

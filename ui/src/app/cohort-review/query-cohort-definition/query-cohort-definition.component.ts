@@ -1,7 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {CohortBuilderService, TreeType} from 'generated';
-import {typeToTitle} from '../../cohort-search/utils';
-
+import {typeToTitle} from 'app/cohort-search/utils';
 
 
 @Component({
@@ -11,11 +9,10 @@ import {typeToTitle} from '../../cohort-search/utils';
 })
 export class QueryCohortDefinitionComponent implements OnInit {
   definition: Array<any>;
-  ppiParents: any;
   values: Array<any>;
   @Input() cohort: any;
   @Input() review: any;
-  constructor(private api: CohortBuilderService) {}
+  constructor() {}
 
   ngOnInit() {
     if (this.cohort) {
@@ -25,17 +22,14 @@ export class QueryCohortDefinitionComponent implements OnInit {
 
   mapDefinition() {
     const definition = JSON.parse(this.cohort.criteria);
-    this.ppiCheck(definition).then(parents => {
-      this.ppiParents = parents;
-      this.definition = ['includes', 'excludes'].map(role => {
-        if (definition[role].length) {
-          const roleObj = {role, groups: []};
-          definition[role].forEach(group => {
-            roleObj.groups.push(this.mapGroup(group));
-          });
-          return roleObj;
-        }
-      });
+    this.definition = ['includes', 'excludes'].map(role => {
+      if (definition[role].length) {
+        const roleObj = {role, groups: []};
+        definition[role].forEach(group => {
+          roleObj.groups.push(this.mapGroup(group));
+        });
+        return roleObj;
+      }
     });
   }
 
@@ -60,7 +54,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
     let typeMatched;
     const modArray =  params.map(eachParam => {
       if (eachParam.type === 'DRUG') {
-         typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
+        typeMatched = groupedData.find( matched => matched.group === eachParam.group.toString());
       } else {
         typeMatched = groupedData.find( matched => matched.group === eachParam.type);
       }
@@ -105,46 +99,13 @@ export class QueryCohortDefinitionComponent implements OnInit {
           type: param.type};
       } else {
         return _type === 'CONDITION' || _type === 'PROCEDURE' ?
-          {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
-            type: param.type} :
-          {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
-            type: param.type};
+        {items: `${typeToTitle(_type)} | ${param.type} | ${typeMatched.customString}`,
+          type: param.type} :
+        {items: `${typeToTitle(_type)} | ${typeMatched.customString}`,
+          type: param.type};
       }
     });
     return this.removeDuplicates(noModArray);
-  }
-
-
-// to get PPI DATA
-  async ppiCheck(definition: any) {
-    const parents = {};
-    for (const role in definition) {
-      if (definition.hasOwnProperty(role)) {
-        for (const group of definition[role]) {
-          for (const item of group.items) {
-            if (item.type !== TreeType[TreeType.PPI]) {
-              continue;
-            }
-            for (const param of item.searchParameters) {
-              const name = await this.getPPIParent(param.conceptId);
-              parents[param.conceptId] = name;
-            }
-          }
-        }
-      }
-    }
-    return new Promise(resolve => {
-      resolve(parents);
-    });
-  }
-
-  async getPPIParent(conceptId: string) {
-    let name;
-    await this.api
-      .getPPICriteriaParent(this.review.cdrVersionId, TreeType[TreeType.PPI], conceptId)
-      .toPromise()
-      .then(parent => name = parent.name);
-    return name;
   }
 
 
@@ -161,7 +122,7 @@ export class QueryCohortDefinitionComponent implements OnInit {
         group: k,
         data: groupedData[k].data,
         customString : groupedData[k].data.reduce((acc, d) => {
-         return this.getFormattedString(acc, d);
+          return this.getFormattedString(acc, d);
         }, '')
       });
     });
@@ -177,12 +138,15 @@ export class QueryCohortDefinitionComponent implements OnInit {
     } else if (d.type === 'PM' || d.type === 'VISIT') {
       return acc === '' ? `${d.name}` : `${acc}, ${d.name}`;
     } else if (d.type === 'PPI') {
-      if (d.group === false) {
-        return acc === '' ? `${this.ppiParents[d.conceptId]} | ${d.name}` :
-          `${acc}, ${this.ppiParents[d.conceptId]} | ${d.name}`;
+      if (!d.group) {
+        return  acc === '' ? `${d.name}` :
+           `${acc}, ${d.name}`;
+      } else if (d.group && !d.conceptId) {
+        return acc === '' ? `Survey - ${d.name}` :
+          `${acc}, Survey - ${d.name}`;
       } else {
-        return acc === '' ? `Parent ${this.ppiParents[d.conceptId]} | ${d.name}` :
-          `${acc}, Parent ${this.ppiParents[d.conceptId]} | ${d.name}`;
+        return acc === '' ? `${d.name}` :
+          `${acc}, ${d.name}`;
       }
     } else {
       if (d.group === false) {

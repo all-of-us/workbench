@@ -89,7 +89,7 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 @Injectable()
 export class CohortSearchEpics {
   constructor(private service: CohortBuilderService,
-              private reviewservice: CohortReviewService) {}
+    private reviewservice: CohortReviewService) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(

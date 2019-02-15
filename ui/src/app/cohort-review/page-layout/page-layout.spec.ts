@@ -4,10 +4,11 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {CohortReview} from 'generated';
+import {Observable} from 'rxjs/Observable';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
-import {CreateReviewPage} from '../create-review-page/create-review-page';
-import {ReviewStateService} from '../review-state.service';
+import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {PageLayout} from './page-layout';
 
 describe('PageLayout', () => {
@@ -19,7 +20,8 @@ describe('PageLayout', () => {
       data: {
         review: <CohortReview> {}
       }
-    }
+    },
+    data: Observable.of({})
   };
   let route;
 

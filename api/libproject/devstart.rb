@@ -27,21 +27,25 @@ DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
   TEST_PROJECT => {
+    :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json"
   },
   "all-of-us-rw-staging" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json"
   },
   "all-of-us-rw-stable" => {
+    :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json"
   },
   "all-of-us-rw-prod" => {
+    :api_endpoint_host => "api.workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json"
@@ -74,10 +78,15 @@ def get_cdr_sql_project(project)
   return ENVIRONMENTS[project][:cdr_sql_instance].split(":")[0]
 end
 
-def ensure_docker(cmd_name, args)
+def ensure_docker(cmd_name, args=nil)
+  args = (args or [])
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
+end
+
+def init_new_cdr_db(args)
+  Common.new.run_inline %W{docker-compose run cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
 
 # exec against a live local API server - used for script access to a local API
@@ -140,9 +149,9 @@ def dev_up()
   common.status "Starting database..."
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -176,6 +185,7 @@ def setup_local_environment()
   ENV["PUBLIC_DB_CONNECTION_STRING"] = "jdbc:mysql://127.0.0.1/public?useSSL=false"
 end
 
+# TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
@@ -183,9 +193,9 @@ def run_local_migrations()
   Dir.chdir('db') do
     common.run_inline %W{./run-migrations.sh main}
   end
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./generate-cdr/init-new-cdr-db.sh --cdr-db-name public}
+  Dir.chdir('db-cdr/generate-cdr') do
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
@@ -482,16 +492,19 @@ Common.register_command({
 def docker_clean()
   common = Common.new
 
-  docker_images = `docker ps -aq`.gsub(/\s+/, " ")
-  unless docker_images.empty?
-    common.run_inline("docker rm -f #{docker_images}")
-  end
-  common.run_inline %W{docker-compose down --volumes}
+  # --volumes clears out any cached data between runs, e.g. MySQL database or Elasticsearch.
+  # --rmi local forces a rebuild of any local dev images on the next run - usually the pieces will
+  #   still be cached and this is fast.
+  common.run_inline %W{docker-compose down --volumes --rmi local}
+
   # This keyfile gets created and cached locally on dev-up. Though it's not
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
   common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+
+  # See https://github.com/docker/compose/issues/3447
+  common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
 end
 
 Common.register_command({
@@ -605,15 +618,14 @@ Common.register_command({
   :fn => ->(*args) { drop_cloud_cdr("drop-cloud-cdr", *args) }
 })
 
-
 def run_local_all_migrations()
   common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  common.run_inline %W{docker-compose run db-migration}
-  common.run_inline %W{docker-compose run db-cdr-migration}
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr}
+  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -624,9 +636,8 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-cdr-data-migration}
-  common.run_inline %W{docker-compose run db-data-migration}
+  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -636,9 +647,8 @@ Common.register_command({
 })
 
 def run_local_public_data_migrations()
-  common = Common.new
-  common.run_inline %W{docker-compose run db-public-migration}
-  common.run_inline %W{docker-compose run db-public-data-migration}
+  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
 end
 
 Common.register_command({
@@ -649,19 +659,43 @@ Common.register_command({
 
 def make_bq_denormalized_tables(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-denormalized-tables} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh} + args
 end
 
 Common.register_command({
   :invocation => "make-bq-denormalized-tables",
   :description => "make-bq-denormalized-tables --bq-project <PROJECT> --bq-dataset <DATASET>
-Generates big query denormalized tables. Used by cohort builder. Must be run once when a new cdr is released",
+Generates big query denormalized tables for search and review. Used by cohort builder. Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_denormalized_tables(*args) }
+})
+
+def make_bq_denormalized_review(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-review.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-review",
+  :description => "make-bq-denormalized-review --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized tables for review. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_review(*args) }
+})
+
+def make_bq_denormalized_search(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-search.sh} + args
+end
+
+Common.register_command({
+  :invocation => "make-bq-denormalized-search",
+  :description => "make-bq-denormalized-search --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized search. Used by cohort builder. Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_denormalized_search(*args) }
 })
 
 def generate_criteria_table(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-criteria-table} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
 end
 
 Common.register_command({
@@ -673,12 +707,12 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 
 def generate_private_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-private-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
 end
 
 def generate_public_cdr_counts(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-public-cdr-counts} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-public-cdr-counts.sh} + args
 end
 
 Common.register_command({
@@ -723,7 +757,7 @@ def generate_cloudsql_db(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    common.run_inline %W{docker-compose run db-generate-cloudsql-db
+    common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cloudsql-db.sh
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket}}
   end
@@ -767,7 +801,6 @@ def cloudsql_import(cmd_name, *args)
 
   ServiceAccountContext.new(op.opts.project).run do
     common = Common.new
-    #common.run_inline %W{docker-compose run db-cloudsql-import} + args
     common.run_inline %W{docker-compose run db-cloudsql-import
           --project #{op.opts.project} --instance #{op.opts.instance} --database #{op.opts.database}
           --bucket #{op.opts.bucket} --file #{op.opts.file}}
@@ -785,7 +818,7 @@ Import bucket of files or a single file in a bucket to a cloudsql database",
 
 def generate_local_cdr_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-cdr-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-cdr-db.sh} + args
 end
 
 Common.register_command({
@@ -798,7 +831,7 @@ Creates and populates local mysql database from data in bucket made by generate-
 
 def generate_local_count_dbs(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-generate-local-count-dbs} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-local-count-dbs.sh} + args
 end
 
 Common.register_command({
@@ -811,7 +844,7 @@ Creates and populates local mysql databases cdr<VERSION> and public<VERSION> fro
 
 def mysqldump_db(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-mysqldump-local-db} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-mysqldump.sh} + args
 end
 
 
@@ -850,7 +883,7 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   common = Common.new
-  common.run_inline %W{docker-compose run drop-cdr-db}
+  common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
 
 Common.register_command({
@@ -938,9 +971,9 @@ def update_user_registered_status(cmd_name, args)
     "Project to update registered status for"
   )
   op.add_option(
-    "--action [action]",
-    ->(opts, v) { opts.action = v},
-    "Action to perform: add/remove."
+    "--disabled [disabled]",
+    ->(opts, v) { opts.disabled = v},
+    "Disabled state to set: true/false."
   )
   op.add_option(
     "--account [account]",
@@ -960,23 +993,16 @@ def update_user_registered_status(cmd_name, args)
   common.run_inline %W{gcloud config set account #{op.opts.account}}
   header = "Authorization: Bearer #{token}"
   content_type = "Content-type: application/json"
-  payload = "{\"email\": \"#{op.opts.user}\"}"
+  payload = "{\"email\": \"#{op.opts.user}\", \"disabled\": \"#{op.opts.disabled}\"}"
   domain_name = get_auth_domain(op.opts.project)
-  if op.opts.action == "add"
-    common.run_inline %W{curl -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
-
-  if op.opts.action == "remove"
-    common.run_inline %W{curl -X DELETE -H #{header} -H #{content_type}
-      -d #{payload} https://api-dot-#{op.opts.project}.appspot.com/v1/auth-domain/#{domain_name}/users}
-  end
+  common.run_inline %W{curl -X POST -H #{header} -H #{content_type}
+      -d #{payload} https://#{ENVIRONMENTS[op.opts.project][:api_endpoint_host]}/v1/auth-domain/#{domain_name}/users}
 end
 
 Common.register_command({
   :invocation => "update-user-registered-status",
   :description => "Adds or removes a specified user from the registered access domain.\n" \
-                  "Accepts three flags: --action [add/remove], --account [admin email], and --user [target user email]",
+                  "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
 })
 
@@ -1202,6 +1228,47 @@ Common.register_command({
   :invocation => "connect-to-cloud-db",
   :description => "Connect to a Cloud SQL database via mysql.",
   :fn => ->(*args) { connect_to_cloud_db("connect-to-cloud-db", *args) }
+})
+
+def connect_to_cloud_db_binlog(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+  env = read_db_vars(gcc)
+  CloudSqlProxyContext.new(gcc.project).run do
+    common.status "\n" + "*" * 80
+    common.status "Listing available journal files: "
+
+    # "root" is required for binlog access.
+    password = env["MYSQL_ROOT_PASSWORD"]
+    run_with_redirects(
+      "echo 'SHOW BINARY LOGS;' | " +
+      "mysql --host=127.0.0.1 --port=3307 --user=root " +
+      "--database=#{env['DB_NAME']} --password=#{password}", password)
+    common.status "*" * 80
+
+    common.status "\n" + "*" * 80
+    common.status "mysql login has been configured. Pick a journal file from " +
+                  "above and run commands like: "
+    common.status "  mysqlbinlog -R mysql-bin.xxxxxx\n"
+    common.status "See the Workbench playbook for more details."
+    common.status "*" * 80
+
+    # Work out of /tmp for easy local file redirection. We don't want binlogs
+    # winding up back in Workbench source control accidentally.
+    run_with_redirects(
+      "export MYSQL_HOME=$(with-mysql-login.sh root #{password}); " +
+      "cd /tmp; /bin/bash", password)
+  end
+end
+
+Common.register_command({
+  :invocation => "connect-to-cloud-db-binlog",
+  :description => "Connect to a Cloud SQL database for mysqlbinlog access",
+  :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
 })
 
 

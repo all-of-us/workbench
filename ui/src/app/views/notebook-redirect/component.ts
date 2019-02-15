@@ -1,12 +1,12 @@
 import {Location} from '@angular/common';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
 import {mapTo} from 'rxjs/operators';
 import {Subscription} from 'rxjs/Subscription';
 
+import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {environment} from 'environments/environment';
 
@@ -21,8 +21,6 @@ import {
   JupyterService,
   NotebooksService,
 } from 'notebooks-generated';
-
-import {WorkspaceData} from 'app/resolvers/workspace';
 
 enum Progress {
   Unknown,
@@ -88,10 +86,10 @@ const pyNotebookMetadata = {
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
-              '../../styles/cards.css',
-              '../../styles/headers.css',
-              '../../styles/inputs.css',
-              './component.css'],
+    '../../styles/cards.css',
+    '../../styles/headers.css',
+    '../../styles/inputs.css',
+    './component.css'],
   templateUrl: './component.html',
 })
 export class NotebookRedirectComponent implements OnInit, OnDestroy {
@@ -104,12 +102,11 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   creating: boolean;
 
-  kernelType: Kernels;
-
   leoUrl: SafeResourceUrl;
 
   private wsId: string;
   private wsNamespace: string;
+  private jupyterLabMode = false;
   private loadingSub: Subscription;
   private cluster: Cluster;
   private progressComplete = new Map<Progress, boolean>();
@@ -117,7 +114,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   constructor(
     private locationService: Location,
-    private route: ActivatedRoute,
     private clusterService: ClusterService,
     private leoClusterService: LeoClusterService,
     private leoNotebooksService: NotebooksService,
@@ -126,15 +122,15 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
-    this.creating = this.route.snapshot.queryParams['creating'] || false;
-    this.playground = (this.route.snapshot.queryParams['playgroundMode'] === 'true');
+    const {ns, wsid} = urlParamsStore.getValue();
+    const {creating, playgroundMode, jupyterLabMode, kernelType} = queryParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
+    this.creating = creating || false;
+    this.playground = playgroundMode === 'true';
+    this.jupyterLabMode = jupyterLabMode === 'true';
     this.setNotebookNames();
 
-    if (this.creating) {
-      this.kernelType = Kernels[this.route.snapshot.queryParamMap.get('kernelType')];
-    }
     this.loadingSub = this.clusterService.listClusters()
       .flatMap((resp) => {
         const c = resp.defaultCluster;
@@ -189,14 +185,21 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
           window.history.replaceState({}, 'Notebook', 'workspaces/' + this.wsNamespace +
           '/' + this.wsId + '/notebooks/' + encodeURIComponent(this.fullNotebookName));
         }
+        let url;
+        if (this.jupyterLabMode) {
+          url = this.jupyterLabUrl(this.cluster, nbName);
+        } else {
+          url = this.notebookUrl(this.cluster, nbName);
+        }
         this.leoUrl = this.sanitizer
-          .bypassSecurityTrustResourceUrl(this.notebookUrl(this.cluster, nbName));
+          .bypassSecurityTrustResourceUrl(url);
+
         // Angular 2 only provides a load hook for iFrames
         // the load hook triggers on url definition, not on completion of url load
         // so instead just giving it a sec to "redirect"
         setTimeout(() => {
           this.incrementProgress(Progress.Loaded);
-          }, 1000);
+        }, 1000);
       });
   }
 
@@ -208,15 +211,16 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   // this maybe overkill, but should handle all situations
   setNotebookNames(): void {
+    const {nbName} = urlParamsStore.getValue();
     this.notebookName =
-      decodeURIComponent(this.route.snapshot.params['nbName']);
-    if (this.route.snapshot.params['nbName'].endsWith('.ipynb')) {
+      decodeURIComponent(nbName);
+    if (nbName.endsWith('.ipynb')) {
       this.fullNotebookName =
-        decodeURIComponent(this.route.snapshot.params['nbName']);
+        decodeURIComponent(nbName);
       this.notebookName = this.fullNotebookName.replace('.ipynb$', '');
     } else {
       this.notebookName =
-        decodeURIComponent(this.route.snapshot.params['nbName']);
+        decodeURIComponent(nbName);
       this.fullNotebookName = this.notebookName + '.ipynb';
     }
   }
@@ -235,6 +239,13 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
         + cluster.clusterName + '/notebooks/' + nbName);
   }
 
+  private jupyterLabUrl(cluster: Cluster, nbName: string): string {
+    return encodeURI(
+      environment.leoApiUrl + '/notebooks/'
+      + cluster.clusterNamespace + '/'
+      + cluster.clusterName + '/lab/tree/' + nbName);
+  }
+
   private initializeNotebookCookies(c: Cluster): Observable<Cluster> {
     return this.leoNotebooksService.setCookieWithHttpInfo(c.clusterNamespace, c.clusterName, {
       withCredentials: true
@@ -243,7 +254,8 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   private newNotebook(): Observable<string> {
     const fileContent = commonNotebookFormat;
-    if (this.route.snapshot.queryParamMap.get('kernelType') === Kernels.R.toString()) {
+    const {kernelType} = queryParamsStore.getValue();
+    if (kernelType === Kernels.R.toString()) {
       fileContent.metadata = rNotebookMetadata;
     } else {
       fileContent.metadata = pyNotebookMetadata;
@@ -264,7 +276,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
   }
 
   private localizeNotebooks(notebookNames: Array<string>,
-                            playgroundMode: boolean): Observable<string> {
+    playgroundMode: boolean): Observable<string> {
     return this.clusterService
       .localize(this.cluster.clusterNamespace, this.cluster.clusterName, {
         workspaceNamespace: this.wsNamespace,
@@ -275,9 +287,9 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
       .map(resp => resp.clusterLocalDirectory);
   }
 
-    navigateBack(): void {
-      this.locationService.back();
-    }
+  navigateBack(): void {
+    this.locationService.back();
+  }
 
   private initializeProgressMap(): void {
     for (const p in Object.keys(Progress)) {

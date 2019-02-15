@@ -26,7 +26,7 @@ export class ClusterApiStub extends ClusterApi {
   }
 
   deleteCluster(projectName: string, clusterName: string,
-                extraHttpRequestParams?: any): Promise<{}> {
+    extraHttpRequestParams?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
       this.cluster.status = ClusterStatus.Deleting;
       resolve({});

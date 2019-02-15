@@ -1,9 +1,10 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
-import {ReviewStateService} from '../review-state.service';
 
 
 @Component({
@@ -37,9 +38,11 @@ export class OverviewPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const {cohort, review, workspace} = this.route.snapshot.data;
+    const {review} = this.route.snapshot.data;
+    const workspace = currentWorkspaceStore.getValue();
+    const cohort = currentCohortStore.getValue();
     const request = <SearchRequest>(JSON.parse(cohort.criteria));
-    this.chartAPI.getDemoChartInfo(workspace.cdrVersionId, request)
+    this.chartAPI.getDemoChartInfo(+workspace.cdrVersionId, request)
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
@@ -61,13 +64,13 @@ export class OverviewPage implements OnInit, OnDestroy {
     this.buttonsDisableFlag = true;
     this.showTitle = false;
     const limit = 10;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const {ns, wsid, cid} = urlParamsStore.getValue();
     this.typesList.map(domainName => {
       this.domainsData[domainName] = {
-              conditionTitle: '',
-              loading: true
-            };
+        conditionTitle: '',
+        loading: true
+      };
       this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
         limit, null)
         .subscribe(data => {

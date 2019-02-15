@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 
-import {DOMAIN_TYPES, PROGRAM_TYPES} from '../constant';
-import {CohortSearchActions} from '../redux';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {CohortSearchActions} from 'app/cohort-search/redux';
 
 import {SearchRequest} from 'generated';
 
@@ -12,6 +12,7 @@ import {SearchRequest} from 'generated';
 })
 export class SearchGroupSelectComponent {
   @Input() role: keyof SearchRequest;
+  @Input() index: number;
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;

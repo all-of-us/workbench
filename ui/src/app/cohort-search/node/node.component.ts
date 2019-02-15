@@ -17,9 +17,9 @@ import {
   isCriteriaLoading,
   isEmpty,
   subtreeSelected,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
-import {highlightMatches, stripHtml} from '../utils';
+import {highlightMatches, stripHtml} from 'app/cohort-search/utils';
 
 @Component({
   selector: 'crit-node',
@@ -52,8 +52,6 @@ export class NodeComponent implements OnInit, OnDestroy {
   originalTree: any;
   modifiedTree = false;
   searchTerms: Array<string>;
-  numMatches = 0;
-  subMatches = 0;
   loading = false;
   empty: boolean;
   error = false;
@@ -112,7 +110,6 @@ export class NodeComponent implements OnInit, OnDestroy {
         .subscribe(searchTerms => {
           this.searchTerms = searchTerms;
           if (this.fullTree) {
-            this.numMatches = 0;
             if (searchTerms && searchTerms.length) {
               this.searchTree();
             } else {
@@ -128,12 +125,14 @@ export class NodeComponent implements OnInit, OnDestroy {
       const subtreeSelectSub = this.selected$
         .filter(selectedIds => !!selectedIds)
         .subscribe(selectedIds => {
-          this.subMatches = selectedIds.length;
           if (parentId !== 0) {
             const displayName = selectedIds.includes(parentId)
               ? highlightMatches(this.searchTerms, this.node.get('name'), false)
               : stripHtml(this.node.get('name'));
             this.node = this.node.set('name', displayName);
+            if (selectedIds[0] === parentId) {
+              setTimeout(() => this.actions.setScrollId(parentId));
+            }
           }
         });
 
@@ -242,9 +241,6 @@ export class NodeComponent implements OnInit, OnDestroy {
         if (path.length > 1) {
           this.setExpanded(path, 0);
         }
-        if (this.searchTerms.length === 1) {
-          this.numMatches++;
-        }
       }
       if (item.children.length) {
         item.children = this.filterTree(item.children, path);
@@ -263,7 +259,7 @@ export class NodeComponent implements OnInit, OnDestroy {
   setExpanded(path: Array<number>, end: number) {
     let obj = this.expandedTree[path[0]];
     for (let x = 1; x < end; x++) {
-        obj = obj.children[path[x]];
+      obj = obj.children[path[x]];
     }
     if (obj.children.length) {
       obj.expanded = true;
@@ -281,10 +277,6 @@ export class NodeComponent implements OnInit, OnDestroy {
       }
     });
     return filtered;
-  }
-
-  get multipleMatches() {
-    return this.ingredients.length > 0 || this.subMatches > 1;
   }
 
   get secondLevel() {

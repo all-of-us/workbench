@@ -17,6 +17,7 @@ public class WorkbenchConfig {
   public AdminConfig admin;
   public JiraConfig jira;
   public MandrillConfig mandrill;
+  public ElasticsearchConfig elasticsearch;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -74,5 +75,10 @@ public class WorkbenchConfig {
   public static class MandrillConfig {
     public String fromEmail;
     public int sendRetries;
+  }
+
+  public static class ElasticsearchConfig {
+    public String host;
+    public boolean enableElasticsearchBackend;
   }
 }

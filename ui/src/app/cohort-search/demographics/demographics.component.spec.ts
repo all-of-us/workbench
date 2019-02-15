@@ -2,18 +2,17 @@ import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
+import {MultiSelectComponent} from 'app/cohort-search/multi-select/multi-select.component';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
-import {MultiSelectComponent} from '../multi-select/multi-select.component';
 
 import {
   activeParameterList,
   CohortSearchActions,
   demoCriteriaChildren,
-} from '../redux';
+} from 'app/cohort-search/redux';
 
 import {CohortBuilderService} from 'generated';
 import {DemographicsComponent} from './demographics.component';
@@ -49,12 +48,6 @@ describe('DemographicsComponent', () => {
         {provide: NgRedux, useValue: mockReduxInst},
         {provide: CohortBuilderService, useValue: {}},
         {provide: CohortSearchActions, useValue: new MockActions()},
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {data: {workspace: {cdrVersionId: '1'}}}
-          }
-        },
       ],
     })
       .compileComponents();

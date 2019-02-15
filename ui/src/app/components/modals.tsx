@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as ReactModal from 'react-modal';
 
 import {withStyle} from 'app/utils/index';
+import {SpinnerOverlay} from './spinners';
 
 const styles = {
   modal: {
@@ -12,8 +13,7 @@ const styles = {
 
   overlay: {
     backgroundColor: 'rgba(49, 49, 49, 0.85)', padding: '1rem', display: 'flex',
-    position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto',
-    zIndex: 1040
+    position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, overflowY: 'auto'
   },
 
   modalTitle: {
@@ -47,14 +47,17 @@ const styles = {
   }
 };
 
-export const Modal = ({width = 450, ...props}) => {
+export const Modal = ({width = 450, loading = false, ...props}) => {
   return <ReactModal
     parentSelector={() => document.getElementById('popup-root')}
     isOpen
     style={{overlay: styles.overlay, content: {...styles.modal, width}}}
     ariaHideApp={false}
     {...props}
-  />;
+  >
+    {props.children}
+    {loading && <SpinnerOverlay/>}
+  </ReactModal>;
 };
 
 export const ModalTitle = withStyle(styles.modalTitle)('div');

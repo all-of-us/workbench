@@ -15,8 +15,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
  */
 @Service
 public class SecurityHeadersInterceptor extends HandlerInterceptorAdapter {
-  // TODO(calbach): Bump this to 1y once we've verified this is working as expected.
-  private static final long HSTS_MAX_AGE = Duration.ofDays(1).getSeconds();
+  private static final long HSTS_MAX_AGE = Duration.ofDays(365).getSeconds();
 
   @Override
   public boolean preHandle(

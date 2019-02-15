@@ -1,11 +1,12 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
@@ -20,7 +21,7 @@ import {StigmatizationPageComponent} from './views/stigmatization-page/component
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
+import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
@@ -42,7 +43,7 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -62,179 +63,183 @@ const routes: Routes = [
           title: 'Stigmatization Definition'
         }
       }, {
-      path: 'workspaces',
-      data: {
-        breadcrumb: {
-          value: 'Workspaces',
-          intermediate: true
-        }
-      },
-      children: [
-        {
-          path: '',
-          component: WorkspaceListComponent,
-          data: {title: 'View Workspaces'}
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
+        path: 'workspaces',
+        data: {
+          breadcrumb: {
+            value: 'Workspaces',
+            intermediate: true
+          }
         },
-        {
-          /* TODO The children under ./views need refactoring to use the data
-           * provided by the route rather than double-requesting it.
-           */
-          path: ':ns/:wsid',
-          component: WorkspaceNavBarComponent,
-          data: {
-            title: 'View Workspace Details',
-            breadcrumb: {
-              value: 'Param: Workspace Name',
-            }
+        children: [
+          {
+            path: '',
+            component: WorkspaceListComponent,
+            data: {title: 'View Workspaces'}
           },
-          runGuardsAndResolvers: 'always',
-          resolve: {
-            workspace: WorkspaceResolver,
-          },
-          children: [
-            {
-              path: '',
-              component: WorkspaceComponent,
-              data: {
-                title: 'View Workspace Details',
-              }
-            }, {
-              path: 'edit',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Edit Workspace',
-                mode: WorkspaceEditMode.Edit,
-                breadcrumb: {
-                  value: 'Edit Workspace',
-                }
-              }
-            }, {
-              path: 'clone',
-              component: WorkspaceEditComponent,
-              data: {
-                title: 'Clone Workspace',
-                mode: WorkspaceEditMode.Clone,
-                breadcrumb: {
-                  value: 'Clone Workspace',
-                }
+          {
+            /* TODO The children under ./views need refactoring to use the data
+             * provided by the route rather than double-requesting it.
+             */
+            path: ':ns/:wsid',
+            component: WorkspaceWrapperComponent,
+            data: {
+              title: 'View Workspace Details',
+              breadcrumb: {
+                value: 'Param: Workspace Name',
               }
             },
-            {
-              path: 'notebooks',
-              data: {
-                breadcrumb: {
-                  value: 'Notebooks',
-                  intermediate: true
+            runGuardsAndResolvers: 'always',
+            resolve: {
+              workspace: WorkspaceResolver,
+            },
+            children: [
+              {
+                path: '',
+                component: WorkspaceComponent,
+                data: {
+                  title: 'View Workspace Details',
                 }
-              },
-              children: [
-                {
-                  path: '',
-                  component: NotebookListComponent,
-                  data: {
-                    title: 'View Notebooks'
-                  }
-                }, {
-                  path: ':nbName',
-                  component: NotebookRedirectComponent,
-                  data: {
-                    title: 'Notebook',
-                    breadcrumb: {
-                        value: 'Param: Notebook Name'
-                    },
-                    minimizeChrome: true
+              }, {
+                path: 'edit',
+                component: WorkspaceEditComponent,
+                data: {
+                  title: 'Edit Workspace',
+                  mode: WorkspaceEditMode.Edit,
+                  breadcrumb: {
+                    value: 'Edit Workspace',
                   }
                 }
-              ]
-            }, {
-              path: 'cohorts',
-              data: {
-                breadcrumb: {
-                  value: 'Cohorts',
-                  intermediate: true
+              }, {
+                path: 'clone',
+                component: WorkspaceEditComponent,
+                data: {
+                  title: 'Clone Workspace',
+                  mode: WorkspaceEditMode.Clone,
+                  breadcrumb: {
+                    value: 'Clone Workspace',
+                  }
                 }
               },
-              children: [
-                {
-                  path: '',
-                  component: CohortListComponent,
-                  data: {
-                    title: 'View Cohorts',
-                  },
+              {
+                path: 'notebooks',
+                data: {
+                  breadcrumb: {
+                    value: 'Notebooks',
+                    intermediate: true
+                  }
                 },
-                {
-                  path: 'build',
-                  loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
-                  data: {
-                    breadcrumb: {
-                      value: 'Add a Cohort',
+                children: [
+                  {
+                    path: '',
+                    component: NotebookListComponent,
+                    data: {
+                      title: 'View Notebooks'
+                    }
+                  }, {
+                    path: ':nbName',
+                    component: NotebookRedirectComponent,
+                    data: {
+                      title: 'Notebook',
+                      breadcrumb: {
+                        value: 'Param: Notebook Name'
+                      },
+                      minimizeChrome: true
                     }
                   }
+                ]
+              }, {
+                path: 'cohorts',
+                data: {
+                  breadcrumb: {
+                    value: 'Cohorts',
+                    intermediate: true
+                  }
                 },
-                {
-                  path: ':cid/review',
-                  loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                children: [
+                  {
+                    path: '',
+                    component: CohortListComponent,
+                    data: {
+                      title: 'View Cohorts',
+                    },
+                  },
+                  {
+                    path: 'build',
+                    loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                    data: {
+                      breadcrumb: {
+                        value: 'Add a Cohort',
+                      }
+                    }
+                  },
+                  {
+                    path: ':cid/review',
+                    loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
+                    data: {
+                      title: 'Cohort',
+                      breadcrumb: {
+                        value: 'Param: Cohort Name',
+                      }
+                    },
+                    resolve: {
+                      cohort: CohortResolver,
+                    }
+                  }
+                ]
+              },
+              {
+                path: 'concepts',
+                component: ConceptHomepageComponent,
+                data: {
+                  title: 'Search Concepts',
+                  breadcrumb: {
+                    value: 'Concepts',
+                    intermediate: true
+                  }
+                }
+              },
+              {
+                path: 'concepts/sets',
+                data: {
+                  breadcrumb: {
+                    value: 'Concept Sets',
+                    intermediate: true
+                  }
+                },
+                children: [{
+                  path: '',
+                  component: ConceptSetListComponent,
                   data: {
-                    title: 'Cohort',
+                    title: 'View Concept Sets',
+                  }
+                }, {
+                  path: ':csid',
+                  component: ConceptSetDetailsComponent,
+                  data: {
+                    title: 'Concept Set',
                     breadcrumb: {
-                      value: 'Param: Cohort Name',
+                      value: 'Param: Concept Set Name',
                     }
                   },
                   resolve: {
-                    cohort: CohortResolver,
+                    conceptSet: ConceptSetResolver,
                   }
-                }
-              ]
-            },
-            {
-              path: 'concepts',
-              component: ConceptHomepageComponent,
-              data: {
-                title: 'Search Concepts',
-                breadcrumb: {
-                  value: 'Concepts',
-                  intermediate: true
-                }
-              }
-            },
-            {
-              path: 'concepts/sets',
-              data: {
-                breadcrumb: {
-                  value: 'Concept Sets',
-                  intermediate: true
-                }
-              },
-              children: [{
-                path: '',
-                component: ConceptSetListComponent,
-                data: {
-                  title: 'View Concept Sets',
-                }
-              }, {
-                path: ':csid',
-                component: ConceptSetDetailsComponent,
-                data: {
-                  title: 'Concept Set',
-                  breadcrumb: {
-                    value: 'Param: Concept Set Name',
-                  }
-                },
-                resolve: {
-                  conceptSet: ConceptSetResolver,
-                }
+                }]
               }]
-            }]
-        }]
+          }]
       },
       {
         path: 'admin/review-workspace',
         component: AdminReviewWorkspaceComponent,
         data: {title: 'Review Workspaces'}
       }, {
-        path: 'admin/review-id-verification',
-        component: AdminReviewIdVerificationComponent,
-        data: {title: 'Review ID Verifications'}
+        path: 'admin/user',
+        component: AdminUserComponent,
+        data: {title: 'User Admin Table'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,
@@ -258,6 +263,7 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     ConceptSetResolver,
+    AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,
@@ -265,7 +271,7 @@ const routes: Routes = [
 })
 export class AppRoutingModule {
 
- constructor(public router: Router) {
+  constructor(public router: Router) {
     NavStore.navigate = (commands, extras) => this.router.navigate(commands, extras);
     NavStore.navigateByUrl = (url, extras) => this.router.navigateByUrl(url, extras);
     this.router.events.subscribe(event => {

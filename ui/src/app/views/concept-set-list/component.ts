@@ -2,19 +2,22 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {
-ConceptSet,
-ConceptSetsService,
-RecentResource,
-Workspace,
-WorkspaceAccessLevel,
+  ConceptSet,
+  RecentResource,
+  Workspace,
+  WorkspaceAccessLevel,
 } from 'generated';
+
+import {generateDomain} from 'app/utils/index';
 
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
 
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
-import {ToolTipComponent} from '../tooltip/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
+
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -31,15 +34,12 @@ export class ConceptSetListComponent implements OnInit {
   conceptSetsLoading = false;
   conceptSetsList: ConceptSet[];
   resourceList: RecentResource[];
-  duplicateName: string;
-  nameConflictError = false;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
   constructor(
     private route: ActivatedRoute,
-    private conceptSetsService: ConceptSetsService
   ) {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
@@ -50,17 +50,18 @@ export class ConceptSetListComponent implements OnInit {
   conceptCreateModal: CreateConceptSetModalComponent;
 
   ngOnInit(): void {
-      this.wsNamespace = this.route.snapshot.params['ns'];
-      this.wsId = this.route.snapshot.params['wsid'];
-      this.conceptSetsLoading = true;
-      this.loadConceptSets();
+    this.wsNamespace = this.route.snapshot.params['ns'];
+    this.wsId = this.route.snapshot.params['wsid'];
+    this.conceptSetsLoading = true;
+    this.loadConceptSets();
   }
 
   loadConceptSets() {
     this.conceptSetsLoading = true;
-    this.conceptSetsService.getConceptSetsInWorkspace(this.wsNamespace, this.wsId)
-      .subscribe(conceptSetListResponse => {
-        this.conceptSetsList = conceptSetListResponse.items;
+    conceptSetsApi().getConceptSetsInWorkspace(this.wsNamespace, this.wsId)
+      .then(conceptSetListResponse => {
+        this.conceptSetsList = conceptSetListResponse.items
+            .map(s => ({...s, domain: generateDomain(s.domain)}));
         this.resourceList = convertToResources(this.conceptSetsList, this.wsNamespace,
           this.wsId, this.accessLevel, ResourceType.CONCEPT_SET);
         this.conceptSetsLoading = false;
@@ -69,11 +70,6 @@ export class ConceptSetListComponent implements OnInit {
 
   newConceptSet(): void {
     this.conceptCreateModal.open();
-  }
-
-  duplicateNameError(dupName: string) {
-    this.duplicateName = dupName;
-    this.nameConflictError = true;
   }
 
   get writePermission(): boolean {

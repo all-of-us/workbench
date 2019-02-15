@@ -12,4 +12,10 @@
     <description>Periodic notebook cluster checks</description>
     <schedule>every 3 hours</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/bulkSyncTrainingStatus</url>
+    <target>api</target>
+    <description>Periodic Sync users training status</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
 </cronentries>

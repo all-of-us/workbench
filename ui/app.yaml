@@ -4,19 +4,22 @@ threadsafe: true
 default_expiration: "2m"
 
 handlers:
+  # TODO(calbach): Remove once verified, see RW-2016.
+- url: /.well-known/pki-validation/gsdv.txt
+  static_files: dist/assets/gsdv.txt
+  upload: dist/assets/gsdv.txt
 - url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|png|svg|ttf|woff|woff2))
   static_files: dist/\1
   upload: dist/(.*)
   secure: always
-  # TODO(calbach): Bump max-age to 1y once we've verified this is correct.
   http_headers:
-    Strict-Transport-Security: "max-age=86400; includeSubDomains; preload"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
   secure: always
   http_headers:
-    Strict-Transport-Security: "max-age=86400; includeSubDomains; preload"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
 
 # If a file (relative path under ui/) matches this regex, do not upload it.
 # Skip everything not starting with "dist".

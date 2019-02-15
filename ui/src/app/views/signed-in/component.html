@@ -69,10 +69,10 @@
           routerLink="/admin/review-workspace"
           (click)="sidenavToggle = false">Review Workspaces</button>
       <button class="btn btn-primary nav-link"
-          [class.active]="reviewIdActive"
+          [class.active]="userAdminActive"
           *ngIf="hasReviewIdVerification"
-          routerLink="/admin/review-id-verification"
-          (click)="sidenavToggle = false">Review ID Verifications</button>
+          routerLink="/admin/user"
+          (click)="sidenavToggle = false">User Admin</button>
       <button class="btn btn-primary nav-link help-desk-item"
           *ngIf="showHelpDeskItem"
           (click)="openZendeskWidget(); sidenavToggle = false;">Help Desk</button>

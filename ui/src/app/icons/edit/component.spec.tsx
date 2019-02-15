@@ -1,4 +1,4 @@
-import { mount } from 'enzyme';
+import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {
@@ -12,14 +12,14 @@ describe('EditIconComponent', () => {
   let props: EditComponentProps;
 
   const component = () => {
-    return mount(<EditComponentReact {...props}/>)
+    return mount(<EditComponentReact {...props}/>);
   };
 
   beforeEach(() => {
     props = {
       disabled: false,
       style: {}
-    }
+    };
   });
 
   it('should render', () => {

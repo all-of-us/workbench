@@ -1,10 +1,5 @@
 import {Location} from '@angular/common';
 import {Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ErrorHandlingService} from 'app/services/error-handling.service';
@@ -12,6 +7,7 @@ import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
+import {routeConfigDataStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 import {Authority, BillingProjectStatus} from 'generated';
@@ -19,8 +15,8 @@ import {Authority, BillingProjectStatus} from 'generated';
 @Component({
   selector: 'app-signed-in',
   styleUrls: ['./component.css',
-              '../../styles/buttons.css',
-              '../../styles/errors.css'],
+    '../../styles/buttons.css',
+    '../../styles/errors.css'],
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit, OnDestroy {
@@ -76,8 +72,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
-    private router: Router,
-    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -94,7 +88,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
         this.familyName = profile.familyName;
         this.aouAccountEmailAddress = profile.username;
         this.contactEmailAddress = profile.contactEmail;
-        this.minimizeChrome = this.shouldMinimize();
       });
     });
 
@@ -114,17 +107,14 @@ export class SignedInComponent implements OnInit, OnDestroy {
         this.billingProjectInitialized = true;
       } else {
         this.billingProjectQuery = setTimeout(() => {
-            this.profileStorageService.reload();
+          this.profileStorageService.reload();
         }, 10000);
       }
     });
 
-    this.subscriptions.push(
-      this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(event => {
-          this.minimizeChrome = this.shouldMinimize();
-        }));
-
+    this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
+      this.minimizeChrome = minimizeChrome;
+    }));
   }
 
   ngOnDestroy() {
@@ -144,14 +134,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
     this.navigateSignOut();
   }
 
-  shouldMinimize(): boolean {
-    let leaf = this.route.snapshot;
-    while (leaf.firstChild != null) {
-      leaf = leaf.firstChild;
-    }
-    return leaf.data.minimizeChrome;
-  }
-
   private navigateSignOut(): void {
     // Force a hard browser reload here. We want to ensure that no local state
     // is persisting across user sessions, as this can lead to subtle bugs.
@@ -163,8 +145,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
     return this.locationService.path() === '/admin/review-workspace';
   }
 
-  get reviewIdActive(): boolean {
-    return this.locationService.path() === '/admin/review-id-verification';
+  get userAdminActive(): boolean {
+    return this.locationService.path() === '/admin/user';
   }
 
   get homeActive(): boolean {

@@ -21,7 +21,7 @@ export class ConfigureStore {
   ) {
 
     let storeEnhancers = [];
-    if (environment.debug && devTools.isEnabled()) {
+    if (devTools.isEnabled()) {
       storeEnhancers = [...storeEnhancers, devTools.enhancer()];
     }
 

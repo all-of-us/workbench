@@ -1,17 +1,16 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Http} from '@angular/http';
-import {ActivatedRoute, Router} from '@angular/router';
 import {Comparator, StringFilter} from '@clr/angular';
 
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
-import {environment} from 'environments/environment';
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
   Cohort,
@@ -23,7 +22,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-import {ToolTipComponent} from '../tooltip/component';
 
 /*
  * Search filters used by the cohort and notebook data tables to
@@ -106,23 +104,23 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   newPageVisit: PageVisit = { page: WorkspaceComponent.PAGE_ID};
   firstVisit = true;
   username = '';
+  creatingNotebook = false;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
 
-  @ViewChild(NewNotebookModalComponent)
-  newNotebookModal: NewNotebookModalComponent;
-
   constructor(
-    private route: ActivatedRoute,
     private cohortsService: CohortsService,
-    private router: Router,
     private signInService: SignInService,
     private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,
   ) {
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
+    this.closeNotebookModal = this.closeNotebookModal.bind(this);
+  }
+
+  ngOnInit(): void {
+    const wsData = currentWorkspaceStore.getValue();
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
     Object.keys(ResearchPurposeItems).forEach((key) => {
@@ -141,11 +139,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.leftResearchPurposes.length,
         this.researchPurposeArray.length);
     this.showTip = false;
-  }
-
-  ngOnInit(): void {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
     // TODO: RW-1057
     this.profileService.getMe().subscribe(
       profile => {
@@ -198,11 +194,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   newNotebook(): void {
-    this.newNotebookModal.open();
+    this.creatingNotebook = true;
+  }
+
+  closeNotebookModal() {
+    this.creatingNotebook = false;
   }
 
   buildCohort(): void {
-    this.router.navigate(['cohorts', 'build'], {relativeTo: this.route});
+    navigate(['/workspaces', this.wsNamespace, this.wsId, 'cohorts', 'build']);
   }
 
   get workspaceCreationTime(): string {

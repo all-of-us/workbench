@@ -1,33 +1,29 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
-import * as fp from 'lodash/fp';
-
-import {
-  DataAccessLevel,
-  Profile,
-} from 'generated/fetch/api';
-
-import {
-  Error,
-  ErrorMessage,
-  LongInput,
-  styles as inputStyles
-} from 'app/components/inputs';
+import {Button} from 'app/components/buttons';
+import {FormSection} from 'app/components/forms';
+import {BoldHeader} from 'app/components/headers';
 
 import {
   InfoIcon,
   ValidationIcon
 } from 'app/components/icons';
 
+import { Error, ErrorMessage, styles as inputStyles, TextArea, TextInput } from 'app/components/inputs';
+
 import {
   TooltipTrigger
 } from 'app/components/popups';
 
-import {Button} from 'app/components/buttons';
-import { FormSection } from 'app/components/forms';
-import {BoldHeader} from 'app/components/headers';
-import {profileApi} from 'app/services/swagger-fetch-clients';
+import {
+  profileApi
+} from 'app/services/swagger-fetch-clients';
+
+import {
+  DataAccessLevel,
+  Profile,
+} from 'generated/fetch/api';
+
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -46,8 +42,7 @@ export interface AccountCreationState {
   showAllFieldsRequiredError: boolean;
 }
 
-export class AccountCreation extends
-  React.Component<AccountCreationProps, AccountCreationState> {
+export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
   private usernameCheckTimeout: NodeJS.Timer;
 
   constructor(props: AccountCreationProps) {
@@ -88,9 +83,9 @@ export class AccountCreation extends
     this.setState({creatingAccount: true});
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
-          this.setState({profile: savedProfile, creatingAccount: false});
-          setProfile(savedProfile);
-        }
+        this.setState({profile: savedProfile, creatingAccount: false});
+        setProfile(savedProfile);
+      }
       )
       .catch(error => {
         console.log(error);
@@ -125,8 +120,8 @@ export class AccountCreation extends
   }
 
   usernameChanged(value: string): void {
-    const {username} = this.state.profile;
     this.updateProfile('username', value);
+    const {username} = this.state.profile;
     if (username === '') {
       return;
     }
@@ -157,123 +152,126 @@ export class AccountCreation extends
   }
 
   render() {
-    const {givenName, familyName, currentPosition, organization} = this.state.profile;
+    const {
+      profile: {
+        givenName, familyName, currentPosition, organization,
+        contactEmail, username, areaOfResearch
+      }
+    } = this.state;
     return <div id='account-creation'
                 style={{'paddingTop': '3rem', 'paddingRight': '3rem', 'paddingLeft': '3rem'}}>
-        <BoldHeader>Create your account</BoldHeader>
-        <div>
-          <FormSection>
-            <LongInput type='text' id='givenName' name='givenName' autoFocus
-                       placeholder='First Name'
-                       value={givenName}
-                       style={(givenName.length > 80) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('givenName', e.target.value)}/>
-            {givenName.length > 80 &&
-            <ErrorMessage id='givenNameError'>
+      <BoldHeader>Create your account</BoldHeader>
+      <div>
+        <FormSection>
+          <TextInput id='givenName' name='givenName' autoFocus
+                     placeholder='First Name'
+                     value={givenName}
+                     invalid={givenName.length > 80}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('givenName', v)}/>
+          {givenName.length > 80 &&
+          <ErrorMessage id='givenNameError'>
               First Name must be 80 characters or less.
-            </ErrorMessage>}
-          </FormSection>
-          <FormSection>
-            <LongInput type='text' id='familyName' name='familyName' placeholder='Last Name'
-                       value={familyName}
-                       style={(familyName.length > 80) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('familyName', e.target.value)}/>
-            {familyName.length > 80 &&
-            <ErrorMessage id='familyNameError'>
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='familyName' name='familyName' placeholder='Last Name'
+                     value={familyName}
+                     invalid={familyName.length > 80}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('familyName', v)}/>
+          {familyName.length > 80 &&
+          <ErrorMessage id='familyNameError'>
               Last Name must be 80 character or less.
-            </ErrorMessage>}
-          </FormSection>
-          <FormSection>
-            <LongInput type='text' id='contactEmail' name='contactEmail'
-                       placeholder='Email Address'
-                       onChange={e => this.updateProfile('contactEmail', e.target.value)}/>
-          </FormSection>
-          <FormSection>
-            <LongInput type='text' id='currentPosition' name='currentPosition'
-                       placeholder='You Current Position'
-                       value={currentPosition}
-                       style={(currentPosition.length > 255) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('currentPosition', e.target.value)}/>
-            {currentPosition.length > 255 &&
-            <ErrorMessage id='currentPositionError'>
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='contactEmail' name='contactEmail'
+                     placeholder='Email Address'
+                     value={contactEmail}
+                       style={{width: '16rem'}}
+                       onChange={v => this.updateProfile('contactEmail', v)}/>
+        </FormSection>
+        <FormSection>
+          <TextInput id='currentPosition' name='currentPosition'
+                     placeholder='Your Current Position'
+                     value={currentPosition}
+                     invalid={currentPosition.length > 255}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('currentPosition', v)}/>
+          {currentPosition.length > 255 &&
+          <ErrorMessage id='currentPositionError'>
               Current Position must be 255 characters or less.
-            </ErrorMessage>}
-          </FormSection>
-          <FormSection>
-            <LongInput type='text' id='organization' name='organization'
-                       placeholder='Your Organization'
-                       value={organization}
-                       style={(organization.length > 255) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}
-                       onChange={e => this.updateProfile('organization', e.target.value)}/>
-            {organization.length > 255 &&
-            <ErrorMessage id='organizationError'>
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection>
+          <TextInput id='organization' name='organization'
+                     placeholder='Your Organization'
+                     value={organization}
+                     invalid={organization.length > 255}
+                       style={{width: '16rem'}}
+                     onChange={v => this.updateProfile('organization', v)}/>
+          {organization.length > 255 &&
+          <ErrorMessage id='organizationError'>
               Organization must be 255 characters of less.
-            </ErrorMessage>}
-          </FormSection>
-          <FormSection style={{display: 'flex'}}>
-              <textarea style={{
-                ...inputStyles.formInput,
-                ...inputStyles.longInput,
-                'height': '10em',
-                'resize': 'none',
-                'width': '16rem'
-              }}
+          </ErrorMessage>}
+        </FormSection>
+        <FormSection style={{display: 'flex'}}>
+              <TextArea style={{height: '10em', resize: 'none', width: '16rem'}}
                         id='areaOfResearch'
                         name='areaOfResearch'
                         placeholder='Describe Your Current Research'
-                        onChange={e => this.updateProfile('areaOfResearch', e.target.value)}/>
-            <TooltipTrigger content='You are required to describe your current research in
+                        value={areaOfResearch}
+                        onChange={v => this.updateProfile('areaOfResearch', v)}/>
+          <TooltipTrigger content='You are required to describe your current research in
                       order to help All of Us improve the Researcher Workbench.'>
-              <InfoIcon style={{
-                'height': '22px',
-                'marginTop': '2.2rem',
-                'paddingLeft': '2px'
-              }}/>
-            </TooltipTrigger>
-          </FormSection>
-          <FormSection>
-            <LongInput type='text' id='username' name='username' placeholder='New Username'
-                       onChange={e => this.usernameChanged(e.target.value)}
-                       style={(this.state.usernameConflictError || this.usernameInvalidError()) ?
-                         inputStyles.unsuccessfulInput : inputStyles.successfulInput}/>
-            <div style={inputStyles.iconArea}>
-              <ValidationIcon validSuccess={this.usernameValid()}/>
-            </div>
-            <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
-              numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-              (maximum of 64 characters).<br/>Usernames cannot begin or end with a period (.)
-              and may not contain more than one period (.) in a row.</div>}>
-              <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
-            </TooltipTrigger>
-            <div style={{height: '1.5rem'}}>
-              {this.state.usernameConflictError &&
-              <Error id='usernameConflictError'>
+            <InfoIcon style={{
+              'height': '22px',
+              'marginTop': '2.2rem',
+              'paddingLeft': '2px'
+            }}/>
+          </TooltipTrigger>
+        </FormSection>
+        <FormSection>
+          <TextInput id='username' name='username' placeholder='New Username'
+                       value={username}
+                     onChange={v => this.usernameChanged(v)}
+                     invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                       style={{width: '16rem'}}/>
+          <div style={inputStyles.iconArea}>
+            <ValidationIcon validSuccess={this.usernameValid()}/>
+          </div>
+          <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
+            numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
+            (maximum of 64 characters).<br/>Usernames cannot begin or end with a period (.)
+            and may not contain more than one period (.) in a row.</div>}>
+            <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
+          </TooltipTrigger>
+          <div style={{height: '1.5rem'}}>
+            {this.state.usernameConflictError &&
+            <Error id='usernameConflictError'>
                 Username is already taken.
-              </Error>}
-              {this.usernameInvalidError() &&
-              <Error id='usernameError'>
+            </Error>}
+            {this.usernameInvalidError() &&
+            <Error id='usernameError'>
                 Username is not a valid username.
-              </Error>}
-            </div>
-          </FormSection>
-          <FormSection>
-            <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
-            this.isUsernameValidationError()}
-                    style={{'height': '2rem', 'width': '10rem'}}
-                    onClick={() => this.createAccount()}>
-              Next
-            </Button>
-          </FormSection>
-        </div>
-        {this.state.showAllFieldsRequiredError &&
-        <Error>
+            </Error>}
+          </div>
+        </FormSection>
+        <FormSection>
+          <Button disabled={this.state.creatingAccount || this.state.usernameCheckInProgress ||
+          this.isUsernameValidationError()}
+                  style={{'height': '2rem', 'width': '10rem'}}
+                  onClick={() => this.createAccount()}>
+            Next
+          </Button>
+        </FormSection>
+      </div>
+      {this.state.showAllFieldsRequiredError &&
+      <Error>
           All fields are required.
-        </Error>}
-      </div>;
+      </Error>}
+    </div>;
   }
 
 }

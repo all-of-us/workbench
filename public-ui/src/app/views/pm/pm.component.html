@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-xs-12 col-sm-12 col-md-9">
+  <div class="col-xs-12 col-sm-12 col-md-12">
 
     <div class="page-header">
       <div>
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div *ngIf="!loading()" class="measurement white-card-box ">
+    <div *ngIf="!loading()" class="measurement white-card-box">
       <div class="row box-title">
         <div class="col-md-4">
           <h5 class="box-title"> {{selectedGroup.groupName}}</h5>
@@ -45,7 +45,8 @@
 
         <!-- show Age totals -->
         <div *ngIf="selectedConcept.analyses && selectedConcept.analyses.ageAnalysis" class="col-md-4 col-xs-12 chart-wrapper" >
-          <app-chart [analysis]="selectedConcept.analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+          <app-chart [analysis]="selectedConcept.analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"
+                     [domainType]="'physical measurements'"> </app-chart>
         </div>
 
         <!-- Todo wait on design for further dev -->
@@ -53,8 +54,5 @@
       </div>
     </div>
 
-  </div>
-  <div class="col-xs-12 col-sm-12 col-md-3">
-    <img [src]="pageImage" />
   </div>
 </div>

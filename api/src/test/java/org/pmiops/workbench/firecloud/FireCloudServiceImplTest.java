@@ -1,6 +1,10 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
@@ -12,15 +16,20 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
+import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
@@ -43,6 +52,8 @@ public class FireCloudServiceImplTest {
   @Mock
   private GroupsApi endUserGroupsApi;
   @Mock
+  private NihApi nihApi;
+  @Mock
   private StatusApi statusApi;
 
   @Rule
@@ -52,8 +63,8 @@ public class FireCloudServiceImplTest {
   public void setUp() {
     service = new FireCloudServiceImpl(Providers.of(workbenchConfig),
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
-        Providers.of(endUserGroupsApi), Providers.of(workspacesApi), Providers.of(statusApi),
-        new FirecloudRetryHandler(new NoBackOffPolicy()));
+        Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
+        Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()));
   }
 
   @Test
@@ -118,4 +129,47 @@ public class FireCloudServiceImplTest {
         Lists.newArrayList(new ManagedGroupAccessResponse().groupName("group").role("member")));
     assertThat(service.isUserMemberOfGroup("group")).isTrue();
   }
+
+  @Test
+  public void testNihStatus() throws Exception {
+    NihStatus status = new NihStatus().linkedNihUsername("test").linkExpireTime(500L);
+    when(nihApi.nihStatus()).thenReturn(status);
+    assertThat(service.getNihStatus()).isNotNull();
+    assertThat(service.getNihStatus()).isEqualTo(status);
+  }
+
+  @Test
+  public void testNihStatusNotFound() throws Exception {
+    when(nihApi.nihStatus()).thenThrow(new ApiException(404, "Not Found"));
+    assertThat(service.getNihStatus()).isNull();
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testNihStatusException() throws Exception {
+    when(nihApi.nihStatus()).thenThrow(new ApiException(500, "Internal Server Error"));
+    service.getNihStatus();
+  }
+
+  @Test
+  public void testNihCallback() throws Exception {
+    doNothing().when(nihApi).nihCallback(any());
+    try {
+      service.postNihCallback(any());
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testNihCallbackBadRequest() throws Exception {
+    doThrow(new ApiException(400, "Bad Request")).when(nihApi).nihCallback(any());
+    service.postNihCallback(any());
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testNihCallbackServerError() throws Exception {
+    doThrow(new ApiException(500, "Internal Server Error")).when(nihApi).nihCallback(any());
+    service.postNihCallback(any());
+  }
+
 }

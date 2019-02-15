@@ -1,25 +1,13 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+
+import {SearchRequest, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {
-  CohortSearchActions,
-  CohortSearchState,
-  getItem,
-  itemError,
-  parameterList
-} from '../redux';
+import {CohortSearchActions, CohortSearchState, getItem, itemError, parameterList} from 'app/cohort-search/redux';
 
-import {
-  attributeDisplay,
-  getCodeOptions,
-  nameDisplay,
-  typeDisplay,
-  typeToTitle,
-} from '../utils';
-
-import {SearchRequest, TreeType} from 'generated';
+import {attributeDisplay, getCodeOptions, nameDisplay, typeDisplay, typeToTitle, } from 'app/cohort-search/utils';
 
 @Component({
   selector: 'app-search-group-item',
@@ -30,7 +18,6 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   @Input() role: keyof SearchRequest;
   @Input() groupId: string;
   @Input() itemId: string;
-  @Input() itemIndex: number;
 
   error: boolean;
   private item: Map<any, any> = Map();
@@ -73,6 +60,10 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     return this.item.get('isRequesting', false);
   }
 
+  get status() {
+    return this.item.get('status');
+  }
+
   get codes() {
     const _type = this.item.get('type', '');
     const formatter = (param) => {
@@ -93,7 +84,26 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
   }
 
   remove() {
-    this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
+    this.hide('pending');
+    const timeoutId = setTimeout(() => {
+      this.actions.removeGroupItem(this.role, this.groupId, this.itemId);
+    }, 10000);
+    // For some reason Angular will delete the timeout id from scope if the inputs change, so we
+    // have to keep in the redux store
+    this.actions.setTimeoutId('items', this.itemId, timeoutId);
+  }
+
+  hide(status: string) {
+    this.actions.removeGroupItem(this.role, this.groupId, this.itemId, status);
+  }
+
+  enable() {
+    this.actions.enableGroupItem(this.role, this.groupId, this.itemId);
+  }
+
+  undo() {
+    clearTimeout(this.item.get('timeout'));
+    this.enable();
   }
 
   launchWizard() {
