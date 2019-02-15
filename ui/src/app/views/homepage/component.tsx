@@ -294,7 +294,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
-    console.log(profile);
 
     if (fp.isEmpty(profile)) {
       this.profileTimer = setTimeout(() => {
@@ -327,7 +326,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
 
     this.setState(
-        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false})
+        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
   }
 
   checkBillingProjectStatus() {
@@ -383,8 +382,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
           'Collaborating with other researchers',
           'Sharing and Publishing Notebooks']
       }];
-
-    console.log((quickTour || (firstVisit && accessTasksRemaining === false)));
 
     return <React.Fragment>
       <div style={homepageStyles.backgroundImage}>

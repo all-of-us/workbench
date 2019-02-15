@@ -13,7 +13,7 @@ export class ConfigApiStub extends ConfigApi {
       gsuiteDomain: 'test',
       projectId: 'test',
       enforceRegistered: true,
-    }
+    };
   }
 
   public getConfig() {

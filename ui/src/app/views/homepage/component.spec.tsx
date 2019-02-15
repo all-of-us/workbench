@@ -14,6 +14,7 @@ import {CohortsApiStub} from "testing/stubs/cohorts-api-stub";
 import {UserMetricsApiStub} from "testing/stubs/user-metrics-api-stub";
 import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
 import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
+import {waitOneTickAndUpdate} from "../../../testing/react-test-helpers";
 
 describe('WorkbenchAccessTasks', () => {
   let props: WorkbenchAccessTasksProps;
@@ -71,7 +72,6 @@ describe('HomepageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      console.log('here');
       userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     });
 
@@ -102,50 +102,38 @@ describe('HomepageComponent', () => {
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
 
-  it('should display quick tour if first visit', () => {
+  it('should display quick tour if first visit', async () => {
     const newProfile = {
       ...profile,
       linkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
-    // console.log(profile.linkedNihUsername);
     const wrapper = component();
-    wrapper.update();
+    await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
-    // setTimeout(() => {
-    //   console.log('executing');
-    //   expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
-    // }, 1000);
   });
 
-  // it('should show the era commons linking page if the user has no nih username', () => {
-  //   console.log(profile);
-  //   const wrapper = component();
-  //   // wrapper.update();
-  //   console.log(wrapper.find('[data-test-id="access-tasks"]').debug());
-  //   expect(wrapper.find('[data-test-id="Login"]').text()).toEqual('LOGIN');
-  //
-  //   // setTimeout(() => {
-  //   //   console.log('in timeout');
-  //   //   //console.log(wrapper.debug());
-  //   //   console.log(wrapper.find('[data-test-id="access-tasks"]').debug());
-  //   //   expect(wrapper.find('[data-test-id="Login"]').text()).toEqual('LOGIN');
-  //   // }, 100);
-  //
-  // });
-  //
-  // // it('should not display the quick tour if access tasks dashboard is open', () => {
-  // //
-  // // });
-  //
-  // it('should not show the era commons linking page if user has an nih username', () => {
-  //   const newProfile = {
-  //       ...profile,
-  //     linkedNihUsername: 'test'
-  //   };
-  //   userProfileStore.next({profile: newProfile as unknown as Profile, reload});
-  //   const wrapper = component();
-  //   expect(wrapper.find('[data-test-id="Login"]').exists()).toBeFalsy();
-  // });
+  it('should show the era commons linking page if the user has no nih username', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="Login"]').first().text()).toEqual('Login');
+  });
+
+  it('should not display the quick tour if access tasks dashboard is open', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
+  });
+
+  it('should not show the era commons linking page if user has an nih username', async () => {
+    const newProfile = {
+        ...profile,
+      linkedNihUsername: 'test'
+    };
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="Login"]').exists()).toBeFalsy();
+  });
 
 });
