@@ -27,7 +27,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: QuickSearchComponent,
+        component: DbHomeComponent,
         data: {title: 'Quick Search'}
       },
       {

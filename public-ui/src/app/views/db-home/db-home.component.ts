@@ -7,14 +7,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DbHomeComponent implements OnInit {
   dbLogo = '/assets/db-images/Data_Browser_Logo.svg';
-  subTitle = 'The Data Browser provides interactive views of the publically available ' +
-    'All of Us Research Program participant data. ' +
-    'Currently, participant provided information, including surveys and ' +
-    'physical measurements taken at the time of participant enrollment ' +
-    '(“program physical measurements”), ' +
-    'as well as electronic health record (EHR) data are available.' +
-    ' The All of Us Research Program data resource will grow to include more data types over time.';
-
+  dbDesc = `The Data Browser provides public access to various levels
+  of the participant database. This data is anonymized, aggregated, and
+  made available for all researchers, participants, and members of the
+  general public to explore and learn about the cohort as a whole.`;
   constructor() { }
 
   ngOnInit() {

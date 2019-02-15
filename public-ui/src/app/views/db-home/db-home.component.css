@@ -1,3 +1,29 @@
+
+.db-title {
+    text-align: center;
+    font-family: Oswald,Arial, Helvetica, sans-serif;
+    font-weight: 500;
+    font-size: 38px;
+    margin-bottom:35px;
+}
+
+.db-desc {
+    font-size: 20px;
+    font-family: Montserrat,Helvetica, sans-serif;
+    color:#262262;
+    font-weight: 300!important;
+    line-height: 30px;
+    text-align:center;
+}
+.db-desc_sub {
+    padding:2rem;
+    font-size: 20px;
+    font-family: Montserrat,Helvetica, sans-serif;
+    color:#262262;
+    font-weight: 300!important;
+    line-height: 30px;
+    text-align:center;
+}
 .title-logo {
     height: 43px;
     width: 316px;
