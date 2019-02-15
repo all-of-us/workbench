@@ -105,6 +105,10 @@ export class WorkbenchAccessTasks extends
     window.location.assign(url);
   }
 
+  static redirectToTraining(): void {
+    window.location.assign('https://aou.nnlm.gov/');
+  }
+
   render() {
     return <React.Fragment>
       <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
@@ -152,7 +156,7 @@ export class WorkbenchAccessTasks extends
                                   defaultText='Complete Training'
                                   completedText='Completed'
                                   failedText=''
-                                  onClick={() => {}}/>
+                                  onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
         </div>
       </div>
@@ -251,7 +255,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       eraCommonsLinked: undefined,
       firstVisit: undefined,
       quickTour: false,
-      trainingCompleted: true,
+      trainingCompleted: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -305,6 +309,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
         profileApi().updatePageVisits({ page: this.pageId});
       }
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+
+      try {
+        const syncTrainingStatus = await profileApi().syncTrainingStatus();
+        this.setState({trainingCompleted: !!syncTrainingStatus.trainingCompletionTime});
+      } catch (ex) {
+        this.setState({trainingCompleted: false});
+        console.error('error fetching moodle training status');
+      }
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       if (workbenchAccessTasks) {
