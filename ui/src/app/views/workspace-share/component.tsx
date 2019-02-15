@@ -22,26 +22,26 @@ import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 
 const selectStyles = {
-  option: (styles, {isSelected}) => ({
-    ...styles,
+  option: (libstyles, {isSelected}) => ({
+    ...libstyles,
     lineHeight: '1rem',
     fontSize: '12px',
     color: '#000000',
     backgroundColor: isSelected ? '#E0EAF1' : '#FFFFFF'
   }),
-  control: (styles, {isDisabled}) => ({
+  control: (libstyles, {isDisabled}) => ({
     color: isDisabled ? '#7f7f7f' : '#000000',
     display: 'flex',
     height: '1rem',
     fontSize: '12px',
     fontSpacing: '13px'
   }),
-  menu: (styles) => ({
-    ...styles,
+  menu: (libstyles) => ({
+    ...libstyles,
     top: '-.15rem',
     position: 'absolute',
   }),
-  container: (styles, {isDisabled}) => ({
+  container: (libstyles, {isDisabled}) => ({
     color: isDisabled ? '#7f7f7f' : '#000000',
     borderRadius: '5px',
     border: isDisabled ? 0 : '1px solid #CCCCCC',
@@ -49,8 +49,8 @@ const selectStyles = {
     width: '6rem',
     position: 'relative'
   }),
-  dropdownIndicator: (styles, {isDisabled}) => ({
-    ...styles,
+  dropdownIndicator: (libstyles, {isDisabled}) => ({
+    ...libstyles,
     color: '#000000',
     paddingTop: '12px',
     display: isDisabled ? 'none' : ''
@@ -256,7 +256,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   removeCollaborator(user: UserRole): void {
     this.setState(({userRolesList, workspace}) => (
       {userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
-      workspace: {...workspace,
+        workspace: {...workspace,
         userRoles: fp.remove(({email}) => user.email === email, workspace.userRoles)} as Workspace}
     ));
   }
@@ -280,7 +280,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     this.setState(({userRolesList, workspace}) => (
       {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
         userRolesList: fp.concat(userRolesList, [userRole]),
-      workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
+        workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
     ));
   }
 
@@ -309,13 +309,13 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   setRole = (e, user)  => {
-    let oldUserRoles = this.state.userRolesList;
-      const newUserRoleList = fp.map((u) => {
-        return u.email === user.email ? {...u, role: e.value} : u
-      }, oldUserRoles);
+    const oldUserRoles = this.state.userRolesList;
+    const newUserRoleList = fp.map((u) => {
+      return u.email === user.email ? {...u, role: e.value} : u;
+    }, oldUserRoles);
     this.setState(({userRolesList, workspace}) => ({userRolesList: newUserRoleList,
       workspace: {...workspace, userRoles: newUserRoleList} as Workspace}));
-  };
+  }
 
   resetModalState(): void {
     this.setState({
@@ -341,7 +341,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       }
       this.closeDropdown();
     }
-  };
+  }
 
   cleanClassNameForSelect(value: string): string {
     return (value + '-user-role').replace(/[@\.]/g, '');
@@ -444,8 +444,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                          style={styles.userName}>{user.email}</div>
                     <label>
                       <Select styles={selectStyles} value={fp.find((u) => {
-                                return u.value === user.role
-                              }, UserRoleOptions)}
+                        return u.value === user.role;
+                      }, UserRoleOptions)}
                               menuPortalTarget={document.getElementById('popup-root')}
                               isDisabled={user.email === this.props.userEmail}
                               classNamePrefix={this.cleanClassNameForSelect(user.email)}
@@ -463,15 +463,17 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                   </div>
                 </div>
                 </div>
-                  {(this.state.userRolesList.length != i+ 1) &&
+                  {(this.state.userRolesList.length !== i + 1) &&
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
               </div>;
             })}
           </div>
         </ModalBody>
         <ModalFooter>
-            <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}} onClick={() => this.props.closeFunction()}>Cancel</Button>
-            <Button data-test-id='save' disabled={!this.hasPermission} onClick={() => this.save()}>Save</Button>
+            <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}}
+                    onClick={() => this.props.closeFunction()}>Cancel</Button>
+            <Button data-test-id='save' disabled={!this.hasPermission}
+                    onClick={() => this.save()}>Save</Button>
         </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>
