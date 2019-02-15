@@ -1,81 +1,55 @@
-.header {
-    height:96px;
-    background-color:inherit;
-    padding-top:24px;
-    margin-bottom: 24px;
+.db-header {
+    width: 100%;
+    background-color: #F0F0F1;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    height: 68px;
+    margin-bottom: 1rem;
 }
 
-.branding {
-    /* Show full logo on small screen */
-    min-width:10rem !important;
-   /* margin-right: 12px;
-    padding-right: 0;*/
-}
-.branding .logo {
-    padding-right: 0px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-}
-.branding .logo img {
-    width: 231px;
+.db-nav {
+    /* background:yellow;       */
+    width: 40%;
+    margin-left: 60%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 3rem;
 }
 
-
-span.title-data {
-    color: #6CACE4;
-    font-weight:bold;
-}
-span.title-browser {
+.db-nav .link-list {
+    list-style: none;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 18px;
     color: #262262;
-    font-weight:bold;
+    font-weight: 700;
+    font-family: 'Oswald', sans-serif !important;
+    text-transform: uppercase;
 }
 
-
-@media (max-width: 544px) {
-
-    .main-container .header.db-header .branding {
-        max-width: 8rem !important;
-        min-width: 0;
-        overflow: hidden;
-    }
+.link-list__item {
+    /* background:red; */
+    min-width: calc(100%/4 - 2rem);
+    text-align: center;
+    height: 2.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.header-nav {
-    font-family: "Gotham HTF",open-sans,sans-serif;
-    margin-top:-.25rem;
+.link-list__item:nth-of-type(2) {
+    border-bottom: solid #262262 .2rem;
 }
 
-clr-header .header-nav .nav-link {
-    color: #302C71;;
-    font-size:14px;
-    /*font-weight: 300;*/
-    line-height: 3.75rem;
+.link-list__item:hover {
+    color: #262262a1;
+    cursor: pointer;
 }
 
-clr-header .header-nav .nav-link.title {
-    font-size:20px;
-    font-family: "Gotham HTF",open-sans,sans-serif;
-    font-weight: bold;
-}
-/*
-.header-nav.menu {
-
-    width:60%;
-    height: 29px
-}
-*/
-
-.db-logo {
-    height: 1rem; /* 24px */
-    width: 7rem;
-    margin-right: 2rem;
-}
-
-.header .header-nav .nav-link.active, header .header-nav .nav-link.active {
-    background-color: inherit;
-}
-
-.nav-link clr-icon {
-    top: 75%;
-    left: 95%;
+.link-list__item img:hover {
+    filter: opacity(.7)
 }
