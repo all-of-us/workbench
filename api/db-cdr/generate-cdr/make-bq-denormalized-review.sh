@@ -67,17 +67,19 @@ done
 echo "Inserting conditions data into person_condition"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_condition\`
- (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
- source_vocabulary, source_name, age_at_event, visit_type)
+ (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
+ source_vocabulary, source_name, source_concept_id, age_at_event, visit_type)
 SELECT P.PERSON_ID,
 	a.CONDITION_OCCURRENCE_ID AS DATA_ID,
 	a.CONDITION_START_DATETIME as START_DATETIME,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
-	case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
     case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
-	case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
+	case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
 	case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
     case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
+	case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
+	case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
 	CAST(FLOOR(DATE_DIFF(a.CONDITION_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
 	case when c3.concept_name is null then 'No matching concept' else c3.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
@@ -93,11 +95,12 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 echo "Inserting drug data into person_drug"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
- (person_id, data_id, start_datetime, standard_name, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route)
+ (person_id, data_id, start_datetime, standard_name, standard_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route)
 SELECT P.PERSON_ID,
     t.DRUG_EXPOSURE_ID AS DATA_ID,
     t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
     case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
     case when c4.concept_name is null then 'No matching concept' else c4.concept_name end as visit_type,
     CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
     T.NUM_MENTIONS,
@@ -116,23 +119,23 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
 GROUP BY PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID) B
 WHERE a.PERSON_ID = b.PERSON_ID and a.DRUG_CONCEPT_ID = b.DRUG_CONCEPT_ID and a.DRUG_SOURCE_CONCEPT_ID = b.DRUG_SOURCE_CONCEPT_ID) t
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.DRUG_CONCEPT_ID = c1.CONCEPT_ID
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.DRUG_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on t.ROUTE_CONCEPT_ID = c3.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
-###################################################
+###################################
 # insert lab data into person_lab #
-###################################################
+###################################
 echo "Inserting lab data into person_lab"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_lab\`
-   (person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
+   (person_id, data_id, start_datetime, standard_name, standard_concept_name, value_as_number, unit, ref_range, age_at_event, visit_type)
 SELECT m.person_id,
     m.measurement_id as data_id,
     m.measurement_datetime as start_datetime,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
+    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
     case when m.value_as_number is null then m.value_as_concept_id else value_as_number end as value_as_number,
     m.unit_source_value as unit,
     case when range_low IS NULL and range_high IS NULL then NULL
@@ -149,17 +152,18 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on v.visit_concept_id = c2.conc
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on m.person_id = p.person_id
 where c1.concept_class_id = 'Lab Test'"
 
-###################################################
+#######################################
 # insert vital data into person_vital #
-###################################################
+#######################################
 echo "Inserting lab data into person_vital"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_vital\`
-   (person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type)
+   (person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type)
 SELECT m.person_id,
     m.measurement_id as data_id,
     m.measurement_datetime as start_datetime,
     case when c1.concept_name is null then 'No matching concept' else c1.concept_name end as standard_name,
+    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
     case when m.value_as_number is null then m.value_as_concept_id else value_as_number end as value_as_number,
     m.unit_source_value as unit,
     case when range_low IS NULL and range_high IS NULL then NULL
@@ -204,9 +208,9 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
-###################################################
+#########################################
 # insert survey data into person_survey #
-###################################################
+#########################################
 echo "Inserting survey data into person_survey"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
@@ -246,7 +250,7 @@ order by person_id, s_id, q_id"
 echo "Inserting pm data into person_physical_measure"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_physical_measure\`
-   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, value_as_number,
+   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, value_as_number,
    unit, age_at_event)
 SELECT P.PERSON_ID,
 	 t.MEASUREMENT_ID AS DATA_ID,
@@ -254,6 +258,7 @@ SELECT P.PERSON_ID,
      case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
      case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
      case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+     case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
      case when VALUE_AS_NUMBER is null then VALUE_AS_CONCEPT_ID else VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
      C2.CONCEPT_NAME AS UNIT,
      CAST(FLOOR(DATE_DIFF(t.MEASUREMENT_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT
@@ -273,14 +278,15 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 echo "Inserting procedure data into person_procedure"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_procedure\`
-   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
-   source_vocabulary, source_name, age_at_event, visit_type)
+   (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
+   source_vocabulary, source_name, source_concept_id, age_at_event, visit_type)
 SELECT P.PERSON_ID,
 	 a.PROCEDURE_OCCURRENCE_ID AS DATA_ID,
      a.PROCEDURE_DATETIME as START_DATETIME,
      case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
      case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
      case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+     case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
      case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
      case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
      case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
@@ -371,4 +377,4 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
   value_as_number, unit, age_at_event, domain)
   select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
            value_as_number, unit, age_at_event, 'Procedure' as domain
-  from \`$BQ_PROJECT.$BQ_DATASET.person_physical_measurement\` a"
+  from \`$BQ_PROJECT.$BQ_DATASET.person_physical_measure\` a"
