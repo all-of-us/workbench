@@ -194,9 +194,6 @@ ul {
   padding: 0;
 }
 
-/*li:last-child{*/
-  /*border: none!important;*/
-/*}*/
 .toggle-no-cursor {
   cursor: not-allowed;
 }
@@ -209,6 +206,3 @@ ul {
   padding-top: 0rem;
 }
 
-/*clr-icon[shape^=warning-standard] {*/
-  /*color: #F57600;*/
-/*}*/

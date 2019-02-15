@@ -99,7 +99,6 @@
   </div>
 
   <!--********************************Temporal changes start***************************************-->
-
   <app-validator-errors [form]="timeForm"></app-validator-errors>
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
@@ -127,9 +126,8 @@
              formControlName="inputTimeValue">
     </form>
   </div>
-
-  <ul *ngIf="temporalFlag">
-    <li *ngFor="let item of temporalItems" class="card-block">
+  <ng-container *ngIf="temporalFlag">
+    <div *ngFor="let item of temporalItems" class="card-block search-item">
       <app-search-group-item
         class="test"
         (temporalGroupValue)="getTemporalGroup($event)"
@@ -137,8 +135,10 @@
         [groupId]="groupId"
         [itemId]="item.get('id')">
       </app-search-group-item>
-    </li>
-  </ul>
+      <div *ngIf="status === 'active'" class="item-or">OR</div>
+    </div>
+  </ng-container>
+
 
   <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
@@ -160,10 +160,11 @@
     </clr-dropdown>
   </div>
   <ng-container>
-    <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 && !groupDiasbleFlag">
+    <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 || !groupDiasbleFlag">
       <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
         <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
-          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox" [checked]="temporalFlag" (click)="getTemporal($event)">
+          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
+                 [checked]="temporalFlag" (click)="getTemporal($event)">
           <label class="" [for]="'toggle'+ index">
             <span class="solid-preview-label"></span>
           </label>
@@ -176,37 +177,40 @@
                 [style.vertical-align]="'middle'">
         Loading...
         </span>
-          <span *ngIf="!isRequesting">
-          <ng-container *ngIf="group.get('count') !== null || temporalFlag; else countWarning">
-            {{ group.get('count') | number }}
+          <ng-container [ngSwitch]="true">
+              <span *ngIf="!isRequesting">
+              <ng-container *ngSwitchCase="(group.get('count') !== null || temporalFlag) &&  group.get('count') !== -1">
+                {{ group.get('count') | number }}
+              </ng-container>
+              <ng-container *ngSwitchCase="(group.get('count') === null || group.get('count') === -1) && !temporalFlag">
+                 - -
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+                  <clr-tooltip-content clrSize="lg" *clrIfOpen>
+                    <span>
+                      All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+                    </span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </ng-container>
+            </span>
+                <span *ngSwitchCase="error && !temporalFlag">
+              <clr-icon
+                [popper]="errorPopper"
+                [popperTrigger]="'hover'"
+                shape="error-standard"
+                size="18"></clr-icon>
+            </span>
+                <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
+            - -
+              <clr-icon
+                [popper]="errorPopper"
+                [popperTrigger]="'hover'"
+                shape="warning-standard"
+                size="18"></clr-icon>
+            </span>
           </ng-container>
-          <ng-template #countWarning>
-            --
-            <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
-              <clr-tooltip-content clrSize="lg" *clrIfOpen>
-                <span>
-                  All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
-                </span>
-              </clr-tooltip-content>
-            </clr-tooltip>
-          </ng-template>
-        </span>
-          <span *ngIf="error && !temporalFlag">
-          <clr-icon
-            [popper]="errorPopper"
-            [popperTrigger]="'hover'"
-            shape="error-standard"
-            size="18"></clr-icon>
-        </span>
-          <span *ngIf="(!isRequesting && temporalFlag && warningFlag)">
-        - -
-          <clr-icon
-            [popper]="errorPopper"
-            [popperTrigger]="'hover'"
-            shape="warning-standard"
-            size="18"></clr-icon>
-        </span>
+
         </div>
       </div>
 

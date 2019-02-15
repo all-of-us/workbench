@@ -123,15 +123,16 @@ export class CohortSearchActions {
     this.addId(newId);
     return newId;
   }
-  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest, itmLength) {
+  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
     this._updatedTemporal(flag, groupId);
-    if (itmLength > 0) {
+    const group = getGroup(groupId)(this.state);
+    if (this.hasActiveItems(group)) {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     } else {
       this.clearGroupCount(groupId);
+      this.clearTotalCount(groupId);
     }
-
   }
 
   updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
@@ -322,9 +323,31 @@ export class CohortSearchActions {
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
-    this.enableEntity('items', itemId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount();
+    const group = getGroup(groupId)(this.state);
+    const temporal = group.get('temporal');
+
+    if (temporal) {
+      const groupItems = group
+        .get('items', List())
+        .map(id => getItem(id)(this.state))
+        .filterNot(it => it.get('status') === 'deleted');
+      const item = getItem(itemId)(this.state);
+      const temporalGroupItems = !groupItems
+          .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+            && it.get('temporalGroup') !== item.get('temporalGroup'))
+          .isEmpty();
+      this.enableEntity('items', itemId);
+      if (temporalGroupItems) {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount();
+      }
+    } else {
+      this.enableEntity('items', itemId);
+      this.requestGroupCount(role, groupId);
+      this.requestTotalCount();
+    }
+
+
   }
 
   fetchCriteria(kind: string, parentId: number): void {
