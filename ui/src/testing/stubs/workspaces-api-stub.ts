@@ -132,7 +132,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   }
 
   shareWorkspace(workspaceNamespace: string, workspaceId: string,
-                 body?: ShareWorkspaceRequest, options?: any): Promise<ShareWorkspaceResponse> {
+   body?: ShareWorkspaceRequest, options?: any): Promise<ShareWorkspaceResponse> {
     return new Promise<ShareWorkspaceResponse>(resolve => {
       const newEtag = fp.defaults(2, (body.workspaceEtag + 1));
       const newItems = fp.defaults({}, body.items);

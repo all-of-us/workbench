@@ -257,7 +257,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     this.setState(({userRolesList, workspace}) => (
       {userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
         workspace: {...workspace,
-        userRoles: fp.remove(({email}) => user.email === email, workspace.userRoles)} as Workspace}
+          userRoles: fp.remove(({email}) => {
+            return user.email === email;
+          }, workspace.userRoles)} as Workspace}
     ));
   }
 
