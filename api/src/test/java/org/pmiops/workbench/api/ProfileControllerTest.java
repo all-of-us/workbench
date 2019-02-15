@@ -22,7 +22,9 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -129,6 +131,9 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private User user;
 
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
   @Before
   public void setUp() throws MessagingException {
     WorkbenchConfig config = new WorkbenchConfig();
@@ -194,6 +199,18 @@ public class ProfileControllerTest {
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
+  @Test
+  public void testCreateAccount_invalidUser() throws Exception {
+    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    CreateAccountRequest accountRequest = new CreateAccountRequest();
+    accountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.getProfile().setUsername("12");
+    accountRequest.setProfile(createAccountRequest.getProfile());
+    exception.expect(BadRequestException.class);
+    exception.expectMessage("Username should be at least 3 characters and not more than 64 characters");
+    profileController.createAccount(accountRequest);
   }
 
   @Test
