@@ -20,7 +20,7 @@
       <column name="path" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="is_main" type="INTEGER">
+      <column name="is_main" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
     </createTable>

@@ -79,11 +79,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
             if (q.subQuestions) {
-              let matchedQuestionConcepts: QuestionConcept[] = [];
-              matchedQuestionConcepts = q.subQuestions.filter(
+              const matchedQuestionConcepts: QuestionConcept[] = q.subQuestions.filter(
                 w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
               if (matchedQuestionConcepts.length === 0) {
-                const missingQuestionConcept = {
+                q.subQuestions.push({
                   conceptId: a.stratum3,
                   conceptName: a.stratum4,
                   domainId: 'ppi',
@@ -96,18 +95,11 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
                   ageAnalysis: this.makeAnalysis(q.ageAnalysis),
                   genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
                   subQuestions: null
-                };
-                q.subQuestions.push(missingQuestionConcept);
-                q.subQuestionCount = q.subQuestionCount + 1;
+                });
+                q.subQuestionCount++;
               }
-              for (const sq of q.subQuestions) {
-                // Expanding biological sex chart by default
-                sq.selectedAnalysis = sq.genderAnalysis;
-                // Removing the sub questions which does not have count analysis object
-                if (sq.countAnalysis.results.length === 0) {
-                  q.subQuestions = q.subQuestions.filter(s => s.conceptId !== sq.conceptId);
-                }
-              }
+              q.subQuestions.map(sq => sq.selectedAnalysis = sq.genderAnalysis);
+              q.subQuestions = q.subQuestions.filter(sq => (sq.countAnalysis.results.length > 0));
             }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
@@ -268,11 +260,10 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   }
 
   public makeAnalysis(a) {
-    const analysis = {
+    return {
       ...a,
       results: a.results.filter(w => w.stratum3 === a.stratum3)
     };
-    return analysis;
   }
 
   public removeDescribingWords(text) {

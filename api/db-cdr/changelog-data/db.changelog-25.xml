@@ -16,7 +16,7 @@
       <column name="survey_concept_id" type="NUMERIC"/>
       <column name="question_concept_id" type="NUMERIC"/>
       <column name="path" type="NUMERIC"/>
-      <column name="is_main" type="NUMERIC"/>
+      <column name="is_main" type="BOOLEAN"/>
     </loadData>
 
   </changeSet>

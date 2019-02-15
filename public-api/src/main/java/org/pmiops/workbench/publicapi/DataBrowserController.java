@@ -475,9 +475,10 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             for (QuestionConcept q : questions) {
                 if (q.getSubQuestionCount() > 0) {
                     List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
-                    List<Long> subQuestionConceptIds = subQuestions.stream().map(QuestionConcept::getConceptId).collect(Collectors.toList());
-                    List<AchillesAnalysis> subQuestionAnalyses = achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestionConceptIds.stream().map(s -> String.valueOf(s)).collect(Collectors.toList()));
-                    QuestionConcept.mapAnalysesToQuestions(subQuestions, subQuestionAnalyses);
+                    QuestionConcept.mapAnalysesToQuestions(subQuestions, achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestions.stream()
+                            .map(QuestionConcept::getConceptId)
+                            .map(String::valueOf)
+                            .collect(Collectors.toList())));
                     q.setSubQuestions(subQuestions);
                 }
                 qlist.add(String.valueOf(q.getConceptId()));

@@ -183,7 +183,7 @@
                 <clr-icon *ngIf="!showAnswer[sq.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[sq.conceptId]" shape="caret" dir="down"></clr-icon> </a>
             </div>
             <div class="row expandable-grid-row sub-question-results flex-xs-middle" *ngFor="let a of sq.countAnalysis.results" [hidden]="!sq.expanded">
-              <div class="col-md-5 flex-xs-middle">{{a.stratum4}}</div>
+              <div class="col-md-5 flex-xs-middle">{{removeDescribingWords(a.stratum4)}}</div>
               <div class="col-md-2 flex-xs-middle">{{a.stratum3}}</div>
               <div class="col-md-2 flex-xs-middle">{{a.countValue | number}}</div>
               <div class="col-md-2 flex-xs-middle">{{countPercentage(a.countValue).toFixed(2)}}%</div>
