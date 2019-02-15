@@ -40,7 +40,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.MANAGE_GROUP})
+  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<Void> disableUser(String groupName, AuthDomainDisableUserRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     DataAccessLevel previousAccess = user.getDataAccessLevelEnum();

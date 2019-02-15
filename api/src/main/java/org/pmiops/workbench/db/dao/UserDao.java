@@ -22,6 +22,9 @@ public interface UserDao extends CrudRepository<User, Long> {
   @Query("SELECT user FROM User user WHERE user.idVerificationIsValid IS NULL OR user.idVerificationIsValid = false")
   List<User> findUserNotValidated();
 
+  @Query("SELECT user FROM User user")
+  List<User> findUsers();
+
   /**
    * Returns the user with their authorities loaded.
    */

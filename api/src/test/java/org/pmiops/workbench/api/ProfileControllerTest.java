@@ -163,16 +163,17 @@ public class ProfileControllerTest {
 
     doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
-        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config));
+        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
+        Providers.of(complianceTrainingService));
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config), environment,
-        Providers.of(mailService), Providers.of(complianceTrainingService));
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService), Providers.of(complianceTrainingService));
+        cloudStorageService, notebooksService, Providers.of(config), cloudEnvironment,
+        Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -261,20 +262,6 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
-  }
-
-  @Test
-  public void testGetIdVerificationsForReview() throws Exception {
-    createUser();
-
-    IdVerificationListResponse response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList().size()).isEqualTo(1);
-
-    IdVerificationReviewRequest request =
-        new IdVerificationReviewRequest().newStatus(IdVerificationStatus.VERIFIED);
-    profileController.reviewIdVerification(user.getUserId(), request);
-    response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList()).isEmpty();
   }
 
   @Test
