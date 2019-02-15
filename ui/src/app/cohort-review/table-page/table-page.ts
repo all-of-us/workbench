@@ -7,6 +7,7 @@ import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/c
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {ParticipantCohortStatusColumns} from 'generated';
 import {
@@ -70,12 +71,11 @@ export class TablePage implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
     private route: ActivatedRoute,
-    // private router: Router,
   ) {}
 
   ngOnInit() {
     this.loading = false;
-    this.cohortName = this.route.snapshot.data.cohort.name;
+    this.cohortName = currentCohortStore.getValue().name;
     this.subscription = this.state.review$.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
@@ -145,7 +145,8 @@ export class TablePage implements OnInit, OnDestroy {
       }
     }
 
-    const {ns, wsid, cid, cdrid} = this.pathParams;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
 
     console.log('Participant page request parameters:');
     console.dir(query);
@@ -160,18 +161,6 @@ export class TablePage implements OnInit, OnDestroy {
 
   isSelected(column: string) {
     return this.isFiltered.indexOf(column) > -1;
-  }
-
-  private get pathParams() {
-    const paths = this.route.snapshot.pathFromRoot;
-    const params: any = paths.reduce((p, r) => ({...p, ...r.params}), {});
-    const data: any = paths.reduce((p, r) => ({...p, ...r.data}), {});
-
-    const ns: Workspace['namespace'] = params.ns;
-    const wsid: Workspace['id'] = params.wsid;
-    const cid: Cohort['id'] = +(params.cid);
-    const cdrid = +(data.workspace.cdrVersionId);
-    return {ns, wsid, cid, cdrid};
   }
 
   private extractDemographics(arr: ConceptIdName[]): string[] {

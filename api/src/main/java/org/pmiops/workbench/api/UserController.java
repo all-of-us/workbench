@@ -11,10 +11,13 @@ import com.google.common.collect.Lists;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.UserResponse;
+import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +40,27 @@ public class UserController implements UserApiDelegate {
   @Autowired
   public UserController(UserService userService) {
     this.userService = userService;
+  }
+
+  /**
+   * Updates moodle information for all User in user Database
+   * @return
+   */
+  @Override
+  public ResponseEntity<Void> bulkSyncTrainingStatus() {
+    List<User> allUsers = userService.getAllUsers();
+    allUsers.parallelStream().forEach(user -> {
+      try {
+        userService.syncUserTraining(user);
+      } catch (NotFoundException ex){
+        log.severe(String.format("User Not found Exception: %s For user id: %s", ex.getMessage(),
+            user.getUserId()));
+      } catch (ApiException ex) {
+        log.severe(String.format("Exception: %s For user id: %s",
+            ex.getMessage(), user.getUserId()));
+      }
+    });
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override

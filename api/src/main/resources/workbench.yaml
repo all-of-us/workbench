@@ -368,6 +368,26 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/sync-training-status:
+    post:
+      tags:
+        - profile
+      summary: Sync moodle badge/training status
+      description: Retrieves moodleId(either from DB or call from Moodle API)
+                   and get Training status on the basis of that
+      operationId: syncTrainingStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
@@ -467,6 +487,24 @@ paths:
           description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the user's email.
           type: string
           required: false
+
+  /v1/account/bulkSyncTrainingStatus:
+    post:
+      tags:
+        - user
+        - cron
+      description: sync moodle badge/training status for all user
+      operationId: bulkSyncTrainingStatus
+      responses:
+        200:
+          description: The user table is updated with training status.
+        404:
+          description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
 
   # Notebook clusters ####################################################################
 
@@ -1307,6 +1345,14 @@ definitions:
       username:
         type: string
 
+  # Authorities are a tool used to add discrete permissions to users. We currently
+  # have three authorities that are used:
+  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+  #      the user has requested review to approve or reject.
+  #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
+  #      and is mainly an internal authority for devs to use when setting up an environment.
+  #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
+  #      to perform actions on a user's enabled status and manual verification.
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -2002,7 +2048,7 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
-      ethicsTrainingCompletionTime:
+      trainingCompletionTime:
         type: integer
         format: int64
         description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.

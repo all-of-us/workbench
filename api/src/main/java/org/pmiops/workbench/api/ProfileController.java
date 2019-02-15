@@ -34,6 +34,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -61,6 +62,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -406,6 +408,8 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> createAccount(CreateAccountRequest request) {
     verifyInvitationKey(request.getInvitationKey());
+    request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
+    validateProfileFields(request.getProfile());
     com.google.api.services.admin.directory.model.User googleUser =
         directoryService.createUser(request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(), request.getProfile().getUsername(),
@@ -422,8 +426,6 @@ public class ProfileController implements ProfileApiDelegate {
     // It's possible for the profile information to become out of sync with the user's Google
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
-
-    validateProfileFields(request.getProfile());
     User user = userService.createUser(
         request.getProfile().getGivenName(),
         request.getProfile().getFamilyName(),
@@ -481,6 +483,24 @@ public class ProfileController implements ProfileApiDelegate {
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
+  /**
+   * This methods updates logged in user's training status from Moodle.
+   * @return Profile updated with training completion time
+   */
+  @Override
+  public ResponseEntity<Profile> syncTrainingStatus() {
+    User user = userProvider.get();
+    Profile profile = profileService.getProfile(user);
+    try {
+      userService.syncUserTraining(user);
+    } catch(NotFoundException ex) {
+      throw ex;
+    } catch (ApiException e) {
+      throw new ServerErrorException(e);
+    }
+    return ResponseEntity.ok(profile);
+  }
+
   @Override
   public ResponseEntity<Void> invitationKeyVerification(InvitationVerificationRequest invitationVerificationRequest) {
     verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
@@ -510,7 +530,7 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Void> updateContactEmail(UpdateContactEmailRequest updateContactEmailRequest) {
-    String username = updateContactEmailRequest.getUsername();
+    String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
@@ -531,7 +551,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
-    String username = resendRequest.getUsername();
+    String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.admin.directory.model.User googleUser =
       directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
@@ -636,7 +656,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
     IdVerificationListResponse response = new IdVerificationListResponse();
     List<Profile> responseList = new ArrayList<>();
-    for (User user : userService.getNonVerifiedUsers()) {
+    for (User user : userDao.findUsers()) {
       responseList.add(profileService.getProfile(user));
     }
     response.setProfileList(responseList);
@@ -650,7 +670,6 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userDao.findUserByUserId(userId);
     Boolean oldVerification = user.getIdVerificationIsValid();
     String newValue;
-
     if (status == IdVerificationStatus.VERIFIED) {
       userService.setIdVerificationApproved(userId, true);
       newValue = "true";
