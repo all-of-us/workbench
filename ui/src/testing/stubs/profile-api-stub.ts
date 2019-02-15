@@ -7,6 +7,24 @@ import {
   ProfileApi
 } from 'generated/fetch';
 
+export class ProfileStubVariables {
+  static PROFILE_STUB = <Profile>{
+    username: 'testers',
+    contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
+    freeTierBillingProjectName: 'all-of-us-free-abcdefg',
+    freeTierBillingProjectStatus: BillingProjectStatus.Ready,
+    dataAccessLevel: DataAccessLevel.Registered,
+    givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
+    familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
+    phoneNumber: '999-999-9999',
+    pageVisits: [{page: 'test'}],
+    linkedNihUsername: null,
+    currentPosition: 'some',
+    organization: 'here',
+    areaOfResearch: 'things',
+  };
+}
+
 // TODO: Port functionality from ProfileServiceStub as needed.
 export class ProfileApiStub extends ProfileApi {
 
@@ -14,17 +32,7 @@ export class ProfileApiStub extends ProfileApi {
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.profile = <Profile>{
-      username: 'testers',
-      contactEmail: 'tester@mactesterson.edu🀓⚚><script>alert("hello");</script>',
-      freeTierBillingProjectName: 'all-of-us-free-abcdefg',
-      freeTierBillingProjectStatus: BillingProjectStatus.Ready,
-      dataAccessLevel: DataAccessLevel.Registered,
-      givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
-      familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
-      phoneNumber: '999-999-9999',
-      pageVisits: [{page: 'test'}],
-    };
+    this.profile = ProfileStubVariables.PROFILE_STUB;
   }
 
   public invitationKeyVerification(request?: InvitationVerificationRequest, options?: any) {

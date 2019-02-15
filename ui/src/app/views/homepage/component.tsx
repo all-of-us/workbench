@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
 import {navigate, queryParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
@@ -107,7 +107,7 @@ export class WorkbenchAccessTasks extends
 
   render() {
     return <React.Fragment>
-      <div style={{display: 'flex', flexDirection: 'row'}}>
+      <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
@@ -231,6 +231,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     billingProjectInitialized: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
+    firstVisit: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
     videoOpen: boolean,
@@ -248,6 +249,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       billingProjectInitialized: false,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
+      firstVisit: undefined,
       quickTour: false,
       trainingCompleted: true,
       videoOpen: false,
@@ -256,7 +258,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }
 
   get accessTasksRemaining(): boolean {
-    return !!(this.state.eraCommonsLinked && this.state.trainingCompleted);
+    return !(this.state.eraCommonsLinked && this.state.trainingCompleted);
   }
 
   componentDidMount() {
@@ -292,6 +294,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
+    console.log(profile);
 
     if (fp.isEmpty(profile)) {
       this.profileTimer = setTimeout(() => {
@@ -299,7 +302,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }, 10000);
     } else {
       if (!profile.pageVisits.some(v => v.page === this.pageId)) {
-        this.setState({quickTour: true});
+        this.setState({firstVisit: true});
         profileApi().updatePageVisits({ page: this.pageId});
       }
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
@@ -322,6 +325,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
         }
       }
     }
+
+    this.setState(
+        {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false})
   }
 
   checkBillingProjectStatus() {
@@ -343,7 +349,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink} = this.state;
+        quickTour, videoLink, firstVisit} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -377,6 +383,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
           'Collaborating with other researchers',
           'Sharing and Publishing Notebooks']
       }];
+
+    console.log((quickTour || (firstVisit && accessTasksRemaining === false)));
 
     return <React.Fragment>
       <div style={homepageStyles.backgroundImage}>
@@ -422,11 +430,15 @@ export const Homepage = withUserProfile()(class extends React.Component<
         </div>
         <div style={homepageStyles.quickRow}>
           <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
-          {quickTourResources.map(thumbnail => {
-            return <Clickable onClick={thumbnail.onClick}>
-              <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
-                   src={thumbnail.src}/>
-            </Clickable>;
+          {quickTourResources.map((thumbnail, i) => {
+            return <React.Fragment key={i}>
+              <Clickable onClick={thumbnail.onClick}
+                         data-test-id={'quick-tour-resource-' + i}>
+                <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                     src={thumbnail.src}/>
+              </Clickable>
+            </React.Fragment>
+            ;
           })}
         </div>
         <div>
@@ -441,17 +453,19 @@ export const Homepage = withUserProfile()(class extends React.Component<
               </div>
               <div style={{display: 'flex', flexDirection: 'row',
                 width: '87.34%', justifyContent: 'space-between'}}>
-                {footerLinks.map(col => {
-                  return <div style={homepageStyles.linksBlock}>
-                    <div style={homepageStyles.footerText}>
-                      <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
-                      <ul style={{color: '#83C3EC'}}>
-                        {col.links.map(link => {
-                          return <li><a href='#' style={{color: '#83C3EC'}}>{link}</a></li>;
-                        } )}
-                      </ul>
+                {footerLinks.map((col, i) => {
+                  return <React.Fragment key={i}>
+                    <div style={homepageStyles.linksBlock}>
+                      <div style={homepageStyles.footerText}>
+                        <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
+                        <ul style={{color: '#83C3EC'}}>
+                          {col.links.map(link => {
+                            return <li><a href='#' style={{color: '#83C3EC'}}>{link}</a></li>;
+                          } )}
+                        </ul>
+                      </div>
                     </div>
-                  </div>;
+                  </React.Fragment>;
                 })}
               </div>
             </div>
@@ -466,7 +480,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         </div>
       </div>
 
-      {quickTour && !accessTasksRemaining &&
+      {quickTour &&
         <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
         <video width='100%' controls autoPlay>
