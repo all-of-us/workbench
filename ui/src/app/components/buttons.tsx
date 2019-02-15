@@ -41,7 +41,7 @@ const buttonVariants = {
   secondary: {
     style: {
       ...styles.base,
-      border: '2px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
+      border: '1px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
       backgroundColor: 'transparent',
       color: colors.purple[0],
     },
