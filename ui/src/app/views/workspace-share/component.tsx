@@ -446,8 +446,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                       <Select styles={selectStyles} value={fp.find((u) => {
                                 return u.value === user.role
                               }, UserRoleOptions)}
-                              // URSA TAKE THIS OUT BEFORE MERGING!!!!
-                              // menuIsOpen={true}
                               menuPortalTarget={document.getElementById('popup-root')}
                               isDisabled={user.email === this.props.userEmail}
                               classNamePrefix={this.cleanClassNameForSelect(user.email)}
