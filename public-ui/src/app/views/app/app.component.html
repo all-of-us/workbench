@@ -1,11 +1,16 @@
-<clr-main-container *ngIf="signedIn else login">
+<clr-main-container class="main-bg" *ngIf="signedIn else login">
+  <div id="workbench-header">workbench-header</div>
   <app-db-header [noMenu]="noHeaderMenu"></app-db-header>
-    <div class="content-container">
-      <router-outlet></router-outlet>
-      <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
-        <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
-      </div>
+  <div class="row">
+  <div class="col-xs-6" id="breadcrumb">BreadCrumb</div>
+  <div class="col-xs-6" id="social">social+bookmark</div>
+</div>
+  <div class="content-container">
+    <router-outlet></router-outlet>
+    <div *ngIf="overriddenUrl" style="position: absolute; top: 0; left: 1rem;">
+      <span style="font-size: 80%; color: darkred;">API URL: {{this.overriddenUrl}}</span>
     </div>
+  </div>
 </clr-main-container>
 <ng-template #login>
   <router-outlet></router-outlet>

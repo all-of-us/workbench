@@ -1,10 +1,10 @@
-import {DOCUMENT, Location} from '@angular/common';
-import {Component, ElementRef, HostListener, Inject, OnInit, ViewChild} from '@angular/core';
+import { DOCUMENT, Location } from '@angular/common';
+import { Component, ElementRef, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
-import {Title} from '@angular/platform-browser';
+import { Title } from '@angular/platform-browser';
 import {
   ActivatedRoute,
   Event as RouterEvent,
@@ -12,11 +12,11 @@ import {
   Router,
 } from '@angular/router';
 
-import {Observable} from 'rxjs/Observable';
+import { Observable } from 'rxjs/Observable';
 
-import {environment} from 'environments/environment';
+import { environment } from 'environments/environment';
 
-import {SignInService} from 'app/services/sign-in.service';
+import { SignInService } from 'app/services/sign-in.service';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
     private router: Router,
     private signInService: SignInService,
     private titleService: Title
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
@@ -88,7 +88,7 @@ export class AppComponent implements OnInit {
           this.noHeaderMenu = true;
         }
         this.setTitleFromRoute(event);
-    });
+      });
 
     this.setGTagManager();
     this.setTCellAgent();
@@ -104,7 +104,7 @@ export class AppComponent implements OnInit {
     }
     if (currentRoute.outlet === 'primary') {
       currentRoute.data.subscribe(value =>
-          this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
+        this.titleService.setTitle(`${value.title} | ${this.baseTitle}`));
     }
   }
 

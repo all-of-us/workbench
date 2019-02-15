@@ -1,0 +1,15 @@
+.main-bg {
+    height: auto;
+    padding-bottom:4rem;
+    background:url('/assets/backgrounds/plus_background.png');
+}
+#breadcrumb {
+    height:87px;
+    background:rgba(0, 0, 0, .4);
+    width: 100vw;
+}
+
+#workbench-header{
+    height:80px;
+    background:white;
+}
