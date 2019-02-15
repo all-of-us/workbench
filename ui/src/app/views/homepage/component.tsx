@@ -79,7 +79,7 @@ const AccountLinkingButton: React.FunctionComponent<{
     return <Clickable style={{...buttonStyles.base,
       ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
                       onClick={onClick}
-                      data-test-id={defaultText}>
+                      data-test-id={fp.lowerCase(defaultText)}>
       {defaultText}
     </Clickable>;
   }
