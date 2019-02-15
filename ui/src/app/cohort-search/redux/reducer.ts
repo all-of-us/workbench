@@ -298,12 +298,9 @@ export const rootReducer: Reducer<CohortSearchState> =
 
       case CLEAR_TOTAL_COUNT:
         const temporalActive = state.getIn(['entities', 'groups', action.groupId, 'temporal']);
-        console.log(temporalActive);
         if (temporalActive) {
-          console.log('here1');
           return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
         } else {
-          console.log('here2');
           return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
         }
 
@@ -575,7 +572,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             .setIn(groupItems, action.time)
             .setIn(timeValue, 1);
         }
-        console.log('i am from reducer');
         return state
           .setIn(groupItems, action.time)
           .setIn(timeValue, '');
