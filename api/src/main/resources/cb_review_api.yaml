@@ -560,7 +560,7 @@ definitions:
 
   DomainType:
     type: string
-    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE, LAB, VITAL]
+    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASURE, LAB, VITAL, SURVEY]
 
   SortOrder:
     type: string
@@ -926,6 +926,20 @@ definitions:
             type: string
             description: The visit type of this data
 
+  Survey:
+    allOf:
+      - $ref: '#/definitions/ParticipantData'
+      - properties: # extra properties
+          survey:
+            type: string
+            description: The name of this survey
+          question:
+            type: string
+            description: a question in this survey
+          answer:
+            type: string
+            description: an answer in this survey
+
   #TODO: delete this when UI work is done
   ProcedureOld:
     allOf:
@@ -1112,7 +1126,7 @@ definitions:
           lastMention:
             type: string
             description: The date of last mention of this data
-          quantity:
+          dose:
             type: string
             description: The quantity of this data
           strength:
