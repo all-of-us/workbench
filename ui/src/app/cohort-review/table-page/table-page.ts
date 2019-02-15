@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {ParticipantCohortStatusColumns} from 'generated';
@@ -69,14 +69,13 @@ export class TablePage implements OnInit, OnDestroy {
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private state: ReviewStateService,
     private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
     this.loading = false;
     this.cohortName = currentCohortStore.getValue().name;
-    this.subscription = this.state.review$.subscribe(review => {
+    this.subscription = cohortReviewStore.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
       this.totalParticipantCount = review.matchedParticipantCount;
@@ -87,11 +86,6 @@ export class TablePage implements OnInit, OnDestroy {
     this.races = this.extractDemographics(concepts.raceList);
     this.genders = this.extractDemographics(concepts.genderList);
     this.ethnicities = this.extractDemographics(concepts.ethnicityList);
-    // this.subscription.add(this.state.review$.subscribe(review => {
-    //   this.review = review;
-    //
-    //
-    // }));
   }
 
 
@@ -155,7 +149,7 @@ export class TablePage implements OnInit, OnDestroy {
       .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
       .do(_ => this.loading = false)
       .subscribe(review => {
-        this.state.review.next(review);
+        cohortReviewStore.next(review);
       });
   }
 

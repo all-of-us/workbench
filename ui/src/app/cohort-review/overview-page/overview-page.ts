@@ -1,6 +1,5 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
@@ -34,11 +33,9 @@ export class OverviewPage implements OnInit, OnDestroy {
     private chartAPI: CohortBuilderService,
     private reviewAPI: CohortReviewService,
     private state: ReviewStateService,
-    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
-    const {review} = this.route.snapshot.data;
     const workspace = currentWorkspaceStore.getValue();
     const cohort = currentCohortStore.getValue();
     const request = <SearchRequest>(JSON.parse(cohort.criteria));
@@ -49,8 +46,8 @@ export class OverviewPage implements OnInit, OnDestroy {
         this.dataItems.emit(this.data);
         this.buttonsDisableFlag = false;
       });
-    this.review = review;
-    this.totalParticipantCount = review.matchedParticipantCount;
+    this.review = cohortReviewStore.getValue();
+    this.totalParticipantCount = this.review.matchedParticipantCount;
 
 
     this.openChartContainer = true;

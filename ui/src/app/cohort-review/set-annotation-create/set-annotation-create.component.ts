@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -79,7 +79,7 @@ export class SetAnnotationCreateComponent {
         .getCohortAnnotationDefinitions(ns, wsid, cid)
         .pluck('items'))
       .do((defns: CohortAnnotationDefinition[]) =>
-        this.state.annotationDefinitions.next(defns))
+        annotationDefinitionsStore.next(defns))
       .subscribe(_ => {
         this.open = false;
         this.form.reset();
