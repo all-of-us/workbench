@@ -208,7 +208,7 @@ public class ProfileControllerTest {
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());
     exception.expect(BadRequestException.class);
-    exception.expectMessage("Username should be of at least 3 characters and not more than 64 characters");
+    exception.expectMessage("Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
   }
 
