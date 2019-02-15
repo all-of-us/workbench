@@ -94,8 +94,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private ParticipantData expectedCondition2;
   private ParticipantData expectedPhysicalMeasure1;
   private ParticipantData expectedPhysicalMeasure2;
-  private ParticipantData expectedMeasurement1;
-  private ParticipantData expectedMeasurement2;
+  private ParticipantData expectedLab1;
+  private ParticipantData expectedLab2;
+  private ParticipantData expectedVital1;
+  private ParticipantData expectedVital2;
   private ParticipantData expectedProcedure1;
   private ParticipantData expectedProcedure2;
   private ParticipantData expectedObservation1;
@@ -401,7 +403,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .standardName("SNOMED")
       .ageAtEvent(28)
       .domainType(DomainType.PHYSICAL_MEASURE);
-    expectedMeasurement1 = new Lab()
+    expectedLab1 = new Lab()
       .value(1.0F)
       .unit("units")
       .refRange("range")
@@ -409,8 +411,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
-      .domainType(DomainType.MEASUREMENT);
-    expectedMeasurement2 = new Vital()
+      .domainType(DomainType.LAB);
+    expectedLab2 = new Lab()
       .value(1.2F)
       .unit("units")
       .refRange("range")
@@ -418,7 +420,25 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
-      .domainType(DomainType.MEASUREMENT);
+      .domainType(DomainType.LAB);
+    expectedVital1 = new Vital()
+      .value(1.0F)
+      .unit("units")
+      .refRange("range")
+      .visitType("visitType")
+      .itemDate("2009-12-03 05:00:00 UTC")
+      .standardName("name")
+      .ageAtEvent(29)
+      .domainType(DomainType.VITAL);
+    expectedVital2 = new Vital()
+      .value(1.2F)
+      .unit("units")
+      .refRange("range")
+      .visitType("visitType")
+      .itemDate("2009-12-04 05:00:00 UTC")
+      .standardName("name")
+      .ageAtEvent(29)
+      .domainType(DomainType.VITAL);
     expectedProcedure1 = new Procedure()
       .visitType("visitType")
       .standardVocabulary("ICD10CM")
@@ -721,7 +741,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantMeasurementsSorting() throws Exception {
+  public void getParticipantaLabSorting() throws Exception {
     PageRequest expectedPageRequest = new PageRequest()
       .page(0)
       .pageSize(25)
@@ -730,7 +750,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MEASUREMENT);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.LAB);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -744,7 +764,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement1, expectedMeasurement2), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab1, expectedLab2), 2);
 
     //added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -759,7 +779,49 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement2, expectedMeasurement1), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab2, expectedLab1), 2);
+  }
+
+  @Test
+  public void getParticipantaVitalSorting() throws Exception {
+    PageRequest expectedPageRequest = new PageRequest()
+      .page(0)
+      .pageSize(25)
+      .sortOrder(SortOrder.ASC)
+      .sortColumn("startDate");
+
+    stubMockFirecloudGetWorkspace();
+
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.VITAL);
+    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+
+    //no sort order or column
+    ParticipantDataListResponse response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedVital1, expectedVital2), 2);
+
+    //added sort order
+    testFilter.sortOrder(SortOrder.DESC);
+    expectedPageRequest.sortOrder(SortOrder.DESC);
+    response = controller
+      .getParticipantData(
+        NAMESPACE,
+        NAME,
+        cohort.getCohortId(),
+        cdrVersion.getCdrVersionId(),
+        PARTICIPANT_ID,
+        testFilter)
+      .getBody();
+
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedVital2, expectedVital1), 2);
   }
 
   @Test
@@ -788,7 +850,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement1), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab1), 2);
 
     //page 2 should have 1 item
     testFilter.page(1);
@@ -802,7 +864,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         PARTICIPANT_ID,
         testFilter)
       .getBody();
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedMeasurement2), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedLab2), 2);
   }
 
   @Test

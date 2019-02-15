@@ -860,7 +860,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.MEASUREMENT);
+        .domainType(DomainType.LAB);
     } else if (domain.equals(DomainType.VITAL)) {
       return new Vital()
         .value(bigQueryService.getFloat(row, rm.get("value")))
@@ -870,7 +870,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .domainType(DomainType.MEASUREMENT);
+        .domainType(DomainType.VITAL);
     } else if(domain.equals(DomainType.PHYSICAL_MEASURE)) {
       return new PhysicalMeasurement()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
