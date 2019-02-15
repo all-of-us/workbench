@@ -10,7 +10,6 @@
 }
 
 .db-nav {
-    /* background:yellow;       */
     width: 40%;
     margin-left: 60%;
     display: flex;
@@ -32,7 +31,6 @@
 }
 
 .link-list__item {
-    /* background:red; */
     min-width: calc(100%/4 - 2rem);
     text-align: center;
     height: 2.7rem;
@@ -44,11 +42,12 @@
 .link-list__item:nth-of-type(2) {
     position: relative;
 }
+
 .link-list__item:nth-of-type(2)::after {
     border-bottom: solid #262262 .2rem;
     content: '';
     position: absolute;
-    bottom:0;
+    bottom: 0;
     width: 100%;
 }
 
