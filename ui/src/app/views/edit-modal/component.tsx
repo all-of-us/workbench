@@ -82,7 +82,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
 
   render() {
     return <React.Fragment>
-      <Modal className='editModal'>
+      <Modal loading={this.state.loading} className='editModal'>
         <ModalTitle style={{fontSize: 16}}>
           Edit {this.state.resourceType} Information
         </ModalTitle>

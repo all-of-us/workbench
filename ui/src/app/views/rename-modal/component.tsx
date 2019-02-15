@@ -12,7 +12,6 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {summarizeErrors} from 'app/utils';
@@ -88,7 +87,7 @@ export class RenameModal extends React.Component<RenameModalProps, {
         message: 'already exists'
       }
     }});
-    return <Modal>
+    return <Modal loading={saving}>
       <ModalTitle>Please enter the new name for {notebookName}</ModalTitle>
       <ModalBody>
         <div style={headerStyles.formLabel}>New Name:</div>
@@ -110,7 +109,6 @@ export class RenameModal extends React.Component<RenameModalProps, {
           >Rename Notebook</Button>
         </TooltipTrigger>
       </ModalFooter>
-      {saving && <SpinnerOverlay />}
     </Modal>;
   }
 }
