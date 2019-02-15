@@ -11,6 +11,66 @@ import {InputText} from 'primereact/inputtext';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
+const css = `
+  body .p-datatable .p-sortable-column:not(.p-highlight):hover,
+  body .p-datatable .p-sortable-column.p-highlight {
+    color: #333333;
+    background-color: #f4f4f4;
+  }
+  body .p-datatable .p-datatable-thead > tr > th {
+    border: 0;
+    border-bottom: 1px solid #c8c8c8;
+    border-left: 1px solid #c8c8c8;
+  }
+  body .p-datatable .p-datatable-thead > tr > th:first-of-typr {
+    border-left: 0;
+  }
+  body .p-datatable .p-column-title {
+    display: flex;
+  }
+  .pi.pi-sort,
+  .pi.pi-sort-up,
+  .pi.pi-sort-down {
+    display: none;
+  }
+  .p-datatable .p-datatable-scrollable-wrapper {
+    border: 1px solid #c8c8c8;
+  }
+  .p-datatable .p-paginator.p-paginator-bottom {
+    border: 0;
+    margin-top: 20px;
+    background: none;
+    font-size: 12px;
+    text-align: right;
+  }
+  body .p-paginator .p-paginator-prev,
+  body .p-paginator .p-paginator-next,
+  body .p-paginator .p-paginator-pages .p-paginator-page {
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    background: #fafafa;
+    color: #2691D0;
+    height: auto;
+    width: auto;
+    min-width: 0;
+    padding: 7px;
+    margin: 0 2px;
+    line-height: 0.5rem;
+  }
+  body .p-paginator .p-paginator-prev,
+  body .p-paginator .p-paginator-next {
+    height: 28px;
+    width: 24px;
+  }
+  body .p-paginator .p-paginator-pages .p-paginator-page:focus {
+    box-shadow: 0;
+  }
+  body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: #fafafa;
+    color: rgba(0, 0, 0, .5);
+  }
+  `;
+
 const styles = reactStyles({
   table: {
     fontSize: '12px',
@@ -19,8 +79,6 @@ const styles = reactStyles({
     padding: '5px',
     verticalAlign: 'top',
     textAlign: 'left',
-    border: 0,
-    borderBottom: '1px solid #c8c8c8',
     lineHeight: '0.6rem'
   },
   columnHeader: {
@@ -135,9 +193,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     columnFilter = (event: any) => {
-      const {id, value} = event.target;
-      this.dt.filter(value, id, 'contains');
-      console.log(this.dt);
+      this.dt.filter(event.target.value, event.target.id, 'contains');
     }
 
     columnSort = (sortField: string) => {
@@ -163,7 +219,16 @@ export const DetailTabTable = withCurrentWorkspace()(
       const paginatorTemplate = 'CurrentPageReport PrevPageLink PageLinks NextPageLink';
 
       const columns = this.props.columns.map((col) => {
-        const filter = <React.Fragment>
+        const asc = sortField === col.name && sortOrder === 1;
+        const desc = sortField === col.name && sortOrder === -1;
+        const header = <React.Fragment>
+          <span
+            onClick={() => this.columnSort(col.name)}
+            style={styles.columnHeader}>
+            {col.displayName}
+          </span>
+          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
           <i
             className='pi pi-filter'
             style={styles.filterIcon}
@@ -177,78 +242,17 @@ export const DetailTabTable = withCurrentWorkspace()(
           </OverlayPanel>
         </React.Fragment>;
 
-        const asc = sortField === col.name && sortOrder === 1;
-        const desc = sortField === col.name && sortOrder === -1;
-        const header = <span
-          onClick={() => this.columnSort(col.name)}
-          style={styles.columnHeader}>
-          {col.displayName}
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-        </span>;
-
         return <Column
           style={styles.tableBody}
           bodyStyle={styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
-          sortable={true}
-          filter={true}
-          filterElement={filter} />;
+          sortable={true} />;
       });
 
-      const style = `
-        body .p-datatable .p-sortable-column:not(.p-highlight):hover,
-        body .p-datatable .p-sortable-column.p-highlight {
-          color: #333333;
-          background-color: #f4f4f4;
-        }
-        .pi.pi-sort,
-        .pi.pi-sort-up,
-        .pi.pi-sort-down {
-          display: none;
-        }
-        .p-datatable .p-datatable-scrollable-wrapper {
-          border: 1px solid #c8c8c8;
-        }
-        .p-datatable .p-paginator.p-paginator-bottom {
-          border: 0;
-          margin-top: 20px;
-          background: none;
-          font-size: 12px;
-          text-align: right;
-        }
-        body .p-paginator .p-paginator-prev,
-        body .p-paginator .p-paginator-next,
-        body .p-paginator .p-paginator-pages .p-paginator-page {
-          border: 1px solid #cccccc;
-          border-radius: 3px;
-          background: #fafafa;
-          color: #2691D0;
-          height: auto;
-          width: auto;
-          min-width: 0;
-          padding: 7px;
-          margin: 0 2px;
-          line-height: 0.5rem;
-        }
-        body .p-paginator .p-paginator-prev,
-        body .p-paginator .p-paginator-next {
-          height: 28px;
-          width: 24px;
-        }
-        body .p-paginator .p-paginator-pages .p-paginator-page:focus {
-          box-shadow: 0;
-        }
-        body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-          background: #fafafa;
-          color: rgba(0, 0, 0, .5);
-        }
-      `;
-
       return <div style={{position: 'relative'}}>
-        <style>{style}</style>
+        <style>{css}</style>
         {data && <DataTable
           style={styles.table}
           ref={(el) => this.dt = el}
