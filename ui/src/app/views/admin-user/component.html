@@ -22,8 +22,8 @@
           <button class="btn" (click)="setIdVerificationStatus(profile,'REJECTED')">Reject</button>
         </div>
         <div *ngIf="profile.idVerificationStatus === IdVerificationStatus.VERIFIED">
-          <button *ngIf="!profile.disabled" class="btn" (click)="disableUser(true, profile)">Disable</button>
-          <button *ngIf="profile.disabled" class="btn" (click)="disableUser(false, profile)">Enable</button>
+          <button *ngIf="!profile.disabled" class="btn" (click)="updateUserDisabledStatus(true, profile)">Disable</button>
+          <button *ngIf="profile.disabled" class="btn" (click)="updateUserDisabledStatus(false, profile)">Enable</button>
         </div>
       </clr-dg-cell>
     </clr-dg-row>

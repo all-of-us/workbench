@@ -12,7 +12,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.model.AuthDomainDisableUserRequest;
+import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -60,7 +60,7 @@ public class AuthDomainControllerTest {
   private Provider<ComplianceService> complianceServiceProvider;
   @Autowired
   private UserDao userDao;
-
+  
   private AuthDomainController authDomainController;
 
   @Before
@@ -90,10 +90,10 @@ public class AuthDomainControllerTest {
   @Test
   public void testDisableUser() {
     createUser(false);
-    AuthDomainDisableUserRequest request = new AuthDomainDisableUserRequest().
+    UpdateUserDisabledRequest request = new UpdateUserDisabledRequest().
         email(PRIMARY_EMAIL).
         disabled(true);
-    ResponseEntity<Void> response = this.authDomainController.disableUser("", request);
+    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled());
@@ -102,10 +102,10 @@ public class AuthDomainControllerTest {
   @Test
   public void testEnableUser() {
     createUser(true);
-    AuthDomainDisableUserRequest request = new AuthDomainDisableUserRequest().
+    UpdateUserDisabledRequest request = new UpdateUserDisabledRequest().
         email(PRIMARY_EMAIL).
         disabled(false);
-    ResponseEntity<Void> response = this.authDomainController.disableUser("", request);
+    ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(!updatedUser.getDisabled());
