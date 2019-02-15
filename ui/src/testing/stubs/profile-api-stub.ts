@@ -22,6 +22,7 @@ export class ProfileStubVariables {
     currentPosition: 'some',
     organization: 'here',
     areaOfResearch: 'things',
+    trainingCompletionTime: null,
   };
 }
 
@@ -60,6 +61,10 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public updatePageVisits(pageVisit) {
+    return Promise.resolve(this.profile);
+  }
+
+  public syncTrainingStatus() {
     return Promise.resolve(this.profile);
   }
 }

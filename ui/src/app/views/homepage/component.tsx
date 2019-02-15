@@ -65,21 +65,25 @@ const AccountLinkingButton: React.FunctionComponent<{
   failed: boolean, completed: boolean, failedText: string,
   completedText: string, defaultText: string, onClick: Function
 }> = ({failed, completed, defaultText, completedText, failedText, onClick}) => {
+  const dataTestId = fp.lowerCase(defaultText)
+      .replace(/\s/g, '-');
   if (failed) {
     return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#f27376'}} disabled={true}>
+      ...styles.infoBoxButton, backgroundColor: '#f27376'}}
+                      disabled={true} data-test-id={dataTestId}>
       <ClrIcon shape='exclamation-triangle'/>{failedText}
     </Clickable>;
   } else if (completed) {
     return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#8BC990'}} disabled={true}>
+      ...styles.infoBoxButton, backgroundColor: '#8BC990'}}
+                      disabled={true} data-test-id={dataTestId}>
       <ClrIcon shape='check'/>{completedText}
     </Clickable>;
   } else {
     return <Clickable style={{...buttonStyles.base,
       ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
                       onClick={onClick}
-                      data-test-id={fp.lowerCase(defaultText)}>
+                      data-test-id={dataTestId}>
       {defaultText}
     </Clickable>;
   }
@@ -105,6 +109,10 @@ export class WorkbenchAccessTasks extends
     window.location.assign(url);
   }
 
+  static redirectToTraining(): void {
+    window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
+  }
+
   render() {
     return <React.Fragment>
       <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
@@ -127,7 +135,6 @@ export class WorkbenchAccessTasks extends
                   to the ERA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
-              {/*TODO: RW-1184 Moodle training UI */}
               <AccountLinkingButton failed={false}
                                     completed={this.props.eraCommonsLinked}
                                     defaultText='Login'
@@ -152,7 +159,7 @@ export class WorkbenchAccessTasks extends
                                   defaultText='Complete Training'
                                   completedText='Completed'
                                   failedText=''
-                                  onClick={() => {}}/>
+                                  onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
         </div>
       </div>
@@ -253,7 +260,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       eraCommonsLinked: undefined,
       firstVisit: undefined,
       quickTour: false,
-      trainingCompleted: true,
+      trainingCompleted: undefined,
       videoOpen: false,
       videoLink: '',
     };
@@ -307,6 +314,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
         profileApi().updatePageVisits({ page: this.pageId});
       }
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+
+      try {
+        const syncTrainingStatus = await profileApi().syncTrainingStatus();
+        this.setState({trainingCompleted: !!syncTrainingStatus.trainingCompletionTime});
+      } catch (ex) {
+        this.setState({trainingCompleted: false});
+        console.error('error fetching moodle training status');
+      }
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       if (workbenchAccessTasks) {
