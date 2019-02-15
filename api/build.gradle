@@ -495,3 +495,13 @@ task backfillGSuiteUserData(type: JavaExec) {
     args Eval.me(appArgs)
   }
 }
+
+// See api/project.rb create-local-es-index
+task elasticSearchIndexer(type: JavaExec) {
+  classpath sourceSets.main.runtimeClasspath
+  main = "org.pmiops.workbench.tools.elastic.BigQueryOmopIndexer"
+  systemProperties = dbProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}

@@ -129,9 +129,9 @@ sourceSets {
                   'org/pmiops/workbench/notebooks/NotebooksRetryHandler.java',
                   'org/pmiops/workbench/db/dao/CohortService.java',
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java',
-                  // Exclude the BackfillGSuite tool, which is built as part of the
-                  // main Gradle config.
+                  // Exclude all tools which are built as part of the main Gradle config.
                   'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
+                  'org/pmiops/workbench/elastic/*.java',
       ]
     }
   }
@@ -148,11 +148,14 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-data-jpa'
   compile 'commons-io:commons-io:2.6'
+  compile 'commons-cli:commons-cli:1.4'
   compile 'joda-time:joda-time:2.10'
   compile 'com.github.fge:json-patch:1.9'
   compile 'io.swagger:swagger-annotations:1.5.9'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.9'
   compile 'org.apache.commons:commons-lang3:3.0'
+  compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
+  compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.code.gson:gson:2.8.5'
   compile 'org.hibernate:hibernate-validator:5.3.5.Final'
   compile 'com.squareup.okhttp:okhttp:2.7.5'
@@ -162,6 +165,9 @@ dependencies {
   compile 'org.json:json:20160810'
   compile 'javax.inject:javax.inject:1'
 
+  // Elasticsearch client
+  compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.6.0'
+  compile 'org.elasticsearch:elasticsearch:6.6.0'
 }
 
 
