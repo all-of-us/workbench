@@ -412,16 +412,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ITEM: {
-        // const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
-        //   .filter(itemId => {
-        //     const item = getItem(itemId)(state);
-        //     return item.get('id') !== action.itemId && item.get('status') === 'active';
-        //   });
-        // if (!activeItems.size) {
-        //   state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
-        // }
-        // return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
-
         return state = state.setIn(['entities', 'groups', action.groupId, 'count'], null)
           .setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }
@@ -453,7 +443,6 @@ export const rootReducer: Reducer<CohortSearchState> =
           ['entities', 'parameters'], Map(),
           params => params.filter((_, key) => paramsInUse.has(key))
         );
-      // .setIn(['entities', 'groups', action.groupId, 'count'], -1);
       }
 
       case REMOVE_GROUP:
