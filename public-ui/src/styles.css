@@ -1,59 +1,60 @@
 /* Master Styles */
 
-@import url('https://fonts.googleapis.com/css?family=Montserrat|Oswald');
-
-*{
-  box-sizing: border-box;
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300|Oswald');
+* {
+    box-sizing: border-box;
 }
+
 body {
-  background-color: #E0E0E1;
-  overflow-x: hidden;
+    background-color: #E0E0E1;
+    overflow-x: hidden;
 }
 
-.content-container{
- width:85vw;
- margin:auto
+.content-container {
+    width: 85vw;
+    max-width: 1170px !important;
+    margin: auto
 }
+
 .main-container {
     background-color: #E0E0E1;
 }
 
-
-input[type=text], input[type=password] {
-  border: 1px solid #9a9a9a;
+input[type=text],
+input[type=password] {
+    border: 1px solid #9a9a9a;
 }
 
-input[type=text]:focus, input[type=password]:focus {
-  border: 1px solid #0094d2;
+input[type=text]:focus,
+input[type=password]:focus {
+    border: 1px solid #0094d2;
 }
 
 .loading-text {
-  padding-left: 0.3rem;
-  color: #888;
+    padding-left: 0.3rem;
+    color: #888;
 }
 
 .loading-area {
-  padding-top: 0.3rem;
+    padding-top: 0.3rem;
 }
 
 .required::after {
-  content: " *";
-  color: red;
+    content: " *";
+    color: red;
 }
 
 /* get rid of margins on small screens */
 
 @media (max-width: 978px) {
-  .content-container {
-    width:98vw
-  }
-  body {
-      padding: 0;
-  }
+    .content-container {
+        width: 98vw
+    }
+    body {
+        padding: 0;
+    }
 }
-
 
 /* Must override clarity styles here, globally as angular component styles don't apply to child components used
  * in the template ie clarity components.
  */
-
