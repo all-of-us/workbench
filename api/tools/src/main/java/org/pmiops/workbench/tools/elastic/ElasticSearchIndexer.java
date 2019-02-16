@@ -13,7 +13,6 @@ import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -61,7 +60,7 @@ import org.threeten.bp.Duration;
  * iterations and local development. The full index will be 10-100GB, so it is not advisable to run
  * this locally against the entire synthetic CDR.
  */
-public final class BigQueryOmopIndexer {
+public final class ElasticSearchIndexer {
 
   private static Option queryProjectIdOpt = Option.builder()
       .longOpt("query-project-id")
@@ -107,6 +106,7 @@ public final class BigQueryOmopIndexer {
       .desc("The inverse probability to index a participant, used to index a " +
           "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
           "target dataset. Defaults to 1 (all participants).")
+      .type(Integer.class)
       .hasArg()
       .build();
   private static Option deleteIndicesOpt = Option.builder()
@@ -123,7 +123,7 @@ public final class BigQueryOmopIndexer {
       .addOption(inverseProbOpt)
       .addOption(deleteIndicesOpt);
 
-  private static final Logger log = Logger.getLogger(BigQueryOmopIndexer.class.getName());
+  private static final Logger log = Logger.getLogger(ElasticSearchIndexer.class.getName());
 
   // Recommended document type for all indices is "_doc" (types are being deprecated):
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html
@@ -171,11 +171,9 @@ public final class BigQueryOmopIndexer {
         .build()
         .getService();
     String cdrDataset = opts.getOptionValue(cdrBigQueryDatasetOpt.getLongOpt());
-    int totalSampleSize = getPersonCount(bq, cdrDataset, inverseProb);
     String personSQL = getPersonBigQuerySQL(cdrDataset, inverseProb);
-    log.info(String.format(
-        "Preparing to insert/update a total of %d person documents", totalSampleSize));
 
+    int totalSampleSize;
     Iterator<ElasticDocument> docs;
     if (opts.hasOption(scratchGcsOpt.getLongOpt())) {
       // Export to BigQuery -> GCS newline-delimited JSON before ingest. Slower, but more reliable.
@@ -195,6 +193,7 @@ public final class BigQueryOmopIndexer {
       if (job.getStatus().getError() != null) {
         throw new IOException("BigQuery job failed: " + job.getStatus().getError().getMessage());
       }
+      totalSampleSize = (int) job.getQueryResults().getTotalRows();
 
       // TODO: Ensure expiry and delete after successful ingest.
       String bucket = opts.getOptionValue(scratchGcsOpt.getLongOpt());
@@ -232,6 +231,7 @@ public final class BigQueryOmopIndexer {
       log.info(
           String.format("SELECTing from CDR '%s' -> Elasticsearch JSON documents", cdrDataset));
       TableResult res = bq.query(QueryJobConfiguration.newBuilder(personSQL).build());
+      totalSampleSize = (int) res.getTotalRows();
       docs = StreamSupport.stream(res.iterateAll().spliterator(), false)
           .map(ElasticDocument::fromBigQueryResults)
           .iterator();
@@ -265,15 +265,6 @@ public final class BigQueryOmopIndexer {
       log.info(String.format("Inserted %.2f%% of documents (%d/%d) (%d failed)",
           ((float) 100 * (inserted)) / totalSampleSize, inserted, totalSampleSize, fails));
     }
-  }
-
-  private int getPersonCount(BigQuery bq, String bqDataset, int inverseProb)
-      throws InterruptedException {
-    TableResult res = bq.query(QueryJobConfiguration.of(
-        String.format(
-            "SELECT SUM(1) FROM `%s.person` WHERE MOD(person_id, %d) = 0;",
-            bqDataset, inverseProb)));
-    return (int) Iterables.getOnlyElement(res.getValues()).get(0).getLongValue();
   }
 
   private String getPersonBigQuerySQL(String bqDataset, int inverseProb) throws IOException {
@@ -319,7 +310,7 @@ public final class BigQueryOmopIndexer {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(BigQueryOmopIndexer.class).web(false).run(args);
+    new SpringApplicationBuilder(ElasticSearchIndexer.class).web(false).run(args);
   }
 
 }

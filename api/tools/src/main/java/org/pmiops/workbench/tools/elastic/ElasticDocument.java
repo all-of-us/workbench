@@ -104,6 +104,8 @@ public class ElasticDocument {
    * Converts a row of BigQuery results to an Elasticsearch document suitable for indexing.
    */
   public static ElasticDocument fromBigQueryResults(FieldValueList fvl) {
+    // The id must be ingested separately from the source document, so we first remove it from the
+    // BigQuery JSON results.
     String id = fvl.get("_id").getStringValue();
     Map<String, Object> source = bqToElasticSchema(fvl, PERSON_SCHEMA);
     try {
