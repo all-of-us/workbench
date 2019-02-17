@@ -8,7 +8,7 @@
   <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showMeasurementGenderHistogram(u)" class="btn btn-link">{{u}} </button>
   <clr-tooltip>
     <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-    <clr-tooltip-content clrPosition=right
+    <clr-tooltip-content clrPosition=top-right
                          clrSize="lg" *clrIfOpen>
       <div class="tooltip-label">Toggle here to view unit specific histograms</div>
     </clr-tooltip-content>

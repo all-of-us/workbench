@@ -29,7 +29,7 @@
             {{ehrDomain.name}}
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=right
+              <clr-tooltip-content clrPosition=top-right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
               </clr-tooltip-content>
@@ -59,7 +59,7 @@
             concepts for this domain
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=right
+              <clr-tooltip-content clrPosition=top-right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
               </clr-tooltip-content>
@@ -70,7 +70,7 @@
               matching medical concepts
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=right
+                <clr-tooltip-content clrPosition=top-right
                                      clrSize="lg" *clrIfOpen>
                   <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
                 </clr-tooltip-content>
@@ -91,7 +91,7 @@
           <div class="col-md grid-header flex-xs-middle info-text col-border"> {{ehrDomain.name}}
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=right
+              <clr-tooltip-content clrPosition=top-right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
               </clr-tooltip-content>
@@ -100,7 +100,7 @@
           <div class="col-md grid-header flex-xs-middle info-text col-border"> Also Known As
             <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=right
+              <clr-tooltip-content clrPosition=top-right
                                  clrSize="lg" *clrIfOpen>
                 <div class="tooltip-header">
                     Medical concepts often have alternative names and descriptions, known as synonyms.
@@ -112,7 +112,7 @@
           <div class="col-md-1 grid-header flex-items-xs-right info-text col-border"> Participants of <b> {{totalParticipants | number}}</b>
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=right
+              <clr-tooltip-content clrPosition=top-right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">The participant counts are the total number of participants in the
                   All of Us data that have at least one mention of a given medical concept
@@ -202,7 +202,7 @@
         <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded" #chartElement>
           <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}} <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-            <clr-tooltip-content clrPosition=right
+            <clr-tooltip-content clrPosition=top-right
                                  clrSize="lg" *clrIfOpen>
               <div class="tooltip-label">{{showToolTip(g)}}</div>
             </clr-tooltip-content>
