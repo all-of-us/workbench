@@ -18,8 +18,8 @@
 .db-desc {
     font-size: 20px;
     font-family: Montserrat, open-sans, sans-serif;
-    color:$darkBlue;
-    font-weight: 300 !important;
+    color:#262262;
+    font-weight: 300;
     line-height: 30px;
     text-align: center;
 
@@ -30,7 +30,7 @@
     font-size: 20px;
     font-family: Montserrat,Helvetica, sans-serif;
     color:#262262;
-    font-weight: 300!important;
+    font-weight: 300;
     line-height: 30px;
     text-align:center;
 }
