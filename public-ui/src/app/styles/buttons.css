@@ -91,11 +91,6 @@ button.btn.btn-lg {
     height: 2.5rem;
 }
 
-button.btn.btn-link {
-    /*color: #4a4a4a;*/
-    /*font-size: 14px;*/
-}
-
 button.icon-btn {
     background-color: inherit;
     border: none;
@@ -108,6 +103,5 @@ button.icon-btn:focus {
 
 .btn-effect:hover{
   transition:.3s cubic-bezier(1,.18,0,1.12);
-  
   transform: scale(1.01);
 }

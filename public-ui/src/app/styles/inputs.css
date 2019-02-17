@@ -21,8 +21,9 @@ input[type=url]:not([readonly]) {
   margin-left:-24px;
 }
 .search-input-full {
-  postion: relative;
-
+  border-radius: 5px;
+  background-color: #DAE6ED;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
 }
 .search-wrapper {
   padding-left: 1rem;
@@ -35,13 +36,27 @@ input[type=url]:not([readonly]) {
 
 .search-input-full input{
   border-bottom: none;
-  width: 100%;
-  padding-left: 24px;
-  padding-right: 0px;
+  padding: 0px;
   margin-left: 0px;
   margin-right: 0px;
   margin-bottom: 0px;
 
+}
+.search-input-full input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  font-family: Montserrat,open-sans,sans-serif;
+  font-size: 16px;
+}
+.search-input-full input::-moz-placeholder { /* Firefox 19+ */
+  font-family: Montserrat,open-sans,sans-serif;
+  font-size: 16px;
+}
+.search-input-full input:-ms-input-placeholder { /* IE 10+ */
+  font-family: Montserrat,open-sans,sans-serif;
+  font-size: 16px;
+}
+.search-input-full input:-moz-placeholder { /* Firefox 18- */
+  font-family: Montserrat,open-sans,sans-serif;
+  font-size: 16px;
 }
 
 .input-icon {
@@ -58,13 +73,9 @@ input[type=url]:not([readonly]) {
   width: 24px;
   height: 24px;
 }
+.info-icon {
+  color: #2691D0;
+}
 
 
-/* webkit solution */
-/*
-::-webkit-input-placeholder { text-align:left; padding-left:24px; }
-*/
-/* mozilla solution */
-/*
-input:-moz-placeholder { text-align:left; }
-*/
+
