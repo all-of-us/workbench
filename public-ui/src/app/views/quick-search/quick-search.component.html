@@ -1,50 +1,44 @@
 <div class="row">
 
-  <div class="col-xs-12 col-sm-12 col-md-9">
+  <div class="col-xs-12">
     <div class="db-header">
       <div>
-        <img class="db-logo" [src]="dbLogo"> </div>
-      <p class="view-sub-title card-text bigger">{{dbSubTitle}} </p>
+        <h1 class="db-title">Explore Data Browser</h1>
+        <p class="db-desc col-xs-10 push-xs-1">{{dbDesc}} </p>
+      </div>
     </div>
-  </div>
+    <div class="search">
+      <div class="search-title"><span> {{title}}
+          <clr-tooltip>
+            <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+              <div class="tooltip-label">{{subTitle}}
+              </div>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </span>
+      </div>
 
-  <div class="col-xs-12 col-sm-12 col-md-10">
-
-    <div class="page-header">
-      <h2> {{title}}
-      <clr-tooltip>
-        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-        <clr-tooltip-content clrPosition=right
-                             clrSize="lg" *clrIfOpen>
-          <div class="tooltip-label">{{subTitle}}
-          </div>
-        </clr-tooltip-content>
-      </clr-tooltip>
-      </h2>
-    </div>
-
-    <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
-      <div class="search-wrapper">
-        <clr-icon shape="search" class="input-icon-absolute is-info search-icon"></clr-icon>
+      <div class="search-bar search-input-full">
+        <clr-icon shape="search" class="is-info search-icon"></clr-icon>
         <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
       </div>
     </div>
 
-
-    <div class="row" *ngIf="loading" >
-      <div class="col-xs-12 flex-xs-middle" style="text-align: center" >
-        <span  class="spinner">
-        Loading...
-      </span>
+    <!-- todo: better loading icon -->
+    <div class="row" *ngIf="loading">
+      <div class="col-xs-12 flex-xs-middle" style="text-align: center">
+        <span class="spinner">
+          Loading...
+        </span>
       </div>
     </div>
 
 
-    <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains:
+    <h5 class="spotlight-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)"> EHR Domains:
       <clr-tooltip>
         <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-        <clr-tooltip-content clrPosition=right
-                             clrSize="lg" *clrIfOpen>
+        <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
           <div class="tooltip-header">EHR Domains</div>
           <div class="tooltip-label">Electronic health records contain information about an individual’s health.
             Medical concepts are similar to medical terms;
@@ -56,50 +50,52 @@
           </div>
         </clr-tooltip-content>
       </clr-tooltip>
-      </h5>
-    <div class="row card-boxes" *ngIf="showDataType(EHR_DATATYPE)" >
-      <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
-          <div class="white-card-box search-result">
-            <p class="box-title box-title-text">
-              {{r.name}}
-              <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=right
-                                     clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
-            </p>
-            <div class="card-stat">
-              {{r.standardConceptCount | number}}
-            </div>
-            <p class="card-text bigger">
-              <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
-              <ng-template #no_search_value><span>medical concepts</span></ng-template>
-              <br><br>
-              <span *ngIf="r.participantCount">
-                <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
-              </span>
-            </p>
+    </h5>
+    <div class="spotlight-boxes" *ngIf="showDataType(EHR_DATATYPE)">
 
-            <div class="card-text bottom">
-              <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewEhrDomain(r)"> View Top 100 </button>
-              <ng-template #searchTextButton>
-                <button class="btn btn-link" (click)="viewEhrDomain(r)"> View Results </button>
-              </ng-template>
-            </div>
-          </div>
+      <div class="spotlight-box" *ngFor="let r of domainResults">
+        <p class="box-title box-title-text">
+          {{r.name}}
+          <clr-tooltip>
+            <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+              <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </p>
+        <div class="card-stat">
+          {{r.standardConceptCount | number}}
+        </div>
+        <p class="card-text">
+          <span *ngIf="searchText.value; else no_search_value">matching medical concepts</span>
+          <ng-template #no_search_value><span>medical concepts</span></ng-template>
+          <br><br>
+          <span *ngIf="r.participantCount">
+            <span class="bolder"> {{r.participantCount | number}}</span> participants in this domain
+          </span>
+        </p>
+
+        <div class="card-text">
+          <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewEhrDomain(r)">
+            View Top 100 </button>
+          <ng-template #searchTextButton>
+            <button class="btn btn-link" (click)="viewEhrDomain(r)"> View Results </button>
+          </ng-template>
+        </div>
       </div>
+
+
+
+
       <div class="col col-xs-12" *ngIf="! domainResults || domainResults.length === 0">
         <h6> No EHR Data Results.</h6>
       </div>
 
     </div>
 
-    <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Survey Questions:  </h5>
-    <div class="row card-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
-      <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
-        <div class="white-card-box search-result">
+    <h5 class="spotlight-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Survey Questions: </h5>
+    <div class="spotlight-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
+        <div class="spotlight-box"     *ngFor="let r of surveyResults">
           <p class="box-title box-title-text">
             {{r.name}}
           </p>
@@ -114,13 +110,14 @@
           </p>
 
           <div class="card-text bottom">
-            <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewSurvey(r)"> View Complete Survey </button>
+            <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewSurvey(r)">
+              View Complete Survey </button>
             <ng-template #searchTextButton>
               <button class="btn btn-link" (click)="viewSurvey(r)"> View Results </button>
             </ng-template>
           </div>
         </div>
-      </div>
+   
 
       <div class="col-xs-12" *ngIf="! surveyResults || surveyResults.length === 0">
         <h6> No Survey Results.</h6>
@@ -128,8 +125,11 @@
 
     </div>
 
-    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0"> Program Phyiscal Measurements:  </h5>
-    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0">
+    <h5 class="spotlight-heading"
+      *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0"> Program
+      Phyiscal Measurements: </h5>
+    <div class="row card-boxes"
+      *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0">
       <div class="col col-xl-5 col-lg-6 col-md-6 col-sm-6 col-xs-12">
         <div class="white-card-box search-result">
           <p class="box-title box-title-text">
@@ -137,9 +137,9 @@
           </p>
           <p class="card-text bigger pm-text">
             <span>Participants have the option to provide a standard set of physical measurements as part
-            of the enrollment process  (“program physical measurements”).
-            Use this tool to browse distributions of measurement values and counts,
-            grouped by age at occurrence and gender, for each program physical measurement.</span>
+              of the enrollment process (“program physical measurements”).
+              Use this tool to browse distributions of measurement values and counts,
+              grouped by age at occurrence and gender, for each program physical measurement.</span>
           </p>
           <div class="card-stat">
             {{matchPhysicalMeasurements(searchText.value)}}
@@ -150,7 +150,8 @@
             <br><br>
           </p>
           <div class="card-text bottom">
-            <button class="btn btn-link" [routerLink]="['physical-measurements']" [queryParams]="{searchString: searchText.value}"> View Program Physical Measurements </button>
+            <button class="btn btn-link" [routerLink]="['physical-measurements']"
+              [queryParams]="{searchString: searchText.value}"> View Program Physical Measurements </button>
           </div>
         </div>
       </div>
@@ -158,9 +159,8 @@
     </div>
 
 
-  </div>
 
-  <div class="hidden-sm-down  col-md-2">
-  </div>
+    <div class="hidden-sm-down  col-md-2">
+    </div>
 
-</div>
+  </div>

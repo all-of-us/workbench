@@ -31,12 +31,12 @@ const routes: Routes = [
         data: {title: 'Quick Search'}
       },
       {
-        path: 'quick-search',
+        path: 'explore',
         component: QuickSearchComponent,
         data: {title: 'Quick Search'}
       },
       {
-        path: 'quick-search/:dataType',
+        path: 'explore/:dataType',
         component: QuickSearchComponent,
         data: {title: 'Quick Search'}
       },

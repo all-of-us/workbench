@@ -1,81 +1,66 @@
-.row.search {
-    margin: .25rem;
-}
-.white-card-box {
-    padding: .25rem;
-}
-
-.view-sub-title {
-    font-size: 14px;
+.search {
+    padding: 4rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    /* justify-content: space-evenly; */
 }
 
-.search-result p.card-text {
-    min-height: 2rem;
-    padding-bottom: .5rem;
-    margin-top: 0;
-}
-
-/* put some space between the cards when they go to the next line in the row */
-.row.card-boxes .col {
-    margin-bottom: .5rem;
-    margin-top: .5rem;
-}
-/* result card */
-.white-card-box.search-result {
-    height: 100%;
-    width: 100%;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    padding: .5rem 1rem;
-    display: block;
-}
-
-.card-text.bottom {
-    padding-bottom: .5rem;
-}
-
-.bolder {
-    font-weight: bold;
-    font-size: 16px;
-}
-.db-logo {
-    margin-top: 1rem;
-    height: 43px;
-    width: 316px;
+.search-title {
+    width: calc((100%/12)*3.5);
+    min-width: 311px;
+    font-family: Oswald, open-sans, sans-serif;
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 0;
     color: #262262;
-    font-family: "Gotham HTF";
-    font-size: 36px;
-    font-weight: bold;
-    line-height: 43px;
-    /* the logo has a little padding in it not lining up with text so move it left a hair */
-    margin-left: -.20rem;
+    display: flex;
+    align-items: center;
 }
 
-.pm-text {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-}
-
-.box-title {
-    color: #6CABE4;
-}
-
-.search-input-full{
-    border: none;
-    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
-    height: 3rem;
-    width: 75%;
-    background-color: #A3D3F232;
+.search-bar {
+    width: calc((100%/12)*7.5);
+    flex-grow: 1;
     font-size: 16px;
-    font-weight: 400;
-    line-height: 19px;
-    color: #000000;
+}
+
+.search-bar input {
+    width: calc((100%/12)*10);
+    padding: 35px;
+    padding-left: 0;
 }
 
 .search-icon {
-    margin-top: 1%;
+    width: calc((100%/12));
+    height: 20px;
 }
 
-#search-db {
-    margin-top: 3%;
+.spotlight-heading {
+    margin-left: 0;
+    margin-bottom: 8px;
+    font-family: Oswald, open-sans, sans-serif;
+    padding: 0;
+    color: #302C71;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 36px;
+}
+
+.spotlight-boxes {
+    display: flex;
+    margin-bottom:48px;
+}
+
+.spotlight-box {
+    margin-right: 16px;
+    width: calc(((100%/12)*4) - 32px);
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+    padding:18px;
+    padding-bottom:0;
+}
+
+
+.spotlight-box:last-of-type {
+    margin-right: 0;
 }
