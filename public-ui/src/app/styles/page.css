@@ -1,0 +1,36 @@
+
+.content-container, .card-header, .card, .card-title, h1, h2, h3, h4, h5, h6, .title, .view-title, .box-title,
+.box-heading, p, div, .view-sub-title, .box-sub-title, label  {
+        font-family: "Montserrat",open-sans, sans-serif;
+        margin:0;
+}
+
+.db-title {
+    text-align: center;
+    font-family: Oswald, open-sans, sans-serif;
+    font-weight: 500;
+    font-size: 38px;
+    margin-bottom: 35px;
+    color: #262262;
+
+}
+
+.db-desc {
+    font-size: 20px;
+    font-family: Montserrat, open-sans, sans-serif;
+    color:$darkBlue;
+    font-weight: 300 !important;
+    line-height: 30px;
+    text-align: center;
+
+}
+
+.db-desc_sub {
+    padding:2rem;
+    font-size: 20px;
+    font-family: Montserrat,Helvetica, sans-serif;
+    color:#262262;
+    font-weight: 300!important;
+    line-height: 30px;
+    text-align:center;
+}

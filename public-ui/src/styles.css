@@ -10,27 +10,8 @@ body {
     overflow-x: hidden;
     /* font-family: Montserrat,Helvetica, sans-serif; */
 }
-p,li,ul,h1,h2,h3,h4{
-  margin: 0;
-  
-}
 
-.db-title{
-  text-align: center;
-  font-family: Oswald,Arial, Helvetica, sans-serif;
-  font-weight: 500;
-  font-size: 38px;
-  margin-bottom:35px;
-}
 
-.db-desc {
-  font-size: 20px;
-  font-family: Montserrat,Helvetica, sans-serif;
-  color:#262262;
-  font-weight: 300!important;
-  line-height: 30px;
-  text-align:center;
-}
 
 .content-container {
     width: 85vw;
