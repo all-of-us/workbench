@@ -1,15 +1,51 @@
 .main-bg {
     height: auto;
-    padding-bottom:4rem;
-    background:url('/assets/backgrounds/plus_background.png');
+    padding-bottom: 4rem;
+    background: url('/assets/backgrounds/plus_background.png');
 }
+
 #breadcrumb {
-    height:87px;
-    background:rgba(0, 0, 0, .4);
+    height: 87px;
+    background: rgba(0, 0, 0, .4);
     width: 100vw;
 }
 
-#workbench-header{
-    height:80px;
-    background:white;
+#workbench-header {
+    height: 40px;
+    background: white;
+}
+
+footer {
+    background: url('/assets/backgrounds/plus_bg-invert.png');
+    height: 200px;
+}
+
+.banner-container {
+    width: 100vw;
+    display: flex;
+
+    align-items: center;
+    justify-content:space-evenly;
+    padding: 1rem;
+}
+
+.banner-btn {
+    cursor: pointer;
+    background: url('/assets/images/applyForAccess_btn.png');
+    width: 100px;
+    height: 100px;
+}
+.banner-btn,.banner-text{
+    display:inline-block;
+    padding:.25rem;
+
+}
+.banner-inner{
+    display: flex;
+    align-items: center;
+}
+.banner-text{
+    margin-top:0;
+    background:yellow;
+
 }
