@@ -1,21 +1,5 @@
-@import url("page.css");
+@import url("page.scss");
 @import url("buttons.css");
 @import url("inputs.css");
 @import url("headers.css");
 
-.db-title{
-    text-align: center;
-    font-family: Oswald,Arial, open-sans, sans-serif;
-    font-weight: 500;
-    font-size: 38px;
-    margin-bottom:35px;
-  }
-  
-  .db-desc {
-    font-size: 20px;
-    font-family: Montserrat,open-sans, sans-serif;
-    color:#262262;
-    font-weight: 300!important;
-    line-height: 30px;11
-    text-align:center;
-  }
