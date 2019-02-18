@@ -1,6 +1,27 @@
 /* Master Styles */
 
-@import url('https://fonts.googleapis.com/css?family=Montserrat:300|Oswald');
+@import url('https://fonts.googleapis.com/css?family=unit');
+/* Unit font */
+@import url("https://use.typekit.net/buf4baz.css");
+
+@font-face {
+    font-family: GothamBook;
+    src: url('/assets/fonts/Gotham Book.otf');
+}
+@font-face {
+    font-family: GothamBold;
+    src: url('/assets/fonts/Gotham Bold.otf');
+}
+@font-face {
+    font-family: GothamLight;
+    src: url('/assets/fonts/Gotham Light.otf');
+}
+@font-face {
+    font-family: GothamMedium;
+    src: url('/assets/fonts/Gotham Medium.otf');
+}
+
+
 * {
     box-sizing: border-box;
 }
@@ -8,14 +29,13 @@
 body {
     background-color: #E0E0E1;
     overflow-x: hidden;
-    /* font-family: Montserrat,Helvetica, sans-serif; */
 }
 
 
 
 .content-container {
     width: 85vw;
-    max-width: 1170px !important;
+    max-width: 1200px !important;
     margin: auto
 }
 
@@ -49,14 +69,14 @@ input[type=password]:focus {
 
 /* get rid of margins on small screens */
 
-@media (max-width: 978px) {
+/* @media (max-width: 978px) {
     .content-container {
         width: 98vw
     }
     body {
         padding: 0;
     }
-}
+} */
 
 /* Must override clarity styles here, globally as angular component styles don't apply to child components used
  * in the template ie clarity components.
