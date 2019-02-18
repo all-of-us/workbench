@@ -23,7 +23,7 @@ input[type=url]:not([readonly]) {
 .search-input-full {
   border-radius: 5px;
   background-color: #DAE6ED;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 .search-wrapper {
   padding-left: 1rem;
@@ -43,20 +43,24 @@ input[type=url]:not([readonly]) {
 
 }
 .search-input-full input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-  font-family: Montserrat,open-sans,sans-serif;
-  font-size: 16px;
+  font-family: GothamBook,open-sans,sans-serif;
+  font-size: 20px;
+  font-weight:bolder;
 }
 .search-input-full input::-moz-placeholder { /* Firefox 19+ */
-  font-family: Montserrat,open-sans,sans-serif;
+  font-family: GothamBook,open-sans,sans-serif;
   font-size: 16px;
+  font-weight:bolder;
 }
 .search-input-full input:-ms-input-placeholder { /* IE 10+ */
-  font-family: Montserrat,open-sans,sans-serif;
+  font-family: GothamBook,open-sans,sans-serif;
   font-size: 16px;
+  font-weight:bolder;
 }
 .search-input-full input:-moz-placeholder { /* Firefox 18- */
-  font-family: Montserrat,open-sans,sans-serif;
+  font-family: GothamBook,open-sans,sans-serif;
   font-size: 16px;
+  font-weight:bolder;
 }
 
 .input-icon {
@@ -73,9 +77,7 @@ input[type=url]:not([readonly]) {
   width: 24px;
   height: 24px;
 }
-.info-icon {
-  color: #2691D0;
-}
+
 
 
 

@@ -1,12 +1,13 @@
 .main-bg {
     height: auto;
     padding-bottom: 4rem;
-    background: url('/assets/backgrounds/plus_background.png');
+    background: url('/assets/backgrounds/background-pattern1.png');
+    background-color:transparent;
+    
 }
 
 #breadcrumb {
     height: 87px;
-    background: rgba(0, 0, 0, .4);
     width: 100vw;
 }
 
@@ -14,16 +15,20 @@
     height: 40px;
     background: white;
 }
+#social {
+    text-align: right;
+}
 
 footer {
-    background: url('/assets/backgrounds/plus_bg-invert.png');
+    background: url('/assets/backgrounds/background-pattern_invert.png');
     height: 200px;
+    background-position-y: 1rem;
+   
 }
 
 .banner-container {
     width: 100vw;
     display: flex;
-
     align-items: center;
     justify-content:space-evenly;
     padding: 1rem;

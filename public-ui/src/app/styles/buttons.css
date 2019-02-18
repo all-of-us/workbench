@@ -8,7 +8,7 @@
     background: #262262;
     padding: .5rem .5rem;
     text-align: center;
-    font-family: Oswald, open-sans, sans-serif;
+    font-family: unit, open-sans, sans-serif;
     font-size: 20px;
     letter-spacing: .14px;
     text-transform: uppercase;
@@ -94,7 +94,7 @@ button.btn.btn-lg {
 button.icon-btn {
     background-color: inherit;
     border: none;
-    height: 1.5rem;
+    height: 1rem;
 }
 
 button.icon-btn:focus {
