@@ -4,7 +4,7 @@ package org.pmiops.workbench.cdr.model;
 import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(name = "concept")
@@ -16,7 +16,6 @@ public class QuestionConcept {
     private String domainId;
     private long countValue;
     private float prevalence;
-    private int subQuestionCount;
     private AchillesAnalysis countAnalysis;
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
@@ -309,17 +308,6 @@ public class QuestionConcept {
         return this;
     }
 
-    @Column(name = "source_count_value")
-    public int getSubQuestionCount() {
-        return this.subQuestionCount;
-    }
-    public void setSubQuestionCount(int subQuestionCount) {
-        this.subQuestionCount = subQuestionCount;
-    }
-    public QuestionConcept subQuestionCount(int subQuestionCount) {
-        this.subQuestionCount = subQuestionCount;
-        return this;
-    }
 
     @Transient
     public List<QuestionConcept> getSubQuestions() {
