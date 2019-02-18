@@ -89,14 +89,12 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
                   conceptCode: '',
                   countValue: a.countValue,
                   prevalence: a.prevalence,
-                  subQuestionCount: 0,
                   countAnalysis: this.makeAnalysis(q.countAnalysis),
                   genderAnalysis: this.makeAnalysis(q.genderAnalysis),
                   ageAnalysis: this.makeAnalysis(q.ageAnalysis),
                   genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
                   subQuestions: null
                 });
-                q.subQuestionCount++;
               }
               q.subQuestions.map(sq => sq.selectedAnalysis = sq.genderAnalysis);
               q.subQuestions = q.subQuestions.filter(sq => (sq.countAnalysis.results.length > 0));

@@ -182,7 +182,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .domainId(concept.getDomainId())
                             .countValue(concept.getCountValue())
                             .prevalence(concept.getPrevalence())
-                            .subQuestionCount(concept.getSubQuestionCount())
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
                             .ageAnalysis(ageAnalysis)
@@ -457,6 +456,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Too slow and concept names wrong so we hardcode list
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
 
+        //Get the list of questions that has sub questions in survey
+        List<Long> hasSubQuestions = questionConceptDao.findSurveyMainQuestionIds(Long.valueOf(surveyConceptId)).stream().map(QuestionConcept::getConceptId).collect(Collectors.toList());
+
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
 
         // Get questions for survey
@@ -473,7 +475,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // Put ids in array for query to get all results at once
             List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
-                if (q.getSubQuestionCount() > 0) {
+                if (hasSubQuestions.contains(q.getConceptId())) {
                     List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
                     QuestionConcept.mapAnalysesToQuestions(subQuestions, achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestions.stream()
                             .map(QuestionConcept::getConceptId)

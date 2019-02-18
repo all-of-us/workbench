@@ -90,7 +90,7 @@
             </div>
           </div>
           <div class="col-xs-12">
-            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)" *ngIf="q.subQuestionCount === 0; else subQuestionLink"> See Answers
+            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)" *ngIf="q.subQuestions === null; else subQuestionLink"> See Answers
               <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
             <ng-template #subQuestionLink>
               <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Sub Questions
@@ -127,7 +127,7 @@
           <div class="col-md-1 info-text">
           </div>
         </div>
-        <ng-container *ngIf="q.subQuestionCount == 0; else subQuestionDisplay">
+        <ng-container *ngIf="q.subQuestions === null; else subQuestionDisplay">
           <div class="row expandable-grid-row" *ngFor="let a of q.countAnalysis.results" [hidden]="!showAnswer[q.conceptId]">
             <div class="col-md-6 flex-xs-middle" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
               <label class="answer-text">

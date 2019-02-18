@@ -309,18 +309,6 @@ public class QuestionConcept {
         return this;
     }
 
-    @Column(name = "source_count_value")
-    public int getSubQuestionCount() {
-        return this.subQuestionCount;
-    }
-    public void setSubQuestionCount(int subQuestionCount) {
-        this.subQuestionCount = subQuestionCount;
-    }
-    public QuestionConcept subQuestionCount(int subQuestionCount) {
-        this.subQuestionCount = subQuestionCount;
-        return this;
-    }
-
     @Transient
     public List<QuestionConcept> getSubQuestions() {
         return this.subQuestions;
