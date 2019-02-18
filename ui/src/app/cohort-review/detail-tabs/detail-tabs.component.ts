@@ -123,7 +123,7 @@ const refRange = {
 };
 const survey = {
   name: 'survey',
-  displayName: 'Survey',
+  displayName: 'Survey Name',
 };
 const question = {
   name: 'question',
