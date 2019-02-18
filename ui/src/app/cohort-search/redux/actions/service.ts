@@ -123,34 +123,50 @@ export class CohortSearchActions {
     this.addId(newId);
     return newId;
   }
-  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
-    this._updatedTemporal(flag, groupId);
+
+  getGroupItem (groupId, role) {
     const group = getGroup(groupId)(this.state);
-    if (this.hasActiveItems(group)) {
+    const itemId = group.get('id');
+    const groupItems = group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    const temporalGroupItems = groupItems
+      .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+        && it.get('temporalGroup') === 1)
+      .isEmpty();
+    const nonTemporalGroupItems = groupItems
+      .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+        && it.get('temporalGroup') === 0)
+      .isEmpty();
+    if (!temporalGroupItems && !nonTemporalGroupItems) {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     } else {
       this.clearGroupCount(groupId);
       this.clearTotalCount(groupId);
+      this.cancelTotalIfRequesting();
     }
+  }
+
+  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
+    this._updatedTemporal(flag, groupId);
+    this.getGroupItem(groupId, role);
   }
 
   updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
     this._updateWhichMention(mention, groupId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount(groupId);
+    this.getGroupItem(groupId, role);
   }
 
   updateTemporalTime(time: any, groupId: string, role: keyof SearchRequest) {
     this._updateTemporalTime(time, groupId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount(groupId);
+    this.getGroupItem(groupId, role);
   }
 
   updateTemporalTimeValue(timeValue: any, groupId: string, role: keyof SearchRequest) {
     this._updateTemporalTimeValue(timeValue, groupId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount(groupId);
+    this.getGroupItem(groupId, role);
   }
 
   genSuffix(): string {
@@ -661,10 +677,6 @@ export class CohortSearchActions {
       entities.searchRequests[SR_ID][role] = data[role].map(group => {
         group.items = group.items.map(item => {
           item.searchParameters = item.searchParameters.map(param => {
-            group.mention = group.mention ? group.mention : '';
-            group.time = group.time ? group.time : '';
-            group.timeValue = group.timeValue ? group.timeValue : 0;
-            group.timeFrame = group.timeFrame ? group.timeFrame : '';
             param.code = param.value;
             if (param.attributes) {
               param.hasAttributes = param.attributes.length > 0;
@@ -673,6 +685,9 @@ export class CohortSearchActions {
             this.addId(param.parameterId);
             return param.parameterId;
           });
+          if(!group.temporal) {
+            item.temporalGroup = 0;
+          }
           item.count = 0;
           item.isRequesting = false;
           item.status = 'active';
@@ -680,6 +695,11 @@ export class CohortSearchActions {
           this.addId(item.id);
           return item.id;
         });
+
+        group.mention = group.mention ? group.mention : '';
+        group.time = group.time ? group.time : '';
+        group.timeValue = group.timeValue ? group.timeValue : 0;
+        group.timeFrame = group.timeFrame ? group.timeFrame : '';
         group.count = 0;
         group.isRequesting = false;
         group.status = 'active';
