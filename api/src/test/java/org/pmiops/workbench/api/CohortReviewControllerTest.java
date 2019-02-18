@@ -17,6 +17,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilderOld;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
@@ -179,6 +180,7 @@ public class CohortReviewControllerTest {
     CohortReviewServiceImpl.class,
     ParticipantCounter.class,
     CohortQueryBuilder.class,
+    ReviewQueryBuilder.class,
     ReviewQueryBuilderOld.class,
     QueryBuilderFactory.class,
     TemporalQueryBuilder.class

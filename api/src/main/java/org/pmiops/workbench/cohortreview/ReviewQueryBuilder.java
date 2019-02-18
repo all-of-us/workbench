@@ -22,6 +22,10 @@ public class ReviewQueryBuilder {
   private static final String VISIT_COLUMNS =
     ", visit_type as visitType\n";
 
+  private static final String OBS_VISIT_COLUMNS =
+    ", visit_id as visitId\n" +
+      ", visit_concept_id as visitConceptId\n";
+
   private static final String STANDARD_COLUMNS =
     ", standard_name as standardName\n" +
       ", standard_code as standardCode\n" +
@@ -65,7 +69,8 @@ public class ReviewQueryBuilder {
       VISIT_COLUMNS +
       DRUG_COLUMNS +
       MEASUREMENT_COLUMNS +
-      MENTION_COLUMNS;
+      MENTION_COLUMNS +
+      VALUE_COLUMNS;
 
   private static final String CONDITION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
@@ -96,7 +101,7 @@ public class ReviewQueryBuilder {
   private static final String OBSERVATION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
       SOURCE_COLUMNS +
-      VISIT_COLUMNS +
+      OBS_VISIT_COLUMNS +
       AGE_AT_EVENT;
 
   private static final String PHYSICAL_MEASURE_SQL_TEMPLATE =
@@ -130,7 +135,7 @@ public class ReviewQueryBuilder {
       "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-      "and standard_name != 'No matching concept' \n" +
+      "and standard_concept_id != 0 \n" +
       "group by standard_code\n" +
       "LIMIT @" + NAMED_LIMIT_PARAM + ") b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +

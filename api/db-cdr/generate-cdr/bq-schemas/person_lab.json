@@ -21,6 +21,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "standard_concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "value_as_number",
     "type": "FLOAT"
   },
