@@ -124,7 +124,7 @@ export class CohortSearchActions {
     return newId;
   }
 
-  getGroupItem (groupId, role) {
+  getGroupItem(groupId, role) {
     const group = getGroup(groupId)(this.state);
     const itemId = group.get('id');
     const groupItems = group
@@ -685,7 +685,7 @@ export class CohortSearchActions {
             this.addId(param.parameterId);
             return param.parameterId;
           });
-          if(!group.temporal) {
+          if (!group.temporal) {
             item.temporalGroup = 0;
           }
           item.count = 0;
