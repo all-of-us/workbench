@@ -3,3 +3,7 @@
 @import url("inputs.css");
 @import url("headers.css");
 
+.info-icon {
+    color: #2691D0;
+    font-weight: 600;
+  }
