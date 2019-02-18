@@ -316,9 +316,10 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     domain: DomainType.SURVEY,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      survey, question, answer
+      itemDate, survey, question, answer
     ],
     reverseEnum: {
+      itemDate: itemDate,
       survey: survey,
       question: question,
       answer: answer
