@@ -16,7 +16,6 @@ public class QuestionConcept {
     private String domainId;
     private long countValue;
     private float prevalence;
-    private int subQuestionCount;
     private AchillesAnalysis countAnalysis;
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
