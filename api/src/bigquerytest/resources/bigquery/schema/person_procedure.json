@@ -31,6 +31,11 @@
 	},
 	{
 	"mode": "NULLABLE",
+	"name": "standard_concept_id",
+	"type": "INTEGER"
+	},
+	{
+	"mode": "NULLABLE",
 	"name": "source_code",
 	"type": "STRING"
 	},
@@ -43,6 +48,11 @@
 	"mode": "NULLABLE", 
 	"name": "source_name",
 	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "source_concept_id",
+	"type": "INTEGER"
 	},
 	{
 	"mode": "NULLABLE", 
