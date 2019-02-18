@@ -80,7 +80,7 @@
     "@types/react-onclickoutside": "^6.7.0",
     "@webcomponents/custom-elements": "^1.0.0",
     "angular2-highcharts": "^0.5.5",
-    "bootstrap": "4.1.2",
+    "bootstrap": "4.3.1",
     "core-js": "^2.5.3",
     "d3": "^4.12.2",
     "dom-to-image": "^2.6.0",
