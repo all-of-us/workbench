@@ -45,7 +45,13 @@ public enum DomainTableEnum {
       "person_visit",
       "visit_concept_id",
       "visit_source_concept_id",
-      "visit_start_date");
+      "visit_start_date"),
+    LAB("Lab",
+      "measurement",
+      "person_lab",
+      "measurement_concept_id",
+      "measurement_source_concept_id",
+      "measurement_date");
 
     private String domainId;
     private String tableName;

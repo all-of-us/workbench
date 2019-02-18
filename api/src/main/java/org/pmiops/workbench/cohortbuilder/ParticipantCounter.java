@@ -54,15 +54,6 @@ public class ParticipantCounter {
     "group by gender, race, ageRange\n" +
       "order by gender, race, ageRange\n";
 
-  private static final String LAB_SQL_TEMPLATE =
-    "and ${tableId} in (\n" +
-      "  select concept_id\n" +
-      "  from `${projectId}.${dataSetId}.criteria`\n" +
-      "  where type = 'MEAS'\n" +
-      "    and subtype = 'LAB'\n" +
-      "    and is_selectable = 1\n" +
-      ")\n";
-
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
     "and standard_concept_id != 0 \n" +
       "group by name, conceptId\n" +
@@ -103,14 +94,12 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
+      String domain = domainType.name();
       String table = DomainTableEnum.getDenormalizedTableName(domain);
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
         .replace("${table}", table);
-      String endSqlTemplate = DomainType.LAB.equals(domainType) ?
-        LAB_SQL_TEMPLATE + DOMAIN_CHART_INFO_SQL_GROUP_BY :
-        DOMAIN_CHART_INFO_SQL_GROUP_BY;
+      String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY;
       endSqlTemplate = endSqlTemplate
         .replace("${limit}", limit)
         .replace("${tableId}", STANDARD_CONCEPT_ID);

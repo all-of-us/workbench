@@ -19,7 +19,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -41,7 +42,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -63,7 +65,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -85,7 +88,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -107,7 +111,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -129,7 +134,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -151,7 +157,8 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   },
   {
     "person_id":102246,
@@ -173,6 +180,7 @@
     "dose":1.0,
     "strength":"str",
     "unit":"unit",
-    "ref_range":"range"
+    "ref_range":"range",
+    "value_as_number":1.0
   }
 ]

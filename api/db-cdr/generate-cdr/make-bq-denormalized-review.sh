@@ -130,7 +130,7 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 echo "Inserting lab data into person_lab"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_lab\`
-   (person_id, data_id, start_datetime, standard_name, standard_concept_name, value_as_number, unit, ref_range, age_at_event, visit_type)
+   (person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type)
 SELECT m.person_id,
     m.measurement_id as data_id,
     m.measurement_datetime as start_datetime,
@@ -290,6 +290,7 @@ SELECT P.PERSON_ID,
      case when c2.CONCEPT_CODE is null then 'No matching concept' else c2.CONCEPT_CODE end as SOURCE_CODE,
      case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
      case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
+     case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
      CAST(FLOOR(DATE_DIFF(a.PROCEDURE_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
      case when c3.concept_name is null then 'No matching concept' else c3.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
@@ -305,10 +306,10 @@ JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
 echo "Inserting conditions data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code, source_vocabulary,
- source_name, domain, age_at_event)
- select person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, source_code,
- source_vocabulary, source_name, 'Condition' as domain, age_at_event
+ (person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code, source_vocabulary,
+ source_name, source_concept_id, domain, age_at_event)
+ select person_id, data_id, start_datetime, visit_type, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
+ source_vocabulary, source_name, source_concept_id, 'Condition' as domain, age_at_event
  from \`$BQ_PROJECT.$BQ_DATASET.person_condition\` a"
 
 ###########################################
@@ -317,8 +318,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting drug data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, start_datetime, standard_name, route, dose, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
- select person_id, data_id, start_datetime, standard_name, route, dose, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
+ (person_id, data_id, start_datetime, standard_name, standard_concept_id, route, dose, strength, domain, age_at_event, num_mentions, first_mention, last_mention, visit_type)
+ select person_id, data_id, start_datetime, standard_name, standard_concept_id, route, dose, strength, 'Drug' as domain, age_at_event, num_mentions, first_mention,
  last_mention, visit_type
  from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` a"
 
@@ -328,8 +329,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  echo "Inserting lab data into person_all_events"
  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
-  (person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
-  select person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, 'LAB' as domain
+  (person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
+  select person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, 'LAB' as domain
   from \`$BQ_PROJECT.$BQ_DATASET.person_lab\` a"
 
  ###########################################
@@ -338,8 +339,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  echo "Inserting vital data into person_all_events"
  bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
-  (person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
-  select person_id, data_id, start_datetime, standard_name, value_as_number, unit, ref_range, age_at_event, visit_type, 'VITAL' as domain
+  (person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, domain)
+  select person_id, data_id, start_datetime, standard_name, standard_concept_id, value_as_number, unit, ref_range, age_at_event, visit_type, 'VITAL' as domain
   from \`$BQ_PROJECT.$BQ_DATASET.person_vital\` a"
 
 ##################################################
@@ -348,10 +349,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting observation data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
- (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code,
- source_vocabulary, age_at_event, visit_type)
- select person_id, data_id, 'Observation' as domain, start_datetime, standard_name, standard_code, standard_vocabulary, source_name, source_code,
- source_vocabulary, age_at_event, b.concept_name as visit_type
+ (person_id, data_id, domain, start_datetime, standard_name, standard_code, standard_vocabulary, standard_concept_id, source_name, source_code,
+ source_vocabulary, source_concept_id, age_at_event, visit_type)
+ select person_id, data_id, 'Observation' as domain, start_datetime, standard_name, standard_code, standard_vocabulary, standard_concept_id, source_name, source_code,
+ source_vocabulary, source_concept_id, age_at_event, b.concept_name as visit_type
  from \`$BQ_PROJECT.$BQ_DATASET.person_observation\` a
  join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.visit_concept_id = b.concept_id"
 
@@ -361,10 +362,10 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting procedure data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
-  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
-  source_vocabulary, source_name, age_at_event, visit_type, domain)
-  select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
-  source_vocabulary, source_name, age_at_event, visit_type, 'Procedure' as domain
+  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
+  source_vocabulary, source_name, source_concept_id, age_at_event, visit_type, domain)
+  select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id, source_code,
+  source_vocabulary, source_name, source_concept_id, age_at_event, visit_type, 'Procedure' as domain
   from \`$BQ_PROJECT.$BQ_DATASET.person_procedure\` a"
 
 ################################################
@@ -373,8 +374,8 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 echo "Inserting procedure data into person_all_events"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_all_events\`
-  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
+  (person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id,
   value_as_number, unit, age_at_event, domain)
-  select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, source_code,
+  select person_id, data_id, start_datetime, standard_code, standard_vocabulary, standard_name, standard_concept_id,
            value_as_number, unit, age_at_event, 'Procedure' as domain
   from \`$BQ_PROJECT.$BQ_DATASET.person_physical_measure\` a"

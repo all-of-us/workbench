@@ -211,7 +211,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -219,6 +219,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-07-22 05:00:00 UTC")
       .lastMention("2008-07-22 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
@@ -231,7 +232,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -239,6 +240,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
@@ -251,7 +253,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -259,6 +261,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
@@ -271,7 +274,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -279,6 +282,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
@@ -291,7 +295,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -299,6 +303,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
@@ -311,7 +316,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -319,6 +324,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
@@ -331,7 +337,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -339,6 +345,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
@@ -351,7 +358,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .route("route")
-      .dose("dose")
+      .dose("1.0")
       .strength("str")
       .unit("unit")
       .refRange("range")
@@ -359,6 +366,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .firstMention("2008-08-01 05:00:00 UTC")
       .lastMention("2008-08-01 05:00:00 UTC")
       .visitType("visit")
+      .value(1.0F)
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
@@ -825,7 +833,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantMeasurementsPagination() throws Exception {
+  public void getParticipantLabPagination() throws Exception {
     PageRequest expectedPageRequest = new PageRequest()
       .page(0)
       .pageSize(1)
@@ -834,7 +842,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.MEASUREMENT);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.LAB);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);
