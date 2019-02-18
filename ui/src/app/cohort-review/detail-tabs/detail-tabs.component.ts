@@ -131,7 +131,7 @@ const question = {
 };
 const answer = {
   name: 'answer',
-  displayName: 'answer',
+  displayName: 'Answer',
 };
 
 @Component({
@@ -156,9 +156,9 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, visitType, standardCode, standardVocabulary, standardName, sourceCode, sourceVocabulary,
-      sourceName, dataRoute, dose, strength, value, unit, refRange, domain, ageAtEvent,
-      numMentions, firstMention, lastMention
+      itemDate, visitType, standardCode, standardVocabulary, standardName, sourceCode,
+      sourceVocabulary, sourceName, dataRoute, dose, strength, value, unit, refRange,
+      domain, ageAtEvent, numMentions, firstMention, lastMention
     ],
     reverseEnum: {
       Date: itemDate,
@@ -184,7 +184,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     }
   };
 
-  // TODO add Surveys tab when we have data to show
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
@@ -228,8 +227,8 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, dataRoute, dose, strength, ageAtEvent, numMentions, firstMention, lastMention,
-      visitType
+      itemDate, standardName, dataRoute, dose, strength, ageAtEvent, numMentions,
+      firstMention, lastMention, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -295,7 +294,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       age: ageAtEvent,
       visitType: visitType
     }
-  },{
+  }, {
     name: 'Vital',
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
@@ -313,18 +312,18 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       visitType: visitType
     }
   }, {
-  name: 'Survey',
-  domain: DomainType.SURVEY,
-  filterType: PageFilterType.ReviewFilter,
-  columns: [
-    survey, question, answer
+    name: 'Survey',
+    domain: DomainType.SURVEY,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      survey, question, answer
     ],
-  reverseEnum: {
-    survey: survey,
-    question: question,
-    answer: answer
-  }
-}];
+    reverseEnum: {
+      survey: survey,
+      question: question,
+      answer: answer
+    }
+  }];
 
   constructor(
     private state: ReviewStateService,
