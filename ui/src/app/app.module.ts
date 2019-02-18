@@ -36,7 +36,6 @@ import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/co
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
-import {WorkbenchAccessTasksComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -165,7 +164,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
-    WorkbenchAccessTasksComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,
