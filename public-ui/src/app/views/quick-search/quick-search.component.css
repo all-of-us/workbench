@@ -21,6 +21,7 @@ strong {
     color: #262262;
     display: flex;
     align-items: center;
+    margin-right:6px;
 }
 
 .search-bar {
