@@ -50,7 +50,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
       .do(_ => this.loading = true)
       .switchMap(([participant, cohort, workspace]) => {
         this.data = [];
-        return this.reviewApi.getParticipantDataOld(
+        return this.reviewApi.getParticipantData(
           workspace.namespace,
           workspace.id,
           cohort.id,
