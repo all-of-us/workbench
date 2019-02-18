@@ -63,7 +63,7 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
               return this.profileService.submitTermsOfService();
             })
             .flatMap((p) => {
-              if (p.ethicsTrainingCompletionTime) {
+              if (p.trainingCompletionTime) {
                 return Observable.from([p]);
               }
               return this.profileService.completeEthicsTraining();

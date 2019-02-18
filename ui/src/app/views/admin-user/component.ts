@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 
 import {
+  AuthDomainService,
   IdVerificationReviewRequest,
   IdVerificationStatus,
   Profile,
@@ -21,15 +22,22 @@ const verificationSortMap = {
   templateUrl: './component.html',
   styleUrls: ['./component.css']
 })
-export class AdminReviewIdVerificationComponent implements OnInit {
+export class AdminUserComponent implements OnInit {
   profiles: Profile[] = [];
   contentLoaded = false;
+  IdVerificationStatus = IdVerificationStatus;
 
   constructor(
+    private authDomainService: AuthDomainService,
     private profileService: ProfileService
   ) {}
 
   ngOnInit(): void {
+    this.loadProfiles();
+  }
+
+  loadProfiles(): void {
+    this.contentLoaded = false;
     this.profileService.getIdVerificationsForReview()
       .subscribe(
         profilesResp => {
@@ -48,6 +56,13 @@ export class AdminReviewIdVerificationComponent implements OnInit {
           this.contentLoaded = true;
         });
     }
+  }
+
+  updateUserDisabledStatus(disable: boolean, profile: Profile): void {
+    this.authDomainService.updateUserDisabledStatus(
+        {email: profile.username, disabled: disable}).subscribe(() => {
+          this.loadProfiles();
+        });
   }
 
   // We want to sort first by verification status, then by

@@ -21,8 +21,8 @@ import {StatusCheckService} from './services/status-check.service';
 import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
@@ -36,7 +36,6 @@ import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/co
 import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
-import {WorkbenchAccessTasksComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
 import {NewNotebookModalComponent} from './views/new-notebook-modal/component';
 import {NotebookListComponent} from './views/notebook-list/component';
@@ -133,7 +132,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminReviewWorkspaceComponent,
-    AdminReviewIdVerificationComponent,
+    AdminUserComponent,
     AppComponent,
     BreadcrumbComponent,
     BugReportComponent,
@@ -165,7 +164,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ToolTipComponent,
     TopBoxComponent,
     UnregisteredComponent,
-    WorkbenchAccessTasksComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,
