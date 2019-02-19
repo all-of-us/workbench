@@ -16,6 +16,7 @@ export class UserServiceStub {
           givenName: 'Sample'
         });
         const userResponse: UserResponse = {
+          query: 'sampleuser4',
           users: roleNamePairs
         };
         observer.next(userResponse);
