@@ -278,7 +278,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       age: ageAtEvent,
     }
   }, {
-    name: 'Lab',
+    name: 'Labs',
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
     columns: [
@@ -295,11 +295,11 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       visitType: visitType
     }
   }, {
-    name: 'Vital',
+    name: 'Vitals',
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, value, unit, refRange, ageAtEvent, visitType
+      itemDate, itemTime, standardName, value, unit, refRange, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -312,7 +312,7 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       visitType: visitType
     }
   }, {
-    name: 'Survey',
+    name: 'Surveys',
     domain: DomainType.SURVEY,
     filterType: PageFilterType.ReviewFilter,
     columns: [

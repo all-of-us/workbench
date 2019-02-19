@@ -4,8 +4,17 @@ import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortReviewService, PageFilterRequest, SortOrder} from 'generated';
+import {
+  AllEvents, CohortReviewService, Drug, PageFilterRequest, ParticipantData,
+  SortOrder
+} from 'generated';
 
+class SortByColumn implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    return (a.numMentions === null ? 999999 : parseInt(a.numMentions, 10))
+        - (b.numMentions === null ? 999999 : parseInt(b.numMentions, 10));
+  }
+}
 
 @Component({
   selector: 'app-detail-tab-table',
@@ -25,6 +34,7 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   subscription: Subscription;
 
   readonly pageSize = 25;
+  numMentionsSort = new SortByColumn();
   filtered = [];
   constructor(
     private route: ActivatedRoute,
@@ -77,5 +87,14 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  sortByColumn(column: string) {
+    switch (column) {
+      case 'numMentions':
+        return this.numMentionsSort;
+      default:
+        return null;
+    }
   }
 }
