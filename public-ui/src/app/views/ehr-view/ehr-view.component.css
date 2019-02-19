@@ -1,62 +1,37 @@
-.row.search {
-    margin: .25rem;
-}
-.white-card-box{
-    padding: .25rem;
-}
-.white-card-box.top-stat {
-    padding: 1rem;
-}
-.card-view {
-    margin-top: .5rem;
-}
-.flex-xs-middle.code-tooltip {
-    display: inline;
-}
-.hand-cursor {
-    cursor: pointer;
-}
-.top-concepts-chart {
-    background-size: contain;
-}
-.col-border {
-    border-right: 1px solid black;
-    padding: .25rem;
-}
-.col-header-row {
-    background-color: #ECECF1;
-    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
-}
-.db-alert {
-    padding: .5rem;
-}
-.matching-concepts-help-text-display {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-}
-.domain-summary {
-    margin: .65rem;
+.expandable-grid-row  {
+    width: 100%;
+    border-bottom: 1px solid #CCCCCC;
+    border-radius: 3px 3px 0 0;
+    min-height: 2em;
 }
 
-.search-input-full{
-    border: none;
-    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
-    height: 3rem;
-    width: 75%;
-    background-color: #A3D3F232;
-    font-size: 16px;
+/* This is a column in our grid */
+.expandable-grid-row > div {
+
+    font-size: 14px;
     font-weight: 400;
-    line-height: 19px;
-    color: #000000;
-    margin-top: 2%;
-    margin-bottom: 2%;
+    line-height: 16px;
+
+}
+
+.search-bar {
+    min-width: 100%;
+    padding-left: 10px;
+    margin-bottom:28px;
+
+}
+
+#domain-name {
+    padding-bottom:12px;
+    font-size: 30px;
+    line-height: 31px;
+}
+#domain-summary {
+    font-size: 23px;
+    margin-bottom:28px;
 }
 
 
-#search-db {
-    margin-top: 3%;
-}
-
-.toggle-link {
-    color: #262262;
+.top-concepts-chart {
+    width:100%;
 }

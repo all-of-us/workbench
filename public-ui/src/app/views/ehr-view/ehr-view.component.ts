@@ -1,11 +1,11 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {DataBrowserService} from '../../../publicGenerated/api/dataBrowser.service';
-import {Concept} from '../../../publicGenerated/model/concept';
-import {ConceptListResponse} from '../../../publicGenerated/model/conceptListResponse';
-import {SearchConceptsRequest} from '../../../publicGenerated/model/searchConceptsRequest';
-import {StandardConceptFilter} from '../../../publicGenerated/model/standardConceptFilter';
-import {GraphType} from '../../utils/enum-defs';
+import { DataBrowserService } from '../../../publicGenerated/api/dataBrowser.service';
+import { Concept } from '../../../publicGenerated/model/concept';
+import { ConceptListResponse } from '../../../publicGenerated/model/conceptListResponse';
+import { SearchConceptsRequest } from '../../../publicGenerated/model/searchConceptsRequest';
+import { StandardConceptFilter } from '../../../publicGenerated/model/standardConceptFilter';
+import { GraphType } from '../../utils/enum-defs';
 
 import { FormControl } from '@angular/forms';
 import {
@@ -26,7 +26,7 @@ import { ISubscription } from 'rxjs/Subscription';
 })
 export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
-  title: string ;
+  title: string;
   subTitle: string;
   ehrDomain: any;
   searchText: FormControl = new FormControl();
@@ -71,20 +71,22 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
   /* Show different graphs depending on domain we are in */
   graphToShow = GraphType.BiologicalSex;
-  showTopConcepts = false;
-  domainHelpText = {'condition': 'Medical concepts that describe the ' +
-    'health status of an individual, ' +
-    'such as medical diagnoses, are found in the conditions domain.',
+  showTopConcepts = true;
+  domainHelpText = {
+    'condition': 'Medical concepts that describe the ' +
+      'health status of an individual, ' +
+      'such as medical diagnoses, are found in the conditions domain.',
     'drug': 'Medical concepts that capture information about the utilization of a ' +
-    'drug when ingested or otherwise introduced into ' +
-    'the body are captured by the drug exposures domain.',
+      'drug when ingested or otherwise introduced into ' +
+      'the body are captured by the drug exposures domain.',
     'measurement': 'Medical concepts that capture values resulting from ' +
-    'examinations or tests are captured by the measurements domain. ' +
-    'The measurements domain may include vital signs, lab values, ' +
-    'quantitative findings from pathology reports, etc.',
+      'examinations or tests are captured by the measurements domain. ' +
+      'The measurements domain may include vital signs, lab values, ' +
+      'quantitative findings from pathology reports, etc.',
     'procedure': 'Medical concepts that capture information related to activities or ' +
-    'processes that are ordered or carried out on individuals for ' +
-    'diagnostic or therapeutic purposes are captured by the procedures domain.'};
+      'processes that are ordered or carried out on individuals for ' +
+      'diagnostic or therapeutic purposes are captured by the procedures domain.'
+  };
   conceptCodeHelpText = 'The concept code is an additional piece of information that\n' +
     'can be utilized to find medical concepts in the All of Us data set. ' +
     'Concept codes are specific to the\n' +
@@ -97,7 +99,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
 
   constructor(private route: ActivatedRoute,
-              private api: DataBrowserService
+    private api: DataBrowserService
   ) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
@@ -121,11 +123,11 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     if (obj) {
       this.ehrDomain = JSON.parse(obj);
       this.subTitle = 'Keyword: ' + this.searchText;
-      this.title = 'Domain Search Results: ' + this.ehrDomain.name;
+      this.title = this.ehrDomain.name;
     } else {
       /* Error. We need a db Domain object. */
-      this.title   = 'Keyword: ' + this.searchText;
-      this.title = 'Domain Search Results: ' + 'Error - no result for domain selected';
+      this.title = 'Keyword: ' + this.searchText;
+      this.title = 'Error - no result for domain selected';
     }
     if (this.ehrDomain) {
       // Set the graphs we want to show for this domain
@@ -146,11 +148,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
           error: err => {
             console.log('Error searching: ', err);
             this.loading = false;
-          }}));
+          }
+        }));
 
       // Set to loading as long as they are typing
       this.subscriptions.push(this.searchText.valueChanges.subscribe(
-        (query) => this.loading = true ));
+        (query) => this.loading = true));
     }
   }
   ngOnDestroy() {
