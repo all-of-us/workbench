@@ -67,6 +67,18 @@ input[type=password]:focus {
     color: red;
 }
 
+:root {
+    --mid-blue: #216fb4;
+    --pale-sky-blue: #bee1ff;
+    --pale-grey: #f6f6f8;
+    --pale-grey-two: #f0f2f3;
+    --blueberry: #2f2e7e;
+    --pinkish-grey: #bababa;
+    --dark-slate-blue: #262262;
+  }
+  /* Text styles */
+
+  
 /* get rid of margins on small screens */
 
 /* @media (max-width: 978px) {

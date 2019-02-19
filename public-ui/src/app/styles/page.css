@@ -1,37 +1,90 @@
 
 .content-container, .card-header, .card, .card-title, h1, h2, h3, h4, h5, h6, .title, .view-title, .box-title,
 .box-heading, p, div, .view-sub-title, .box-sub-title, label  {
-        font-family: "unit",open-sans, sans-serif;
+        font-family: "unit, sans-serif",open-sans, sans-serif;
         margin:0;
 }
 
-.db-title {
+/* primary display */
+#db-title {
     text-align: center;
-    font-family: unit, open-sans, sans-serif;
-    font-weight: 500;
-    font-size: 40px;
-    margin-bottom: 35px;
-    color: #262262;
+    width: calc((100%/12)- 8px);
+    margin: auto;
 
 }
 
-.db-desc {
+#db-desc {
+    text-align: center;
+}
+
+#db-sub-desc {
+    padding:2rem;
+    text-align:center;
+}
+
+
+.primary-display {
+    font-family: unit, sans-serif;
+    font-size: 50px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 2.08em;
+    letter-spacing: normal;
+    text-align: left;
+    color: var(--dark-slate-blue);
+  }
+
+  .secondary-display {
+    font-family: unit, sans-serif, sans-serif;
+    font-weight: 200;
+    font-style: normal;
+    font-size: 38px;
+    font-stretch:normal;
+    line-height: 1.47em;
+    letter-spacing: normal;
+    text-align: left;
+    color: var(--dark-slate-blue);
+  }
+  .display-body {
+    font-family: unit, sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.23;
+    letter-spacing: normal;
+    text-align: left;
+    color: var(--dark-slate-blue);
+  }
+  .body-lead {
+    font-family: GothamBook, open-sans, sans-serif;
+    font-size: 20px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 2em;
+    letter-spacing: normal;
+    text-align: left;
+    color: var(--dark-slate-blue);
+  }
+  .body-default {
     font-family: GothamBook, open-sans, sans-serif;
     font-size: 18px;
-    font-weight: 300;
-    line-height: 27px;
-    line-height: 40px;
-    color:#262262;
-    text-align: center;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+    text-align: left;
+    color: var(--dark-slate-blue);
+  }
 
-}
+  .info-icon {
+    color: #216fb4;
+    font-weight: 600;
+  }
 
-.db-desc_sub {
-    padding:2rem;
-    font-size: 20px;
-    font-family: GothamBook,Helvetica, sans-serif;
-    color:#262262;
-    font-weight: 300;
-    line-height: 30px;
-    text-align:center;
+  .search-icon {
+    margin-top: 1%;
 }
