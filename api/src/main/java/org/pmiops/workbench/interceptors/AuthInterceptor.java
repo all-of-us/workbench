@@ -141,7 +141,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       if (!userEmail.endsWith(gsuiteDomainSuffix)) {
         log.log(Level.INFO, "User {0} isn't in domain {1}, can't access the workbench",
             new Object[] { userEmail, gsuiteDomainSuffix });
-        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return false;
       }
     }
