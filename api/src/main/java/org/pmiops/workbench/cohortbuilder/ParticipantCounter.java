@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.util.HashMap;
 
-import org.pmiops.workbench.cdm.DomainTableEnum;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ public class ParticipantCounter {
 
   public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
+  private static final String TABLE_PREFIX = QueryBuilderConstants.TABLE_PREFIX;
 
   private static final String PERSON_TABLE = "person";
 
@@ -95,7 +96,7 @@ public class ParticipantCounter {
                                                                   DomainType domainType,
                                                                   int chartLimit) {
       String domain = domainType.name();
-      String table = DomainTableEnum.getDenormalizedTableName(domain);
+      String table = TABLE_PREFIX + domain.toString().toLowerCase();
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
         .replace("${table}", table);
