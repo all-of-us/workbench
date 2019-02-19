@@ -60,6 +60,111 @@ done
 
 # Populate some tables from cdr data
 
+#########################################
+# insert survey data into person_survey #
+#########################################
+echo "Inserting survey data into person_survey"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
+   (person_id, data_id, start_datetime, survey, question, answer)
+SELECT PERSON_ID,
+    DATA_ID,
+    START_DATETIME,
+    survey,
+    question,
+    answer
+FROM
+(SELECT person_id,
+    observation_id as DATA_ID,
+    observation_datetime as START_DATETIME,
+    observation_source_concept_id as concept_id,
+    case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer
+FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a.value_as_concept_id = b1.concept_id
+where a.observation_source_concept_id in
+(select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1)) x
+join
+(select b2.name as survey,
+    c1.name as question,
+    c1.concept_id,
+    b2.id as s_id,
+    c1.id as q_id
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\` a1
+left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
+left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
+where ancestor_id in
+(select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and parent_id = 0)) y on x.concept_id = y.concept_id"
+
+#####################################
+# insert drug data into person_drug #
+#####################################
+echo "Inserting drug data into person_drug"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
+ (person_id, data_id, start_datetime, standard_concept_id, visit_occurrence_id, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose,
+ strength, route_concept_id)
+SELECT P.PERSON_ID,
+    t.DRUG_EXPOSURE_ID AS DATA_ID,
+    t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
+    DRUG_CONCEPT_ID as STANDARD_CONCEPT_ID,
+    VISIT_OCCURRENCE_ID,
+    CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
+    T.NUM_MENTIONS,
+    T.FIRST_MENTION,
+    T.LAST_MENTION,
+    T.QUANTITY as dose,
+    '' as strength,
+    ROUTE_CONCEPT_ID
+FROM
+(SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, a.DRUG_SOURCE_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
+NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, QUANTITY, ROUTE_CONCEPT_ID
+FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` A,
+(SELECT PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
+min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATETIME) as LAST_MENTION
+FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
+GROUP BY PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID) B
+WHERE a.PERSON_ID = b.PERSON_ID and a.DRUG_CONCEPT_ID = b.DRUG_CONCEPT_ID and a.DRUG_SOURCE_CONCEPT_ID = b.DRUG_SOURCE_CONCEPT_ID) t
+JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
+
+#####################################
+# update drug data into person_drug #
+#####################################
+echo "Updating drug data into person_drug"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
+ set pd.standard_name = con.standard_name, pd.standard_code = con.standard_code, pd.standard_vocabulary = con.standard_vocabulary
+ from (select data_id,
+ case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+ case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
+ case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY
+ from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
+ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on d.standard_concept_id = c1.CONCEPT_ID) as con
+ where con.data_id = pd.data_id"
+
+#####################################
+# update drug data into person_drug #
+#####################################
+echo "Updating drug data into person_drug"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
+  set pd.route = con.route
+  from (select data_id, case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as ROUTE
+  from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on d.ROUTE_CONCEPT_ID = c1.CONCEPT_ID) as con
+  where con.data_id = pd.data_id"
+
+#####################################
+# update drug data into person_drug #
+#####################################
+echo "Updating drug data into person_drug"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
+  set pd.visit_type = con.visit_type
+  from (select data_id, case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as VISIT_TYPE
+  from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
+  left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on d.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on v.VISIT_CONCEPT_ID = c1.CONCEPT_ID) as con
+  where con.data_id = pd.data_id"
 
 ################################################
 # insert condition data into person_condition #
@@ -88,41 +193,6 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.CONDITION_SOURCE_CONCEPT_I
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on a.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.visit_concept_id = c3.concept_id
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on a.PERSON_ID = p.PERSON_ID"
-
-#####################################
-# insert drug data into person_drug #
-#####################################
-echo "Inserting drug data into person_drug"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
- (person_id, data_id, start_datetime, standard_name, standard_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose, strength, route)
-SELECT P.PERSON_ID,
-    t.DRUG_EXPOSURE_ID AS DATA_ID,
-    t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
-    case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
-    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
-    case when c4.concept_name is null then 'No matching concept' else c4.concept_name end as visit_type,
-    CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-    T.NUM_MENTIONS,
-    T.FIRST_MENTION,
-    T.LAST_MENTION,
-    T.QUANTITY as dose,
-    '' as strength,
-    C3.CONCEPT_NAME AS ROUTE
-FROM
-(SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
-a.DRUG_SOURCE_CONCEPT_ID, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, REFILLS, QUANTITY, ROUTE_CONCEPT_ID
-FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` A,
-(SELECT PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID, COUNT(*) AS NUM_MENTIONS,
-min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATETIME) as LAST_MENTION
-FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
-GROUP BY PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID) B
-WHERE a.PERSON_ID = b.PERSON_ID and a.DRUG_CONCEPT_ID = b.DRUG_CONCEPT_ID and a.DRUG_SOURCE_CONCEPT_ID = b.DRUG_SOURCE_CONCEPT_ID) t
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.DRUG_CONCEPT_ID = c1.CONCEPT_ID
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on t.ROUTE_CONCEPT_ID = c3.CONCEPT_ID
-left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.concept_id
-JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
 
 ###################################
 # insert lab data into person_lab #
@@ -207,42 +277,6 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.OBSERVATION_CONCEPT_ID = c
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
-
-#########################################
-# insert survey data into person_survey #
-#########################################
-echo "Inserting survey data into person_survey"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_survey\`
-   (person_id, data_id, start_datetime, survey, question, answer)
-SELECT PERSON_ID,
-    DATA_ID,
-    START_DATETIME,
-    survey,
-    question,
-    answer
-FROM
-(SELECT person_id,
-    observation_id as DATA_ID,
-    observation_datetime as START_DATETIME,
-    observation_source_concept_id as concept_id,
-    case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer
-FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b1 on a.value_as_concept_id = b1.concept_id
-where a.observation_source_concept_id in
-(select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1)) x
-join
-(select b2.name as survey,
-    c1.name as question,
-    c1.concept_id,
-    b2.id as s_id,
-    c1.id as q_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\` a1
-left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
-left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
-where ancestor_id in
-(select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and parent_id = 0)) y on x.concept_id = y.concept_id
-order by person_id, s_id, q_id"
 
 ################################################################
 # insert physicalMeasurement data into person_physical_measure #
