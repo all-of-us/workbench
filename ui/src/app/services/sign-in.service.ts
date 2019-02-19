@@ -103,7 +103,7 @@ export class SignInService {
     if (!gapi.auth2) {
       return null;
     } else {
-      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().Paa;
+      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
     }
   }
 }

@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {
   AnnotationType,
@@ -51,12 +51,11 @@ export class SetAnnotationCreateComponent {
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
     private state: ReviewStateService,
-    private route: ActivatedRoute,
   ) {}
 
   create(): void {
     this.posting = true;
-    const {ns, wsid, cid} = this.route.snapshot.params;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
 
     const request = <CohortAnnotationDefinition>{
       cohortId: cid,
@@ -80,7 +79,7 @@ export class SetAnnotationCreateComponent {
         .getCohortAnnotationDefinitions(ns, wsid, cid)
         .pluck('items'))
       .do((defns: CohortAnnotationDefinition[]) =>
-        this.state.annotationDefinitions.next(defns))
+        annotationDefinitionsStore.next(defns))
       .subscribe(_ => {
         this.open = false;
         this.form.reset();

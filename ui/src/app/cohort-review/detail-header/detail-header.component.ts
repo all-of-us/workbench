@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReview,
@@ -30,13 +30,10 @@ export class DetailHeaderComponent implements OnChanges {
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private state: ReviewStateService,
-    private route: ActivatedRoute,
-    private router: Router,
   ) {}
 
   ngOnChanges(changes) {
-    this.state.review$.subscribe(review => this.update(review));
+    this.update(cohortReviewStore.getValue());
   }
 
   update(review) {
@@ -70,7 +67,8 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   backToTable() {
-    this.router.navigate(['..'], {relativeTo: this.route});
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
   }
 
   previous() {
@@ -96,12 +94,12 @@ export class DetailHeaderComponent implements OnChanges {
         ? page - 1
         : page + 1;
 
-      this.state.review$
+      cohortReviewStore
         .take(1)
         .map(({page, pageSize}) => ({page: adjustPage(page), size: pageSize}))
         .mergeMap(({page, size}) => this.callAPI(page, size))
         .subscribe(review => {
-          this.state.review.next(review);
+          cohortReviewStore.next(review);
           const stat = statusGetter(review.participantCohortStatuses);
           this.navigateById(stat.participantId);
 
@@ -110,8 +108,8 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   private callAPI = (page: number, size: number): Observable<CohortReview> => {
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const request = {
       page: page,
       pageSize: size,
@@ -123,7 +121,8 @@ export class DetailHeaderComponent implements OnChanges {
   }
 
   private navigateById = (id: number): void => {
-    this.router.navigate(['..', id], {relativeTo: this.route});
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
     this.navigationClicked.emit(id);
   }
 }

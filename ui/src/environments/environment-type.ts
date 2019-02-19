@@ -36,6 +36,9 @@ export interface Environment {
   // The TCell app ID. See RW-1682 for details.
   // Example value: 'AoUNonProd-WZFW2'
   tcellappid: string;
+  // The url for Moodle integration
+  // Example value: https://aoudev.nnlm.gov
+  trainingUrl: string;
   // The base URL for the Zendesk help center / user forum.
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;

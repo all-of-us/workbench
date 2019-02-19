@@ -1,9 +1,10 @@
 import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {urlParamsStore} from 'app/utils/navigation';
+import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
 
 import {
@@ -15,17 +16,6 @@ import {
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionService,
 } from 'generated';
-
-
-class StubRoute {
-  snapshot = {params: {
-    ns: 'workspaceNamespace',
-    wsid: 'workspaceId',
-    cid: 1
-  }};
-}
-
-const stubRoute = new StubRoute();
 
 const stubDefinition = <CohortAnnotationDefinition>{
   cohortAnnotationDefinitionId: 1,
@@ -59,7 +49,6 @@ describe('SetAnnotationItemComponent', () => {
         providers: [
           ReviewStateService,
           {provide: CohortAnnotationDefinitionService, useValue: new ApiSpy()},
-          {provide: ActivatedRoute, useValue: stubRoute},
         ],
       }).compileComponents().then((resp) => {
         fixture = TestBed.createComponent(SetAnnotationItemComponent);
@@ -70,6 +59,12 @@ describe('SetAnnotationItemComponent', () => {
         component.definition = stubDefinition;
         updateAndTick(fixture);
       });
+    urlParamsStore.next({
+      ns: 'workspaceNamespace',
+      wsid: 'workspaceId',
+      cid: 1
+    });
+    cohortReviewStore.next(cohortReviewStub);
   }));
 
   it('Should render', () => {

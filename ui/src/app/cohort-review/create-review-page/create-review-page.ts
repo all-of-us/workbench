@@ -1,7 +1,8 @@
 import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
 
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {
   Cohort,
   CohortReview,
@@ -28,8 +29,6 @@ export class CreateReviewPage implements OnInit {
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private router: Router,
-    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -42,9 +41,8 @@ export class CreateReviewPage implements OnInit {
   }
 
   ngOnInit() {
-    const {review, cohort} = this.route.snapshot.data;
-    this.review = review;
-    this.cohort = cohort;
+    this.review = cohortReviewStore.getValue();
+    this.cohort = currentCohortStore.getValue();
 
     this.numParticipants.setValidators([
       Validators.required,
@@ -54,23 +52,22 @@ export class CreateReviewPage implements OnInit {
   }
 
   cancelReview() {
-    const {ns, wsid} = this.route.parent.snapshot.params;
-    console.dir(this.route);
-    this.router.navigate(['workspaces', ns, wsid, 'cohorts']);
+    const {ns, wsid} = urlParamsStore.getValue();
+    navigate(['workspaces', ns, wsid, 'cohorts']);
   }
 
   createReview() {
     this.creating = true;
     this.cdr.detectChanges();
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
-    const cdrid = this.route.parent.snapshot.data.workspace.cdrVersionId;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const request = <CreateReviewRequest>{size: this.numParticipants.value};
 
     this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
       .subscribe(_ => {
         this.creating = false;
         this.created.emit(true);
-        this.router.navigate(['participants'], {relativeTo: this.route.parent});
+        navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
       });
   }
 }

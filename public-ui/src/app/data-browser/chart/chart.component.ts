@@ -4,6 +4,7 @@ import * as highcharts from 'highcharts';
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DbConfigService} from '../../utils/db-config.service';
+import {DomainType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-chart',
@@ -20,6 +21,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartType: string;
   @Input() sources = false;
   @Input() genderId: string; // Hack until measurement design of graphs gender overlay
+  @Input() domainType: DomainType;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
@@ -437,7 +439,8 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
+      title: {text: this.getChartTitle(this.domainType),
+        style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -527,6 +530,15 @@ export class ChartComponent implements OnChanges {
       xAxisTitle: unit
     };
 
+  }
+  public getChartTitle(domainType: string) {
+    if (domainType === DomainType.EHR) {
+      return 'Age At First Occurrence';
+    } else if (domainType === DomainType.SURVEYS) {
+      return 'Age When Survey Was Taken';
+    } else if (domainType === DomainType.PHYSICAL_MEASUREMENTS) {
+      return 'Age When Physical Measurement Was Taken';
+    }
   }
 
 }

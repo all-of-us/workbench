@@ -1,41 +1,28 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
-import {currentCohortStore} from 'app/utils/navigation';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {ReviewStatus} from 'generated';
 
 @Component({
   templateUrl: './page-layout.html',
   styleUrls: ['./page-layout.css']
 })
-export class PageLayout implements OnInit, OnDestroy {
+export class PageLayout implements OnInit {
 
   subscription: any;
   create = false;
-  constructor(
-    private state: ReviewStateService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {}
+  constructor() {}
 
   ngOnInit() {
-    const {review} = this.route.snapshot.data;
-    this.subscription = this.route.data.subscribe(({cohort}) => {
-      this.state.cohort.next(cohort);
-      currentCohortStore.next(cohort);
-    });
-    this.state.review.next(review);
+    const review = cohortReviewStore.getValue();
 
     if (review.reviewStatus === ReviewStatus.NONE) {
       this.create = true;
     } else {
-      this.router.navigate(['participants'], {relativeTo: this.route});
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
     }
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 
   reviewCreated(created: boolean) {

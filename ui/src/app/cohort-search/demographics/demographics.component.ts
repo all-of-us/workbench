@@ -1,7 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -12,6 +11,7 @@ import {
   participantsCount,
   previewStatus,
 } from 'app/cohort-search/redux';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
@@ -93,7 +93,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   showCalculateContainer = false;
   count: any;
   constructor(
-    private route: ActivatedRoute,
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
     private ngRedux: NgRedux<CohortSearchState>
@@ -175,7 +174,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadNodesFromApi() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
         /*
          * Each subtype's possible criteria is loaded via the API.  Race and Gender
          * criteria nodes become options in their respective dropdowns; deceased
