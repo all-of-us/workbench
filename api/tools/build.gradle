@@ -1,6 +1,6 @@
 // Gradle targets for tools, used by Ruby commands and docker-compose.
 //
-// TODO(gjuggler): the tool targets here should be migrated to the main Gradle config,
+// TODO(RW-2172): the tool targets here should be migrated to the main Gradle config,
 // similar to how backfillGSuiteUserData is set up.
 
 ext['hibernate.version'] = '5.2.10.Final'

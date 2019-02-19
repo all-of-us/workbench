@@ -41,6 +41,9 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
  * we now populate for new users.
  *
  * Once the backfill is completed for all environments, this script may be deleted.
+ *
+ * TODO(RW-2032): Before this script goes away, but after recoveryEmail becomes available
+ * to the directory API, we should augment this script & run a backfill for recovery emails.
  */
 @SpringBootApplication
 // Most of the "config" module contains Spring beans that we don't want. But the RetryConfig
