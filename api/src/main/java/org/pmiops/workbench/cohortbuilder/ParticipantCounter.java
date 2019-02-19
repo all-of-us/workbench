@@ -95,8 +95,7 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      String domain = domainType.name();
-      String table = TABLE_PREFIX + domain.toString().toLowerCase();
+      String table = TABLE_PREFIX + domainType.name().toLowerCase();
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
         .replace("${table}", table);
