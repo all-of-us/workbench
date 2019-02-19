@@ -28,10 +28,10 @@ import {CohortResolver} from './resolvers/cohort';
 import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
+import {DataPageComponent} from 'app/views/data-page/component';
 import {environment} from 'environments/environment';
 import {NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
-import {DataPageComponent} from "app/views/data-page/component";
 
 declare let gtag: Function;
 

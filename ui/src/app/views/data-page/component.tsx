@@ -1,18 +1,18 @@
-import {Component} from "@angular/core";
-import {ReactWrapperBase, withCurrentWorkspace} from "../../utils/index";
+import {Component} from '@angular/core';
 
-import * as React from 'react'
-import {FadeBox} from "../../components/containers";
-import {CardButton, TabButton} from "../../components/buttons";
-import {ClrIcon} from "../../components/icons";
-import {navigate} from "app/utils/navigation";
-import {WorkspaceData} from "../../resolvers/workspace";
-import {cohortsApi, conceptSetsApi} from "../../services/swagger-fetch-clients";
-import {convertToResources, ResourceType} from "../../utils/resourceActionsReact";
-import {WorkspaceAccessLevel} from "../../../generated/fetch/api";
-import {ResourceCard} from "../resource-card/component";
-import {RecentResource} from "generated/fetch";
-import {SpinnerOverlay, Spinner} from "../../components/spinners";
+import * as React from 'react';
+
+import {CardButton, TabButton} from 'app/components/buttons';
+import {FadeBox} from 'app/components/containers';
+import {ClrIcon} from 'app/components/icons';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {cohortsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
+import {navigate} from 'app/utils/navigation';
+import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
+import {ResourceCard} from 'app/views/resource-card/component';
+import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -132,7 +132,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
           <CardButton style={styles.resourceTypeButton} disabled={true}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Datasets</h2>
-              <ClrIcon shape='plus-circle' class="is-solid" size={18} style={{marginTop: 5}}/>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
               Littera gothica quam nunc putamus parum claram anteposuerit litterarum
@@ -145,7 +145,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
           }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Cohorts</h2>
-              <ClrIcon shape='plus-circle' class="is-solid" size={18} style={{marginTop: 5}}/>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
               Littera gothica quam nunc putamus parum claram anteposuerit litterarum
@@ -160,7 +160,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
                       }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Concept Sets</h2>
-              <ClrIcon shape='plus-circle' class="is-solid" size={18} style={{marginTop: 5}}/>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
               Littera gothica quam nunc putamus parum claram anteposuerit litterarum
@@ -210,7 +210,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
           padding: '0 0.5rem'
         }}>
           {filteredList.map(resource => {
-            {resourceKey = resourceKey + 1;}
+            {resourceKey = resourceKey + 1; }
             return <ResourceCard key={resourceKey}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
@@ -221,7 +221,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
       </FadeBox>
     </React.Fragment>;
   }
-})
+});
 
 @Component({
   template: '<div #root></div>'

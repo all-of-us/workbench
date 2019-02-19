@@ -7,8 +7,8 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {withCurrentWorkspace} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
 import {environment} from 'environments/environment';
+import {WorkspaceAccessLevel} from 'generated';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
