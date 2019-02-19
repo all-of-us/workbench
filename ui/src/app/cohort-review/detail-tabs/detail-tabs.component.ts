@@ -1,6 +1,6 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import * as fp from 'lodash/fp';
+
 import {typeToTitle} from 'app/cohort-search/utils';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
@@ -8,6 +8,7 @@ import {
   DomainType,
   PageFilterType,
 } from 'generated';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
@@ -139,7 +140,7 @@ const answer = {
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
+export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   data;
   participantsId: any;
@@ -149,7 +150,6 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
   chartLoadedSpinner = false;
-  @Input() clickedParticipantId: number;
   summaryActive = false;
   readonly allEvents = {
     name: 'All Events',
@@ -327,58 +327,35 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
   }];
 
   constructor(
-    private state: ReviewStateService,
-    private route: ActivatedRoute,
     private reviewAPI: CohortReviewService,
   ) {}
 
-
-  ngOnChanges() {
-    if (this.clickedParticipantId && this.participantsId !== this.clickedParticipantId) {
-      this.chartLoadedSpinner = true;
-      if (this.summaryActive) {
-        this.getSubscribedData();
-      }
-    }
-  }
-
-  getSubscribedData() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.subscription = this.route.data.map(({participant}) => participant)
-      .subscribe(participants => {
-        this.participantsId = this.clickedParticipantId || participants.participantId;
-      });
-    this.getDomainsParticipantsData();
-  }
-
   ngOnInit() {
-    this.getSubscribedData();
-  }
-
-
-  getDomainsParticipantsData() {
-    const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const limit = 10;
-
-    this.domainList.map(domainName => {
-      this.chartData[domainName] = {
-        conditionTitle: '',
-        loading: true,
-        items: []
-      };
-      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
-        this.participantsId , domainName, limit)
-        .subscribe(data => {
-          const participantsData = data;
-          this.chartData[domainName].items = participantsData.items;
-          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
-          this.chartData[domainName].loading = false;
-        });
-      this.subscription.add(getParticipantsDomainData);
-    });
+    this.subscription = Observable
+      .combineLatest(urlParamsStore, currentWorkspaceStore)
+      .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
+        return Observable.forkJoin(
+          ...this.domainList.map(domainName => {
+            this.chartData[domainName] = {
+              loading: true,
+              conditionTitle: '',
+              items: []
+            };
+            return this.reviewAPI
+              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10)
+              .do(({items}) => {
+                this.chartData[domainName] = {
+                  loading: false,
+                  conditionTitle: typeToTitle(domainName),
+                  items
+                };
+              });
+          })
+        );
+      })
+      .subscribe();
   }
 
   ngOnDestroy() {
