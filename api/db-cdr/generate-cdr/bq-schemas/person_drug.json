@@ -21,6 +21,16 @@
 	},
 	{
 	"mode": "NULLABLE",
+	"name": "standard_code",
+	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "standard_vocabulary",
+	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
 	"name": "standard_concept_id",
 	"type": "INTEGER"
 	},
@@ -63,5 +73,15 @@
 	"mode": "NULLABLE",
 	"name": "visit_type",
 	"type": "STRING"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "visit_occurrence_id",
+	"type": "INTEGER"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "route_concept_id",
+	"type": "INTEGER"
 	}
 ]
