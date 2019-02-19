@@ -1,14 +1,12 @@
-<div class="row">
-
-  <div class="col-xs-12">
     <div class="db-header">
       <div>
-        <h1 class="db-title">Explore Data Browser</h1>
-        <p class="db-desc col-xs-10 push-xs-1">{{dbDesc}} </p>
+        <h1 id='db-title' class="primary-display ">Explore Data Browser</h1>
+        <p id="db-desc" class="display-body">{{dbDesc}} </p>
       </div>
     </div>
     <div class="search">
-      <div class="search-title"><span> {{title}}
+      <div class="search-title">
+         <span class="secondary-display">{{title}}</span>
           <clr-tooltip>
             <clr-icon clrTooltipTrigger shape="info-standard" size="18" class="is-solid info-icon"></clr-icon>
             <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
@@ -16,7 +14,6 @@
               </div>
             </clr-tooltip-content>
           </clr-tooltip>
-        </span>
       </div>
 
       <div class="search-bar search-input-full">
@@ -71,39 +68,34 @@
           <span class="result-body_item" *ngIf="!searchText.value"><span>medical concepts</span></span>
           <span class="result-body_item result-body-stat" *ngIf="r.participantCount">
             <span><strong> {{r.participantCount | number}}</strong> participants in this domain
+            </span>
           </span>
-          </span>
-
           <div class="result-bottom">
             <span *ngIf="!searchText.value" class="result-bottom-link" (click)="viewEhrDomain(r)">
               View Top 100 </span>
             <span *ngIf="searchText.value" class="result-bottom-link" (click)="viewEhrDomain(r)"> View Results </span>
           </div>
         </div>
-
       </div>
-
-
-
+      <!--result-box/>-->
 
       <div class="col col-xs-12" *ngIf="! domainResults || domainResults.length === 0">
         <h6> No EHR Data Results.</h6>
       </div>
-
     </div>
 
     <h5 class="result-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Survey Questions: </h5>
-    <div id="survey"class="result-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
+    <div id="survey" class="result-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
       <div class="result-box" *ngFor="let r of surveyResults">
         <p class="result-box-title">
           {{r.name}}
           <!-- NEEDS help text -->
           <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" size="18" class="is-solid info-icon"></clr-icon>
-              <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
-                <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
-              </clr-tooltip-content>
-            </clr-tooltip>
+            <clr-icon clrTooltipTrigger shape="info-standard" size="18" class="is-solid info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+              <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
+            </clr-tooltip-content>
+          </clr-tooltip>
         </p>
         <div class="result-stat">
           {{r.questionCount | number}}
@@ -140,13 +132,13 @@
       <div id="pm-box" class="result-box">
         <p class="result-box-title">
           Physical Measurements
-             <!-- NEEDS help text -->
-             <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" size="18" class="is-solid info-icon"></clr-icon>
-                <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
-                  <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
-                </clr-tooltip-content>
-              </clr-tooltip>
+          <!-- NEEDS help text -->
+          <clr-tooltip>
+            <clr-icon clrTooltipTrigger shape="info-standard" size="18" class="is-solid info-icon"></clr-icon>
+            <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+              <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
+            </clr-tooltip-content>
+          </clr-tooltip>
         </p>
         <p class="result-body">
           <span>Participants have the option to provide a standard set of physical measurements as part
@@ -168,9 +160,3 @@
 
     </div>
 
-
-
-    <div class="hidden-sm-down  col-md-2">
-    </div>
-
-  </div>
