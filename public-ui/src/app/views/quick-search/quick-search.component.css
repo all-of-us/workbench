@@ -18,9 +18,7 @@ strong {
     align-items: center;
     margin:6px;
 }
-input#search-db{
-    height:auto
-}
+
 .search-bar {
     min-width: calc((100%/12)*7.5);
     flex-grow: 1;
@@ -30,13 +28,11 @@ input#search-db{
 
 .search-bar input {
     min-width: calc((100%/12)*10);
-    padding: 35px;
 }
 
 .search-icon {
     width: calc((100%/12));
     height: 20px;
-    
 }
 .search-title .info-icon {
     margin:0.6em 0.5em 0.1em;
