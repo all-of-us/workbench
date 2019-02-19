@@ -42,7 +42,6 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.Lab;
-import org.pmiops.workbench.model.Measurement;
 import org.pmiops.workbench.model.Observation;
 import org.pmiops.workbench.model.PageFilterType;
 import org.pmiops.workbench.model.PageRequest;
@@ -419,7 +418,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(29)
       .domainType(DomainType.LAB);
     expectedLab2 = new Lab()
-      .value("1.2")
+      .value("1.0")
       .unit("units")
       .refRange("range")
       .visitType("visitType")
@@ -437,7 +436,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(29)
       .domainType(DomainType.VITAL);
     expectedVital2 = new Vital()
-      .value("1.2")
+      .value("1.0")
       .unit("units")
       .refRange("range")
       .visitType("visitType")
@@ -1465,8 +1464,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         assertThat((Procedure) actualData).isEqualTo((Procedure) expected);
       } else if (expected instanceof AllEvents) {
         assertThat((AllEvents) actualData).isEqualTo((AllEvents) expected);
-      } else if (expected instanceof Measurement) {
-        assertThat((Measurement) actualData).isEqualTo((Measurement) expected);
+      } else if (expected instanceof Lab) {
+        assertThat((Lab) actualData).isEqualTo((Lab) expected);
+      } else if (expected instanceof Vital) {
+        assertThat((Vital) actualData).isEqualTo((Vital) expected);
       } else if (expected instanceof PhysicalMeasurement) {
         assertThat((PhysicalMeasurement) actualData).isEqualTo((PhysicalMeasurement) expected);
       }
