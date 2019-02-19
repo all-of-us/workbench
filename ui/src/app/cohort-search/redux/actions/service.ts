@@ -135,7 +135,7 @@ export class CohortSearchActions {
     const [temporalGroupItems, nonTemporalGroupItems] =
       this.getActiveTemporalGroups(groupItems, itemId);
     if (temporal) {
-      if (temporalGroupItems && nonTemporalGroupItems && this.otherGroupsWithActiveItems(groupId)) {
+      if (temporalGroupItems && nonTemporalGroupItems) {
         this.requestGroupCount(role, groupId);
         this.requestTotalCount(groupId);
       } else {
@@ -143,11 +143,10 @@ export class CohortSearchActions {
         this.clearTotalCount(groupId);
         this.cancelTotalIfRequesting();
       }
-    } else if (this.hasActiveItems(group)) {
+    } else {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
     }
-
   }
 
   updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
