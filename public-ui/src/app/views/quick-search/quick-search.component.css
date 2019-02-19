@@ -67,8 +67,8 @@ strong {
     margin-bottom: 1rem;
     padding: 18px;
     padding-bottom: 0;
-    min-width: 279px;
-    max-width: calc(((100%/12)*3) - 15px);
+    min-width: calc(((100%/12)*3) - 15px);
+    max-width: 339px;
     border-radius: 4px;
     background-color: #FFFFFF;
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.15);

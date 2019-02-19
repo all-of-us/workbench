@@ -34,9 +34,9 @@ body {
 
 
 .content-container {
-    width: 85vw;
-    max-width: 1200px !important;
-    margin: auto
+    width:100vw;
+    max-width: 60rem;
+    margin: auto;
 }
 
 .main-container {
