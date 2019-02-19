@@ -359,10 +359,6 @@ definitions:
         description: prevalence among participants percent count divided num participants
         type: number
         format: float
-      subQuestionCount:
-        description: number of sub questions (if any)
-        type: integer
-        format: int32
       countAnalysis:
         description: count analysis
         $ref: "#/definitions/Analysis"

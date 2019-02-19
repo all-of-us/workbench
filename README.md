@@ -494,5 +494,5 @@ survey_question_map.csv is used to identify the order of appearance of the quest
 3. question_concept_id holds the concept id of each question. (can be fetched from the survey pdf)
 4. path specifies the origin id of each question. If the question is the sub-question, then the id of the main question would be the path.
 5. is_main is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question.
-* NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones.
+* NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones. Also, the missing questions would not be displayed as they do not have the counts in there to display.
 
