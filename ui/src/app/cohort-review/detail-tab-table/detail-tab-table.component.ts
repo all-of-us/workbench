@@ -5,8 +5,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {
-  AllEvents, CohortReviewService, Drug, PageFilterRequest, ParticipantData,
-  SortOrder
+  CohortReviewService, PageFilterRequest, SortOrder
 } from 'generated';
 
 class SortByColumn implements ClrDatagridComparatorInterface<any> {
