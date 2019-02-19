@@ -31,6 +31,7 @@ import {WorkspaceResolver} from './resolvers/workspace';
 import {environment} from 'environments/environment';
 import {NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
+import {DataPageComponent} from "app/views/data-page/component";
 
 declare let gtag: Function;
 
@@ -200,6 +201,13 @@ const routes: Routes = [
                     value: 'Concepts',
                     intermediate: true
                   }
+                }
+              },
+              {
+                path: 'data',
+                component: DataPageComponent,
+                data: {
+                  title: 'Data Page'
                 }
               },
               {

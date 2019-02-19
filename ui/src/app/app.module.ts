@@ -79,6 +79,7 @@ import {
 } from 'notebooks-generated';
 import { HighlightSearchComponent } from './highlight-search/highlight-search.component';
 import {ToolTipComponent} from './views/tooltip/component';
+import {DataPageComponent} from "app/views/data-page/component";
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
 // we need to explicitly load its StackTrace dep:
@@ -144,6 +145,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptTableComponent,
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
+    DataPageComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,

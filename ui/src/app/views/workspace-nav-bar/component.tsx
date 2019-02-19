@@ -8,6 +8,7 @@ import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {withCurrentWorkspace} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceAccessLevel} from 'generated';
+import {environment} from 'environments/environment';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -51,9 +52,10 @@ const styles = reactStyles({
 
 const tabs = [
   {name: 'About', link: ''},
+  ...(environment.enableDatasetBuilder ? [{name: 'Data', link: 'data'}] : []),
   {name: 'Cohorts', link: 'cohorts'},
   {name: 'Concepts', link: 'concepts'},
-  {name: 'Notebooks', link: 'notebooks'}
+  {name: 'Notebooks', link: 'notebooks'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;
