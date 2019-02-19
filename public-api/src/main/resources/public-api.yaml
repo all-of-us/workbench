@@ -371,6 +371,11 @@ definitions:
       genderIdentityAnalysis:
         description: gender identity analysis
         $ref: "#/definitions/Analysis"
+      subQuestions:
+        description: sub questions if any
+        type: array
+        items:
+          $ref: "#/definitions/QuestionConcept"
 
   QuestionConceptListResponse:
     type: object

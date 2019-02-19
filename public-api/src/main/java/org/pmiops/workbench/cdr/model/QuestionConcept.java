@@ -20,6 +20,7 @@ public class QuestionConcept {
     private AchillesAnalysis genderAnalysis;
     private AchillesAnalysis ageAnalysis;
     private AchillesAnalysis genderIdentityAnalysis;
+    private List<QuestionConcept> subQuestions;
 
     public static final long SURVEY_COUNT_ANALYSIS_ID = 3110;
     public static final long SURVEY_GENDER_ANALYSIS_ID = 3111;
@@ -161,7 +162,7 @@ public class QuestionConcept {
                 Long qid = Long.valueOf(r.getStratum2());
                 QuestionConcept q = questionMap.get(qid);
 
-                if ( q.getAnalysis(analysis.getAnalysisId())  == null) {
+                if (q.getAnalysis(analysis.getAnalysisId())  == null) {
                     q.setAnalysis(new AchillesAnalysis(analysis));
                 }
                 AchillesAnalysis questionAnalysis = q.getAnalysis(analysis.getAnalysisId());
@@ -304,6 +305,18 @@ public class QuestionConcept {
     public void setGenderIdentityAnalysis(AchillesAnalysis analysis) { this.genderIdentityAnalysis = analysis; }
     public QuestionConcept genderIdentityAnalysis(AchillesAnalysis analysis) {
         this.genderIdentityAnalysis = analysis;
+        return this;
+    }
+
+    @Transient
+    public List<QuestionConcept> getSubQuestions() {
+        return this.subQuestions;
+    }
+    public void setSubQuestions(List<QuestionConcept> subQuestions) {
+        this.subQuestions = subQuestions;
+    }
+    public QuestionConcept subQuestions(List<QuestionConcept> subQuestions) {
+        this.subQuestions = subQuestions;
         return this;
     }
 
