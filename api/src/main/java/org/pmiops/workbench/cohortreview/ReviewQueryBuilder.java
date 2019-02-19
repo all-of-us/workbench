@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_LIMIT_PARAM = "limit";
-  private static final String TABLE_PREFIX = "person_";
+  private static final String TABLE_PREFIX = QueryBuilderConstants.TABLE_PREFIX;
 
   private static final String VISIT_COLUMNS =
     ", visit_type as visitType\n";
