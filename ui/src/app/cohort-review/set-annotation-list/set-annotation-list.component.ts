@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {CohortAnnotationDefinition} from 'generated';
 
@@ -20,7 +20,7 @@ export class SetAnnotationListComponent implements OnInit, OnDestroy {
   constructor(private state: ReviewStateService) {}
 
   ngOnInit() {
-    this.subscription = this.state.annotationDefinitions$
+    this.subscription = annotationDefinitionsStore
             .subscribe(defns => this.definitions = defns);
   }
 

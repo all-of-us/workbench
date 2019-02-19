@@ -1,5 +1,5 @@
 import {AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
@@ -23,15 +23,13 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
   workspace: Workspace;
 
   constructor(private api: CohortBuilderService,
-    private route: ActivatedRoute,
     private cdref: ChangeDetectorRef,
     private cdrVersionStorageService: CdrVersionStorageService) {}
 
   ngOnInit() {
-    const {review} = this.route.snapshot.data;
     this.cohort = currentCohortStore.getValue();
     this.workspace = currentWorkspaceStore.getValue();
-    this.review = review;
+    this.review = cohortReviewStore.getValue();
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
       this.cdrDetails = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
     });

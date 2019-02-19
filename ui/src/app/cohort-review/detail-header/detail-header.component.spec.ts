@@ -3,7 +3,8 @@ import {ClarityModule} from '@clr/angular';
 import {CohortReviewService} from 'generated';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {DetailHeaderComponent} from './detail-header.component';
 
 describe('DetailHeaderComponent', () => {
@@ -17,10 +18,10 @@ describe('DetailHeaderComponent', () => {
       imports: [ClarityModule],
       providers: [
         {provide: CohortReviewService, useValue: {}},
-        {provide: ReviewStateService, useValue: {}},
       ],
     })
       .compileComponents();
+    cohortReviewStore.next(cohortReviewStub);
   }));
 
   beforeEach(() => {
