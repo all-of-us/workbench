@@ -16,6 +16,7 @@ input[type=url]:not([readonly]) {
 }
 
 
+
 .search-input-big {
   padding: 0;
   margin-left:-24px;
@@ -42,6 +43,12 @@ input[type=url]:not([readonly]) {
   margin-bottom: 0px;
 
 }
+
+.search-bar input {
+  padding: 1.25em;
+  height:auto
+}
+
 .search-input-full input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
   font-family: GothamBook,open-sans,sans-serif;
   font-size: 20px;
