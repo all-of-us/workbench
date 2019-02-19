@@ -127,26 +127,27 @@ export class CohortSearchActions {
   getGroupItem(groupId, role) {
     const group = getGroup(groupId)(this.state);
     const itemId = group.get('id');
+    const temporal = group.get('temporal');
     const groupItems = group
       .get('items', List())
       .map(id => getItem(id)(this.state))
       .filterNot(it => it.get('status') === 'deleted');
-    const temporalGroupItems = groupItems
-      .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
-        && it.get('temporalGroup') === 1)
-      .isEmpty();
-    const nonTemporalGroupItems = groupItems
-      .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
-        && it.get('temporalGroup') === 0)
-      .isEmpty();
-    if (!temporalGroupItems && !nonTemporalGroupItems) {
+    const [temporalGroupItems, nonTemporalGroupItems] =
+      this.getActiveTemporalGroups(groupItems, itemId);
+    if (temporal) {
+      if (temporalGroupItems && nonTemporalGroupItems && this.otherGroupsWithActiveItems(groupId)) {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount(groupId);
+      } else {
+        this.clearGroupCount(groupId);
+        this.clearTotalCount(groupId);
+        this.cancelTotalIfRequesting();
+      }
+    } else if (this.hasActiveItems(group)) {
       this.requestGroupCount(role, groupId);
       this.requestTotalCount(groupId);
-    } else {
-      this.clearGroupCount(groupId);
-      this.clearTotalCount(groupId);
-      this.cancelTotalIfRequesting();
     }
+
   }
 
   updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
@@ -193,11 +194,25 @@ export class CohortSearchActions {
     return !groupList('includes')(this.state)
       .merge(groupList('excludes')(this.state))
       .filter(
-        grp => grp.get('status') === 'active'
-          && grp.get('id') !== ingoreGroupId
-          && this.hasActiveItems(grp)
-      )
-      .isEmpty();
+        grp => {
+          const temporal = grp.get('temporal');
+          if (temporal) {
+            const groupItems = grp
+              .get('items', List())
+              .map(id => getItem(id)(this.state))
+              .filterNot(it => it.get('status') === 'deleted');
+            const  [temporalGroupItems, nonTemporalGroupItems] =
+              this.getActiveTemporalGroups(groupItems);
+            return grp.get('status') === 'active'
+              && grp.get('id') !== ingoreGroupId
+              && (temporalGroupItems && nonTemporalGroupItems);
+          } else {
+            return grp.get('status') === 'active'
+              && grp.get('id') !== ingoreGroupId
+              && this.hasActiveItems(grp);
+          }
+        }
+      ).isEmpty();
   }
 
   get state() {
@@ -270,6 +285,19 @@ export class CohortSearchActions {
     }
   }
 
+  getActiveTemporalGroups(groupItems, itemId?) {
+    const temporalGroupItems = !groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 1)
+        .isEmpty();
+    const  nonTemporalGroupItems = !groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 0)
+        .isEmpty();
+    return [temporalGroupItems, nonTemporalGroupItems];
+  }
+
+
   removeGroupItem(
     role: keyof SearchRequest,
     groupId: string,
@@ -286,14 +314,8 @@ export class CohortSearchActions {
     let nonTemporalGroupItems;
     let isOnlyActiveChild;
     if (temporal) {
-      temporalGroupItems = groupItems
-        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
-          && it.get('temporalGroup') === 1)
-        .isEmpty();
-      nonTemporalGroupItems = groupItems
-        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
-          && it.get('temporalGroup') === 0)
-        .isEmpty();
+      [temporalGroupItems, nonTemporalGroupItems] =
+        this.getActiveTemporalGroups(groupItems, itemId);
     } else {
       isOnlyActiveChild = groupItems
       .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
@@ -316,7 +338,8 @@ export class CohortSearchActions {
           if (groupItems.size === 1 && status === 'pending') {
             this.clearGroupCount(groupId);
           }
-          if (this.otherGroupsWithActiveItems(groupId)) {
+          if (this.otherGroupsWithActiveItems(groupId) ||
+            ( temporalGroupItems && nonTemporalGroupItems)) {
             this.requestTotalCount(groupId);
           } else {
             this.cancelTotalIfRequesting();
@@ -332,8 +355,18 @@ export class CohortSearchActions {
 
   enableGroup(group: any) {
     const groupId = group.get('id');
+    const temporal = group.get('temporal');
+    const groupItems = group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
     this.enableEntity('groups', groupId);
-    if (this.hasActiveItems(group)) {
+    if (temporal) {
+      if (temporalGroupItems && nonTemporalGroupItems && this.otherGroupsWithActiveItems(groupId)) {
+        this.requestTotalCount();
+      }
+    } else if (this.hasActiveItems(group) && this.otherGroupsWithActiveItems(groupId)) {
       this.requestTotalCount();
     }
   }
@@ -508,6 +541,7 @@ export class CohortSearchActions {
    * @param outdatedGroup: string
    */
   requestTotalCount(outdatedGroupId?: string): void {
+    // const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
     this.cancelTotalIfRequesting();
     const included = includeGroups(this.state);
 
@@ -600,6 +634,14 @@ export class CohortSearchActions {
     }
     const searchGroup = <SearchGroup>{id: groupId, items, temporal};
     if (temporal) {
+      const groupItems = group
+        .get('items', List())
+        .map(id => getItem(id)(this.state))
+        .filterNot(it => it.get('status') === 'deleted');
+      const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
+      if (!temporalGroupItems || !nonTemporalGroupItems) {
+        return;
+      }
       searchGroup.mention = group.get('mention');
       searchGroup.time = group.get('time');
       searchGroup.timeValue = group.get('timeValue');
