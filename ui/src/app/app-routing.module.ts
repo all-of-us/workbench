@@ -207,7 +207,11 @@ const routes: Routes = [
                 path: 'data',
                 component: DataPageComponent,
                 data: {
-                  title: 'Data Page'
+                  title: 'Data Page',
+                  breadcrumb: {
+                    value: 'Data',
+                    intermediate: true
+                  }
                 }
               },
               {
