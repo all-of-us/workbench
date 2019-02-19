@@ -79,7 +79,7 @@ export const CreateConceptSetModal = withCurrentWorkspace()
     return <Modal>
       <ModalTitle>Create a Concept Set</ModalTitle>
       <ModalBody>
-        <TextInput placeholder='Name' value={name}
+        <TextInput placeholder='Name' value={name} data-test-id='concept-set-name'
                    onChange={(v) => {this.setState({name: v, nameTouched: true}); }}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.name)}
@@ -87,7 +87,8 @@ export const CreateConceptSetModal = withCurrentWorkspace()
         <TextInput style={{marginTop: '1rem'}} placeholder='Description'
                    value={description} onChange={(v) => {this.setState({description: v}); }}/>
         <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
-                onChange={(e) => {this.setState({domain: e.target.value}); }}>
+                data-test-id='domain-options'
+                onChange={(e) => {this.setState({domain: e.target.value as unknown as Domain}); }}>
           {conceptDomainList.map((concept, i) => <option value={concept.domain} key={i}>
             {concept.domain}
           </option>)}
@@ -97,6 +98,7 @@ export const CreateConceptSetModal = withCurrentWorkspace()
           <Button type='secondary' onClick={onClose}>Cancel</Button>
           <Button style={{marginLeft: '0.5rem'}}
                   disabled={!!errors || saving}
+                  data-test-id='save-concept-set'
                   onClick={() => this.saveConceptSet()}>Save</Button>
         </ModalFooter>
       </ModalBody>
