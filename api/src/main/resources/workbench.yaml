@@ -2305,6 +2305,9 @@ definitions:
   UserResponse:
     type: object
     properties:
+      query:
+        description: The provided search query
+        type: string
       users:
         description: A list of users matching the provided search query.
         type: array

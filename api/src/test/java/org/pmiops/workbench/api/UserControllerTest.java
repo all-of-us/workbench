@@ -111,10 +111,11 @@ public class UserControllerTest {
   @Test
   public void testUserSearch() {
     User john = userDao.findUserByEmail("john@lis.org");
-
-    UserResponse response = userController.user("John", null, null, null).getBody();
+    String queryTerm = "John";
+    UserResponse response = userController.user(queryTerm, null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
     assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
+    assertThat(response.getQuery()).isSameAs(queryTerm);
   }
 
   @Test

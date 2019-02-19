@@ -68,6 +68,7 @@ public class UserController implements UserApiDelegate {
     UserResponse response = new UserResponse();
     response.setUsers(Collections.emptyList());
     response.setNextPageToken("");
+    response.setQuery(term);
 
     if (null == term || term.isEmpty()) {
       return ResponseEntity.ok(response);
