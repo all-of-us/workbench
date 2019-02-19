@@ -83,7 +83,7 @@ export class DomainStubVariables {
   ];
 }
 
-class ConceptsApiStub extends ConceptsApi {
+export class ConceptsApiStub extends ConceptsApi {
   public concepts?: Concept[];
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
