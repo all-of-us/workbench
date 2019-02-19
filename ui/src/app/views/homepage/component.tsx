@@ -309,7 +309,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
         reload();
       }, 10000);
     } else {
-      if (!profile.pageVisits.some(v => v.page === this.pageId)) {
+
+      if ((!profile.pageVisits) ||
+          (!profile.pageVisits.some(v => v.page === this.pageId))) {
         this.setState({firstVisit: true});
         profileApi().updatePageVisits({ page: this.pageId});
       }
