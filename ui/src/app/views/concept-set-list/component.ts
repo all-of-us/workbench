@@ -17,8 +17,8 @@ import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 
-import {conceptSetsApi, conceptsApi} from 'app/services/swagger-fetch-clients';
-import {DomainInfo} from "generated/fetch";
+import {conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {DomainInfo} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -47,8 +47,6 @@ export class ConceptSetListComponent implements OnInit {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
-    this.loadConceptSets = this.loadConceptSets.bind(this);
-    this.closeCreateModal = this.closeCreateModal.bind(this);
   }
 
   @ViewChild(CreateConceptSetModalComponent)

@@ -44,7 +44,9 @@
   </div>
 </app-top-box>
 <app-create-concept-modal *ngIf="isCreateModalOpen"
-                          [onCreate]="loadConceptSets"
-                          [onClose]="closeCreateModal"
+                          [onCreate]="loadConceptSets.bind(this)"
+                          [onClose]="closeCreateModal.bind(this)"
                           [conceptDomainList]="conceptDomainList"
-                          [existingConceptSets]="conceptSetsList"></app-create-concept-modal>
+                          [existingConceptSets]="conceptSetsList">
+
+</app-create-concept-modal>

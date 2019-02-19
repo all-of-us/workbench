@@ -1,145 +1,108 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {urlParamsStore} from 'app/utils/navigation';
-import {ConceptSet, ConceptsService, CreateConceptSetRequest, DomainInfo} from 'generated';
-import {ConceptSetsService} from 'generated/api/conceptSets.service';
-import {Domain} from 'generated/fetch';
+import {Component, Input} from '@angular/core';
+import {AlertDanger} from 'app/components/alert';
+import {Button} from 'app/components/buttons';
+import {TextInput, ValidationError} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils/index';
+import {ConceptSet, CreateConceptSetRequest, Domain, DomainInfo} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {ReactWrapperBase, summarizeErrors} from "../../utils/index";
-import {Modal, ModalFooter, ModalTitle, ModalTitle, ModalBody} from "../../components/modals";
-import {Button} from "app/components/buttons";
-import {TextInput, ValidationError} from "app/components/inputs";
-import * as fp from 'lodash/fp';
 
-// @Component({
-//   selector: 'app-create-concept-modal',
-//   styleUrls: [
-//     '../../styles/buttons.css',
-//     '../../styles/inputs.css',
-//     '../../styles/errors.css',
-//     './component.css'
-//   ],
-//   templateUrl: './component.html',
-// })
-// export class CreateConceptSetModalComponent {
-//   @Output() onUpdate: EventEmitter<void> = new EventEmitter();
-//   public modalOpen  = false;
-//   wsNamespace: string;
-//   wsId: string;
-//   name: string;
-//   description: string;
-//   domain: Domain;
-//   conceptDomainList: Array<DomainInfo> = [];
-//   required = false;
-//   alreadyExist = false;
-//
-//   constructor(private conceptsService: ConceptsService,
-//     private conceptSetService: ConceptSetsService,
-//   ) {
-//     const {ns, wsid} = urlParamsStore.getValue();
-//     this.wsNamespace = ns;
-//     this.wsId = wsid;
-//   }
-//
-//   open(): void {
-//     this.required = false;
-//     this.alreadyExist = false;
-//     this.reset();
-//     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
-//       this.conceptDomainList = response.items;
-//       this.domain = this.conceptDomainList[0].domain;
-//     });
-//     this.modalOpen = true;
-//   }
-//
-//   close(): void {
-//     this.modalOpen = false;
-//   }
-//
-//   reset(): void {
-//     this.name = '';
-//     this.description = '';
-//   }
-//
-//   saveConcept(): void {
-//     this.required = false;
-//     this.alreadyExist = false;
-//
-//     if (!this.name) {
-//       this.required = true;
-//       return;
-//     }
-//     const concept: ConceptSet = {
-//       name: this.name,
-//       description: this.description,
-//       domain: this.domain
-//     };
-//     const request: CreateConceptSetRequest = {
-//       conceptSet: concept
-//     };
-//     this.conceptSetService.createConceptSet(this.wsNamespace, this.wsId, request)
-//       .subscribe(() => {
-//         this.modalOpen = false;
-//         this.onUpdate.emit();
-//       });
-//   }
-// }
 
-class CreateConceptSetModal extends React.Component<{
+export const CreateConceptSetModal = withCurrentWorkspace()
+(class extends React.Component<{
+  workspace: WorkspaceData,
   onCreate: Function,
   onClose: Function,
   conceptDomainList: Array<DomainInfo>,
-  existingConceptSets: ConceptSet[]
+  existingConceptSets: ConceptSet[],
 }, {
   name: string,
   description: string,
   domain: Domain,
-  nameTouched: boolean
+  nameTouched: boolean,
+  saving: boolean,
+  savingError: string,
 }> {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       name: '',
       description: '',
-      domain: props.domainList[0],
+      domain: props.conceptDomainList[0] as unknown as Domain,
       nameTouched: false,
+      saving: false,
+      savingError: ''
     };
   }
 
+  async saveConceptSet() {
+    try {
+      const {name, description, domain} = this.state;
+      const {workspace} = this.props;
+      const concept: ConceptSet = {
+        name: name,
+        description: description,
+        domain: domain
+      };
+      const request: CreateConceptSetRequest = {
+        conceptSet: concept
+      };
+      this.setState({saving: true});
+      await conceptSetsApi().createConceptSet(workspace.namespace, workspace.id, request);
+      this.props.onCreate();
+      this.props.onClose();
+    } catch (e) {
+      console.error(e);
+      this.setState({savingError: e});
+    } finally {
+      this.setState({saving: false});
+    }
+  }
+
   render() {
-    const {onCreate, onClose, domainList, existingConceptSets} = this.props;
-    const {name, description, domain, nameTouched} = this.state;
+    const {onClose, conceptDomainList, existingConceptSets} = this.props;
+    const {name, description, nameTouched, saving, savingError} = this.state;
     const errors = validate({name}, {
       name: {
         presence: {allowEmpty: false},
         exclusion: {
-          within: existingConceptSets.map((concept: ConceptSet) => {concept.name}),
+          within: existingConceptSets.map((concept: ConceptSet) => concept.name),
           message: 'already exists'
         }
       }
     });
+
     return <Modal>
       <ModalTitle>Create a Concept Set</ModalTitle>
       <ModalBody>
-        <TextInput placeholder="Name" value={name} onChange={(v) => {this.setState({name: v, nameTouched: true})}}/>
+        <TextInput placeholder='Name' value={name}
+                   onChange={(v) => {this.setState({name: v, nameTouched: true}); }}/>
         <ValidationError>
           {summarizeErrors(nameTouched && errors && errors.name)}
         </ValidationError>
-        <TextInput placeholder="Description" value={description} onChange={(v) => {this.setState({description: v})}}/>
-        <select value={domain} onChange={(e) => {this.setState({domain: e.target.value})}}>
-          {domainList.map(concept => <option value={concept.domain}>
+        <TextInput style={{marginTop: '1rem'}} placeholder='Description'
+                   value={description} onChange={(v) => {this.setState({description: v}); }}/>
+        <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
+                onChange={(e) => {this.setState({domain: e.target.value}); }}>
+          {conceptDomainList.map((concept, i) => <option value={concept.domain} key={i}>
             {concept.domain}
           </option>)}
         </select>
+        {savingError && <AlertDanger>Error creating Concept Set.</AlertDanger>}
         <ModalFooter>
-          <Button type="secondary" onClick={onClose}>Cancel</Button>
-          <Button onClick="saveConcept()">Save</Button>
+          <Button type='secondary' onClick={onClose}>Cancel</Button>
+          <Button style={{marginLeft: '0.5rem'}}
+                  disabled={!!errors || saving}
+                  onClick={() => this.saveConceptSet()}>Save</Button>
         </ModalFooter>
       </ModalBody>
     </Modal>;
   }
-}
+});
 
 @Component({
   selector: 'app-create-concept-modal',
