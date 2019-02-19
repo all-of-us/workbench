@@ -3,7 +3,6 @@ import {ActivatedRoute} from '@angular/router';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 @Component({
   templateUrl: './detail-page.html',
@@ -15,11 +14,9 @@ export class DetailPage implements OnInit, OnDestroy {
   participant: Participant;
   subscription: Subscription;
   participantId: number;
-  constructor(private route: ActivatedRoute, private state: ReviewStateService) {}
+  constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
-    const {annotationDefinitions} = this.route.snapshot.data;
-    this.state.annotationDefinitions.next(annotationDefinitions);
     this.subscription = this.route.data.subscribe(({participant, annotations}) => {
       participant.annotations = annotations;
       this.participant = participant;

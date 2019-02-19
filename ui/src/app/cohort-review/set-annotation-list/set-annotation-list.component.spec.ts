@@ -3,9 +3,10 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortAnnotationDefinitionService} from 'generated';
+import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {SetAnnotationItemComponent} from 'app/cohort-review/set-annotation-item/set-annotation-item.component';
 import {SetAnnotationListComponent} from './set-annotation-list.component';
 
@@ -26,6 +27,7 @@ describe('SetAnnotationListComponent', () => {
       ],
     })
       .compileComponents();
+    annotationDefinitionsStore.next([cohortAnnotationDefinitionStub]);
   }));
 
   beforeEach(() => {

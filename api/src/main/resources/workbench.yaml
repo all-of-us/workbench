@@ -419,7 +419,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /v1/auth-domain/{groupName}/users:
+  /v1/auth-domain/users:
     post:
       tags:
         - authDomain
@@ -441,17 +441,13 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       parameters:
-        - in: path
-          name: groupName
-          required: true
-          type: string
         - in: body
           name: request
           description: Request containing user email to update and a disabled status to update the user to.
           schema:
-            $ref: "#/definitions/AuthDomainDisableUserRequest"
+            $ref: "#/definitions/UpdateUserDisabledRequest"
       summary: enable/disable a user to an auth domain if you have manage groups permission
-      operationId: disableUser
+      operationId: updateUserDisabledStatus
 
   /v1/user/{term}:
     get:
@@ -487,6 +483,24 @@ paths:
           description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the user's email.
           type: string
           required: false
+
+  /v1/account/bulkSyncTrainingStatus:
+    post:
+      tags:
+        - user
+        - cron
+      description: sync moodle badge/training status for all user
+      operationId: bulkSyncTrainingStatus
+      responses:
+        200:
+          description: The user table is updated with training status.
+        404:
+          description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
 
   # Notebook clusters ####################################################################
 
@@ -2245,7 +2259,7 @@ definitions:
         items:
           $ref: "#/definitions/Profile"
 
-  AuthDomainDisableUserRequest:
+  UpdateUserDisabledRequest:
     type: object
     required:
       - email

@@ -41,7 +41,7 @@ const buttonVariants = {
   secondary: {
     style: {
       ...styles.base,
-      border: '2px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
+      border: '1px solid', borderRadius: '0.2rem', borderColor: colors.purple[0],
       backgroundColor: 'transparent',
       color: colors.purple[0],
     },
@@ -137,6 +137,8 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
 const cardButtonStyle = {
   style: {
     ...cardStyles.card,
+    alignItems: 'flex-start', alignContent: 'left',
+    marginTop: '1.9rem', marginRight: '106px',
     justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
     fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },

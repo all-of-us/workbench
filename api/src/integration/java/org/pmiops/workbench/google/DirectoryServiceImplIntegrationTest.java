@@ -4,10 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Clock;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -30,8 +32,8 @@ public class DirectoryServiceImplIntegrationTest {
   public void setUp() throws MessagingException {
     MailService mailService = Mockito.mock(MailServiceImpl.class);
     service = new DirectoryServiceImpl(
-        Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
-        new GoogleRetryHandler(new NoBackOffPolicy()));
+      Providers.of(googleCredential), Providers.of(workbenchConfig), httpTransport,
+      new GoogleRetryHandler(new NoBackOffPolicy()));
   }
 
   @Test
@@ -52,9 +54,9 @@ public class DirectoryServiceImplIntegrationTest {
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(service.getContactEmailAddress(userName).equals("notasecret@gmail.com"));
     assertThat(
-            service.getUserByUsername(userName).getCustomSchemas()
-                    .get("All_of_Us_Workbench")
-                    .get("Institution").equals("All of Us Research Workbench"));
+      service.getUserByUsername(userName).getCustomSchemas()
+        .get("All_of_Us_Workbench")
+        .get("Institution").equals("All of Us Research Workbench"));
     service.deleteUser(userName);
     assertThat(service.isUsernameTaken(userName)).isFalse();
   }

@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortService;
@@ -185,7 +186,7 @@ public class ConceptSetsControllerTest {
   @Import({WorkspaceServiceImpl.class, CohortService.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
-      ConceptSetService.class, UserRecentResourceService.class})
+      ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class})
   static class Configuration {
     @Bean
     Clock clock() {

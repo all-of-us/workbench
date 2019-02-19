@@ -38,7 +38,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   // Name of the GSuite custom schema containing AOU custom fields.
-  public static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
+  private static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
   // Name of the "contact email" custom field, which is stored within the AoU GSuite custom schema.
   private static final String GSUITE_FIELD_CONTACT_EMAIL = "Contact_email_address";
   // Name of the "institution" custom field, whose value is the same for all Workbench users.

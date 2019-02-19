@@ -2,8 +2,9 @@ import {ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
+import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {SetAnnotationItemComponent} from './set-annotation-item.component';
 
 import {
@@ -63,6 +64,7 @@ describe('SetAnnotationItemComponent', () => {
       wsid: 'workspaceId',
       cid: 1
     });
+    cohortReviewStore.next(cohortReviewStub);
   }));
 
   it('Should render', () => {

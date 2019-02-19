@@ -10,15 +10,11 @@ import {
 
 @Injectable()
 export class ReviewStateService {
-  /* Data Subjects */
-  review = new ReplaySubject<CohortReview>(1);
-  annotationDefinitions = new ReplaySubject<CohortAnnotationDefinition[]>(1);
-
-  /* Observable views on the data Subjects */
-  review$ = this.review.asObservable();
-  annotationDefinitions$ = this.annotationDefinitions.asObservable();
-
   /* Flags */
   annotationManagerOpen = new BehaviorSubject<boolean>(false);
   editAnnotationManagerOpen = new BehaviorSubject<boolean>(false);
 }
+
+export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
+export const annotationDefinitionsStore =
+  new BehaviorSubject<CohortAnnotationDefinition[]>(undefined);

@@ -58,8 +58,8 @@ export class AdminUserComponent implements OnInit {
     }
   }
 
-  disableUser(disable: boolean, profile: Profile): void {
-    this.authDomainService.disableUser('registered',
+  updateUserDisabledStatus(disable: boolean, profile: Profile): void {
+    this.authDomainService.updateUserDisabledStatus(
         {email: profile.username, disabled: disable}).subscribe(() => {
           this.loadProfiles();
         });

@@ -22,7 +22,9 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -129,6 +131,9 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private User user;
 
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
   @Before
   public void setUp() throws MessagingException {
     WorkbenchConfig config = new WorkbenchConfig();
@@ -163,16 +168,17 @@ public class ProfileControllerTest {
 
     doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
-        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config));
+        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
+        Providers.of(complianceTrainingService));
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
         cloudStorageService, notebooksService, Providers.of(config), environment,
-        Providers.of(mailService), Providers.of(complianceTrainingService));
+        Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService), Providers.of(complianceTrainingService));
+        cloudStorageService, notebooksService, Providers.of(config), cloudEnvironment,
+        Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -193,6 +199,18 @@ public class ProfileControllerTest {
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
+  @Test
+  public void testCreateAccount_invalidUser() throws Exception {
+    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    CreateAccountRequest accountRequest = new CreateAccountRequest();
+    accountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.getProfile().setUsername("12");
+    accountRequest.setProfile(createAccountRequest.getProfile());
+    exception.expect(BadRequestException.class);
+    exception.expectMessage("Username should be at least 3 characters and not more than 64 characters");
+    profileController.createAccount(accountRequest);
   }
 
   @Test
