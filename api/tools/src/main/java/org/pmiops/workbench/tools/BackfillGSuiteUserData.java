@@ -40,20 +40,26 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
  * This command-line tool updates some GSuite data for all existing AoU users to match the data
  * we now populate for new users.
  *
- * Once the backfill is completed for all environments, this script may be deleted.s
+ * Once the backfill is completed for all environments, this script may be deleted.
  */
 @SpringBootApplication
 // Most of the "config" module contains Spring beans that we don't want. But the RetryConfig
 // is required for the DirectoryService class, so we specifically include only that one.
+//
+// TODO(gjuggler): find a better way to manage component scans like this... either cenralize
+// in CommandLineToolConfig or fix the /config/ module (with @Lazy annotations?) so it can be
+// loaded altogether.
 @ComponentScan(
   basePackageClasses = RetryConfig.class,
   useDefaultFilters = false,
   includeFilters = {
     @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = RetryConfig.class),
   })
+// Scan the module containing the DirectoryService so it can be auto-wired into this tool.
 @ComponentScan(
   basePackageClasses = DirectoryService.class
 )
+// Load the DBA and DB model classes required for UserDao.
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class BackfillGSuiteUserData {
