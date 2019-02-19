@@ -38,7 +38,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   // Name of the GSuite custom schema containing AOU custom fields.
-  private static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
+  public static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
   // Name of the "contact email" custom field, which is stored within the AoU GSuite custom schema.
   private static final String GSUITE_FIELD_CONTACT_EMAIL = "Contact_email_address";
   // Name of the "institution" custom field, whose value is the same for all Workbench users.
@@ -108,6 +108,13 @@ public class DirectoryServiceImpl implements DirectoryService {
     return getUser(username + "@" + gSuiteDomain());
   }
 
+  /**
+   * Fetches a user by their GSuite email address.
+   *
+   * If the user is not found, a null value will be returned (no exception is thrown).
+   * @param email
+   * @return
+   */
   @Override
   public User getUser(String email) {
     try {
@@ -139,11 +146,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .get(GSUITE_FIELD_CONTACT_EMAIL);
   }
 
-  @Override
-  public User createUser(String givenName, String familyName, String username, String contactEmail) {
-    String primaryEmail = username + "@" + gSuiteDomain();
-    String password = randomString();
-
+  public static void addCustomSchemaValues(User user, String primaryEmail, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
@@ -156,19 +159,35 @@ public class DirectoryServiceImpl implements DirectoryService {
     // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
     aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
 
+    // In addition to the custom schema value, we store each user's contact email as a secondary
+    // email address with type "home". This makes it show up nicely in GSuite admin as the
+    // user's "Secondary email".
+      user.setEmails(Lists.newArrayList(
+      new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
+      new UserEmail().setType("home").setAddress(contactEmail)))
+      .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
+  }
+
+  @Override
+  public User createUser(String givenName, String familyName, String username, String contactEmail) {
+    String primaryEmail = username + "@" + gSuiteDomain();
+    String password = randomString();
+
     User user = new User()
         .setPrimaryEmail(primaryEmail)
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-        // In addition to the custom schema value, we store each user's contact email as a secondary
-        // email address with type "home". This makes it show up nicely in GSuite admin as the
-        // user's "Secondary email".
-        .setEmails(Lists.newArrayList(
-            new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
-            new UserEmail().setType("home").setAddress(contactEmail)))
-        .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields))
         .setChangePasswordAtNextLogin(true);
+    addCustomSchemaValues(user, primaryEmail, contactEmail);
+
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
+    return user;
+  }
+
+  @Override
+  public User updateUser(User user) {
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(
+      user.getPrimaryEmail(), user).execute());
     return user;
   }
 

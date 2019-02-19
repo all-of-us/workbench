@@ -1,24 +1,35 @@
 package org.pmiops.workbench.tools;
 
-import com.google.common.cache.LoadingCache;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.gson.Gson;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
+import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.db.model.User;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.Banner;
+import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.google.DirectoryServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScans;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
@@ -30,24 +41,27 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
  * environment in two ways:
  */
 @SpringBootApplication
-// Only import the CacheSpringConfiguration bean -- we don't want the rest of the stuff from
-// o.p.w.config which includes things specific to the web app.
+// Most of the "config" module contains Spring beans that we don't want. But the RetryConfig
+// is required for the DirectoryService class, so we specifically include only that one.
 @ComponentScan(
-  basePackageClasses = CacheSpringConfiguration.class,
+  basePackageClasses = RetryConfig.class,
   useDefaultFilters = false,
   includeFilters = {
-    @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = CacheSpringConfiguration.class)
+    @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = RetryConfig.class),
   })
+@ComponentScan(
+  basePackageClasses = DirectoryService.class
+)
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class BackfillGSuiteUserData {
-
   private static final Logger log = Logger.getLogger(BackfillGSuiteUserData.class.getName());
+
 
   @Bean
   public CommandLineRunner run(
     UserDao userDao,
-    @Qualifier("configCache") LoadingCache<String, Object> configCache) {
+    DirectoryService directoryService) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException(
@@ -56,14 +70,46 @@ public class BackfillGSuiteUserData {
       }
       boolean dryRun = Boolean.valueOf(args[0]);
 
-      WorkbenchConfig config = CacheSpringConfiguration.lookupWorkbenchConfig(configCache);
-      log.log(Level.INFO,"GSuite domain: " + config.googleDirectoryService.gSuiteDomain);
+      int updateCount = 0;
+      int skipCount = 0;
+      int errorCount = 0;
+      for (User user : userDao.findAll()) {
+        com.google.api.services.admin.directory.model.User gSuiteUser =
+          directoryService.getUser(user.getEmail());
+        if (gSuiteUser == null) {
+            log.severe(String.format("Error: AoU user %s (%s) not found in GSuite! Skipping.",
+              user.getEmail(), user.getContactEmail()));
+            errorCount++;
+            continue;
+        }
 
-      int userCount = 0;
-      for (User user : userDao.findUsers()) {
-        userCount += 1;
+        com.google.api.services.admin.directory.model.User origGSuiteUser = gSuiteUser.clone();
+        DirectoryServiceImpl.addCustomSchemaValues(
+          gSuiteUser, user.getEmail(), user.getContactEmail());
+        if (gSuiteUser.getCustomSchemas().equals(origGSuiteUser.getCustomSchemas())) {
+          log.info("User " + user.getEmail() + " already has correct GSuite data");
+          skipCount++;
+          continue;
+        }
+
+        if (dryRun) {
+          log.info("DRY RUN: Would update user " + user.getEmail());
+          updateCount++;
+        } else {
+          try {
+            directoryService.updateUser(gSuiteUser);
+            updateCount++;
+            log.info("Backfilled data for " + user.getEmail());
+          } catch (Exception e) {
+            log.severe("Error backfilling data for " + user.getEmail());
+            log.severe(e.getMessage());
+            errorCount++;
+          }
+        }
       }
-      log.log(Level.INFO, "Found " + userCount + " users");
+
+      log.info(String.format("%s Backfill complete. Updated %d, skipped %d, failed %d.",
+        dryRun ? "DRY RUN: " : "", updateCount, skipCount, errorCount));
     };
   }
 
