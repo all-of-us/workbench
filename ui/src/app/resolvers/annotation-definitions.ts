@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {annotationDefinitionsStore} from 'app/cohort-review/review-state.service';
 import {
   Cohort,
   CohortAnnotationDefinition,
@@ -21,7 +22,8 @@ export class AnnotationDefinitionsResolver implements Resolve<CohortAnnotationDe
 
     // console.log(`Resolving annotation definitions for ${ns}/${wsid}:${cid}`);
 
-    const call = this.api.getCohortAnnotationDefinitions(ns, wsid, cid).pluck('items');
-    return (call as Observable<CohortAnnotationDefinition[]>);
+    return this.api.getCohortAnnotationDefinitions(ns, wsid, cid).map(({items}) => items).do(v => {
+      annotationDefinitionsStore.next(v);
+    });
   }
 }

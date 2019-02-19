@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -78,7 +78,7 @@ export class SetAnnotationItemComponent {
         .getCohortAnnotationDefinitions(ns, wsid, cid)
         .pluck('items'))
       .do((defns: CohortAnnotationDefinition[]) =>
-                this.state.annotationDefinitions.next(defns))
+                annotationDefinitionsStore.next(defns))
       .subscribe(_ => {
         this.editing = false;
         this.isPosting.emit(false);
@@ -104,7 +104,7 @@ export class SetAnnotationItemComponent {
         .getCohortAnnotationDefinitions(ns, wsid, cid)
         .pluck('items'))
       .do((defns: CohortAnnotationDefinition[]) =>
-                this.state.annotationDefinitions.next(defns))
+                annotationDefinitionsStore.next(defns))
       .subscribe(_ => this.isPosting.emit(false));
   }
 }

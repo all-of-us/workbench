@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {annotationDefinitionsStore, cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {
   CohortAnnotationDefinition,
@@ -53,8 +53,8 @@ export class AnnotationListComponent implements OnChanges {
   constructor(private state: ReviewStateService) {}
 
   ngOnChanges(changes) {
-    const defs$ = this.state.annotationDefinitions$.filter(identity);
-    const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
+    const defs$ = annotationDefinitionsStore.filter(identity);
+    const factory$ = cohortReviewStore.filter(identity).pluck('cohortReviewId')
       .map(rid => valueFactory([this.participant.id, rid]));
     this.annotations$ = Observable
       .combineLatest(defs$, factory$)
