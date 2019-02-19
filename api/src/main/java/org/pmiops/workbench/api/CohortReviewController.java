@@ -46,7 +46,7 @@ import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.Drug;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Filter;
-import org.pmiops.workbench.model.Measurement;
+import org.pmiops.workbench.model.Lab;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.Observation;
@@ -67,6 +67,8 @@ import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
+import org.pmiops.workbench.model.Survey;
+import org.pmiops.workbench.model.Vital;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -746,51 +748,40 @@ public class CohortReviewController implements CohortReviewApiDelegate {
                                                       DomainType domain) {
     if (domain.equals(DomainType.DRUG)) {
       return new Drug()
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
-        .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
-        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
         .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .quantity(bigQueryService.getString(row, rm.get("quantity")))
-        .refills(bigQueryService.getString(row, rm.get("refills")))
+        .dose(bigQueryService.getString(row, rm.get("dose")))
         .strength(bigQueryService.getString(row, rm.get("strength")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .route(bigQueryService.getString(row, rm.get("route")))
-        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
-        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
-        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE)) {
       return new Procedure()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
-        .firstMention(bigQueryService.getDateTime(row, rm.get("firstMention")))
-        .lastMention(bigQueryService.getDateTime(row, rm.get("lastMention")))
-        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.PROCEDURE);
     } else if (domain.equals(DomainType.OBSERVATION)) {
       return new Observation()
@@ -804,50 +795,64 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .visitId(bigQueryService.getLong(row, rm.get("visitId")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.OBSERVATION);
-    } else if (domain.equals(DomainType.MEASUREMENT)) {
-      return new Measurement()
-        .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
-        .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
-        .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
-        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
-        .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
-        .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
-        .units(bigQueryService.getString(row, rm.get("units")))
-        .labRefRange(bigQueryService.getString(row, rm.get("refRange")))
-        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+    } else if (domain.equals(DomainType.LAB)) {
+      return new Lab()
+        .value(bigQueryService.getString(row, rm.get("value")))
+        .unit(bigQueryService.getString(row, rm.get("unit")))
+        .refRange(bigQueryService.getString(row, rm.get("refRange")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-        .domainType(DomainType.MEASUREMENT);
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .domainType(DomainType.LAB);
+    } else if (domain.equals(DomainType.VITAL)) {
+      return new Vital()
+        .value(bigQueryService.getString(row, rm.get("value")))
+        .unit(bigQueryService.getString(row, rm.get("unit")))
+        .refRange(bigQueryService.getString(row, rm.get("refRange")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .domainType(DomainType.VITAL);
     } else if(domain.equals(DomainType.PHYSICAL_MEASURE)) {
       return new PhysicalMeasurement()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .valueConcept(bigQueryService.getString(row, rm.get("valueConcept")))
-        .valueSource(bigQueryService.getString(row, rm.get("valueSourceValue")))
-        .valueNumber(bigQueryService.getString(row, rm.get("valueAsNumber")))
-        .units(bigQueryService.getString(row, rm.get("units")))
+        .value(bigQueryService.getString(row, rm.get("value")))
+        .unit(bigQueryService.getString(row, rm.get("unit")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.PHYSICAL_MEASURE);
+    } else if (domain.equals(DomainType.SURVEY)) {
+      return new Survey()
+        .survey(bigQueryService.getString(row, rm.get("survey")))
+        .question(bigQueryService.getString(row, rm.get("question")))
+        .answer(bigQueryService.getString(row, rm.get("answer")))
+        .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .domainType(DomainType.SURVEY);
     } else {
       return new AllEvents()
-        .dataId(bigQueryService.getLong(row, rm.get("dataId")))
         .domain(bigQueryService.getString(row, rm.get("domain")))
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-        .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
         .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
-        .sourceValue(bigQueryService.getString(row, rm.get("sourceValue")))
-        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
         .firstMention(row.get(rm.get("firstMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("firstMention")))
         .lastMention(row.get(rm.get("lastMention")).isNull() ? "" : bigQueryService.getDateTime(row, rm.get("lastMention")))
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
+        .route(bigQueryService.getString(row, rm.get("route")))
+        .dose(bigQueryService.getString(row, rm.get("dose")))
+        .strength(bigQueryService.getString(row, rm.get("strength")))
+        .value(bigQueryService.getString(row, rm.get("value")))
+        .unit(bigQueryService.getString(row, rm.get("unit")))
+        .refRange(bigQueryService.getString(row, rm.get("refRange")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardName(bigQueryService.getString(row, rm.get("standardName")))
+        .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .domainType(DomainType.ALL_EVENTS);
     }
   }

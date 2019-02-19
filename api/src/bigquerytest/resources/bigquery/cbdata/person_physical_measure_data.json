@@ -7,10 +7,8 @@
     "standard_code":"002",
     "standard_vocabulary":"SNOMED",
     "age_at_event":28,
-    "value_concept":"val",
     "value_as_number":1.0,
-    "value_source_value":"val",
-    "units":"nits"
+    "unit":"nits"
   },
   {
     "person_id":102246,
@@ -20,9 +18,7 @@
     "standard_code":"002",
     "standard_vocabulary":"SNOMED",
     "age_at_event":28,
-    "value_concept":"val",
     "value_as_number":1.0,
-    "value_source_value":"val",
-    "units":"nits"
+    "unit":"nits"
   }
 ]
