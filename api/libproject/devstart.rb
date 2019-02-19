@@ -113,7 +113,6 @@ def read_db_vars(gcc)
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{vars_path}
   }))
-  print vars
   if vars.empty?
     Common.new.error "Failed to read #{vars_path}"
     exit 1
@@ -1085,10 +1084,12 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info setAuthority
-       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+      Dir.chdir("tools") do
+        common = Common.new
+        common.run_inline %W{
+          gradle --info setAuthority
+         -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+      end
   end
 end
 
@@ -1166,10 +1167,12 @@ def list_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    common = Common.new
-    common.run_inline %W{
-      gradle --info manageClusters -PappArgs=['list','#{api_url}']
-    }
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{
+        gradle --info manageClusters -PappArgs=['list','#{api_url}']
+      }
+    end
   end
 end
 

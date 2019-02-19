@@ -4,18 +4,18 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
+import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
@@ -42,12 +42,9 @@ public class CommandLineToolConfig {
   @Lazy
   @Bean
   GoogleCredential googleCredential() {
-    System.out.println("Loading Google Credential...");
     try {
       String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
-      GoogleCredential creds = GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
-      System.out.println("Success!");
-      return creds;
+      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

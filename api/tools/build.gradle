@@ -1,4 +1,7 @@
 // Gradle targets for tools, used by Ruby commands and docker-compose.
+//
+// TODO(gjuggler): the tool targets here should be migrated to the main Gradle config,
+// similar to how backfillGSuiteUserData is set up.
 
 ext['hibernate.version'] = '5.2.10.Final'
 
@@ -19,11 +22,6 @@ def dbProperties = [
   'spring.datasource.username': '${workbench_db_user}',
   'spring.datasource.password': '${workbench_db_password}'
 ]
-
-println dbProperties.toString()
-println "DB host: ${db_host}"
-println "DB port: ${db_port}"
-println "DB user: ${workbench_db_user}"
 
 // Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
 // which is automatically run during api/project.rb dev-up.
@@ -127,6 +125,8 @@ sourceSets {
                   'org/pmiops/workbench/notebooks/NotebooksRetryHandler.java',
                   'org/pmiops/workbench/db/dao/CohortService.java',
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java',
+                  // Exclude the BackfillGSuite tool, which is built as part of the
+                  // main Gradle config.
                   'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
       ]
     }

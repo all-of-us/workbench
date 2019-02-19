@@ -37,8 +37,10 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 /**
  * See api/project.rb backfill-gsuite-fields for usage.
  * <p>
- * This command-line tool updates some GSuite data for all known AoU users in the current
- * environment in two ways:
+ * This command-line tool updates some GSuite data for all existing AoU users to match the data
+ * we now populate for new users.
+ *
+ * Once the backfill is completed for all environments, this script may be deleted.s
  */
 @SpringBootApplication
 // Most of the "config" module contains Spring beans that we don't want. But the RetryConfig
