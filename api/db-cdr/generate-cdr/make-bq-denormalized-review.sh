@@ -101,20 +101,23 @@ where ancestor_id in
 echo "Inserting drug data into person_drug"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.person_drug\`
- (person_id, data_id, start_datetime, standard_concept_id, visit_occurrence_id, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose,
- strength, route_concept_id)
+ (person_id, data_id, start_datetime, standard_name, standard_code, standard_vocabulary, standard_concept_id, visit_type, age_at_event, NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, dose,
+ strength, route)
 SELECT P.PERSON_ID,
     t.DRUG_EXPOSURE_ID AS DATA_ID,
     t.DRUG_EXPOSURE_START_DATETIME as START_DATETIME,
-    DRUG_CONCEPT_ID as STANDARD_CONCEPT_ID,
-    VISIT_OCCURRENCE_ID,
+    case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
+    case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
+    case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
+    case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
+    case when c3.CONCEPT_NAME is null then 'No matching concept' else c3.CONCEPT_NAME end as VISIT_TYPE,
     CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
     T.NUM_MENTIONS,
     T.FIRST_MENTION,
     T.LAST_MENTION,
     T.QUANTITY as dose,
     '' as strength,
-    ROUTE_CONCEPT_ID
+    C2.CONCEPT_NAME AS ROUTE
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, a.DRUG_SOURCE_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
 NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, QUANTITY, ROUTE_CONCEPT_ID
@@ -124,47 +127,11 @@ min(DRUG_EXPOSURE_START_DATETIME) as FIRST_MENTION, max(DRUG_EXPOSURE_START_DATE
 FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
 GROUP BY PERSON_ID, DRUG_CONCEPT_ID, DRUG_SOURCE_CONCEPT_ID) B
 WHERE a.PERSON_ID = b.PERSON_ID and a.DRUG_CONCEPT_ID = b.DRUG_CONCEPT_ID and a.DRUG_SOURCE_CONCEPT_ID = b.DRUG_SOURCE_CONCEPT_ID) t
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.DRUG_CONCEPT_ID = c1.CONCEPT_ID
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.ROUTE_CONCEPT_ID = c2.CONCEPT_ID
+left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on t.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on v.VISIT_CONCEPT_ID = c3.CONCEPT_ID
 JOIN \`$BQ_PROJECT.$BQ_DATASET.person\` p on t.PERSON_ID = p.PERSON_ID"
-
-#####################################
-# update drug data into person_drug #
-#####################################
-echo "Updating drug data into person_drug"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
- set pd.standard_name = con.standard_name, pd.standard_code = con.standard_code, pd.standard_vocabulary = con.standard_vocabulary
- from (select data_id,
- case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as STANDARD_NAME,
- case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
- case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY
- from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
- left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on d.standard_concept_id = c1.CONCEPT_ID) as con
- where con.data_id = pd.data_id"
-
-#####################################
-# update drug data into person_drug #
-#####################################
-echo "Updating drug data into person_drug"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
-  set pd.route = con.route
-  from (select data_id, case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as ROUTE
-  from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
-  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on d.ROUTE_CONCEPT_ID = c1.CONCEPT_ID) as con
-  where con.data_id = pd.data_id"
-
-#####################################
-# update drug data into person_drug #
-#####################################
-echo "Updating drug data into person_drug"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.person_drug\` pd
-  set pd.visit_type = con.visit_type
-  from (select data_id, case when c1.CONCEPT_NAME is null then 'No matching concept' else c1.CONCEPT_NAME end as VISIT_TYPE
-  from \`$BQ_PROJECT.$BQ_DATASET.person_drug\` d
-  left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on d.VISIT_OCCURRENCE_ID = v.VISIT_OCCURRENCE_ID
-  left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on v.VISIT_CONCEPT_ID = c1.CONCEPT_ID) as con
-  where con.data_id = pd.data_id"
 
 ################################################
 # insert condition data into person_condition #

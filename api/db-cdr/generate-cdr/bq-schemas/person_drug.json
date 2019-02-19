@@ -73,15 +73,5 @@
 	"mode": "NULLABLE",
 	"name": "visit_type",
 	"type": "STRING"
-	},
-	{
-	"mode": "NULLABLE",
-	"name": "visit_occurrence_id",
-	"type": "INTEGER"
-	},
-	{
-	"mode": "NULLABLE",
-	"name": "route_concept_id",
-	"type": "INTEGER"
 	}
 ]
