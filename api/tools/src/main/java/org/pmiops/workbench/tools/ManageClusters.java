@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Profile;
  * @SpringBootApplication.
  */
 @SpringBootApplication
-@Profile("ManageClusters")
 public class ManageClusters {
 
   private static final Logger log = Logger.getLogger(ManageClusters.class.getName());

@@ -24,8 +24,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench.db.dao")
 @EntityScan("org.pmiops.workbench.db.model")
-@Profile("ConfigLoader")
 /**
+ * Command-line tool to load a WorkbenchConfig or CdrBigQuerySchemaConfig from a local file
+ * and store it in the MySQL database for the current environment.
+ *
  * Run by api/project.rb update-cloud-config and (locally) docker-compose run update-config, which
  * is automatically invoked during api/project.rb dev-up.
  */

@@ -31,7 +31,6 @@ task loadConfig(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ConfigLoader"
   systemProperties = dbProperties
-  systemProperties += ['spring.profiles.active': 'ConfigLoader']
   args config_key, config_file
 }
 
@@ -53,7 +52,6 @@ task manageClusters(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.ManageClusters"
   systemProperties = dbProperties
-  systemProperties += ['spring.profiles.active': 'ManageClusters']
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }
@@ -63,7 +61,6 @@ task updateCdrVersions(type: JavaExec) {
   classpath sourceSets.main.runtimeClasspath
   main = "org.pmiops.workbench.tools.UpdateCdrVersions"
   systemProperties = dbProperties
-  systemProperties += ['spring.profiles.active': 'UpdateCdrVersions']
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
   }

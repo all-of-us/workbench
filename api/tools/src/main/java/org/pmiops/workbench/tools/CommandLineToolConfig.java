@@ -9,6 +9,8 @@ import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.File;
@@ -28,8 +30,16 @@ public class CommandLineToolConfig {
 
   /**
    * Loads the GSuite admin service account key from local disk.
+   *
+   * This needs to be annotated with @Lazy so only classes that use it (e.g. BackfillGSuiteUserData
+   * which requires a WorkbenchConfig instance) will trigger the file load attempt.
+   *
+   * Any command-line tool which loads this bean needs to be called from a project.rb command
+   * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
+   *
    * @return
    */
+  @Lazy
   @Bean
   GoogleCredential googleCredential() {
     try {
