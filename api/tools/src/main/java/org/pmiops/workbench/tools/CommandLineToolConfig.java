@@ -42,9 +42,12 @@ public class CommandLineToolConfig {
   @Lazy
   @Bean
   GoogleCredential googleCredential() {
+    System.out.println("Loading Google Credential...");
     try {
       String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
-      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
+      GoogleCredential creds = GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
+      System.out.println("Success!");
+      return creds;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -58,6 +61,7 @@ public class CommandLineToolConfig {
    * @return
    */
   @Bean
+  @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
     Gson gson = new Gson();
