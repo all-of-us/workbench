@@ -457,7 +457,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
 
         //Get the list of questions that has sub questions in survey
-        Set<Long> hasSubQuestions = questionConceptDao.findSurveyMainQuestionIds(Long.valueOf(surveyConceptId)).stream().map(QuestionConcept::getConceptId).collect(Collectors.toList());
+        Set<Long> hasSubQuestions = questionConceptDao.findSurveyMainQuestionIds(Long.valueOf(surveyConceptId)).stream().map(QuestionConcept::getConceptId).collect(Collectors.toSet());
 
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
 
