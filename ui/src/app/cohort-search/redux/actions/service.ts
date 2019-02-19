@@ -275,7 +275,6 @@ export class CohortSearchActions {
       this.hideGroup(groupId, status);
       if (this.hasActiveItems(group)) {
         if (this.otherGroupsWithActiveItems(groupId)) {
-          console.log('checkingggg')
           this.requestTotalCount();
         } else {
           this.cancelTotalIfRequesting();
@@ -335,7 +334,6 @@ export class CohortSearchActions {
         (temporal && ( !temporalGroupItems || !nonTemporalGroupItems));
       if (hasItems && (countIsNonZero || onlyChild)) {
         if (onlyChild) {
-          console.log('here');
           if (groupItems.size === 1 && status === 'pending') {
             this.clearGroupCount(groupId);
           }
@@ -347,7 +345,6 @@ export class CohortSearchActions {
             this.clearTotalCount(groupId);
           }
         } else {
-          console.log('here2');
           this.requestTotalCount();
           this.requestGroupCount(role, groupId);
         }
@@ -365,7 +362,8 @@ export class CohortSearchActions {
     const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
     this.enableEntity('groups', groupId);
     if (temporal) {
-      if ((temporalGroupItems && nonTemporalGroupItems) || this.otherGroupsWithActiveItems(groupId)) {
+      if ((temporalGroupItems && nonTemporalGroupItems) ||
+        this.otherGroupsWithActiveItems(groupId)) {
         this.requestTotalCount();
       }
     } else if (this.hasActiveItems(group) || this.otherGroupsWithActiveItems(groupId)) {
