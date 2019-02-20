@@ -366,7 +366,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   render() {
-    return <div>
+    return <React.Fragment>
       {this.state.workspaceFound && this.props.sharing &&
       <Modal width={450}>
         <ModalTitle style={styles.modalTitle}>
@@ -492,7 +492,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           <Button onClick={() => this.props.onClose()}>Cancel Sharing</Button>
         </ModalFooter>
       </Modal>}
-    </div>;
+    </React.Fragment>;
   }
 }
 

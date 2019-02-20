@@ -44,6 +44,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private workspacesService: WorkspacesService
   ) {
     this.share = this.share.bind(this);
+    this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);

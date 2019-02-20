@@ -59,6 +59,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   ) {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeShare = this.closeShare.bind(this);
   }
 
   ngOnInit(): void {
@@ -154,9 +155,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.sharing = true;
   }
 
-  // not sure if this is the right thing to do.
-  // what's our current strategy, feel like I lost track
-  closeShare = () => {
+  closeShare(): void {
     this.sharing = false;
   }
 
