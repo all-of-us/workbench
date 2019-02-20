@@ -11,23 +11,23 @@ import {ToolTipComponent} from 'app/views/tooltip/component';
 
 import {Subscription} from 'rxjs/Subscription';
 
-import * as React from 'react';
-import * as fp from 'lodash/fp';
-import {reactStyles, ReactWrapperBase, withUserProfile} from "app/utils/index";
+import {CardButton} from 'app/components/buttons';
+import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
-import {ListPageHeader} from "app/components/headers";
-import {
-  Profile,
-  BillingProjectStatus,
-  Workspace,
-  ErrorResponse
-} from 'generated/fetch';
-import {Spinner} from "app/components/spinners";
-import {Card} from "app/components/card";
-import {CardButton} from "app/components/buttons";
-import {ClrIcon} from "app/components/icons";
-import {homepageStyles} from 'app/views/homepage/component';
+import {ListPageHeader} from 'app/components/headers';
+import {ClrIcon} from 'app/components/icons';
+import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {homepageStyles} from 'app/views/homepage/component';
+import {
+  BillingProjectStatus,
+  ErrorResponse,
+  Profile,
+  Workspace
+} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 const styles = reactStyles({
   fadeBox: {
@@ -40,10 +40,10 @@ const styles = reactStyles({
 
 const WorkspaceCard: React.FunctionComponent<
     {name: string, description: string}> = ({name, description}) => {
-  return <Card>
+      return <Card>
     something
   </Card>;
-};
+    };
 
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
@@ -59,7 +59,7 @@ export const WorkspaceList = withUserProfile()
       billingProjectInitialized: true,
       workspaceList: [],
       errorText: '',
-    }
+    };
   }
 
   componentDidMount() {
@@ -75,10 +75,12 @@ export const WorkspaceList = withUserProfile()
     try {
       const workspacesReceived = await workspacesApi().getWorkspaces();
       console.log('here');
-      workspacesReceived.items.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({workspaceList: workspacesReceived.items.map(w => new WorkspacePermissions(w))});
+      workspacesReceived.items.sort(
+        (a, b) => a.workspace.name.localeCompare(b.workspace.name));
+      this.setState({workspaceList: workspacesReceived.items
+          .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
-    } catch(e) {
+    } catch (e) {
       const response: ErrorResponse = ErrorHandlingService.convertAPIError(e);
       this.setState({errorText: response.message});
     }
@@ -227,7 +229,8 @@ export class WorkspaceListComponent extends ReactWrapperBase {
 //     this.workspacesService.getWorkspaces()
 //       .subscribe(
 //         workspacesReceived => {
-//           workspacesReceived.items.sort((a, b) => a.workspace.name.localeCompare(b.workspace.name));
+//           workspacesReceived.items.sort((a, b) =>
+// a.workspace.name.localeCompare(b.workspace.name));
 //           this.workspaceList = workspacesReceived
 //             .items
 //             .map(w => new WorkspacePermissions(w));
