@@ -20,7 +20,7 @@ import {
   WorkspaceResponseListResponse
 } from 'generated/fetch';
 import * as React from 'react';
-import {PopupTrigger} from "../../components/popups";
+import {PopupTrigger} from 'app/components/popups';
 
 const styles = reactStyles({
   fadeBox: {
@@ -57,9 +57,9 @@ const WorkspaceCardMenu: React.FunctionComponent<{
       closeOnClick
       content={ <React.Fragment>
         <MenuItem icon='copy'
-                  onClick={() => {navigate([wsPathPrefix, 'clone'])}}>Duplicate</MenuItem>
+                  onClick={() => {navigate([wsPathPrefix, 'clone']); }}>Duplicate</MenuItem>
         <MenuItem icon='pencil'
-                  onClick={() => {navigate([wsPathPrefix, 'edit'])}}>Edit</MenuItem>
+                  onClick={() => {navigate([wsPathPrefix, 'edit']); }}>Edit</MenuItem>
         <MenuItem icon='pencil' onClick={onShare}>Share</MenuItem>
         <MenuItem icon='trash' onClick={onDelete}>Delete</MenuItem>
       </React.Fragment>}
@@ -75,7 +75,7 @@ const WorkspaceCardMenu: React.FunctionComponent<{
 const WorkspaceCard: React.FunctionComponent<
   {wp: WorkspacePermissions, onDelete: Function, onShare: Function}> =
     ({wp, onDelete, onShare}) => {
-    return <Card>
+      return <Card>
       <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
         <WorkspaceCardMenu wp={wp} onDelete={onDelete} onShare={onShare} disabled={false}/>
         <Clickable>
@@ -87,7 +87,7 @@ const WorkspaceCard: React.FunctionComponent<
       </div>
       <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
     </Card>;
-};
+    };
 
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
@@ -144,7 +144,7 @@ export const WorkspaceList = withUserProfile()
 
   }
 
-  share():void {
+  share(): void {
 
   }
 
@@ -168,8 +168,8 @@ export const WorkspaceList = withUserProfile()
                 </CardButton>
                 {workspaceList.map(wp => {
                   return <WorkspaceCard wp={wp}
-                                        onDelete={() => {this.delete()}}
-                                        onShare={() => {this.share()}}/>;
+                                        onDelete={() => {this.delete(); }}
+                                        onShare={() => {this.share(); }}/>;
 
                 })}
               </div>)}
