@@ -295,7 +295,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     const searchTerm = this.state.searchTerm;
     userApi().user(this.state.searchTerm)
       .then((response) => {
-        if (this.searchTerm !== searchTerm) {
+        if (this.state.searchTerm !== searchTerm) {
           return;
         }
         this.setState({autocompleteLoading: false});
