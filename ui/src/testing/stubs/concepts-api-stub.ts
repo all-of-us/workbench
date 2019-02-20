@@ -93,9 +93,7 @@ export class ConceptsApiStub extends ConceptsApi {
 
   public getDomainInfo(
     workspaceNamespace: string, workspaceId: string): Promise<DomainInfoResponse> {
-    return new Promise<DomainInfoResponse>(resolve => {
-      resolve({items: DomainStubVariables.STUB_DOMAINS});
-    });
+    return Promise.resolve({items: DomainStubVariables.STUB_DOMAINS});
   }
 
 }

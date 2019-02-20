@@ -24,7 +24,7 @@ export const CreateConceptSetModal = withCurrentWorkspace()
   domain: Domain,
   nameTouched: boolean,
   saving: boolean,
-  savingError: string,
+  savingError: boolean,
 }> {
 
   constructor(props) {
@@ -35,7 +35,7 @@ export const CreateConceptSetModal = withCurrentWorkspace()
       domain: props.conceptDomainList[0] as unknown as Domain,
       nameTouched: false,
       saving: false,
-      savingError: ''
+      savingError: false
     };
   }
 
@@ -43,21 +43,14 @@ export const CreateConceptSetModal = withCurrentWorkspace()
     try {
       const {name, description, domain} = this.state;
       const {workspace} = this.props;
-      const concept: ConceptSet = {
-        name: name,
-        description: description,
-        domain: domain
-      };
-      const request: CreateConceptSetRequest = {
-        conceptSet: concept
-      };
+      const request = {conceptSet: {name, description, domain}};
       this.setState({saving: true});
       await conceptSetsApi().createConceptSet(workspace.namespace, workspace.id, request);
       this.props.onCreate();
       this.props.onClose();
     } catch (e) {
       console.error(e);
-      this.setState({savingError: e});
+      this.setState({savingError: true});
     } finally {
       this.setState({saving: false});
     }

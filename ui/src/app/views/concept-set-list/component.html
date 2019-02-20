@@ -37,16 +37,15 @@
     <div style="display: flex; flex-wrap: wrap;">
       <div *ngFor="let conceptSet of resourceList">
         <app-resource-card [resourceCard]="conceptSet"
-                           [onUpdate]="loadConceptSets.bind(this)">
+                           [onUpdate]="loadConceptSets">
         </app-resource-card>
       </div>
     </div>
   </div>
 </app-top-box>
 <app-create-concept-modal *ngIf="isCreateModalOpen"
-                          [onCreate]="loadConceptSets.bind(this)"
-                          [onClose]="closeCreateModal.bind(this)"
+                          [onCreate]="loadConceptSets"
+                          [onClose]="closeCreateModal"
                           [conceptDomainList]="conceptDomainList"
                           [existingConceptSets]="conceptSetsList">
-
 </app-create-concept-modal>

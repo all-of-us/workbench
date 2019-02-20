@@ -47,6 +47,8 @@ export class ConceptSetListComponent implements OnInit {
     const wsData: WorkspaceData = this.route.snapshot.data.workspace;
     this.workspace = wsData;
     this.accessLevel = wsData.accessLevel;
+    this.loadConceptSets = this.loadConceptSets.bind(this);
+    this.closeCreateModal = this.closeCreateModal.bind(this);
   }
 
   @ViewChild(CreateConceptSetModalComponent)
