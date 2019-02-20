@@ -21,7 +21,7 @@
    This looping variable is set if showMeasurements is passed in to the component-->
 
   <ng-container *ngIf="displayMeasurementGraphs">
-    <div class="col-md-4 col-xs-12 chart" *ngFor="let gender of genderResults">
+    <div class="push-xs-1 col-xs-10 chart" *ngFor="let gender of genderResults">
       <app-chart *ngIf="[dbc.FEMALE_GENDER_ID, dbc.MALE_GENDER_ID, dbc.INTERSEX_GENDER_ID, dbc.NONE_GENDER_ID, dbc.OTHER_GENDER_ID].includes(gender.stratum2)"
                  [genderId]="gender.stratum2"
                  [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
@@ -34,56 +34,56 @@
 
   <!-- show gender totals  if we want -->
   <ng-container *ngIf="showGraph === graphType.BiologicalSex">
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
+    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
       <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
   <ng-container *ngIf="showGraph === graphType.GenderIdentity">
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.GenderIdentity && analyses.genderIdentityAnalysis"  >
+    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.GenderIdentity && analyses.genderIdentityAnalysis"  >
       <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Gender Identity'"> </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show age totals  if we want -->
   <ng-container *ngIf="showGraph === graphType.Age">
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
-    <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
+    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
       <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor" [domainType]="'ehr'"> </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show sources totals  if we want -->
   <ng-container *ngIf="showGraph === graphType.Sources">
-    <div class="col-md-4 col-xs-12" *ngIf="showGraph === graphType.Sources">
+    <div class="push-xs-1 col-xs-10" *ngIf="showGraph === graphType.Sources">
     </div>
-    <div class="col-md-4 col-xs-12 chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
+    <div class="push-xs-1 col-xs-10 chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
       <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20"
                  [backgroundColor]="backgroundColor" [chartTitle]="'Sources'">
       </app-chart>
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show race totals  if we want -->
-  <div class="col-md-4 col-xs-12 chart"  *ngIf="showRace && analyses.raceAnalysis ">
+  <div class="push-xs-1 col-xs-10 chart"  *ngIf="showRace && analyses.raceAnalysis ">
     <app-chart [analysis]="analyses.raceAnalysis" [pointWidth]="20"
                [backgroundColor]="backgroundColor" [chartTitle]="'Race'">
     </app-chart>
   </div>
   <!-- show ethnicity totals  if we want -->
-  <div class="col-md-4 col-xs-12 chart"  *ngIf="showEthnicity && analyses.ethnicityAnalysis ">
+  <div class="push-xs-1 col-xs-10 chart"  *ngIf="showEthnicity && analyses.ethnicityAnalysis ">
     <app-chart [analysis]="analyses.ethnicityAnalysis" [pointWidth]="20"
                [backgroundColor]="backgroundColor" [chartTitle]="'Ethnicity'">
     </app-chart>
