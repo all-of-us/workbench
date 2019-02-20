@@ -81,6 +81,7 @@ sourceSets {
                  '../../common-api/src/main/java']
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
+                  'org/pmiops/workbench/google/**/*.java',
                   'org/pmiops/workbench/notebooks/**/*.java',
                   'org/pmiops/workbench/jira/**/*.java',
                   // In general, command-line tools won't need access to

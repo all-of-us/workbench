@@ -1,5 +1,7 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.json.JsonFactory;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -10,6 +12,9 @@ import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -131,6 +136,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public JSONObject getJiraCredentials() {
     return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
+  }
+
+  @Override
+  public GoogleCredential getGSuiteAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "gsuite-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override

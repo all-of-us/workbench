@@ -7,7 +7,11 @@ import com.google.gson.Gson;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
-import org.springframework.context.annotation.*;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.File;
@@ -25,10 +29,12 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
  */
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+// Scan the google module, which contains the CloudStorageService bean.
+@ComponentScan("org.pmiops.workbench.google")
 public class CommandLineToolConfig {
 
   /**
-   * Loads the GSuite admin service account key from local disk.
+   * Loads the GSuite admin service account key from GCS.
    *
    * This needs to be annotated with @Lazy so only classes that use it (e.g. BackfillGSuiteUserData
    * which requires a WorkbenchConfig instance) will trigger the file load attempt.
@@ -40,10 +46,9 @@ public class CommandLineToolConfig {
    */
   @Lazy
   @Bean
-  GoogleCredential googleCredential() {
+  GoogleCredential googleCredential(CloudStorageService cloudStorageService) {
     try {
-      String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
-      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
+      return cloudStorageService.getGSuiteAdminCredentials();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

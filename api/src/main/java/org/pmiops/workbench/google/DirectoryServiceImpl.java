@@ -162,10 +162,10 @@ public class DirectoryServiceImpl implements DirectoryService {
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
-      user.setEmails(Lists.newArrayList(
-      new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
-      new UserEmail().setType("home").setAddress(contactEmail)))
-      .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
+    user.setEmails(Lists.newArrayList(
+    new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
+    new UserEmail().setType("home").setAddress(contactEmail)))
+    .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
   @Override

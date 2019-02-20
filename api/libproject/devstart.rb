@@ -1007,6 +1007,7 @@ Common.register_command({
 })
 
 def backfill_gsuite_user_data(cmd_name, *args)
+  common = Common.new
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
@@ -1029,14 +1030,8 @@ def backfill_gsuite_user_data(cmd_name, *args)
     common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
-  #ENV.update(read_db_vars(gcc))
-
   # This command reads from the AoU database and reads/writes to the associated GSuite API.
   with_cloud_proxy_and_db(gcc) do
-    # Copy the GSuite admin key to the local machine.
-    get_gsuite_admin_key(op.opts.project)
-
-    common = Common.new
     common.run_inline %W{
         gradle --info backfillGSuiteUserData
        -PappArgs=[#{op.opts.dry_run}]}
