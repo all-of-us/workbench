@@ -6,15 +6,12 @@
     "standard_name":"name",
     "standard_code":"002",
     "standard_vocabulary":"ICD10CM",
+    "standard_concept_id":1,
     "source_name":"name",
     "source_code":"004",
     "source_vocabulary":"ICD10CM",
-    "visit_id":1,
-    "visit_concept_id":1,
-    "age_at_event":29,
-    "num_mentions":2,
-    "first_mention":"2009-12-03 05:00:00 UTC",
-    "last_mention":"2009-12-03 05:00:00 UTC"
+    "visit_type":"visitType",
+    "age_at_event":29
   },
   {
     "person_id":102246,
@@ -23,15 +20,12 @@
     "standard_name":"name",
     "standard_code":"002",
     "standard_vocabulary":"CPT4",
+    "standard_concept_id":1,
     "source_name":"name",
     "source_code":"004",
     "source_vocabulary":"CPT4",
-    "visit_id":1,
-    "visit_concept_id":1,
-    "age_at_event":29,
-    "num_mentions":2,
-    "first_mention":"2009-12-03 05:00:00 UTC",
-    "last_mention":"2009-12-03 05:00:00 UTC"
+    "visit_type":"visitType",
+    "age_at_event":29
   },
   {
     "person_id":1,
@@ -39,18 +33,13 @@
     "start_datetime":"2009-12-04 05:00:00 UTC",
     "standard_name":"name2",
     "standard_code":"002",
-    "standard_concept_id":2,
     "standard_vocabulary":"CPT4",
+    "standard_concept_id":2,
     "source_name":"name2",
     "source_code":"004",
-    "source_concept_id":2,
     "source_vocabulary":"CPT4",
-    "visit_id":1,
-    "visit_concept_id":1,
-    "age_at_event":29,
-    "num_mentions":2,
-    "first_mention":"2009-12-03 05:00:00 UTC",
-    "last_mention":"2009-12-03 05:00:00 UTC"
+    "visit_type":"visitType",
+    "age_at_event":29
   },
   {
     "person_id":1,
@@ -58,18 +47,13 @@
     "start_datetime":"2009-12-04 05:00:00 UTC",
     "standard_name":"name4",
     "standard_code":"002",
-    "standard_concept_id":4,
     "standard_vocabulary":"CPT4",
+    "standard_concept_id":4,
     "source_name":"name4",
     "source_code":"004",
-    "source_concept_id":4,
     "source_vocabulary":"CPT4",
-    "visit_id":1,
-    "visit_concept_id":1,
-    "age_at_event":29,
-    "num_mentions":2,
-    "first_mention":"2009-12-03 05:00:00 UTC",
-    "last_mention":"2009-12-03 05:00:00 UTC"
+    "visit_type":"visitType",
+    "age_at_event":29
   },
   {
     "person_id":1,
@@ -77,17 +61,12 @@
     "start_datetime":"2009-12-04 05:00:00 UTC",
     "standard_name":"name8",
     "standard_code":"002",
-    "standard_concept_id":8,
     "standard_vocabulary":"CPT4",
+    "standard_concept_id":8,
     "source_name":"name8",
     "source_code":"004",
-    "source_concept_id":8,
     "source_vocabulary":"CPT4",
-    "visit_id":1,
-    "visit_concept_id":1,
-    "age_at_event":29,
-    "num_mentions":2,
-    "first_mention":"2009-12-03 05:00:00 UTC",
-    "last_mention":"2009-12-03 05:00:00 UTC"
+    "visit_type":"visitType",
+    "age_at_event":29
   }
 ]

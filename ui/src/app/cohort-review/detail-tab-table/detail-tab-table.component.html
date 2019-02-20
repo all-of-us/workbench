@@ -21,11 +21,14 @@
   <clr-dg-row *clrDgItems="let datum of data">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="true">
-        <span *ngSwitchCase="col.name === 'itemDate'
+        <span *ngSwitchCase="col.displayName === 'Date'
           || col.name === 'endDate'
           || col.name === 'firstMention'
           || col.name === 'lastMention'">
           {{ datum[col.name] | date: 'yyyy-MM-dd': 'UTC/GMT' }}
+        </span>
+        <span *ngSwitchCase="col.displayName === 'Time'">
+          {{ datum[col.name] | date:'h:mm a z' }}
         </span>
         <span *ngSwitchCase="col.name === 'sourceVocabulary'"
           [style.width.%]="100"
@@ -37,7 +40,7 @@
           <span #valueSource>{{ datum.sourceVocabulary }}</span>
         </span>
         <span *ngSwitchDefault >
-          {{ datum[col.name] }}
+   {{ datum[col.name] }}
         </span>
       </ng-container>
     </clr-dg-cell>

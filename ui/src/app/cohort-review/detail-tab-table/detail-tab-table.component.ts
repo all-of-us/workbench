@@ -4,12 +4,14 @@ import {ClrDatagridComparatorInterface} from '@clr/angular';
 import {Subscription} from 'rxjs/Subscription';
 
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortReviewService, PageFilterRequest, ParticipantData, SortOrder} from 'generated';
+import {
+  CohortReviewService, PageFilterRequest, SortOrder
+} from 'generated';
 
-class SortByColumn implements ClrDatagridComparatorInterface<ParticipantData> {
-  compare(a: ParticipantData, b: ParticipantData) {
-    return (a.numMentions === null ? 0 : parseInt(a.numMentions, 10))
-        - (b.numMentions === null ? 0 : parseInt(b.numMentions, 10));
+class SortByColumn implements ClrDatagridComparatorInterface<any> {
+  compare(a: any, b: any) {
+    return (a.numMentions === null ? 999999 : parseInt(a.numMentions, 10))
+        - (b.numMentions === null ? 999999 : parseInt(b.numMentions, 10));
   }
 }
 
@@ -33,7 +35,6 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   readonly pageSize = 25;
   numMentionsSort = new SortByColumn();
   filtered = [];
-
   constructor(
     private route: ActivatedRoute,
     private reviewApi: CohortReviewService,

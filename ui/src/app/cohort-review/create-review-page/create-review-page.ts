@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {
   Cohort,
@@ -29,7 +29,6 @@ export class CreateReviewPage implements OnInit {
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -42,8 +41,7 @@ export class CreateReviewPage implements OnInit {
   }
 
   ngOnInit() {
-    const {review} = this.route.snapshot.data;
-    this.review = review;
+    this.review = cohortReviewStore.getValue();
     this.cohort = currentCohortStore.getValue();
 
     this.numParticipants.setValidators([

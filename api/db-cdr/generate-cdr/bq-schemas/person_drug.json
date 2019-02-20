@@ -11,19 +11,14 @@
 	}, 
 	{
 	"mode": "NULLABLE",
-	"name": "domain",
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE",
 	"name": "start_datetime",
 	"type": "TIMESTAMP"
-	}, 
+	},
 	{
 	"mode": "NULLABLE",
 	"name": "standard_name",
 	"type": "STRING"
-	}, 
+	},
 	{
 	"mode": "NULLABLE",
 	"name": "standard_code",
@@ -31,48 +26,33 @@
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "standard_concept_id",
-	"type": "integer"
-	},
-	{
-	"mode": "NULLABLE", 
 	"name": "standard_vocabulary",
 	"type": "STRING"
-	}, 
+	},
 	{
-	"mode": "NULLABLE", 
-	"name": "source_name",
+	"mode": "NULLABLE",
+	"name": "standard_concept_id",
+	"type": "INTEGER"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "route",
 	"type": "STRING"
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "source_code",
-	"type": "STRING"
+	"name": "dose",
+	"type": "FLOAT"
 	},
 	{
 	"mode": "NULLABLE",
-	"name": "source_concept_id",
-	"type": "integer"
-	},
-	{
-	"mode": "NULLABLE", 
-	"name": "source_vocabulary",
+	"name": "strength",
 	"type": "STRING"
 	},
 	{
 	"mode": "NULLABLE", 
 	"name": "age_at_event",
 	"type": "INTEGER"
-	}, 
-	{
-	"mode": "NULLABLE", 
-	"name": "visit_type",
-	"type": "STRING"
-	}, 
-	{
-	"mode": "NULLABLE",
-	"name": "source_value",
-	"type": "STRING"
 	}, 
 	{
 	"mode": "NULLABLE", 
@@ -88,5 +68,10 @@
 	"mode": "NULLABLE", 
 	"name": "last_mention",
 	"type": "TIMESTAMP"
+	},
+	{
+	"mode": "NULLABLE",
+	"name": "visit_type",
+	"type": "STRING"
 	}
 ]

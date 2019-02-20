@@ -16,6 +16,11 @@ const itemDate = {
   classNames: ['date-col'],
   displayName: 'Date',
 };
+const itemTime = {
+  name: 'itemDate',
+  classNames: ['time-col'],
+  displayName: 'Time',
+};
 const endDate = {
   name: 'endDate',
   classNames: ['date-col'],
@@ -59,9 +64,9 @@ const valueSource = {
   name: 'valueSource',
   displayName: 'Source Value',
 };
-const valueNumber = {
-  name: 'valueNumber',
-  displayName: 'Value As Number',
+const value = {
+  name: 'value',
+  displayName: 'Value',
 };
 const sourceCode = {
   name: 'sourceCode',
@@ -91,9 +96,10 @@ const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
 };
-const quantity = {
-  name: 'quantity',
-  displayName: 'Quantity',
+
+const dose = {
+  name: 'dose',
+  displayName: 'Dose',
 };
 const refills = {
   name: 'refills',
@@ -107,15 +113,26 @@ const dataRoute = {
   name: 'route',
   displayName: 'Route',
 };
-const units = {
-  name: 'units',
+const unit = {
+  name: 'unit',
   displayName: 'Units',
 };
-const labRefRange = {
-  name: 'labRefRange',
-  displayName: 'Lab Reference Range',
+const refRange = {
+  name: 'refRange',
+  displayName: 'Reference Range',
 };
-
+const survey = {
+  name: 'survey',
+  displayName: 'Survey Name',
+};
+const question = {
+  name: 'question',
+  displayName: 'Question',
+};
+const answer = {
+  name: 'answer',
+  displayName: 'Answer',
+};
 
 @Component({
   selector: 'app-detail-tabs',
@@ -139,118 +156,91 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
-      firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
+      itemDate, visitType, standardCode, standardVocabulary, standardName, sourceCode,
+      sourceVocabulary, sourceName, dataRoute, dose, strength, value, unit, refRange,
+      domain, ageAtEvent, numMentions, firstMention, lastMention
     ],
     reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      age: ageAtEvent,
+      Date: itemDate,
+      Time: itemDate,
       visitType: visitType,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      standardName: standardName,
+      sourceCode: sourceCode,
+      sourceVocabulary: sourceVocabulary,
+      sourceName: sourceName,
+      dataRoute: dataRoute,
+      quantity: dose,
+      strength: strength,
+      value: value,
+      unit: unit,
+      refRange: refRange,
+      domain: domain,
+      age: ageAtEvent,
       numMentions: numMentions,
       firstMention: firstMention,
       lastMention: lastMention,
-      valueSource: valueSource,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
     }
   };
 
-  // TODO add Surveys tab when we have data to show
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
-      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, standardCode, standardVocabulary, standardName, sourceCode, sourceVocabulary,
+      sourceName, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
-      sourceName: sourceName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      standardName: standardName,
       sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
+      sourceName: sourceName,
       age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      standardCode: standardCode,
-      standardName: standardName,
-      standardVocabulary: standardVocabulary,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
-      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, standardCode, standardVocabulary, standardName, sourceCode, sourceVocabulary,
+      sourceName, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
-      sourceName: sourceName,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      standardName: standardName,
       sourceCode: sourceCode,
       sourceVocabulary: sourceVocabulary,
+      sourceName: sourceName,
       age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      standardCode: standardCode,
-      standardName: standardName,
-      standardVocabulary: standardVocabulary,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Drugs',
     domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
-      lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
-      sourceVocabulary, visitId
+      itemDate, standardName, dataRoute, dose, strength, ageAtEvent, numMentions,
+      firstMention, lastMention, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
       standardName: standardName,
-      standardCode: standardCode,
+      dataRoute: dataRoute,
+      dose: dose,
+      strength: strength,
       age: ageAtEvent,
       numMentions: numMentions,
       firstMention: firstMention,
       lastMention: lastMention,
-      quantity: quantity,
-      refills: refills,
-      strength: strength,
-      route: dataRoute,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      visitId: visitId,
-    }
-  }, {
-    name: 'Measurements',
-    domain: DomainType.MEASUREMENT,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
-      valueSource, units, ageAtEvent, labRefRange, sourceName, sourceCode, visitId
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      valueConcept: valueConcept,
-      valueNumber: valueNumber,
-      valueSource: valueSource,
-      units: units,
-      age: ageAtEvent,
-      labRefRange: labRefRange,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Observations',
@@ -276,19 +266,63 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
     domain: DomainType.PHYSICALMEASURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
-      valueSource, units, ageAtEvent
+      itemDate, standardCode, standardVocabulary, standardName, value, unit, ageAtEvent
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      valueConcept: valueConcept,
-      valueNumber: valueNumber,
-      valueSource: valueSource,
-      units: units,
+      standardName: standardName,
+      value: value,
+      unit: unit,
       age: ageAtEvent,
+    }
+  }, {
+    name: 'Labs',
+    domain: DomainType.LAB,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, itemTime, standardName, value, unit, refRange, ageAtEvent, visitType
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      itemTime: itemTime,
+      standardName: standardName,
+      value: value,
+      unit: unit,
+      refRange: refRange,
+      age: ageAtEvent,
+      visitType: visitType
+    }
+  }, {
+    name: 'Vitals',
+    domain: DomainType.VITAL,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, itemTime, standardName, value, unit, refRange, ageAtEvent, visitType
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      itemTime: itemTime,
+      standardName: standardName,
+      value: value,
+      unit: unit,
+      refRange: refRange,
+      age: ageAtEvent,
+      visitType: visitType
+    }
+  }, {
+    name: 'Surveys',
+    domain: DomainType.SURVEY,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, survey, question, answer
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      survey: survey,
+      question: question,
+      answer: answer
     }
   }];
 

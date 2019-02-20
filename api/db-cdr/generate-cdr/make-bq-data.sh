@@ -563,11 +563,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set sm.question_count=num_questions from
 (select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
 \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
-  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm2
-    on r.stratum_1 = CAST(sm2.concept_id AS STRING)
+  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_question_map\` sq
+    on r.stratum_1 = CAST(sq.survey_concept_id AS STRING)
   join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` qc
-    on r.stratum_2 = CAST(qc.concept_id AS STRING)
-where r.analysis_id = 3110 and qc.count_value > 0
+    on sq.question_concept_id = qc.concept_id
+where r.analysis_id = 3110 and qc.count_value > 0 and sq.is_main=1
   group by survey_concept_id)
 where CAST(sm.concept_id AS STRING) = survey_concept_id
 "
