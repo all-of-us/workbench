@@ -34,7 +34,6 @@
     "@webcomponents/custom-elements": "^1.0.0",
     "angular-2-local-storage": "^1.0.1",
     "angular2-highcharts": "^0.5.5",
-    "bootstrap": "4.1.2",
     "core-js": "^2.5.3",
     "enhanced-resolve": "3.3.0",
     "highcharts": "^6.0.4",
