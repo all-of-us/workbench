@@ -138,8 +138,7 @@ const cardButtonStyle = {
   style: {
     ...cardStyles.card,
     alignItems: 'flex-start', alignContent: 'left',
-    marginTop: '1.9rem', marginRight: '106px',
-    justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+    marginTop: '1.9rem', justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
     fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}

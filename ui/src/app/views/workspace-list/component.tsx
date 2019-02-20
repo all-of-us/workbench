@@ -1,17 +1,10 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {ToolTipComponent} from 'app/views/tooltip/component';
-
-import {Subscription} from 'rxjs/Subscription';
-
-import {CardButton} from 'app/components/buttons';
+import {CardButton, Clickable, MenuItem} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
@@ -19,15 +12,15 @@ import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
-import {homepageStyles} from 'app/views/homepage/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
   Profile,
-  Workspace
+  Workspace,
+  WorkspaceResponseListResponse
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {PopupTrigger} from "../../components/popups";
 
 const styles = reactStyles({
   fadeBox: {
@@ -35,15 +28,66 @@ const styles = reactStyles({
   },
   cardArea: {
     display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'
+  },
+  addCard: {
+    display: 'flex', fontSize: '20px', lineHeight: '28px', marginTop: '0',
+    fontWeight: 600
+  },
+  workspaceName: {
+    color: '#216FB4', marginBottom: '0.5rem', fontWeight: 600,
+    fontSize: 18, wordBreak: 'break-all', cursor: 'pointer',
+  },
+  workspaceDescription: {
+    textOverflow: 'ellipsis', overflow: 'hidden', height: '2rem'
   }
 });
 
+
+// TODO: permissions & tooltips
+const WorkspaceCardMenu: React.FunctionComponent<{
+  disabled: boolean, wp: WorkspacePermissions, onShare: Function, onDelete: Function
+}> = ({
+        disabled, wp, onShare, onDelete
+      }) => {
+  const wsPathPrefix = 'workspaces/' + wp.workspace.namespace + '/' + wp.workspace.id;
+
+  return <PopupTrigger
+      data-test-id='resource-card-menu'
+      side='bottom'
+      closeOnClick
+      content={ <React.Fragment>
+        <MenuItem icon='copy'
+                  onClick={() => {navigate([wsPathPrefix, 'clone'])}}>Duplicate</MenuItem>
+        <MenuItem icon='pencil'
+                  onClick={() => {navigate([wsPathPrefix, 'edit'])}}>Edit</MenuItem>
+        <MenuItem icon='pencil' onClick={onShare}>Share</MenuItem>
+        <MenuItem icon='trash' onClick={onDelete}>Delete</MenuItem>
+      </React.Fragment>}
+  >
+    <Clickable disabled={disabled} data-test-id='resource-menu'>
+      <ClrIcon shape='ellipsis-vertical' size={21}
+               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                 cursor: disabled ? 'auto' : 'pointer'}}/>
+    </Clickable>
+  </PopupTrigger>;
+};
+
 const WorkspaceCard: React.FunctionComponent<
-    {name: string, description: string}> = ({name, description}) => {
-      return <Card>
-    something
-  </Card>;
-    };
+  {wp: WorkspacePermissions, onDelete: Function, onShare: Function}> =
+    ({wp, onDelete, onShare}) => {
+    return <Card>
+      <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
+        <WorkspaceCardMenu wp={wp} onDelete={onDelete} onShare={onShare} disabled={false}/>
+        <Clickable>
+          <div style={styles.workspaceName}
+               onClick={() => navigate(
+                   ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
+            {wp.workspace.name}</div>
+        </Clickable>
+      </div>
+      <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
+    </Card>;
+};
 
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
@@ -56,7 +100,7 @@ export const WorkspaceList = withUserProfile()
     super(props);
     this.state = {
       workspacesLoading: true,
-      billingProjectInitialized: true,
+      billingProjectInitialized: false,
       workspaceList: [],
       errorText: '',
     };
@@ -71,21 +115,18 @@ export const WorkspaceList = withUserProfile()
     clearTimeout(this.timer);
   }
 
-  async reloadWorkspaces(): void {
+  async reloadWorkspaces() {
     try {
       const workspacesReceived = await workspacesApi().getWorkspaces();
-      console.log('here');
       workspacesReceived.items.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
       this.setState({workspaceList: workspacesReceived.items
           .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
-      const response: ErrorResponse = ErrorHandlingService.convertAPIError(e);
+      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
     }
-
-    console.log(this.state.workspaceList);
   }
 
   checkBillingProjectStatus() {
@@ -99,8 +140,16 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
+  delete(): void {
+
+  }
+
+  share():void {
+
+  }
+
   render() {
-    const {billingProjectInitialized, workspacesLoading} = this.state;
+    const {billingProjectInitialized, workspaceList, workspacesLoading} = this.state;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
@@ -110,12 +159,20 @@ export const WorkspaceList = withUserProfile()
           <div style={styles.cardArea}>
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
-              (<CardButton disabled={!billingProjectInitialized}
-                           onClick={() => navigate(['workspaces/build'])}
-                           style={homepageStyles.addCard}>
-                Create a <br/> New Workspace
-                <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-              </CardButton>)}
+              (<div style={{display: 'flex', marginTop: '1.5rem'}}>
+                <CardButton disabled={!billingProjectInitialized}
+                            onClick={() => navigate(['workspaces/build'])}
+                            style={styles.addCard}>
+                  Create a <br/> New Workspace
+                  <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                </CardButton>
+                {workspaceList.map(wp => {
+                  return <WorkspaceCard wp={wp}
+                                        onDelete={() => {this.delete()}}
+                                        onShare={() => {this.share()}}/>;
+
+                })}
+              </div>)}
           </div>
         </div>
       </FadeBox>

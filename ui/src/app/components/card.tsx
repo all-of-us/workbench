@@ -9,7 +9,10 @@ export const styles = reactStyles({
     backgroundColor: '#fff',
     border: '1px solid #d7d7d7',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    width: '12rem',
+    height: '9rem',
+    marginRight: '1rem'
   }
 });
 
