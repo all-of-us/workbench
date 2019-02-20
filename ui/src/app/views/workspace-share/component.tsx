@@ -254,12 +254,12 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   removeCollaborator(user: UserRole): void {
-    this.setState(({userRolesList, workspace}) => (
-      {userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
-        workspace: {...workspace,
-          userRoles: fp.remove(({email}) => {
-            return user.email === email;
-          }, workspace.userRoles)} as Workspace}
+    this.setState(({userRolesList, workspace}) => ({
+      userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
+      workspace: {...workspace,
+        userRoles: fp.remove(({email}) => {
+          return user.email === email;
+        }, workspace.userRoles)} as Workspace}
     ));
   }
 
@@ -279,10 +279,10 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   addCollaborator(user: User): void {
     const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
       email: user.email, role: WorkspaceAccessLevel.READER};
-    this.setState(({userRolesList, workspace}) => (
-      {searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
-        userRolesList: fp.concat(userRolesList, [userRole]),
-        workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
+    this.setState(({userRolesList, workspace}) => ({
+      searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
+      userRolesList: fp.concat(userRolesList, [userRole]),
+      workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
     ));
   }
 

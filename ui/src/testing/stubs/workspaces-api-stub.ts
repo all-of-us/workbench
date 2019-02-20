@@ -28,7 +28,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
 
   constructor(workspaces?: Workspace[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.workspaces = fp.defaults([WorkspacesApiStub.stubWorkspace()], workspaces);
+    this.workspaces = fp.defaultTo([WorkspacesApiStub.stubWorkspace()], workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
   }
@@ -135,7 +135,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     body?: ShareWorkspaceRequest, options?: any): Promise<ShareWorkspaceResponse> {
     return new Promise<ShareWorkspaceResponse>(resolve => {
       const newEtag = fp.defaults(2, (body.workspaceEtag + 1));
-      const newItems = fp.defaults({}, body.items);
+      const newItems = fp.defaults([], body.items);
       resolve({
         workspaceEtag: newEtag, items: newItems
       });

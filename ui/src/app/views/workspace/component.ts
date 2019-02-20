@@ -230,13 +230,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
-    // only done until this page refactored ot React
+    // TODO: RW-1919 - remove this
     window.location.reload();
   }
 
   updateAclList(userRoleList: UserRole[]): void {
     this.workspace.userRoles = userRoleList;
-    console.log(this.workspace);
   }
 
   dismissTip(): void {

@@ -6,7 +6,9 @@ export class UserApiStub extends UserApi {
   existingUsers: UserRole[];
   constructor(existingUsers?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    if (existingUsers) { this.existingUsers = existingUsers; }
+    if (existingUsers) {
+      this.existingUsers = existingUsers;
+    }
   }
 
   user(searchTerm: string): Promise<UserResponse> {
