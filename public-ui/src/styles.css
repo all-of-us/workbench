@@ -76,19 +76,24 @@ input[type=password]:focus {
     --pinkish-grey: #bababa;
     --dark-slate-blue: #262262;
   }
-  /* Text styles */
 
-  
+.highcharts-tooltip>span {
+    background:var(--pale-grey);
+    border-radius: 3px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.15);
+    padding: 8px;
+}
+
 /* get rid of margins on small screens */
 
-/* @media (max-width: 978px) {
+@media (max-width: 978px) {
     .content-container {
         width: 98vw
     }
     body {
         padding: 0;
     }
-} */
+}
 
 /* Must override clarity styles here, globally as angular component styles don't apply to child components used
  * in the template ie clarity components.

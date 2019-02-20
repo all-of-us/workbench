@@ -78,7 +78,20 @@ export class ChartComponent implements OnChanges {
       title: options.title,
       subtitle: {},
       tooltip: {
-        pointFormat: '<b>{point.y} </b><br>'
+        formatter: function() {
+          return `<span style="font-size:.7em; padding-bottom:.5em">${this.x}:
+          <br><span style="font-size:1em">${this.y}</span>`;
+      },
+      useHTML: true,
+      followPointer: true,
+      backgroundColor: null,
+        borderWidth: 0,
+        shadow: false,
+      style: {
+      padding: 0,
+      fontSize: '18px',
+      color: '#262262'
+      }
       },
       plotOptions: {
         series: {
@@ -138,6 +151,14 @@ export class ChartComponent implements OnChanges {
         title: {
           text: null
         },
+        labels: {
+          style: {
+            fontSize: '18',
+            labels: {
+              format: '<{value}'
+          }
+          }
+        },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR,
         gridLineColor: this.backgroundColor
@@ -153,7 +174,7 @@ export class ChartComponent implements OnChanges {
           reserveSpace: true,
           style: {
             whiteSpace: 'wrap',
-            fontSize: '11px',
+            fontSize: '18',
           },
         },
         lineWidth: 1,
@@ -303,13 +324,16 @@ export class ChartComponent implements OnChanges {
       chart: {
         type: 'bar',
         backgroundColor: this.backgroundColor,
-      },
+        style: {
+          fontFamily: 'GothamBook'
+        }
+    },
       title: {text: null, style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointPadding: 0.25,
       minPointLength: 3,
-      pointWidth: 5,
+      pointWidth: 20,
       xAxisTitle: null,
     };
 
@@ -377,7 +401,7 @@ export class ChartComponent implements OnChanges {
     });
     const series = {name: seriesName, colorByPoint: true, data: data,
       tooltip: {
-        headerFormat: '<span style="font-size: 10px"><br/>',
+        headerFormat: '<span style="font-size: 20px"><br/>',
         pointFormat: '<b> {point.y} </b> {point.name}</span>'
       }};
     return {
