@@ -23,14 +23,14 @@ public class ComplianceServiceImpl implements ComplianceService {
   private CloudStorageService cloudStorageService;
 
   @Autowired
-  public ComplianceServiceImpl(
-      CloudStorageService cloudStorageService) {
+  public ComplianceServiceImpl(CloudStorageService cloudStorageService) {
     this.cloudStorageService = cloudStorageService;
   }
 
   private String getToken() {
     return this.cloudStorageService.getMoodleApiKey();
   }
+
   @Override
   public Integer getMoodleId(String email) throws ApiException {
     List<MoodleUserResponse> response = api.getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD, email);
