@@ -33,5 +33,13 @@
 
 
 .top-concepts-chart {
-    width:100%;
+    width: 100%!important;
+    margin: 0 auto;
+    display: block!important;
+}
+
+.row-expansion {
+    width: 100%;
+    text-align: center;
+    margin-top: 1rem;
 }
