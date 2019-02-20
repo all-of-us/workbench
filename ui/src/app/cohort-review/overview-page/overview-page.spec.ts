@@ -1,17 +1,16 @@
 import {NgRedux} from '@angular-redux/store';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService, CohortReview, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
+import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {OverviewPage} from './overview-page';
@@ -21,15 +20,7 @@ import {OverviewPage} from './overview-page';
 describe('OverviewPage', () => {
   let component: OverviewPage;
   let fixture: ComponentFixture<OverviewPage>;
-  const activatedRouteStub = {
-    snapshot: {
-      data: {
-        review: {}
-      }
-    }
-  };
 
-  let route;
   beforeEach(async(() => {
 
     TestBed.configureTestingModule({
@@ -40,7 +31,6 @@ describe('OverviewPage', () => {
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
@@ -59,12 +49,12 @@ describe('OverviewPage', () => {
       wsid: 'workspaceId',
       cid: 1
     });
+    cohortReviewStore.next(cohortReviewStub);
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(OverviewPage);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

@@ -269,14 +269,10 @@ echo "Inserting conditions data into search_drug"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.search_drug\`
  (person_id, entry_date, concept_id, subtype, age_at_event, visit_concept_id)
-select de.person_id, de.drug_exposure_start_date as entry_date, de.drug_concept_id as concept_id, c.subtype,
+select de.person_id, de.drug_exposure_start_date as entry_date, de.drug_concept_id as concept_id, '' as subtype,
 cast(floor(date_diff(de.drug_exposure_start_date, date(p.year_of_birth, p.month_of_birth, p.day_of_birth), month)/12) as int64) as age_at_event,
 vo.visit_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
-join (select distinct concept_id, is_selectable, type, subtype from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
-where is_selectable = 1
-and type = 'DRUG'
-and subtype = 'ATC') c on (c.concept_id = de.drug_concept_id)
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on (p.person_id = de.person_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = de.visit_occurrence_id)"
 
