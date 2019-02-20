@@ -81,14 +81,15 @@ sourceSets {
                  '../../common-api/src/main/java']
       includes = ['org/pmiops/workbench/tools/**/*.java',
                   'org/pmiops/workbench/db/**/*.java',
-                  'org/pmiops/workbench/google/**/*.java',
-                  'org/pmiops/workbench/notebooks/**/*.java',
                   'org/pmiops/workbench/jira/**/*.java',
+                  'org/pmiops/workbench/notebooks/**/*.java',
                   // In general, command-line tools won't need access to
                   // org.pmiops.workbench.model (Swagger-generated classes),
                   // so we selectively whitelist as needed.
                   'org/pmiops/workbench/config/CdrBigQuerySchemaConfig.java',
                   'org/pmiops/workbench/config/WorkbenchConfig.java',
+                  'org/pmiops/workbench/google/CloudStorageService.java',
+                  'org/pmiops/workbench/google/CloudStorageServiceImpl.java',
                   'org/pmiops/workbench/model/Authority.java',
                   'org/pmiops/workbench/model/BlockscoreVerificationStatus.java',
                   'org/pmiops/workbench/model/BillingProjectStatus.java',
@@ -105,7 +106,8 @@ sourceSets {
                   'org/pmiops/workbench/model/ParticipantCohortStatus.java',
                   'org/pmiops/workbench/model/ReviewStatus.java',
                   'org/pmiops/workbench/model/UnderservedPopulationEnum.java',
-                  'org/pmiops/workbench/model/AnnotationType.java']
+                  'org/pmiops/workbench/model/AnnotationType.java',
+      ]
       excludes = ['org/pmiops/workbench/db/dao/ConceptSetService.java',
                   'org/pmiops/workbench/db/dao/UserService.java',
                   'org/pmiops/workbench/db/dao/WorkspaceService.java',
@@ -118,6 +120,7 @@ sourceSets {
                   'org/pmiops/workbench/model/Operator.java',
                   'org/pmiops/workbench/model/ParticipantCohortStatusColumns.java',
                   'org/pmiops/workbench/model/SortOrder.java',
+                  'org/pmiops/workbench/model/User.java',
                   'org/pmiops/workbench/jira/JiraService.java',
                   'org/pmiops/workbench/jira/JiraServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksService.java',
@@ -155,6 +158,10 @@ dependencies {
   compile 'com.squareup.okhttp:okhttp:2.7.5'
   compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
   compile 'org.hibernate:hibernate-core:5.2.10.Final'
+  compile 'com.google.cloud:google-cloud-storage:1.51.0'
+  compile 'org.json:json:20160810'
+  compile 'javax.inject:javax.inject:1'
+
 }
 
 
