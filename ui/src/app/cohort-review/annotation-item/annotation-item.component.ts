@@ -71,7 +71,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     private cdref: ChangeDetectorRef
   ) {}
 
-  ngOnChanges(changes) {
+  ngOnChanges() {
     if (this.annotation.value[this.valuePropertyName]) {
       this.defaultAnnotation = true;
       this.annotationOption = this.annotation.value[this.valuePropertyName];
