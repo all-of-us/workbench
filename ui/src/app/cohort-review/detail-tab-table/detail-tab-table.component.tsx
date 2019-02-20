@@ -7,8 +7,6 @@ import {urlParamsStore} from 'app/utils/navigation';
 import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {InputText} from 'primereact/inputtext';
-import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
 const css = `
@@ -18,11 +16,13 @@ const css = `
     background-color: #f4f4f4;
   }
   body .p-datatable .p-datatable-thead > tr > th {
+    padding: 10px 5px 10px 10px;
+    vertical-align: middle;
     border: 0;
     border-bottom: 1px solid #c8c8c8;
     border-left: 1px solid #c8c8c8;
   }
-  body .p-datatable .p-datatable-thead > tr > th:first-of-typr {
+  body .p-datatable .p-datatable-thead > tr > th:first-of-type {
     border-left: 0;
   }
   body .p-datatable .p-column-title {
@@ -76,15 +76,13 @@ const styles = reactStyles({
     fontSize: '12px',
   },
   tableBody: {
-    padding: '5px',
-    verticalAlign: 'top',
     textAlign: 'left',
     lineHeight: '0.6rem'
   },
   columnHeader: {
     background: '#f4f4f4',
     color: '#262262',
-    fontWeight: 600
+    fontWeight: 600,
   },
   columnBody: {
     background: '#ffffff',
@@ -118,7 +116,6 @@ export interface DetailTabTableProps {
 export interface DetailTabTableState {
   data: Array<any>;
   loading: boolean;
-  filters: any;
   start: number;
   rows: number;
   sortField: string;
@@ -128,13 +125,11 @@ export interface DetailTabTableState {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
     dt: any;
-    overlays = {};
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
         data: null,
         loading: true,
-        filters: {},
         start: 0,
         rows: 25,
         sortField: null,
@@ -151,7 +146,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({
           data: null,
           loading: true,
-          filters: {}
         });
         this.getParticipantData();
       }
@@ -184,16 +178,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
     }
 
-    onFilter = (event: any) => {
-      this.setState({filters: event.filters});
-    }
-
     onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
-    }
-
-    columnFilter = (event: any) => {
-      this.dt.filter(event.target.value, event.target.id, 'contains');
     }
 
     columnSort = (sortField: string) => {
@@ -210,7 +196,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {filters, loading, rows, start, sortField, sortOrder} = this.state;
+      const {loading, rows, start, sortField, sortOrder} = this.state;
       const data = this.state.data || [];
       const lastRowOfPage = (start + rows) > data.length
         ? start + rows - (start + rows - data.length) : start + rows;
@@ -229,17 +215,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-          <i
-            className='pi pi-filter'
-            style={styles.filterIcon}
-            onClick={(e) => this.overlays[col.name].toggle(e)} />
-          <OverlayPanel ref={(el) => this.overlays[col.name] = el} appendTo={document.body}>
-            <InputText
-              value={filters[col.name] ? filters[col.name].value : ''}
-              className='p-inputtext p-column-filter'
-              id={col.name}
-              onChange={this.columnFilter} />
-          </OverlayPanel>
         </React.Fragment>;
 
         return <Column
@@ -257,8 +232,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           style={styles.table}
           ref={(el) => this.dt = el}
           value={data}
-          filters={filters}
-          onFilter={this.onFilter}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
