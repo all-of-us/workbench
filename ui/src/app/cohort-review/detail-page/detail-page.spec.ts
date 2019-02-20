@@ -10,7 +10,6 @@ import {AnnotationItemComponent} from 'app/cohort-review/annotation-item/annotat
 import {AnnotationListComponent} from 'app/cohort-review/annotation-list/annotation-list.component';
 import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
-import {DetailAllEventsComponent} from 'app/cohort-review/detail-all-events/detail-all-events.component';
 import {DetailHeaderComponent} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from 'app/cohort-review/detail-tabs/detail-tabs.component';
@@ -27,6 +26,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionService, CohortReview, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
+import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
 import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
@@ -59,7 +59,6 @@ describe('DetailPage', () => {
         AnnotationListComponent,
         ClearButtonInMemoryFilterComponent,
         CreateReviewPage,
-        DetailAllEventsComponent,
         DetailHeaderComponent,
         DetailPage,
         DetailTabsComponent,
