@@ -167,7 +167,7 @@ export class WorkbenchAccessTasks extends
   }
 }
 
-const homepageStyles = reactStyles({
+export const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
