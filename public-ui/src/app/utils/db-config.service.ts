@@ -52,7 +52,7 @@ export class DbConfigService {
     '903070': '#252660',
     '903096': '#252660',
     '903079': '#80C4EC',
-    '1585841': '#4259A5',
+    '1585841': '#216fb4',
     '1585842': '#80C4EC',
     '1585843': '#8DC892'
   };
@@ -75,19 +75,19 @@ export class DbConfigService {
     '11': '#000000',
     '12': '#DDDDDD'
   };
-  COLUMN_COLOR = '#6CAEE3';
+  COLUMN_COLOR = '#216fb4';
   AXIS_LINE_COLOR = '#979797';
 
   /* Chart Styles */
   CHART_TITLE_STYLE = {
-    'color': '#302C71', 'font-family': 'Gotham HTF',	'font-size': '14px', 'font-weight': '300'
+    'color': '#262262', 'font-family': 'GothamBook',	'font-size': '14px', 'font-weight': '300'
   };
   DATA_LABEL_STYLE = {
-    'color': '#FFFFFF', 'font-family': 'Gotham HTF',	'font-size': '14px',
+    'color': '#FFFFFF', 'font-family': 'GothamBook',	'font-size': '14px',
     'font-weight': '300', 'textOutline': 'none'
   };
   GI_DATA_LABEL_STYLE = {
-    'color': 'black', 'font-family': 'Gotham HTF',	'font-size': '14px',
+    'color': 'black', 'font-family': 'GothamBook',	'font-size': '14px',
       'font-weight': '300', 'textOutline': 'none'
   };
 

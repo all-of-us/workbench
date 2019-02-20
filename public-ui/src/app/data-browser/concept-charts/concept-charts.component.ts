@@ -17,7 +17,7 @@ import {GraphType} from '../../utils/enum-defs';
 })
 export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   @Input() concept: Concept;
-  @Input() backgroundColor = '#ECF1F4'; // background color to pass to the chart component
+  @Input() backgroundColor = 'transparent'; // background color to pass to the chart component
   @Input() showGraph = GraphType.None;
   @Input() showRace = false;
   @Input() showEthnicity = false;

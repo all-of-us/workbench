@@ -57,7 +57,7 @@
     <div class="push-xs-1 col-xs-10">
     </div>
     <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
-      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor" [domainType]="'ehr'"> </app-chart>
+      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="30" [backgroundColor]="backgroundColor" [domainType]="'ehr'"> </app-chart>
     </div>
     <div class="push-xs-1 col-xs-10">
     </div>
@@ -68,8 +68,7 @@
     <div class="push-xs-1 col-xs-10" *ngIf="showGraph === graphType.Sources">
     </div>
     <div class="push-xs-1 col-xs-10 chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
-      <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20"
-                 [backgroundColor]="backgroundColor" [chartTitle]="'Sources'">
+      <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20" [chartTitle]="'Sources'">
       </app-chart>
     </div>
     <div class="push-xs-1 col-xs-10">
