@@ -18,7 +18,6 @@ import {AnnotationListComponent} from './annotation-list/annotation-list.compone
 import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
 import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
-import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
@@ -92,7 +91,6 @@ import {TablePage} from './table-page/table-page';
     DetailHeaderComponent,
     DetailTabsComponent,
     DetailTabTableComponent,
-    DetailAllEventsComponent,
     ParticipantsChartsComponent,
     QueryCohortDefinitionComponent,
     QueryDescriptiveStatsComponent
