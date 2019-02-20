@@ -23,4 +23,5 @@ public interface CloudStorageService {
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();
   public void deleteBlob(BlobId blobId);
+  public String getMoodleApiKey();
 }
