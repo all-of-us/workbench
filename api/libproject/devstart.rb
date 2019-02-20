@@ -1019,8 +1019,6 @@ def backfill_gsuite_user_data(cmd_name, *args)
       ->(opts, v) { opts.dry_run = v},
       "When true, print debug lines instead of performing writes. Defaults to true.")
 
-  print "Project is #{op.opts.project}\n"
-
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
   gcc = GcloudContextV2.new(op)
@@ -1028,22 +1026,21 @@ def backfill_gsuite_user_data(cmd_name, *args)
   gcc.validate()
 
   if op.opts.dry_run
-    print "DRY RUN -- CHANGES WILL NOT BE PERSISTED\n"
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
   end
 
   #ENV.update(read_db_vars(gcc))
 
   # This command reads from the AoU database and reads/writes to the associated GSuite API.
-  #ServiceAccountContext.new(op.opts.project).run do
   with_cloud_proxy_and_db(gcc) do
-    #get_gsuite_admin_key(op.opts.project)
+    # Copy the GSuite admin key to the local machine.
+    get_gsuite_admin_key(op.opts.project)
 
     common = Common.new
     common.run_inline %W{
         gradle --info backfillGSuiteUserData
        -PappArgs=[#{op.opts.dry_run}]}
   end
-  #end
 end
 
 Common.register_command({
@@ -1084,12 +1081,12 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-      Dir.chdir("tools") do
-        common = Common.new
-        common.run_inline %W{
-          gradle --info setAuthority
-         -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-      end
+    Dir.chdir("tools") do
+      common = Common.new
+      common.run_inline %W{
+        gradle --info setAuthority
+       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
+    end
   end
 end
 
