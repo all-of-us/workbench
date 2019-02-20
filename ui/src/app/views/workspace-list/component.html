@@ -133,7 +133,7 @@
                           [receiveDelete]="receiveDelete"
                           [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
 <app-workspace-share *ngIf="sharing"
-                     [closeFunction]="closeShare"
+                     [onClose]="closeShare"
                      [workspace]="workspace"
                      [accessLevel]="accessLevel"
                      [userEmail]="username"

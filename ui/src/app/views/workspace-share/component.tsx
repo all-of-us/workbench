@@ -192,7 +192,7 @@ export interface WorkspaceShareProps {
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
   userEmail: string;
-  closeFunction: Function;
+  onClose: Function;
   sharing: boolean;
 }
 
@@ -235,12 +235,14 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       this.state.workspace.id,
       {workspaceEtag: this.state.workspace.etag, items: this.state.workspace.userRoles})
       .then((resp: ShareWorkspaceResponse) => {
-        const updatedWorkspace = this.state.workspace;
-        updatedWorkspace.etag = resp.workspaceEtag;
-        updatedWorkspace.userRoles = resp.items;
+        const updatedWorkspace = {
+          ...this.state.workspace,
+          etag: resp.workspaceEtag,
+          userRoles: resp.items
+        };
         this.setState({usersLoading: false, userNotFound: '',
           searchTerm: '', workspace: updatedWorkspace});
-        this.props.closeFunction();
+        this.props.onClose();
       }).catch(error => {
         if (error.status === 400) {
           this.setState({userNotFound: error});
@@ -298,7 +300,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         if (this.state.searchTerm !== searchTerm) {
           return;
         }
-        this.setState({autocompleteLoading: false});
         response.users = fp.differenceWith((a, b) => {
           return a.email === b.email;
         }, response.users, this.state.userRolesList);
@@ -473,7 +474,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         </ModalBody>
         <ModalFooter>
             <Button type='secondary' style={{marginRight: '.8rem', border: 'none'}}
-                    onClick={() => this.props.closeFunction()}>Cancel</Button>
+                    onClick={() => this.props.onClose()}>Cancel</Button>
             <Button data-test-id='save' disabled={!this.hasPermission}
                     onClick={() => this.save()}>Save</Button>
         </ModalFooter>
@@ -488,7 +489,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         </ModalBody>
         <ModalFooter>
           <Button onClick={() => this.reloadWorkspace()}>Reload Workspace</Button>
-          <Button onClick={() => this.props.closeFunction()}>Cancel Sharing</Button>
+          <Button onClick={() => this.props.onClose()}>Cancel Sharing</Button>
         </ModalFooter>
       </Modal>}
     </div>;
@@ -504,10 +505,10 @@ export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit 
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
   @Input('userEmail') userEmail: WorkspaceShareProps['userEmail'];
   @Input('sharing') sharing: boolean;
-  @Input('closeFunction') closeFunction: WorkspaceShareProps['closeFunction'];
+  @Input('onClose') closeFunction: WorkspaceShareProps['onClose'];
 
   constructor() {
-    super(WorkspaceShare, ['workspace', 'accessLevel', 'sharing', 'closeFunction', 'userEmail']);
+    super(WorkspaceShare, ['workspace', 'accessLevel', 'sharing', 'onClose', 'userEmail']);
   }
 
 }
