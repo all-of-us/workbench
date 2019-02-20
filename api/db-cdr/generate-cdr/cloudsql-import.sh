@@ -63,8 +63,7 @@ function import_wait () {
   sleep 5
   seconds_waited=5
   while true; do
-    local operations=$(gcloud sql operations list --instance $INSTANCE --project $PROJECT --limit 10)
-    if [[ $(operations | grep ".*RUNNING") ]] || [[ $(operations | grep ".*PENDING") ]]
+    if [[ $(gcloud sql operations list --instance $INSTANCE --project $PROJECT --limit 10 | grep -e ".*RUNNING" -e ".*PENDING") ]]
     then
         sleep $wait_interval
         seconds_waited=$((seconds_waited + wait_interval))
