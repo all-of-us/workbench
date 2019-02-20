@@ -1,12 +1,13 @@
 import {ConceptsServiceStub} from './concepts-service-stub';
 
+import {Empty} from '@angular-devkit/core/src/virtual-fs/host';
 import {
   ConceptSet,
   ConceptSetListResponse,
   Domain,
   UpdateConceptSetRequest
 } from 'generated/fetch';
-import {ConceptSetsApi, EmptyResponse} from 'generated/fetch/api';
+import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptSets?: ConceptSet[];
@@ -83,4 +84,14 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
       resolve({});
     });
   }
+
+  public createConceptSet(
+    workspaceNamespace: string, workspaceId: string,
+    conceptSetRequest: CreateConceptSetRequest): Promise<ConceptSet> {
+    return new Promise<ConceptSet>(resolve => {
+      this.conceptSets.push(conceptSetRequest.conceptSet);
+      resolve(conceptSetRequest.conceptSet);
+    });
+  }
+
 }
