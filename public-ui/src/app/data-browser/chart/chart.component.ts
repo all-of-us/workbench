@@ -82,9 +82,11 @@ export class ChartComponent implements OnChanges {
         followPointer: true,
         backgroundColor: '#f6f6f8',
         borderWidth: 0,
-        shadow: true,
+        borderRadius: 10,
+        shadow: false,
         style: {
           padding: 0,
+          borderRadius: 3,
           fontSize: '18px',
           color: '#262262'
         }
