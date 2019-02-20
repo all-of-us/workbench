@@ -41,7 +41,7 @@ public class TemporalQueryBuilder {
 
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String SAME_ENC =
-    "temp1.person_id = temp2.person_id and temp1.visit_concept_id = temp2.visit_concept_id\n";
+    "temp1.person_id = temp2.person_id and temp1.visit_occurrence_id = temp2.visit_occurrence_id\n";
   private static final String X_DAYS_BEFORE =
     "temp1.person_id = temp2.person_id and temp1.entry_date <= DATE_SUB(temp2.entry_date, INTERVAL ${timeValue} DAY)\n";
   private static final String X_DAYS_AFTER =
@@ -59,7 +59,7 @@ public class TemporalQueryBuilder {
   private static final String TEMPORAL_JOIN_TEMPLATE =
     "select temp1.person_id\n" +
       "from (${query1}) temp1\n" +
-      "join (select person_id, visit_concept_id, entry_date\n" +
+      "join (select person_id, visit_occurrence_id, entry_date\n" +
       "from (${query2})\n" +
       ") temp2 on (${conditions})\n";
 

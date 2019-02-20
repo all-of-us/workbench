@@ -28,5 +28,10 @@
     "mode": "NULLABLE",
     "name": "visit_concept_id",
     "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "visit_occurrence_id",
+    "type": "integer"
   }
 ]
