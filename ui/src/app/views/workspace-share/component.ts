@@ -175,9 +175,13 @@ export class WorkspaceShareComponent implements OnInit {
       this.autocompleteNoResults = true;
       return;
     }
-    this.userService.user(this.searchTerm).subscribe((response) => {
-      this.autocompleteLoading = false;
+    const searchTerm = this.searchTerm;
+    this.userService.user(searchTerm).subscribe((response) => {
+      if (this.searchTerm !== searchTerm) {
+        return;
+      }
       this.userResponse = response;
+      this.autocompleteLoading = false;
       response.users = response.users.filter(user => {
         return this.checkUnique(user.email, user.familyName, user.givenName);
       });

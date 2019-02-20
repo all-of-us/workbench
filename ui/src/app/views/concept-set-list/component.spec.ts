@@ -38,8 +38,9 @@ import {SignInService} from 'app/services/sign-in.service';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConceptSetsApi} from 'generated/fetch';
+import {ConceptsApi, ConceptSetsApi} from 'generated/fetch';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 
 
 const activatedRouteStub  = {
@@ -95,6 +96,7 @@ describe('ConceptSetListComponent', () => {
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(ConceptSetListComponent);
       registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
+      registerApiClient(ConceptsApi, new ConceptsApiStub());
       setupModals(fixture);
       // This tick initializes the component.
       tick();
