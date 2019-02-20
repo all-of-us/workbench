@@ -9,6 +9,7 @@ import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
@@ -20,7 +21,6 @@ import {
   WorkspaceResponseListResponse
 } from 'generated/fetch';
 import * as React from 'react';
-import {PopupTrigger} from 'app/components/popups';
 
 const styles = reactStyles({
   fadeBox: {
