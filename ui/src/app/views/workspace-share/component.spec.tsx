@@ -47,7 +47,7 @@ describe('WorkspaceShareComponent', () => {
     registerApiClient(UserApi, new UserApiStub([harryRole, hermioneRole, ronRole, lunaRole]));
     registerApiClient(WorkspacesApi, new WorkspacesApiStub([tomRiddleDiary]));
     props = {
-      closeFunction: () => {},
+      onClose: () => {},
       workspace: tomRiddleDiary,
       accessLevel: WorkspaceAccessLevel.OWNER,
       userEmail: 'harry.potter@hogwarts.edu',
