@@ -29,6 +29,11 @@
 body {
     background-color: #E0E0E1;
     overflow-x: hidden;
+    font-family: Gotham;
+    font-size: 18px;
+    line-height: 1.5em;
+    letter-spacing: normal;
+    color: var(--dark-slate-blue);
 }
 
 
@@ -75,8 +80,17 @@ input[type=password]:focus {
     --blueberry: #2f2e7e;
     --pinkish-grey: #bababa;
     --dark-slate-blue: #262262;
-    --gutter: 18px;
+    --gutter: 9px;
     --boxshadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+    --tbl-border:1px solid #CCCCCC;
+  }
+
+  .toggle-link {
+      cursor: pointer;
+  }
+
+  .no-b-border {
+      border-bottom:none!important;
   }
 
 .highcharts-tooltip>span {
