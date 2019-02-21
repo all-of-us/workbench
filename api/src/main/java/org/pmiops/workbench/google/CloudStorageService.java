@@ -1,7 +1,10 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONObject;
@@ -22,5 +25,8 @@ public interface CloudStorageService {
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();
+  public GoogleCredential getGSuiteAdminCredentials() throws IOException;
+
   public void deleteBlob(BlobId blobId);
+  public String getMoodleApiKey();
 }

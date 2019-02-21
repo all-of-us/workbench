@@ -26,7 +26,7 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
-  TEST_PROJECT => {
+  "all-of-us-workbench-test" => {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
@@ -1004,6 +1004,44 @@ Common.register_command({
   :description => "Adds or removes a specified user from the registered access domain.\n" \
                   "Accepts three flags: --disabled [true/false], --account [admin email], and --user [target user email]",
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
+})
+
+def backfill_gsuite_user_data(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  # This command reads from the AoU database and reads/writes to the associated GSuite API.
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle --info backfillGSuiteUserData
+       -PappArgs=[#{op.opts.dry_run}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "backfill-gsuite-user-data",
+  :description => "Backfills the Institution and contact email address fields in GSuite.\n",
+  :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
 })
 
 def authority_options(cmd_name, args)
