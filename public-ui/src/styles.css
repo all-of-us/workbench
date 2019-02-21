@@ -75,6 +75,8 @@ input[type=password]:focus {
     --blueberry: #2f2e7e;
     --pinkish-grey: #bababa;
     --dark-slate-blue: #262262;
+    --gutter: 18px;
+    --boxshadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
   }
 
 .highcharts-tooltip>span {
