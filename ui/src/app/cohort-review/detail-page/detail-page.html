@@ -1,3 +1,4 @@
+<div class="spinner spinner-inverse" *ngIf="!(participant && annotations && annotationDefinitions)"></div>
 <ng-container *ngIf="participant && annotations && annotationDefinitions">
   <div class="detail-page" [class.sidebar-open]="sidebarOpen">
 
