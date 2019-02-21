@@ -6,7 +6,14 @@ export const PROGRAM_TYPES = [
 ];
 
 export const DOMAIN_TYPES = [
-  {name: 'Demographics', type: TreeType.DEMO},
+  {
+    name: 'Demographics', type: TreeType.DEMO, children: [
+      {name: 'Current Age', type: TreeType.DEMO, subtype: TreeSubType.AGE},
+      {name: 'Gender', type: TreeType.DEMO, subtype: TreeSubType.GEN},
+      {name: 'Race', type: TreeType.DEMO, subtype: TreeSubType.RACE},
+      {name: 'Ethnicity', type: TreeType.DEMO, subtype: TreeSubType.ETH},
+    ]
+  },
   {
     name: 'Conditions', type: TreeType.CONDITION, codes: [
       {name: 'ICD9 Codes', type: TreeType.ICD9, subtype: TreeSubType.CM},
