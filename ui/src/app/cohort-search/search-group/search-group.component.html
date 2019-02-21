@@ -61,7 +61,7 @@
         <h4 class="dropdown-header">Program Data</h4>
         <button
           *ngFor="let criteria of programTypes"
-          id="criteria.type"
+          [id]="criteria.type"
           class="dropdown-item"
           type="button"
           [disabled]="criteria.disabled"
@@ -69,13 +69,34 @@
           clrDropdownItem>{{criteria.name}}</button>
         <div class="dropdown-divider"></div>
         <h4 class="dropdown-header">Domains</h4>
-        <button *ngFor="let criteria of domainTypes"
-          id="criteria.type"
-          class="dropdown-item"
-          type="button"
-          [disabled]="criteria.disabled"
-          (click)="launchWizard(criteria)"
-          clrDropdownItem>{{criteria.name}}</button>
+        <clr-dropdown *ngFor="let criteria of domainTypes">
+          <button
+            *ngIf="!criteria.children"
+            [id]="criteria.type"
+            class="dropdown-item"
+            type="button"
+            [disabled]="criteria.disabled"
+            (click)="launchWizard(criteria)"
+            clrDropdownItem>{{criteria.name}}</button>
+          <ng-container *ngIf="criteria.children">
+            <button
+              [id]="criteria.type"
+              class="dropdown-item"
+              type="button"
+              [disabled]="criteria.disabled"
+              clrDropdownTrigger>{{criteria.name}}</button>
+            <clr-dropdown-menu>
+              <button
+                *ngFor="let child of criteria.children"
+                [id]="child.subtype"
+                class="dropdown-item"
+                type="button"
+                [disabled]="child.disabled"
+                (click)="launchWizard(child)"
+                clrDropdownItem>{{child.name}}</button>
+            </clr-dropdown-menu>
+          </ng-container>
+        </clr-dropdown>
       </clr-dropdown-menu>
     </clr-dropdown>
     </ng-template>
