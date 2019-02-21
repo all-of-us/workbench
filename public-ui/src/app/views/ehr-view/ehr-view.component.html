@@ -11,9 +11,6 @@
     <span class="spinner spinner-sm hidden-sm-up"></span>
   </div>
 </div>
-
-
-
 <div class="result-list">
   <div class="db-card">
     <div class="db-card-inner">
@@ -81,7 +78,7 @@
         </div>
         <div class="results-tbl-head expandable-grid-row">
 
-          <div class="results-tbl-head-item-1 info-text"> {{ehrDomain.name}}
+          <div class="results-tbl-head-item a secondary-display info-text"> {{ehrDomain.name}}
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
@@ -89,7 +86,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="results-tbl-head-item-2 info-text"> Participants of <b>
+          <div class="results-tbl-head-item b secondary-display info-text"> Participants of <b>
               {{totalParticipants | number}}</b>
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -102,7 +99,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="results-tbl-head-item-3 info-text">
+          <div class="results-tbl-head-item c secondary-display info-text">
             Vocabulary Code
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -118,7 +115,7 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="results-tbl-head-item-4 info-text">
+          <div class="results-tbl-head-item d secondary-display info-text">
             Concept Code
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -127,21 +124,23 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="results-tbl-head-item-5  info-text"> View graphs
+          <div class="results-tbl-head-item e  secondary-display info-text"> View graphs
           </div>
         </div>
-        <div class="expandable-grid-row " *ngFor="let r of standardConcepts.concat(items), let i = index"
-          [ngClass]="{'expanded-grid-row': r.expanded}">
-          <div class="results-tbl-body">
-            <div class="results-tbl-col"
+        <div class="expandable-grid-row results-tbl-row " [ngClass]="r.expanded?'row-selected':''"
+          *ngFor="let r of standardConcepts.concat(items), let i = index"
+          [ngClass]="{'results-tbl-row-expanded': r.expanded}">
+          <div class="results-tbl-row-inner" (click)="expandRow(standardConcepts.concat(items),r)">
+            <div class="secondary-display info-text results-tbl-col"
               *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept !='S';else code_match_standard">
               <div class="code-tooltip">
                 <app-highlight-search [text]="r.conceptName" [searchTerm]="prevSearchText" [isSource]="true">
                 </app-highlight-search>
               </div>
             </div>
+
             <ng-template #code_match_standard>
-              <div class="results-tbl-col"
+              <div class="secondary-display info-text results-tbl-col"
                 *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard">
                 <div class="code-tooltip"
                   *ngIf="searchResult.matchType === 'CONCEPT_CODE' && r.standardConcept ==='S';else code_match_not_standard">
@@ -151,59 +150,71 @@
               </div>
             </ng-template>
             <ng-template #code_match_not_standard>
-              <div class="results-tbl-col">
+              <div class="secondary-display info-text results-tbl-col">
                 <div class="code-tooltip">
                   <app-highlight-search [indNum]="i+1" [text]="r.conceptName" [searchTerm]="prevSearchText">
                   </app-highlight-search>
                 </div>
               </div>
             </ng-template>
-            <div class="results-tbl-col">
+
+
+            <div class="secondary-display info-text results-tbl-col">
               {{r.countValue | number }}
             </div>
-            <div class="results-tbl-col" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
-              <div class="aka">Also Known As
-                  <clr-tooltip>
-                      <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
-                      <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
-                        <div class="tooltip-header">
-                          Medical concepts often have alternative names and descriptions, known as synonyms.
-                          Alternate names and descriptions,
-                          if available, are listed for each medical concept.</div>
-                      </clr-tooltip-content>
-                    </clr-tooltip>
-              </div>  
-              <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]"
-                [text]="synonymString[r.conceptId].substring(0,110)" [searchTerm]="prevSearchText">
-              </app-highlight-search>
-              <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="synonymString[r.conceptId]"
-                [searchTerm]="prevSearchText"></app-highlight-search>
-              <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)"
-                *ngIf="synonymString[r.conceptId].length > 110 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
-              </a>
-              <ng-template #seeMore>
-                <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)"
-                  *ngIf="synonymString[r.conceptId].length > 100"> See More
-                  <clr-icon shape="ellipsis-horizontal"></clr-icon>
-                </a>
-              </ng-template>
-            </div>
+
+
+
+
             <ng-template #noConceptSynonyms>
-              <div class="results-tbl-col"></div>
+              <div class="secondary-display info-text results-tbl-col"></div>
             </ng-template>
-            <div class="results-tbl-col">
+            <div class="secondary-display info-text results-tbl-col">
               {{r.vocabularyId}} {{r.conceptCode}}
             </div>
-            <div class="results-tbl-col">
+
+
+
+            <div class="secondary-display info-text results-tbl-col">
               {{r.conceptId}}
             </div>
-            <div class="results-tbl-col">
-              <button class="icon-btn" (click)="expandRow(standardConcepts.concat(items),r)">
+
+
+
+            <div class="secondary-display info-text results-tbl-col">
+              <button class="icon-btn">
                 <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
               </button>
             </div>
           </div>
-          <div class=" row-expansion flex-xs-middle" *ngIf="r.expanded" #chartElement>
+          <div (click)="expandRow(standardConcepts.concat(items),r)" class="secondary-display info-text results-tbl-col aka" [ngClass]="{'no-b-border': r.expanded}" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
+            <div (click)="$event.stopPropagation();toggleSynonyms(r.conceptId)" class="aka-text"><span>Also Known As</span>
+              <clr-tooltip>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon aka-info"></clr-icon>
+                <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+                  <div class="tooltip-header">
+                    Medical concepts often have alternative names and descriptions, known as synonyms.
+                    Alternate names and descriptions,
+                    if available, are listed for each medical concept.</div>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+            <app-highlight-search (click)="toggleSynonyms(r.conceptId);$event.stopPropagation()" class="aka-body" *ngIf="!showMoreSynonyms[r.conceptId]"
+              [text]="synonymString[r.conceptId].substring(0,110)" [searchTerm]="prevSearchText">
+            </app-highlight-search>
+            <app-highlight-search (click)="toggleSynonyms(r.conceptId);$event.stopPropagation()" class="aka-body" *ngIf="showMoreSynonyms[r.conceptId]"
+              [text]="synonymString[r.conceptId]" [searchTerm]="prevSearchText"></app-highlight-search>
+            <a (click)="toggleSynonyms(r.conceptId);$event.stopPropagation()" class="toggle-link see-less" 
+              *ngIf="synonymString[r.conceptId].length > 110 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
+            </a>
+            <ng-template #seeMore>
+              <a (click)="toggleSynonyms(r.conceptId);$event.stopPropagation()"  class="toggle-link see-more"
+                *ngIf="synonymString[r.conceptId].length > 100"> See More
+                <clr-icon shape="ellipsis-horizontal"></clr-icon>
+              </a>
+            </ng-template>
+          </div>
+          <div class="row-expansion" *ngIf="r.expanded" #chartElement>
             <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']"
               [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}}
               <clr-tooltip>
@@ -215,8 +226,13 @@
             <app-concept-charts [concept]="r" [showGraph]="graphToShow" [backgroundColor]="'#ECF1F4'">
             </app-concept-charts>
           </div>
+
+
+
         </div>
       </div>
+
+
 
       <div class="results-grid">
         <div class="row" *ngIf="!loading && items.length === 0">
