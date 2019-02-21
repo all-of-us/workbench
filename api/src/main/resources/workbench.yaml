@@ -484,7 +484,7 @@ paths:
           type: string
           required: false
 
- 
+
   # Notebook clusters ####################################################################
 
   /v1/clusters:
@@ -826,7 +826,7 @@ paths:
             $ref: "#/definitions/CheckClustersResponse"
 
   /v1/cron/bulkSyncTrainingStatus:
-    post:
+    get:
       tags:
         - user
         - cron
