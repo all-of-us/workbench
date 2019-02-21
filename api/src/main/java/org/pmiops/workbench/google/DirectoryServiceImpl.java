@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Provider;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -146,7 +147,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .get(GSUITE_FIELD_CONTACT_EMAIL);
   }
 
-  public static void addCustomSchemaValues(User user, String primaryEmail, String contactEmail) {
+  public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
@@ -162,10 +163,13 @@ public class DirectoryServiceImpl implements DirectoryService {
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
-    user.setEmails(Lists.newArrayList(
-    new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
-    new UserEmail().setType("home").setAddress(contactEmail)))
-    .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
+    ArrayList<UserEmail> emails = Lists.newArrayList(
+      new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+    if (contactEmail != null) {
+      emails.add(new UserEmail().setType("home").setAddress(contactEmail));
+    }
+    user.setEmails(emails)
+        .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
   @Override
@@ -178,7 +182,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
         .setChangePasswordAtNextLogin(true);
-    addCustomSchemaValues(user, primaryEmail, contactEmail);
+    addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
