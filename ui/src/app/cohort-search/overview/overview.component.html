@@ -5,7 +5,7 @@
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!(isRequesting$ | async)">
+      <span class="count-header" *ngIf="!(isRequesting$ | async) && (total$ | async) !== -1">
         {{ total$ | async | number }}
       </span>
       <span *ngIf="(error$ | async) && !temporal.flag">
@@ -15,7 +15,7 @@
           shape="error-standard"
           size="18"></clr-icon>
       </span>
-      <span *ngIf="!(isRequesting$ | async) && temporal?.flag && temporal.tempLength && (total$ | async) === null">
+      <span *ngIf="!(isRequesting$ | async) && ((temporal?.flag && temporal.tempLength && (total$ | async) === null) || (total$ | async) === -1)">
         - -
         <clr-icon
           [popper]="errorPopper"
@@ -73,8 +73,11 @@
   <p   *ngIf="(error$ | async) && !temporal?.flag" [style.margin]="'0'">
     A problem occurred and we were not able to retrieve the requested data
   </p>
-  <p  *ngIf="temporal?.flag && temporal.tempLength " [style.margin]="'0'">
+  <p *ngIf="temporal?.flag && temporal.tempLength" [style.margin]="'0'">
     Please complete criteria selections before saving temporal relationship.
+  </p>
+  <p *ngIf="(total$ | async) === -1" [style.margin]="'0'">
+    All criteria are suppressed. Un-surpress criteria to update the total count based on the visible criteria.
   </p>
 </popper-content>
 <clr-modal #saveModal
