@@ -1,20 +1,10 @@
 package org.pmiops.workbench.tools;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.gson.Gson;
-import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.RetryConfig;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.google.DirectoryServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -23,13 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;

@@ -14,11 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
