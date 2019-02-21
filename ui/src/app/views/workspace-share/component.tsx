@@ -180,7 +180,6 @@ export interface WorkspaceShareState {
   userNotFound: string;
   workspaceShareError: boolean;
   usersLoading: boolean;
-  userRolesList: UserRole[];
   workspaceFound: boolean;
   workspaceUpdateConflictError: boolean;
   workspace: Workspace;
@@ -208,7 +207,6 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
       userNotFound: '',
       workspaceShareError: false,
       usersLoading: false,
-      userRolesList: this.props.workspace.userRoles || [],
       workspaceFound: (this.props.workspace !== null),
       workspaceUpdateConflictError: false,
       workspace: this.props.workspace,
@@ -218,7 +216,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
     this.searchTermChangedEvent = fp.debounce(300, this.userSearch);
   }
 
-  componentWillMount(): void {
+  componentDidMount(): void {
     document.addEventListener('mousedown', this.handleClickOutsideSearch, false);
   }
 
@@ -256,8 +254,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   removeCollaborator(user: UserRole): void {
-    this.setState(({userRolesList, workspace}) => ({
-      userRolesList: fp.remove(({email}) => user.email === email, userRolesList),
+    this.setState(({workspace}) => ({
       workspace: {...workspace,
         userRoles: fp.remove(({email}) => {
           return user.email === email;
@@ -281,10 +278,9 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   addCollaborator(user: User): void {
     const userRole: UserRole = {givenName: user.givenName, familyName: user.familyName,
       email: user.email, role: WorkspaceAccessLevel.READER};
-    this.setState(({userRolesList, workspace}) => ({
+    this.setState(({workspace}) => ({
       searchTerm: '', autocompleteLoading: false, autocompleteUsers: [], dropDown: false,
-      userRolesList: fp.concat(userRolesList, [userRole]),
-      workspace: {...workspace, userRoles: fp.concat(userRolesList, [userRole])} as Workspace}
+      workspace: {...workspace, userRoles: fp.concat(workspace.userRoles, [userRole])} as Workspace}
     ));
   }
 
@@ -302,7 +298,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
         }
         response.users = fp.differenceWith((a, b) => {
           return a.email === b.email;
-        }, response.users, this.state.userRolesList);
+        }, response.users, this.state.workspace.userRoles);
         this.setState({
           autocompleteUsers: response.users.splice(0, 4),
           autocompleteLoading: false,
@@ -312,11 +308,11 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
   }
 
   setRole = (e, user)  => {
-    const oldUserRoles = this.state.userRolesList;
+    const oldUserRoles = this.state.workspace.userRoles;
     const newUserRoleList = fp.map((u) => {
       return u.email === user.email ? {...u, role: e.value} : u;
     }, oldUserRoles);
-    this.setState(({userRolesList, workspace}) => ({userRolesList: newUserRoleList,
+    this.setState(({workspace}) => ({
       workspace: {...workspace, userRoles: newUserRoleList} as Workspace}));
   }
 
@@ -407,8 +403,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
               </div></div>}
             {this.showSearchResults &&
               <div data-test-id='drop-down' style={{...styles.dropdownMenu, ...styles.open}}>
-              {this.state.autocompleteUsers.map((user, i) => {
-                return <div><div style={styles.wrapper} key={i}>
+              {this.state.autocompleteUsers.map((user) => {
+                return <div key={user.email}><div style={styles.wrapper}>
                   <div style={styles.box}>
                     <h5 style={styles.userName}>{user.givenName} {user.familyName}</h5>
                     <div data-test-id='user-email' style={styles.userName}>{user.email}</div>
@@ -435,8 +431,8 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
           </div>}
             <h3>Current Collaborators</h3>
           <div style={{overflowY: this.state.dropDown ? 'hidden' : 'auto'}}>
-            {this.state.userRolesList.map((user, i) => {
-              return <div key={i}>
+            {this.state.workspace.userRoles.map((user, i) => {
+              return <div key={user.email}>
                 <div style={styles.wrapper}>
                   <div style={styles.box}>
                     <h5 data-test-id='collab-user-name'
@@ -466,7 +462,7 @@ export class WorkspaceShare extends React.Component<WorkspaceShareProps, Workspa
                   </div>
                 </div>
                 </div>
-                  {(this.state.userRolesList.length !== i + 1) &&
+                  {(this.state.workspace.userRoles.length !== i + 1) &&
                   <div style={{borderTop: '1px solid grey', width: '100%', marginTop: '.5rem'}}/>}
               </div>;
             })}
