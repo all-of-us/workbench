@@ -1,42 +1,53 @@
-<form class="form-container" [formGroup]="demoForm">
+<form class="form-container" [formGroup]="demoForm" [ngSwitch]="subtype">
   <!-- Age -->
-  <div class="age-label">
-    Current Age
-  </div>
-  <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
-    <input type="number"
-           id="min-age"
-           [min]="minAge" [max]="maxAge"
-           formControlName="ageMin"
-           class="number-display"
-           (blur)="checkMin()">
-    <div class="slider">
-      <div id="count-wrapper">
-          <span id="age-count" class="badge badge-info">
-            {{ ageCount | number }}
-          </span>
-      </div>
-      <nouislider
-              [min]="minAge" [max]="maxAge" [step]="1"
-              [behaviour]="'drag'"
-              [connect]="true"
-              (slide)="centerAgeCount()"
-              [formControl]="demoForm.controls.ageRange">
-      </nouislider>
+  <div *ngSwitchCase="treeSubType.AGE">
+    <div class="age-label">
+      Age Range
     </div>
-    <input type="number"
-           id="max-age"
-           [min]="minAge" [max]="maxAge"
-           formControlName="ageMax"
-           class="number-display"
-           (blur)="checkMax()">
-    <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getAgeValue()"></clr-icon>
-    <clr-icon *ngIf= "ageClicked" class="selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
+    <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
+      <input type="number"
+             id="min-age"
+             [min]="minAge" [max]="maxAge"
+             formControlName="ageMin"
+             class="number-display"
+             (blur)="checkMin()">
+      <div class="slider">
+        <div id="count-wrapper">
+            <span id="age-count" class="badge badge-info">
+              {{ ageCount | number }}
+            </span>
+        </div>
+        <nouislider
+                [min]="minAge" [max]="maxAge" [step]="1"
+                [behaviour]="'drag'"
+                [connect]="true"
+                (slide)="centerAgeCount()"
+                [formControl]="demoForm.controls.ageRange">
+        </nouislider>
+      </div>
+      <input type="number"
+             id="max-age"
+             [min]="minAge" [max]="maxAge"
+             formControlName="ageMax"
+             class="number-display"
+             (blur)="checkMax()">
+      <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getAgeValue()"></clr-icon>
+      <clr-icon *ngIf= "ageClicked" class="selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
+    </div>
+
+    <div class="deceased-title">
+      Deceased
+    </div>
+    <div class="control-wrapper">
+      <div (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
+        <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
+        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
+        Is Deceased</div>
+    </div>
   </div>
 
   <!-- Genders -->
-  <div class="demo-container test-container">
-    <div>
+    <div *ngSwitchCase="treeSubType.GEN">
       <div class="demo-title">
         Gender
       </div>
@@ -53,7 +64,7 @@
     </div>
 
     <!-- Races -->
-    <div>
+    <div *ngSwitchCase="treeSubType.RACE">
       <div class="demo-title">
         Race
       </div>
@@ -70,7 +81,7 @@
     </div>
 
     <!-- Ethnicities -->
-    <div>
+    <div *ngSwitchCase="treeSubType.ETH">
       <div class="demo-title">
         Ethnicity
       </div>
@@ -85,18 +96,6 @@
         </crit-multi-select>
       </div>
     </div>
-  </div>
-  <div>
-    <div class="deceased-title">
-      Deceased
-    </div>
-    <div class="control-wrapper">
-      <div (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
-        <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
-        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
-        Is Deceased</div>
-    </div>
-  </div>
 </form>
 <div class="container count-preview" *ngIf="!noSelection">
   <div class="row">

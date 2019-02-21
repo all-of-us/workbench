@@ -5,6 +5,7 @@ import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
+  activeCriteriaSubtype,
   activeParameterList,
   CohortSearchActions,
   CohortSearchState,
@@ -41,12 +42,14 @@ function sortByCountThenName(critA, critB) {
   ]
 })
 export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
+  @select(activeCriteriaSubtype) subtype$;
   @select(activeParameterList) selection$;
   @Input() selectedParamId: any;
   @Input() selectedTypes: any;
   @Output() itemsAddedFlag = new EventEmitter<boolean>();
   @select(previewStatus) preview$;
   @select(participantsCount) count$;
+  readonly treeSubType = TreeSubType;
   readonly minAge = minAge;
   readonly maxAge = maxAge;
   loading = {
@@ -92,6 +95,8 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   isCancelTimerInitiated: any = false;
   showCalculateContainer = false;
   count: any;
+  subtype: string;
+
   constructor(
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
@@ -140,6 +145,11 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       this.initAgeRange(selections);
       this.loadNodesFromApi();
     });
+
+    this.subscription.add(this.subtype$.subscribe(sub => {
+      console.log(sub);
+      this.subtype = sub;
+    }));
 
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)

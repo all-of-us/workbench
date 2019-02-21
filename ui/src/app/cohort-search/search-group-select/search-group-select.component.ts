@@ -23,7 +23,7 @@ export class SearchGroupSelectComponent {
     const itemId = this.actions.generateId('items');
     const groupId = this.actions.generateId(this.role);
     const criteriaType = criteria.codes ? criteria.codes[0].type : criteria.type;
-    const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : null;
+    const criteriaSubtype = criteria.codes ? criteria.codes[0].subtype : criteria.subtype;
     const fullTree = criteria.fullTree || false;
     const codes = criteria.codes || false;
     this.actions.initGroup(this.role, groupId);
