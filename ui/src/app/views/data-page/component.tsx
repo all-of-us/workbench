@@ -7,12 +7,13 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
-import {cohortsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
+import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
-import {RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -61,7 +62,8 @@ enum Tabs {
 
 const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean}> {
+  {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
+    creatingConceptSet: boolean, conceptDomainList: DomainInfo[]}> {
 
   constructor(props) {
     super(props);
@@ -69,11 +71,17 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
       activeTab: Tabs.SHOWALL,
       resourceList: [],
       isLoading: true,
+      creatingConceptSet: false,
+      conceptDomainList: undefined
     };
   }
 
   componentDidMount() {
+    const {namespace, id} = this.props.workspace;
     this.loadResources();
+    conceptsApi().getDomainInfo(namespace, id).then((response) => {
+      this.setState({conceptDomainList: response.items});
+    });
   }
 
   async loadResources() {
@@ -107,7 +115,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
 
   render() {
     const {namespace, id} = this.props.workspace;
-    const {activeTab, isLoading, resourceList} = this.state;
+    const {activeTab, isLoading, resourceList, creatingConceptSet, conceptDomainList} = this.state;
     let resourceKey = 0;
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
@@ -155,8 +163,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
           </CardButton>
           <CardButton style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
                       onClick={() => {
-                        // TODO: This should open a concept set create modal
-                        // Blocked on that React conversion.
+                        this.setState({creatingConceptSet: true});
                       }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Concept Sets</h2>
@@ -219,6 +226,19 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
+      {creatingConceptSet &&
+      <CreateConceptSetModal onCreate={() => {
+        this.loadResources().then(() => {
+          this.setState({creatingConceptSet: false});
+        });
+      }}
+      onClose={() => {
+        this.setState({creatingConceptSet: false});
+      }}
+      conceptDomainList={conceptDomainList}
+      existingConceptSets={resourceList
+        .filter((resource: RecentResource) => resource.conceptSet !== null)
+        .map((resource: RecentResource) => resource.conceptSet)}/>}
     </React.Fragment>;
   }
 });
