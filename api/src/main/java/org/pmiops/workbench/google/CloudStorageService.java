@@ -28,4 +28,5 @@ public interface CloudStorageService {
   public GoogleCredential getGSuiteAdminCredentials() throws IOException;
 
   public void deleteBlob(BlobId blobId);
+  public String getMoodleApiKey();
 }

@@ -72,10 +72,10 @@ public class BackfillGSuiteUserData {
         com.google.api.services.admin.directory.model.User gSuiteUser =
           directoryService.getUser(user.getEmail());
         if (gSuiteUser == null) {
-            log.warning(String.format("AoU user %s (%s) not found in GSuite! Skipping.",
-              user.getEmail(), user.getContactEmail()));
-            skipCount++;
-            continue;
+          log.warning(String.format("AoU user %s (%s) not found in GSuite! Skipping.",
+            user.getEmail(), user.getContactEmail()));
+          skipCount++;
+          continue;
         }
 
         com.google.api.services.admin.directory.model.User origGSuiteUser = gSuiteUser.clone();

@@ -61,6 +61,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public String getMoodleApiKey() {
+    return readToString(getCredentialsBucketName(), "moodle-key.txt");
+  }
+
+
+  @Override
   public String getImageUrl(String image_name) {
     return "http://storage.googleapis.com/" + getImagesBucketName() + "/" + image_name;
   }
