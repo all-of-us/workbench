@@ -12,7 +12,7 @@ import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {displayDate, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
 import {
   BillingProjectStatus,
   ErrorResponse,
@@ -31,14 +31,22 @@ const styles = reactStyles({
   },
   addCard: {
     display: 'flex', fontSize: '20px', lineHeight: '28px', marginTop: '0',
-    fontWeight: 600
+    fontWeight: 600, color: '#216FB4'
   },
   workspaceName: {
     color: '#216FB4', marginBottom: '0.5rem', fontWeight: 600,
     fontSize: 18, wordBreak: 'break-all', cursor: 'pointer',
   },
   workspaceDescription: {
-    textOverflow: 'ellipsis', overflow: 'hidden', height: '2rem'
+    textOverflow: 'ellipsis', overflow: 'hidden', height: '2rem', display: '-webkit-box',
+    webkitLineClamp: '2', webkitBoxOrient: 'vertical'
+  },
+  workspaceCardFooter: {
+    display:'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+  },
+  permissionBox: {
+    color: '#FFFFFF', height: '1rem', width: '3rem', fontSize: 10, textAlign: 'center',
+    borderRadius: '0.2rem', padding: 0
   }
 });
 
@@ -75,17 +83,37 @@ const WorkspaceCardMenu: React.FunctionComponent<{
 const WorkspaceCard: React.FunctionComponent<
   {wp: WorkspacePermissions, onDelete: Function, onShare: Function}> =
     ({wp, onDelete, onShare}) => {
+    const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
+
       return <Card>
-      <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
-        <WorkspaceCardMenu wp={wp} onDelete={onDelete} onShare={onShare} disabled={false}/>
-        <Clickable>
-          <div style={styles.workspaceName}
-               onClick={() => navigate(
-                   ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
-            {wp.workspace.name}</div>
-        </Clickable>
-      </div>
-      <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
+        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'}}>
+          <div style={{display: 'flex', flexDirection: 'column'}}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
+            <WorkspaceCardMenu wp={wp} onDelete={onDelete} onShare={onShare} disabled={false}/>
+            <Clickable>
+              <div style={styles.workspaceName}
+                   onClick={() => navigate(
+                       ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
+                {wp.workspace.name}</div>
+            </Clickable>
+          </div>
+          <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
+          {wp.isPending && <div style={{color: '#f8c954'}}>
+            <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f8c954'}}/>
+            Pending Approval
+          </div>}
+          {wp.isRejected && <div style={{color: '#f58771'}}>
+            <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f58771'}}/>
+            Rejected
+          </div> }
+        </div>
+          <div style={styles.workspaceCardFooter}>
+            <div style={{fontSize: 12, lineHeight: '17px'}}>Last Changed: <br/>
+              {displayDate(wp.workspace.lastModifiedTime)}</div>
+            <div style={{...styles.permissionBox, backgroundColor: permissionBoxColors[wp.accessLevel]}}>
+              {wp.accessLevel}</div>
+          </div>
+        </div>
     </Card>;
     };
 
@@ -159,7 +187,7 @@ export const WorkspaceList = withUserProfile()
           <div style={styles.cardArea}>
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
-              (<div style={{display: 'flex', marginTop: '1.5rem'}}>
+              (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
                 <CardButton disabled={!billingProjectInitialized}
                             onClick={() => navigate(['workspaces/build'])}
                             style={styles.addCard}>

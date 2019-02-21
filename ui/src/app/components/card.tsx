@@ -12,7 +12,7 @@ export const styles = reactStyles({
     flexDirection: 'column',
     width: '12rem',
     height: '9rem',
-    marginRight: '1rem'
+    margin: '0 1rem 1rem 0'
   }
 });
 
