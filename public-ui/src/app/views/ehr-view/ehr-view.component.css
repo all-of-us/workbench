@@ -1,18 +1,14 @@
-.expandable-grid-row  {
-    width: 100%;
-    border-bottom: 1px solid #CCCCCC;
-    border-radius: 3px 3px 0 0;
-    min-height: 2em;
+
+.aka {
+    font-style: italic;
+    color: var(--pinkish-grey);
 }
-
 /* This is a column in our grid */
-.expandable-grid-row > div {
-
+/* .expandable-grid-row > div {
     font-size: 14px;
     font-weight: 400;
     line-height: 16px;
-
-}
+} */
 
 .search-bar {
     min-width: 100%;
@@ -38,8 +34,94 @@
     display: block!important;
 }
 
+
+
+.results-tbl-head {
+    background: var(--pale-grey);
+    padding:8px;
+    border-radius: 3px 3px 0 0;
+    border: 1px solid #CCCCCC;
+    display:grid;
+    grid-template-columns: repeat(24, 1fr);
+    grid-gap: 8px;
+    grid-template-areas: 
+    'a a a a a a b b b b c c c c c d d d d e e e e';
+    align-items: baseline;
+
+}
+.info-text {
+    min-height:2em;
+}
+.results-tbl-head-item-1 {
+    padding:0 8px;
+    grid-area: a;
+}
+.results-tbl-head-item-2 {
+    padding:0 8px;
+    grid-area: b;
+}
+.results-tbl-head-item-3 {
+    padding:0 8px;
+    grid-area: c;
+}
+.results-tbl-head-item-4 {
+    padding:0 8px;
+    grid-area: d;
+}
+.results-tbl-head-item-5 {
+    padding:0 8px;
+    grid-area: e;
+}
+
+.results-tbl-body  {
+    width: 100%;
+    padding:0 8px;
+    border: 1px solid #CCCCCC;
+    border-top:none;
+    border-radius: 3px 3px 0 0;
+    min-height: 2em;
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
+    grid-gap: 8px;
+    grid-template-areas: 
+    'a a a a a a b b b b d d d d d e e e e f f f f'
+    'c c c c c c c c c c c c c c c c c c c c c c c'
+}
+.results-tbl-col {
+    padding:0 8px;
+}
+
+.results-tbl-col:first-of-type {
+    grid-area: a
+}
+
+.results-tbl-col:nth-of-type(2) {
+    grid-area: b
+}
+
+.results-tbl-col:nth-of-type(3) {
+    grid-area: c
+}
+
+.results-tbl-col:nth-of-type(4) {
+    grid-area: d
+}
+
+.results-tbl-col:nth-of-type(5) {
+    grid-area: e
+}
+
+.results-tbl-col:nth-of-type(6) {
+    grid-area: f
+}
 .row-expansion {
     width: 100%;
     text-align: center;
     margin-top: 1rem;
+}
+
+.domain-info-container {
+    display: flex;
+    align-items: center;
+    padding-bottom:16px;
 }
