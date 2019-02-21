@@ -33,56 +33,44 @@
   </ng-container>
 
   <!-- show gender totals  if we want -->
+  <!-- BIOLOGICAL P CHART -->
   <ng-container *ngIf="showGraph === graphType.BiologicalSex">
-    <div class="push-xs-1 col-xs-10">
-    </div>
-    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
+    <div class="chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
       <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
     </div>
-    <div class="push-xs-1 col-xs-10">
-    </div>
   </ng-container>
+   <!-- IDENTITY COLUMN CHART -->
   <ng-container *ngIf="showGraph === graphType.GenderIdentity">
-    <div class="push-xs-1 col-xs-10">
-    </div>
-    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.GenderIdentity && analyses.genderIdentityAnalysis"  >
+    <div class="chart" *ngIf="showGraph === graphType.GenderIdentity && analyses.genderIdentityAnalysis"  >
       <app-chart [analysis]="analyses.genderIdentityAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Gender Identity'"> </app-chart>
-    </div>
-    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show age totals  if we want -->
+  <!-- AGE COLUMN CHART -->
   <ng-container *ngIf="showGraph === graphType.Age">
-    <div class="push-xs-1 col-xs-10">
-    </div>
-    <div class="push-xs-1 col-xs-10 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
+    <div class="chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
       <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="30" [backgroundColor]="backgroundColor" [domainType]="'ehr'"> </app-chart>
-    </div>
-    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show sources totals  if we want -->
-  <ng-container *ngIf="showGraph === graphType.Sources">
-    <div class="push-xs-1 col-xs-10" *ngIf="showGraph === graphType.Sources">
-    </div>
-    <div class="push-xs-1 col-xs-10 chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
+  <!-- SOURCE COLUMN CHART -->
+  <ng-container class="chart-container" *ngIf="showGraph === graphType.Sources">
+    <div class="chart"  *ngIf="showGraph === graphType.Sources && sourceConcepts && sourceConcepts.length">
       <app-chart [concepts]="sourceConcepts" [sources]="true" [pointWidth]="20" [chartTitle]="'Sources'">
       </app-chart>
-    </div>
-    <div class="push-xs-1 col-xs-10">
     </div>
   </ng-container>
 
   <!-- show race totals  if we want -->
-  <div class="push-xs-1 col-xs-10 chart"  *ngIf="showRace && analyses.raceAnalysis ">
+  <div class="chart"  *ngIf="showRace && analyses.raceAnalysis ">
     <app-chart [analysis]="analyses.raceAnalysis" [pointWidth]="20"
                [backgroundColor]="backgroundColor" [chartTitle]="'Race'">
     </app-chart>
   </div>
   <!-- show ethnicity totals  if we want -->
-  <div class="push-xs-1 col-xs-10 chart"  *ngIf="showEthnicity && analyses.ethnicityAnalysis ">
+  <div class="chart"  *ngIf="showEthnicity && analyses.ethnicityAnalysis ">
     <app-chart [analysis]="analyses.ethnicityAnalysis" [pointWidth]="20"
                [backgroundColor]="backgroundColor" [chartTitle]="'Ethnicity'">
     </app-chart>

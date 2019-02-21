@@ -80,14 +80,14 @@ export class DbConfigService {
 
   /* Chart Styles */
   CHART_TITLE_STYLE = {
-    'color': '#262262', 'font-family': 'GothamBook',	'font-size': '14px', 'font-weight': '300'
+    'color': '#262262', 'font-family': 'GothamBook',	'font-size': '22px', 'font-weight': 'normal'
   };
   DATA_LABEL_STYLE = {
-    'color': '#FFFFFF', 'font-family': 'GothamBook',	'font-size': '14px',
+    'color': '#FFFFFF', 'font-family': 'GothamBook',	'fontSize': '22px', 'padding':'10px'
     'font-weight': '300', 'textOutline': 'none'
   };
   GI_DATA_LABEL_STYLE = {
-    'color': 'black', 'font-family': 'GothamBook',	'font-size': '14px',
+    'color': 'black', 'font-family': 'GothamBook',	'font-size': '22x',
       'font-weight': '300', 'textOutline': 'none'
   };
 
