@@ -484,7 +484,7 @@ paths:
           type: string
           required: false
 
-  /v1/account/bulkSyncTrainingStatus:
+  /v1/cron/bulkSyncTrainingStatus:
     post:
       tags:
         - user
