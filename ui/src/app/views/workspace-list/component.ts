@@ -157,6 +157,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   closeShare(): void {
     this.sharing = false;
+    this.reloadWorkspaces();
   }
 
   get twoFactorBannerEnabled() {

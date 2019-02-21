@@ -501,7 +501,7 @@ export class WorkspaceShareComponent extends ReactWrapperBase implements OnInit 
   @Input('accessLevel') accessLevel: WorkspaceAccessLevel;
   @Input('userEmail') userEmail: WorkspaceShareProps['userEmail'];
   @Input('sharing') sharing: boolean;
-  @Input('onClose') closeFunction: WorkspaceShareProps['onClose'];
+  @Input('onClose') onClose: WorkspaceShareProps['onClose'];
 
   constructor() {
     super(WorkspaceShare, ['workspace', 'accessLevel', 'sharing', 'onClose', 'userEmail']);
