@@ -1208,78 +1208,118 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndChild() throws Exception {
-    Criteria icd9ConditionChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "1");
-    Criteria icd9ConditionParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
-    SearchParameter icd9Child = createSearchParameter(icd9ConditionChild, "001");
-    SearchParameter icd9Parent = createSearchParameter(icd9ConditionParent, "001");
+    SearchParameter icd9Child = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .value("001.1")
+      .conceptId(1L);
+    SearchParameter icd9Parent = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(true)
+      .value("001");
+
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9Child, icd9Parent), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ConditionOccurrenceParent() throws Exception {
-    Criteria icd9ConditionParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
-    SearchParameter icd9 = createSearchParameter(icd9ConditionParent, "001");
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .value("001")
+      .conceptId(1L);
+
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ProcedureOccurrenceChild() throws Exception {
-    Criteria icd9ProcedureChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.PROC.name(), 0, "2");
-    SearchParameter icd9 = createSearchParameter(icd9ProcedureChild, "002.1");
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.PROC.name())
+      .group(false)
+      .value("002.1")
+      .conceptId(2L);
+
     SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9ProcedureOccurrenceParent() throws Exception {
-    Criteria icd9ProcedureParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.PROC.name());
-    SearchParameter icd9 = createSearchParameter(icd9ProcedureParent, "002");
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.PROC.name())
+      .group(true)
+      .value("002");
+
     SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9MeasurementChild() throws Exception {
-    Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "3");
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .value("003.1")
+      .conceptId(3L);
+
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsICD9MeasurementParent() throws Exception {
-    Criteria icd9MeasurementParent = createCriteriaParent(TreeType.ICD9.name(), TreeSubType.CM.name());
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementParent, "003");
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(true)
+      .value("003");
+
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoGender() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demo = createSearchParameter(demoGender, null);
-    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
+    SearchParameter demo = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.GEN.name())
+      .group(false)
+      .conceptId(8507L);
+
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoEthnicity() throws Exception {
-    Criteria demoEthnicity = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.ETH.name(), "9898");
-    SearchParameter demo = createSearchParameter(demoEthnicity, null);
-    SearchRequest searchRequest = createSearchRequests(demoEthnicity.getType(), Arrays.asList(demo), new ArrayList<>());
+    SearchParameter demo = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.ETH.name())
+      .group(false)
+      .conceptId(9898L);
+
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
   public void countSubjectsDemoDec() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.DEC.name(), null);
-    SearchParameter demo = createSearchParameter(demoGender, "Deceased");
-    SearchRequest searchRequest = createSearchRequests(demoGender.getType(), Arrays.asList(demo), new ArrayList<>());
+    SearchParameter demo = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.DEC.name())
+      .group(false)
+      .value("Deceased");
+
+    SearchRequest searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
@@ -1289,59 +1329,79 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demo = createSearchParameter(demoAge, null);
-    demo.attributes(Arrays.asList(new Attribute().name(AttrName.AGE).operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
+    SearchParameter demo = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.AGE.name())
+      .group(false);
+    demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
   public void countSubjectsDemoAgeBetween() throws Exception {
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demo = createSearchParameter(demoAge, null);
+    SearchParameter demo = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.AGE.name())
+      .group(false);
     demo.attributes(Arrays.asList(
       new Attribute().operator(Operator.BETWEEN).operands(Arrays.asList("15","99"))
     ));
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demo), new ArrayList<>());
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
   public void countSubjectsDemoGenderAndAge() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+    SearchParameter demoGenderSearchParam = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.GEN.name())
+      .group(false)
+      .conceptId(8507L);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
+    SearchParameter demoAgeSearchParam = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.AGE.name())
+      .group(false);
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
   public void countSubjectsICD9AndDemo() throws Exception {
-    Criteria icd9MeasurementChild =
-      createCriteriaChild(TreeType.ICD9.name(), TreeSubType.CM.name(), 0, "3");
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+    SearchParameter icd9 = new SearchParameter()
+      .type(TreeType.ICD9.name())
+      .subtype(TreeSubType.CM.name())
+      .group(false)
+      .conceptId(3L)
+      .value("003.1");
+
+    SearchParameter demoGenderSearchParam = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.GEN.name())
+      .group(false)
+      .conceptId(8507L);
+
+    SearchParameter demoAgeSearchParam = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.AGE.name())
+      .group(false);
 
     DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
     DateTime now = new DateTime();
     Period period = new Period(birthDate, now);
     Integer age = period.getYears();
-    Criteria demoAge = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.AGE.name(), null);
-    SearchParameter demoAgeSearchParam = createSearchParameter(demoAge, null);
+
     demoAgeSearchParam.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
 
-    SearchRequest searchRequests = createSearchRequests(demoAge.getType(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoGenderSearchParam, demoAgeSearchParam), new ArrayList<>());
 
-    SearchParameter icd9 = createSearchParameter(icd9MeasurementChild, "003.1");
     SearchGroupItem anotherSearchGroupItem = new SearchGroupItem().type(TreeType.CONDITION.name()).searchParameters(Arrays.asList(icd9)).modifiers(new ArrayList<>());
 
     searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
@@ -1351,16 +1411,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoExcluded() throws Exception {
-    Criteria demoGender = createDemoCriteria(TreeType.DEMO.name(), TreeSubType.GEN.name(), "8507");
-    SearchParameter demoGenderSearchParam = createSearchParameter(demoGender, null);
+    SearchParameter demoGenderSearchParam = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.GEN.name())
+      .group(false)
+      .conceptId(8507L);
 
-    SearchParameter demoGenderSearchParamExclude = createSearchParameter(demoGender, null);
+    SearchParameter demoGenderSearchParamExclude = new SearchParameter()
+      .type(TreeType.DEMO.name())
+      .subtype(TreeSubType.GEN.name())
+      .group(false)
+      .conceptId(8507L);
 
-    SearchGroupItem excludeSearchGroupItem = new SearchGroupItem().type(demoGender.getType())
+    SearchGroupItem excludeSearchGroupItem = new SearchGroupItem().type(TreeType.DEMO.name())
       .searchParameters(Arrays.asList(demoGenderSearchParamExclude));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
-    SearchRequest searchRequests = createSearchRequests(demoGender.getType(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
+    SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoGenderSearchParam), new ArrayList<>());
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
