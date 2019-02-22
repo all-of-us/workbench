@@ -11,8 +11,8 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {Profile} from 'generated/fetch';
 import {environment} from 'environments/environment';
+import {Profile} from 'generated/fetch';
 
 
 const styles = reactStyles({
@@ -297,7 +297,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               <Button
                 type='purplePrimary'
                 onClick={window.location.assign(
-                    environment.trainingUrl + '/static/data-researcher.html?saml=on')}
+                  environment.trainingUrl + '/static/data-researcher.html?saml=on')}
               >
                 Access Training
               </Button>
