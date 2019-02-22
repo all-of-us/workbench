@@ -140,7 +140,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
 
       // Add value changed event to search when value changes
       this.subscriptions.push(this.searchText.valueChanges
-        .debounceTime(200)
+        .debounceTime(300)
         .distinctUntilChanged()
         .switchMap((query) => this.searchDomain(query))
         .subscribe({
@@ -148,6 +148,8 @@ export class EhrViewComponent implements OnInit, OnDestroy {
           error: err => {
             console.log('Error searching: ', err);
             this.loading = false;
+            // Wait till last to load chard so it fits its container
+            setTimeout(() => this.toggleTopConcepts(), 500);
           }
         }));
 
