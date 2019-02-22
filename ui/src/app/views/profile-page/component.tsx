@@ -75,7 +75,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
 
   navigateToTraining(): void {
     window.location.assign(
-        environment.trainingUrl + '/static/data-researcher.html?saml=on')
+      environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
   componentDidUpdate(prevProps) {
