@@ -1,7 +1,7 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -33,6 +33,7 @@ export class SetAnnotationCreateComponent {
     displayName: 'Integer'
   }];
 
+  @Input() loadAnnotationDefinitions: Function;
   @Output() onFinish = new EventEmitter<boolean>();
   posting = false;
   enumValues = <string[]>[];
@@ -75,11 +76,7 @@ export class SetAnnotationCreateComponent {
 
     this.annotationAPI
       .createCohortAnnotationDefinition(ns, wsid, cid, request)
-      .switchMap(_ => this.annotationAPI
-        .getCohortAnnotationDefinitions(ns, wsid, cid)
-        .pluck('items'))
-      .do((defns: CohortAnnotationDefinition[]) =>
-        annotationDefinitionsStore.next(defns))
+      .switchMap(_ => this.loadAnnotationDefinitions())
       .subscribe(_ => {
         this.open = false;
         this.form.reset();

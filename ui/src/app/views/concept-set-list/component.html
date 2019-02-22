@@ -27,7 +27,7 @@
   </div>
   <div class="card-area" *ngIf="!conceptSetsLoading">
     <div role="tooltip" aria-haspopup="true" class="card add-card tooltip tooltip-md tooltip-top-right"
-         [class.disabled]="actionsDisabled" (click)="actionsDisabled || newConceptSet()">
+         [class.disabled]="actionsDisabled || !conceptDomainList" (click)="actionsDisabled ||  !conceptDomainList || newConceptSet()">
       <div class="create-text">
         Create a<br/>Concept Set
         <clr-icon shape="plus-circle" class="plus-circle"></clr-icon>
@@ -37,11 +37,15 @@
     <div style="display: flex; flex-wrap: wrap;">
       <div *ngFor="let conceptSet of resourceList">
         <app-resource-card [resourceCard]="conceptSet"
-                           [onUpdate]="loadConceptSets.bind(this)">
+                           [onUpdate]="loadConceptSets">
         </app-resource-card>
       </div>
     </div>
   </div>
 </app-top-box>
-
-<app-create-concept-modal (onUpdate)="loadConceptSets()"></app-create-concept-modal>
+<app-create-concept-modal *ngIf="isCreateModalOpen"
+                          [onCreate]="loadConceptSets"
+                          [onClose]="closeCreateModal"
+                          [conceptDomainList]="conceptDomainList"
+                          [existingConceptSets]="conceptSetsList">
+</app-create-concept-modal>
