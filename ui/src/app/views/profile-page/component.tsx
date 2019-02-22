@@ -73,6 +73,11 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     };
   }
 
+  navigateToTraining(): void {
+    window.location.assign(
+        environment.trainingUrl + '/static/data-researcher.html?saml=on')
+  }
+
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
 
@@ -285,19 +290,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </div>
               <Button
                 type='purplePrimary'
-                disabled={true}
-                style={{
-                  backgroundColor: colors.green,
-                  border: 'none',
-                  cursor: 'initial'
-                }}
-              >
-                <ClrIcon shape='check' style={{marginRight: 4}}/>Completed
-              </Button> :
-              <Button
-                type='purplePrimary'
-                onClick={window.location.assign(
-                  environment.trainingUrl + '/static/data-researcher.html?saml=on')}
+                onClick={this.navigateToTraining}
               >
                 Access Training
               </Button>
