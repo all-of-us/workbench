@@ -1,11 +1,11 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {Subscription} from 'rxjs/Subscription';
 
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
@@ -15,7 +15,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
@@ -39,18 +38,15 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   twoFactorEnabled: boolean;
   private profileSubscription: Subscription;
 
-  // All the things related to sharing a workspace
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
-  // TODO This is necessary to placate the sharing template - figure out how to remove it
-  selectedWorkspace: Workspace = {name: ''};
   accessLevel: WorkspaceAccessLevel;
+  username: string;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
   deleting = false;
   confirmDeleting = false;
+  sharing = false;
   workspaceDeletionError = false;
   workspace: Workspace = {name: ''};
 
@@ -63,12 +59,14 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   ) {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeShare = this.closeShare.bind(this);
   }
 
   ngOnInit(): void {
     this.workspacesLoading = true;
     this.profileSubscription = this.profileStorageService.profile$.subscribe(
       (profile) => {
+        this.username = profile.username;
         this.twoFactorEnabled = profile.twoFactorEnabled;
         if (this.firstSignIn === undefined) {
           this.firstSignIn = new Date(profile.firstSignInTime);
@@ -151,12 +149,15 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.confirmDeleting = false;
   }
 
-  share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
-    this.selectedWorkspace = workspace;
+  openShare(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
+    this.workspace = workspace;
     this.accessLevel = accessLevel;
-    this.shareModal.workspace = workspace;
-    this.shareModal.accessLevel = accessLevel;
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    this.reloadWorkspaces();
   }
 
   get twoFactorBannerEnabled() {

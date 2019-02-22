@@ -18,6 +18,7 @@ import {
   FileDetail,
   PageVisit,
   ProfileService,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
@@ -82,8 +83,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
   @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
+  sharing = false;
   showTip: boolean;
   workspace: Workspace;
   cdrVersion: CdrVersion;
@@ -225,7 +225,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    // TODO: RW-1919 - remove this
+    window.location.reload();
+  }
+
+  updateAclList(userRoleList: UserRole[]): void {
+    this.workspace.userRoles = userRoleList;
   }
 
   dismissTip(): void {

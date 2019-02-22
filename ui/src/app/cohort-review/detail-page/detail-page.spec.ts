@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import { ChartModule } from 'angular2-highcharts';
@@ -16,7 +15,7 @@ import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail
 import {DetailTabsComponent} from 'app/cohort-review/detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
 import {ParticipantStatusComponent} from 'app/cohort-review/participant-status/participant-status.component';
-import {annotationDefinitionsStore, cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {SetAnnotationCreateComponent} from 'app/cohort-review/set-annotation-create/set-annotation-create.component';
 import {SetAnnotationItemComponent} from 'app/cohort-review/set-annotation-item/set-annotation-item.component';
 import {SetAnnotationListComponent} from 'app/cohort-review/set-annotation-list/set-annotation-list.component';
@@ -28,7 +27,7 @@ import {CohortAnnotationDefinitionService, CohortReview, CohortReviewService, Wo
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
-import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
+import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
@@ -41,17 +40,6 @@ describe('DetailPage', () => {
   let component: DetailPage;
   let fixture: ComponentFixture<DetailPage>;
 
-  const routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
-  const activatedRouteStub = {
-    data: Observable.of({
-      participant: {},
-      annotations: [],
-    }),
-    snapshot: {
-      data: {},
-    },
-  };
-  let route;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
@@ -83,12 +71,13 @@ describe('DetailPage', () => {
           provide: HighchartsStatic,
           useValue: highCharts
         },
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: CohortAnnotationDefinitionService, useValue: {}},
+        {
+          provide: CohortAnnotationDefinitionService,
+          useValue: new CohortAnnotationDefinitionServiceStub()
+        },
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
-        {provide: Router, useValue: routerSpy},
       ],
     })
       .compileComponents();
@@ -97,13 +86,11 @@ describe('DetailPage', () => {
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
     cohortReviewStore.next(cohortReviewStub);
-    annotationDefinitionsStore.next([cohortAnnotationDefinitionStub]);
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(DetailPage);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 
