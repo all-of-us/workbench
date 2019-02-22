@@ -12,6 +12,7 @@ import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {Profile} from 'generated/fetch';
+import {environment} from 'environments/environment';
 
 
 const styles = reactStyles({
@@ -282,36 +283,24 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 />
               </TooltipTrigger>
             </div>
-            {profile && (!!profile.trainingCompletionTime ?
-                <Button
-                  type='purplePrimary'
-                  disabled={true}
-                  style={{
-                    backgroundColor: colors.green,
-                    border: 'none',
-                    cursor: 'initial'
-                  }}
-                >
-                  <ClrIcon shape='check' style={{marginRight: 4}}/>Completed
-                </Button> :
-                <Button
-                  type='purplePrimary'
-                  onClick={async() => {
-                    this.setState({updating: true});
-
-                    try {
-                      await profileApi().completeEthicsTraining();
-                      await reload();
-                    } catch (e) {
-                      console.error(e);
-                    } finally {
-                      this.setState({updating: false});
-                    }
-                  }}
-                >
-                  Complete Training
-                </Button>
-            )}
+              <Button
+                type='purplePrimary'
+                disabled={true}
+                style={{
+                  backgroundColor: colors.green,
+                  border: 'none',
+                  cursor: 'initial'
+                }}
+              >
+                <ClrIcon shape='check' style={{marginRight: 4}}/>Completed
+              </Button> :
+              <Button
+                type='purplePrimary'
+                onClick={window.location.assign(
+                    environment.trainingUrl + '/static/data-researcher.html?saml=on')}
+              >
+                Access Training
+              </Button>
           </div>
         </div>
       </div>
