@@ -148,7 +148,6 @@ repositories {   // repositories for Jar's you access in your code
 dependencies {
   compile 'org.springframework.boot:spring-boot-starter-data-jpa'
   compile 'commons-io:commons-io:2.6'
-  compile 'commons-cli:commons-cli:1.4'
   compile 'joda-time:joda-time:2.10'
   compile 'com.github.fge:json-patch:1.9'
   compile 'io.swagger:swagger-annotations:1.5.9'
@@ -164,10 +163,6 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'org.json:json:20160810'
   compile 'javax.inject:javax.inject:1'
-
-  // Elasticsearch client
-  compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:6.6.0'
-  compile 'org.elasticsearch:elasticsearch:6.6.0'
 }
 
 

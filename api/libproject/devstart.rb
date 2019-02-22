@@ -1188,24 +1188,22 @@ def create_local_es_index(cmd_name, *args)
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
   end
 
-  Dir.chdir("tools") do
-    common = Common.new
-    # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
-    # to work against the synthetic CDR into a local ES (using test Workbench).
-    create_flags = ([
-      ['--query-project-id', 'all-of-us-ehr-dev'],
-      ['--es-base-url', 'http://elastic:9200'],
-      ['--cdr-version', 'synth_r_2019_q1'],
-      ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
-      ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
-      ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
-      ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
-    ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
-      '--delete-indices'
-      # Gradle args need to be single-quote wrapped.
-    ]).map { |f| "'#{f}'" }
-    common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
-  end
+  common = Common.new
+  # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
+  # to work against the synthetic CDR into a local ES (using test Workbench).
+  create_flags = ([
+    ['--query-project-id', 'all-of-us-ehr-dev'],
+    ['--es-base-url', 'http://elastic:9200'],
+    ['--cdr-version', 'synth_r_2019_q1'],
+    ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
+    ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
+    ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+  ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+    '--delete-indices'
+    # Gradle args need to be single-quote wrapped.
+  ]).map { |f| "'#{f}'" }
+  common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
 end
 
 Common.register_command({
