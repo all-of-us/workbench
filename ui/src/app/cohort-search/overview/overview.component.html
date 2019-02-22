@@ -5,14 +5,22 @@
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
         Loading...
       </span>
-      <span class="count-header" *ngIf="!(isRequesting$ | async)">
+      <span class="count-header" *ngIf="!(isRequesting$ | async) && (total$ | async) !== -1">
         {{ total$ | async | number }}
       </span>
-      <span *ngIf="(error$ | async)">
+      <span *ngIf="(error$ | async) && !temporal.flag">
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
           shape="error-standard"
+          size="18"></clr-icon>
+      </span>
+      <span *ngIf="!(isRequesting$ | async) && ((temporal?.flag && temporal.tempLength && (total$ | async) === null) || (total$ | async) === -1)">
+        - -
+        <clr-icon
+          [popper]="errorPopper"
+          [popperTrigger]="'hover'"
+          shape="warning-standard"
           size="18"></clr-icon>
       </span>
     </h2>
@@ -21,7 +29,7 @@
         type="button"
         class="btn btn-primary"
         [style.margin-left]="'0'"
-        [disabled]="(isRequesting$ | async) || !(total$ | async)"
+        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
         (click)="saveModal.open()">
         Save Cohort
       </button>
@@ -61,11 +69,17 @@
   </ng-container>
 </ng-container>
 </div>
-
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p   *ngIf="(error$ | async) && !temporal?.flag" [style.margin]="'0'">
+    A problem occurred and we were not able to retrieve the requested data
+  </p>
+  <p *ngIf="temporal?.flag && temporal.tempLength" [style.margin]="'0'">
+    Please complete criteria selections before saving temporal relationship.
+  </p>
+  <p *ngIf="(total$ | async) === -1" [style.margin]="'0'">
+    All criteria are suppressed. Un-surpress criteria to update the total count based on the visible criteria.
+  </p>
 </popper-content>
-
 <clr-modal #saveModal
   [clrModalSize]="'md'"
   (clrModalOpenChange)="modalChange($event)">

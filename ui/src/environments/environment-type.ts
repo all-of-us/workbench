@@ -45,9 +45,6 @@ export interface Environment {
 
   // Transient client-side flags.
   //
-  // Whether temporal queries should be enabled in the cohort builder UI. See
-  // RW-1443 for details.
-  enableTemporal: boolean;
   // Whether Zendesk should be used for support requests & bug reports, instead
   // of Jira. See RW-1885 for details.
   // Exit criteria: remove flag and change all code to use Zendesk after Athens
