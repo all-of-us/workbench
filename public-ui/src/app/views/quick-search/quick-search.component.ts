@@ -21,7 +21,6 @@ import {DbConfigService} from '../../utils/db-config.service';
         './quick-search.component.css']
 })
 export class QuickSearchComponent implements OnInit, OnDestroy {
-    dbLogo = '/assets/db-images/Data_Browser_Logo.svg';
     dbDesc = `The Data Browser provides interactive views of the publically available
      All of Us (AoU) Research Program participant data. Currently, participant provided
       information, including surveys
