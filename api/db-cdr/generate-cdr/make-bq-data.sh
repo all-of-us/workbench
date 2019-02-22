@@ -637,5 +637,3 @@ select cr.*,ar2.stratum_1 as parent from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achil
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr on cast(cr.id as string) in UNNEST(split(ar2.stratum_5,'.')) where ar2.analysis_id=3000
 and ar2.stratum_3='Condition' and cr.type='SNOMED' order by cr.id asc)
 group by parent) where parent=ar.stratum_1 and ar.analysis_id=3000 and ar.stratum_3='Condition' "
-
-
