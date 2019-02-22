@@ -196,12 +196,14 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {loading, rows, start, sortField, sortOrder} = this.state;
-      const data = this.state.data || [];
-      const lastRowOfPage = (start + rows) > data.length
-        ? start + rows - (start + rows - data.length) : start + rows;
-      const pageReportTemplate = (start + 1) + ' - ' + lastRowOfPage + ' of ' + data.length
-        + ' records ';
+      const {data, loading, rows, start, sortField, sortOrder} = this.state;
+      let pageReportTemplate;
+      if (data !== null) {
+        const lastRowOfPage = (start + rows) > data.length
+          ? start + rows - (start + rows - data.length) : start + rows;
+        pageReportTemplate = (start + 1) + ' - ' + lastRowOfPage + ' of ' + data.length
+          + ' records ';
+      }
       const paginatorTemplate = 'CurrentPageReport PrevPageLink PageLinks NextPageLink';
 
       const columns = this.props.columns.map((col) => {
@@ -245,7 +247,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           scrollable={true}
           scrollHeight='calc(100vh - 350px)'
           autoLayout={true}
-          emptyMessage=''>
+          emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
