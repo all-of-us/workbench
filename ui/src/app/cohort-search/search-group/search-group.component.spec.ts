@@ -1,8 +1,10 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {MockNgRedux} from '@angular-redux/store/testing';
 import {async, ComponentFixture, fakeAsync, TestBed} from '@angular/core/testing';
+import {ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {ClarityModule} from '@clr/angular';
+import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
 
@@ -70,10 +72,12 @@ describe('SearchGroupComponent', () => {
         declarations: [
           SearchGroupComponent,
           SearchGroupItemComponent,
+          ValidatorErrorsComponent
         ],
         imports: [
           ClarityModule,
           NgxPopperModule,
+          ReactiveFormsModule
         ],
         providers: [
           {provide: NgRedux, useValue: mockReduxInst},
@@ -100,7 +104,7 @@ describe('SearchGroupComponent', () => {
     // sanity check
     expect(comp).toBeTruthy();
     const items = fixture.debugElement.queryAll(By.css('app-search-group-item'));
-    expect(items.length).toBe(2);
+    expect(items.length).toBe(0);
   });
 
   it('Should dispatch WIZARD_OPEN when a Criteria is selected', () => {
@@ -117,8 +121,9 @@ describe('SearchGroupComponent', () => {
         groupId: 'include0',
         itemId: 'TestId',
         fullTree: false,
-        codes: false
-      }
+        codes: false,
+      },
+      tempGroup: undefined,
     });
   });
 
@@ -149,7 +154,7 @@ describe('SearchGroupComponent', () => {
     const spinner = fixture.debugElement.query(By.css('span.spinner'));
     const text = footer.nativeElement.textContent.replace(/\s+/g, ' ').trim();
 
-    expect(text).toEqual('Group Count: 25');
+    expect(text).toEqual('Temporal Group Count: 25');
     expect(spinner).toBeNull();
   });
 
