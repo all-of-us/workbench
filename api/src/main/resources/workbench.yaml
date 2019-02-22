@@ -826,6 +826,7 @@ paths:
 
   /v1/cron/bulkSyncTrainingStatus:
     get:
+      security: []
       tags:
         - user
         - cron
