@@ -80,7 +80,7 @@ export class ChartComponent implements OnChanges {
       subtitle: {},
       tooltip: {
         followPointer: true,
-        backgroundColor: '#f6f6f8',
+        backgroundColor: '#f0f2f3',
         borderWidth: 0,
         borderRadius: 10,
         shadow: false,
