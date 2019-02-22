@@ -519,8 +519,7 @@ set d.participant_count = r.count_value from
 \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
 where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
 and r.stratum_3 = d.domain_id
-and r.stratum_2 is null
-"
+and r.stratum_2 is null"
 
 ##########################################
 # survey count updates                   #
@@ -606,3 +605,37 @@ join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"
+
+##########################
+# Update rolled up counts #
+##########################
+echo "Updating rolled up counts in achilles results from criteria (for snomed conditions)"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+SET ar.count_value = cr1.est_count
+FROM
+\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
+WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
+and analysis_id=3000 and ar.stratum_3='Condition' "
+
+###############################################################
+# Update the path of concepts in achilles_results to fetch tree
+###############################################################
+echo "Updating path of concept in achilles results to fetch tree later"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+set ar.stratum_5=(select path from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` where synonyms like ('%rank1%') and cast(concept_id as string)=ar.stratum_1
+and type='SNOMED')
+where ar.analysis_id=3000 and ar.stratum_3='Condition' "
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+set ar.stratum_5=concepts
+from
+(select string_agg(cast(concept_id as string)) as concepts,parent from (
+select cr.*,ar2.stratum_1 as parent from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar2
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr on cast(cr.id as string) in UNNEST(split(ar2.stratum_5,'.')) where ar2.analysis_id=3000
+and ar2.stratum_3='Condition' and cr.type='SNOMED' order by cr.id asc)
+group by parent) where parent=ar.stratum_1 and ar.analysis_id=3000 and ar.stratum_3='Condition' "
+
+

@@ -1362,33 +1362,93 @@ group by sm.concept_id,o.observation_source_concept_id,stratum_4,stratum_5,sq.id
 order by sq.id asc"
 
 # Condition Domain participant counts
-echo "Getting domain participant counts"
+echo "Getting condition domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
-select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3, COUNT(distinct ob.person_id) as count_value, 0 as source_count_value
-from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob"
+with condition_concepts as
+(select condition_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.condition_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI'),
+condition_source_concepts as
+(select condition_source_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.condition_source_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI'
+and co.condition_source_concept_id not in (select distinct condition_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\`)),
+concepts as
+(select * from condition_concepts union all select * from condition_source_concepts)
+select 0 as id,3000 as analysis_id,'19' as stratum_1,'Condition' as stratum_3,(select count(distinct person) from concepts) as count_value,
+0 as source_count_value"
 
-# Drug Exposure Domain participant counts
+echo "Getting drug domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
- (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
- select 0 as id,3000 as analysis_id,'13' as stratum_1,'Drug' as stratum_3, COUNT(distinct d.person_id) as count_value, 0 as source_count_value
- from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` d"
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+with drug_concepts as
+(select drug_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.drug_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI'),
+drug_source_concepts as
+(select drug_source_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.condition_occurrence\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.drug_source_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI'
+and co.drug_source_concept_id not in (select distinct drug_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.drug_exposure\`)),
+concepts as
+(select * from drug_concepts union all select * from drug_source_concepts)
+select 0 as id,3000 as analysis_id,'13' as stratum_1,'Drug' as stratum_3, (select count(distinct person) from concepts) as count_value, 0 as source_count_value"
 
-# Measurement domain participant counts
+echo "Getting measurement domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
- (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
- select 0 as id,3000 as analysis_id,'21' as stratum_1,'Measurement' as stratum_3, COUNT(distinct m.person_id) as count_value, 0 as source_count_value
- from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m"
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+with measurement_concepts as
+(select measurement_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.measurement_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and co.measurement_concept_id not in (3036277,903118,903115,3025315,903135,903136,903126,903111,42528957)),
+measurement_source_concepts as
+(select measurement_source_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.measurement_source_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and co.measurement_source_concept_id not in (3036277,903133,903118,903115,3025315,903121,903135,903136,903126,903111,42528957,903120)
+and co.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)),
+concepts as
+(select * from measurement_concepts union all select * from measurement_source_concepts)
+select 0 as id,3000 as analysis_id,'21' as stratum_1,'Measurement' as stratum_3, (select count(distinct person) from concepts) as count_value,
+0 as source_count_value"
 
-#Procedure domain participant counts
+echo "Getting participant domain participant counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
- (id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
- select 0 as id,3000 as analysis_id,'10' as stratum_1,'Procedure' as stratum_3, COUNT(distinct p.person_id) as count_value, 0 as source_count_value
- from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` p"
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+with procedure_concepts as
+(select procedure_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.procedure_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and c.concept_id not in (3036277,903118,903115,3025315,903135,903136,903126,903111,42528957)),
+procedure_source_concepts as
+(select procedure_source_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.procedure_source_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and c.concept_id not in (3036277,903133,903118,903115,3025315,903121,903135,903136,903126,903111,42528957,903120)
+and co.procedure_source_concept_id not in (select distinct procedure_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.procedure_occurrence\`)),
+concepts as
+(select * from procedure_concepts union all select * from procedure_source_concepts)
+select 0 as id,3000 as analysis_id,'10' as stratum_1,'Procedure' as stratum_3, (select count(distinct person) from concepts) as count_value,
+0 as source_count_value"
+
+echo "Getting physical measurements participant counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_3, count_value, source_count_value)
+with pm_concepts as
+(select measurement_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.measurement_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and c.concept_id not in (3036277,903118,903115,3025315,903135,903136,903126,903111,42528957)),
+pm_source_concepts as
+(select measurement_source_concept_id as concept,co.person_id as person
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on co.measurement_source_concept_id=c.concept_id
+where c.vocabulary_id != 'PPI' and c.concept_id in (3036277,903133,903118,903115,3025315,903121,903135,903136,903126,903111,42528957,903120)
+and co.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)),
+concepts as
+(select * from pm_concepts union all select * from pm_source_concepts)
+select 0 as id,3000 as analysis_id,'0' as stratum_1,'Physical Measurement' as stratum_3, (select count(distinct person) from concepts) as count_value, 0 as source_count_value"
 
 # Count of people who took each survey
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
