@@ -53,7 +53,7 @@ jobs:
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
-  build:
+  api-local-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.13
       - image: mysql:5.7
