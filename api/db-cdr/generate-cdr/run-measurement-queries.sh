@@ -994,6 +994,64 @@ and m1.measurement_source_concept_id > 0 and
 m1.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
 group by stratum_1,stratum_3,stratum_4,stratum_5"
 
+# Generating biological sex counts for measurement concepts for each unit
+echo "Inserting unit specific biological sex counts for each measurement concept"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
+(id, analysis_id, stratum_1, stratum_2, stratum_3, count_value, source_count_value)
+select 0 as id, 1910 as analysis_id, cast(measurement_concept_id as string) as stratum_1, cast(unit_concept_id as string) as stratum_2, cast(p.gender_concept_id as string) as stratum_3,count(distinct p.person_id) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
+on co2.person_id=p1.person_id
+where co2.measurement_source_concept_id=m.measurement_concept_id
+and co2.unit_concept_id=unit_concept_id and p1.gender_concept_id=p.gender_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+where m.measurement_concept_id = 3020416 and unit_concept_id != 0
+group by concept_id,unit,gender
+union all
+select measurement_concept_id as concept_id, cast(um.unit_concept_id as string) as unit, p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
+on co2.person_id=p1.person_id
+where co2.measurement_source_concept_id=m.measurement_concept_id
+and co2.unit_concept_id=0 and co2.unit_source_value=unit_source_value and p1.gender_concept_id=p.gender_concept_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on um.unit_source_value=m.unit_source_value
+where m.measurement_concept_id = 3020416 and m.unit_source_value is not null and m.unit_concept_id = 0
+group by concept_id,unit,gender
+union all
+select measurement_concept_id as concept_id, 'No unit' as unit, p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+(select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
+on co2.person_id=p1.person_id
+where co2.measurement_source_concept_id=m.measurement_concept_id
+and p1.gender_concept_id=p.gender_concept_id and co2.unit_concept_id = 0 and co2.unit_source_value is null) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+where m.measurement_concept_id = 3020416 and unit_source_value is null and unit_concept_id = 0
+group by concept_id,unit,gender
+union all
+select measurement_source_concept_id as concept_id, cast(m.unit_concept_id as string) as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+count(distinct p.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+where m.measurement_source_concept_id > 0 and
+m.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
+and m.unit_concept_id != 0
+group by concept_id, unit, gender
+union all
+select measurement_source_concept_id as concept_id, cast(um.unit_concept_id as string) as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+count(distinct p.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on um.unit_source_value=m.unit_source_value
+where m.measurement_source_concept_id > 0 and
+m.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
+and m.unit_concept_id = 0 and m.unit_source_value is not null
+group by concept_id, unit, gender
+union all
+select measurement_source_concept_id as concept_id, 'No unit' as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+count(distinct p.person_id) as source_count_value
+from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
+where m.measurement_source_concept_id > 0 and
+m.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
+and m.unit_concept_id = 0 and m.unit_source_value is null
+group by concept_id, unit, gender"
+
 
 # Set the counts > 0 and < 20 to 20
 echo "Binning counts < 20"
@@ -1013,7 +1071,7 @@ echo "Replacing unit concept id with unit concept name"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
 set stratum_2 = (select distinct concept_name from \`${BQ_PROJECT}.${BQ_DATASET}.concept\` where cast(concept_id as string)=stratum_2)
-where analysis_id in (1900,1901) and stratum_2 is not null and stratum_2 != '' "
+where analysis_id in (1900,1901,1910) and stratum_2 is not null and stratum_2 != '' "
 
 # Update no unit concept name in achilles_results_dist(For nice display)
 echo "Replacing no matching concept unit name to no unit"
