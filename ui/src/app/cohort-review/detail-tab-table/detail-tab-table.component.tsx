@@ -4,7 +4,8 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
-import {PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
@@ -171,6 +172,12 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.props.participantId,
         pageFilterRequest
       ).then(response => {
+        response.items.forEach(item => {
+          if (this.props.domain === DomainType.VITAL || this.props.domain === DomainType.LAB) {
+            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+          }
+          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+        });
         this.setState({
           data: response.items,
           loading: false,

@@ -17,7 +17,7 @@ const itemDate = {
   displayName: 'Date',
 };
 const itemTime = {
-  name: 'itemDate',
+  name: 'itemTime',
   classNames: ['time-col'],
   displayName: 'Time',
 };
