@@ -21,6 +21,7 @@ import {
   Profile,
 } from 'generated/fetch';
 import * as React from 'react';
+import {WorkspaceShare} from "../workspace-share/component";
 
 const styles = reactStyles({
   fadeBox: {
@@ -39,7 +40,7 @@ const styles = reactStyles({
   },
   workspaceDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', height: '2rem', display: '-webkit-box',
-    WebkitLineClamp: '2', WebkitBoxOrient: 'vertical'
+    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
   },
   workspaceCard: {
     display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'
@@ -101,7 +102,7 @@ const WorkspaceCardMenu: React.FunctionComponent<{
 };
 
 export class WorkspaceCard extends React.Component<
-    {wp: WorkspacePermissions, onDelete: Function},
+    {wp: WorkspacePermissions, userEmail: string, reload: Function},
     {sharing: boolean, confirmDeleting: boolean}> {
 
   constructor(props) {
@@ -115,21 +116,21 @@ export class WorkspaceCard extends React.Component<
   // todo: deletion error
   async deleteWorkspace() {
     const {wp} = this.props;
-    this.setState({deleting: true});
+    // this.setState({deleting: true});
     workspacesApi().deleteWorkspace(wp.workspace.namespace, wp.workspace.id).then(() => {
       this.setState({confirmDeleting: false});
-      this.props.onDelete();
+      this.props.reload();
     });
   }
 
-  // todo
   shareWorkspace(): void {
-
+    this.setState({sharing: false});
+    this.props.reload();
   }
 
   render() {
-    const {wp} = this.props;
-    const {confirmDeleting} = this.state;
+    const {wp, userEmail} = this.props;
+    const {confirmDeleting, sharing} = this.state;
     const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
@@ -139,7 +140,8 @@ export class WorkspaceCard extends React.Component<
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
                                  onDelete={() => {this.setState({confirmDeleting: true}); }}
-                                 onShare={() => {}} disabled={false}/>
+                                 onShare={() => {this.setState({sharing: true})}}
+                                 disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
                      onClick={() => navigate(
@@ -169,8 +171,13 @@ export class WorkspaceCard extends React.Component<
       {confirmDeleting &&
         <ConfirmDeleteModal resourceType='workspace'
                             resourceName={wp.workspace.name}
-                            receiveDelete={() => {this.deleteWorkspace(); }}
-                            closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
+                            receiveDelete={() => {this.deleteWorkspace()}}
+                            closeFunction={() => {this.setState({confirmDeleting: false})}}/>}
+      {sharing && <WorkspaceShare workspace={wp.workspace}
+                                  accessLevel={wp.accessLevel}
+                                  userEmail={userEmail}
+                                  sharing={sharing}
+                                  onClose={() => {this.shareWorkspace()}} />}
     </React.Fragment>;
 
   }
@@ -236,8 +243,6 @@ export const WorkspaceList = withUserProfile()
 
   checkTwoFactorAuth() {
     const {profileState: {profile}} = this.props;
-    console.log(profile.twoFactorEnabled);
-
     this.setState({
       twoFactorEnabled: profile.twoFactorEnabled,
       firstSignIn: new Date(profile.firstSignInTime)
@@ -260,6 +265,7 @@ export const WorkspaceList = withUserProfile()
   }
 
   render() {
+    const {profileState: {profile}} = this.props;
     const {billingProjectInitialized, errorText,
       workspaceList, workspacesLoading} = this.state;
 
@@ -291,7 +297,8 @@ export const WorkspaceList = withUserProfile()
                 </CardButton>
                 {workspaceList.map(wp => {
                   return <WorkspaceCard wp={wp}
-                                        onDelete={() => {this.reloadWorkspaces(); }}/>;
+                                        userEmail={profile.username}
+                                        reload={() => {this.reloadWorkspaces(); }}/>;
 
                 })}
               </div>)}
