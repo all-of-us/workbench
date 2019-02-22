@@ -1,6 +1,7 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {CohortAnnotationDefinition} from 'generated';
 
 @Component({
   selector: 'app-set-annotation-modal',
@@ -8,7 +9,8 @@ import {ReviewStateService} from 'app/cohort-review/review-state.service';
   styleUrls: ['./set-annotation-modal.component.css']
 })
 export class SetAnnotationModalComponent {
-
+  @Input() annotationDefinitions: CohortAnnotationDefinition[];
+  @Input() loadAnnotationDefinitions: Function;
   /*
    * The modal displays a list or a form. Default is always list.
    */

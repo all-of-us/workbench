@@ -6,8 +6,7 @@ import {
   HostListener,
   Input,
   OnChanges,
-  OnInit,
-  Output
+  OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {dateValidator} from 'app/cohort-search/validators';
@@ -38,9 +37,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   readonly kinds = AnnotationType;
 
   @Input() annotation: Annotation;
-  @Input() showDataType: boolean;
-  @Output() annotationUpdate: EventEmitter<ParticipantCohortAnnotation> =
-    new EventEmitter<ParticipantCohortAnnotation>();
+  @Input() onChange: Function;
   textSpinnerFlag = false;
   successIcon = false;
   form = new FormGroup({
@@ -184,16 +181,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
     if (apiCall) {
       apiCall.toPromise().then((update) => {
-        if (update) {
-          if (update.annotationId) {
-            this.annotationUpdate.emit(update);
-          } else {
-            this.annotation.value.annotationId = undefined;
-          }
-          if (update && !annoId) {
-            this.annotation.value.annotationId = update.annotationId;
-          }
-        }
+        this.onChange(defnId, update);
         setTimeout(() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;

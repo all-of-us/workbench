@@ -97,7 +97,7 @@ export const WorkspaceNavBarReact = withCurrentWorkspace()(props => {
           <MenuItem
             icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
-            Clone
+            Duplicate
           </MenuItem>
           <MenuItem
             icon='pencil'

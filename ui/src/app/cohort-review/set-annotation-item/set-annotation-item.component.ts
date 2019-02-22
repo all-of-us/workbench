@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 
-import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -23,6 +23,7 @@ import {
   styleUrls: ['./set-annotation-item.component.css']
 })
 export class SetAnnotationItemComponent {
+  @Input() loadAnnotationDefinitions: Function;
   @Input() definition: CohortAnnotationDefinition;
   @Output() isPosting = new EventEmitter<boolean>();
 
@@ -74,11 +75,7 @@ export class SetAnnotationItemComponent {
 
     this.annotationAPI
       .updateCohortAnnotationDefinition(ns, wsid, cid, id, request)
-      .switchMap(_ => this.annotationAPI
-        .getCohortAnnotationDefinitions(ns, wsid, cid)
-        .pluck('items'))
-      .do((defns: CohortAnnotationDefinition[]) =>
-                annotationDefinitionsStore.next(defns))
+      .switchMap(_ => this.loadAnnotationDefinitions())
       .subscribe(_ => {
         this.editing = false;
         this.isPosting.emit(false);
@@ -100,11 +97,7 @@ export class SetAnnotationItemComponent {
 
     this.annotationAPI
       .deleteCohortAnnotationDefinition(ns, wsid, cid, id)
-      .switchMap(_ => this.annotationAPI
-        .getCohortAnnotationDefinitions(ns, wsid, cid)
-        .pluck('items'))
-      .do((defns: CohortAnnotationDefinition[]) =>
-                annotationDefinitionsStore.next(defns))
+      .switchMap(_ => this.loadAnnotationDefinitions())
       .subscribe(_ => this.isPosting.emit(false));
   }
 }

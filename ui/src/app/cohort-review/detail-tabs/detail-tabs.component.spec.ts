@@ -1,6 +1,5 @@
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {ChartModule} from 'angular2-highcharts';
@@ -20,13 +19,6 @@ import {DetailTabsComponent} from './detail-tabs.component';
 describe('DetailTabsComponent', () => {
   let component: DetailTabsComponent;
   let fixture: ComponentFixture<DetailTabsComponent>;
-  const activatedRouteStub = {
-    data: Observable.of({
-      participant: {},
-      annotations: [],
-    }),
-  };
-  let route;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -40,7 +32,6 @@ describe('DetailTabsComponent', () => {
         },
         {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ]
     })
       .compileComponents();
@@ -54,7 +45,6 @@ describe('DetailTabsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(DetailTabsComponent);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

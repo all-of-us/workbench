@@ -266,7 +266,7 @@ export class WorkspaceEditComponent implements OnInit {
         this.canEditResearchPurpose = false;
       }
     } else if (this.mode === WorkspaceEditMode.Clone) {
-      this.workspace.name = 'Clone of ' + wsData.name;
+      this.workspace.name = 'Duplicate of ' + wsData.name;
       this.workspace.description = wsData.description;
       this.workspace.cdrVersionId = wsData.cdrVersionId;
       const fromPurpose = wsData.researchPurpose;
