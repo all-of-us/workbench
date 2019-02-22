@@ -234,7 +234,7 @@ public final class ElasticSearchIndexer {
   }
 
   @Bean
-  private CommandLineRunner run() {
+  public CommandLineRunner run() {
     return (args) -> {
       if (args.length < 1) {
         throw new IllegalArgumentException("must specify a command 'create'");
