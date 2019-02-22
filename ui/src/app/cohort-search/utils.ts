@@ -86,7 +86,7 @@ export function subtypeToTitle(subtype: string): string {
   let title;
   switch (subtype) {
     case TreeSubType[TreeSubType.AGE]:
-      title = 'Age';
+      title = 'Current Age/Deceased';
       break;
     case TreeSubType[TreeSubType.DEC]:
       title = 'Deceased';
