@@ -2,7 +2,7 @@
 
   <div class="row">
 
-    <div class="col-xs-12">
+    <div class="">
       <div class="page-header">
         <div *ngIf="survey && survey.conceptId">
           <h2> {{survey.name}} Survey </h2>
@@ -15,7 +15,7 @@
 
   <div class="white-card-box">
     <div class="row">
-      <div class="col-md-4 col-xs-12">
+      <div class=" ">
         <div class="card-stat" *ngIf="!loading">
           {{survey.participantCount | number }}
         </div>
@@ -23,7 +23,7 @@
           Participants completed this survey
         </div>
       </div>
-      <div class="col-md-4 col-xs-12">
+      <div class=" ">
         <div class="card-stat">
           <span *ngIf="loading" class="spinner spinner-md"> </span>
           <span *ngIf="!loading" >{{ surveyResult.items.length }} </span>
@@ -32,10 +32,10 @@
           Questions
         </h5>
       </div>
-      <div class="col-md-4 col-xs-12">
-        <div class="col-xs-12 flex-xs-middle search-input-full ">
+      <div class=" ">
+        <div class=" flex-xs-middle search-input-full ">
           <div class="row search">
-            <div class="col-xs-12 flex-xs-middle search-input-full ">
+            <div class=" flex-xs-middle search-input-full ">
               <div class="search-wrapper">
                 <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
                 <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
@@ -43,7 +43,7 @@
             </div>
           </div>
         </div>
-        <div class="col-xs-12 flex" *ngIf="searchText.value.length > 0">
+        <div class=" flex" *ngIf="searchText.value.length > 0">
           <p class="results-heading no-results" *ngIf="questions.length === 0 && !loading">
           <span *ngIf="searchMethod === 'and'"> No questions match *ALL* keywords: <mark> {{searchText.value}}</mark>.
             <span  class="search-extra"> <button class="btn btn-link" (click)="setSearchMethod('or')">Match any keyword</button> </span>
@@ -66,14 +66,14 @@
       </div>
     </div>
     <div class="row survey-pdf-url">
-      <div class="col-md-4 col-xs-12">
+      <div class=" ">
         <div class="card-text">
           <a href="{{surveyPdfUrl}}" download> <clr-icon shape="file" class="has-badge is-solid"></clr-icon> Download Survey as PDF</a>
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="col-md-12 col-xs-12">
+      <div class=" ">
         <p card-text>Click on each response to view branding logic and age and gender distributions</p>
       </div>
     </div>
@@ -81,7 +81,7 @@
       <div class="row question-result" *ngFor="let q of questions, let i = index">
 
         <div class="row question">
-          <div class="col-md-12 col-xs-12">
+          <div class=" ">
             <div class="box-title"> Question {{i + 1}}</div>
             <div class="box-sub-title question-display">
               <div class="box-sub-title question question">
@@ -89,16 +89,16 @@
               </div>
             </div>
           </div>
-          <div class="col-xs-12">
+          <div class="">
             <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers
               <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
           </div>
         </div>
-        <div class="row col-xs-12 col-header-row" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-6 info-text">
+        <div class="row  " [hidden]="!showAnswer[q.conceptId]">
+          <div class=" info-text">
             Text
           </div>
-          <div class="col-md-2 info-text">
+          <div class=" info-text">
             Concept Code
             <clr-tooltip>
               <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -114,23 +114,23 @@
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md-2 info-text">
+          <div class=" info-text">
             Participant Count
           </div>
-          <div class="col-md-1 info-text flex-xs-middle">
+          <div class=" info-text flex-xs-middle">
             % answered
           </div>
-          <div class="col-md-1 info-text">
+          <div class=" info-text">
           </div>
         </div>
         <div class="row expandable-grid-row" *ngFor="let a of q.countAnalysis.results" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-6 flex-xs-middle" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
+          <div class=" flex-xs-middle" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
             <label class="answer-text">
               <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
             </label>
           </div>
           <ng-template #binnedSurveyQuestionDisplay>
-            <div class="col-md-6 flex-xs-middle">
+            <div class=" flex-xs-middle">
               <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
                 <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
               </label>
@@ -141,28 +141,28 @@
               </ng-template>
             </div>
           </ng-template>
-          <div class="col-md-2 flex-xs-middle">
+          <div class=" flex-xs-middle">
             <label class="concept-code">{{a.stratum3}}</label>
           </div>
-          <div class="answer-text col-md-2 flex-xs-middle">
+          <div class="answer-text  flex-xs-middle">
             <label class="participant-count answer-text">{{a.countValue | number}}  </label>
           </div>
-          <div class="col-md-1 percent-bar flex-xs-middle">
+          <div class=" percent-bar flex-xs-middle">
             <span>{{a.countPercent.toFixed(2)}}%</span>
           </div>
-          <div class="col-md-1 flex-xs-middle">
+          <div class=" flex-xs-middle">
             <button class="icon-btn" (click)="showAnswerGraphs(a)">
               <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
             </button>
           </div>
-          <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'" #chartElement>
+          <div class=" row-expansion flex-xs-middle" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'" #chartElement>
             <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g,q)" class="btn btn-link">{{g}}</button>
             <div class="row">
-              <div class="col-md-4"></div>
-              <div class="col-md-4">
+              <div class=""></div>
+              <div class="">
                 <app-chart [analysis]="q.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'" [domainType]="'surveys'"></app-chart>
               </div>
-              <div class="col-md-4"></div>
+              <div class=""></div>
             </div>
           </div>
         </div>
@@ -175,7 +175,7 @@
   <!-- Todo show general totals for demographics of who took the survey -->
   <!--
   <div class="row">
-    <div class="col-xs-12">
+    <div class="">
       <app-concept-charts [concept]="survey" [showRace]="true" [showAge]="true" [showGender]="true"
                         [showEthnicity]="true" [backgroundColor]="'#ECF1F4'">
       </app-concept-charts>
