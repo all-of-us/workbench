@@ -28,7 +28,7 @@
 
 body {
     background-color: #E0E0E1;
-    overflow-x: hidden;
+    /* overflow-x: hidden; */
     font-family: Gotham;
     font-size: 18px;
     line-height: 1.5em;
@@ -39,14 +39,14 @@ body {
 
 
 .content-container {
-    width:100vw;
-    width: 60rem;
-    padding: 0 var(--gutter);
+    width:80vw;
+    min-width: 30rem;
     margin: auto;
 }
 
 .main-container {
     background-color: #E0E0E1;
+    
 }
 
 input[type=text],
@@ -105,7 +105,7 @@ input[type=password]:focus {
 
 @media (max-width: 978px) {
     .content-container {
-        width: 98vw
+        width: 90vw
     }
     body {
         padding: 0;
