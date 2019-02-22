@@ -54,8 +54,9 @@ public class ComplianceServiceImpl implements ComplianceService {
 
   @Override
   public Integer getMoodleId(String email) throws ApiException {
-    if (!enableMoodleCalls())
+    if (!enableMoodleCalls()) {
       return null;
+    }
     List<MoodleUserResponse> response = getApi().
         getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
     if (response.size() == 0) {
@@ -66,9 +67,9 @@ public class ComplianceServiceImpl implements ComplianceService {
 
   @Override
   public List<BadgeDetails>  getUserBadge(int userMoodleId) throws ApiException {
-    if (!enableMoodleCalls())
+    if (!enableMoodleCalls()) {
       return null;
-
+    }
     UserBadgeResponse response = getApi().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
