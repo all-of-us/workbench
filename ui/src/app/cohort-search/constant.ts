@@ -8,7 +8,7 @@ export const PROGRAM_TYPES = [
 export const DOMAIN_TYPES = [
   {
     name: 'Demographics', type: TreeType.DEMO, subtype: null, children: [
-      {name: 'Current Age', type: TreeType.DEMO, subtype: TreeSubType.AGE},
+      {name: 'Current Age/Deceased', type: TreeType.DEMO, subtype: TreeSubType.AGE},
       {name: 'Gender', type: TreeType.DEMO, subtype: TreeSubType.GEN},
       {name: 'Race', type: TreeType.DEMO, subtype: TreeSubType.RACE},
       {name: 'Ethnicity', type: TreeType.DEMO, subtype: TreeSubType.ETH},

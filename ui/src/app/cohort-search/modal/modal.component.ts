@@ -123,6 +123,13 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subscription.add(this.criteriaSubtype$
+      .subscribe(subtype => {
+        this.subtype = subtype;
+        console.log(subtype);
+      })
+    );
+
     this.subscription.add(this.item$.subscribe(item => {
       this.itemType = item.get('type');
       this.title = 'Codes';
@@ -130,6 +137,10 @@ export class ModalComponent implements OnInit, OnDestroy {
         const regex = new RegExp(`.*${crit.type}.*`, 'i');
         if (regex.test(this.itemType)) {
           this.title = crit.name;
+          if (crit.type === TreeType.DEMO) {
+            console.log(item.toJS());
+            this.title += ' - ' + subtypeToTitle(this.subtype);
+          }
         }
       }
       for (const crit of PROGRAM_TYPES) {
@@ -139,12 +150,6 @@ export class ModalComponent implements OnInit, OnDestroy {
         }
       }
     }));
-
-    this.subscription.add(this.criteriaSubtype$
-      .subscribe(subtype => {
-        this.subtype = subtype;
-      })
-    );
     this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
