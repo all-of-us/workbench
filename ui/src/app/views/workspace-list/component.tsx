@@ -15,13 +15,13 @@ import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {displayDate, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {WorkspaceShare} from 'app/views/workspace-share/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
   Profile,
 } from 'generated/fetch';
 import * as React from 'react';
-import {WorkspaceShare} from "../workspace-share/component";
 
 const styles = reactStyles({
   fadeBox: {
@@ -140,7 +140,7 @@ export class WorkspaceCard extends React.Component<
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
                                  onDelete={() => {this.setState({confirmDeleting: true}); }}
-                                 onShare={() => {this.setState({sharing: true})}}
+                                 onShare={() => {this.setState({sharing: true}); }}
                                  disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
@@ -171,13 +171,13 @@ export class WorkspaceCard extends React.Component<
       {confirmDeleting &&
         <ConfirmDeleteModal resourceType='workspace'
                             resourceName={wp.workspace.name}
-                            receiveDelete={() => {this.deleteWorkspace()}}
-                            closeFunction={() => {this.setState({confirmDeleting: false})}}/>}
+                            receiveDelete={() => {this.deleteWorkspace(); }}
+                            closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
       {sharing && <WorkspaceShare workspace={wp.workspace}
                                   accessLevel={wp.accessLevel}
                                   userEmail={userEmail}
                                   sharing={sharing}
-                                  onClose={() => {this.shareWorkspace()}} />}
+                                  onClose={() => {this.shareWorkspace(); }} />}
     </React.Fragment>;
 
   }
