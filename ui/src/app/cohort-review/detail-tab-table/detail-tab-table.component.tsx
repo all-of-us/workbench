@@ -204,7 +204,10 @@ export const DetailTabTable = withCurrentWorkspace()(
         pageReportTemplate = (start + 1) + ' - ' + lastRowOfPage + ' of ' + data.length
           + ' records ';
       }
-      const paginatorTemplate = 'CurrentPageReport PrevPageLink PageLinks NextPageLink';
+      let paginatorTemplate = 'CurrentPageReport';
+      if (data && data.length > rows) {
+        paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
+      }
 
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
