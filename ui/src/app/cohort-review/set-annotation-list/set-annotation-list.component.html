@@ -2,6 +2,7 @@
   <app-set-annotation-item
           *ngFor="let defn of definitions"
           [definition]="defn"
+          [loadAnnotationDefinitions]="loadAnnotationDefinitions"
           (isPosting)="isPosting($event, defn)">
   </app-set-annotation-item>
 
