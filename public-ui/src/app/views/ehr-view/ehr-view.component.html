@@ -37,7 +37,7 @@
         </h5>
 
         <div *ngIf="showTopConcepts">
-          <app-chart *ngIf="delayLoad" class="top-concepts-chart" [concepts]="top10Results" [pointWidth]="10">
+          <app-chart *ngIf="showTopConcepts" class="top-concepts-chart" [concepts]="top10Results" [pointWidth]="10">
           </app-chart>
         </div>
       </section>
@@ -67,7 +67,7 @@
             </h5>
           </ng-template>
         </div>
-        <div class="row" *ngIf="items.length === 1 && items[0].standardConcept != 'S' && standardConcepts.length > 0">
+        <div *ngIf="items.length === 1 && items[0].standardConcept != 'S' && standardConcepts.length > 0">
           <div class=" db-alert">
             <clr-alert [clrAlertClosable]="false" [clrAlertType]="info">
               Note: {{items[0].vocabularyId}} {{items[0].conceptCode}} "{{items[0].conceptName}}"
@@ -188,7 +188,7 @@
             </div>
           </div>
           <div (click)="expandRow(standardConcepts.concat(items),r)" class="secondary-display info-text results-tbl-col aka" [ngClass]="{'no-b-border': r.expanded}" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
-            <div (click)="$event.stopPropagation();toggleSynonyms(r.conceptId)" class="aka-text"><span>Also Known As</span>
+            <div (click)="$event.stopPropagation();toggleSynonyms(r.conceptId)" class="aka-text" [ngClass]="{'no-b-border': r.expanded}"><span>Also Known As</span>
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon aka-info"></clr-icon>
                 <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
@@ -215,14 +215,17 @@
             </ng-template>
           </div>
           <div class="row-expansion" *ngIf="r.expanded" #chartElement>
-            <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']"
-              [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}}
+            <div class="graph-menu">
+            <div *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']"
+              [ngClass]="{'active':graphToShow === g}" (click)="selectGraph(g)" class="chart-choice">
+              <span>{{g}}</span>
               <clr-tooltip>
                 <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
                   <div class="tooltip-label">{{showToolTip(g)}}</div>
                 </clr-tooltip-content>
-              </clr-tooltip></button>
+              </clr-tooltip> </div>
+            </div>
             <app-concept-charts [concept]="r" [showGraph]="graphToShow" [backgroundColor]="'#ECF1F4'">
             </app-concept-charts>
           </div>
@@ -235,12 +238,12 @@
 
 
       <div class="results-grid">
-        <div class="row" *ngIf="!loading && items.length === 0">
+        <div *ngIf="!loading && items.length === 0">
           <div class="">
             <h5 class="no-results"> No results match your search. </h5>
           </div>
         </div>
-        <div class="row">
+        <div>
           <div class="col-md-4 ">
             <button class="btn btn-primary btn-sm" [routerLink]="['/quick-search/ehr']"> Back to Quick Search </button>
           </div>
