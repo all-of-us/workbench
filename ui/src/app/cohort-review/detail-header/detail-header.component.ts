@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {Participant} from 'app/cohort-review/participant.model';

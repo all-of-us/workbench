@@ -9,7 +9,6 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {

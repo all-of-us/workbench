@@ -248,7 +248,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
-  private profileTimer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
@@ -305,7 +304,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     const {profileState: {profile, reload}} = this.props;
 
     if (fp.isEmpty(profile)) {
-      this.profileTimer = setTimeout(() => {
+      setTimeout(() => {
         reload();
       }, 10000);
     } else {
@@ -367,7 +366,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink, firstVisit} = this.state;
+        quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',

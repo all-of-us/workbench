@@ -5,7 +5,6 @@ import {ClarityModule} from '@clr/angular';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {AnnotationItemComponent} from 'app/cohort-review/annotation-item/annotation-item.component';
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
-import {Observable} from 'rxjs/Observable';
 import {AnnotationListComponent} from './annotation-list.component';
 
 describe('AnnotationListComponent', () => {

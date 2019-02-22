@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 
 import {typeToTitle} from 'app/cohort-search/utils';
@@ -21,11 +21,6 @@ const itemTime = {
   name: 'itemDate',
   classNames: ['time-col'],
   displayName: 'Time',
-};
-const endDate = {
-  name: 'endDate',
-  classNames: ['date-col'],
-  displayName: 'End Date',
 };
 const domain = {
   name: 'domain',
@@ -52,18 +47,6 @@ const sourceVocabulary = {
 const sourceName = {
   name: 'sourceName',
   displayName: 'Source Name',
-};
-const signature = {
-  name: 'signature',
-  displayName: 'Signature',
-};
-const valueConcept = {
-  name: 'valueConcept',
-  displayName: 'Concept Value',
-};
-const valueSource = {
-  name: 'valueSource',
-  displayName: 'Source Value',
 };
 const value = {
   name: 'value',
@@ -101,10 +84,6 @@ const lastMention = {
 const dose = {
   name: 'dose',
   displayName: 'Dose',
-};
-const refills = {
-  name: 'refills',
-  displayName: 'Refills',
 };
 const strength = {
   name: 'strength',

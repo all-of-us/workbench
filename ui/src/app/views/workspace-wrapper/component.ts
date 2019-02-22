@@ -5,7 +5,6 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {

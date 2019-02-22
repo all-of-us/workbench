@@ -20,24 +20,6 @@ import {SearchGroupComponent} from './search-group.component';
 
 import {CohortBuilderService, TreeType} from 'generated';
 
-const itemA = fromJS({
-  id: 'itemA',
-  count: null,
-  isRequesting: false,
-  type: TreeType[TreeType.ICD9],
-  searchParameters: [],
-  modifiers: [],
-});
-
-const itemB = fromJS({
-  id: 'itemB',
-  count: null,
-  isRequesting: false,
-  type: TreeType[TreeType.ICD9],
-  searchParameters: [],
-  modifiers: [],
-});
-
 const group = fromJS({
   id: 'include0',
   count: null,
