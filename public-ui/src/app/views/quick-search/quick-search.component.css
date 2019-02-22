@@ -23,7 +23,6 @@ strong {
     min-width: calc((100%/12)*7.5);
     flex-grow: 1;
     font-size: 20px;
-    padding-left: 10px;
 }
 
 .search-bar input {

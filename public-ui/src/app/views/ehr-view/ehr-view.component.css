@@ -15,11 +15,6 @@
     opacity: .7;
 }
 
-.search-bar {
-    min-width: 100%;
-    padding-left: 10px;
-    margin-bottom: 28px;
-}
 
 #domain-name {
     padding-bottom: 12px;
@@ -76,10 +71,6 @@
     grid-area: e;
 }
 
-.info-text {
-    min-height: 2em;
-    font-size: 12px;
-}
 
 .results-tbl-head-item {
     padding: 0 var(--gutter);
@@ -201,9 +192,9 @@
     content: '';
     position: absolute;
     width:100%;
-    height: 5px;
+    height: 3px;
     background: var(--dark-slate-blue);
-    bottom:-5px;
+    bottom:-3px;
     left:0;
 }
 
@@ -211,10 +202,11 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    padding-bottom: var(--gutter);
 }
 .chart-choice {
     padding:var(--gutter);
-    border-bottom: solid 3px var(--dark-slate-blue);
+    border-bottom: solid 1px var(--dark-slate-blue);
     position: relative;
     display: flex;
 }
