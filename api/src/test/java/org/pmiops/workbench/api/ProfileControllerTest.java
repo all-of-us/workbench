@@ -236,17 +236,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSubmitEthicsTraining_success() throws Exception {
-    createUser();
-    Profile profile = profileController.completeEthicsTraining().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
-    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
-  }
-
-  @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
     WorkbenchConfig testConfig = new WorkbenchConfig();
@@ -254,7 +243,7 @@ public class ProfileControllerTest {
     testConfig.firecloud.registeredDomainName = "";
 
     when(configProvider.get()).thenReturn(testConfig);
-    Profile profile = profileController.completeEthicsTraining().getBody();
+    Profile profile = profileController.syncTrainingStatus().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
     reviewStatus.setNewStatus(IdVerificationStatus.VERIFIED);
