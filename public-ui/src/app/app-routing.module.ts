@@ -26,20 +26,20 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     children: [
       {
-        path: '',
+        path: 'home',
         component: DbHomeComponent,
         data: {title: 'Quick Search'}
       },
       {
-        path: 'explore',
+        path: '',
         component: QuickSearchComponent,
         data: {title: 'Quick Search'}
       },
-      {
-        path: 'explore/:dataType',
-        component: QuickSearchComponent,
-        data: {title: 'Quick Search'}
-      },
+      // {
+      //   path: 'quick-search/:dataType',
+      //   component: QuickSearchComponent,
+      //   data: {title: 'Quick Search'}
+      // },
       {
         path: 'survey/:id',
         component: SurveyViewComponent,
