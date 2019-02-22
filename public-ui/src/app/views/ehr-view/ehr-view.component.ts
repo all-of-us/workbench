@@ -24,11 +24,10 @@ import { ISubscription } from 'rxjs/Subscription';
   templateUrl: './ehr-view.component.html',
   styleUrls: ['../../styles/template.css', '../../styles/cards.css', './ehr-view.component.css']
 })
-export class EhrViewComponent implements OnInit, OnDestroy  {
+export class EhrViewComponent implements OnInit, OnDestroy {
   domainId: string;
   title: string;
   subTitle: string;
-  delayLoad = false;
   ehrDomain: any;
   searchText: FormControl = new FormControl();
   prevSearchText = '';
@@ -180,7 +179,7 @@ export class EhrViewComponent implements OnInit, OnDestroy  {
     localStorage.setItem('searchText', '');
     this.loading = false;
     // Wait till last to load chard so it fits its container
-    setTimeout(() => this.toggleDelayLoad(),500);
+    setTimeout(() => this.toggleTopConcepts(), 500);
   }
 
   private searchDomain(query: string) {
