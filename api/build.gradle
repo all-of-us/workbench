@@ -242,14 +242,6 @@ sourceSets {
       srcDirs = ['tools/src/main/java']
     }
   }
-  toolstest {
-    compileClasspath += tools.output
-    runtimeClasspath += tools.output
-
-    java {
-      srcDirs = ['tools/src/test/java']
-    }
-  }
   bigquerytest {
     resources {
       srcDir "bigquerytest/resources"

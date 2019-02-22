@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools.elastic;
+package org.pmiops.workbench.elasticsearch;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;

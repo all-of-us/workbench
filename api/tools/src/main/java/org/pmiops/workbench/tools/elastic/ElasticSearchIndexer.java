@@ -12,7 +12,6 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,16 +29,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.http.HttpHost;
 import org.elasticsearch.ElasticsearchStatusException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.action.bulk.BulkItemResponse;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.pmiops.workbench.elasticsearch.ElasticDocument;
+import org.pmiops.workbench.elasticsearch.ElasticUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -125,13 +118,6 @@ public final class ElasticSearchIndexer {
 
   private static final Logger log = Logger.getLogger(ElasticSearchIndexer.class.getName());
 
-  // Recommended document type for all indices is "_doc" (types are being deprecated):
-  // https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html
-  private static final String ES_INDEX_TYPE = "_doc";
-  private static final RequestOptions ES_OPTS = RequestOptions.DEFAULT;
-
-  private static final int BATCH_SIZE = 500;
-
   private RestHighLevelClient client;
 
   private void createIndex(CommandLine opts) throws IOException, InterruptedException {
@@ -144,18 +130,9 @@ public final class ElasticSearchIndexer {
       inverseProb = Integer.parseInt(opts.getOptionValue(inverseProbOpt.getLongOpt()));
     }
 
-    // Initialize the index.
-    String personIndex = opts.getOptionValue("cdr-version") + "_person";
-    if (opts.hasOption(deleteIndicesOpt.getLongOpt()) &&
-        client.indices().exists(new GetIndexRequest().indices(personIndex), ES_OPTS)) {
-      client.indices().delete(new DeleteIndexRequest(personIndex), ES_OPTS);
-      log.info("deleted existing index: " + personIndex);
-    }
+    String personIndex = ElasticUtils.personIndexName(opts.getOptionValue("cdr-version"));
     try {
-      client.indices().create(
-          new CreateIndexRequest(personIndex)
-              .mapping(ES_INDEX_TYPE, ImmutableMap.of("properties", ElasticDocument.PERSON_SCHEMA)),
-          ES_OPTS);
+      ElasticUtils.createPersonIndex(client, personIndex, opts.hasOption(deleteIndicesOpt.getLongOpt()));
     } catch (ElasticsearchStatusException e) {
       if (e.status().getStatus() != 400) {
         throw e;
@@ -239,32 +216,7 @@ public final class ElasticSearchIndexer {
 
     log.info(String.format("Starting bulk ingest of Elasticsearch documents to '%s'",
         opts.getOptionValue(esBaseUrlOpt.getLongOpt())));
-    int fails = 0;
-    for (int i = 0; docs.hasNext(); i += BATCH_SIZE) {
-      BulkRequest bulkReq = new BulkRequest();
-      int j;
-      for (j = 0; j < BATCH_SIZE && docs.hasNext(); j++) {
-        ElasticDocument doc = docs.next();
-
-        // Cannot include _id in the document, needs to be part of the insertion request.
-        bulkReq.add(new IndexRequest(personIndex, ES_INDEX_TYPE, doc.id)
-            .source(doc.source));
-      }
-      BulkResponse response = client.bulk(bulkReq, ES_OPTS);
-      if (response.hasFailures()) {
-        for (BulkItemResponse itemResp : response.getItems()) {
-          if (itemResp.isFailed()) {
-            // TODO: Investigate retry handling or aggregate failures.
-            log.warning(itemResp.getFailureMessage());
-            fails++;
-          }
-        }
-      }
-
-      int inserted = i + j - fails;
-      log.info(String.format("Inserted %.2f%% of documents (%d/%d) (%d failed)",
-          ((float) 100 * (inserted)) / totalSampleSize, inserted, totalSampleSize, fails));
-    }
+    ElasticUtils.ingestDocuments(client, personIndex, docs, totalSampleSize);
   }
 
   private String getPersonBigQuerySQL(String bqDataset, int inverseProb) throws IOException {
