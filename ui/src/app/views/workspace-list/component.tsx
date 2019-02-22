@@ -4,6 +4,7 @@ import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
+import {AlertDanger, AlertWarning} from 'app/components/alert';
 import {CardButton, Clickable, MenuItem} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -13,12 +14,11 @@ import {PopupTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {displayDate, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {
   BillingProjectStatus,
   ErrorResponse,
   Profile,
-  Workspace,
-  WorkspaceResponseListResponse
 } from 'generated/fetch';
 import * as React from 'react';
 
@@ -39,10 +39,13 @@ const styles = reactStyles({
   },
   workspaceDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', height: '2rem', display: '-webkit-box',
-    webkitLineClamp: '2', webkitBoxOrient: 'vertical'
+    WebkitLineClamp: '2', WebkitBoxOrient: 'vertical'
+  },
+  workspaceCard: {
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'
   },
   workspaceCardFooter: {
-    display:'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
   },
   permissionBox: {
     color: '#FFFFFF', height: '1rem', width: '3rem', fontSize: 10, textAlign: 'center',
@@ -80,48 +83,90 @@ const WorkspaceCardMenu: React.FunctionComponent<{
   </PopupTrigger>;
 };
 
-const WorkspaceCard: React.FunctionComponent<
-  {wp: WorkspacePermissions, onDelete: Function, onShare: Function}> =
-    ({wp, onDelete, onShare}) => {
+export class WorkspaceCard extends React.Component<
+    {wp: WorkspacePermissions, onDelete: Function},
+    {sharing: boolean, confirmDeleting: boolean}> {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      sharing: false,
+      confirmDeleting: false
+    };
+  }
+
+  // todo: deletion error
+  async deleteWorkspace() {
+    const {wp} = this.props;
+    this.setState({deleting: true});
+    workspacesApi().deleteWorkspace(wp.workspace.namespace, wp.workspace.id).then(() => {
+      this.setState({confirmDeleting: false});
+      this.props.onDelete();
+    });
+  }
+
+  // todo
+  shareWorkspace(): void {
+
+  }
+
+  render() {
+    const {wp} = this.props;
+    const {confirmDeleting} = this.state;
     const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
-      return <Card>
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%'}}>
+    return <React.Fragment>
+      <Card>
+        <div style={styles.workspaceCard}>
           <div style={{display: 'flex', flexDirection: 'column'}}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
-            <WorkspaceCardMenu wp={wp} onDelete={onDelete} onShare={onShare} disabled={false}/>
-            <Clickable>
-              <div style={styles.workspaceName}
-                   onClick={() => navigate(
-                       ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
-                {wp.workspace.name}</div>
-            </Clickable>
+            <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
+              <WorkspaceCardMenu wp={wp}
+                                 onDelete={() => {this.setState({confirmDeleting: true}); }}
+                                 onShare={() => {}} disabled={false}/>
+              <Clickable>
+                <div style={styles.workspaceName}
+                     onClick={() => navigate(
+                         ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
+                  {wp.workspace.name}</div>
+              </Clickable>
+            </div>
+            <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
+            {wp.isPending && <div style={{color: '#f8c954'}}>
+              <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f8c954'}}/>
+              Pending Approval
+            </div>}
+            {wp.isRejected && <div style={{color: '#f58771'}}>
+              <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f58771'}}/>
+              Rejected
+            </div> }
           </div>
-          <div style={styles.workspaceDescription}>{wp.workspace.description}</div>
-          {wp.isPending && <div style={{color: '#f8c954'}}>
-            <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f8c954'}}/>
-            Pending Approval
-          </div>}
-          {wp.isRejected && <div style={{color: '#f58771'}}>
-            <ClrIcon shape='exclamation-triangle' className='is-solid' style={{fill: '#f58771'}}/>
-            Rejected
-          </div> }
-        </div>
           <div style={styles.workspaceCardFooter}>
             <div style={{fontSize: 12, lineHeight: '17px'}}>Last Changed: <br/>
               {displayDate(wp.workspace.lastModifiedTime)}</div>
-            <div style={{...styles.permissionBox, backgroundColor: permissionBoxColors[wp.accessLevel]}}>
-              {wp.accessLevel}</div>
+            <div style={{
+              ...styles.permissionBox,
+              backgroundColor: permissionBoxColors[wp.accessLevel]}}>{wp.accessLevel}</div>
           </div>
         </div>
-    </Card>;
-    };
+      </Card>
+      {confirmDeleting &&
+        <ConfirmDeleteModal resourceType='workspace'
+                            resourceName={wp.workspace.name}
+                            receiveDelete={() => {this.deleteWorkspace(); }}
+                            closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
+    </React.Fragment>;
+
+  }
+}
+
 
 export const WorkspaceList = withUserProfile()
 (class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
   { workspacesLoading: boolean, billingProjectInitialized: boolean,
-    workspaceList: WorkspacePermissions[], errorText: string}> {
+    workspaceList: WorkspacePermissions[], errorText: string,
+    firstSignIn: Date, twoFactorEnabled: boolean
+  }> {
   private timer: NodeJS.Timer;
 
   constructor(props) {
@@ -131,11 +176,14 @@ export const WorkspaceList = withUserProfile()
       billingProjectInitialized: false,
       workspaceList: [],
       errorText: '',
+      twoFactorEnabled: false,
+      firstSignIn: undefined,
     };
   }
 
   componentDidMount() {
     this.checkBillingProjectStatus();
+    this.checkTwoFactorAuth();
     this.reloadWorkspaces();
   }
 
@@ -144,6 +192,7 @@ export const WorkspaceList = withUserProfile()
   }
 
   async reloadWorkspaces() {
+    this.setState({workspacesLoading: true});
     try {
       const workspacesReceived = await workspacesApi().getWorkspaces();
       workspacesReceived.items.sort(
@@ -168,22 +217,51 @@ export const WorkspaceList = withUserProfile()
     }
   }
 
-  delete(): void {
+  checkTwoFactorAuth() {
+    const {profileState: {profile}} = this.props;
+    console.log(profile.twoFactorEnabled);
 
+    this.setState({
+      twoFactorEnabled: profile.twoFactorEnabled,
+      firstSignIn: new Date(profile.firstSignInTime)
+    });
   }
 
-  share(): void {
-
+  get twoFactorBannerEnabled() {
+    if (this.state.firstSignIn === undefined) {
+      return false;
+    }
+    if (this.state.twoFactorEnabled === true) {
+      return false;
+    }
+    // Don't show the banner after 1 week as their account would
+    // have been disabled had they not enabled 2-factor auth.
+    if (new Date().getTime() - this.state.firstSignIn.getTime() > 7 * 24 * 60 * 60 * 1000) {
+      return false;
+    }
+    return true;
   }
 
   render() {
-    const {billingProjectInitialized, workspaceList, workspacesLoading} = this.state;
+    const {billingProjectInitialized, errorText,
+      workspaceList, workspacesLoading} = this.state;
 
     return <React.Fragment>
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
-          {/*todo: alerts*/}
+          {this.twoFactorBannerEnabled && <AlertWarning>
+            <div>Please add a second layer of protection with 2-Step Verification.
+            After three days your account will be suspended.
+            If you already completed setup, please ignore this message.  <a
+                  style={{color: '#2691D0'}} href='https://myaccount.google.com/security'>
+              Set up 2-Step Verification here</a>.</div>
+          </AlertWarning>}
+          {errorText && <AlertDanger>
+            <ClrIcon shape='exclamation-circle'/>
+            {errorText}
+          </AlertDanger>}
+
           <div style={styles.cardArea}>
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
@@ -196,8 +274,7 @@ export const WorkspaceList = withUserProfile()
                 </CardButton>
                 {workspaceList.map(wp => {
                   return <WorkspaceCard wp={wp}
-                                        onDelete={() => {this.delete(); }}
-                                        onShare={() => {this.share(); }}/>;
+                                        onDelete={() => {this.reloadWorkspaces(); }}/>;
 
                 })}
               </div>)}
@@ -219,13 +296,7 @@ export class WorkspaceListComponent extends ReactWrapperBase {
   }
 }
 
-// @Component({
-//   styleUrls: ['./component.css',
-//     '../../styles/buttons.css',
-//     '../../styles/tooltip.css',
-//     '../../styles/cards.css'],
-//   templateUrl: './component.html',
-// })
+
 // export class WorkspaceListComponent implements OnInit, OnDestroy {
 //
 //   // TODO: Consider moving profile load to be in a resolver - currently we have
@@ -340,18 +411,6 @@ export class WorkspaceListComponent extends ReactWrapperBase {
 //     });
 //   }
 //
-//   receiveDelete(): void {
-//     this.delete(this.workspace);
-//   }
-//
-//   openConfirmDelete(workspace: Workspace): void {
-//     this.workspace = workspace;
-//     this.confirmDeleting = true;
-//   }
-//
-//   closeConfirmDelete(): void {
-//     this.confirmDeleting = false;
-//   }
 //
 //   share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
 //     this.selectedWorkspace = workspace;
