@@ -18,8 +18,7 @@
     </clr-dg-filter>
   </clr-dg-column>
 
-  <clr-dg-row *clrDgItems="let datum of data"
-    (click)="onClick(datum)">
+  <clr-dg-row *clrDgItems="let datum of data">
     <clr-dg-cell *ngFor="let col of columns" class="cell">
       <ng-container [ngSwitch]="true">
         <span *ngSwitchCase="col.name === 'itemDate'

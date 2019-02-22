@@ -31,6 +31,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
+  username: string;
 
   @ViewChild(BugReportComponent)
   bugReportComponent: BugReportComponent;
@@ -43,6 +44,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private workspacesService: WorkspacesService
   ) {
     this.share = this.share.bind(this);
+    this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
@@ -112,7 +114,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    // TODO: RW-1919 - remove this
+    window.location.reload();
   }
 
   submitWorkspaceDeleteBugReport(): void {
