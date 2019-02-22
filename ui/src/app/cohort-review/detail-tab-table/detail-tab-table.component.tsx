@@ -173,7 +173,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         pageFilterRequest
       ).then(response => {
         response.items.forEach(item => {
-          if (this.props.domain === DomainType.VITAL || this.props.domain === DomainType.LAB) {
+          if (this.props.domain === DomainType[DomainType.VITAL]
+            || this.props.domain === DomainType[DomainType.LAB]) {
             item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
           }
           item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
