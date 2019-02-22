@@ -40,7 +40,8 @@ body {
 
 .content-container {
     width:100vw;
-    max-width: 60rem;
+    width: 60rem;
+    padding: 0 var(--gutter);
     margin: auto;
 }
 
