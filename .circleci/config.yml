@@ -53,7 +53,7 @@ jobs:
             - ~/workbench/api/build/exploded-api/WEB-INF/lib/
           key: api-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
-  api-local-test:
+  build:
     docker:
       - image: allofustest/workbench:buildimage-0.0.13
       - image: mysql:5.7
@@ -63,7 +63,7 @@ jobs:
           - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx3g
+      JAVA_TOOL_OPTIONS: -Xmx2g
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
