@@ -33,7 +33,6 @@ body {
     font-size: 18px;
     line-height: 1.5em;
     letter-spacing: normal;
-    color: var(--dark-slate-blue);
 }
 
 
@@ -84,6 +83,10 @@ input[type=password]:focus {
     --gutter: 9px;
     --boxshadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
     --tbl-border:1px solid #CCCCCC;
+  }
+  a a:link a:visited {
+      color:var(--pale-sky-blue);
+      
   }
 
   .toggle-link {

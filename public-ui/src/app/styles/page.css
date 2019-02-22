@@ -20,7 +20,7 @@
   text-align: center;
 }
 
-.primary-display {
+.primary-display, h1 {
   font-family: unit, sans-serif;
   font-size: 50px;
   font-weight: normal;
@@ -32,7 +32,7 @@
   color: var(--dark-slate-blue);
 }
 
-.secondary-display {
+.secondary-display, h2 {
   font-family: unit, sans-serif, sans-serif;
   font-weight: 200;
   font-style: normal;
@@ -68,7 +68,7 @@
   color: var(--dark-slate-blue);
 }
 
-.body-default {
+.body-default, p {
   font-family: GothamBook, open-sans, sans-serif;
   font-size: 18px;
   font-weight: normal;
@@ -98,3 +98,14 @@
   width: 100%;
 }
 
+
+
+.search-icon {
+  width: calc((100%/12));
+  height: 20px;
+}
+
+
+.info-text {
+  font-size: .75em;
+}

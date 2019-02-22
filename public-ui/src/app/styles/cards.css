@@ -1,7 +1,7 @@
 .card {
     border-radius: 5px;
     box-shadow: none;
-    font-family: "Gotham HTF", open-sans, sans-serif;
+    font-family: "GothamBook", open-sans, sans-serif;
     border: 1px solid #979797;
     background-color: #FFFFFF;
 }
@@ -58,7 +58,7 @@
 .card-stat {
     font-size:48px;
     color: rgba(0,0,0,0.87);
-    font-family: "Gotham HTF", open-sans, sans-serif;
+    font-family: "Gotham", open-sans, sans-serif;
     font-weight: 300;
     line-height: 55px;
 }
