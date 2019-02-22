@@ -3,11 +3,13 @@ package org.pmiops.workbench.compliance;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.moodle.ApiClient;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.moodle.MoodleConfig;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;
 import org.pmiops.workbench.moodle.model.UserBadgeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -25,12 +27,17 @@ public class ComplianceServiceImpl implements ComplianceService {
   private CloudStorageService cloudStorageService;
   private Provider<WorkbenchConfig> configProvider;
 
+  private MoodleConfig moodleConfig;
+
 
   @Autowired
   public ComplianceServiceImpl(CloudStorageService cloudStorageService,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      Provider<MoodleConfig> moodleConfigProvider) {
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
+    moodleConfig = moodleConfigProvider.get();
+
   }
 
   private String getToken() {
@@ -41,18 +48,16 @@ public class ComplianceServiceImpl implements ComplianceService {
     return configProvider.get().moodle.enableMoodleBackend;
   }
 
-  private void setApiHost() {
-    ApiClient apiClient = api.getApiClient();
-    apiClient.setBasePath("https://" + configProvider.get().moodle.host +"/webservice/rest");
+  private MoodleApi getApi() {
+    return moodleConfig.moodleApi(configProvider.get());
   }
 
   @Override
   public Integer getMoodleId(String email) throws ApiException {
     if (!enableMoodleCalls())
       return null;
-    setApiHost();
-    api.getApiClient().setDebugging(true);
-    List<MoodleUserResponse> response = api.getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD, email);
+    List<MoodleUserResponse> response = getApi().
+        getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
     if (response.size() == 0) {
       return null;
     }
@@ -63,10 +68,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   public List<BadgeDetails>  getUserBadge(int userMoodleId) throws ApiException {
     if (!enableMoodleCalls())
       return null;
-    setApiHost();
-    api.getApiClient().setDebugging(true);
 
-    UserBadgeResponse response = api.getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
+    UserBadgeResponse response = getApi().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
