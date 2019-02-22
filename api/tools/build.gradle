@@ -131,7 +131,7 @@ sourceSets {
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java',
                   // Exclude all tools which are built as part of the main Gradle config.
                   'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
-                  'org/pmiops/workbench/elastic/*.java',
+                  'org/pmiops/workbench/tools/elastic/*.java',
       ]
     }
   }

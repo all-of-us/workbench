@@ -123,6 +123,7 @@ public class ElasticDocument {
    * columns must exactly match the target Elasticsearch schema, and the resulting documents
    * are encoded as a nested "JSON" structure of type Map<String, Object>.
    */
+  @SuppressWarnings("unchecked")
   private static Map<String, Object> bqToElasticSchema(FieldValueList fvl, Map<String, Object> elasticSchema) {
     Map<String, Object> doc = Maps.newHashMap();
     for (String k : elasticSchema.keySet()) {
@@ -145,7 +146,7 @@ public class ElasticDocument {
       switch (esType) {
         case INTEGER:
           if (isRepeated) {
-            val = fv.getRepeatedValue().stream().map(f -> f.getNumericValue())
+            val = fv.getRepeatedValue().stream().map(FieldValue::getNumericValue)
                 .collect(Collectors.toList());
           } else {
             val = fv.getNumericValue();
@@ -154,7 +155,7 @@ public class ElasticDocument {
         case DATE:
         case KEYWORD:
           if (isRepeated) {
-            val = fv.getRepeatedValue().stream().map(f -> f.getStringValue()).collect(Collectors.toList());
+            val = fv.getRepeatedValue().stream().map(FieldValue::getStringValue).collect(Collectors.toList());
           } else {
             val = fv.getStringValue();
           }
