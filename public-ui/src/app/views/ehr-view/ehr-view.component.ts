@@ -260,8 +260,4 @@ export class EhrViewComponent implements OnInit, OnDestroy  {
   public toggleTopConcepts() {
     this.showTopConcepts = !this.showTopConcepts;
   }
-  public toggleDelayLoad() {
-    this.delayLoad = true;
-    this.showTopConcepts = true;
-  }
 }
