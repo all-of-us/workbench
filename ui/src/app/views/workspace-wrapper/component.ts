@@ -33,8 +33,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   confirmDeleting = false;
   username: string;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  // @ViewChild(BugReportComponent)
+  // bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   private subscriptions = [];
 
@@ -125,7 +127,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
   }
 }

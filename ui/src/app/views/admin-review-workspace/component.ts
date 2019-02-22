@@ -26,8 +26,10 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   reviewedWorkspace: Workspace;
   reviewError = false;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  // @ViewChild(BugReportComponent)
+  // bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
   constructor(
     private workspacesService: WorkspacesService
   ) {}
@@ -63,16 +65,16 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   }
 
   submitFetchingWorkspacesBugReport(): void {
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription =
+    this.bugReportDescription =
       'Could not fetch workspaces for approval';
+    this.bugReportOpen = true;
   }
 
   submitReviewWorkspaceBugReport(): void {
     this.reviewError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription =
+    this.bugReportDescription =
       'Could not review workspace: \'' + this.reviewedWorkspace.namespace + '/' +
       this.reviewedWorkspace.name + '\'';
+    this.bugReportOpen = true;
   }
 }

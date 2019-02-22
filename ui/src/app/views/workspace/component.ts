@@ -106,8 +106,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   username = '';
   creatingNotebook = false;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  // @ViewChild(BugReportComponent)
+  // bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   constructor(
     private cohortsService: CohortsService,
@@ -244,7 +246,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not load notebooks';
+    this.bugReportOpen = true;
   }
 }

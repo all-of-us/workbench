@@ -50,8 +50,10 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaceDeletionError = false;
   workspace: Workspace = {name: ''};
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  // @ViewChild(BugReportComponent)
+  // bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   constructor(
     private profileStorageService: ProfileStorageService,
@@ -179,7 +181,8 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
   }
 }

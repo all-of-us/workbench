@@ -34,4 +34,4 @@
     <span class="loading-text">Loading workspaces for review...</span>
   </div>
 </ng-template>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen" [bugReportDescription]="bugReportDescription"></app-bug-report>
