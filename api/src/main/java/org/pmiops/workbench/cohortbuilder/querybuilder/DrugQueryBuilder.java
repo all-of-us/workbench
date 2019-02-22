@@ -87,7 +87,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     baseSql.append(AGE_DATE_AND_ENCOUNTER_VAR);
     List<Modifier> modifiers = searchGroupItem.getModifiers();
     String modifiedSql = buildModifierSql(baseSql.toString(), queryParams, modifiers);
-    return buildTemporalSql(TABLE_ID, modifiedSql, conceptIdSql.toString(), queryParams, modifiers, mention);
+    return buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {

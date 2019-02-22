@@ -103,7 +103,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     String conceptIdSql = String.join(OR, queryParts).replace("${conceptIds}", "@" + idParameter) + AGE_DATE_AND_ENCOUNTER_VAR;
     String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql;
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    return buildTemporalSql(TABLE_ID, modifiedSql, conceptIdSql, queryParams, modifiers, mention);
+    return buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
   }
 
   @Override

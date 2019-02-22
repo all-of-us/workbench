@@ -61,7 +61,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
     List<Modifier> modifiers = inputParameters.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
     String namedParameter = addQueryParameterValue(queryParams,
       QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);

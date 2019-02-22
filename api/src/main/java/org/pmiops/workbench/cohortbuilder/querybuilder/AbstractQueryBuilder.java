@@ -13,6 +13,7 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.betweenOperator;
@@ -50,6 +51,7 @@ public abstract class AbstractQueryBuilder {
   public static final String CHILD = "child";
   public static final String AND = " and ";
   public static final String OR = " or\n";
+  public static final String UNION = "union all\n";
   public static final String AGE_DATE_AND_ENCOUNTER_VAR = "${ageDateAndEncounterSql}";
   private static final String MODIFIER_SQL_TEMPLATE =
     "select criteria.person_id from (${innerSql}) criteria\n";
@@ -59,8 +61,8 @@ public abstract class AbstractQueryBuilder {
   private static final String TEMPORAL_SQL_TEMPLATE =
     "select person_id, visit_occurrence_id, entry_date${rank1Sql}\n" +
       "from `${projectId}.${dataSetId}.${tableId}`\n" +
-      "where ${conceptIdSql}" +
-      "and person_id in (${innerSql})\n";
+      "where ${ageDateAndEncounterSql}";
+  private static final String PERSON_IN = "person_id in (${innerSql})\n";
   private static final String TEMPORAL_RANK_1_SQL_TEMPLATE =
     "select person_id, visit_occurrence_id, entry_date\n" +
       "from (${innerTemporalSql}) a\n" +
@@ -98,17 +100,17 @@ public abstract class AbstractQueryBuilder {
 
   public String buildTemporalSql(String tableId,
                                  String innerSql,
-                                 String conceptIdsSql,
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
                                  TemporalMention mention) {
     if (mention != null) {
-      String temporalSql = TEMPORAL_SQL_TEMPLATE
+      String ageDateAndEncounterSql = getAgeDateAndEncounterSql(queryParams, modifiers).replaceFirst(Pattern.quote("and "), "");
+      String temporalSqlEnd = ageDateAndEncounterSql.isEmpty() ? PERSON_IN : AND + PERSON_IN;
+      String temporalSql = (TEMPORAL_SQL_TEMPLATE + temporalSqlEnd)
         .replace("${tableId}", tableId)
         .replace("${innerSql}", innerSql)
-        .replace("${conceptIdSql}", conceptIdsSql)
-        .replace("${ageDateAndEncounterSql}", getAgeDateAndEncounterSql(queryParams, modifiers));
-      if (TemporalMention.ANY_MENTION.equals(mention)) {
+        .replace("${ageDateAndEncounterSql}", ageDateAndEncounterSql);
+      if (TemporalMention.ANY_MENTION.name().equals(mention)) {
         return temporalSql.replace("${rank1Sql}", "");
       } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
         temporalSql = temporalSql.replace("${rank1Sql}", RANK_1_SQL_TEMPLATE.replace("${descSql}", ""));
