@@ -70,8 +70,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-      Provider<WorkbenchConfig> configProvider,
-      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
+                              Provider<WorkbenchConfig> configProvider,
+                              HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
@@ -111,8 +111,9 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   /**
    * Fetches a user by their GSuite email address.
-   *
+   * <p>
    * If the user is not found, a null value will be returned (no exception is thrown).
+   *
    * @param email
    * @return
    */
@@ -156,15 +157,18 @@ public class DirectoryServiceImpl implements DirectoryService {
     // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
     // variable.
     aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
-    // This gives us a structured place to store researchers' contact email addresses, in
-    // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
-    aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
+
+    if (contactEmail != null) {
+      // This gives us a structured place to store researchers' contact email addresses, in
+      // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
+      aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
+    }
 
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
     ArrayList<UserEmail> emails = Lists.newArrayList(
-      new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+        new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
     if (contactEmail != null) {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
     }
@@ -191,7 +195,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public User updateUser(User user) {
     retryHandler.run((context) -> getGoogleDirectoryService().users().update(
-      user.getPrimaryEmail(), user).execute());
+        user.getPrimaryEmail(), user).execute());
     return user;
   }
 
