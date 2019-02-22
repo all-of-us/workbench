@@ -77,9 +77,8 @@
     flex-grow:1;
 }
 
-
-.answer-tbl-r-group * {
-    width:calc(auto + var(--gutter));
+.answer-tbl-r .info-text:first-of-type {
+    max-width: 586px;
 }
 
 .answer-tbl-r-group {
@@ -87,6 +86,9 @@
     justify-content: space-evenly;
     width:45%;
     
+}
+.answer-tbl-r-group * {
+    width:100%;
 }
 
 

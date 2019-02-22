@@ -125,13 +125,13 @@
 
 
           <div class="expandable-grid-row" *ngFor="let a of q.countAnalysis.results"
-            [hidden]="!showAnswer[q.conceptId]">
+            [hidden]="!showAnswer[q.conceptId]"> 
             <div class="answer-tbl-r">
+              <div class="info-text">
               <div *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
-                <label class="info-text">
                   <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
-                </label>
               </div>
+            </div>
 
               <div class="answer-tbl-r-group">
                 <!-- <span class='answer-body'>
@@ -168,6 +168,7 @@
                   </button>
                 </div>
               </div>
+            </div>
 
 
 
@@ -184,7 +185,6 @@
                   </div>
                 </div>
               </div>
-            </div>
           </div>
         </div>
       </div>
