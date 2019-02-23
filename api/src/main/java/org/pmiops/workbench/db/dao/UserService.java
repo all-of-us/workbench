@@ -50,7 +50,6 @@ public class UserService {
   private final ComplianceService complianceService;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
-
   @Autowired
   public UserService(Provider<User> userProvider,
       UserDao userDao,
