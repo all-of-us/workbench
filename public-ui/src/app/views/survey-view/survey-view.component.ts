@@ -236,4 +236,4 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     return Number(s);
   }
 
-}
+  }

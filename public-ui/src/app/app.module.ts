@@ -39,6 +39,7 @@ import { SurveysComponent } from './views/surveys/surveys.component';
 
 import {ConfigService, DataBrowserService} from 'publicGenerated';
 import {DbConfigService} from './utils/db-config.service';
+import {TooltipService} from './utils/tooltip.service';
 import { overriddenPublicUrlKey } from './views/app/app.component';
 import { EhrViewComponent } from './views/ehr-view/ehr-view.component';
 import { PhysicalMeasurementsComponent } from './views/pm/pm.component';
@@ -98,6 +99,7 @@ export function getConfigService(http: Http) {
       useFactory: getConfiguration
     },
     DbConfigService,
+    TooltipService,
     ServerConfigService,
     {
       provide: ErrorHandler,
