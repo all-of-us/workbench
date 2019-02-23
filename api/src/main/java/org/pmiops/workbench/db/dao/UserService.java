@@ -58,7 +58,7 @@ public class UserService {
       Random random,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
-      Provider<ComplianceService> complianceServiceProvider) {
+      ComplianceService complianceService) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -66,7 +66,7 @@ public class UserService {
     this.random = random;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
-    this.complianceService = complianceServiceProvider.get();
+    this.complianceService = complianceService;
   }
 
   /**
