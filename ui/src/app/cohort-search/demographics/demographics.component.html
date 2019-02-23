@@ -1,10 +1,10 @@
-<form class="form-container" [formGroup]="demoForm" [ngSwitch]="subtype">
+<form class="form-container" [class.age]="subtype === treeSubType.AGE" [formGroup]="demoForm" [ngSwitch]="subtype">
   <!-- Age -->
   <div *ngSwitchCase="treeSubType.AGE">
     <div class="age-label">
       Age Range
     </div>
-    <div class="control-wrapper slider-wrapper" [ngClass]="[deceasedClicked? 'deceaseNoCursor':'deceaseCursor']">
+    <div class="control-wrapper slider-wrapper" [class.disabled]="deceased.value">
       <input type="number"
              id="min-age"
              [min]="minAge" [max]="maxAge"
@@ -13,7 +13,7 @@
              (blur)="checkMin()">
       <div class="slider">
         <div id="count-wrapper">
-            <span id="age-count" class="badge badge-info">
+            <span *ngIf="ageCount" id="age-count" class="badge badge-info">
               {{ ageCount | number }}
             </span>
         </div>
@@ -31,19 +31,14 @@
              formControlName="ageMax"
              class="number-display"
              (blur)="checkMax()">
-      <clr-icon *ngIf= "!ageClicked" class="selection-icon" shape="plus-circle" size = '39' (click)="getAgeValue()"></clr-icon>
-      <clr-icon *ngIf= "ageClicked" class="selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
     </div>
 
-    <div class="deceased-title">
-      Deceased
-    </div>
-    <div class="control-wrapper">
-      <div (click)="selectedDeasease()" [ngClass]="[ageClicked? 'deceaseNoCursor':'deceaseCursor']">
-        <clr-icon *ngIf= "!deceasedClicked" class="decease-selection-icon" shape="plus-circle" size = '39'  ></clr-icon>
-        <clr-icon *ngIf= "deceasedClicked" class="decease-selection-icon selection-check-icon" shape="check-circle" size = '39'></clr-icon>
-        Is Deceased</div>
-    </div>
+    <clr-checkbox formControlName="deceased">
+      Is Deceased
+      <span *ngIf="deceasedNode" class="badge badge-info">
+        {{ deceasedNode.get('count') | number }}
+      </span>
+    </clr-checkbox>
   </div>
 
   <!-- Genders -->
@@ -97,7 +92,7 @@
       </div>
     </div>
 </form>
-<div class="container count-preview" *ngIf="!noSelection">
+<div class="container count-preview" *ngIf="!noSelection && subtype !== treeSubType.AGE">
   <div class="row">
     <div class="col-lg-1 " *ngIf="showCalculateContainer || preview.get('requesting')">
        <span class="spinner spinner-md">
