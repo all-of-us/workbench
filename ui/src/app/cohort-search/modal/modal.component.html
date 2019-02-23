@@ -3,7 +3,7 @@
   <div class="crit-modal-content">
     <div class="container title-margin">
       <div class="row">
-        <div class="col col-sm-8 padding-zero">
+        <div class="col padding-zero" [ngClass]="subtype === treeSubType.AGE ? 'col-sm-12' : 'col-sm-8'">
           <div class="title-bar">
             <div class="btn-group btn-link">
               <ng-container>
@@ -86,10 +86,23 @@
                 </div>
               </ng-container>
             </ng-container>
+            <div *ngIf="subtype === treeSubType.AGE" class="footer">
+              <button type="button"
+                      (click)="cancel()"
+                      class="btn btn-link">
+                Cancel
+              </button>
+              <button type="button"
+                      [disabled]="disableFlag"
+                      (click)="finish()"
+                      class="btn btn-primary">
+                Finish
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="col col-sm-4 padding-zero">
+        <div *ngIf="subtype !== treeSubType.AGE" class="col col-sm-4 padding-zero">
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
               <ng-container *ngSwitchDefault>

@@ -114,9 +114,8 @@ label[for="deceased"] {
 
 .age-label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #262262;
-  padding-left: 1rem;
 }
 
 .demo-title {
@@ -166,11 +165,7 @@ label[for="deceased"] {
   width: 0rem;
 }
 
-.deceaseCursor {
-  cursor: pointer;
-}
-
-.deceaseNoCursor {
+.disabled {
   opacity: 0.4;
   pointer-events: none;
 }
@@ -191,6 +186,21 @@ label[for="deceased"] {
 
 .form-container {
   padding-left: 1rem;
+}
+
+.form-container.age {
+  margin: 0.5rem 1rem;
+  padding-bottom: 0.5rem;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
+.form-container.age clr-checkbox {
+  padding-left: 1rem;
+}
+
+.form-container.age clr-checkbox .badge.badge-info{
+  margin-left: 0.5rem;
 }
 
 .selection-check-icon {

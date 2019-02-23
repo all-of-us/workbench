@@ -43,6 +43,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
+  readonly treeSubType = TreeSubType;
   ctype: string;
   subtype: string;
   itemType: string;
@@ -126,7 +127,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.subscription.add(this.criteriaSubtype$
       .subscribe(subtype => {
         this.subtype = subtype;
-        console.log(subtype);
       })
     );
 
@@ -138,7 +138,6 @@ export class ModalComponent implements OnInit, OnDestroy {
         if (regex.test(this.itemType)) {
           this.title = crit.name;
           if (crit.type === TreeType.DEMO) {
-            console.log(item.toJS());
             this.title += ' - ' + subtypeToTitle(this.subtype);
           }
         }

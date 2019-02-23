@@ -146,10 +146,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       this.loadNodesFromApi();
     });
 
-    this.subscription.add(this.subtype$.subscribe(sub => {
-      console.log(sub);
-      this.subtype = sub;
-    }));
+    this.subscription.add(this.subtype$.subscribe(sub => this.subtype = sub));
 
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
@@ -228,6 +225,17 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.ageNode = nodes.get(0);
         this.ageNodes = nodes.toJS();
         this.calculateAgeCount();
+        const attr = fromJS(<Attribute>{
+          name: 'Age',
+          operator: Operator.BETWEEN,
+          operands: [minAge.toString(), maxAge.toString()],
+          conceptId: this.ageNode.get('conceptId', null)
+        });
+        const paramId = `age-param${this.ageNode.get('id')}`;
+        this.selectedNode = this.ageNode
+          .set('parameterId', paramId)
+          .set('attributes', [attr]);
+        this.actions.addParameter(this.selectedNode);
         break;
       case TreeSubType[TreeSubType.DEC]:
         this.deceasedNode = nodes.get(0);
@@ -344,13 +352,15 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                     operands: [lo, hi],
                     conceptId: this.ageNode.get('conceptId', null)
                 });
-                const paramId = `age-param${attr.hashCode()}`;
+                const paramId = `age-param${this.ageNode.get('id')}`;
                 return this.ageNode
                     .set('parameterId', paramId)
                     .set('attributes', [attr]);
             })
             .withLatestFrom(selectedAge)
             .filter(([newNode, oldNode]) => {
+              this.selectedNode = newNode;
+              this.actions.addParameter(newNode);
               if (oldNode) {
                 return oldNode.get('parameterId') !== newNode.get('parameterId');
               }
@@ -368,17 +378,20 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.DEC]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
+
     }
     this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
       if (!this.deceasedNode) {
-        this.deceasedClicked = includeDeceased;
         console.warn('No node from which to make parameter for deceased status');
         return ;
       }
-      this.deceasedClicked = includeDeceased;
-      includeDeceased
-                ? this.actions.addParameter(this.deceasedNode)
-                : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+      if (includeDeceased) {
+        this.actions.addParameter(this.deceasedNode);
+        this.actions.removeParameter(this.selectedNode.get('parameterId'));
+      } else {
+        this.actions.addParameter(this.selectedNode);
+        this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+      }
     }));
   }
 
