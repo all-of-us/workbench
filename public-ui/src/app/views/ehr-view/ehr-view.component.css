@@ -188,28 +188,8 @@
 }
 
 
-.active::after {
-    content: '';
-    position: absolute;
-    width:100%;
-    height: 3px;
-    background: var(--dark-slate-blue);
-    bottom:-3px;
-    left:0;
-}
 
-.graph-menu {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding-bottom: var(--gutter);
-}
-.chart-choice {
-    padding:var(--gutter);
-    border-bottom: solid 1px var(--dark-slate-blue);
-    position: relative;
-    display: flex;
-}
+
 
 @media (max-width: 600px) {
     .chart-choice {

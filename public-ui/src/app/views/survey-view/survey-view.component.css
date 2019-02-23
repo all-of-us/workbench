@@ -1,60 +1,60 @@
 .title-container {
-    width:100%;
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
-    align-items:baseline;
+    align-items: baseline;
 }
 
-
-.desc-container{
+.desc-container {
     display: flex;
     flex-wrap: wrap;
-    align-items:baseline;
+    align-items: baseline;
 }
+
 .title-container * {
     padding-right: var(--gutter);
-    width: calc(auto + var(--gutter)) ;
+    width: calc(auto + var(--gutter));
 }
 
 .title-container h1 {
     line-height: 1em;
 }
-.toggle-link ,.toggle-link:link, .toggle-link:visited {
-    color:var(--mid-blue);
+
+.toggle-link, .toggle-link:link, .toggle-link:visited {
+    color: var(--mid-blue);
 }
 
-
-
 .search-bar-container {
-    margin-bottom:var(--gutter);
+    margin-bottom: var(--gutter);
 }
 
 .survey-head {
-    display:flex;
+    display: flex;
     position: relative;
 }
+
 .stat-container {
-    display:flex;
+    display: flex;
     flex-direction: column;
 }
+
 .stat-container:first-of-type {
     padding-right: 45px;
 }
+
 .stat-desc {
     font-size: .75em;
 }
-.stat-container h2{
-    line-height:calc(var(--gutter)*4);
+
+.stat-container h2 {
+    line-height: calc(var(--gutter)*4);
 }
 
 .pdf-link {
     position: absolute;
-    right:0;
-    top:0;
+    right: 0;
+    top: 0;
 }
-
-
-
 
 .survey-results {
     padding: .5rem;
@@ -62,32 +62,37 @@
 }
 
 .no-results {
-    margin-top:1em;
+    margin-top: 1em;
 }
 
 .answer-tbl {
     border: var(--tbl-border);
+}
 
-}
 .answer-tbl-r {
-    display:flex;
+    display: flex;
     justify-content: start;
+    border: var(--tbl-border);
 }
-.answer-tbl-r .info-text {
-    flex-grow:1;
+
+.answer-tbl-r .answer-tbl-d {
+    flex-grow: 1;
 }
 
 .answer-tbl-r-group {
     display: flex;
     justify-content: space-evenly;
-    width:45%;
-    
-}
-.answer-tbl-r-group * {
-    width:100%;
+    width: 45%;
 }
 
+.answer-tbl-r-group .answer-tbl-d {
+    width: 115px;
+    /* white-space: nowrap; */
+}
 
+.answer-tbl-r-group .answer-tbl-d:last-of-type {
+    width: 47px;
+}
 
 /* .search-bar {
     min-width: 100%;
@@ -100,41 +105,29 @@
     min-width: calc((100%/12)*10);
   } */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .white-card-box.top-stat {
     height: inherit;
 }
+
 .view-sub-title {
     color: #4A4A4A;
     font-weight: 300;
 }
+
 .box-sub-title.question {
     font-size: larger;
     display: inline;
 }
-.box-sub-title.question.question-display{
+
+.box-sub-title.question.question-display {
     font-size: larger;
 }
 
 .survey-results-background {
     width: 100%;
     opacity: 0.59;
-    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0) 100%);
-    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0) 100%);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
     padding: 1rem;
     /* Opacity trick so the question cards can be white and not inherit these */
     position: absolute;
@@ -147,14 +140,12 @@
     padding: 1rem;
     margin: 1rem;
     border-radius: 0;
-    border-radius:4px;
+    border-radius: 4px;
     position: relative;
     /*margin-right: 12px;
     margin-left: 12px;
     */
 }
-
-
 
 .survey-results .row.search {
     margin-left: .1rem;
@@ -162,15 +153,14 @@
     margin-bottom: 1rem;
 }
 
-
-.survey-results
-.row.answers {
+.survey-results .row.answers {
     margin-left: .5rem;
 }
 
 .answer-active, .answer-card, .answer-charts-wrapper {
     background-color: #D9E4EA;
 }
+
 .answer-card {
     height: 100%;
 }
@@ -180,9 +170,9 @@
 }
 
 /* remove space between list and charts */
-.answer-list {
 
-}
+.answer-list {}
+
 .answer-charts {
     margin-left: 0px;
     padding-left: 0px;
@@ -194,23 +184,23 @@
 
 .answer-charts .chart-wrapper {
     height: 240px;
-    margin-top:0;
+    margin-top: 0;
 }
+
 .answer-charts .chart-wrapper.age {
     height: 240px;
     margin-top: 0;
 }
 
 .row.answers .chart-wrapper {
-    margin-bottom:0px;
+    margin-bottom: 0px;
 }
-
 
 .answers-bar-col {
-    margin-top:1rem;
+    margin-top: 1rem;
 }
 
-.btn-link.extra-search  {
+.btn-link.extra-search {
     font-weight: bolder;
     text-decoration: underline;
 }
