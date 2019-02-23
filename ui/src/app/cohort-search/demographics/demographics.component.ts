@@ -413,21 +413,23 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   centerAgeCount() {
-    this.calculateAgeCount();
-    this.ageClicked = false;
-    const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
-    const wrapper = document.getElementById('count-wrapper');
-    const count = document.getElementById('age-count');
-    wrapper.setAttribute(
-      'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
-        );
-        // set style properties also for cross-browser compatibility
-    wrapper.style.width = slider.offsetWidth.toString();
-    wrapper.style.left = slider.offsetLeft.toString();
-    if (slider.offsetWidth < count.offsetWidth) {
-      const margin = (slider.offsetWidth - count.offsetWidth) / 2;
-      count.setAttribute('style', 'margin-left: ' + margin + 'px;');
-      count.style.marginLeft = margin.toString();
+    if (this.ageNodes) {
+      this.calculateAgeCount();
+      this.ageClicked = false;
+      const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
+      const wrapper = document.getElementById('count-wrapper');
+      const count = document.getElementById('age-count');
+      wrapper.setAttribute(
+        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+      );
+      // set style properties also for cross-browser compatibility
+      wrapper.style.width = slider.offsetWidth.toString();
+      wrapper.style.left = slider.offsetLeft.toString();
+      if (slider.offsetWidth < count.offsetWidth) {
+        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+        count.style.marginLeft = margin.toString();
+      }
     }
   }
 
