@@ -27,16 +27,16 @@ public class ComplianceServiceImpl implements ComplianceService {
   private CloudStorageService cloudStorageService;
   private Provider<WorkbenchConfig> configProvider;
 
-  private MoodleConfig moodleConfig;
+  private Provider<MoodleApi> moodleApi;
 
 
   @Autowired
   public ComplianceServiceImpl(CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> configProvider,
-      Provider<MoodleConfig> moodleConfigProvider) {
+      Provider<MoodleApi> moodleApiProvider) {
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
-    moodleConfig = moodleConfigProvider.get();
+    moodleApi = moodleApiProvider;
 
   }
 
@@ -48,17 +48,12 @@ public class ComplianceServiceImpl implements ComplianceService {
     return configProvider.get().moodle.enableMoodleBackend;
   }
 
-  private MoodleApi getApi() {
-    return moodleConfig.moodleApi(configProvider.get());
-  }
-
   @Override
   public Integer getMoodleId(String email) throws ApiException {
     if (!enableMoodleCalls()) {
       return null;
     }
-    List<MoodleUserResponse> response = getApi().
-        getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
+    List<MoodleUserResponse> response = moodleApi.get().getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
     if (response.size() == 0) {
       return null;
     }
@@ -70,7 +65,7 @@ public class ComplianceServiceImpl implements ComplianceService {
     if (!enableMoodleCalls()) {
       return null;
     }
-    UserBadgeResponse response = getApi().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
+    UserBadgeResponse response = moodleApi.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
