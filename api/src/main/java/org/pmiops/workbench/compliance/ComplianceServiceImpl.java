@@ -1,15 +1,12 @@
 package org.pmiops.workbench.compliance;
 
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.moodle.ApiClient;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.moodle.MoodleConfig;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;
 import org.pmiops.workbench.moodle.model.UserBadgeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -27,7 +24,7 @@ public class ComplianceServiceImpl implements ComplianceService {
   private CloudStorageService cloudStorageService;
   private Provider<WorkbenchConfig> configProvider;
 
-  private Provider<MoodleApi> moodleApi;
+  private Provider<MoodleApi> moodleApiProvider;
 
 
   @Autowired
@@ -36,7 +33,7 @@ public class ComplianceServiceImpl implements ComplianceService {
       Provider<MoodleApi> moodleApiProvider) {
     this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
-    moodleApi = moodleApiProvider;
+    this.moodleApiProvider = moodleApiProvider;
 
   }
 
@@ -53,7 +50,7 @@ public class ComplianceServiceImpl implements ComplianceService {
     if (!enableMoodleCalls()) {
       return null;
     }
-    List<MoodleUserResponse> response = moodleApi.get().getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
+    List<MoodleUserResponse> response = moodleApiProvider.get().getMoodleId(getToken(), GET_MOODLE_ID_SEARCH_FIELD,  email);
     if (response.size() == 0) {
       return null;
     }
@@ -65,7 +62,7 @@ public class ComplianceServiceImpl implements ComplianceService {
     if (!enableMoodleCalls()) {
       return null;
     }
-    UserBadgeResponse response = moodleApi.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
+    UserBadgeResponse response = moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
