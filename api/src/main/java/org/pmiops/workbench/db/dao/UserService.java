@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -48,10 +47,8 @@ public class UserService {
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
+  private final ComplianceService complianceService;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
-
-  @Inject
-  Provider<ComplianceService> complianceServiceProvider;
 
   @Autowired
   public UserService(Provider<User> userProvider,
@@ -60,7 +57,8 @@ public class UserService {
       Clock clock,
       Random random,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      Provider<ComplianceService> complianceServiceProvider) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -68,6 +66,7 @@ public class UserService {
     this.random = random;
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
+    this.complianceService = complianceServiceProvider.get();
   }
 
   /**
@@ -329,14 +328,14 @@ public class UserService {
     try {
       Integer moodleId = user.getMoodleId();
       if (moodleId == null) {
-        moodleId = complianceServiceProvider.get().getMoodleId(user.getEmail());
+        moodleId = complianceService.getMoodleId(user.getEmail());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
           return;
         }
         user.setMoodleId(moodleId);
       }
-      List<BadgeDetails> badgeResponse = complianceServiceProvider.get().getUserBadge(moodleId);
+      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
         BadgeDetails badge = badgeResponse.get(0);
