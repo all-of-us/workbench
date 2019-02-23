@@ -77,10 +77,6 @@
     flex-grow:1;
 }
 
-.answer-tbl-r .info-text:first-of-type {
-    max-width: 586px;
-}
-
 .answer-tbl-r-group {
     display: flex;
     justify-content: space-evenly;
