@@ -1,5 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs/Subscription';
+import {Component, Input} from '@angular/core';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';
 

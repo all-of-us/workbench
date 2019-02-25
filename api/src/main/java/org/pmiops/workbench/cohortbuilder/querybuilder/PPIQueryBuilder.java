@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String temporalMention) {
+                           TemporalMention temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {

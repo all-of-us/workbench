@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -17,6 +17,7 @@ export class SearchGroupListComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() groups$: Observable<List<any>>;
   @Input() index: number;
+  @Output() tempLength = new EventEmitter<boolean>();
 
   @select(s => s.get('initShowChart', true)) initShowChart$: Observable<boolean>;
   listSize: number;
@@ -33,5 +34,8 @@ export class SearchGroupListComponent implements OnInit {
 
   get emptyIndex() {
     return this.listSize + this.index + 1;
+  }
+  getTemporalLength(e) {
+    this.tempLength.emit(e);
   }
 }

@@ -23,10 +23,9 @@ import {SetAnnotationModalComponent} from 'app/cohort-review/set-annotation-moda
 import {SidebarContentComponent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortAnnotationDefinitionService, CohortReview, CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {CohortAnnotationDefinitionService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';

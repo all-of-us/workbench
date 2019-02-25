@@ -1,14 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Comparator, StringFilter} from '@clr/angular';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {SignInService} from 'app/services/sign-in.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
@@ -22,48 +17,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-
-/*
- * Search filters used by the cohort and notebook data tables to
- * determine which of the cohorts loaded into client side memory
- * are displayed.
- */
-class CohortNameFilter implements StringFilter<Cohort> {
-  accepts(cohort: Cohort, search: string): boolean {
-    return cohort.name.toLowerCase().indexOf(search) >= 0;
-  }
-}
-class CohortDescriptionFilter implements StringFilter<Cohort> {
-  accepts(cohort: Cohort, search: string): boolean {
-    return cohort.description.toLowerCase().indexOf(search) >= 0;
-  }
-}
-class NotebookNameFilter implements StringFilter<FileDetail> {
-  accepts(notebook: FileDetail, search: string): boolean {
-    return notebook.name.toLowerCase().indexOf(search) >= 0;
-  }
-}
-
-/*
- * Sort comparators used by the cohort and notebook data tables to
- * determine the order that the cohorts loaded into client side memory
- * are displayed.
- */
-class CohortNameComparator implements Comparator<Cohort> {
-  compare(a: Cohort, b: Cohort) {
-    return a.name.localeCompare(b.name);
-  }
-}
-class CohortDescriptionComparator implements Comparator<Cohort> {
-  compare(a: Cohort, b: Cohort) {
-    return a.description.localeCompare(b.description);
-  }
-}
-class NotebookNameComparator implements Comparator<FileDetail> {
-  compare(a: FileDetail, b: FileDetail) {
-    return a.name.localeCompare(b.name);
-  }
-}
 
 enum Tabs {
   Cohorts,
@@ -110,7 +63,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   constructor(
     private cohortsService: CohortsService,
-    private signInService: SignInService,
     private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,

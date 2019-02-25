@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import {FormControl, Validators} from '@angular/forms';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -34,7 +33,6 @@ export class SetAnnotationItemComponent {
 
   constructor(
     private annotationAPI: CohortAnnotationDefinitionService,
-    private state: ReviewStateService,
     private ngZone: NgZone,
   ) {}
 

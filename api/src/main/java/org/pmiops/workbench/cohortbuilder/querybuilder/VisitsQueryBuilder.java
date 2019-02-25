@@ -6,6 +6,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem inputParameters,
-                           String mention) {
+                           TemporalMention mention) {
     from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<Long> conceptIdList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getSearchParameters()) {

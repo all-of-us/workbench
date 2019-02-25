@@ -11,8 +11,6 @@ import {Observable} from 'rxjs/Observable';
 import {SignInService} from 'app/services/sign-in.service';
 
 
-declare const gapi: any;
-
 @Injectable()
 export class SignInGuard implements CanActivate, CanActivateChild {
   constructor(private signInService: SignInService, private router: Router) {}
