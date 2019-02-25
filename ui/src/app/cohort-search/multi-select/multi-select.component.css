@@ -6,17 +6,11 @@
 
 .ds-options {
   min-width: 7rem;
-  max-width: 12rem;
 }
 
 .ds-options,
 .ds-selected {
   margin: 0.25rem 0.5rem 0.25rem 0;
-}
-
-.select-box {
-  border-radius: 2px;
-  border: 1px solid gray;
 }
 
 .box-header {
@@ -49,7 +43,6 @@
 }
 
 .option-list {
-  height: 10rem;
   overflow: auto;
 }
 
@@ -58,9 +51,10 @@
   overflow: auto;
 }
 .option {
-  font-size: 0.5rem;
+  font-size: 13px;
   font-weight: 400;
   color: black;
+  margin-bottom: 0.5rem;
   padding: 0 .25rem;
   cursor: pointer;
 }
@@ -81,10 +75,12 @@
 }
 
 .items-selection-icon {
+  margin-right: 0.25rem;
   color: rgb(98, 164, 32);
 }
 
 .items-disabled-icon {
+  margin-right: 0.25rem;
   color: rgb(98, 164, 32);
   opacity: 0.4;
   pointer-events: none;
@@ -92,4 +88,8 @@
 
 .disable-option{
   cursor: not-allowed;
+}
+
+.badge.badge-info {
+  margin-left: 0.25rem;
 }

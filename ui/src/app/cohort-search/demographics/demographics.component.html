@@ -43,9 +43,6 @@
 
   <!-- Genders -->
     <div *ngSwitchCase="treeSubType.GEN">
-      <div class="demo-title">
-        Gender
-      </div>
       <div class="control-wrapper">
         <crit-multi-select
                 (addedItems)="getItems($event)"
@@ -60,9 +57,6 @@
 
     <!-- Races -->
     <div *ngSwitchCase="treeSubType.RACE">
-      <div class="demo-title">
-        Race
-      </div>
       <div class="control-wrapper">
         <crit-multi-select
                 (addedItems)="getItems($event)"
@@ -77,9 +71,6 @@
 
     <!-- Ethnicities -->
     <div *ngSwitchCase="treeSubType.ETH">
-      <div class="demo-title">
-        Ethnicity
-      </div>
       <div class="control-wrapper">
         <crit-multi-select
                 (addedItems)="getItems($event)"
