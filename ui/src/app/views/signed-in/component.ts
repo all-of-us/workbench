@@ -70,7 +70,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
-  ) {}
+  ) {
+    this.closeBugReport = this.closeBugReport.bind(this);
+  }
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {

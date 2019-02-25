@@ -94,4 +94,5 @@
   </div>
 </div>
 <app-bug-report *ngIf="bugReportOpen"
-                [onClose]="closeBugReport.bind(this)"></app-bug-report>
+                [bugReportDescription]=""
+                [onClose]="closeBugReport"></app-bug-report>
