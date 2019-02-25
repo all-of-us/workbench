@@ -102,7 +102,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   }
 
   render() {
-    const {profileState: {profile, reload}} = this.props;
+    const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
