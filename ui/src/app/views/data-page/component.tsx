@@ -194,12 +194,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             this.setState({
               activeTab: Tabs.COHORTS
             });
-          }}>Cohorts</TabButton>
+          }} data-test-id='view-only-cohorts'>Cohorts</TabButton>
           <TabButton active={activeTab === Tabs.CONCEPTSETS} onClick={() => {
             this.setState({
               activeTab: Tabs.CONCEPTSETS
             });
-          }}>Concept Sets</TabButton>
+          }} data-test-id='view-only-concept-sets'>Concept Sets</TabButton>
         </div>
         <div style={{
           borderBottom: '1px solid #525A65',
