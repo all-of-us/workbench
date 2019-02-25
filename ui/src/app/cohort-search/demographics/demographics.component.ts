@@ -148,6 +148,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         case TreeSubType.AGE:
           this.initDeceased(selections);
           this.initAgeRange(selections);
+          this.loadNodesFromApi(TreeSubType.DEC);
       }
       this.loadNodesFromApi();
     });
@@ -185,8 +186,9 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  loadNodesFromApi() {
+  loadNodesFromApi(subtype?: string) {
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    subtype = subtype || this.subtype;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
@@ -196,12 +198,12 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * sort them by count, then by name.
      */
     this.loading = true;
-    this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], this.subtype, null, null)
+    this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], subtype, null, null)
       .toPromise()
       .then(response => {
         const items = response.items
                   .filter(item => item.parentId !== 0
-                      || this.subtype === TreeSubType[TreeSubType.DEC]);
+                      || subtype === TreeSubType[TreeSubType.DEC]);
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
           if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
@@ -211,13 +213,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
           }
           return node;
         });
-        this.loadOptions(nodes);
+        this.loadOptions(nodes, subtype);
       });
   }
 
-  loadOptions(nodes: any) {
+  loadOptions(nodes: any, subtype: string) {
     this.loading = false;
-    switch (this.subtype) {
+    switch (subtype) {
       /* Age and Deceased are single nodes we use as templates */
       case TreeSubType[TreeSubType.AGE]:
         this.ageNode = nodes.get(0);
@@ -375,7 +377,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     const existent = selections.find(s => s.get('subtype') === TreeSubType[TreeSubType.DEC]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
-
     }
     this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
       if (!this.deceasedNode) {
@@ -390,12 +391,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         this.actions.removeParameter(this.deceasedNode.get('parameterId'));
       }
     }));
-  }
-
-  selectedDeasease() {
-    this.showCalculateContainer = true;
-    this.actions.addParameter(this.deceasedNode);
-    this.getSearchResponse();
   }
 
   calculateAgeCount() {
@@ -427,25 +422,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         count.setAttribute('style', 'margin-left: ' + margin + 'px;');
         count.style.marginLeft = margin.toString();
       }
-    }
-  }
-
-  getAgeValue() {
-    this.showCalculateContainer = true;
-    if (!this.selectedNode) {
-      this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
-      if (this.isCancelTimerInitiated) {
-        clearTimeout(this.isCancelTimerInitiated);
-      }
-      this.isCancelTimerInitiated =  setTimeout (() => {
-        this.actions.addParameter(this.selectedNode);
-        this.actions.requestPreview();
-        this.showCalculateContainer = false;
-      }, 500);
-    } else {
-      this.actions.addParameter(this.selectedNode);
-      this.actions.requestPreview();
-      this.showCalculateContainer = false;
     }
   }
 
