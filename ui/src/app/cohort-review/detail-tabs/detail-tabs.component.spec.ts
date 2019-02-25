@@ -5,12 +5,10 @@ import {ClarityModule} from '@clr/angular';
 import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import * as highCharts from 'highcharts';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
-import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {DetailTabsComponent} from './detail-tabs.component';
 
@@ -29,7 +27,6 @@ describe('DetailTabsComponent', () => {
           provide: HighchartsStatic,
           useValue: highCharts
         },
-        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ]
     })

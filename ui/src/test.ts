@@ -12,7 +12,7 @@ import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
-import {annotationDefinitionsStore, cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentWorkspaceStore, currentCohortStore, urlParamsStore, queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
@@ -34,7 +34,6 @@ beforeEach(() => {
   queryParamsStore.next({});
   routeConfigDataStore.next({});
   cohortReviewStore.next(undefined);
-  annotationDefinitionsStore.next(undefined);
 });
 // Then we find all the tests.
 const context = require.context('./', true, /\.spec\.ts$/);

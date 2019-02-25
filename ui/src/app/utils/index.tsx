@@ -9,7 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -280,6 +280,11 @@ export const withCurrentWorkspace = () => {
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
+};
+
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withUrlParams = () => {
+  return connectBehaviorSubject(urlParamsStore, 'urlParams');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain

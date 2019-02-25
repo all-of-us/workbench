@@ -4,13 +4,12 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
-import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
-import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {OverviewPage} from './overview-page';
 
@@ -29,7 +28,6 @@ describe('OverviewPage', () => {
         {provide: NgRedux},
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
-        {provide: ReviewStateService, useValue: new ReviewStateServiceStub()},
       ],
     })
       .compileComponents();
