@@ -244,7 +244,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
-    // this.bugReportComponent.reportBug();
     this.bugReportDescription = 'Could not load notebooks';
     this.bugReportOpen = true;
   }

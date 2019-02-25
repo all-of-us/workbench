@@ -179,7 +179,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    // this.bugReportComponent.reportBug();
     this.bugReportDescription = 'Could not delete workspace.';
     this.bugReportOpen = true;
   }
