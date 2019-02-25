@@ -23,6 +23,7 @@ import {
   BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
+import {AlertWarning} from "app/components/alert";
 
 
 const styles = reactStyles({
@@ -93,6 +94,7 @@ export interface WorkbenchAccessTasksProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
+  firstVisitTraining: boolean;
 }
 
 export class WorkbenchAccessTasks extends
@@ -100,6 +102,7 @@ export class WorkbenchAccessTasks extends
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
+    console.log(props.firstVisitTraining);
   }
 
   static redirectToNiH(): void {
@@ -109,7 +112,8 @@ export class WorkbenchAccessTasks extends
     window.location.assign(url);
   }
 
-  static redirectToTraining(): void {
+  static async redirectToTraining() {
+    await profileApi().updatePageVisits({page: 'moodle'});
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
@@ -156,11 +160,17 @@ export class WorkbenchAccessTasks extends
             </div>
             <AccountLinkingButton failed={false}
                                   completed={this.props.trainingCompleted}
-                                  defaultText='Complete Training'
+                                  defaultText={'Complete Training'}
                                   completedText='Completed'
                                   failedText=''
                                   onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
+          {!this.props.firstVisitTraining && !this.props.trainingCompleted &&
+          <AlertWarning>
+            <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+            It may take several minutes for Moodle to update your Online Training
+            status once you have completed compliance training.
+          </AlertWarning>}
         </div>
       </div>
     </React.Fragment>;
@@ -241,6 +251,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
+    firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
     videoOpen: boolean,
@@ -258,6 +269,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
+      firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
       videoOpen: false,
@@ -309,11 +321,17 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }, 10000);
     } else {
 
-      if ((!profile.pageVisits) ||
-          (!profile.pageVisits.some(v => v.page === this.pageId))) {
-        this.setState({firstVisit: true});
-        profileApi().updatePageVisits({ page: this.pageId});
+      if (profile.pageVisits) {
+        if (!profile.pageVisits.some(v => v.page === this.pageId)) {
+          this.setState({firstVisit: true});
+          profileApi().updatePageVisits({ page: this.pageId});
+        }
+        if (profile.pageVisits.some(v => v.page === 'moodle')) {
+          this.setState({firstVisitTraining: false});
+          console.log(this.state.firstVisitTraining);
+        }
       }
+
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
 
       try {
@@ -365,8 +383,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink} = this.state;
+        accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
+        trainingCompleted, quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -409,7 +427,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
               (accessTasksRemaining ?
                 (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
                                        eraCommonsError={eraCommonsError}
-                                       trainingCompleted={trainingCompleted}/>
+                                       trainingCompleted={trainingCompleted}
+                                       firstVisitTraining={firstVisitTraining}/>
                 ) : (
                   <div>
                     <div style={homepageStyles.contentWrapper}>

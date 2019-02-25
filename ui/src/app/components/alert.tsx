@@ -23,8 +23,15 @@ export const styles = reactStyles({
     background: '#f5dbd9',
     color: '#565656',
     border: '1px solid #ebafa6'
+  },
+  warning: {
+    background: '#FFFCEB',
+    color: '#E28327',
+    border: 'none',
+    padding: '.2rem'
   }
 });
 
 export const Alert = withStyle(styles.alert)('div');
 export const AlertDanger = withStyle(styles.danger)(Alert);
+export const AlertWarning = withStyle(styles.warning)(Alert);
