@@ -42,7 +42,7 @@ describe('DataPage', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should show resource cards of all types', async() => {
+  it('should show all datasets, cohorts, and concept sets', async() => {
     const wrapper = mount(<DataPage />);
     const resourceCardsExpected =
       ConceptSetsApiStub.stubConceptSets().length +
