@@ -51,7 +51,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String TABLE_ID = "search_measurement";
   private static final String MEASUREMENT_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
@@ -103,7 +102,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     String conceptIdSql = String.join(OR, queryParts).replace("${conceptIds}", "@" + idParameter) + AGE_DATE_AND_ENCOUNTER_VAR;
     String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql;
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    return buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
+    return buildTemporalSql(modifiedSql, conceptIdSql, queryParams, modifiers, mention);
   }
 
   @Override

@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -41,8 +40,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
  */
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
-
-  private static final String TABLE_ID = "search_all_domains";
 
   private static final String CODES_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
@@ -112,7 +109,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       MULTIPLE_TEMPLATE.replace("${innerParentAndChildSql}", String.join(OR, queryParts));
     String baseSql = CODES_SQL_TEMPLATE + bodySql;
     String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
-    return buildTemporalSql(TABLE_ID, modifiedSql, queryParams, searchGroupItem.getModifiers(), mention);
+    return buildTemporalSql(modifiedSql, bodySql, queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   private void validateSearchParameter(SearchParameter param) {

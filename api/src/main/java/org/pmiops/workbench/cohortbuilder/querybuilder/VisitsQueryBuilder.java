@@ -32,8 +32,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String TABLE_ID = "search_visit";
-  //If the querybuilder will use modifiers then sql statement will need entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
@@ -61,7 +59,7 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
     List<Modifier> modifiers = inputParameters.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
+    String finalSql = buildTemporalSql(modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
     String namedParameter = addQueryParameterValue(queryParams,
       QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);

@@ -32,8 +32,8 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
 
   private static final String UNION_ALL = " union all\n";
   private static final String PPI_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.search_ppi`\n" +
-      "where source_concept_id\n";
+    "select person_id from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where concept_id\n";
 
   private static final String SURVEY_IN_CLAUSE =
     "in (select concept_id\n" +

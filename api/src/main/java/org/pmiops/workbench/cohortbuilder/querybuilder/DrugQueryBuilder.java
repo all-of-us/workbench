@@ -28,7 +28,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String TABLE_ID = "search_drug";
   private static final String DRUG_SQL_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
@@ -87,7 +86,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     baseSql.append(AGE_DATE_AND_ENCOUNTER_VAR);
     List<Modifier> modifiers = searchGroupItem.getModifiers();
     String modifiedSql = buildModifierSql(baseSql.toString(), queryParams, modifiers);
-    return buildTemporalSql(TABLE_ID, modifiedSql, queryParams, modifiers, mention);
+    return buildTemporalSql(modifiedSql, conceptIdSql.toString(), queryParams, modifiers, mention);
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {
