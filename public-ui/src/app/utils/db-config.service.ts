@@ -49,12 +49,12 @@ export class DbConfigService {
   GENDER_IDENTITY_COLORS = {
     '1585839': '#8DC892',
     '1585840': '#6CAEE3',
-    '903070': '#6CAEE3',
-    '903096': '#6CAEE3',
-    '903079': '#6CAEE3',
-    '1585841': '#6CAEE3',
-    '1585842': '#6CAEE3',
-    '1585843': '#6CAEE3'
+    '903070': '#252660',
+    '903096': '#252660',
+    '903079': '#80C4EC',
+    '1585841': '#216fb4',
+    '1585842': '#80C4EC',
+    '1585843': '#8DC892'
   };
 
   /* Age colors -- for now we just use one color pending design */
