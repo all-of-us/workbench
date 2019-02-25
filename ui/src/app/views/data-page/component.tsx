@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
+import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
@@ -237,7 +237,7 @@ const DataPage = withCurrentWorkspace()(class extends React.Component<
       }}
       conceptDomainList={conceptDomainList}
       existingConceptSets={resourceList
-        .filter((resource: RecentResource) => resource.conceptSet !== null)
+        .filter((resource: RecentResource) => resource.conceptSet !== undefined)
         .map((resource: RecentResource) => resource.conceptSet)}/>}
     </React.Fragment>;
   }
