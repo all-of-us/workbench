@@ -1,9 +1,10 @@
 import {Component} from '@angular/core';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import * as React from 'react';
+
+import {Button} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import {FadeBox} from 'app/components/containers';
-import {ClrIcon} from "../../components/icons";
-import {Button} from "../../components/buttons";
+import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 
 export const styles = {
   selectBoxHeader: {
@@ -75,7 +76,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<{}, 
             <div>Preview Dataset</div>
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}>SAVE DATASET</Button>
+            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}>
+              SAVE DATASET
+            </Button>
           </div>
           {/*TODO: Display dataset preview*/}
           <div style={{height: '8rem'}}/>

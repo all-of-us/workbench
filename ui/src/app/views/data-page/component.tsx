@@ -143,7 +143,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         <div style={{color: '#000000', fontSize: '14px'}}>{placeholderText}</div>
         <div style={styles.cardButtonArea}>
           <CardButton style={styles.resourceTypeButton} onClick={() => {
-            navigate(['workspaces', namespace, id, 'data', 'datasets'])
+            navigate(['workspaces', namespace, id, 'data', 'datasets']);
           }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Datasets</h2>
