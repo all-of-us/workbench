@@ -456,6 +456,18 @@ else
     exit 1
 fi
 
+##########################
+# Update rolled up counts #
+##########################
+echo "Updating rolled up counts in achilles results from criteria (for snomed conditions)"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+SET ar.count_value = cr1.est_count
+FROM
+\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
+WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
+and analysis_id=3000 and ar.stratum_3='Condition' "
+
 ###########################
 # concept with count cols #
 ###########################
@@ -605,18 +617,6 @@ join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"
-
-##########################
-# Update rolled up counts #
-##########################
-echo "Updating rolled up counts in achilles results from criteria (for snomed conditions)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-SET ar.count_value = cr1.est_count
-FROM
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
-WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
-and analysis_id=3000 and ar.stratum_3='Condition' "
 
 ###############################################################
 # Update the path of concepts in achilles_results to fetch tree

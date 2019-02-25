@@ -1005,29 +1005,30 @@ on co2.person_id=p1.person_id
 where co2.measurement_source_concept_id=m.measurement_concept_id
 and co2.unit_concept_id=unit_concept_id and p1.gender_concept_id=p.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
-where m.measurement_concept_id = 3020416 and unit_concept_id != 0
-group by concept_id,unit,gender
+where m.measurement_concept_id!=0 and unit_concept_id != 0
+group by m.measurement_concept_id,unit_concept_id,p.gender_concept_id
 union all
-select measurement_concept_id as concept_id, cast(um.unit_concept_id as string) as unit, p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+select 0 as id, 1910 as analysis_id,cast(measurement_concept_id as string) as concept_id, cast(um.unit_concept_id as string) as unit, cast(p.gender_concept_id as string) as gender,count(distinct p.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
 on co2.person_id=p1.person_id
 where co2.measurement_source_concept_id=m.measurement_concept_id
 and co2.unit_concept_id=0 and co2.unit_source_value=unit_source_value and p1.gender_concept_id=p.gender_concept_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on um.unit_source_value=m.unit_source_value
-where m.measurement_concept_id = 3020416 and m.unit_source_value is not null and m.unit_concept_id = 0
-group by concept_id,unit,gender
+where m.measurement_concept_id!=0 and m.unit_source_value is not null and m.unit_concept_id = 0
+group by m.measurement_concept_id,um.unit_concept_id,p.gender_concept_id
 union all
-select measurement_concept_id as concept_id, 'No unit' as unit, p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+select 0 as id, 1910 as analysis_id,cast(measurement_concept_id as string) as concept_id, 'No unit' as unit, cast(p.gender_concept_id as string) as gender,count(distinct p.person_id) as count_value,
 (select COUNT(distinct co2.person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` co2 join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p1
 on co2.person_id=p1.person_id
 where co2.measurement_source_concept_id=m.measurement_concept_id
 and p1.gender_concept_id=p.gender_concept_id and co2.unit_concept_id = 0 and co2.unit_source_value is null) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
-where m.measurement_concept_id = 3020416 and unit_source_value is null and unit_concept_id = 0
-group by concept_id,unit,gender
+where m.measurement_concept_id!=0 and unit_source_value is null and unit_concept_id = 0
+group by m.measurement_concept_id,p.gender_concept_id
 union all
-select measurement_source_concept_id as concept_id, cast(m.unit_concept_id as string) as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+select 0 as id, 1910 as analysis_id,cast(measurement_source_concept_id as string) as concept_id, cast(m.unit_concept_id as string) as unit,
+cast(p.gender_concept_id as string) as gender,count(distinct p.person_id) as count_value,
 count(distinct p.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.measurement_source_concept_id > 0 and
@@ -1035,7 +1036,8 @@ m.measurement_source_concept_id not in (select distinct measurement_concept_id f
 and m.unit_concept_id != 0
 group by concept_id, unit, gender
 union all
-select measurement_source_concept_id as concept_id, cast(um.unit_concept_id as string) as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+select 0 as id, 1910 as analysis_id,cast(measurement_source_concept_id as string) as concept_id, cast(um.unit_concept_id as string) as unit,
+cast(p.gender_concept_id as string) as gender,count(distinct p.person_id) as count_value,
 count(distinct p.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 join \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.unit_map\` um on um.unit_source_value=m.unit_source_value
@@ -1044,7 +1046,8 @@ m.measurement_source_concept_id not in (select distinct measurement_concept_id f
 and m.unit_concept_id = 0 and m.unit_source_value is not null
 group by concept_id, unit, gender
 union all
-select measurement_source_concept_id as concept_id, 'No unit' as unit,p.gender_concept_id as gender,count(distinct p.person_id) as count_value,
+select 0 as id, 1910 as analysis_id,cast(measurement_source_concept_id as string) as concept_id, 'No unit' as unit,
+cast(p.gender_concept_id as string) as gender,count(distinct p.person_id) as count_value,
 count(distinct p.person_id) as source_count_value
 from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\` m join \`${BQ_PROJECT}.${BQ_DATASET}.person\` p on p.person_id=m.person_id
 where m.measurement_source_concept_id > 0 and
@@ -1077,10 +1080,16 @@ where analysis_id in (1900,1901,1910) and stratum_2 is not null and stratum_2 !=
 echo "Replacing no matching concept unit name to no unit"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results_dist\` set stratum_2 = 'No unit'
-where stratum_2 = 'No matching concept' "
+where stratum_2 = 'No matching concept'"
 
 # Update no unit concept name in achilles_results(For nice display)
 echo "Replacing no matching concept unit name to no unit"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` set stratum_2 = 'No unit'
-where stratum_2 = 'No matching concept' "
+where stratum_2 = 'No matching concept'"
+
+# Update no unit concept name in achilles_results(For nice display)
+echo "Replacing no matching concept unit name to no unit"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\` set stratum_2 = 'No unit'
+where (stratum_2 = '' or stratum_2 is null) and analysis_id=1910 "
