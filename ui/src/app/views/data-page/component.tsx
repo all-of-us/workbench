@@ -60,7 +60,7 @@ enum Tabs {
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
-const DataPage = withCurrentWorkspace()(class extends React.Component<
+export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
     creatingConceptSet: boolean, conceptDomainList: DomainInfo[]}> {
