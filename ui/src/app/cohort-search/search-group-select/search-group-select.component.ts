@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input} from '@angular/core';
 
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {CohortSearchActions} from 'app/cohort-search/redux';
@@ -10,14 +10,33 @@ import {SearchRequest} from 'generated';
   templateUrl: './search-group-select.component.html',
   styleUrls: ['./search-group-select.component.css']
 })
-export class SearchGroupSelectComponent {
+export class SearchGroupSelectComponent implements AfterViewInit {
   @Input() role: keyof SearchRequest;
   @Input() index: number;
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
 
+  demoOpen = false;
+  demoMenuHover = false;
+
   constructor(private actions: CohortSearchActions) {}
+
+  ngAfterViewInit(): void {
+    /* Open nested menu on hover */
+    const demoItem = document.getElementById('DEMO');
+    if (demoItem) {
+      demoItem.addEventListener('mouseenter', () => {
+        this.demoOpen = true;
+        setTimeout(() => {
+          const demoMenu = document.getElementById('demo-menu');
+          demoMenu.addEventListener('mouseenter', () => this.demoMenuHover = true);
+          demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
+        });
+      });
+      demoItem.addEventListener('mouseleave', () => this.demoOpen = false);
+    }
+  }
 
   launchWizard(criteria: any) {
     const itemId = this.actions.generateId('items');

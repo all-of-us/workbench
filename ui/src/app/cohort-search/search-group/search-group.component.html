@@ -57,7 +57,7 @@
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
-      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+      <clr-dropdown-menu clrPosition="bottom-left">
         <h4 class="dropdown-header">Program Data</h4>
         <button
           *ngFor="let criteria of programTypes"
@@ -80,12 +80,12 @@
             clrDropdownItem>{{criteria.name}}</button>
           <ng-container *ngIf="criteria.children">
             <button
-              [id]="criteria.type"
+              [id]="criteria.type + '-' + index"
               class="dropdown-item"
               type="button"
               [disabled]="criteria.disabled"
               clrDropdownTrigger>{{criteria.name}}</button>
-            <clr-dropdown-menu>
+            <clr-dropdown-menu [id]="'demo-menu-' + index">
               <button
                 *ngFor="let child of criteria.children"
                 [id]="child.subtype"

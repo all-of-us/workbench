@@ -48,6 +48,8 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
     inputTimeValue: new FormControl([Validators.required],
       [integerAndRangeValidator('Form', 0, 9999)]),
   });
+  demoOpen = false;
+  demoMenuHover = false;
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -79,6 +81,18 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
       });
       const groupDiv = document.getElementById(this.group.get('id'));
       ro.observe(groupDiv);
+    }
+    const demoItem = document.getElementById('DEMO' + this.index);
+    if (demoItem) {
+      demoItem.addEventListener('mouseenter', () => {
+        this.demoOpen = true;
+        setTimeout(() => {
+          const demoMenu = document.getElementById('demo-menu' + this.index);
+          demoMenu.addEventListener('mouseenter', () => this.demoMenuHover = true);
+          demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
+        });
+      });
+      demoItem.addEventListener('mouseleave', () => this.demoOpen = false);
     }
   }
 
