@@ -85,6 +85,12 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subscription.add(this.criteriaSubtype$
+      .subscribe(subtype => {
+        this.subtype = subtype;
+      })
+    );
+
     this.subscription.add(this.isFullTree$.subscribe(fullTree => this.fullTree = fullTree));
     this.subscription.add(this.selection$
       .subscribe(selections => {
@@ -124,12 +130,6 @@ export class ModalComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subscription.add(this.criteriaSubtype$
-      .subscribe(subtype => {
-        this.subtype = subtype;
-      })
-    );
-
     this.subscription.add(this.item$.subscribe(item => {
       this.itemType = item.get('type');
       this.title = 'Codes';
@@ -152,12 +152,22 @@ export class ModalComponent implements OnInit, OnDestroy {
     this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
-    const key = selection.get('type') === TreeType[TreeType.DEMO]
-      ? selection.get('subtype') : selection.get('type');
-    if (this.selections[key] && !this.selections[key].includes(selection)) {
-      this.selections[key].push(selection);
+    if (selection.get('type') === TreeType[TreeType.DEMO]) {
+      if (selection.get('subtype') === this.subtype) {
+        const key = selection.get('subtype');
+        if (this.selections[key] && !this.selections[key].includes(selection)) {
+          this.selections[key].push(selection);
+        } else {
+          this.selections[key] = [selection];
+        }
+      }
     } else {
-      this.selections[key] = [selection];
+      const key = selection.get('type');
+      if (this.selections[key] && !this.selections[key].includes(selection)) {
+        this.selections[key].push(selection);
+      } else {
+        this.selections[key] = [selection];
+      }
     }
   }
   setScroll(nodeId: string) {
@@ -227,8 +237,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get showHeader() {
     return this.itemType === TreeType[TreeType.CONDITION]
-    || this.itemType === TreeType[TreeType.PROCEDURE]
-    || this.itemType === TreeType[TreeType.DEMO];
+    || this.itemType === TreeType[TreeType.PROCEDURE];
   }
 
   get showSnomed() {

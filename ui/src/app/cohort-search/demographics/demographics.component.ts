@@ -52,13 +52,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   readonly treeSubType = TreeSubType;
   readonly minAge = minAge;
   readonly maxAge = maxAge;
-  loading = {
-    'AGE': false,
-    'GEN': false,
-    'RACE': false,
-    'ETH': false,
-    'DEC': false
-  };
+  loading = false;
   subscription = new Subscription();
   hasSelection = false;
   selectedNode: any;
@@ -123,30 +117,41 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-        // Set back to false at the end of loadNodesFromApi (i.e. the end of the
-        // initialization routine)
+    this.subscription.add(this.subtype$.subscribe(sub => {
+      this.subtype = sub;
+      if (sub === TreeSubType.AGE) {
+        this.initAgeControls();
+      }
+    }));
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
-    this.initAgeControls();
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
     this.selection$.first().subscribe(selections => {
-            /*
-             * Each subtype of DEMO requires subtly different initialization, which
-             * is handled by special-case methods which each receive any selected
-             * criteria already in the state (i.e. if we're editing a search group
-             * item).  Finally we load the relevant criteria from the API.
-             */
-      this.initialGenders = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
-      this.initialRaces = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
-      this.initialEthnicities = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
-      this.initDeceased(selections);
-      this.initAgeRange(selections);
+      /*
+       * Each subtype of DEMO requires subtly different initialization, which
+       * is handled by special-case methods which each receive any selected
+       * criteria already in the state (i.e. if we're editing a search group
+       * item).  Finally we load the relevant criteria from the API.
+       */
+      switch (this.subtype) {
+        case TreeSubType.GEN:
+          this.initialGenders = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
+          break;
+        case TreeSubType.RACE:
+          this.initialRaces = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
+          break;
+        case TreeSubType.ETH:
+          this.initialEthnicities = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
+          break;
+        case TreeSubType.AGE:
+          this.initDeceased(selections);
+          this.initAgeRange(selections);
+      }
       this.loadNodesFromApi();
     });
 
-    this.subscription.add(this.subtype$.subscribe(sub => this.subtype = sub));
 
     this.subscription.add(this.selection$
       .map(sel => sel.size === 0)
@@ -190,37 +195,30 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * objects complete with deterministically generated `parameterId`s and
      * sort them by count, then by name.
      */
-    [
-      TreeSubType[TreeSubType.AGE],
-      TreeSubType[TreeSubType.DEC],
-      TreeSubType[TreeSubType.GEN],
-      TreeSubType[TreeSubType.RACE],
-      TreeSubType[TreeSubType.ETH]
-    ].forEach(code => {
-      this.loading[code] = true;
-      this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-        .subscribe(response => {
-          const items = response.items
-                    .filter(item => item.parentId !== 0
-                        || code === TreeSubType[TreeSubType.DEC]);
-          items.sort(sortByCountThenName);
-          const nodes = fromJS(items).map(node => {
-            if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-              const paramId =
-                            `param${node.get('conceptId', node.get('code'))}`;
-              node = node.set('parameterId', paramId);
-            }
-            return node;
-          });
-          this.loadOptions(nodes, code);
+    this.loading = true;
+    this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], this.subtype, null, null)
+      .toPromise()
+      .then(response => {
+        const items = response.items
+                  .filter(item => item.parentId !== 0
+                      || this.subtype === TreeSubType[TreeSubType.DEC]);
+        items.sort(sortByCountThenName);
+        const nodes = fromJS(items).map(node => {
+          if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+            const paramId =
+                          `param${node.get('conceptId', node.get('code'))}`;
+            node = node.set('parameterId', paramId);
+          }
+          return node;
         });
-    });
+        this.loadOptions(nodes);
+      });
   }
 
-  loadOptions(nodes: any, subtype: string) {
-    this.loading[subtype] = false;
-    switch (subtype) {
-            /* Age and Deceased are single nodes we use as templates */
+  loadOptions(nodes: any) {
+    this.loading = false;
+    switch (this.subtype) {
+      /* Age and Deceased are single nodes we use as templates */
       case TreeSubType[TreeSubType.AGE]:
         this.ageNode = nodes.get(0);
         this.ageNodes = nodes.toJS();
@@ -240,7 +238,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       case TreeSubType[TreeSubType.DEC]:
         this.deceasedNode = nodes.get(0);
         break;
-            /* Gender, Race, and Ethnicity are all used to generate option lists */
       case TreeSubType[TreeSubType.GEN]:
         this.genderNodes = nodes;
         break;
