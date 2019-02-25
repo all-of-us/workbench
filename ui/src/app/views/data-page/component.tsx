@@ -10,7 +10,11 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
-import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
+import {
+  convertToResources,
+  mapAndFilterResourceList,
+  ResourceType
+} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
 import {DomainInfo, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
@@ -121,7 +125,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
   render() {
     const {namespace, id} = this.props.workspace;
     const {activeTab, isLoading, resourceList, creatingConceptSet, conceptDomainList} = this.state;
-    let resourceKey = 0;
     const filteredList = resourceList.filter((resource) => {
       if (activeTab === Tabs.SHOWALL) {
         return true;
@@ -231,9 +234,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         this.setState({creatingConceptSet: false});
       }}
       conceptDomainList={conceptDomainList}
-      existingConceptSets={resourceList
-        .filter((resource: RecentResource) => resource.conceptSet !== undefined)
-        .map((resource: RecentResource) => resource.conceptSet)}/>}
+      existingConceptSets={mapAndFilterResourceList(resourceList, 'conceptSet')}/>}
     </React.Fragment>;
   }
 });
