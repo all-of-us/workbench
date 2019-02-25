@@ -12,6 +12,7 @@ export class SurveysComponent implements OnInit, OnDestroy {
   subTitle = 'Conduct a simple keyword search to quickly identify survey questions ' +
     'related to your area of interest.';
   surveys = [];
+  graphToShow: string;
   private subscription: ISubscription;
 
   constructor(
@@ -29,10 +30,12 @@ export class SurveysComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+
   public viewSurvey(r) {
     localStorage.setItem('surveyModule', JSON.stringify(r));
     localStorage.setItem('searchText', '');
     this.router.navigateByUrl('/survey/' + r.conceptId);
   }
+
 
 }
