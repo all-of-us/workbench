@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 

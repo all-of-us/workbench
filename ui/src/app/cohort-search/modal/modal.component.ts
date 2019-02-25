@@ -1,7 +1,6 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit } from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -41,7 +40,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(scrollId) scrollTo$: Observable<any>;
   @select(subtreeSelected) subtree$: Observable<any>;
   @select(previewStatus) preview$;
-  @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
@@ -285,4 +283,3 @@ export class ModalComponent implements OnInit, OnDestroy {
       || this.modifiersDisabled;
   }
 }
-

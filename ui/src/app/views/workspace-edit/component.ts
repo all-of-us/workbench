@@ -460,7 +460,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   openStigmatizationLink() {
     const stigmatizationURL = `/definitions/stigmatization`;
-    const stigmatizationPage = window.open(stigmatizationURL, '_blank');
+    window.open(stigmatizationURL, '_blank');
   }
 
   clearAllFields() {

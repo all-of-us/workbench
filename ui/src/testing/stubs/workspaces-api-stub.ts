@@ -1,13 +1,10 @@
 import {
   FileDetail, ShareWorkspaceRequest, ShareWorkspaceResponse,
-  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceResponseListResponse,
   WorkspacesApi
 } from 'generated/fetch';
-
-import {UserServiceStub} from './user-service-stub';
 
 import * as fp from 'lodash/fp';
 

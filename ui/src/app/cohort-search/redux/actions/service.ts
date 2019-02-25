@@ -1,15 +1,13 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
 
-import {environment} from 'environments/environment';
 
 import {
   SearchGroup,
   SearchGroupItem,
   SearchParameter,
-  SearchRequest, TemporalMention, TemporalTime,
-  TreeSubType,
-  TreeType
+  SearchRequest,
+  TreeSubType
 } from 'generated';
 
 import {stripHtml} from 'app/cohort-search/utils';

@@ -2,7 +2,6 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   HostListener,
   Input,
   OnChanges,
