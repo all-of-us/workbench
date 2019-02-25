@@ -19,7 +19,6 @@
         <h2 class="secondary-display" *ngIf="!loading">
           {{survey.participantCount | number }}
         </h2>
-
         <p class="info-text">
           Participants completed this survey
         </p>
@@ -72,31 +71,28 @@
 
     <div class="survey-results" *ngIf="resultsComplete">
       <div class="question-result" *ngFor="let q of questions, let i = index">
-        <div class="row question">
-          <div class=" ">
+        <div class="question">         
             <div class="display-body"> Question {{i + 1}}</div>
             <div class="body-default">
               <app-highlight-search [text]="q.conceptName" [searchTerm]="searchText.value" [conceptId]="q.conceptId">
               </app-highlight-search>
             </div>
-          </div>
         </div>
 
 
 
-        <a class="info-text toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers
+        <a class="see-answers secondary-display" (click)="toggleAnswer(q.conceptId)"> See Answers
           <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon>
           <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon>
         </a>
 
         <!-- v add ! back -->
-        <div class="answer-tbl" [hidden]="!showAnswer[q.conceptId]">
-          <div class="answer-tbl-r">
-            <div class=" info-text">
-              Text
+        <div class="tbl" [hidden]="!showAnswer[q.conceptId]">
+          <div class="tbl-r tbl-head">
+            <div class=" info-text tbl-d">
             </div>
-            <div class="answer-tbl-r-group">
-              <div class="info-text">
+            <div class="tbl-r-group tbl-r-group-style ">
+              <div class="tbl-d display-body">
                 Concept Code
                 <clr-tooltip>
                   <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
@@ -112,36 +108,36 @@
                   </clr-tooltip-content>
                 </clr-tooltip>
               </div>
-              <div class=" info-text">
+              <div class=" info-text tbl-d display-body">
                 Participant Count
               </div>
-              <div class=" info-text">
+              <div class=" info-text tbl-d display-body">
                 % answered
               </div>
-              <div class="info"></div>
+              <div class="tbl-d display-body"></div>
             </div>
           </div>
 
 
 
-          <div class="expandable-grid-row" *ngFor="let a of q.countAnalysis.results"
-            [hidden]="!showAnswer[q.conceptId]"> 
-            <div class="answer-tbl-r">
-              <div class="info-text">
-              <div *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
+          <div [ngClass]="a.expanded?'tbl-r-state':''" class="tbl-exp-r" *ngFor="let a of q.countAnalysis.results"
+            (click)="showAnswerGraphs(a)" [hidden]="!showAnswer[q.conceptId]">
+            <div class="tbl-r" >
+              <div class="tbl-d secondary-display">
+                <div *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
                   <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
+                </div>
               </div>
-            </div>
 
-              <div class="answer-tbl-r-group">
-                <!-- <span class='answer-body'>
-                  <ng-template class="answer-text" #binnedSurveyQuestionDisplay>
+              <div class="tbl-r-group">
+                <!-- <span class='body'>
+                  <ng-template class="text" #binnedSurveyQuestionDisplay>
                     <label
                       *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
                       <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
                     </label>
                     <ng-template #rangeLabel>
-                      <label class="answer-text">
+                      <label class="text">
                         <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)"
                           [searchTerm]="searchText.value"></app-highlight-search>
                       </label>
@@ -149,50 +145,55 @@
                   </ng-template>
                 </span> -->
 
-                <div class="info-text">
+                <div class="info-text tbl-d secondary-display">
                   <label class="concept-code">{{a.stratum3}}</label>
                 </div>
 
 
-                <div class="info-text">
-                  <label class="participant-count answer-text">{{a.countValue | number}} </label>
+                <div class="info-text tbl-d secondary-display">
+                  <label class="participant-count">{{a.countValue | number}} </label>
                 </div>
 
-                <div class=" info-text percent-bar">
+                <div class=" info-text tbl-d secondary-display">
                   <span>{{a.countPercent.toFixed(2)}}%</span>
                 </div>
 
-                <div class=" info-text graph-btn">
-                  <button class="icon-btn" (click)="showAnswerGraphs(a)">
-                    <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
+                <div class=" info-text tbl-d secondary-display secondary-display graph-btn">
+                  <button class="icon-btn">
+                    <clr-icon *ngIf="!a.expanded" shape="caret" dir="right"></clr-icon>
+                    <clr-icon *ngIf="a.expanded" shape="caret" dir="down"></clr-icon>
                   </button>
                 </div>
               </div>
             </div>
 
-
-
-              <div class=" row-expansion" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'"
-                #chartElement>
-                <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']"
-                  [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g,q)"
-                  class="btn btn-link">{{g}}</button>
-                <div class="row">
-                  <div class=""></div>
-                  <div class="">
-                    <app-chart [analysis]="q.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'"
-                      [domainType]="'surveys'"></app-chart>
-                  </div>
+            <div class="row-expansion" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'"
+              #chartElement>
+              <div class="graph-menu">
+                <div *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']"
+                  [ngClass]="{'active':graphToShow === g}" (click)="$event.stopPropagation();selectGraph(g,q)" class="chart-choice">
+                  <span>{{g}}</span>
+                  <clr-tooltip>
+                    <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+                    <clr-tooltip-content clrPosition=top-right clrSize="lg" *clrIfOpen>
+                      <div class="tooltip-label">{{showToolTip(g)}}</div>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
                 </div>
               </div>
+              <app-chart [analysis]="q.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'"
+                [domainType]="'surveys'"[chartTitle]="graphToShow"></app-chart>
+            </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
 
-    <!-- Todo show general totals for demographics of who took the survey -->
-    <!--
+<!-- Todo show general totals for demographics of who took the survey -->
+<!--
   <div class="row">
     <div class="">
       <app-concept-charts [concept]="survey" [showRace]="true" [showAge]="true" [showGender]="true"
@@ -201,7 +202,5 @@
     </div>
   </div>
   -->
-    <div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.
-    </div>
-
-  </div>
+<div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.
+</div>

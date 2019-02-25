@@ -98,18 +98,14 @@
   width: 100%;
 }
 
-
-
 .search-icon {
   width: calc((100%/12));
   height: 20px;
 }
 
-
 .info-text {
   font-size: .75em;
 }
-
 
 .graph-menu {
   width: 100%;
@@ -117,9 +113,10 @@
   justify-content: center;
   padding-bottom: var(--gutter);
 }
+
 .chart-choice {
-  padding:var(--gutter);
-  border-bottom: solid 1px var(--dark-slate-blue);
+  padding: var(--gutter);
+  color:var(--mid-blue);
   position: relative;
   display: flex;
 }
@@ -127,10 +124,110 @@
 .chart-choice.active::after {
   content: '';
   position: absolute;
-  width:100%;
-  height: 3px;
-  background: var(--dark-slate-blue);
-  bottom:-3px;
-  left:0;
-  cursor:pointer;
+  width: 86%;
+  height: 5px;
+  background: var(--mid-blue);
+  left: 5%;
+  bottom:-5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+.tbl {
+
+}
+
+
+.tbl-r {
+  display: flex;
+  justify-content: space-between;
+  /* border:var(--tbl-border); */
+  /* border-bottom: none; */
+  
+}
+
+.tbl-r {
+  cursor: pointer;
+  transition: .2s background ease-out;
+}
+
+.expandable-grid-row:hover {  
+  background: var(--pale-grey);
+  transition: .1s background ease-in;
+}
+.aka {
+  transition: .1s background ease-in;
+  cursor: pointer;
+}
+
+.tbl-r-group {
+  display: flex;
+  justify-content: space-between;
+  width: 45%;
+}
+
+.tbl-r-group .tbl-d {
+  width: 31%;
+  /* white-space: nowrap; */
+}
+
+.tbl-r-group .tbl-d:last-of-type {
+  width: 40px;
+  text-align: right;
+}
+
+
+.tbl-r.tbl-head {
+  padding: var(--gutter);
+  border-radius: 3px 3px 0 0;
+}
+
+.tbl-d {
+  padding: 0 var(--gutter);
+  position: relative;
+}
+
+
+
+
+
+
+
+.tbl-d {
+
+  padding: 0 var(--gutter);
+}
+.tbl-d:first-of-type {
+  padding: 0 var(--gutter);
+}
+
+.row-expansion {
+  width: 100%;
+  text-align: center;
+  padding-top: var(--gutter);
+  background: var(--pale-grey);
+  border-top: none;
+  padding-bottom:calc(var(--gutter)*3);
+  
+}
+
+.tbl-r-state {
+  background: var(--pale-grey);
+}
+
+.tbl-r-expanded {
+  border-left: var(--tbl-border);
+  border-right: var(--tbl-border);
+
+}
+
+.tbl-exp-r .tbl-r .tbl-d {
+  max-width: 50%;
+}
+
+.tbl-exp-r {
+  border: var(--tbl-border);
+  border-bottom: none;
 }
