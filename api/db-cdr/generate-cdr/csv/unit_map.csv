@@ -1,7 +1,7 @@
 unit_concept_id,unit_source_value
 8961,10*3/mm3
 8961,1000/mm3
-9667/umol
+9667,umol
 8503,{DILS}
 8503,DILS
 8503,dils
@@ -152,12 +152,10 @@ unit_concept_id,unit_source_value
 4122410,mL
 8748,ug/L
 8748,mcg/L
-8748,
 8748,ug/l
 8749,umol/l
 8749,UMOL/L
 8749,mcmol/L
-8749,
 8749,uMol/L
 8749,umol/L
 8494,MoM
@@ -245,7 +243,6 @@ unit_concept_id,unit_source_value
 8763,u/ml
 9531,kg/m2
 9020,ng/mL/h
-9020,
 9020,ng/mL/hr
 9020,NGMLHR
 4118332,ft
@@ -255,7 +252,6 @@ unit_concept_id,unit_source_value
 8510,[U]
 8511,week
 8511,wks
-8518,
 8518,H
 8518,h
 8774,ug/min
@@ -326,7 +322,6 @@ unit_concept_id,unit_source_value
 9561,mg/{vol}
 9562,mg/kg
 8795,ML/MIN
-8795,
 8795,mL/min
 8541,per minute
 8541,/min
@@ -363,7 +358,6 @@ unit_concept_id,unit_source_value
 8549,x10-6
 8549,x10E6
 8549,X10^6
-8469,
 8550,Minutes
 8550,min
 8550,Min
@@ -375,11 +369,9 @@ unit_concept_id,unit_source_value
 8807,g/day
 8807,gm/24hr
 8807,gm/day
-9577,
 8554,percent
 8554,PERCENT
 8554,%
-8554,
 8554,X10E+09/L
 8810,10*3.[U]/L
 8810,kU/L
@@ -464,7 +456,7 @@ unit_concept_id,unit_source_value
 4304247,mill/mcL
 4304247,x10'6/mcL
 4304247,x10^6/mc/L
-4304247,,x10^6/mcL
+4304247,x10^6/mcL
 4304247,10E6MCL
 8569,pH units
 8569,pHunits

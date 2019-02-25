@@ -164,6 +164,7 @@ export class EhrViewComponent implements OnInit, OnDestroy {
     this.searchResult = results;
     this.items = this.searchResult.items;
     for (const concept of this.items) {
+      console.log(concept.countValue);
       this.synonymString[concept.conceptId] = concept.conceptSynonyms.join(', ');
     }
     if (this.searchResult.standardConcepts) {
