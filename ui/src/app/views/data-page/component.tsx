@@ -60,6 +60,11 @@ enum Tabs {
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
+const placeholderText = `Littera gothica quam nunc
+  putamus parum claram anteposuerit litterarum formas humanitatis per. In
+  iis qui facit eorum claritatem Investigationes demonstraverunt lectores
+  legere me lius quod ii legunt.`;
+
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {activeTab: Tabs, resourceList: RecentResource[], isLoading: boolean,
@@ -132,10 +137,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Data</h2>
-        <div style={{color: '#000000', fontSize: '14px'}}>Littera gothica quam nunc
-          putamus parum claram anteposuerit litterarum formas humanitatis per. In
-          iis qui facit eorum claritatem Investigationes demonstraverunt lectores
-          legere me lius quod ii legunt.</div>
+        <div style={{color: '#000000', fontSize: '14px'}}>{placeholderText}</div>
         <div style={styles.cardButtonArea}>
           <CardButton style={styles.resourceTypeButton} disabled={true}>
             <div style={styles.cardHeader}>
@@ -143,9 +145,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              Littera gothica quam nunc putamus parum claram anteposuerit litterarum
-              formas humanitatis per. In iis qui facit eorum claritatem Investigationes
-              demonstraverunt lectores legere me lius quod ii legunt.
+              {placeholderText}
             </div>
           </CardButton>
           <CardButton style={styles.resourceTypeButton} onClick={() => {
@@ -156,9 +156,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              Littera gothica quam nunc putamus parum claram anteposuerit litterarum
-              formas humanitatis per. In iis qui facit eorum claritatem Investigationes
-              demonstraverunt lectores legere me lius quod ii legunt.
+              {placeholderText}
             </div>
           </CardButton>
           <CardButton style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
@@ -170,9 +168,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              Littera gothica quam nunc putamus parum claram anteposuerit litterarum
-              formas humanitatis per. In iis qui facit eorum claritatem Investigationes
-              demonstraverunt lectores legere me lius quod ii legunt.
+              {placeholderText}
             </div>
           </CardButton>
         </div>
@@ -216,9 +212,8 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           minHeight: 247,
           padding: '0 0.5rem'
         }}>
-          {filteredList.map(resource => {
-            {resourceKey = resourceKey + 1; }
-            return <ResourceCard key={resourceKey}
+          {filteredList.map((resource: RecentResource, index: number) => {
+            return <ResourceCard key={index}
                                  resourceCard={resource}
                                  onUpdate={() => this.loadResources()}
             />;
