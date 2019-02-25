@@ -1,6 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-
-import {BugReportComponent} from 'app/views/bug-report/component';
+import {Component, OnInit} from '@angular/core';
 
 import {
   ResearchPurposeReviewRequest,
@@ -26,13 +24,13 @@ export class AdminReviewWorkspaceComponent implements OnInit {
   reviewedWorkspace: Workspace;
   reviewError = false;
 
-  // @ViewChild(BugReportComponent)
-  // bugReportComponent: BugReportComponent;
   bugReportOpen: boolean;
   bugReportDescription = '';
   constructor(
     private workspacesService: WorkspacesService
-  ) {}
+  ) {
+    this.closeBugReport = this.closeBugReport.bind(this);
+  }
 
   ngOnInit(): void {
     this.workspacesService.getWorkspacesForReview()
@@ -76,5 +74,9 @@ export class AdminReviewWorkspaceComponent implements OnInit {
       'Could not review workspace: \'' + this.reviewedWorkspace.namespace + '/' +
       this.reviewedWorkspace.name + '\'';
     this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

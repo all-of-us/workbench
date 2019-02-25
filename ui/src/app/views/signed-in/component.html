@@ -93,4 +93,5 @@
     <app-routing-spinner></app-routing-spinner>
   </div>
 </div>
-<app-bug-report *ngIf="bugReportOpen" [bugReportDescription]=""></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [onClose]="closeBugReport.bind(this)"></app-bug-report>

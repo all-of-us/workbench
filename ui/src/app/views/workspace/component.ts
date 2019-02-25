@@ -5,7 +5,6 @@ import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
@@ -106,8 +105,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   username = '';
   creatingNotebook = false;
 
-  // @ViewChild(BugReportComponent)
-  // bugReportComponent: BugReportComponent;
   bugReportOpen: boolean;
   bugReportDescription = '';
 
@@ -119,6 +116,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -249,5 +247,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     // this.bugReportComponent.reportBug();
     this.bugReportDescription = 'Could not load notebooks';
     this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

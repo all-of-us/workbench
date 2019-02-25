@@ -211,4 +211,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
     window.open(environment.zendeskHelpCenterUrl, '_blank');
   }
 
+  closeBugReport(): void {
+    this.bugReportOpen = false;
+  }
+
 }

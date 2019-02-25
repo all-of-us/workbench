@@ -5,7 +5,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {BugReportComponent} from 'app/views/bug-report/component';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
@@ -50,8 +49,6 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   workspaceDeletionError = false;
   workspace: Workspace = {name: ''};
 
-  // @ViewChild(BugReportComponent)
-  // bugReportComponent: BugReportComponent;
   bugReportOpen: boolean;
   bugReportDescription = '';
 
@@ -62,6 +59,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
     this.closeShare = this.closeShare.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -184,5 +182,9 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     // this.bugReportComponent.reportBug();
     this.bugReportDescription = 'Could not delete workspace.';
     this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }
