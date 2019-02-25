@@ -187,7 +187,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       "person_physical_measure",
       "person",
       "search_person",
-      "search_codes",
+      "search_all_domains",
       "criteria"
     );
   }
