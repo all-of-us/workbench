@@ -7,5 +7,6 @@ export const environment: Environment = {
   debug: true,
   useZendeskForSupport: false,
   enableJupyterLab: true,
-  enableComplianceLockout: true
+  enableComplianceLockout: true,
+  enableDatasetBuilder: true,
 };
