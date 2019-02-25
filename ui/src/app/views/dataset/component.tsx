@@ -2,8 +2,8 @@ import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
 import {FadeBox} from 'app/components/containers';
+import {ClrIcon} from 'app/components/icons';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 
 export const styles = {
