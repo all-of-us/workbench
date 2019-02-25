@@ -11,7 +11,7 @@ import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 import {GraphType} from '../../utils/enum-defs';
-
+import {TooltipService} from '../../utils/tooltip.service';
 @Component({
   selector: 'app-survey-view',
   templateUrl: './survey-view.component.html',
@@ -45,7 +45,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   showAnswer = {};
   @ViewChild('chartElement') chartEl: ElementRef;
 
-  constructor(private route: ActivatedRoute, private api: DataBrowserService) {
+  constructor(private route: ActivatedRoute, private api: DataBrowserService,
+     private tooltipText: TooltipService) {
     this.route.params.subscribe(params => {
       this.domainId = params.id;
     });
@@ -204,6 +205,8 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public showAnswerGraphs(a: any) {
     a.expanded = !a.expanded;
+    console.log(a,'this is a');
+    
   }
 
   public resetSelectedGraphs() {
@@ -236,4 +239,14 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     return Number(s);
   }
 
+  public showToolTip(g: string) {
+    if (g === 'Biological Sex' || g === 'Gender Identity') {
+      return 'Gender chart';
+    } else if (g === 'Age at Occurrence') {
+      return this.tooltipText.ageChartHelpText;
+    } else if (g === 'Sources') {
+      return this.tooltipText.sourcesChartHelpText;
+    }
   }
+
+}
