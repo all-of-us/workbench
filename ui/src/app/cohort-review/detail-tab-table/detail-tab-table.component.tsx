@@ -19,12 +19,16 @@ const css = `
   body .p-datatable .p-datatable-thead > tr > th {
     padding: 10px 5px 10px 10px;
     vertical-align: middle;
+    background: #f4f4f4;
     border: 0;
     border-bottom: 1px solid #c8c8c8;
     border-left: 1px solid #c8c8c8;
   }
   body .p-datatable .p-datatable-thead > tr > th:first-of-type {
     border-left: 0;
+  }
+  body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
+    border-bottom: 1px solid #c8c8c8;
   }
   body .p-datatable .p-column-title {
     display: flex;
@@ -43,6 +47,9 @@ const css = `
     background: none;
     font-size: 12px;
     text-align: right;
+  }
+  body .p-paginator .p-paginator-pages {
+    display: inline;
   }
   body .p-paginator .p-paginator-prev,
   body .p-paginator .p-paginator-next,
@@ -73,6 +80,10 @@ const css = `
   `;
 
 const styles = reactStyles({
+  container: {
+    position: 'relative',
+    minHeight: '15rem'
+  },
   table: {
     fontSize: '12px',
   },
@@ -104,6 +115,7 @@ const styles = reactStyles({
     fontSize: '0.4rem'
   }
 });
+const rows = 25;
 
 export interface DetailTabTableProps {
   tabname: string;
@@ -118,21 +130,18 @@ export interface DetailTabTableState {
   data: Array<any>;
   loading: boolean;
   start: number;
-  rows: number;
   sortField: string;
   sortOrder: number;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    dt: any;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
         data: null,
         loading: true,
         start: 0,
-        rows: 25,
         sortField: null,
         sortOrder: 1
       };
@@ -153,37 +162,41 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getParticipantData() {
-      const {cdrVersionId, id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
-      const pageFilterRequest = {
-        page: 0,
-        pageSize: 10000,
-        sortOrder: SortOrder.Asc,
-        sortColumn: this.props.columns[0].name,
-        pageFilterType: this.props.filterType,
-        domain: this.props.domain,
-      } as PageFilterRequest;
+      try {
+        const {cdrVersionId, id, namespace} = this.props.workspace;
+        const {cid} = urlParamsStore.getValue();
+        const pageFilterRequest = {
+          page: 0,
+          pageSize: 10000,
+          sortOrder: SortOrder.Asc,
+          sortColumn: this.props.columns[0].name,
+          pageFilterType: this.props.filterType,
+          domain: this.props.domain,
+        } as PageFilterRequest;
 
-      cohortReviewApi().getParticipantData(
-        namespace,
-        id,
-        +cid,
-        +cdrVersionId,
-        this.props.participantId,
-        pageFilterRequest
-      ).then(response => {
-        response.items.forEach(item => {
-          if (this.props.domain === DomainType[DomainType.VITAL]
-            || this.props.domain === DomainType[DomainType.LAB]) {
-            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
-          }
-          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+        cohortReviewApi().getParticipantData(
+          namespace,
+          id,
+          +cid,
+          +cdrVersionId,
+          this.props.participantId,
+          pageFilterRequest
+        ).then(response => {
+          response.items.forEach(item => {
+            if (this.props.domain === DomainType[DomainType.VITAL]
+              || this.props.domain === DomainType[DomainType.LAB]) {
+              item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+            }
+            item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+          });
+          this.setState({
+            data: response.items,
+            loading: false,
+          });
         });
-        this.setState({
-          data: response.items,
-          loading: false,
-        });
-      });
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     onSort = (event: any) => {
@@ -204,13 +217,12 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, rows, start, sortField, sortOrder} = this.state;
+      const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
           ? start + rows - (start + rows - data.length) : start + rows;
-        pageReportTemplate = (start + 1) + ' - ' + lastRowOfPage + ' of ' + data.length
-          + ' records ';
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${data.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (data && data.length > rows) {
@@ -236,28 +248,27 @@ export const DetailTabTable = withCurrentWorkspace()(
           key={col.name}
           field={col.name}
           header={header}
-          sortable={true} />;
+          sortable />;
       });
 
-      return <div style={{position: 'relative'}}>
+      return <div style={styles.container}>
         <style>{css}</style>
         {data && <DataTable
           style={styles.table}
-          ref={(el) => this.dt = el}
           value={data}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
-          paginator={true}
+          paginator
           paginatorTemplate={data.length ? paginatorTemplate : ''}
           currentPageReportTemplate={data.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
           totalRecords={data.length}
-          scrollable={true}
+          scrollable
           scrollHeight='calc(100vh - 350px)'
-          autoLayout={true}
+          autoLayout
           emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
           {columns}
         </DataTable>}
