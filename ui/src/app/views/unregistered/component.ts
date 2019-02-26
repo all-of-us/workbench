@@ -6,7 +6,6 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {hasRegisteredAccess} from 'app/utils';
 
 import {
-  DataAccessLevel,
   IdVerificationStatus,
   ProfileService,
 } from 'generated';

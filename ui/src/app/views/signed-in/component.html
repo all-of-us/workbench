@@ -24,7 +24,7 @@
         <a routerLink="/profile" clrDropdownItem>Profile</a>
         <a routerLink="/settings" clrDropdownItem>Settings</a>
         <div class="dropdown-divider"></div>
-        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportComponent.reportBug();">Report A Bug</button>
+        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportOpen = true">Report A Bug</button>
         <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -81,7 +81,7 @@
           (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
       <button class="btn btn-secondary btn-bug-report"
           *ngIf="showBugReportItem"
-          (click)="bugReportComponent.reportBug(); sidenavToggle = false;">Report a Bug</button>
+          (click)="bugReportOpen = true; sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
   <div class="app-container" [class.minimize-chrome]="minimizeChrome">
@@ -93,4 +93,6 @@
     <app-routing-spinner></app-routing-spinner>
   </div>
 </div>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]=""
+                [onClose]="closeBugReport"></app-bug-report>

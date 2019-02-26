@@ -60,7 +60,7 @@ import {
 import {CohortSearchState} from './store';
 /* tslint:enable:ordered-imports */
 
-import {CohortBuilderService, CohortReviewService} from 'generated';
+import {CohortBuilderService} from 'generated';
 
 type CSEpic = Epic<RootAction, CohortSearchState>;
 type CritRequestAction = ActionTypes[typeof BEGIN_CRITERIA_REQUEST];
@@ -89,7 +89,7 @@ const compare = (obj) => (action) => Map(obj).isSubset(Map(action));
 @Injectable()
 export class CohortSearchEpics {
   constructor(private service: CohortBuilderService,
-    private reviewservice: CohortReviewService) {}
+  ) {}
 
   fetchCriteria: CSEpic = (action$) => (
     action$.ofType(BEGIN_CRITERIA_REQUEST).mergeMap(

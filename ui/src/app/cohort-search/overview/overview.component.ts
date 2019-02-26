@@ -7,7 +7,7 @@ import {Observable} from 'rxjs/Observable';
 import {CohortSearchActions, searchRequestError} from 'app/cohort-search/redux';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 
-import {Cohort, CohortsService, Workspace} from 'generated';
+import {Cohort, CohortsService} from 'generated';
 
 const COHORT_TYPE = 'AoU_Discover';
 

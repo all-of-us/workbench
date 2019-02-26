@@ -9,7 +9,6 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
-  getItem,
   initialState,
   SR_ID
 } from './store';
@@ -491,7 +490,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         const itemId = item.get('id');
         const groupId = activeGroupId(state);
         const groupItems = ['entities', 'groups', groupId, 'items'];
-        const group = getGroup(groupId)(state);
         if (item.get('searchParameters', List()).isEmpty()) {
           return state
             .updateIn(groupItems, List(),

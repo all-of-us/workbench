@@ -11,7 +11,6 @@ import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/uti
 
 import {ParticipantCohortStatusColumns} from 'generated';
 import {
-  Cohort,
   CohortReview,
   CohortReviewService,
   ConceptIdName,
@@ -22,7 +21,6 @@ import {
   ParticipantCohortStatuses as Request,
   ParticipantDemographics,
   SortOrder,
-  Workspace,
 } from 'generated';
 
 function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {

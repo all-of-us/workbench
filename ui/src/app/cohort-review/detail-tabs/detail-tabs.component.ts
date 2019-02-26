@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 
 import {typeToTitle} from 'app/cohort-search/utils';
@@ -18,14 +18,9 @@ const itemDate = {
   displayName: 'Date',
 };
 const itemTime = {
-  name: 'itemDate',
+  name: 'itemTime',
   classNames: ['time-col'],
   displayName: 'Time',
-};
-const endDate = {
-  name: 'endDate',
-  classNames: ['date-col'],
-  displayName: 'End Date',
 };
 const domain = {
   name: 'domain',
@@ -52,18 +47,6 @@ const sourceVocabulary = {
 const sourceName = {
   name: 'sourceName',
   displayName: 'Source Name',
-};
-const signature = {
-  name: 'signature',
-  displayName: 'Signature',
-};
-const valueConcept = {
-  name: 'valueConcept',
-  displayName: 'Concept Value',
-};
-const valueSource = {
-  name: 'valueSource',
-  displayName: 'Source Value',
 };
 const value = {
   name: 'value',
@@ -102,10 +85,6 @@ const dose = {
   name: 'dose',
   displayName: 'Dose',
 };
-const refills = {
-  name: 'refills',
-  displayName: 'Refills',
-};
 const strength = {
   name: 'strength',
   displayName: 'Strength',
@@ -143,7 +122,7 @@ const answer = {
 export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  participantsId: any;
+  participantId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
@@ -336,6 +315,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
+        this.participantId = pid;
         return Observable.forkJoin(
           ...this.domainList.map(domainName => {
             this.chartData[domainName] = {

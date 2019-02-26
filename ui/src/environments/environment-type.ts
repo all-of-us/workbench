@@ -61,4 +61,9 @@ export interface Environment {
   // See RW-1697 for details
   // Exit criteria: remove flag for Athens release.
   enableComplianceLockout: boolean;
+
+  // Whether users should be able to see the dataset builder.
+  // See RW-2169 for details
+  // Exit Criteria: remove flag for Bedford release.
+  enableDatasetBuilder: boolean;
 }

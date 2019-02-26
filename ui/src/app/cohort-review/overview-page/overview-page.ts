@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
-import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
 import {fromJS, List} from 'immutable';
@@ -32,7 +32,6 @@ export class OverviewPage implements OnInit, OnDestroy {
   constructor(
     private chartAPI: CohortBuilderService,
     private reviewAPI: CohortReviewService,
-    private state: ReviewStateService,
   ) {}
 
   ngOnInit() {

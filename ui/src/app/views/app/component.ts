@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
   cookiesEnabled = true;
   overriddenUrl: string = null;
   private baseTitle: string;
-  private overriddenPublicUrl: string = null;
+  overriddenPublicUrl: string = null;
 
   constructor(
     @Inject(DOCUMENT) private doc: any,

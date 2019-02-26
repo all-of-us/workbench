@@ -8,7 +8,7 @@ import {
   getTemporalGroupItems,
   groupError
 } from 'app/cohort-search/redux';
-import {integerAndRangeValidator, numberAndNegativeValidator} from 'app/cohort-search/validators';
+import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {SearchRequest, TemporalMention, TemporalTime, TreeType} from 'generated';
 import {List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
