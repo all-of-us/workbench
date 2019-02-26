@@ -58,7 +58,7 @@ public abstract class AbstractQueryBuilder {
   private static final String RANK_1_SQL_TEMPLATE =
     ", rank() over (partition by person_id order by entry_date${descSql}) rn";
   private static final String TEMPORAL_SQL_TEMPLATE =
-    "select person_id, visit_concept_id, entry_date${rank1Sql}\n" +
+    "select person_id, visit_occurrence_id, entry_date${rank1Sql}\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where ${conceptIdSql}" +
       "and person_id in (${innerSql})\n";
