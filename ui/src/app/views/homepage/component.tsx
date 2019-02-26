@@ -332,7 +332,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         }
         if (profile.pageVisits.some(v => v.page === 'moodle')) {
           this.setState({firstVisitTraining: false});
-          console.log(this.state.firstVisitTraining);
         }
       }
 
