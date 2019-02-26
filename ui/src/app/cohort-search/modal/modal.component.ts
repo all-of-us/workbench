@@ -253,6 +253,17 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.showModifiers && this.mode === 'modifiers';
   }
 
+  get treeClass() {
+    if (this.ctype === TreeType.DEMO) {
+      return this.subtype === TreeSubType.AGE ? 'col-md-12' : 'col-md-6';
+    }
+    return 'col-md-8';
+  }
+
+  get sidebarClass() {
+    return this.ctype === TreeType.DEMO ? 'col-md-6' : 'col-md-4';
+  }
+
   setMode(mode: any) {
     if (mode !== 'tree' && this.ctype !== TreeType[TreeType.SNOMED]) {
       this.originalNode = Map({
