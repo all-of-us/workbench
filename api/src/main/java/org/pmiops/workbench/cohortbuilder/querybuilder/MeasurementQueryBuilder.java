@@ -48,6 +48,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
+/**
+ * MeasurementQueryBuilder builds SQL for BigQuery for measurement criteria types.
+ */
 @Service
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
@@ -64,6 +67,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_CONCEPT_ID =
     " and value_as_concept_id ${operator} unnest(${values})";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -105,6 +111,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     return buildTemporalSql(modifiedSql, conceptIdSql, queryParams, modifiers, mention);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.MEAS;

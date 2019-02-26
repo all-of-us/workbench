@@ -35,8 +35,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * CodesQueryBuilder is an object that builds SQL for BigQuery for the following criteria types:
- * ICD9, ICD10 and CPT.
+ * CodesQueryBuilder builds SQL for BigQuery for the following criteria types: ICD9, ICD10, CPT and SNOMED.
  */
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
@@ -66,6 +65,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     "concept_id in unnest(${conceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -119,6 +121,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.CODES;

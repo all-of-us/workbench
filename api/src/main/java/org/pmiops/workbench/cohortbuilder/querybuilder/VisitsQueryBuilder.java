@@ -26,8 +26,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for visit criteria types.
+ * VisitsQueryBuilder builds SQL for BigQuery for visit criteria types.
  */
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
@@ -40,6 +39,9 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     "concept_id in unnest(${visitConceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem inputParameters,
@@ -65,6 +67,9 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.VISIT;

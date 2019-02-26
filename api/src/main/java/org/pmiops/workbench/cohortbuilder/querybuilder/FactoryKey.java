@@ -7,16 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This enum maps specific implementations of {@link AbstractQueryBuilder} to specific
- * criteria types/searches. This enum is built specifically for use of the
- * {@link org.pmiops.workbench.cohortbuilder.QueryBuilderFactory} to get the correct
- * factory implementation.
+ * This enum maps specific implementations of {@link AbstractQueryBuilder} to specific criteria types/searches. This enum is built specifically
+ * for use of the {@link org.pmiops.workbench.cohortbuilder.QueryBuilderFactory} to get the correct factory implementation.
  */
 public enum FactoryKey {
     CODES,
     DEMO,
     VISIT,
-    PHECODE,
     PM,
     DRUG,
     MEAS,
@@ -32,12 +29,8 @@ public enum FactoryKey {
     }
 
     /**
-     * {@link AbstractQueryBuilder} implementations will have a many to one
-     * relationship with the criteria tree types. This map will only contain
-     * mappings for searching for subject/person data.
-     *
-     * For example: ICD9, ICD10 and CPT criteria will all map to the
-     * {@link CodesQueryBuilder}.
+     * {@link AbstractQueryBuilder} implementations will have a many to one relationship with the criteria tree types. This map will only contain
+     * mappings for searching for subject/person data. For example: ICD9, ICD10, CPT and SNOMED criteria will all map to the {@link CodesQueryBuilder}.
      *
      * @return
      */
