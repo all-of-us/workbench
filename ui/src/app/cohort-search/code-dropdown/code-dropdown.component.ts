@@ -1,10 +1,9 @@
-import {NgRedux, select} from '@angular-redux/store';
+import {select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {
   activeItem,
   codeDropdownOptions,
   CohortSearchActions,
-  CohortSearchState,
 } from 'app/cohort-search/redux';
 import {getCodeOptions} from 'app/cohort-search/utils';
 import {Observable} from 'rxjs/Observable';
@@ -25,7 +24,6 @@ export class CodeDropdownComponent implements  OnInit {
   @select(activeItem) activeItem$: Observable<any>;
   @select(codeDropdownOptions) options$: Observable<any>;
   constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
     private actions: CohortSearchActions
   ) {}
 

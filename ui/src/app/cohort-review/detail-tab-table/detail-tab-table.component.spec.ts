@@ -1,12 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {DetailTabTableComponent} from './detail-tab-table.component';
@@ -14,12 +12,6 @@ import {DetailTabTableComponent} from './detail-tab-table.component';
 describe('DetailTabTableComponent', () => {
   let component: DetailTabTableComponent;
   let fixture: ComponentFixture<DetailTabTableComponent>;
-  const activatedRouteStub = {
-    data: Observable.of({
-      participant: {}
-    })
-  };
-  let route;
 
   beforeEach(async(() => {
 
@@ -28,7 +20,6 @@ describe('DetailTabTableComponent', () => {
       imports: [ClarityModule, NgxPopperModule, FormsModule, ReactiveFormsModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
@@ -48,7 +39,6 @@ describe('DetailTabTableComponent', () => {
     fixture = TestBed.createComponent(DetailTabTableComponent);
     component = fixture.componentInstance;
     component.columns = [{name: ''}];
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

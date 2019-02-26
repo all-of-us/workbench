@@ -503,27 +503,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       SEARCH_GROUP, MENTION, param1.getValue());
 
     //temporal mention invalid
-    temporalGroup.setMention("blah");
+    temporalGroup.setMention(null);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, MENTION, temporalGroup.getMention());
 
     //temporal time null
-    temporalGroup.setMention(TemporalMention.ANY_MENTION.name());
+    temporalGroup.setMention(TemporalMention.ANY_MENTION);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal time invalid
-    temporalGroup.setTime("blah");
+    temporalGroup.setTime(null);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal timeValue null
-    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER.name());
+    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
 
     //temporal group is null
-    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP_ITEM, TEMPORAL_GROUP, searchGroupItem1.getTemporalGroup());
 
@@ -801,8 +801,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -851,8 +851,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -892,8 +892,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_BEFORE.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_BEFORE)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -932,8 +932,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.ANY_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -965,8 +965,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(visitSGI, cptSGI))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.WITHIN_X_DAYS_OF.name())
+      .mention(TemporalMention.ANY_MENTION)
+      .time(TemporalTime.WITHIN_X_DAYS_OF)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -1000,8 +1000,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1034,8 +1034,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1076,8 +1076,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1118,8 +1118,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));

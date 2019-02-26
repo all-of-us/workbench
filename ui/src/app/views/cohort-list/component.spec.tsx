@@ -34,7 +34,6 @@ describe('CohortList', () => {
     const wrapper = mount(<CohortList />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
-    wrapper.debug();
     expect(wrapper.text()).toMatch(exampleCohortStubs[0].name);
   });
 });

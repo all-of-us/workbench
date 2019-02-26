@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
 
@@ -16,7 +16,4 @@ export class DetailAllEventsComponent extends DetailTabTableComponent {
   @Input() columns;
   @Input() filterType;
   @Input() reverseEnum;
-
-  @Output() onRowClick = new EventEmitter();
-  onClick(datum) { this.onRowClick.emit(datum); }
 }

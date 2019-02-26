@@ -6,6 +6,7 @@ import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -56,7 +57,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String mention) {
+                           TemporalMention mention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     ListMultimap<String, Long> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
     StringBuilder baseSql = new StringBuilder(DRUG_SQL_TEMPLATE);

@@ -62,6 +62,10 @@ export const HIDE_ATTRIBUTES_PAGE = 'HIDE_ATTRIBUTES_PAGE';
 export const OPEN_WIZARD = 'OPEN_WIZARD';
 export const REOPEN_WIZARD = 'REOPEN_WIZARD';
 export const WIZARD_FINISH = 'WIZARD_FINISH';
+export const UPDATE_TEMPORAL = 'UPDATE_TEMPORAL';
+export const UPDATE_WHICH_MENTION = 'UPDATE_WHICH_MENTION';
+export const UPDATE_TEMPORAL_TIME = 'UPDATE_TEMPORAL_TIME';
+export const UPDATE_TEMPORAL_TIME_VALUE = 'UPDATE_TEMPORAL_TIME_VALUE';
 export const WIZARD_CANCEL = 'WIZARD_CANCEL';
 export const SET_WIZARD_CONTEXT = 'SET_WIZARD_CONTEXT';
 
@@ -242,6 +246,7 @@ export interface ActionTypes {
   };
   CLEAR_TOTAL_COUNT: {
     type: typeof CLEAR_TOTAL_COUNT;
+    groupId: string;
   };
   CLEAR_GROUP_COUNT: {
     type: typeof CLEAR_GROUP_COUNT;
@@ -361,21 +366,48 @@ export interface ActionTypes {
     itemId: string;
     itemType: string;
     context?: ActiveContext;
+    tempGroup?: number;
   };
   REOPEN_WIZARD: {
     type: typeof REOPEN_WIZARD;
     item: any;
     context?: ActiveContext;
   };
+
   WIZARD_FINISH: {
     type: typeof WIZARD_FINISH;
   };
+
   WIZARD_CANCEL: {
     type: typeof WIZARD_CANCEL;
   };
   SET_WIZARD_CONTEXT: {
     type: typeof SET_WIZARD_CONTEXT;
     context: ActiveContext;
+  };
+
+  UPDATE_TEMPORAL: {
+    type: typeof UPDATE_TEMPORAL;
+    flag: boolean;
+    groupId: string;
+  };
+
+  UPDATE_WHICH_MENTION: {
+    type: typeof UPDATE_WHICH_MENTION;
+    mention: any;
+    groupId: string;
+  };
+
+  UPDATE_TEMPORAL_TIME: {
+    type: typeof UPDATE_TEMPORAL_TIME;
+    time: any;
+    groupId: string;
+  };
+
+  UPDATE_TEMPORAL_TIME_VALUE: {
+    type: typeof UPDATE_TEMPORAL_TIME_VALUE;
+    timeValue: number;
+    groupId: string;
   };
 
   LOAD_ENTITIES: {
@@ -451,6 +483,10 @@ export type RootAction =
   | ActionTypes[typeof OPEN_WIZARD]
   | ActionTypes[typeof REOPEN_WIZARD]
   | ActionTypes[typeof WIZARD_FINISH]
+  | ActionTypes[typeof UPDATE_TEMPORAL]
+  | ActionTypes[typeof UPDATE_WHICH_MENTION]
+  | ActionTypes[typeof UPDATE_TEMPORAL_TIME]
+  | ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE]
   | ActionTypes[typeof WIZARD_CANCEL]
   | ActionTypes[typeof SET_WIZARD_CONTEXT]
   | ActionTypes[typeof SHOW_ATTRIBUTES_PAGE]

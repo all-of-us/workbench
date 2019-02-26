@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, Output} from '@angular/core';
+import {Component, Input, OnChanges} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 
 import {Participant} from 'app/cohort-review/participant.model';
@@ -22,7 +22,6 @@ import {
 })
 export class DetailHeaderComponent implements OnChanges {
   @Input() participant: Participant;
-  @Output() navigationClicked = new EventEmitter<any>();
   isFirstParticipant: boolean;
   isLastParticipant: boolean;
   priorId: number;
@@ -123,6 +122,5 @@ export class DetailHeaderComponent implements OnChanges {
   private navigateById = (id: number): void => {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
-    this.navigationClicked.emit(id);
   }
 }

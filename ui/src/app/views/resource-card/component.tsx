@@ -36,7 +36,7 @@ const ResourceCardMenu: React.FunctionComponent<{
         ['notebook', () => {
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
             {
               environment.enableJupyterLab &&
@@ -55,7 +55,7 @@ const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['cohort', () => {
           return <React.Fragment>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>

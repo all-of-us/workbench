@@ -1,11 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import 'rxjs/add/observable/of';
-import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
@@ -17,12 +15,6 @@ import {DetailAllEventsComponent} from './detail-all-events.component';
 describe('DetailAllEventsComponent', () => {
   let component: DetailAllEventsComponent;
   let fixture: ComponentFixture<DetailAllEventsComponent>;
-  const activatedRouteStub = {
-    data: Observable.of({
-      cohort: {},
-      participant: {}
-    })
-  };
 
   beforeEach(async(() => {
 
@@ -32,7 +24,6 @@ describe('DetailAllEventsComponent', () => {
       imports: [ClarityModule, NgxPopperModule, ReactiveFormsModule, FormsModule],
       providers: [
         {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();

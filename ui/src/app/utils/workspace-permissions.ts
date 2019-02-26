@@ -1,4 +1,8 @@
-import {Workspace, WorkspaceAccessLevel, WorkspaceResponse} from 'generated';
+import {
+  Workspace,
+  WorkspaceAccessLevel,
+  WorkspaceResponse
+} from 'generated';
 
 export class WorkspacePermissions {
   workspace: Workspace;

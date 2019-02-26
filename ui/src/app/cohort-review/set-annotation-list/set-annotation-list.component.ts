@@ -1,7 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subscription} from 'rxjs/Subscription';
+import {Component, Input} from '@angular/core';
 
-import {annotationDefinitionsStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {ReviewStateService} from 'app/cohort-review/review-state.service';
 
 import {CohortAnnotationDefinition} from 'generated';
 
@@ -12,21 +11,12 @@ type DefnId = CohortAnnotationDefinition['cohortAnnotationDefinitionId'];
   templateUrl: './set-annotation-list.component.html',
   styleUrls: ['./set-annotation-list.component.css']
 })
-export class SetAnnotationListComponent implements OnInit, OnDestroy {
-  subscription: Subscription;
-  definitions: CohortAnnotationDefinition[];
+export class SetAnnotationListComponent {
+  @Input() loadAnnotationDefinitions: Function;
+  @Input() definitions: CohortAnnotationDefinition[];
   postSet: Set<DefnId> = new Set<DefnId>();
 
   constructor(private state: ReviewStateService) {}
-
-  ngOnInit() {
-    this.subscription = annotationDefinitionsStore
-            .subscribe(defns => this.definitions = defns);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
 
   isPosting(flag: boolean, defn: CohortAnnotationDefinition): void {
     const id = defn.cohortAnnotationDefinitionId;

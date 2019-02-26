@@ -1,9 +1,10 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridComparatorInterface} from '@clr/angular';
+import * as fp from 'lodash/fp';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
-import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {
   CohortReviewService, PageFilterRequest, SortOrder
 } from 'generated';
@@ -36,37 +37,28 @@ export class DetailTabTableComponent implements OnInit, OnDestroy {
   numMentionsSort = new SortByColumn();
   filtered = [];
   constructor(
-    private route: ActivatedRoute,
     private reviewApi: CohortReviewService,
   ) {}
 
   ngOnInit() {
-    this.subscription = this.route.data
-      .map(({participant}) => participant)
-      .withLatestFrom(currentCohortStore, currentWorkspaceStore)
-      .distinctUntilChanged()
-      .do(_ => this.loading = true)
-      .switchMap(([participant, cohort, workspace]) => {
+    this.subscription = Observable
+      .combineLatest(urlParamsStore, currentWorkspaceStore)
+      .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
+        this.loading = true;
         this.data = [];
-        return this.reviewApi.getParticipantData(
-          workspace.namespace,
-          workspace.id,
-          cohort.id,
-          +(workspace.cdrVersionId),
-          participant.participantId,
-          <PageFilterRequest>{
-            page: 0,
-            pageSize: 10000,
-            sortOrder: SortOrder.Asc,
-            sortColumn: this.columns[0].name,
-            pageFilterType: this.filterType,
-            domain: this.domain,
-          }
-        );
-      })
-      .subscribe(resp => {
-        this.data = resp.items;
-        this.totalCount = resp.count;
+        return this.reviewApi.getParticipantData(ns, wsid, cid, +cdrVersionId, pid, {
+          page: 0,
+          pageSize: 10000,
+          sortOrder: SortOrder.Asc,
+          sortColumn: this.columns[0].name,
+          pageFilterType: this.filterType,
+          domain: this.domain,
+        } as PageFilterRequest);
+      }).subscribe(({items, count}) => {
+        this.data = items;
+        this.totalCount = count;
         this.loading = false;
       });
   }

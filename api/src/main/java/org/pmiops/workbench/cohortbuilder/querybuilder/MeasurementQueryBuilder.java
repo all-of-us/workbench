@@ -7,6 +7,7 @@ import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 
+import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +67,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String mention) {
+                           TemporalMention mention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     List<Long> conceptIds = new ArrayList<>();

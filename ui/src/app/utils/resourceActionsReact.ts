@@ -50,3 +50,8 @@ export function convertToResource(resource: FileDetail | Cohort | ConceptSet,
   }
   return newResource;
 }
+
+export function mapAndFilterResourceList(list: RecentResource[], type: string) {
+  return list.filter((resource: RecentResource) => resource[type] !== undefined)
+    .map((resource: RecentResource) => resource[type]);
+}
