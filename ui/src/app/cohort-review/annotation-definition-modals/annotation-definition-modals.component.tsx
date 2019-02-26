@@ -47,7 +47,7 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
       const {onCreate, urlParams: {ns, wsid, cid}} = this.props;
       const {name, annotationType, enumValues} = this.state;
       this.setState({saving: true});
-      const newAd = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
+      const newDef = await cohortAnnotationDefinitionApi().createCohortAnnotationDefinition(
         ns, wsid, cid, {
           cohortId: cid,
           columnName: name,
@@ -55,7 +55,7 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
           enumValues: annotationType === AnnotationType.ENUM ? enumValues : undefined
         }
       );
-      onCreate(newAd);
+      onCreate(newDef);
     } catch (error) {
       console.error(error);
     } finally {
@@ -70,7 +70,7 @@ export const AddAnnotationDefinitionModal = withUrlParams()(class extends React.
       name: {
         presence: {allowEmpty: false},
         exclusion: {
-          within: annotationDefinitions.map(ad => ad.columnName),
+          within: annotationDefinitions.map(({columnName}) => columnName),
           message: 'already exists'
         }
       },
@@ -196,12 +196,12 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
       const {editId, editValue} = this.state;
       if (editValue && !fp.some({columnName: editValue}, annotationDefinitions)) {
         this.setState({busy: true});
-        const newAd = await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
+        const newDef = await cohortAnnotationDefinitionApi().updateCohortAnnotationDefinition(
           ns, wsid, cid, editId, {columnName: editValue}
         );
         setAnnotationDefinitions(
-          annotationDefinitions.map(oldAd => {
-            return oldAd.cohortAnnotationDefinitionId === editId ? newAd : oldAd;
+          annotationDefinitions.map(oldDef => {
+            return oldDef.cohortAnnotationDefinitionId === editId ? newDef : oldDef;
           })
         );
       }
@@ -218,8 +218,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
     return <Modal loading={busy}>
       <ModalTitle>Edit Cohort-wide Annotations</ModalTitle>
       <ModalBody>
-        {annotationDefinitions.map(ad => {
-          const {cohortAnnotationDefinitionId: id, columnName} = ad;
+        {annotationDefinitions.map(({cohortAnnotationDefinitionId: id, columnName}) => {
           return <div key={id} style={styles.editRow}>
             {editId === id ?
               <TextInput
