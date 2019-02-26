@@ -1176,13 +1176,13 @@ Common.register_command({
 
 def create_local_es_index(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.inverse_prob = 10000
+  op.opts.inverse_prob = 1000
   op.add_option(
       "--participant-inclusion-inverse-prob [DENOMINATOR]",
       ->(opts, v) { opts.inverse_prob = v},
       "The inverse probabilty to index a participant, used to index a " +
       "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
-      "target dataset. Defaults to 1 (all participants).")
+      "target dataset. Defaults to 1K (~1K participants on the 1M participant synthetic CDR).")
   op.parse.validate
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
