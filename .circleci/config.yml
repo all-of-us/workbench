@@ -192,7 +192,7 @@ jobs:
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
   rainforest-integration-test:
-      <<: *java_defaults
+      <<: *defaults
       steps:
         - run:
             name: Download Rainforest
