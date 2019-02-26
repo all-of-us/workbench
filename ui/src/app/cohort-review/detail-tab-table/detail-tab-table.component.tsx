@@ -143,6 +143,7 @@ const styles = reactStyles({
     fontSize: '0.6rem',
     paddingLeft: '0.4rem',
     color: '#0086C1',
+    cursor: 'pointer',
   },
 });
 const rows = 25;
