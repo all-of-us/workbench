@@ -1,18 +1,21 @@
 import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import {validate} from 'validate.js';
 
 import {bugReportApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {reactStyles, ReactWrapperBase, summarizeErrors, withUserProfile} from 'app/utils/index';
 
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {Modal, ModalBody, ModalFooter, ModalInput, ModalTitle} from 'app/components/modals';
+import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {
   BugReport,
   BugReportType,
   Profile
 } from 'generated/fetch';
-import * as React from 'react';
 
 
 const styles = reactStyles({
@@ -56,40 +59,46 @@ export const BugReportModal = withUserProfile()
     };
   }
 
-  async send() {
+  send() {
     this.setState({submitting: true, sendBugReportError: false});
     bugReportApi().sendBugReport(this.state.bugReport).then(() => {
       this.setState({submitting: false});
       this.props.onClose();
-    }
-    ).catch(() => {
+    }).catch(() => {
       this.setState({sendBugReportError: true, submitting: false});
     });
+  }
 
+  updateBugReport(attribute: string, value: string) {
+    const newReport = this.state.bugReport;
+    newReport[attribute] = value;
+    this.setState(({bugReport}) => ({bugReport: fp.set(attribute, value, bugReport)}));
   }
 
   render() {
-    const {bugReport, submitting, sendBugReportError} = this.state;
+    const {bugReport, bugReport: {shortDescription}, submitting, sendBugReportError} = this.state;
     const {onClose} = this.props;
+    const errors = validate({shortDescription}, {
+      shortDescription: {presence: {allowEmpty: false}}
+    });
+
     return <Modal width={700} loading={submitting}>
       <ModalTitle style={{fontWeight: 400}}>Submit a Bug</ModalTitle>
       <ModalBody>
-        <label className='required' style={styles.fieldHeader}>Description: </label>
-        <ModalInput value={bugReport.shortDescription}
-                    onChange={(v) => this.setState({bugReport:
-                        {...bugReport, shortDescription: v.target.value}})}/>
-        <label className='required' style={styles.fieldHeader}>Bug Type: </label>
+        <label style={styles.fieldHeader}>Description: </label>
+        <TextInput value={shortDescription}
+                    onChange={v => this.updateBugReport('shortDescription', v)}/>
+        <ValidationError>
+          {summarizeErrors(errors && errors.shortDescription)}
+        </ValidationError>
+        <label style={styles.fieldHeader}>Bug Type: </label>
         <select style={{height: '1.5rem', width: '100%'}}
-                onChange={(e) => {this.setState(
-                  {bugReport: {
-                    ...bugReport,
-                    bugReportType: e.target.value as unknown as BugReportType}
-                  }); }}>
+                onChange={e => this.updateBugReport('bugReportType', e.target.value)}>
           <option value={BugReportType.APPLICATION}>Workbench Application</option>
           <option value={BugReportType.DATA}>Data Quality</option>
         </select>
         <label style={styles.fieldHeader}>How to Reproduce: </label>
-        <textarea onChange={(v) => {bugReport.reproSteps = v.target.value; } }/>
+        <TextArea onChange={v => this.updateBugReport('reproSteps', v) }/>
         <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
           <input type='checkbox'
                  defaultChecked={bugReport.includeNotebookLogs}
@@ -103,9 +112,8 @@ export const BugReportModal = withUserProfile()
             Attach notebook logs? </label>
         </div>
         <label style={styles.fieldHeader}>Contact Email: </label>
-        <ModalInput value={bugReport.contactEmail}
-                    onChange={(e) => this.setState(
-                        {bugReport: {...bugReport, contactEmail: e.target.value}})}/>
+        <TextInput value={bugReport.contactEmail}
+                    onChange={e => this.updateBugReport('contactEmail', e)}/>
         {sendBugReportError && <AlertDanger style={{justifyContent: 'space-between'}}>
           <div>Error sending the bug report.</div>
           <ClrIcon shape='times'
@@ -114,7 +122,7 @@ export const BugReportModal = withUserProfile()
         <ModalFooter>
           <Button type='secondary' onClick={onClose}>Cancel</Button>
           <Button style={{marginLeft: '0.5rem'}}
-                  disabled={!!sendBugReportError || submitting}
+                  disabled={!!sendBugReportError || !!errors || submitting}
                   data-test-id='submit-bug-report'
                   onClick={() => this.send()}>Send</Button>
         </ModalFooter>
