@@ -1,7 +1,7 @@
 import {reactStyles, withStyle} from 'app/utils';
 
-import {ClrIcon} from 'app/components/icons';
 import {Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
 import * as React from 'react';
 
 export const styles = reactStyles({
@@ -41,5 +41,5 @@ export const AlertClose = ({style = {}, ...props}) => {
   return <Clickable style={{...style, width: '8%', height: '16px'}}
                     {...props}>
     <ClrIcon shape='times'/>
-  </Clickable>
+  </Clickable>;
 };

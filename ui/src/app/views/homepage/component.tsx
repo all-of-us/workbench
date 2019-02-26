@@ -5,6 +5,7 @@ import {environment} from 'environments/environment';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {AlertClose, AlertWarning} from 'app/components/alert';
 import {
   Button,
   CardButton,
@@ -23,7 +24,6 @@ import {
   BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
-import {AlertWarning, AlertClose} from "app/components/alert";
 
 
 const styles = reactStyles({
@@ -102,7 +102,7 @@ export class WorkbenchAccessTasks extends
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
-    this.state = {trainingWarningOpen: !props.firstVisitTraining}
+    this.state = {trainingWarningOpen: !props.firstVisitTraining};
   }
 
   static redirectToNiH(): void {
