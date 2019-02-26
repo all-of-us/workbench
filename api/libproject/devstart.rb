@@ -1176,6 +1176,7 @@ Common.register_command({
 
 def create_local_es_index(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+  # TODO(RW-2213): Generalize this subsampling approach for all local development work.
   op.opts.inverse_prob = 1000
   op.add_option(
       "--participant-inclusion-inverse-prob [DENOMINATOR]",
