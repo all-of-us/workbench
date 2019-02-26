@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
@@ -59,8 +58,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   username = '';
   creatingNotebook = false;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   constructor(
     private cohortsService: CohortsService,
@@ -69,6 +68,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -196,7 +196,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+    this.bugReportDescription = 'Could not load notebooks';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }
