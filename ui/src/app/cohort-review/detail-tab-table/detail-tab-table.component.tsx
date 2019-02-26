@@ -8,6 +8,7 @@ import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generate
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
 const css = `
@@ -77,6 +78,23 @@ const css = `
     background: #fafafa;
     color: rgba(0, 0, 0, .5);
   }
+    body .p-overlaypanel .p-overlaypanel-close {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+  }
+  body .p-overlaypanel {
+    top: 14px!important;
+    left: 0px!important;
+    width:10rem;
+    }
+  body .p-overlaypanel .p-overlaypanel-close :hover {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+    }
   `;
 
 const styles = reactStyles({
@@ -113,7 +131,15 @@ const styles = reactStyles({
   sortIcon: {
     color: '#2691D0',
     fontSize: '0.4rem'
-  }
+  },
+  overlayHeader: {
+    padding: '0.3rem',
+  },
+  caretIcon: {
+    fontSize: '0.6rem',
+    paddingLeft: '0.4rem',
+    color: '#0086C1',
+  },
 });
 const rows = 25;
 
@@ -216,6 +242,29 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.setState({start: event.first});
     }
 
+    overlayTemplate(rowData, column) {
+      console.log(column);
+      let vl: any;
+      return <div style={{position: 'relative'}}>
+        { column.field === 'value' && <span>{rowData.value}</span>}
+        { column.field === 'standardName' && <span>{rowData.standardName}</span>}
+        {(((rowData.refRange || rowData.unit ) && column.field === 'value') || (rowData.route && column.field === 'standardName'))
+        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
+            <OverlayPanel ref={(el) => {vl = el;}} showCloseIcon={true} dismissable={true}>
+              {(rowData.refRange &&  column.field === 'value') && <div>
+                <span>Reference Range:  </span>
+                <span>{rowData.refRange}</span>
+              </div>}
+              {(rowData.unit && column.field === 'value') && <div>
+                <span>Units:  </span>
+                <span>{rowData.unit}</span>
+              </div>}
+              {(rowData.route && column.field === 'standardName') && <div>
+                <span>{rowData.route}</span>
+              </div>}
+            </OverlayPanel>
+      </div>
+    }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
@@ -248,7 +297,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           key={col.name}
           field={col.name}
           header={header}
-          sortable />;
+          sortable
+          body={(col.name === 'value' || col.name === 'standardName') && this.overlayTemplate }/>;
       });
 
       return <div style={styles.container}>
