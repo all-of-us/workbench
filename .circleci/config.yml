@@ -191,6 +191,16 @@ jobs:
             - ~/.m2
           key: api-integration-cache-{{ checksum "~/workbench/api/build.gradle" }}
 
+  rainforest-integration-test:
+      <<: *java_defaults
+      steps:
+        - run:
+            name: Download Rainforest
+            command: gem install rainforest-cli
+        - run:
+            working_directory: ~/workbench
+            command: rainforest run all
+
   ui-build-test:
     <<: *defaults
     steps:
@@ -367,6 +377,7 @@ workflows:
       - api-build-test
       - ui-build-test
       - public-ui-build-test
+      - rainforest-integration-test
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
