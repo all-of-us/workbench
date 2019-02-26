@@ -27,6 +27,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
+/**
+ * PPIQueryBuilder builds SQL for BigQuery for the survey criteria type.
+ */
 @Service
 public class PPIQueryBuilder extends AbstractQueryBuilder {
 
@@ -53,6 +56,9 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
     "and value_as_concept_id = ${value}\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -98,6 +104,9 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.PPI;

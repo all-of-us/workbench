@@ -25,6 +25,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
+/**
+ * DrugQueryBuilder builds SQL for BigQuery for drug criteria type.
+ */
 @Service
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
@@ -54,6 +57,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
   private static final String PARENT_ONLY_TEMPLATE =
     "concept_id in (" + PARENT_CRITERIA + ")\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -109,6 +115,9 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.DRUG;
