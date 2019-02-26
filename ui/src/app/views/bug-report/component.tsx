@@ -103,7 +103,7 @@ export const BugReportModal = withUserProfile()
           <input type='checkbox'
                  defaultChecked={bugReport.includeNotebookLogs}
                  onClick={() => this.updateBugReport('includeNotebookLogs',
-                     !bugReport.includeNotebookLogs)}
+                   !bugReport.includeNotebookLogs)}
           />
           <label style={{...styles.fieldHeader, marginTop: '0rem', marginLeft: '0.2rem'}}>
             Attach notebook logs? </label>
