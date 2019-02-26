@@ -221,7 +221,7 @@ const routes: Routes = [
                 data: {
                   title: 'DataSet Page',
                   breadcrumb: {
-                    value: 'DataSet'
+                    value: 'Dataset'
                   }
                 }
               },
