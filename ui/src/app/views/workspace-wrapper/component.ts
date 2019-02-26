@@ -4,7 +4,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -32,8 +31,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   confirmDeleting = false;
   username: string;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   private subscriptions = [];
 
@@ -47,6 +46,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -124,7 +124,12 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

@@ -18,7 +18,7 @@ const itemDate = {
   displayName: 'Date',
 };
 const itemTime = {
-  name: 'itemDate',
+  name: 'itemTime',
   classNames: ['time-col'],
   displayName: 'Time',
 };
@@ -122,7 +122,7 @@ const answer = {
 export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  participantsId: any;
+  participantId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
@@ -315,6 +315,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
+        this.participantId = pid;
         return Observable.forkJoin(
           ...this.domainList.map(domainName => {
             this.chartData[domainName] = {
