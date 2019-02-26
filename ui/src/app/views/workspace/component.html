@@ -184,7 +184,9 @@
     <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
   </div>
 </clr-modal>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <app-new-notebook-modal *ngIf="creatingNotebook"
   [workspace]="workspace"
   [existingNotebooks]="notebookList"

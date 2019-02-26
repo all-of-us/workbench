@@ -8,7 +8,6 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {hasRegisteredAccess} from 'app/utils';
 import {routeConfigDataStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {environment} from 'environments/environment';
 import {Authority, BillingProjectStatus} from 'generated';
 
@@ -48,8 +47,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
   private profileBlockingSub: Subscription;
   private subscriptions = [];
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
 
   @ViewChild('sidenavToggleElement') sidenavToggleElement: ElementRef;
 
@@ -72,7 +70,9 @@ export class SignedInComponent implements OnInit, OnDestroy {
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
-  ) {}
+  ) {
+    this.closeBugReport = this.closeBugReport.bind(this);
+  }
 
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
@@ -211,6 +211,10 @@ export class SignedInComponent implements OnInit, OnDestroy {
 
   openHubForum(): void {
     window.open(environment.zendeskHelpCenterUrl, '_blank');
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 
 }

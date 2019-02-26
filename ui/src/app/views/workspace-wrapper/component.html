@@ -21,5 +21,7 @@
                           [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete"
                           [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <router-outlet></router-outlet>

@@ -89,6 +89,14 @@ const buttonVariants = {
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
     hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
+  },
+  link: {
+    style: {
+      color: colors.blue[0]
+    },
+    disabledStyle: {
+      color: colors.gray[2]
+    }
   }
 };
 

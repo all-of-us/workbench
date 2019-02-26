@@ -31,6 +31,8 @@
         [annotations]="annotations"
         [annotationDefinitions]="annotationDefinitions"
         [setAnnotations]="setAnnotations"
+        [openCreateDefinitionModal]="openCreateDefinitionModal"
+        [openEditDefinitionsModal]="openEditDefinitionsModal"
         ></app-sidebar-content>
     </div>
   </div>
@@ -39,8 +41,16 @@
     set-annotation-modal: A manager for creating, updating, removing annotation
     definitions (i.e. set wide annotations)
   -->
-  <app-set-annotation-modal
+  <app-edit-annotation-definitions-modal
+    *ngIf="editingDefinitions"
+    [onClose]="closeEditDefinitionsModal"
     [annotationDefinitions]="annotationDefinitions"
-    [loadAnnotationDefinitions]="loadAnnotationDefinitions"
-  ></app-set-annotation-modal>
+    [setAnnotationDefinitions]="setAnnotationDefinitions"
+  ></app-edit-annotation-definitions-modal>
+  <app-add-annotation-definition-modal
+    *ngIf="creatingDefinition"
+    [annotationDefinitions]="annotationDefinitions"
+    [onCancel]="closeCreateDefinitionModal"
+    [onCreate]="definitionCreated"
+  ></app-add-annotation-definition-modal>
 </ng-container>

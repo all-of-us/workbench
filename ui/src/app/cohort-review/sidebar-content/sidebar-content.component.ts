@@ -13,4 +13,6 @@ export class SidebarContentComponent {
   @Input() annotations: ParticipantCohortAnnotation[];
   @Input() annotationDefinitions: CohortAnnotationDefinition[];
   @Input() setAnnotations: Function;
+  @Input() openCreateDefinitionModal: Function;
+  @Input() openEditDefinitionsModal: Function;
 }

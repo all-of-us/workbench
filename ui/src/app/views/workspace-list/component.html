@@ -119,7 +119,9 @@
     </div>
   </app-top-box>
 </div>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
