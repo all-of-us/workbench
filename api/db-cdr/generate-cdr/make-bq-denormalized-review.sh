@@ -110,14 +110,14 @@ SELECT P.PERSON_ID,
     case when c1.CONCEPT_CODE is null then 'No matching concept' else c1.CONCEPT_CODE end as STANDARD_CODE,
     case when C1.VOCABULARY_ID is null then 'None' else C1.VOCABULARY_ID end AS STANDARD_VOCABULARY,
     case when c1.CONCEPT_ID is null then 0 else c1.CONCEPT_ID end as STANDARD_CONCEPT_ID,
-    case when c3.CONCEPT_NAME is null then 'No matching concept' else c3.CONCEPT_NAME end as VISIT_TYPE,
+    case when c3.CONCEPT_NAME is null then '' else c3.CONCEPT_NAME end as VISIT_TYPE,
     CAST(FLOOR(DATE_DIFF(t.DRUG_EXPOSURE_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
     T.NUM_MENTIONS,
     T.FIRST_MENTION,
     T.LAST_MENTION,
     T.QUANTITY as dose,
     '' as strength,
-    C2.CONCEPT_NAME AS ROUTE
+    case when C2.CONCEPT_NAME is null then '' else C2.CONCEPT_NAME end as ROUTE
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, a.DRUG_SOURCE_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
 NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, QUANTITY, ROUTE_CONCEPT_ID
@@ -153,7 +153,7 @@ SELECT P.PERSON_ID,
 	case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
 	case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
 	CAST(FLOOR(DATE_DIFF(a.CONDITION_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-	case when c3.concept_name is null then 'No matching concept' else c3.concept_name end as visit_type
+	case when c3.concept_name is null then '' else c3.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.CONDITION_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.CONDITION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
@@ -181,7 +181,7 @@ SELECT m.person_id,
               else concat(cast(range_low AS STRING) ,'-',cast(range_high AS STRING) )
               end as ref_range,
     CAST(FLOOR(DATE_DIFF(m.measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as age_at_event,
-    case when c2.concept_name is null then 'No matching concept' else c2.concept_name end as visit_type
+    case when c2.concept_name is null then '' else c2.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on m.measurement_concept_id = c1.concept_id
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on m.visit_occurrence_id = v.visit_occurrence_id
@@ -209,7 +209,7 @@ SELECT m.person_id,
               else concat(cast(range_low AS STRING) ,'-',cast(range_high AS STRING) )
               end as ref_range,
     CAST(FLOOR(DATE_DIFF(m.measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as age_at_event,
-    case when c2.concept_name is null then 'No matching concept' else c2.concept_name end as visit_type
+    case when c2.concept_name is null then '' else c2.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on m.measurement_concept_id = c1.concept_id
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v on m.visit_occurrence_id = v.visit_occurrence_id
@@ -293,7 +293,7 @@ SELECT P.PERSON_ID,
      case when c2.CONCEPT_NAME is null then 'No matching concept' else c2.CONCEPT_NAME end as SOURCE_NAME,
      case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
      CAST(FLOOR(DATE_DIFF(a.PROCEDURE_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-     case when c3.concept_name is null then 'No matching concept' else c3.concept_name end as visit_type
+     case when c3.concept_name is null then '' else c3.concept_name end as visit_type
 FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.PROCEDURE_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.PROCEDURE_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
