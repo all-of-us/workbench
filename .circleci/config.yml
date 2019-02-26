@@ -196,7 +196,7 @@ jobs:
       steps:
         - run:
             name: Download Rainforest
-            command: gem install rainforest-cli
+            command: sudo gem install rainforest-cli
         - run:
             working_directory: ~/workbench
             command: rainforest run all
