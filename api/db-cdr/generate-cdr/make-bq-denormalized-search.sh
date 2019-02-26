@@ -59,7 +59,7 @@ bq --project=$BQ_PROJECT rm -f $BQ_DATASET.search_all_domains
 bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/search_all_domains.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.search_all_domains
 
 ################################################
-#   insert condition data into search_person   #
+#   insert person data into search_person   #
 ################################################
 echo "Inserting conditions data into search_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -91,6 +91,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = co.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = co.condition_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = co.visit_occurrence_id)
 where co.condition_source_concept_id is not null and co.condition_source_concept_id != 0"
 
@@ -111,6 +112,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = co.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = co.condition_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = co.visit_occurrence_id)
 where co.condition_concept_id is not null and co.condition_concept_id != 0"
 
@@ -131,6 +133,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = po.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = po.procedure_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)
 where po.procedure_source_concept_id is not null and po.procedure_source_concept_id != 0"
 
@@ -151,6 +154,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = po.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = po.procedure_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = po.visit_occurrence_id)
 where po.procedure_concept_id is not null and po.procedure_concept_id != 0"
 
@@ -173,6 +177,7 @@ m.value_as_number,
 m.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
 where m.measurement_source_concept_id is not null and m.measurement_source_concept_id != 0"
 
@@ -195,6 +200,7 @@ m.value_as_number,
 m.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = m.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = m.measurement_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = m.visit_occurrence_id)
 where m.measurement_concept_id is not null and m.measurement_concept_id != 0"
 
@@ -217,6 +223,7 @@ o.value_as_number,
 o.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = o.observation_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)
 where o.observation_source_concept_id is not null and o.observation_source_concept_id != 0"
 
@@ -239,6 +246,7 @@ o.value_as_number,
 o.value_as_concept_id
 from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = o.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = o.observation_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = o.visit_occurrence_id)
 where o.observation_concept_id is not null and o.observation_concept_id != 0"
 
@@ -259,6 +267,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = d.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = d.drug_source_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = d.visit_occurrence_id)
 where d.drug_source_concept_id is not null and d.drug_source_concept_id != 0"
 
@@ -279,6 +288,7 @@ vo.visit_concept_id,
 vo.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` d
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = d.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = d.drug_concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` vo on (vo.visit_occurrence_id = d.visit_occurrence_id)
 where d.drug_concept_id is not null and d.drug_concept_id != 0"
 
@@ -299,4 +309,5 @@ v.visit_concept_id,
 v.visit_occurrence_id
 from \`$BQ_PROJECT.$BQ_DATASET.visit_occurrence\` v
 join \`$BQ_PROJECT.$BQ_DATASET.person\` p on p.person_id = v.person_id
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on (c.concept_id = v.visit_concept_id)
 where v.visit_concept_id is not null and v.visit_concept_id != 0"
