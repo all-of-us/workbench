@@ -300,7 +300,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           sortable
-          body={colName && this.overlayTemplate}/>;
+          body={(colName && this.overlayTemplate)}/>;
       });
 
       return <div style={styles.container}>
