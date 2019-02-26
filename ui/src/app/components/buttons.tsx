@@ -189,3 +189,14 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
     {...fp.merge(computeStyle(tabButtonStyleMerged, {disabled}), {style})}
   >{children}</Clickable>;
 };
+
+export const Link = ({disabled = false, style = {}, children, ...props}) => {
+  const linkStyle = {
+    style: {color: '#2691D0'},
+    hover: {textDecoration: 'underline'}
+  };
+  return <Clickable
+      disabled={disabled} {...props}
+      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
+  >{children}</Clickable>;
+};

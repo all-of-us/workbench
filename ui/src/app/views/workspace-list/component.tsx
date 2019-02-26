@@ -5,15 +5,17 @@ import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger, AlertWarning} from 'app/components/alert';
-import {CardButton, Clickable, MenuItem} from 'app/components/buttons';
+import {Button, CardButton, Clickable, Link, MenuItem} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {displayDate, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {BugReportModal} from 'app/views/bug-report/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShare} from 'app/views/workspace-share/component';
 import {
@@ -103,23 +105,27 @@ const WorkspaceCardMenu: React.FunctionComponent<{
 
 export class WorkspaceCard extends React.Component<
     {wp: WorkspacePermissions, userEmail: string, reload: Function},
-    {sharing: boolean, confirmDeleting: boolean}> {
+    {sharing: boolean, confirmDeleting: boolean, workspaceDeletionError: boolean,
+      bugReportOpen: boolean, bugReportError: string}> {
 
   constructor(props) {
     super(props);
     this.state = {
+      bugReportOpen: false,
+      bugReportError: '',
       sharing: false,
-      confirmDeleting: false
+      confirmDeleting: false,
+      workspaceDeletionError: false
     };
   }
 
-  // todo: deletion error
   async deleteWorkspace() {
     const {wp} = this.props;
-    // this.setState({deleting: true});
     workspacesApi().deleteWorkspace(wp.workspace.namespace, wp.workspace.id).then(() => {
       this.setState({confirmDeleting: false});
       this.props.reload();
+    }).catch(() => {
+      this.setState({workspaceDeletionError: true});
     });
   }
 
@@ -128,9 +134,17 @@ export class WorkspaceCard extends React.Component<
     this.props.reload();
   }
 
+  submitWorkspaceDeletionError(): void {
+    this.setState({
+      bugReportOpen: true,
+      bugReportError: 'Could not delete workspace.',
+      workspaceDeletionError: false});
+  }
+
   render() {
     const {wp, userEmail} = this.props;
-    const {confirmDeleting, sharing} = this.state;
+    const {bugReportOpen, bugReportError, confirmDeleting,
+      sharing, workspaceDeletionError} = this.state;
     const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
@@ -168,6 +182,17 @@ export class WorkspaceCard extends React.Component<
           </div>
         </div>
       </Card>
+      {workspaceDeletionError && <Modal>
+        <ModalTitle>Error: Could not delete workspace '{wp.workspace.name}'</ModalTitle>
+        <ModalBody style={{display: 'flex', flexDirection: 'row'}}>
+          Please{' '}
+          <Link onClick={() => this.submitWorkspaceDeletionError()}>submit a bug report.</Link>
+        </ModalBody>
+        <ModalFooter>
+          <Button type='secondary'
+                  onClick={() => this.setState({workspaceDeletionError: false})}>Close</Button>
+        </ModalFooter>
+      </Modal>}
       {confirmDeleting &&
         <ConfirmDeleteModal resourceType='workspace'
                             resourceName={wp.workspace.name}
@@ -178,6 +203,8 @@ export class WorkspaceCard extends React.Component<
                                   userEmail={userEmail}
                                   sharing={sharing}
                                   onClose={() => {this.shareWorkspace(); }} />}
+      {bugReportOpen && <BugReportModal bugReportDescription={bugReportError}
+                                        onClose={() => this.setState({bugReportOpen: false})}/>}
     </React.Fragment>;
 
   }
@@ -201,7 +228,7 @@ export const WorkspaceList = withUserProfile()
       workspaceList: [],
       errorText: '',
       twoFactorEnabled: false,
-      firstSignIn: undefined,
+      firstSignIn: undefined
     };
   }
 
@@ -299,7 +326,6 @@ export const WorkspaceList = withUserProfile()
                   return <WorkspaceCard wp={wp}
                                         userEmail={profile.username}
                                         reload={() => {this.reloadWorkspaces(); }}/>;
-
                 })}
               </div>)}
           </div>
