@@ -195,11 +195,14 @@ jobs:
       <<: *defaults
       steps:
         - run:
+            name: Download Ruby Dev
+            comman: sudo apt-get install ruby-dev
+        - run:
             name: Download Rainforest
             command: sudo gem install rainforest-cli
         - run:
             working_directory: ~/workbench
-            command: rainforest run all
+            command: rainforest run all --token ${RAINFOREST_API_TOKEN}
 
   ui-build-test:
     <<: *defaults
