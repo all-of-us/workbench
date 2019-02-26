@@ -1,6 +1,8 @@
-import {reactStyles} from 'app/utils';
+import {reactStyles, withStyle} from 'app/utils';
 
-import {withStyle} from 'app/utils/index';
+import {ClrIcon} from 'app/components/icons';
+import {Clickable} from 'app/components/buttons';
+import * as React from 'react';
 
 export const styles = reactStyles({
   alert: {
@@ -35,3 +37,9 @@ export const styles = reactStyles({
 export const Alert = withStyle(styles.alert)('div');
 export const AlertDanger = withStyle(styles.danger)(Alert);
 export const AlertWarning = withStyle(styles.warning)(Alert);
+export const AlertClose = ({style = {}, ...props}) => {
+  return <Clickable style={{...style, width: '8%', height: '16px'}}
+                    {...props}>
+    <ClrIcon shape='times'/>
+  </Clickable>
+};

@@ -23,7 +23,7 @@ import {
   BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
-import {AlertWarning} from "app/components/alert";
+import {AlertWarning, AlertClose} from "app/components/alert";
 
 
 const styles = reactStyles({
@@ -98,11 +98,11 @@ export interface WorkbenchAccessTasksProps {
 }
 
 export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps, {}> {
+    React.Component<WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}> {
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
-    console.log(props.firstVisitTraining);
+    this.state = {trainingWarningOpen: !props.firstVisitTraining}
   }
 
   static redirectToNiH(): void {
@@ -118,6 +118,8 @@ export class WorkbenchAccessTasks extends
   }
 
   render() {
+    const {trainingWarningOpen} = this.state;
+    const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
     return <React.Fragment>
       <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
@@ -140,15 +142,15 @@ export class WorkbenchAccessTasks extends
                   Workbench once you are logged in.</div>
               </div>
               <AccountLinkingButton failed={false}
-                                    completed={this.props.eraCommonsLinked}
+                                    completed={eraCommonsLinked}
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
                                     onClick={WorkbenchAccessTasks.redirectToNiH}/>
             </div>
-            {this.props.eraCommonsError && <Error data-test-id='era-commons-error'>
+            {eraCommonsError && <Error data-test-id='era-commons-error'>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
+              Error Linking NIH Username: {eraCommonsError} Please try again!
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
@@ -159,17 +161,19 @@ export class WorkbenchAccessTasks extends
                 outstanding training material to be completed.</div>
             </div>
             <AccountLinkingButton failed={false}
-                                  completed={this.props.trainingCompleted}
+                                  completed={trainingCompleted}
                                   defaultText={'Complete Training'}
                                   completedText='Completed'
                                   failedText=''
                                   onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
-          {!this.props.firstVisitTraining && !this.props.trainingCompleted &&
+          {trainingWarningOpen && !trainingCompleted &&
           <AlertWarning>
-            <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-            It may take several minutes for Moodle to update your Online Training
-            status once you have completed compliance training.
+            <ClrIcon shape='exclamation-triangle' class='is-solid'
+                     style={{width: '8%', height: '40px', marginRight: '.1rem'}}/>
+            <div>It may take several minutes for Moodle to update your Online Training
+            status once you have completed compliance training.</div>
+            <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
           </AlertWarning>}
         </div>
       </div>
