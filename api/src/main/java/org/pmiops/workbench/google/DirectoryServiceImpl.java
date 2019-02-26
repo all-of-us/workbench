@@ -70,8 +70,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
-                              Provider<WorkbenchConfig> configProvider,
-                              HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
+      Provider<WorkbenchConfig> configProvider,
+      HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
@@ -167,7 +167,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
-    ArrayList<UserEmail> emails = Lists.newArrayList(
+    List<UserEmail> emails = Lists.newArrayList(
         new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
     if (contactEmail != null) {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
