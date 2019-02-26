@@ -733,29 +733,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ICD10AndSnomed() throws Exception {
-    SearchParameter icd9 = new SearchParameter()
-      .type(TreeType.ICD9.name())
-      .subtype(TreeSubType.CM.name())
-      .group(false)
-      .value("001.1")
-      .conceptId(1L);
-    SearchParameter icd10 = new SearchParameter()
-      .type(TreeType.ICD10.name())
-      .subtype(TreeSubType.CM.name())
-      .group(true)
-      .value("200");
-    SearchParameter snomed = new SearchParameter()
-      .type(TreeType.SNOMED.name())
-      .subtype(TreeSubType.CM.name())
-      .group(false)
-      .value("xx")
-      .conceptId(4L);
-    SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9, icd10, snomed), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers() throws Exception {
     Modifier ageModifier = new Modifier()
       .name(ModifierType.AGE_AT_EVENT)
