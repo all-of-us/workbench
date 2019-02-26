@@ -219,7 +219,7 @@ const routes: Routes = [
                 path: 'data/datasets',
                 component: DataSetComponent,
                 data: {
-                  title: 'DataSet Page',
+                  title: 'Dataset Page',
                   breadcrumb: {
                     value: 'Dataset'
                   }
