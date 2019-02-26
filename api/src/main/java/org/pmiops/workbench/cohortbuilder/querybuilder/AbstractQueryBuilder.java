@@ -1,8 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -103,13 +101,13 @@ public abstract class AbstractQueryBuilder {
                                  String conceptIdsSql,
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
-                                 String mention) {
+                                 TemporalMention mention) {
     if (mention != null) {
       String temporalSql = TEMPORAL_SQL_TEMPLATE
         .replace("${innerSql}", innerSql)
         .replace("${conceptIdSql}", conceptIdsSql)
         .replace("${ageDateAndEncounterSql}", getAgeDateAndEncounterSql(queryParams, modifiers));
-      if (TemporalMention.ANY_MENTION.name().equals(mention)) {
+      if (TemporalMention.ANY_MENTION.equals(mention)) {
         return temporalSql.replace("${rank1Sql}", "");
       } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
         temporalSql = temporalSql.replace("${rank1Sql}", RANK_1_SQL_TEMPLATE.replace("${descSql}", ""));
