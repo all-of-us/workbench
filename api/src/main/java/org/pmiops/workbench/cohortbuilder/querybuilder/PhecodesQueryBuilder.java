@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -38,7 +39,7 @@ public class PhecodesQueryBuilder extends AbstractQueryBuilder {
     @Override
     public String buildQuery(Map<String, QueryParameterValue> queryParams,
                              SearchGroupItem searchGroupItem,
-                             String temporalMention) {
+                             TemporalMention temporalMention) {
         String namedParameter = addQueryParameterValue(queryParams,
                 QueryParameterValue.array(
                         searchGroupItem

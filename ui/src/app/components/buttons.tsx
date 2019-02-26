@@ -89,6 +89,14 @@ const buttonVariants = {
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
     hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
+  },
+  link: {
+    style: {
+      color: colors.blue[0]
+    },
+    disabledStyle: {
+      color: colors.gray[2]
+    }
   }
 };
 
@@ -148,5 +156,36 @@ export const CardButton = ({disabled = false, style = {}, children, ...props}) =
   return <Clickable
     disabled={disabled} {...props}
     {...fp.merge(computeStyle(cardButtonStyle, {disabled}), {style})}
+  >{children}</Clickable>;
+};
+
+const tabButtonStyle = {
+  style: {
+    margin: '0 1rem',
+    textAlign: 'center',
+    color: '#2691D0',
+    fontSize: '16px',
+    lineHeight: '28px',
+  },
+  hover: {},
+  disabledStyle: {}
+};
+
+const activeTabButtonStyle = {
+  style: {
+    borderBottom: '4px solid #216FB4',
+    fontWeight: 600
+  }
+};
+
+export const TabButton = ({disabled = false, style = {}, active = false, children, ...props}) => {
+  const tabButtonStyleMerged = {
+    style: {...tabButtonStyle.style, ...(active ? activeTabButtonStyle.style : {})},
+    hover: tabButtonStyle.hover,
+    disabledStyle: tabButtonStyle.disabledStyle,
+  };
+  return <Clickable
+    disabled={disabled} {...props}
+    {...fp.merge(computeStyle(tabButtonStyleMerged, {disabled}), {style})}
   >{children}</Clickable>;
 };

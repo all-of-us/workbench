@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {Router} from '@angular/router';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -9,12 +8,12 @@ import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {isBlank, ReactWrapperBase, summarizeErrors} from 'app/utils/index';
+import {ReactWrapperBase, summarizeErrors} from 'app/utils/index';
 import {navigate} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 
 
-import {FileDetail, UserMetricsService, Workspace} from 'generated';
+import {FileDetail, Workspace} from 'generated';
 
 export class NewNotebookModal extends React.Component<
   {onClose: Function, workspace: Workspace, existingNotebooks: FileDetail[]},

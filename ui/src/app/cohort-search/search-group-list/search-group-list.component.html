@@ -5,7 +5,9 @@
 
   <!-- .size, not .length => this is an immutable.js list -->
   <div *ngFor="let group of (groups$ | async); let i = index;">
-    <app-search-group [group]="group" [index]="i + index" [role]="role">
+    <app-search-group [group]="group" [index]="i + index"
+                      [role]="role"
+                      (temporalLength)="getTemporalLength($event)">
     </app-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>

@@ -121,7 +121,7 @@ export class WorkbenchAccessTasks extends
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
-            <div style={styles.text}>Please login to your ERA Commons account and complete
+            <div style={styles.text}>Please login to your eRA Commons account and complete
               the online training courses in order to gain full access to the Researcher
               Workbench data and tools.</div>
           </div>
@@ -130,9 +130,9 @@ export class WorkbenchAccessTasks extends
           <div style={{...styles.infoBox, flexDirection: 'column'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
               <div style={{flexDirection: 'column', width: '70%'}}>
-                <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
+                <div style={styles.infoBoxHeader}>Login to eRA Commons</div>
                 <div style={styles.infoBoxBody}>Clicking the login link will bring you
-                  to the ERA Commons Portal and redirect you back to the
+                  to the eRA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
               <AccountLinkingButton failed={false}
@@ -248,7 +248,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
-  private profileTimer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
@@ -305,7 +304,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     const {profileState: {profile, reload}} = this.props;
 
     if (fp.isEmpty(profile)) {
-      this.profileTimer = setTimeout(() => {
+      setTimeout(() => {
         reload();
       }, 10000);
     } else {
@@ -367,7 +366,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink, firstVisit} = this.state;
+        quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',

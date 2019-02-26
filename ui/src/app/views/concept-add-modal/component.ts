@@ -5,7 +5,6 @@ import {
   Concept,
   ConceptSet,
   ConceptSetsService,
-  ConceptsService,
   CreateConceptSetRequest,
   Domain,
   UpdateConceptSetRequest
@@ -43,7 +42,6 @@ export class ConceptAddModalComponent {
 
   constructor(
     private conceptSetsService: ConceptSetsService,
-    private conceptService: ConceptsService,
   ) {
     const {ns, wsid} = urlParamsStore.getValue();
     this.wsNamespace = ns;

@@ -7,4 +7,7 @@
 const enzyme = require("enzyme");
 const Adapter = require("enzyme-adapter-react-16");
 
+const {setupCustomValidators} = require('./src/app/services/setup');
+
+setupCustomValidators();
 enzyme.configure({ adapter: new Adapter() });

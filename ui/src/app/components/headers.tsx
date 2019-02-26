@@ -1,4 +1,3 @@
-import * as React from 'react';
 
 import colors from 'app/styles/colors';
 import {withStyle} from 'app/utils/index';

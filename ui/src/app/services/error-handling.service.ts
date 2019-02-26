@@ -1,4 +1,4 @@
-import {Injectable, NgZone} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
@@ -16,7 +16,7 @@ export class ErrorHandlingService {
   public userDisabledError: boolean;
   public profileLoadError: boolean;
 
-  constructor(private zone: NgZone) {
+  constructor() {
     this.serverError = false;
     this.profileLoadError = false;
     this.noServerResponse = false;

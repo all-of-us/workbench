@@ -5,8 +5,8 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Local->Test',
   debug: true,
-  enableTemporal: false,
   useZendeskForSupport: false,
   enableJupyterLab: true,
-  enableComplianceLockout: true
+  enableComplianceLockout: true,
+  enableDatasetBuilder: true,
 };

@@ -14,6 +14,8 @@ import {CohortAnnotationDefinition, CohortAnnotationDefinitionService, CohortRev
 export class DetailPage implements OnInit, OnDestroy {
 
   sidebarOpen = true;
+  creatingDefinition = false;
+  editingDefinitions = false;
   participant: Participant;
   annotations: ParticipantCohortAnnotation[];
   annotationDefinitions: CohortAnnotationDefinition[];
@@ -22,8 +24,13 @@ export class DetailPage implements OnInit, OnDestroy {
     private reviewAPI: CohortReviewService,
     private defsAPI: CohortAnnotationDefinitionService
   ) {
-    this.loadAnnotationDefinitions = this.loadAnnotationDefinitions.bind(this);
     this.setAnnotations = this.setAnnotations.bind(this);
+    this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
+    this.closeCreateDefinitionModal = this.closeCreateDefinitionModal.bind(this);
+    this.definitionCreated = this.definitionCreated.bind(this);
+    this.openEditDefinitionsModal = this.openEditDefinitionsModal.bind(this);
+    this.closeEditDefinitionsModal = this.closeEditDefinitionsModal.bind(this);
+    this.setAnnotationDefinitions = this.setAnnotationDefinitions.bind(this);
   }
 
   ngOnInit() {
@@ -72,5 +79,30 @@ export class DetailPage implements OnInit, OnDestroy {
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  openCreateDefinitionModal() {
+    this.creatingDefinition = true;
+  }
+
+  closeCreateDefinitionModal() {
+    this.creatingDefinition = false;
+  }
+
+  definitionCreated(ad) {
+    this.creatingDefinition = false;
+    this.annotationDefinitions = this.annotationDefinitions.concat([ad]);
+  }
+
+  openEditDefinitionsModal() {
+    this.editingDefinitions = true;
+  }
+
+  closeEditDefinitionsModal() {
+    this.editingDefinitions = false;
+  }
+
+  setAnnotationDefinitions(v) {
+    this.annotationDefinitions = v;
   }
 }

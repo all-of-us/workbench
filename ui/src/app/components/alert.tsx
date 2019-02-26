@@ -1,5 +1,4 @@
 import {reactStyles} from 'app/utils';
-import * as React from 'react';
 
 import {withStyle} from 'app/utils/index';
 
