@@ -29,32 +29,38 @@ const domain = {
 const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
-  displayName: 'Standard Vocabulary',
+  displayName: 'Vocabulary',
 };
 const standardName = {
   name: 'standardName',
-  displayName: 'Standard Name',
+  displayName: 'Name',
 };
 const standardCode = {
   name: 'standardCode',
-  displayName: 'Standard Code',
+  displayName: 'Code',
 };
-const sourceVocabulary = {
-  name: 'sourceVocabulary',
-  classNames: ['vocab-col'],
-  displayName: 'Source Vocabulary',
-};
-const sourceName = {
-  name: 'sourceName',
-  displayName: 'Source Name',
-};
+
+/*
+  * TODO - uncomment below code when we will have source code and standard code radio button filter.
+  */
+//
+// const sourceVocabulary = {
+//   name: 'sourceVocabulary',
+//   classNames: ['vocab-col'],
+//   displayName: 'Source Vocabulary',
+// };
+// const sourceName = {
+//   name: 'sourceName',
+//   displayName: 'Source Name',
+// };
+// const sourceCode = {
+//   name: 'sourceCode',
+//   displayName: 'Source Code',
+// };
+
 const value = {
   name: 'value',
   displayName: 'Value',
-};
-const sourceCode = {
-  name: 'sourceCode',
-  displayName: 'Source Code',
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
@@ -79,27 +85,6 @@ const firstMention = {
 const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
-};
-
-const dose = {
-  name: 'dose',
-  displayName: 'Dose',
-};
-const strength = {
-  name: 'strength',
-  displayName: 'Strength',
-};
-const dataRoute = {
-  name: 'route',
-  displayName: 'Route',
-};
-const unit = {
-  name: 'unit',
-  displayName: 'Units',
-};
-const refRange = {
-  name: 'refRange',
-  displayName: 'Reference Range',
 };
 const survey = {
   name: 'survey',
@@ -135,31 +120,17 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, visitType, standardCode, standardVocabulary, standardName, sourceCode,
-      sourceVocabulary, sourceName, dataRoute, dose, strength, value, unit, refRange,
-      domain, ageAtEvent, numMentions, firstMention, lastMention
+      visitType, standardCode, standardVocabulary, standardName, value,
+      domain, ageAtEvent
     ],
     reverseEnum: {
-      Date: itemDate,
-      Time: itemDate,
       visitType: visitType,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
       standardName: standardName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
-      dataRoute: dataRoute,
-      quantity: dose,
-      strength: strength,
       value: value,
-      unit: unit,
-      refRange: refRange,
       domain: domain,
       age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
     }
   };
 
@@ -168,17 +139,12 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardCode, standardVocabulary, standardName, sourceCode, sourceVocabulary,
-      sourceName, ageAtEvent, visitType
+      standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
-      itemDate: itemDate,
+      standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
       age: ageAtEvent,
       visitType: visitType,
     }
@@ -187,17 +153,12 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardCode, standardVocabulary, standardName, sourceCode, sourceVocabulary,
-      sourceName, ageAtEvent, visitType
+      standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
-      itemDate: itemDate,
+      standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      sourceName: sourceName,
       age: ageAtEvent,
       visitType: visitType,
     }
@@ -206,15 +167,12 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, dataRoute, dose, strength, ageAtEvent, numMentions,
+      itemDate, standardName, ageAtEvent, numMentions,
       firstMention, lastMention, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
       standardName: standardName,
-      dataRoute: dataRoute,
-      dose: dose,
-      strength: strength,
       age: ageAtEvent,
       numMentions: numMentions,
       firstMention: firstMention,
@@ -226,8 +184,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
-      sourceCode, sourceVocabulary, visitId
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitId
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -235,9 +192,6 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
       visitId: visitId,
     }
   }, {
@@ -245,7 +199,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.PHYSICALMEASURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardCode, standardVocabulary, standardName, value, unit, ageAtEvent
+      itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -253,7 +207,6 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardVocabulary: standardVocabulary,
       standardName: standardName,
       value: value,
-      unit: unit,
       age: ageAtEvent,
     }
   }, {
@@ -261,15 +214,13 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, unit, refRange, ageAtEvent, visitType
+      itemDate, itemTime, standardName, value, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
       value: value,
-      unit: unit,
-      refRange: refRange,
       age: ageAtEvent,
       visitType: visitType
     }
@@ -278,15 +229,13 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, unit, refRange, ageAtEvent, visitType
+      itemDate, itemTime, standardName, value, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
       value: value,
-      unit: unit,
-      refRange: refRange,
       age: ageAtEvent,
       visitType: visitType
     }
