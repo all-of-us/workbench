@@ -5,7 +5,8 @@
     "concept_id":1520218,
     "subtype":"ATC",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -13,7 +14,8 @@
     "concept_id":11,
     "subtype":"ATC",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":19
   },
   {
     "person_id":1,
@@ -21,6 +23,7 @@
     "concept_id":1520218,
     "subtype":"ATC",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   }
 ]

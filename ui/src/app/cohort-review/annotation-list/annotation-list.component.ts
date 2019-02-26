@@ -1,6 +1,5 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import * as fp from 'lodash/fp';
-import {Observable} from 'rxjs/Observable';
 
 import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 

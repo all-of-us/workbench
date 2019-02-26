@@ -6,7 +6,8 @@
     "type":"ICD9",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   },
   {
     "person_id":2,
@@ -15,7 +16,8 @@
     "type":"ICD9",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -24,7 +26,8 @@
     "type":"ICD9",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -33,7 +36,8 @@
     "type":"ICD9",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -42,7 +46,8 @@
     "type":"CPT",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -51,7 +56,8 @@
     "type":"SNOMED",
     "subtype":"PCS",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -60,7 +66,8 @@
     "type":"ICD9",
     "subtype":"PCS",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -69,7 +76,8 @@
     "type":"ICD9",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -78,7 +86,8 @@
     "type":"CPT",
     "subtype":"CPT4",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -87,7 +96,8 @@
     "type":"ICD10",
     "subtype":"CM",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -96,7 +106,8 @@
     "type":"ICD10",
     "subtype":"PCS",
     "age_at_event":38,
-    "visit_concept_id":1
+    "visit_concept_id":1,
+    "visit_occurrence_id":1
   },
   {
     "person_id":1,
@@ -105,6 +116,7 @@
     "type":"CPT",
     "subtype":"CPT4",
     "age_at_event":38,
-    "visit_concept_id":12
+    "visit_concept_id":12,
+    "visit_occurrence_id":1
   }
 ]

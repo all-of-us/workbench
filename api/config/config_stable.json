@@ -45,5 +45,9 @@
   "elasticsearch": {
     "host": "",
     "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aou.nnlm.gov",
+    "enableMoodleBackend": false
   }
 }

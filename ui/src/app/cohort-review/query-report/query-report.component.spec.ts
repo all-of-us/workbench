@@ -10,9 +10,8 @@ import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.
 import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReview, CohortReviewService, DataAccessLevel, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService, CohortReviewService, DataAccessLevel, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';

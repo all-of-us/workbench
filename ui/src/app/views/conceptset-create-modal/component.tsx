@@ -6,7 +6,7 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils/index';
-import {ConceptSet, CreateConceptSetRequest, Domain, DomainInfo} from 'generated/fetch';
+import {ConceptSet, Domain, DomainInfo} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
 

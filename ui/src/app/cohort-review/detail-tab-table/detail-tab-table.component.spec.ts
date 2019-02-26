@@ -5,7 +5,6 @@ import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {DetailTabTableComponent} from './detail-tab-table.component';

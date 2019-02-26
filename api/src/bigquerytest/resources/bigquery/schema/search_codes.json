@@ -33,5 +33,10 @@
     "type": "integer",
     "name": "visit_concept_id",
     "mode": "nullable"
+  },
+  {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
   }
 ]

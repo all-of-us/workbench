@@ -30,6 +30,11 @@
     "mode": "nullable"
   },
   {
+    "type": "integer",
+    "name": "visit_occurrence_id",
+    "mode": "nullable"
+  },
+  {
     "type": "float",
     "name": "value_as_number",
     "mode": "nullable"

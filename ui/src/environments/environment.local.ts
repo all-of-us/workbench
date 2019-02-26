@@ -15,8 +15,8 @@ export const environment: Environment = {
   gaId: 'UA-112406425-5',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  enableTemporal: true,
   useZendeskForSupport: true,
   enableJupyterLab: true,
-  enableComplianceLockout: true
+  enableComplianceLockout: true,
+  enableDatasetBuilder: true,
 };
