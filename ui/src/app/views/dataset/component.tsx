@@ -4,7 +4,15 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
+import {WorkspaceData} from 'app/resolvers/workspace';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
+import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
+import {
+  ConceptSet,
+  DomainInfo,
+} from 'generated/fetch';
 
 export const styles = {
   selectBoxHeader: {
@@ -23,13 +31,34 @@ export const styles = {
   }
 };
 
-export const DataSet = withCurrentWorkspace()(class extends React.Component<{}, {}> {
+export const DataSet = withCurrentWorkspace()(class extends React.Component<
+  {workspace: WorkspaceData},
+  {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
+    conceptSetList: ConceptSet[]}> {
 
   constructor(props) {
     super(props);
+    this.state = {
+      creatingConceptSet: false,
+      conceptDomainList: undefined,
+      conceptSetList: []
+    };
+  }
+
+  async loadResources() {
+    try {
+      const {namespace, id} = this.props.workspace;
+      const conceptSets = await Promise.resolve(conceptSetsApi()
+        .getConceptSetsInWorkspace(namespace, id));
+      this.setState({conceptSetList: conceptSets.items});
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   render() {
+    const {namespace, id} = this.props.workspace;
+    const {creatingConceptSet, conceptDomainList, conceptSetList} = this.state;
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -43,7 +72,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<{}, 
           <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
             <div style={styles.selectBoxHeader}>
               Cohorts
-              <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}/>
+              <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
+              onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
             </div>
             {/*TODO: load cohorts and display here*/}
             <div style={{height: '8rem'}}/>
@@ -55,7 +85,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<{}, 
             <div style={{flexGrow: 1}}>
               <div style={{...styles.selectBoxHeader, borderRight: '1px solid #E5E5E5'}}>
                 Concept Sets
-                <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}/>
+                <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
+                onClick={() => this.setState({creatingConceptSet: true})}/>
               </div>
               {/*TODO: load concept steps and display here*/}
               <div style={{height: '8rem', borderRight: '1px solid #E5E5E5'}}/>
@@ -84,6 +115,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<{}, 
           <div style={{height: '8rem'}}/>
         </div>
       </FadeBox>
+      {creatingConceptSet &&
+      <CreateConceptSetModal onCreate={() => {
+        this.loadResources().then(() => {
+          this.setState({creatingConceptSet: false});
+        });
+      }}
+      onClose={() => {this.setState({ creatingConceptSet: false}); }}
+      conceptDomainList={conceptDomainList}
+      existingConceptSets={conceptSetList}/>}
     </React.Fragment>;
   }
 
