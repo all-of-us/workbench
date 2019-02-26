@@ -69,7 +69,7 @@ export const BugReportModal = withUserProfile()
     });
   }
 
-  updateBugReport(attribute: string, value: string) {
+  updateBugReport(attribute: string, value: any) {
     const newReport = this.state.bugReport;
     newReport[attribute] = value;
     this.setState(({bugReport}) => ({bugReport: fp.set(attribute, value, bugReport)}));
@@ -102,11 +102,8 @@ export const BugReportModal = withUserProfile()
         <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
           <input type='checkbox'
                  defaultChecked={bugReport.includeNotebookLogs}
-                 onClick={() => this.setState(
-                   {bugReport: {
-                     ...bugReport,
-                     includeNotebookLogs: !bugReport.includeNotebookLogs
-                   }})}
+                 onClick={() => this.updateBugReport('includeNotebookLogs',
+                     !bugReport.includeNotebookLogs)}
           />
           <label style={{...styles.fieldHeader, marginTop: '0rem', marginLeft: '0.2rem'}}>
             Attach notebook logs? </label>
