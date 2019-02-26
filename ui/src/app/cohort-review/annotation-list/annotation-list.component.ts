@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
 import * as fp from 'lodash/fp';
 
-import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 import {
   CohortAnnotationDefinition,
@@ -25,8 +25,10 @@ export class AnnotationListComponent implements OnChanges {
   @Input() annotations: ParticipantCohortAnnotation[];
   @Input() annotationDefinitions: CohortAnnotationDefinition[];
   @Input() setAnnotations: Function;
+  @Input() openCreateDefinitionModal: Function;
+  @Input() openEditDefinitionsModal: Function;
 
-  constructor(private state: ReviewStateService) {
+  constructor() {
     this.setAnnotation = this.setAnnotation.bind(this);
   }
 
@@ -47,11 +49,11 @@ export class AnnotationListComponent implements OnChanges {
   }
 
   openManager(): void {
-    this.state.annotationManagerOpen.next(true);
+    this.openCreateDefinitionModal();
   }
 
   openEditManager(): void {
-    this.state.editAnnotationManagerOpen.next(true);
+    this.openEditDefinitionsModal();
   }
 
   setAnnotation(cohortAnnotationDefinitionId, update: ParticipantCohortAnnotation) {

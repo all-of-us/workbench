@@ -6,7 +6,6 @@ import {Participant} from 'app/cohort-review/participant.model';
 import {Observable} from 'rxjs/Observable';
 import {ParticipantStatusComponent} from './participant-status.component';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {CohortReviewService, CohortStatus} from 'generated';
 
 
@@ -28,7 +27,6 @@ const participant: Participant = new Participant({
 describe('ParticipantStatusComponent', () => {
   let component: ParticipantStatusComponent;
   let fixture: ComponentFixture<ParticipantStatusComponent>;
-  let reviewStateService: ReviewStateService;
   let cohortReviewService: CohortReviewService;
 
   beforeEach(fakeAsync(() => {
@@ -36,7 +34,6 @@ describe('ParticipantStatusComponent', () => {
       declarations: [CreateReviewPage, ParticipantStatusComponent],
       imports: [ReactiveFormsModule, ClarityModule],
       providers: [
-        {provide: ReviewStateService, useClass: ReviewStateService},
         {provide: CohortReviewService, useValue: new ApiSpy()},
       ],
     }).compileComponents().then((resp) => {
@@ -46,7 +43,6 @@ describe('ParticipantStatusComponent', () => {
       component.participant = participant;
       fixture.detectChanges();
 
-      reviewStateService = TestBed.get(ReviewStateService);
       cohortReviewService = TestBed.get(CohortReviewService);
     });
   }));
