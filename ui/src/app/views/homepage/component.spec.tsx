@@ -20,7 +20,7 @@ describe('WorkbenchAccessTasks', () => {
   let props: WorkbenchAccessTasksProps;
 
   const component = () => {
-    return mount<WorkbenchAccessTasks, WorkbenchAccessTasksProps, {}>
+    return mount<WorkbenchAccessTasks, WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}>
     (<WorkbenchAccessTasks {...props}/>);
   };
 
@@ -30,6 +30,7 @@ describe('WorkbenchAccessTasks', () => {
       eraCommonsLinked: false,
       eraCommonsError: '',
       trainingCompleted: false,
+      firstVisitTraining: true,
     }
   });
 
