@@ -11,6 +11,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 
 
@@ -72,6 +73,11 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     };
   }
 
+  navigateToTraining(): void {
+    window.location.assign(
+      environment.trainingUrl + '/static/data-researcher.html?saml=on');
+  }
+
   componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
 
@@ -96,7 +102,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   }
 
   render() {
-    const {profileState: {profile, reload}} = this.props;
+    const {profileState: {profile}} = this.props;
     const {profileEdits, updating} = this.state;
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
@@ -282,36 +288,12 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 />
               </TooltipTrigger>
             </div>
-            {profile && (!!profile.trainingCompletionTime ?
-                <Button
-                  type='purplePrimary'
-                  disabled={true}
-                  style={{
-                    backgroundColor: colors.green,
-                    border: 'none',
-                    cursor: 'initial'
-                  }}
-                >
-                  <ClrIcon shape='check' style={{marginRight: 4}}/>Completed
-                </Button> :
-                <Button
-                  type='purplePrimary'
-                  onClick={async() => {
-                    this.setState({updating: true});
-
-                    try {
-                      await profileApi().completeEthicsTraining();
-                      await reload();
-                    } catch (e) {
-                      console.error(e);
-                    } finally {
-                      this.setState({updating: false});
-                    }
-                  }}
-                >
-                  Complete Training
-                </Button>
-            )}
+            <Button
+                type='purplePrimary'
+                onClick={this.navigateToTraining}
+            >
+              Access Training
+            </Button>
           </div>
         </div>
       </div>

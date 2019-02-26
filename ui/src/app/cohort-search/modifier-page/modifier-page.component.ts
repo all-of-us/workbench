@@ -307,7 +307,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.ngAfterContentChecked();
     this.errors = new Set();
     return this.modifiers.map(mod => {
-      const {name, inputType, min, max, maxLength, modType} = mod;
+      const {name, inputType, maxLength, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
           return;

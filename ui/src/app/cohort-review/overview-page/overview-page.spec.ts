@@ -6,9 +6,8 @@ import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.com
 import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
 import {cohortReviewStore, ReviewStateService} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReview, CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
-import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';

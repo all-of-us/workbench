@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 import {CohortAnnotationDefinitionService} from 'generated';
-import {cohortAnnotationDefinitionStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
 
 import {ReviewStateService} from 'app/cohort-review/review-state.service';

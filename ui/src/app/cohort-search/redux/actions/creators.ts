@@ -59,6 +59,10 @@ import {
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
+  UPDATE_TEMPORAL,
+  UPDATE_WHICH_MENTION,
+  UPDATE_TEMPORAL_TIME,
+  UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -228,8 +232,8 @@ export const countRequestError =
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
 export const clearTotalCount =
-  (): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
-  ({type: CLEAR_TOTAL_COUNT});
+  (groupId?: string): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
+  ({type: CLEAR_TOTAL_COUNT, groupId});
 
 export const clearGroupCount =
   (groupId: string
@@ -349,9 +353,9 @@ export const hideAttributesPage =
  * Context mgmt
  */
 export const openWizard =
-  (itemId: string, itemType: string, context: object
+  (itemId: string, itemType: string, context: object, tempGroup?: number
   ): ActionTypes[typeof OPEN_WIZARD] =>
-  ({type: OPEN_WIZARD, itemId, itemType, context});
+  ({type: OPEN_WIZARD, itemId, itemType, context, tempGroup});
 
 export const reOpenWizard =
   (item: any, context: object
@@ -367,6 +371,22 @@ export const cancelWizard =
 export const setWizardContext =
   (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
   ({type: SET_WIZARD_CONTEXT, context});
+
+export const updatedTemporal =
+  (flag: boolean, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL] =>
+    ({type: UPDATE_TEMPORAL, flag, groupId});
+
+export const updateWhichMention =
+  (mention: any, groupId: any): ActionTypes[typeof UPDATE_WHICH_MENTION] =>
+    ({type: UPDATE_WHICH_MENTION, mention, groupId});
+
+export const updateTemporalTime =
+  (time: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME] =>
+    ({type: UPDATE_TEMPORAL_TIME, time, groupId});
+
+export const updateTemporalTimeValue =
+  (timeValue: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE] =>
+    ({type: UPDATE_TEMPORAL_TIME_VALUE, timeValue, groupId});
 
 export const loadEntities =
   (entities: any): ActionTypes[typeof LOAD_ENTITIES] =>

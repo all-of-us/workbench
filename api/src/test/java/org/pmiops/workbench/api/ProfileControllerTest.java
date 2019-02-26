@@ -169,7 +169,7 @@ public class ProfileControllerTest {
     doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
-        Providers.of(complianceTrainingService));
+        complianceTrainingService);
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,

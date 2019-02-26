@@ -13,8 +13,7 @@ import {environment} from 'environments/environment';
 import {
   Cluster,
   ClusterService,
-  ClusterStatus,
-  WorkspaceAccessLevel
+  ClusterStatus
 } from 'generated';
 import {
   ClusterService as LeoClusterService,
@@ -123,7 +122,7 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const {ns, wsid} = urlParamsStore.getValue();
-    const {creating, playgroundMode, jupyterLabMode, kernelType} = queryParamsStore.getValue();
+    const {creating, playgroundMode, jupyterLabMode} = queryParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
     this.creating = creating || false;
@@ -289,14 +288,6 @@ export class NotebookRedirectComponent implements OnInit, OnDestroy {
 
   navigateBack(): void {
     this.locationService.back();
-  }
-
-  private initializeProgressMap(): void {
-    for (const p in Object.keys(Progress)) {
-      if (p) {
-        this.progressComplete[p] = false;
-      }
-    }
   }
 
   private incrementProgress(p: Progress): void {
