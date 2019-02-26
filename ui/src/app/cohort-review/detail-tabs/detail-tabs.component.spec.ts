@@ -10,7 +10,6 @@ import {ReviewStateService} from 'app/cohort-review/review-state.service';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
 import * as highCharts from 'highcharts';
-import 'rxjs/add/observable/of';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {ReviewStateServiceStub} from 'testing/stubs/review-state-service-stub';
