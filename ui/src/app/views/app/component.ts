@@ -137,6 +137,7 @@ export class AppComponent implements OnInit {
    */
   private setGTagManager() {
     const s = this.doc.createElement('script');
+    const ua = window.navigator.userAgent;
     s.type = 'text/javascript';
     s.innerHTML =
       '(function(w,d,s,l,i){' +
@@ -152,7 +153,8 @@ export class AppComponent implements OnInit {
       'window.dataLayer = window.dataLayer || [];' +
       'function gtag(){dataLayer.push(arguments);}' +
       'gtag(\'js\', new Date());' +
-      'gtag(\'config\', \'' + environment.gaId + '\');';
+      'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': {\'dimension1\': \'user_agent\'}});' +
+      'gtag(\'event\', \'ua_dimension\', {\'user_agent\': \'' + ua + '\'});';
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }
