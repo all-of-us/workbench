@@ -431,7 +431,7 @@ definitions:
 
   SearchGroup:
     description: >
-      A SearchGroup is a container for groups of criteria which are `AND`ed together.
+      A SearchGroup is a container for groups of criteria which are `OR`ed together.
     type: object
     required:
       - temporal
@@ -489,7 +489,31 @@ definitions:
         items:
           $ref: "#/definitions/SearchParameter"
       modifiers:
-        description: criteria by operation or predicate
+        description: >
+          Predicates to apply to the search parameters. Aggregate modifiers
+          (i.e. NUM_OF_OCCURRENCES) are applied independently to each
+          SearchParameter and furthermore, are applied independently to any
+          group elements within those SearchParameters.
+
+          Consider the following example query scenario.
+
+          Example criteria tree:
+          - parent
+            - child1
+            - child2
+
+          Curated dataset contains 1 participant with 1 event each of concepts
+          child1 and child2. Search request is made on "parent", with a modifier of
+          {type: NUM_OF_OCCURRENCES, operands: [2]}.
+
+          This does not match - the participant would need to have at least 2
+          events of type child1 and/or of child2 and/or of parent (in the event
+          that "parent" corresponds to a real concept in the data).
+
+          Additionally, aggregate modifiers are applied secondarily to other
+          modifiers. For example, combining the AGE_AT_EVENT with
+          NUM_OF_OCCURRENCES - first we filter down all events by the age
+          predicate, then we count occurrences.
         type: "array"
         items:
           $ref: "#/definitions/Modifier"
@@ -538,6 +562,7 @@ definitions:
         type: integer
         format: int64
       attributes:
+        # TODO: Concrete examples? How is this actually used?
         description: Any applicable arguments that complete the sense of the parameter
         type: "array"
         items:
