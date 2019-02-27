@@ -179,9 +179,9 @@
     tslib "^1.7.1"
 
 "@angular/compiler-cli@^7.1.1":
-  version "7.2.6"
-  resolved "https://registry.yarnpkg.com/@angular/compiler-cli/-/compiler-cli-7.2.6.tgz#50c4d2fed21292b40b7e14d20a2133312a09d2cd"
-  integrity sha512-sB0Bc5hE1zoXKwK4E9pC/UblCEHi3CwLBT/1nmVMYBdGzSSUxO4FaioJi+SCeGJJ+kk85Vny2up08gnupmLKqA==
+  version "7.2.7"
+  resolved "https://registry.yarnpkg.com/@angular/compiler-cli/-/compiler-cli-7.2.7.tgz#01adbb176075d2d02959a92053409dd0af343e2f"
+  integrity sha512-UPWROJzBLejgNf+aqgEUXYts8UiFOl2IavDhS/olA9irszv2lNFj9Yqr8OKdy0jK/lKaipZog3VZEx8g5dNeBA==
   dependencies:
     canonical-path "1.0.0"
     chokidar "^2.1.1"
@@ -224,9 +224,9 @@
     tslib "^1.7.1"
 
 "@angular/language-service@^7.1.1":
-  version "7.2.6"
-  resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-7.2.6.tgz#cc4fc6427667c57f3745de889d30bd751bb4c325"
-  integrity sha512-iFKgaat5MZlixsO5dqy1Km3tb4q3iAU+ZPMJCk7DN419aizF38UFnQY1gCYkw3dxZLZGIkXnwy8szGXUEhra/A==
+  version "7.2.7"
+  resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-7.2.7.tgz#c92d7fde437d6bddd2a4fe197f9c06005f3a5c53"
+  integrity sha512-d3iCBpOfgLNSGMrtqZvN6NHZIEnKD2MV8Hz4WsRLU4WY0RbshZj5dqx2nO3YRT2tACpAvhWBQoYvtLpTCPzsMA==
 
 "@angular/platform-browser-dynamic@^5.2.2":
   version "5.2.11"
@@ -802,9 +802,9 @@ acorn@^5.0.0, acorn@^5.5.3, acorn@^5.6.2:
   integrity sha512-T/zvzYRfbVojPWahDsE5evJdHb3oJoQfFbsrKM7w5Zcs++Tr257tia3BmMP8XYVjp1S9RZXQMh7gao96BlqZOw==
 
 acorn@^6.0.1:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.0.tgz#b0a3be31752c97a0f7013c5f4903b71a05db6818"
-  integrity sha512-MW/FjM+IvU9CgBzjO3UIPCE2pyEwUsoFl+VGdczOPEdxfGFjuKny/gN54mOuX7Qxmb9Rg9MCn2oKiSUeW+pjrw==
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.1.1.tgz#7d25ae05bb8ad1f9b699108e1094ecd7884adc1f"
+  integrity sha512-jPTiwtOxaHNaAPg/dmrJ/beuzLRnXtB0kQPQ8JpotKJgTB6rX6c8mlf315941pyjBSaPg8NHXS9fhP4u17DpGA==
 
 adm-zip@^0.4.9:
   version "0.4.13"
@@ -7585,7 +7585,7 @@ primeicons@^1.0.0:
   resolved "https://registry.yarnpkg.com/primeicons/-/primeicons-1.0.0.tgz#90061f168ef6227f21f0a7db8204ffa85cd27aec"
   integrity sha512-p/hzIjUVccW4eJPhuORHI3AUkDpqfvCQVrjxbFEejnTEdWY4C8fomVfjiaA9jCu83fSQnBHuRIGB96iAR8R6uA==
 
-primereact@^3.0.0:
+primereact@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/primereact/-/primereact-3.1.0.tgz#39262611140bd7c9164d7236770a99b46e58063b"
   integrity sha512-09qcKII90KM+fqNqU/d14RwfuFfAc92baS7g7ssbfJdUljFKtPXT0XAg3SQvXzSxBLneI+AbaAn0m/ebc0udkA==
