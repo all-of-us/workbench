@@ -137,7 +137,7 @@ export class ChartComponent implements OnChanges {
       },
       yAxis: {
         title: {
-          text: options.yAxisTitle ? options.yAxisTitle : null
+          text: null
         },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR,
@@ -499,7 +499,6 @@ export class ChartComponent implements OnChanges {
 
     // Unit for measurements is in stratum5
     const unit = this.analysis.unitName ? this.analysis.unitName : '';
-    const unitCount = this.analysis2.results.filter(r => r.stratum3 === this.genderId)[0].countValue;
     const series: any = {
       name: this.analysis.analysisName,
       colorByPoint: true,
@@ -522,7 +521,6 @@ export class ChartComponent implements OnChanges {
       series.pointWidth = null;
       series.shadow = false;
     }
-    console.log(this.chartTitle);
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
       title: { text: this.chartTitle },
@@ -530,7 +528,6 @@ export class ChartComponent implements OnChanges {
       categories: cats,
       pointWidth: this.pointWidth,
       xAxisTitle: unit,
-      yAxisTitle: unitCount + ' same unit participants'
     };
 
   }

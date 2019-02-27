@@ -42,6 +42,7 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   genderResults: AchillesResult[] = [];
   displayMeasurementGraphs = false;
   toDisplayMeasurementGenderAnalysis: any;
+  toDisplayMeasurementGenderCountAnalysis: any;
   graphType = GraphType;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
@@ -156,8 +157,22 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
 
   showMeasurementGenderHistogram(unit: string) {
     this.selectedUnit = unit;
-    this.toDisplayMeasurementGenderAnalysis = [this.analyses.measurementValueGenderAnalysis.
-    find(aa => aa.unitName === unit), this.analyses.measurementGenderCountAnalysis.
-    find(aa => aa.unitName === unit)];
+    this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
+    find(aa => aa.unitName === unit);
+    this.toDisplayMeasurementGenderCountAnalysis = this.analyses.measurementGenderCountAnalysis.
+    find(aa => aa.unitName === unit);
+  }
+  
+  public fetchChartTitle(gender: any) {
+    if (this.toDisplayMeasurementGenderCountAnalysis) {
+      const genderResults = this.toDisplayMeasurementGenderCountAnalysis.results.filter(r => r.stratum3 === gender.stratum2)[0];
+      if (genderResults) {
+        return genderResults.countValue;
+      } else {
+        return 0;
+      }
+    }else {
+      return gender.countValue;
+    }
   }
 }
