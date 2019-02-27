@@ -11,7 +11,6 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ModifierPredicates.betweenOperator;
@@ -52,7 +51,6 @@ public abstract class AbstractQueryBuilder {
   public static final String CHILD = "child";
   public static final String AND = " and ";
   public static final String OR = " or\n";
-  public static final String UNION = "union all\n";
   public static final String AGE_DATE_AND_ENCOUNTER_VAR = "${ageDateAndEncounterSql}";
   private static final String MODIFIER_SQL_TEMPLATE =
     "select criteria.person_id from (${innerSql}) criteria\n";
@@ -61,9 +59,9 @@ public abstract class AbstractQueryBuilder {
     ", rank() over (partition by person_id order by entry_date${descSql}) rn";
   private static final String TEMPORAL_SQL_TEMPLATE =
     "select person_id, visit_occurrence_id, entry_date${rank1Sql}\n" +
-      "from `${projectId}.${dataSetId}}." + TABLE_ID + "`\n" +
-      "where ${ageDateAndEncounterSql}";
-  private static final String PERSON_IN = "person_id in (${innerSql})\n";
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where ${conceptIdSql}" +
+      "and person_id in (${innerSql})\n";
   private static final String TEMPORAL_RANK_1_SQL_TEMPLATE =
     "select person_id, visit_occurrence_id, entry_date\n" +
       "from (${innerTemporalSql}) a\n" +
