@@ -137,9 +137,10 @@ export class AppComponent implements OnInit {
    */
   private setGTagManager() {
     const s = this.doc.createElement('script');
-    const ua = window.navigator.userAgent;
-    console.log(environment.gaId);
-    console.log(ua);
+    // This is set in Google Analytics, all the other envs this was the first
+    // custom dimension, but in test it was the second, no way to change it that
+    // I can find -US 2/27/18
+    const d = environment.gaId === 'UA-112406425-1' ? 'dimension2' : 'dimension1';
     s.type = 'text/javascript';
     s.innerHTML =
       '(function(w,d,s,l,i){' +
@@ -155,9 +156,12 @@ export class AppComponent implements OnInit {
       'window.dataLayer = window.dataLayer || [];' +
       'function gtag(){dataLayer.push(arguments);}' +
       'gtag(\'js\', new Date());' +
+      // There is some interpolation issues here that cause some useragents to be too long
+      // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
+      // it comes in under this limit -US 2/27/18
       'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
       'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
-      '{\'dimension2\': \'user_agent\'}});';
+      '{\'' + d + '\': \'user_agent\'}});';
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }
