@@ -126,25 +126,13 @@ label[for="deceased"] {
 
 .count-preview {
   background-color: #E4F3FC;
-  padding: 0.8rem;
-  margin-top: 1rem;
-}
-.count-preview  .calculate-btn{
-  background-color: #2691D0;
-  color: white;
+  padding: 0.5rem;
+  margin: 1rem 2.5% 0;
+  position: absolute;
+  width: 95%;
+  bottom: 1rem;
 }
 
-.count-preview  .disable-link {
-  pointer-events: none;
-  opacity: 0.3;
-}
-.count-preview  .add-button {
-  border-color: transparent;
-  outline: none;
-  background-color: transparent;
-  font-weight: 500;
-  color: #2691D0;
-}
 .count-preview .text-bold {
   font-weight: bold;
   color: #4A4A4A;

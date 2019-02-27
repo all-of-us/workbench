@@ -85,16 +85,18 @@
               type="button"
               [disabled]="criteria.disabled"
               clrDropdownTrigger>{{criteria.name}}</button>
-            <clr-dropdown-menu [id]="'demo-menu-' + index">
-              <button
-                *ngFor="let child of criteria.children"
-                [id]="child.subtype"
-                class="dropdown-item"
-                type="button"
-                [disabled]="child.disabled"
-                (click)="launchWizard(child)"
-                clrDropdownItem>{{child.name}}</button>
-            </clr-dropdown-menu>
+            <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
+              <clr-dropdown-menu [id]="'demo-menu-' + index">
+                <button
+                  *ngFor="let child of criteria.children"
+                  [id]="child.subtype"
+                  class="dropdown-item"
+                  type="button"
+                  [disabled]="child.disabled"
+                  (click)="launchWizard(child)"
+                  clrDropdownItem>{{child.name}}</button>
+              </clr-dropdown-menu>
+            </ng-template>
           </ng-container>
         </clr-dropdown>
       </clr-dropdown-menu>

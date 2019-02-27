@@ -13,7 +13,7 @@
              (blur)="checkMin()">
       <div class="slider">
         <div id="count-wrapper">
-            <span *ngIf="ageCount" id="age-count" class="badge badge-info">
+            <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
               {{ ageCount | number }}
             </span>
         </div>
@@ -85,15 +85,15 @@
 </form>
 <div class="container count-preview" *ngIf="!noSelection && subtype !== treeSubType.AGE">
   <div class="row">
-    <div class="col-lg-1 " *ngIf="showCalculateContainer || preview.get('requesting')">
+    <div class="col-lg-2 " *ngIf="showCalculateContainer || preview.get('requesting')">
        <span class="spinner spinner-md">
     </span>
     </div>
-    <div class="col-lg-2 calculate-button" *ngIf="showCalculateContainer || preview.get('requesting')">
+    <div class="col-lg-4 calculate-button" *ngIf="showCalculateContainer || preview.get('requesting')">
       Calculating ...
     </div>
     <ng-container *ngIf="!preview.get('requesting') && !showCalculateContainer">
-      <div class="col-lg-6 text-padding" *ngIf="preview.get('count') >= 0 || count">
+      <div class="col-lg-12 text-padding" *ngIf="preview.get('count') >= 0 || count">
         <div class="result-text">
           Results
         </div>

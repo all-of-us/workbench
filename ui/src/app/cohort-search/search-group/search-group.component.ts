@@ -82,12 +82,12 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
       const groupDiv = document.getElementById(this.group.get('id'));
       ro.observe(groupDiv);
     }
-    const demoItem = document.getElementById('DEMO' + this.index);
+    const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
         setTimeout(() => {
-          const demoMenu = document.getElementById('demo-menu' + this.index);
+          const demoMenu = document.getElementById('demo-menu-' + this.index);
           demoMenu.addEventListener('mouseenter', () => this.demoMenuHover = true);
           demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
         });
