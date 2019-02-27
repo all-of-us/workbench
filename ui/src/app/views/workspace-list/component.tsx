@@ -65,7 +65,7 @@ const WorkspaceCardMenu: React.FunctionComponent<{
   const wsPathPrefix = 'workspaces/' + wp.workspace.namespace + '/' + wp.workspace.id;
 
   return <PopupTrigger
-      data-test-id='resource-card-menu'
+      data-test-id='workspace-card-menu'
       side='bottom'
       closeOnClick
       content={ <React.Fragment>
@@ -95,7 +95,7 @@ const WorkspaceCardMenu: React.FunctionComponent<{
         </TooltipTrigger>
       </React.Fragment>}
   >
-    <Clickable disabled={disabled} data-test-id='resource-menu'>
+    <Clickable disabled={disabled} data-test-id='workspace-menu'>
       <ClrIcon shape='ellipsis-vertical' size={21}
                style={{color: disabled ? '#9B9B9B' : '#216FB4', marginLeft: -9,
                  cursor: disabled ? 'auto' : 'pointer'}}/>
@@ -149,7 +149,7 @@ export class WorkspaceCard extends React.Component<
 
     return <React.Fragment>
       <Card>
-        <div style={styles.workspaceCard}>
+        <div style={styles.workspaceCard} data-test-id='workspace-card'>
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
               <WorkspaceCardMenu wp={wp}
@@ -158,6 +158,7 @@ export class WorkspaceCard extends React.Component<
                                  disabled={false}/>
               <Clickable>
                 <div style={styles.workspaceName}
+                     data-test-id='workspace-card-name'
                      onClick={() => navigate(
                          ['workspaces', wp.workspace.namespace, wp.workspace.id])}>
                   {wp.workspace.name}</div>
@@ -178,7 +179,8 @@ export class WorkspaceCard extends React.Component<
               {displayDate(wp.workspace.lastModifiedTime)}</div>
             <div style={{
               ...styles.permissionBox,
-              backgroundColor: permissionBoxColors[wp.accessLevel]}}>{wp.accessLevel}</div>
+              backgroundColor: permissionBoxColors[wp.accessLevel]}}
+                 data-test-id='workspace-access-level'>{wp.accessLevel}</div>
           </div>
         </div>
       </Card>
@@ -323,7 +325,8 @@ export const WorkspaceList = withUserProfile()
                   <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                 </CardButton>
                 {workspaceList.map(wp => {
-                  return <WorkspaceCard wp={wp}
+                  return <WorkspaceCard key={wp.workspace.name}
+                                        wp={wp}
                                         userEmail={profile.username}
                                         reload={() => {this.reloadWorkspaces(); }}/>;
                 })}

@@ -7,9 +7,19 @@ import {WorkspacesApi, ProfileApi} from "generated/fetch/api";
 import {Profile} from 'generated';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {userProfileStore} from 'app/utils/navigation';
-import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
+import {navigate, userProfileStore} from 'app/utils/navigation';
+import {
+  WorkspacesApiStub,
+  workspaceStubs,
+  WorkspaceStubVariables
+} from 'testing/stubs/workspaces-api-stub';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
+// Mock the navigate function but not userProfileStore
+jest.mock('app/utils/navigation', () => ({
+    ...(jest.requireActual('app/utils/navigation')),
+  navigate: jest.fn()
+}));
 
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -17,8 +27,7 @@ describe('WorkspaceList', () => {
   const reload = jest.fn();
 
   const component = () => {
-    return mount(<WorkspaceList
-    />);
+    return mount(<WorkspaceList/>);
   };
 
   beforeEach(() => {
@@ -34,28 +43,31 @@ describe('WorkspaceList', () => {
     userProfileStore.next({profile, reload});
   });
 
-  it('displays the correct number of workspaces', () => {
+  it('displays the correct number of workspaces', async () => {
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
+        .map(c => c.text());
+    expect(cardNameList).toEqual(workspaceStubs.map(w => w.name));
   });
 
-  it('enables editing workspaces', () => {
-
+  it('enables editing workspaces', async () => {
+    const workspace = workspaceStubs[0];
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="workspace-card-name"]').first().simulate('click');
+    expect(navigate).toHaveBeenCalledWith(['workspaces', workspace.namespace, workspace.id]);
   });
 
-  it('enables deleting workspaces', () => {
+  it('has the correct permissions classes', async () => {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="workspace-card"]').first()
+        .find('[data-test-id="workspace-access-level"]').text())
+        .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
+  })
 
-  });
-
-  it('shows an error modal if there is an error deleting a workspace', () => {
-
-  });
-
-  it('enables sharing workspaces', () => {
-
-  });
-
-  it('enables duplicating workspaces', () => {
-
-  });
+  // Note: this spec is not testing the Popup menus on workspace cards due to an issue using
+  //    PopupTrigger in the test suite.
 
 });

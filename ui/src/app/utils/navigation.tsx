@@ -21,6 +21,7 @@ export const userProfileStore = new BehaviorSubject<{ profile: Profile, reload: 
 // NOTE: Because these are wired up directly to the router component,
 // all navigation done from here will effectively use absolute paths.
 export const navigate = (...args) => {
+  console.log('calling real navigate');
   return NavStore.navigate(...args);
 };
 
