@@ -9,7 +9,8 @@ export function typeDisplay(parameter): string {
   if (_type.match(/^DEMO.*/i)) {
     return {
       'GEN': 'Gender',
-      'RACE': 'Race/Ethnicity',
+      'RACE': 'Race',
+      'ETH': 'Ethnicity',
       'AGE': 'Age',
       'DEC': 'Deceased'
     }[subtype] || '';
