@@ -57,6 +57,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
+/**
+ * PMQueryBuilder builds SQL for BigQuery for the physical measurement criteria types.
+ */
 @Service
 public class PMQueryBuilder extends AbstractQueryBuilder {
 
@@ -65,15 +68,15 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_NUMBER = "and value_as_number ${operator} ${value}\n";
 
   private static final String BP_INNER_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.search_pm`\n" +
-    "   where source_concept_id = ${conceptId}\n";
+    "select person_id from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+    "   where concept_id = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
     "select person_id from( ${bpInnerSqlTemplate} )\n";
 
   private static final String BASE_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.search_pm`\n" +
-      "where source_concept_id = ${conceptId}\n";
+    "select person_id from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where concept_id = ${conceptId}\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;
@@ -81,6 +84,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + "and value_as_concept_id = ${value}\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -138,6 +144,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     return String.join(UNION_ALL, queryParts);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.PM;
