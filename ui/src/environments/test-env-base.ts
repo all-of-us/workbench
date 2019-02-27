@@ -10,7 +10,7 @@ export const testEnvironmentBase = {
   publicApiUrl: 'https://public-api-dot-all-of-us-workbench-test.appspot.com',
   publicUiUrl: 'https://public-ui-dot-all-of-us-workbench-test.appspot.com',
   gaId: 'UA-112406425-1',
-  gaDimension: 'dimension2',
+  gaUserAgentDimension: 'dimension2',
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',

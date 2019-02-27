@@ -20,7 +20,9 @@ export interface Environment {
   gaId: string;
   // The Google Analytics custom dimension ID for sending User Agent
   // info, allowing us to filter out Pingdom, Appscan, etc
-  gaDimension: string;
+  // This value should look like 'dimension1' with the digit
+  // being the variable
+  gaUserAgentDimension: string;
   // API endpoint to use for Leonardo (notebook proxy) API calls.
   // Example value: 'https://notebooks.firecloud.org'
   leoApiUrl: string;
