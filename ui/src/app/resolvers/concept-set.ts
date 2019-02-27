@@ -6,6 +6,9 @@ import {
   ConceptSetsService,
   Workspace
 } from 'generated';
+import {ConceptSet as FetchConceptSet} from 'generated/fetch';
+
+import {currentConceptSetStore} from 'app/utils/navigation';
 
 @Injectable()
 export class ConceptSetResolver implements Resolve<ConceptSet> {
@@ -18,6 +21,8 @@ export class ConceptSetResolver implements Resolve<ConceptSet> {
     const wsid: Workspace['id'] = route.params.wsid;
     const csid: ConceptSet['id'] = route.params.csid;
 
-    return this.api.getConceptSet(ns, wsid, csid).toPromise();
+    return this.api.getConceptSet(ns, wsid, csid).do(v => {
+      currentConceptSetStore.next(v as unknown as FetchConceptSet);
+    }).toPromise();
   }
 }

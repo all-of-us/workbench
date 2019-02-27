@@ -142,7 +142,9 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         <h2 style={{marginTop: 0}}>Data</h2>
         <div style={{color: '#000000', fontSize: '14px'}}>{placeholderText}</div>
         <div style={styles.cardButtonArea}>
-          <CardButton style={styles.resourceTypeButton} disabled={true}>
+          <CardButton style={styles.resourceTypeButton} onClick={() => {
+            navigate(['workspaces', namespace, id, 'data', 'datasets']);
+          }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Datasets</h2>
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>

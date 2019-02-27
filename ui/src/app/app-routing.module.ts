@@ -29,6 +29,7 @@ import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
 import {DataPageComponent} from 'app/views/data-page/component';
+import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
 import {NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
@@ -211,6 +212,16 @@ const routes: Routes = [
                   breadcrumb: {
                     value: 'Data',
                     intermediate: true
+                  }
+                }
+              },
+              {
+                path: 'data/datasets',
+                component: DataSetComponent,
+                data: {
+                  title: 'Dataset Page',
+                  breadcrumb: {
+                    value: 'Dataset'
                   }
                 }
               },

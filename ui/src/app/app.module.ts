@@ -74,6 +74,7 @@ import {
 import {Configuration as FetchConfiguration} from 'generated/fetch';
 
 import {DataPageComponent} from 'app/views/data-page/component';
+import {DataSetComponent} from 'app/views/dataset/component';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
@@ -146,6 +147,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetListComponent,
     ConfirmDeleteModalComponent,
     DataPageComponent,
+    DataSetComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
     NewNotebookModalComponent,
