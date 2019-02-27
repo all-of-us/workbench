@@ -9,6 +9,7 @@ import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {MultiSelect} from 'primereact/multiSelect';
 import * as React from 'react';
 
 const css = `
@@ -281,9 +282,19 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
 
       const columns = this.props.columns.map((col) => {
+        let fl: any;
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
+        const filterColName = col.name === 'standardVocabulary';
+        const filterOverlay = <React.Fragment> {filterColName && <div> <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+          <OverlayPanel ref={(el) => {fl = el;}} showCloseIcon={true} dismissable={true}>
+            <div>{col.name}</div>
+          </OverlayPanel>
+        </div>}
+        </React.Fragment>;
+        // let vocabFilter = <div>{col.name}</div>
+
         const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
@@ -292,6 +303,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {filterOverlay}
         </React.Fragment>;
 
         return <Column
@@ -301,6 +313,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           sortable
+          filterElement={filterOverlay}
           body={colName && this.overlayTemplate}/>;
       });
 
