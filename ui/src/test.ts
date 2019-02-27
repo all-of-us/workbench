@@ -13,7 +13,7 @@ import {
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {currentWorkspaceStore, currentCohortStore, urlParamsStore, queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, currentCohortStore, currentConceptSetStore, urlParamsStore, queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
 declare var __karma__: any;
@@ -30,6 +30,7 @@ getTestBed().initTestEnvironment(
 beforeEach(() => {
   currentWorkspaceStore.next(undefined);
   currentCohortStore.next(undefined);
+  currentConceptSetStore.next(undefined);
   urlParamsStore.next({});
   queryParamsStore.next({});
   routeConfigDataStore.next({});
