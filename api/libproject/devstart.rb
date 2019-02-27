@@ -1174,6 +1174,45 @@ Common.register_command({
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
 })
 
+def create_local_es_index(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  # TODO(RW-2213): Generalize this subsampling approach for all local development work.
+  op.opts.inverse_prob = 1000
+  op.add_option(
+      "--participant-inclusion-inverse-prob [DENOMINATOR]",
+      ->(opts, v) { opts.inverse_prob = v},
+      "The inverse probabilty to index a participant, used to index a " +
+      "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
+      "target dataset. Defaults to 1K (~1K participants on the 1M participant synthetic CDR).")
+  op.parse.validate
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
+  end
+
+  common = Common.new
+  # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
+  # to work against the synthetic CDR into a local ES (using test Workbench).
+  create_flags = ([
+    ['--query-project-id', 'all-of-us-ehr-dev'],
+    ['--es-base-url', 'http://elastic:9200'],
+    ['--cdr-version', 'synth_r_2019_q1'],
+    ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
+    ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
+    ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+  ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+    '--delete-indices'
+    # Gradle args need to be single-quote wrapped.
+  ]).map { |f| "'#{f}'" }
+  common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
+end
+
+Common.register_command({
+  :invocation => "create-local-es-index",
+  :description => "Create Elasticsearch index",
+  :fn => ->(*args) { create_local_es_index("create-local-es-index", *args) }
+})
+
 def update_cdr_version_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false

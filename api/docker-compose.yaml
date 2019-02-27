@@ -65,6 +65,20 @@ services:
     ports:
       - 8083:8083
       - 8084:8002
+  es-scripts:
+    depends_on:
+      - elastic
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
   db-scripts:
     depends_on:
       - db

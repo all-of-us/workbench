@@ -1,7 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentConceptSetStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 import {
@@ -38,7 +37,6 @@ export class ConceptSetDetailsComponent implements OnInit {
 
   constructor(
     private conceptSetsService: ConceptSetsService,
-    private route: ActivatedRoute,
   ) {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
@@ -50,7 +48,7 @@ export class ConceptSetDetailsComponent implements OnInit {
     this.wsId = wsid;
     const {accessLevel} = currentWorkspaceStore.getValue();
     this.accessLevel = accessLevel;
-    this.conceptSet = this.route.snapshot.data.conceptSet;
+    this.conceptSet = currentConceptSetStore.getValue() as unknown as ConceptSet;
     this.editName = this.conceptSet.name;
     this.editDescription = this.conceptSet.description;
   }
