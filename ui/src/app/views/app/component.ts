@@ -157,7 +157,7 @@ export class AppComponent implements OnInit {
       'gtag(\'js\', new Date());' +
       'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
       'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
-      '{\'dimension1\': \'user_agent\'}});';
+      '{\'dimension2\': \'user_agent\'}});';
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }
