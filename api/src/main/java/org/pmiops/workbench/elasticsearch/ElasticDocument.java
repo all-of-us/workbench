@@ -64,7 +64,7 @@ public class ElasticDocument {
       .build();
 
   private static Map<String, Object> esType(ElasticType t) {
-    return ImmutableMap.of("type", ElasticType.KEYWORD.lower());
+    return ImmutableMap.of("type", t.lower());
   }
 
   public final String id;
