@@ -3,13 +3,12 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import { HighlightSearchComponent } from 'app/highlight-search/highlight-search.component';
 import {EditComponent} from 'app/icons/edit/component';
-import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentConceptSetStore, currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetDetailsComponent} from 'app/views/concept-set-details/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
@@ -23,6 +22,7 @@ import {
   Domain,
   WorkspaceAccessLevel,
 } from 'generated';
+import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
@@ -38,16 +38,8 @@ import {
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
   let conceptSetsStub: ConceptSetsServiceStub;
-  let routeStub: any;
   beforeEach(fakeAsync(() => {
     conceptSetsStub = new ConceptSetsServiceStub([]);
-    routeStub = {
-      snapshot: {
-        data: {
-          conceptSet: newConceptSet()
-        }
-      }
-    };
     TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
@@ -68,7 +60,6 @@ describe('ConceptSetDetailsComponent', () => {
       ],
       providers: [
         { provide: ConceptSetsService, useValue: conceptSetsStub },
-        { provide: ActivatedRoute, useFactory: () => routeStub }
       ]}).compileComponents();
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -98,7 +89,7 @@ describe('ConceptSetDetailsComponent', () => {
     if (!conceptSet) {
       conceptSet = newConceptSet();
     }
-    routeStub.snapshot.data.conceptSet = conceptSet;
+    currentConceptSetStore.next(conceptSet as unknown as FetchConceptSet);
     if (!conceptSetsStub.conceptSets.length) {
       conceptSetsStub.conceptSets = [conceptSet];
     }
