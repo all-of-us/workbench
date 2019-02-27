@@ -38,7 +38,10 @@ import {SafeHtmlPipe} from './safe-html.pipe';
 const routes: Routes = [{
   path: '',
   component: CohortSearchComponent,
-  data: {title: 'Build Cohort Criteria'},
+  data: {
+    title: 'Build Cohort Criteria',
+    breadcrumb: 'cohortAdd'
+  },
 }];
 
 

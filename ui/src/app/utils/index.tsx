@@ -9,7 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import {currentWorkspaceStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
+import {currentCohortStore, currentConceptSetStore, currentWorkspaceStore, routeConfigDataStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -277,6 +277,16 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
+// HOC that provides a 'workspace' prop with current WorkspaceData
+export const withCurrentCohort = () => {
+  return connectBehaviorSubject(currentCohortStore, 'cohort');
+};
+
+// HOC that provides a 'workspace' prop with current WorkspaceData
+export const withCurrentConceptSet = () => {
+  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
+};
+
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
@@ -285,6 +295,11 @@ export const withUserProfile = () => {
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUrlParams = () => {
   return connectBehaviorSubject(urlParamsStore, 'urlParams');
+};
+
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withRouteConfigData = () => {
+  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain

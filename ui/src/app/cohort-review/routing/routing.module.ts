@@ -15,7 +15,8 @@ const routes: Routes = [{
   path: '',
   component: PageLayout,
   data: {
-    title: 'Review Cohort Participants'
+    title: 'Review Cohort Participants',
+    breadcrumb: 'cohort'
   },
   resolve: {
     review: ReviewResolver,
@@ -27,28 +28,19 @@ const routes: Routes = [{
       concepts: DemographicConceptMapsResolver,
     },
     data: {
-      breadcrumb: {
-        value: 'Participants',
-        intermediate: true
-      },
+      breadcrumb: 'cohort'
     }
   }, {
     path: 'participants/:pid',
     component: DetailPage,
     data: {
-      breadcrumb: {
-        value: 'Participant :pid',
-        intermediate: false
-      }
+      breadcrumb: 'participant'
     }
   }, {
     path: 'report',
     component: QueryReportComponent,
     data: {
-      breadcrumb: {
-        value: 'Query Report',
-        intermediate: false
-      }
+      breadcrumb: 'report'
     }
   }],
 }];
