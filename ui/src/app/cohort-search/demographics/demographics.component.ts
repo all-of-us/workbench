@@ -10,7 +10,6 @@ import {
   CohortSearchActions,
   CohortSearchState,
   participantsCount,
-  previewStatus,
 } from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
@@ -47,7 +46,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() selectedParamId: any;
   @Input() selectedTypes: any;
   @Output() itemsAddedFlag = new EventEmitter<boolean>();
-  @select(previewStatus) preview$;
   @select(participantsCount) count$;
   readonly treeSubType = TreeSubType;
   readonly minAge = minAge;
@@ -56,7 +54,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   subscription = new Subscription();
   hasSelection = false;
   selectedNode: any;
-  preview = Map();
   ageClicked = false;
 
 
@@ -84,9 +81,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
   ethnicityNodes = List();
   initialEthnicities = List();
-  deceasedClicked = false;
-  noSelection = true;
-  isCancelTimerInitiated: any = false;
+  selections: any;
   showCalculateContainer = false;
   count: any;
   subtype: string;
@@ -94,24 +89,13 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
-    private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
   ngOnChanges() {
     this.showCalculateContainer = false;
-    if (this.selectedTypes === 'Age') {
-      this.ageClicked = false;
-    } else if (this.selectedTypes === 'Deceased') {
-      this.deceasedClicked = false;
-    }
-    if (this.noSelection && this.selectedParamId) {
-      if (this.isCancelTimerInitiated) {
-        clearTimeout(this.isCancelTimerInitiated);
-        return;
-      }
-    } else if (this.selectedParamId) {
+    if (this.selections && this.selections.size && this.selectedParamId) {
       this.showCalculateContainer = true;
-      this.getSearchResponse();
+      this.calculate();
     }
 
   }
@@ -124,7 +108,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       }
     }));
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
-    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
     this.selection$.first().subscribe(selections => {
       /*
        * Each subtype of DEMO requires subtly different initialization, which
@@ -153,33 +136,20 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
       this.loadNodesFromApi();
     });
 
-
     this.subscription.add(this.selection$
-      .map(sel => sel.size === 0)
-      .subscribe(sel => this.noSelection = sel)
-        );
-
-
-    this.subscription.add(this.count$
-      .subscribe(totalCount => {
-        if (totalCount) {
-          this.count = totalCount;
-        }
-      }));
-
-    this.subscription.add (this.ngRedux
-      .select(activeParameterList)
-      .subscribe(val => {
-        val.forEach( paramList => {
-
-          if (paramList.get('subtype') === TreeSubType.DEC) {
-            this.deceasedClicked = paramList.get('name');
-          } else if (paramList.get('subtype') === TreeSubType.AGE) {
-            this.ageClicked = paramList.get('name');
+      .subscribe(selections => {
+        this.selections = selections;
+        selections.forEach(selection => {
+          if (this.subtype === TreeSubType.AGE
+            && (selection.get('subtype') === TreeSubType.AGE
+            || selection.get('subtype') === TreeSubType.DEC)) {
+            console.log(selection.toJS());
+          } else if (selection.get('subtype') === TreeSubType.AGE) {
+            // this.ageClicked = selection.get('name');
           }
         });
-
-      }));
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -425,20 +395,15 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  getSearchResponse() {
-    if (this.isCancelTimerInitiated) {
-      clearTimeout(this.isCancelTimerInitiated);
-    }
-    this.isCancelTimerInitiated = setTimeout(() => {
-      this.actions.requestPreview();
-      this.showCalculateContainer = false;
-    }, 200);
+  calculate() {
+    // calculate
+    this.showCalculateContainer = false;
   }
 
   getItems(flag) {
     if (flag) {
       this.showCalculateContainer = true;
-      this.getSearchResponse();
+      this.calculate();
     } else {
       this.showCalculateContainer = false;
     }
