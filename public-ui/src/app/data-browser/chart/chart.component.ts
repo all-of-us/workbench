@@ -13,6 +13,7 @@ import {DomainType} from '../../utils/enum-defs';
 })
 export class ChartComponent implements OnChanges {
   @Input() analysis: Analysis;
+  @Input() analysis2: Analysis;
   @Input() concepts: Concept[] = []; // Can put in analysis or concepts to chart. Don't put both
   @Input() selectedResult: any; // For ppi question, this is selected answer.
   @Input() pointWidth = 10;   // Optional width of bar or point or box plot
@@ -136,7 +137,7 @@ export class ChartComponent implements OnChanges {
       },
       yAxis: {
         title: {
-          text: null
+          text: options.yAxisTitle ? options.yAxisTitle : null
         },
         lineWidth: 1,
         lineColor: this.dbc.AXIS_LINE_COLOR,
@@ -261,7 +262,7 @@ export class ChartComponent implements OnChanges {
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
-      xAxisTitle: null
+      xAxisTitle: null,
     };
 
   }
@@ -444,7 +445,7 @@ export class ChartComponent implements OnChanges {
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
-      xAxisTitle: null
+      xAxisTitle: null,
     };
   }
 
@@ -498,6 +499,7 @@ export class ChartComponent implements OnChanges {
 
     // Unit for measurements is in stratum5
     const unit = this.analysis.unitName ? this.analysis.unitName : '';
+    const unitCount = this.analysis2.results.filter(r => r.stratum3 === this.genderId)[0].countValue;
     const series: any = {
       name: this.analysis.analysisName,
       colorByPoint: true,
@@ -520,14 +522,15 @@ export class ChartComponent implements OnChanges {
       series.pointWidth = null;
       series.shadow = false;
     }
-
+    console.log(this.chartTitle);
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
       title: { text: this.chartTitle },
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
-      xAxisTitle: unit
+      xAxisTitle: unit,
+      yAxisTitle: unitCount + ' same unit participants'
     };
 
   }

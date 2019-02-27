@@ -26,7 +26,8 @@
                  [genderId]="gender.stratum2"
                  [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                  [chartType]="'histogram'"
-                 [analysis]="toDisplayMeasurementGenderAnalysis"
+                 [analysis]="toDisplayMeasurementGenderAnalysis[0]"
+                 [analysis2]="toDisplayMeasurementGenderAnalysis[1]"
                  [backgroundColor]="backgroundColor"
       ></app-chart>
     </div>
@@ -37,7 +38,7 @@
     <div class="col-md-4 col-xs-12">
     </div>
     <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.BiologicalSex && analyses.genderAnalysis"  >
-      <app-chart [analysis]="analyses.genderAnalysis" [backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
+      <app-chart [analysis]="analyses.genderAnalysis"[backgroundColor]="backgroundColor" [chartTitle]="'Biological Sex'"> </app-chart>
     </div>
     <div class="col-md-4 col-xs-12">
     </div>
