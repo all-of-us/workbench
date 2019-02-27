@@ -78,7 +78,7 @@ const css = `
     background: #fafafa;
     color: rgba(0, 0, 0, .5);
   }
-    body .p-overlaypanel .p-overlaypanel-close {
+  body .p-overlaypanel .p-overlaypanel-close {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
@@ -88,17 +88,17 @@ const css = `
     top: 19px!important;
     left: 0px!important;
     width:9.5rem;
-    }
+  }
   body .p-overlaypanel .p-overlaypanel-close:hover {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
     color: #0086C1;
-    }
+  }
   body .p-overlaypanel .p-overlaypanel-content {
-  padding: 0.6rem 0.6rem;
-  font-size: 13px;
-    }
+    padding: 0.6rem 0.6rem;
+    font-size: 13px;
+  }
   `;
 
 const styles = reactStyles({
@@ -247,7 +247,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.setState({start: event.first});
     }
 
-    overlayTemplate(rowData, column) {
+    overlayTemplate(rowData: any, column: any) {
       let vl: any;
       const valueField = (rowData.refRange || rowData.unit ) && column.field === 'value';
       const nameField = rowData.route && column.field === 'standardName';
