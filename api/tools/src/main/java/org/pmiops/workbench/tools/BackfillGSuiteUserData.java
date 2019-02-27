@@ -72,14 +72,14 @@ public class BackfillGSuiteUserData {
         com.google.api.services.admin.directory.model.User gSuiteUser =
           directoryService.getUser(user.getEmail());
         if (gSuiteUser == null) {
-            log.severe(String.format("Error: AoU user %s (%s) not found in GSuite! Skipping.",
-              user.getEmail(), user.getContactEmail()));
-            errorCount++;
-            continue;
+          log.warning(String.format("AoU user %s (%s) not found in GSuite! Skipping.",
+            user.getEmail(), user.getContactEmail()));
+          skipCount++;
+          continue;
         }
 
         com.google.api.services.admin.directory.model.User origGSuiteUser = gSuiteUser.clone();
-        DirectoryServiceImpl.addCustomSchemaValues(
+        DirectoryServiceImpl.addCustomSchemaAndEmails(
           gSuiteUser, user.getEmail(), user.getContactEmail());
         if (gSuiteUser.getCustomSchemas().equals(origGSuiteUser.getCustomSchemas())) {
           log.info("User " + user.getEmail() + " already has correct GSuite data");
@@ -88,7 +88,9 @@ public class BackfillGSuiteUserData {
         }
 
         if (dryRun) {
-          log.info("DRY RUN: Would update user " + user.getEmail());
+          log.info(
+            String.format(
+              "DRY RUN: Would update user %s / %s.", user.getEmail(), user.getContactEmail()));
           updateCount++;
         } else {
           try {
