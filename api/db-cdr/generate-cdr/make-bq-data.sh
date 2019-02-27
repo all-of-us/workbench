@@ -488,7 +488,6 @@ on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c
 q="select count_value from \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
 
-
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = r.source_count_value,c.count_value=r.count_value
