@@ -7,6 +7,7 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {withCurrentWorkspace} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {WorkspaceAccessLevel} from 'generated';
 
 import * as fp from 'lodash/fp';
@@ -51,9 +52,10 @@ const styles = reactStyles({
 
 const tabs = [
   {name: 'About', link: ''},
+  ...(environment.enableDatasetBuilder ? [{name: 'Data', link: 'data'}] : []),
   {name: 'Cohorts', link: 'cohorts'},
   {name: 'Concepts', link: 'concepts'},
-  {name: 'Notebooks', link: 'notebooks'}
+  {name: 'Notebooks', link: 'notebooks'},
 ];
 
 const navSeparator = <div style={styles.separator}/>;
@@ -97,7 +99,7 @@ export const WorkspaceNavBarReact = withCurrentWorkspace()(props => {
           <MenuItem
             icon='copy'
             onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'clone'])}>
-            Clone
+            Duplicate
           </MenuItem>
           <MenuItem
             icon='pencil'

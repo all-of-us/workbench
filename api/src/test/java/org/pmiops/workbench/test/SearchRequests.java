@@ -82,8 +82,8 @@ public class SearchRequests {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
     return new SearchRequest().includes(Arrays.asList(temporalGroup));
   }

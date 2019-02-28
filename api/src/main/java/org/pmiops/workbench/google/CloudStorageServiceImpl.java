@@ -1,5 +1,6 @@
 package org.pmiops.workbench.google;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -10,17 +11,20 @@ import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import javax.inject.Provider;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.inject.Provider;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class CloudStorageServiceImpl implements CloudStorageService {
@@ -55,6 +59,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
     return mandrillKeys.getString("api-key");
   }
+
+  @Override
+  public String getMoodleApiKey() {
+    return readToString(getCredentialsBucketName(), "moodle-key.txt");
+  }
+
 
   @Override
   public String getImageUrl(String image_name) {
@@ -131,6 +141,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public JSONObject getJiraCredentials() {
     return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
+  }
+
+  @Override
+  public GoogleCredential getGSuiteAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "gsuite-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override

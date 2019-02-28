@@ -6,7 +6,7 @@
     (click)="openManager()">
     <clr-icon shape="plus-circle" size="21" title="Manage Annotations"></clr-icon>
   </button>
-  <button *ngIf="(annotations$ | async).length> 0"
+  <button *ngIf="annotationList.length > 0"
           (click)="openEditManager()"
           type="button"
           class="btn btn-icon btn-link">
@@ -14,8 +14,7 @@
   </button>
 </div>
 <app-annotation-item
-  *ngFor="let anno of (annotations$ | async)"
+  *ngFor="let anno of annotationList"
   [annotation]="anno"
-  (annotationUpdate)="updateAnnotation($event)"
-  [showDataType]="showDataType">
-</app-annotation-item>
+  [onChange]="setAnnotation"
+></app-annotation-item>

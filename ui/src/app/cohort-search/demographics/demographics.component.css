@@ -114,9 +114,8 @@ label[for="deceased"] {
 
 .age-label {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: #262262;
-  padding-left: 1rem;
 }
 
 .demo-title {
@@ -127,25 +126,13 @@ label[for="deceased"] {
 
 .count-preview {
   background-color: #E4F3FC;
-  padding: 0.8rem;
-  margin-top: 1rem;
-}
-.count-preview  .calculate-btn{
-  background-color: #2691D0;
-  color: white;
+  padding: 0.5rem;
+  margin: 1rem 2.5% 0;
+  position: absolute;
+  width: 95%;
+  bottom: 1rem;
 }
 
-.count-preview  .disable-link {
-  pointer-events: none;
-  opacity: 0.3;
-}
-.count-preview  .add-button {
-  border-color: transparent;
-  outline: none;
-  background-color: transparent;
-  font-weight: 500;
-  color: #2691D0;
-}
 .count-preview .text-bold {
   font-weight: bold;
   color: #4A4A4A;
@@ -166,11 +153,7 @@ label[for="deceased"] {
   width: 0rem;
 }
 
-.deceaseCursor {
-  cursor: pointer;
-}
-
-.deceaseNoCursor {
+.disabled {
   opacity: 0.4;
   pointer-events: none;
 }
@@ -191,6 +174,21 @@ label[for="deceased"] {
 
 .form-container {
   padding-left: 1rem;
+}
+
+.form-container.age {
+  margin: 0.5rem 1rem;
+  padding-bottom: 0.5rem;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
+.form-container.age clr-checkbox {
+  padding-left: 1rem;
+}
+
+.form-container.age clr-checkbox .badge.badge-info{
+  margin-left: 0.5rem;
 }
 
 .selection-check-icon {

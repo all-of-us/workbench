@@ -20,7 +20,7 @@ import {CohortSearchActions} from 'app/cohort-search/redux';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentCohortStore} from 'app/utils/navigation';
 import {CohortBuilderService} from 'generated';
-import {CohortReview, CohortReviewService, DataAccessLevel} from 'generated';
+import {CohortReviewService, DataAccessLevel} from 'generated';
 import {NgxPopperModule} from 'ngx-popper';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';

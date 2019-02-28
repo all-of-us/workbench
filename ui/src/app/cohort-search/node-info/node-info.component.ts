@@ -35,7 +35,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   private isSelected: boolean;
   private isSelectedChild: boolean;
   private subscription: Subscription;
-  private ppiSubscription: Subscription;
   @ViewChild('name') name: ElementRef;
   isTruncated = false;
   matched = false;

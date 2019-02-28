@@ -5,6 +5,7 @@ import {environment} from 'environments/environment';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {AlertClose, AlertWarning} from 'app/components/alert';
 import {
   Button,
   CardButton,
@@ -93,13 +94,15 @@ export interface WorkbenchAccessTasksProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
+  firstVisitTraining: boolean;
 }
 
 export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps, {}> {
+    React.Component<WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}> {
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
+    this.state = {trainingWarningOpen: !props.firstVisitTraining};
   }
 
   static redirectToNiH(): void {
@@ -109,11 +112,14 @@ export class WorkbenchAccessTasks extends
     window.location.assign(url);
   }
 
-  static redirectToTraining(): void {
+  static async redirectToTraining() {
+    await profileApi().updatePageVisits({page: 'moodle'});
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
   render() {
+    const {trainingWarningOpen} = this.state;
+    const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
     return <React.Fragment>
       <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
@@ -121,7 +127,7 @@ export class WorkbenchAccessTasks extends
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
-            <div style={styles.text}>Please login to your ERA Commons account and complete
+            <div style={styles.text}>Please login to your eRA Commons account and complete
               the online training courses in order to gain full access to the Researcher
               Workbench data and tools.</div>
           </div>
@@ -130,21 +136,21 @@ export class WorkbenchAccessTasks extends
           <div style={{...styles.infoBox, flexDirection: 'column'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
               <div style={{flexDirection: 'column', width: '70%'}}>
-                <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
+                <div style={styles.infoBoxHeader}>Login to eRA Commons</div>
                 <div style={styles.infoBoxBody}>Clicking the login link will bring you
-                  to the ERA Commons Portal and redirect you back to the
+                  to the eRA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
               <AccountLinkingButton failed={false}
-                                    completed={this.props.eraCommonsLinked}
+                                    completed={eraCommonsLinked}
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
                                     onClick={WorkbenchAccessTasks.redirectToNiH}/>
             </div>
-            {this.props.eraCommonsError && <Error data-test-id='era-commons-error'>
+            {eraCommonsError && <Error data-test-id='era-commons-error'>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
+              Error Linking NIH Username: {eraCommonsError} Please try again!
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
@@ -155,19 +161,27 @@ export class WorkbenchAccessTasks extends
                 outstanding training material to be completed.</div>
             </div>
             <AccountLinkingButton failed={false}
-                                  completed={this.props.trainingCompleted}
-                                  defaultText='Complete Training'
+                                  completed={trainingCompleted}
+                                  defaultText={'Complete Training'}
                                   completedText='Completed'
                                   failedText=''
                                   onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
+          {trainingWarningOpen && !trainingCompleted &&
+          <AlertWarning>
+            <ClrIcon shape='exclamation-triangle' class='is-solid'
+                     style={{width: '8%', height: '40px', marginRight: '.1rem'}}/>
+            <div>It may take several minutes for Moodle to update your Online Training
+            status once you have completed compliance training.</div>
+            <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
+          </AlertWarning>}
         </div>
       </div>
     </React.Fragment>;
   }
 }
 
-const homepageStyles = reactStyles({
+export const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
@@ -229,7 +243,7 @@ const homepageStyles = reactStyles({
   addCard: {
     display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    fontSize: '20px', lineHeight: '28px'
+    fontSize: '20px', lineHeight: '28px',  marginRight: '106px'
   }
 });
 
@@ -241,6 +255,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
+    firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
     videoOpen: boolean,
@@ -248,7 +263,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
-  private profileTimer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
@@ -259,6 +273,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
+      firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
       videoOpen: false,
@@ -305,16 +320,21 @@ export const Homepage = withUserProfile()(class extends React.Component<
     const {profileState: {profile, reload}} = this.props;
 
     if (fp.isEmpty(profile)) {
-      this.profileTimer = setTimeout(() => {
+      setTimeout(() => {
         reload();
       }, 10000);
     } else {
 
-      if ((!profile.pageVisits) ||
-          (!profile.pageVisits.some(v => v.page === this.pageId))) {
-        this.setState({firstVisit: true});
-        profileApi().updatePageVisits({ page: this.pageId});
+      if (profile.pageVisits) {
+        if (!profile.pageVisits.some(v => v.page === this.pageId)) {
+          this.setState({firstVisit: true});
+          profileApi().updatePageVisits({ page: this.pageId});
+        }
+        if (profile.pageVisits.some(v => v.page === 'moodle')) {
+          this.setState({firstVisitTraining: false});
+        }
       }
+
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
 
       try {
@@ -366,8 +386,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink, firstVisit} = this.state;
+        accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
+        trainingCompleted, quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -410,7 +430,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
               (accessTasksRemaining ?
                 (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
                                        eraCommonsError={eraCommonsError}
-                                       trainingCompleted={trainingCompleted}/>
+                                       trainingCompleted={trainingCompleted}
+                                       firstVisitTraining={firstVisitTraining}/>
                 ) : (
                   <div>
                     <div style={homepageStyles.contentWrapper}>

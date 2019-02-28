@@ -3,7 +3,7 @@ import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 
 import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
-import {Workspace, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {Workspace, WorkspaceAccessLevel} from 'generated';
 
 /**
  * Flatten a layer of nesting
@@ -15,7 +15,6 @@ export interface WorkspaceData extends Workspace {
 @Injectable()
 export class WorkspaceResolver implements Resolve<WorkspaceData> {
   constructor(
-    private api: WorkspacesService,
     private workspaceStorageService: WorkspaceStorageService,
   ) {}
 

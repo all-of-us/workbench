@@ -2,8 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
-import {CohortReview} from 'generated';
-import {Observable} from 'rxjs/Observable';
 
 import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';

@@ -1,5 +1,4 @@
 import {reactStyles, withStyle} from 'app/utils';
-import * as React from 'react';
 
 export const styles = reactStyles({
   card: {
@@ -9,7 +8,10 @@ export const styles = reactStyles({
     backgroundColor: '#fff',
     border: '1px solid #d7d7d7',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    width: '12rem',
+    height: '9rem',
+    margin: '0 1rem 1rem 0'
   }
 });
 

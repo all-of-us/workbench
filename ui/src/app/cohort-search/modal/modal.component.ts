@@ -1,7 +1,6 @@
 import {select} from '@angular-redux/store';
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit } from '@angular/core';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {ModifierPageComponent} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {
   activeCriteriaSubtype,
   activeCriteriaTreeType,
@@ -41,10 +40,10 @@ export class ModalComponent implements OnInit, OnDestroy {
   @select(scrollId) scrollTo$: Observable<any>;
   @select(subtreeSelected) subtree$: Observable<any>;
   @select(previewStatus) preview$;
-  @ViewChild(ModifierPageComponent) private modifiers: ModifierPageComponent;
 
   readonly domainType = DomainType;
   readonly treeType = TreeType;
+  readonly treeSubType = TreeSubType;
   ctype: string;
   subtype: string;
   itemType: string;
@@ -83,6 +82,12 @@ export class ModalComponent implements OnInit, OnDestroy {
       .filter(ctype => !!ctype)
       .subscribe(ctype => {
         this.ctype = ctype;
+      })
+    );
+
+    this.subscription.add(this.criteriaSubtype$
+      .subscribe(subtype => {
+        this.subtype = subtype;
       })
     );
 
@@ -132,6 +137,9 @@ export class ModalComponent implements OnInit, OnDestroy {
         const regex = new RegExp(`.*${crit.type}.*`, 'i');
         if (regex.test(this.itemType)) {
           this.title = crit.name;
+          if (crit.type === TreeType.DEMO) {
+            this.title += ' - ' + subtypeToTitle(this.subtype);
+          }
         }
       }
       for (const crit of PROGRAM_TYPES) {
@@ -141,21 +149,25 @@ export class ModalComponent implements OnInit, OnDestroy {
         }
       }
     }));
-
-    this.subscription.add(this.criteriaSubtype$
-      .subscribe(subtype => {
-        this.subtype = subtype;
-      })
-    );
     this.originalNode = this.rootNode;
   }
   addSelectionToGroup(selection: any) {
-    const key = selection.get('type') === TreeType[TreeType.DEMO]
-      ? selection.get('subtype') : selection.get('type');
-    if (this.selections[key] && !this.selections[key].includes(selection)) {
-      this.selections[key].push(selection);
+    if (selection.get('type') === TreeType[TreeType.DEMO]) {
+      if (selection.get('subtype') === this.subtype) {
+        const key = selection.get('subtype');
+        if (this.selections[key] && !this.selections[key].includes(selection)) {
+          this.selections[key].push(selection);
+        } else {
+          this.selections[key] = [selection];
+        }
+      }
     } else {
-      this.selections[key] = [selection];
+      const key = selection.get('type');
+      if (this.selections[key] && !this.selections[key].includes(selection)) {
+        this.selections[key].push(selection);
+      } else {
+        this.selections[key] = [selection];
+      }
     }
   }
   setScroll(nodeId: string) {
@@ -225,8 +237,7 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get showHeader() {
     return this.itemType === TreeType[TreeType.CONDITION]
-    || this.itemType === TreeType[TreeType.PROCEDURE]
-    || this.itemType === TreeType[TreeType.DEMO];
+    || this.itemType === TreeType[TreeType.PROCEDURE];
   }
 
   get showSnomed() {
@@ -240,6 +251,17 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get showBack() {
     return this.showModifiers && this.mode === 'modifiers';
+  }
+
+  get treeClass() {
+    if (this.ctype === TreeType.DEMO) {
+      return this.subtype === TreeSubType.AGE ? 'col-md-12' : 'col-md-6';
+    }
+    return 'col-md-8';
+  }
+
+  get sidebarClass() {
+    return this.ctype === TreeType.DEMO ? 'col-md-6' : 'col-md-4';
   }
 
   setMode(mode: any) {
@@ -271,13 +293,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 
-  getDemoParams(e) {
-    if (e) {
-      this.demoItemsType = e.type;
-      this.demoParam = e.paramId;
-    }
-  }
-
   get disableFlag() {
     return this.noSelection
       || this.preview.get('requesting')
@@ -285,4 +300,3 @@ export class ModalComponent implements OnInit, OnDestroy {
       || this.modifiersDisabled;
   }
 }
-

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import RSelect from 'react-select';
 
 import {withStyle} from 'app/utils/index';
 
@@ -96,5 +97,14 @@ export const RadioButton = ({ onChange, ...props }) => {
     {...props}
     onChange={onChange}
     onClick={onChange}
+  />;
+};
+
+export const Select = ({value, options, onChange, ...props}) => {
+  return <RSelect
+    value={options.find(o => o.value === value)}
+    options={options}
+    onChange={o => onChange(o && o.value)}
+    {...props}
   />;
 };

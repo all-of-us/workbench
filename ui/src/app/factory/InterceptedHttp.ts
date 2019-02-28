@@ -13,7 +13,7 @@ export class InterceptedHttp extends Http {
   public shouldPingStatus = true;
 
 
-  constructor(private backend: ConnectionBackend, private defaultOptions: RequestOptions,
+  constructor(backend: ConnectionBackend, defaultOptions: RequestOptions,
     private errorHandlingService: ErrorHandlingService) {
     super(backend, defaultOptions);
   }

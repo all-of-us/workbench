@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,22 +35,18 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * CodesQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for the following criteria types:
- * ICD9, ICD10 and CPT.
+ * CodesQueryBuilder builds SQL for BigQuery for the following criteria types: ICD9, ICD10, CPT and SNOMED.
  */
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String TABLE_ID = "search_codes";
-
   private static final String CODES_SQL_TEMPLATE =
-    "select person_id, entry_date, concept_id_or_source_concept_id as concept_id\n" +
-      "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
+    "select person_id, entry_date, concept_id\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where ";
 
   private static final String MULTIPLE_TEMPLATE =
-    "concept_id_or_source_concept_id in (select concept_id\n" +
+    "concept_id in (select concept_id\n" +
       "  from `${projectId}.${dataSetId}.criteria`\n" +
       "  where ${innerParentAndChildSql}" +
       ")\n" + AGE_DATE_AND_ENCOUNTER_VAR;
@@ -66,13 +62,16 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     "(concept_id in unnest(${conceptIds}))\n";
 
   private static final String CHILD_ONLY_TEMPLATE =
-    "concept_id_or_source_concept_id in unnest(${conceptIds})\n" +
+    "concept_id in unnest(${conceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String mention) {
+                           TemporalMention mention) {
     List<SearchParameter> parameters = searchGroupItem.getSearchParameters();
     from(parametersEmpty()).test(parameters).throwException(EMPTY_MESSAGE, PARAMETERS);
 
@@ -112,7 +111,7 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       MULTIPLE_TEMPLATE.replace("${innerParentAndChildSql}", String.join(OR, queryParts));
     String baseSql = CODES_SQL_TEMPLATE + bodySql;
     String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
-    return buildTemporalSql(TABLE_ID, modifiedSql, bodySql, queryParams, searchGroupItem.getModifiers(), mention);
+    return buildTemporalSql(modifiedSql, bodySql, queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   private void validateSearchParameter(SearchParameter param) {
@@ -122,6 +121,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     from(paramParent().and(codeBlank())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CODE, param.getValue());
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.CODES;

@@ -6,7 +6,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore} from 'app/utils/navigation';
-import {CohortReview, CohortReviewService} from 'generated';
+import {CohortReviewService} from 'generated';
 import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CreateReviewPage} from './create-review-page';
 

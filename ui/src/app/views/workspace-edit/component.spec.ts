@@ -189,7 +189,7 @@ describe('WorkspaceEditComponent', () => {
     fixture.componentRef.instance.profileStorageService.reload();
     tick();
     expect(testComponent.workspace.name).toBe(
-      `Clone of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
+      `Duplicate of ${WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME}`);
     expect(testComponent.hasPermission).toBeTruthy(
       'cloner should be able to edit cloned workspace');
 

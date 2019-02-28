@@ -6,11 +6,8 @@ import {PageLayout} from 'app/cohort-review/page-layout/page-layout';
 import {TablePage} from 'app/cohort-review/table-page/table-page';
 
 import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
-import {ParticipantAnnotationsResolver} from './participant-annotations.resolver';
-import {ParticipantResolver} from './participant.resolver';
 
 import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
-import {AnnotationDefinitionsResolver} from 'app/resolvers/annotation-definitions';
 import {ReviewResolver} from 'app/resolvers/review';
 
 
@@ -38,11 +35,6 @@ const routes: Routes = [{
   }, {
     path: 'participants/:pid',
     component: DetailPage,
-    resolve: {
-      annotationDefinitions: AnnotationDefinitionsResolver,
-      participant: ParticipantResolver,
-      annotations: ParticipantAnnotationsResolver,
-    },
     data: {
       breadcrumb: {
         value: 'Participant :pid',
@@ -65,10 +57,7 @@ const routes: Routes = [{
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
-    AnnotationDefinitionsResolver,
     DemographicConceptMapsResolver,
-    ParticipantResolver,
-    ParticipantAnnotationsResolver,
     ReviewResolver,
   ],
 })

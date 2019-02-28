@@ -22,7 +22,7 @@
         <span *ngIf="loading" class="spinner spinner-md"></span>
         <div *ngFor="let opt of filteredOptions; let i = index" class="option" (click)="select(opt)">
           <clr-icon  *ngIf="!selectedOption.includes(opt.get('parameterId'))"  shape="plus-circle"  size="20" class="selection-icon items-selection-icon" ></clr-icon>
-          <clr-icon  *ngIf="selectedOption.includes(opt.get('parameterId'))" shape="check-circle" size="25"  class="selection-icon items-disabled-icon"></clr-icon>
+          <clr-icon  *ngIf="selectedOption.includes(opt.get('parameterId'))" shape="check-circle" size="20"  class="selection-icon items-disabled-icon"></clr-icon>
           {{ opt.get('name', '') | titlecase }}
           <span *ngIf="opt.get('count')" class="badge badge-info">
             {{ opt.get('count') | number }}

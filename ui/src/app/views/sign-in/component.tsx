@@ -14,11 +14,6 @@ import * as React from 'react';
 
 import {styles} from './style';
 
-interface ImagesSource {
-  backgroundImgSrc: string;
-  smallerBackgroundImgSrc: string;
-}
-
 export interface SignInProps {
   onInit: () => void;
   signIn: () => void;

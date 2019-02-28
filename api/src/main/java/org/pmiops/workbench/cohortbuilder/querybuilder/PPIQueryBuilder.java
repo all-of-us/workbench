@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,13 +27,16 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
+/**
+ * PPIQueryBuilder builds SQL for BigQuery for the survey criteria type.
+ */
 @Service
 public class PPIQueryBuilder extends AbstractQueryBuilder {
 
   private static final String UNION_ALL = " union all\n";
   private static final String PPI_SQL_TEMPLATE =
-    "select person_id from `${projectId}.${dataSetId}.search_ppi`\n" +
-      "where source_concept_id\n";
+    "select person_id from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
+      "where concept_id\n";
 
   private static final String SURVEY_IN_CLAUSE =
     "in (select concept_id\n" +
@@ -52,10 +56,13 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
     "and value_as_concept_id = ${value}\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String temporalMention) {
+                           TemporalMention temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<String> queryParts = new ArrayList<String>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
@@ -97,6 +104,9 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.PPI;

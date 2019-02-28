@@ -18,6 +18,11 @@ export interface Environment {
   // The Google Analytics account ID for logging actions and page views.
   // Example value: 'UA-112406425-3'
   gaId: string;
+  // The Google Analytics custom dimension ID for sending User Agent
+  // info, allowing us to filter out Pingdom, Appscan, etc
+  // This value should look like 'dimension1' with the digit
+  // being the variable
+  gaUserAgentDimension: string;
   // API endpoint to use for Leonardo (notebook proxy) API calls.
   // Example value: 'https://notebooks.firecloud.org'
   leoApiUrl: string;
@@ -45,9 +50,6 @@ export interface Environment {
 
   // Transient client-side flags.
   //
-  // Whether temporal queries should be enabled in the cohort builder UI. See
-  // RW-1443 for details.
-  enableTemporal: boolean;
   // Whether Zendesk should be used for support requests & bug reports, instead
   // of Jira. See RW-1885 for details.
   // Exit criteria: remove flag and change all code to use Zendesk after Athens
@@ -64,4 +66,9 @@ export interface Environment {
   // See RW-1697 for details
   // Exit criteria: remove flag for Athens release.
   enableComplianceLockout: boolean;
+
+  // Whether users should be able to see the dataset builder.
+  // See RW-2169 for details
+  // Exit Criteria: remove flag for Bedford release.
+  enableDatasetBuilder: boolean;
 }

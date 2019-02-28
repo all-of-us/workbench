@@ -73,13 +73,14 @@ describe('SearchGroupSelectComponent', () => {
       itemType: 'test',
       context: {
         criteriaType: 'test',
-        criteriaSubtype: null,
+        criteriaSubtype: undefined,
         role: 'includes',
         groupId: 'Testincludes',
         itemId: 'Testitems',
         fullTree: false,
-        codes: false
+        codes: false,
       },
+      tempGroup: undefined,
     });
   });
 

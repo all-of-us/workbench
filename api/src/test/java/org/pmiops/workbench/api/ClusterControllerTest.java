@@ -131,7 +131,7 @@ public class ClusterControllerTest {
   @Mock
   Provider<User> userProvider;
   @Mock
-  Provider<ComplianceService> complianceServiceProvider;
+  ComplianceService complianceService;
   @Autowired
   ClusterController clusterController;
   @Autowired
@@ -158,7 +158,7 @@ public class ClusterControllerTest {
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
-        fireCloudService, Providers.of(config), complianceServiceProvider);
+        fireCloudService, Providers.of(config), complianceService);
     clusterController.setUserService(userService);
 
     cdrVersion = new CdrVersion();

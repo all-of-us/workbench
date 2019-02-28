@@ -9,8 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import {WorkspaceData} from 'app/resolvers/workspace';
-import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -283,8 +282,22 @@ export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
 };
 
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withUrlParams = () => {
+  return connectBehaviorSubject(urlParamsStore, 'urlParams');
+};
+
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {
   const d = fp.capitalize(FetchDomain[domain]);
   return Domain[d];
+}
+
+// To convert datetime strings into human-readable dates
+export function displayDate(time: Number): string {
+  const date = new Date(Number(time));
+  // datetime formatting to slice off weekday from readable date string
+  return date.toLocaleString('en-US',
+    {year: '2-digit', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: true});
 }

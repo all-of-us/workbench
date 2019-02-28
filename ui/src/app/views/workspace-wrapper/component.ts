@@ -4,8 +4,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {WorkspaceData} from 'app/resolvers/workspace';
 
 import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -31,9 +29,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
+  username: string;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   private subscriptions = [];
 
@@ -43,9 +42,11 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     private workspacesService: WorkspacesService
   ) {
     this.share = this.share.bind(this);
+    this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -112,12 +113,23 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    // TODO: RW-1919 - remove this
+    window.location.reload();
   }
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

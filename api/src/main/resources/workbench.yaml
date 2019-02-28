@@ -484,24 +484,6 @@ paths:
           type: string
           required: false
 
-  /v1/account/bulkSyncTrainingStatus:
-    post:
-      tags:
-        - user
-        - cron
-      description: sync moodle badge/training status for all user
-      operationId: bulkSyncTrainingStatus
-      responses:
-        200:
-          description: The user table is updated with training status.
-        404:
-          description: User not found while retrieving  badge.
-        500:
-          description: Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-
-
   # Notebook clusters ####################################################################
 
   /v1/clusters:
@@ -841,6 +823,24 @@ paths:
           description: Clusters were checked and handled successfully.
           schema:
             $ref: "#/definitions/CheckClustersResponse"
+
+  /v1/cron/bulkSyncTrainingStatus:
+    get:
+      security: []
+      tags:
+        - user
+        - cron
+      description: sync moodle badge/training status for all user
+      operationId: bulkSyncTrainingStatus
+      responses:
+        200:
+          description: The user table is updated with training status.
+        404:
+          description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:

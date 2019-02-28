@@ -24,6 +24,9 @@
               "node_modules/@clr/icons/clr-icons.min.css",
               "node_modules/@clr/ui/clr-ui.min.css",
               "node_modules/nouislider/distribute/nouislider.min.css",
+              "node_modules/primereact/resources/primereact.min.css",
+              "node_modules/primeicons/primeicons.css",
+              "node_modules/primereact/resources/themes/nova-light/theme.css",
               "src/styles.css"
             ],
             "scripts": [

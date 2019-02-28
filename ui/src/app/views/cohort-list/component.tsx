@@ -52,7 +52,7 @@ const styles = reactStyles({
     width: '16px'
   },
   addCard: {
-    width: 200, height: 105,
+    minWidth: 200, minHeight: 105, maxHeight: 105,
     marginTop: '1rem', marginRight: '1rem',
   }
 });

@@ -1,15 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Comparator, StringFilter} from '@clr/angular';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {SignInService} from 'app/services/sign-in.service';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
 import {ResearchPurposeItems} from 'app/views/workspace-edit/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
-import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
   CdrVersion,
@@ -18,52 +12,11 @@ import {
   FileDetail,
   PageVisit,
   ProfileService,
+  UserRole,
   Workspace,
   WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
-
-/*
- * Search filters used by the cohort and notebook data tables to
- * determine which of the cohorts loaded into client side memory
- * are displayed.
- */
-class CohortNameFilter implements StringFilter<Cohort> {
-  accepts(cohort: Cohort, search: string): boolean {
-    return cohort.name.toLowerCase().indexOf(search) >= 0;
-  }
-}
-class CohortDescriptionFilter implements StringFilter<Cohort> {
-  accepts(cohort: Cohort, search: string): boolean {
-    return cohort.description.toLowerCase().indexOf(search) >= 0;
-  }
-}
-class NotebookNameFilter implements StringFilter<FileDetail> {
-  accepts(notebook: FileDetail, search: string): boolean {
-    return notebook.name.toLowerCase().indexOf(search) >= 0;
-  }
-}
-
-/*
- * Sort comparators used by the cohort and notebook data tables to
- * determine the order that the cohorts loaded into client side memory
- * are displayed.
- */
-class CohortNameComparator implements Comparator<Cohort> {
-  compare(a: Cohort, b: Cohort) {
-    return a.name.localeCompare(b.name);
-  }
-}
-class CohortDescriptionComparator implements Comparator<Cohort> {
-  compare(a: Cohort, b: Cohort) {
-    return a.description.localeCompare(b.description);
-  }
-}
-class NotebookNameComparator implements Comparator<FileDetail> {
-  compare(a: FileDetail, b: FileDetail) {
-    return a.name.localeCompare(b.name);
-  }
-}
 
 enum Tabs {
   Cohorts,
@@ -82,8 +35,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private static PAGE_ID = 'workspace';
 
   @ViewChild(ToolTipComponent) toolTip: ToolTipComponent;
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
+  sharing = false;
   showTip: boolean;
   workspace: Workspace;
   cdrVersion: CdrVersion;
@@ -106,17 +58,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   username = '';
   creatingNotebook = false;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   constructor(
     private cohortsService: CohortsService,
-    private signInService: SignInService,
     private workspacesService: WorkspacesService,
     private cdrVersionStorageService: CdrVersionStorageService,
     private profileService: ProfileService,
   ) {
     this.closeNotebookModal = this.closeNotebookModal.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
@@ -225,7 +177,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    // TODO: RW-1919 - remove this
+    window.location.reload();
+  }
+
+  updateAclList(userRoleList: UserRole[]): void {
+    this.workspace.userRoles = userRoleList;
   }
 
   dismissTip(): void {
@@ -234,7 +196,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   submitNotebooksLoadBugReport(): void {
     this.notebookError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not load notebooks';
+    this.bugReportDescription = 'Could not load notebooks';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

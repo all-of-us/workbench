@@ -11,11 +11,17 @@
   </div>
 </clr-modal>
 
-<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
+<app-workspace-share [onClose]="closeShare"
+                     [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>
 <app-confirm-delete-modal *ngIf="confirmDeleting"
                           [resourceType]="'workspace'"
                           [resourceName]="workspace.name"
                           [receiveDelete]="receiveDelete"
                           [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <router-outlet></router-outlet>

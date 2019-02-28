@@ -29,7 +29,6 @@ export class ComboChartComponent {
     }
   };
 
-  private _raw;
   private _data: any = [];
 
   /**
@@ -42,8 +41,6 @@ export class ComboChartComponent {
    *   { name: string; series: { name: string; value: number}[]; }[]
    */
   @Input() set data(raw) {
-    this._raw = raw;
-
     this._data = raw
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => `${datum.get('gender', 'Unknown')} ${datum.get('ageRange', 'Unknown')}`)

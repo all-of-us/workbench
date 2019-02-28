@@ -35,4 +35,10 @@ export class CohortReviewServiceStub {
   getCohortChartData(): Observable<ParticipantDataListResponse> {
     return Observable.of(<ParticipantDataListResponse> {items: []});
   }
+  getParticipantCohortStatus() {
+    return Observable.of({});
+  }
+  getParticipantCohortAnnotations() {
+    return Observable.of({items: []});
+  }
 }

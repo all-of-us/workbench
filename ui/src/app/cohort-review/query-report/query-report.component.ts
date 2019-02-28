@@ -1,9 +1,8 @@
 import {AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortBuilderService, Workspace} from 'generated';
+import {Workspace} from 'generated';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -22,7 +21,7 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
   data:  Observable<List<any>>;
   workspace: Workspace;
 
-  constructor(private api: CohortBuilderService,
+  constructor(
     private cdref: ChangeDetectorRef,
     private cdrVersionStorageService: CdrVersionStorageService) {}
 

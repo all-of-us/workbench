@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ClarityModule} from '@clr/angular';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {CohortReview} from 'generated';
 import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats.component';
 
