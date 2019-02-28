@@ -120,6 +120,10 @@ const styles = reactStyles({
     cursor: 'pointer',
     wordBreak: 'break-all'
   },
+  cardDescription: {
+    textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
+    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
+  },
   lastModified: {
     color: '#4A4A4A',
     fontSize: '11px',
@@ -439,7 +443,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
               </div>
             </Clickable>
           </div>
-          <div>{this.description}</div>
+          <div style={styles.cardDescription}>{this.description}</div>
         </div>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
