@@ -174,7 +174,8 @@
         </ng-container>
         <ng-template #subQuestionDisplay>
           <div class="row expandable-grid-row sub-question" *ngFor="let sq of q.subQuestions" [ngClass]="{'expanded-row': sq.expanded}" [hidden]="!showAnswer[q.conceptId]">
-            <div class="col-md-5 flex-xs-middle">{{sq.conceptName}}</div>
+            <div class="col-md-5 flex-xs-middle"><app-highlight-search [text]="sq.conceptName" [searchTerm]="searchText.value"></app-highlight-search>
+            </div>
             <div class="col-md-2 flex-xs-middle">{{sq.conceptId}}</div>
             <div class="col-md-2 flex-xs-middle">{{sq.countValue}}</div>
             <div class="col-md-2 flex-xs-middle">{{countPercentage(sq.countValue).toFixed(2)}}</div>
@@ -183,7 +184,8 @@
                 <clr-icon *ngIf="!showAnswer[sq.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[sq.conceptId]" shape="caret" dir="down"></clr-icon> </a>
             </div>
             <div class="row expandable-grid-row sub-question-results flex-xs-middle" *ngFor="let a of sq.countAnalysis.results" [hidden]="!sq.expanded">
-              <div class="col-md-5 flex-xs-middle">{{removeDescribingWords(a.stratum4)}}</div>
+              <div class="col-md-5 flex-xs-middle"><app-highlight-search [text]="removeDescribingWords(a.stratum4)" [searchTerm]="searchText.value"></app-highlight-search>
+              </div>
               <div class="col-md-2 flex-xs-middle">{{a.stratum3}}</div>
               <div class="col-md-2 flex-xs-middle">{{a.countValue | number}}</div>
               <div class="col-md-2 flex-xs-middle">{{countPercentage(a.countValue).toFixed(2)}}%</div>
