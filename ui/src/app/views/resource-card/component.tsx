@@ -19,13 +19,14 @@ import {Domain, RecentResource} from 'generated/fetch';
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {environment} from 'environments/environment';
 
-const ResourceCardMenu: React.FunctionComponent<{
+export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
   onOpenJupyterLabNotebook: any, onCloneResource: Function, onDeleteResource: Function,
   onEditCohort: Function, onReviewCohort: Function, onEditConceptSet: Function
 }> = ({
-  disabled, resourceType, onRenameNotebook, onOpenJupyterLabNotebook, onCloneResource,
-  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
+  disabled, resourceType, onRenameNotebook = () => {}, onOpenJupyterLabNotebook = () => {},
+  onCloneResource = () => {}, onDeleteResource = () => {}, onEditCohort = () => {},
+  onReviewCohort = () => {}, onEditConceptSet = () => {}
 }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
