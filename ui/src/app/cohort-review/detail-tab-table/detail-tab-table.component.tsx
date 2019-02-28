@@ -11,6 +11,8 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {MultiSelect} from 'primereact/multiSelect';
 import * as React from 'react';
+import * as fp from "lodash/fp";
+import {Checkbox} from "primereact/checkbox";
 
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
@@ -175,7 +177,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         loading: true,
         start: 0,
         sortField: null,
-        sortOrder: 1
+        sortOrder: 1,
       };
     }
 
@@ -268,6 +270,32 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
+    getColumnValue(colName) {
+      const {data} = this.state;
+      let names = [];
+      if(data) {
+        names = [...fp.uniq(data.map(item => {
+          if(colName === 'standardVocabulary') {
+           return item.standardVocabulary;
+          } else if(colName === 'domain') {
+            return item.domain;
+          }
+
+        }))];
+      }
+      let fl: any;
+      return ( <React.Fragment>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel ref={(el) => {fl = el;}} showCloseIcon={true} dismissable={true}>
+          { names.map(i => (
+            <div key={i}>
+              <input type='checkbox'/>
+              <label> {i} </label>
+            </div>
+          ))}
+        </OverlayPanel>
+      </React.Fragment>);
+    }
+
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
@@ -282,18 +310,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
 
       const columns = this.props.columns.map((col) => {
-        let fl: any;
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const filterColName = col.name === 'standardVocabulary';
-        const filterOverlay = <React.Fragment> {filterColName && <div> <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
-          <OverlayPanel ref={(el) => {fl = el;}} showCloseIcon={true} dismissable={true}>
-            <div>{col.name}</div>
-          </OverlayPanel>
-        </div>}
-        </React.Fragment>;
-        // let vocabFilter = <div>{col.name}</div>
+         const filterColName = col.name === 'standardVocabulary' || col.name === 'domain' ;
 
         const header = <React.Fragment>
           <span
@@ -303,7 +323,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-          {filterOverlay}
+          {filterColName && this.getColumnValue(col.name)}
         </React.Fragment>;
 
         return <Column
@@ -313,7 +333,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           sortable
-          filterElement={filterOverlay}
           body={colName && this.overlayTemplate}/>;
       });
 
