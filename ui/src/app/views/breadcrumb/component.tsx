@@ -2,7 +2,14 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {ReactWrapperBase, withCurrentCohort, withCurrentConceptSet, withCurrentWorkspace, withRouteConfigData, withUrlParams} from 'app/utils/index';
+import {
+  ReactWrapperBase,
+  withCurrentCohort,
+  withCurrentConceptSet,
+  withCurrentWorkspace,
+  withRouteConfigData,
+  withUrlParams
+} from 'app/utils/index';
 import {BreadcrumbType, navigateByUrl} from 'app/utils/navigation';
 
 const styles = {
