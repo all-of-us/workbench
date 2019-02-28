@@ -293,13 +293,6 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 
-  getDemoParams(e) {
-    if (e) {
-      this.demoItemsType = e.type;
-      this.demoParam = e.paramId;
-    }
-  }
-
   get disableFlag() {
     return this.noSelection
       || this.preview.get('requesting')

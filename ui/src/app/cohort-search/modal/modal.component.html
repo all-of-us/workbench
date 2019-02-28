@@ -52,12 +52,7 @@
           </div>
           <div class="content" *ngIf="open">
             <ng-container [ngSwitch]="ctype">
-              <crit-demographics
-                *ngSwitchCase="treeType[treeType.DEMO]"
-                [selectedTypes]="demoItemsType"
-                [selectedParamId]="demoParam">
-              </crit-demographics>
-
+              <crit-demographics *ngSwitchCase="treeType[treeType.DEMO]"></crit-demographics>
               <ng-container *ngSwitchDefault>
                 <div *ngIf="disableCursor" class="spinner spinner-lg spin-in-overlay">
                   Loading...
@@ -112,8 +107,7 @@
                   <crit-selection-info
                     *ngFor="let parameter of selections[type]; let p = index"
                     [indexes]="[i,p]"
-                    [parameter]="parameter"
-                    (demoItems) = "getDemoParams($event)">
+                    [parameter]="parameter">
                   </crit-selection-info>
                 </ng-container>
               </div>

@@ -20,13 +20,10 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
     this.selected = this.selected.union(_selections);
   }
   @Input() loading: boolean;
-  @Input() deleteFlag = false;
   selected = Set<number>();
   filter = new FormControl();
   regex = new RegExp('');
   subscription: Subscription;
-  @Input() getParamId: any;
-  @Output() addedItems = new EventEmitter<boolean>();
   selectedOption: any;
   constructor(private actions: CohortSearchActions,
     private ngRedux: NgRedux<CohortSearchState>) {}
@@ -61,7 +58,6 @@ export class MultiSelectComponent implements OnInit, OnDestroy {
 
   select(opt) {
     this.actions.addParameter(opt);
-    this.addedItems.emit(true);
   }
 
   unsetFilter() {
