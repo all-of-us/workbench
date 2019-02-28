@@ -1,14 +1,13 @@
-import {NgRedux, select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {select} from '@angular-redux/store';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {fromJS, List, Map} from 'immutable';
+import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
   activeCriteriaSubtype,
   activeParameterList,
   CohortSearchActions,
-  CohortSearchState,
   participantsCount,
 } from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -40,12 +39,9 @@ function sortByCountThenName(critA, critB) {
     '../../styles/buttons.css',
   ]
 })
-export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
+export class DemographicsComponent implements OnInit, OnDestroy {
   @select(activeCriteriaSubtype) subtype$;
   @select(activeParameterList) selection$;
-  @Input() selectedParamId: any;
-  @Input() selectedTypes: any;
-  @Output() itemsAddedFlag = new EventEmitter<boolean>();
   @select(participantsCount) count$;
   readonly treeSubType = TreeSubType;
   readonly minAge = minAge;
@@ -81,8 +77,7 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
   ethnicityNodes = List();
   initialEthnicities = List();
-  selections: any;
-  showCalculateContainer = false;
+  selections: Array<any>;
   count: any;
   subtype: string;
 
@@ -90,15 +85,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
   ) {}
-
-  ngOnChanges() {
-    this.showCalculateContainer = false;
-    if (this.selections && this.selections.size && this.selectedParamId) {
-      this.showCalculateContainer = true;
-      this.calculate();
-    }
-
-  }
 
   ngOnInit() {
     this.subscription.add(this.subtype$.subscribe(sub => {
@@ -138,16 +124,19 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
     this.subscription.add(this.selection$
       .subscribe(selections => {
-        this.selections = selections;
+        this.selections = [];
         selections.forEach(selection => {
           if (this.subtype === TreeSubType.AGE
             && (selection.get('subtype') === TreeSubType.AGE
             || selection.get('subtype') === TreeSubType.DEC)) {
-            console.log(selection.toJS());
-          } else if (selection.get('subtype') === TreeSubType.AGE) {
-            // this.ageClicked = selection.get('name');
+            this.selections.push(selection.toJS());
+          } else if (selection.get('subtype') === this.subtype) {
+            this.selections.push(selection.toJS());
           }
         });
+        if (this.subtype !== TreeSubType.AGE && this.selections.length) {
+          this.calculate();
+        }
       })
     );
   }
@@ -354,11 +343,11 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
         return ;
       }
       if (includeDeceased) {
-        this.actions.addParameter(this.deceasedNode);
         this.actions.removeParameter(this.selectedNode.get('parameterId'));
+        this.actions.addParameter(this.deceasedNode);
       } else {
-        this.actions.addParameter(this.selectedNode);
         this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+        this.actions.addParameter(this.selectedNode);
       }
     }));
   }
@@ -396,17 +385,9 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   calculate() {
-    // calculate
-    this.showCalculateContainer = false;
-  }
-
-  getItems(flag) {
-    if (flag) {
-      this.showCalculateContainer = true;
-      this.calculate();
-    } else {
-      this.showCalculateContainer = false;
-    }
-
+    this.count = 0;
+    this.selections.forEach(selection => {
+      this.count += selection.count;
+    });
   }
 }
