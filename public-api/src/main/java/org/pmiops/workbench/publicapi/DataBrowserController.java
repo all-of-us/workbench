@@ -575,7 +575,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     addEthnicityStratum(aa);
                     conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == MEASUREMENT_GENDER_ANALYSIS_ID){
-                    HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_GENDER_DIST_ANALYSIS_ID);
                     if (distResults != null) {
@@ -600,7 +600,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueGenderAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
                 }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
-                    HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_AGE_DIST_ANALYSIS_ID);
                     if (distResults != null) {
@@ -624,7 +624,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueAgeAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
                 }else if(analysisId == MEASUREMENT_GENDER_UNIT_ANALYSIS_ID){
-                    HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     for(String unit: results.keySet()){
                         AchillesAnalysis unitGenderCountAnalysis = new AchillesAnalysis(aa);
