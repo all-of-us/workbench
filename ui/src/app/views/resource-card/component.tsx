@@ -113,12 +113,14 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px',
-    fontWeight: 500,
-    lineHeight: '22px',
-    color: '#2691D0',
-    cursor: 'pointer',
-    wordBreak: 'break-all'
+    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: '#2691D0',
+    cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
+    overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical'
+  },
+  cardDescription: {
+    textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
+    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
   lastModified: {
     color: '#4A4A4A',
@@ -439,7 +441,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
               </div>
             </Clickable>
           </div>
-          <div>{this.description}</div>
+          <div style={styles.cardDescription}>{this.description}</div>
         </div>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
