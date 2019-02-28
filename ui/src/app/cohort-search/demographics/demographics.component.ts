@@ -1,15 +1,14 @@
-import {NgRedux, select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
+import {select} from '@angular-redux/store';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {fromJS, List, Map} from 'immutable';
+import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
 import {
+  activeCriteriaSubtype,
   activeParameterList,
   CohortSearchActions,
-  CohortSearchState,
   participantsCount,
-  previewStatus,
 } from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
@@ -40,26 +39,17 @@ function sortByCountThenName(critA, critB) {
     '../../styles/buttons.css',
   ]
 })
-export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
+export class DemographicsComponent implements OnInit, OnDestroy {
+  @select(activeCriteriaSubtype) subtype$;
   @select(activeParameterList) selection$;
-  @Input() selectedParamId: any;
-  @Input() selectedTypes: any;
-  @Output() itemsAddedFlag = new EventEmitter<boolean>();
-  @select(previewStatus) preview$;
   @select(participantsCount) count$;
+  readonly treeSubType = TreeSubType;
   readonly minAge = minAge;
   readonly maxAge = maxAge;
-  loading = {
-    'AGE': false,
-    'GEN': false,
-    'RACE': false,
-    'ETH': false,
-    'DEC': false
-  };
+  loading = false;
   subscription = new Subscription();
   hasSelection = false;
   selectedNode: any;
-  preview = Map();
   ageClicked = false;
 
 
@@ -87,94 +77,77 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
 
   ethnicityNodes = List();
   initialEthnicities = List();
-  deceasedClicked = false;
-  noSelection = true;
-  isCancelTimerInitiated: any = false;
-  showCalculateContainer = false;
+  selections: Array<any>;
   count: any;
+  subtype: string;
+
   constructor(
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
-    private ngRedux: NgRedux<CohortSearchState>
   ) {}
 
-  ngOnChanges() {
-    this.showCalculateContainer = false;
-    if (this.selectedTypes === 'Age') {
-      this.ageClicked = false;
-    } else if (this.selectedTypes === 'Deceased') {
-      this.deceasedClicked = false;
-    }
-    if (this.noSelection && this.selectedParamId) {
-      if (this.isCancelTimerInitiated) {
-        clearTimeout(this.isCancelTimerInitiated);
-        return;
-      }
-    } else if (this.selectedParamId) {
-      this.showCalculateContainer = true;
-      this.getSearchResponse();
-    }
-
-  }
-
   ngOnInit() {
-        // Set back to false at the end of loadNodesFromApi (i.e. the end of the
-        // initialization routine)
+    this.subscription.add(this.subtype$.subscribe(sub => {
+      this.subtype = sub;
+      if (sub === TreeSubType.AGE) {
+        this.initAgeControls();
+      }
+    }));
     this.subscription = this.selection$.subscribe(sel => this.hasSelection = sel.size > 0);
-    this.initAgeControls();
-    this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
     this.selection$.first().subscribe(selections => {
-            /*
-             * Each subtype of DEMO requires subtly different initialization, which
-             * is handled by special-case methods which each receive any selected
-             * criteria already in the state (i.e. if we're editing a search group
-             * item).  Finally we load the relevant criteria from the API.
-             */
-      this.initialGenders = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
-      this.initialRaces = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
-      this.initialEthnicities = selections
-                .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
-      this.initDeceased(selections);
-      this.initAgeRange(selections);
+      /*
+       * Each subtype of DEMO requires subtly different initialization, which
+       * is handled by special-case methods which each receive any selected
+       * criteria already in the state (i.e. if we're editing a search group
+       * item).  Finally we load the relevant criteria from the API.
+       */
+      switch (this.subtype) {
+        case TreeSubType.GEN:
+          this.initialGenders = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.GEN]);
+          break;
+        case TreeSubType.RACE:
+          this.initialRaces = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.RACE]);
+          break;
+        case TreeSubType.ETH:
+          this.initialEthnicities = selections
+            .filter(s => s.get('subtype') === TreeSubType[TreeSubType.ETH]);
+          break;
+        case TreeSubType.AGE:
+          this.initDeceased(selections);
+          this.initAgeRange(selections);
+          this.loadNodesFromApi(TreeSubType.DEC);
+      }
       this.loadNodesFromApi();
     });
 
     this.subscription.add(this.selection$
-      .map(sel => sel.size === 0)
-      .subscribe(sel => this.noSelection = sel)
-        );
-
-
-    this.subscription.add(this.count$
-      .subscribe(totalCount => {
-        if (totalCount) {
-          this.count = totalCount;
-        }
-      }));
-
-    this.subscription.add (this.ngRedux
-      .select(activeParameterList)
-      .subscribe(val => {
-        val.forEach( paramList => {
-
-          if (paramList.get('subtype') === TreeSubType.DEC) {
-            this.deceasedClicked = paramList.get('name');
-          } else if (paramList.get('subtype') === TreeSubType.AGE) {
-            this.ageClicked = paramList.get('name');
+      .subscribe(selections => {
+        this.selections = [];
+        selections.forEach(selection => {
+          if (this.subtype === TreeSubType.AGE
+            && (selection.get('subtype') === TreeSubType.AGE
+            || selection.get('subtype') === TreeSubType.DEC)) {
+            this.selections.push(selection.toJS());
+          } else if (selection.get('subtype') === this.subtype) {
+            this.selections.push(selection.toJS());
           }
         });
-
-      }));
+        if (this.subtype !== TreeSubType.AGE && this.selections.length) {
+          this.calculate();
+        }
+      })
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  loadNodesFromApi() {
+  loadNodesFromApi(subtype?: string) {
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    subtype = subtype || this.subtype;
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
@@ -183,46 +156,49 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
      * objects complete with deterministically generated `parameterId`s and
      * sort them by count, then by name.
      */
-    [
-      TreeSubType[TreeSubType.AGE],
-      TreeSubType[TreeSubType.DEC],
-      TreeSubType[TreeSubType.GEN],
-      TreeSubType[TreeSubType.RACE],
-      TreeSubType[TreeSubType.ETH]
-    ].forEach(code => {
-      this.loading[code] = true;
-      this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-        .subscribe(response => {
-          const items = response.items
-                    .filter(item => item.parentId !== 0
-                        || code === TreeSubType[TreeSubType.DEC]);
-          items.sort(sortByCountThenName);
-          const nodes = fromJS(items).map(node => {
-            if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-              const paramId =
-                            `param${node.get('conceptId', node.get('code'))}`;
-              node = node.set('parameterId', paramId);
-            }
-            return node;
-          });
-          this.loadOptions(nodes, code);
+    this.loading = true;
+    this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], subtype, null, null)
+      .toPromise()
+      .then(response => {
+        const items = response.items
+                  .filter(item => item.parentId !== 0
+                      || subtype === TreeSubType[TreeSubType.DEC]);
+        items.sort(sortByCountThenName);
+        const nodes = fromJS(items).map(node => {
+          if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+            const paramId =
+                          `param${node.get('conceptId', node.get('code'))}`;
+            node = node.set('parameterId', paramId);
+          }
+          return node;
         });
-    });
+        this.loadOptions(nodes, subtype);
+      });
   }
 
   loadOptions(nodes: any, subtype: string) {
-    this.loading[subtype] = false;
+    this.loading = false;
     switch (subtype) {
-            /* Age and Deceased are single nodes we use as templates */
+      /* Age and Deceased are single nodes we use as templates */
       case TreeSubType[TreeSubType.AGE]:
         this.ageNode = nodes.get(0);
         this.ageNodes = nodes.toJS();
         this.calculateAgeCount();
+        const attr = fromJS(<Attribute>{
+          name: 'Age',
+          operator: Operator.BETWEEN,
+          operands: [minAge.toString(), maxAge.toString()],
+          conceptId: this.ageNode.get('conceptId', null)
+        });
+        const paramId = `age-param${this.ageNode.get('id')}`;
+        this.selectedNode = this.ageNode
+          .set('parameterId', paramId)
+          .set('attributes', [attr]);
+        this.actions.addParameter(this.selectedNode);
         break;
       case TreeSubType[TreeSubType.DEC]:
         this.deceasedNode = nodes.get(0);
         break;
-            /* Gender, Race, and Ethnicity are all used to generate option lists */
       case TreeSubType[TreeSubType.GEN]:
         this.genderNodes = nodes;
         break;
@@ -334,13 +310,15 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
                     operands: [lo, hi],
                     conceptId: this.ageNode.get('conceptId', null)
                 });
-                const paramId = `age-param${attr.hashCode()}`;
+                const paramId = `age-param${this.ageNode.get('id')}`;
                 return this.ageNode
                     .set('parameterId', paramId)
                     .set('attributes', [attr]);
             })
             .withLatestFrom(selectedAge)
             .filter(([newNode, oldNode]) => {
+              this.selectedNode = newNode;
+              this.actions.addParameter(newNode);
               if (oldNode) {
                 return oldNode.get('parameterId') !== newNode.get('parameterId');
               }
@@ -361,21 +339,17 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.subscription.add(this.deceased.valueChanges.subscribe(includeDeceased => {
       if (!this.deceasedNode) {
-        this.deceasedClicked = includeDeceased;
         console.warn('No node from which to make parameter for deceased status');
         return ;
       }
-      this.deceasedClicked = includeDeceased;
-      includeDeceased
-                ? this.actions.addParameter(this.deceasedNode)
-                : this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+      if (includeDeceased) {
+        this.actions.removeParameter(this.selectedNode.get('parameterId'));
+        this.actions.addParameter(this.deceasedNode);
+      } else {
+        this.actions.removeParameter(this.deceasedNode.get('parameterId'));
+        this.actions.addParameter(this.selectedNode);
+      }
     }));
-  }
-
-  selectedDeasease() {
-    this.showCalculateContainer = true;
-    this.actions.addParameter(this.deceasedNode);
-    this.getSearchResponse();
   }
 
   calculateAgeCount() {
@@ -390,60 +364,30 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   centerAgeCount() {
-    this.calculateAgeCount();
-    this.ageClicked = false;
-    const slider = <HTMLElement> document.getElementsByClassName('noUi-connect')[0];
-    const wrapper = document.getElementById('count-wrapper');
-    const count = document.getElementById('age-count');
-    wrapper.setAttribute(
-      'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
-        );
-        // set style properties also for cross-browser compatibility
-    wrapper.style.width = slider.offsetWidth.toString();
-    wrapper.style.left = slider.offsetLeft.toString();
-    if (slider.offsetWidth < count.offsetWidth) {
-      const margin = (slider.offsetWidth - count.offsetWidth) / 2;
-      count.setAttribute('style', 'margin-left: ' + margin + 'px;');
-      count.style.marginLeft = margin.toString();
-    }
-  }
-
-  getAgeValue() {
-    this.showCalculateContainer = true;
-    if (!this.selectedNode) {
-      this.ageRange.updateValueAndValidity ({onlySelf: false, emitEvent: true});
-      if (this.isCancelTimerInitiated) {
-        clearTimeout(this.isCancelTimerInitiated);
+    if (this.ageNodes) {
+      this.calculateAgeCount();
+      this.ageClicked = false;
+      const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
+      const wrapper = document.getElementById('count-wrapper');
+      const count = document.getElementById('age-count');
+      wrapper.setAttribute(
+        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
+      );
+      // set style properties also for cross-browser compatibility
+      wrapper.style.width = slider.offsetWidth.toString();
+      wrapper.style.left = slider.offsetLeft.toString();
+      if (slider.offsetWidth < count.offsetWidth) {
+        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
+        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
+        count.style.marginLeft = margin.toString();
       }
-      this.isCancelTimerInitiated =  setTimeout (() => {
-        this.actions.addParameter(this.selectedNode);
-        this.actions.requestPreview();
-        this.showCalculateContainer = false;
-      }, 500);
-    } else {
-      this.actions.addParameter(this.selectedNode);
-      this.actions.requestPreview();
-      this.showCalculateContainer = false;
     }
   }
 
-  getSearchResponse() {
-    if (this.isCancelTimerInitiated) {
-      clearTimeout(this.isCancelTimerInitiated);
-    }
-    this.isCancelTimerInitiated = setTimeout(() => {
-      this.actions.requestPreview();
-      this.showCalculateContainer = false;
-    }, 200);
-  }
-
-  getItems(flag) {
-    if (flag) {
-      this.showCalculateContainer = true;
-      this.getSearchResponse();
-    } else {
-      this.showCalculateContainer = false;
-    }
-
+  calculate() {
+    this.count = 0;
+    this.selections.forEach(selection => {
+      this.count += selection.count;
+    });
   }
 }
