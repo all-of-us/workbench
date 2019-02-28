@@ -146,8 +146,7 @@ const cardButtonStyle = {
   style: {
     ...cardStyles.card,
     alignItems: 'flex-start', alignContent: 'left',
-    marginTop: '1.9rem', marginRight: '106px',
-    justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
+    marginTop: '1.9rem', justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
     fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
@@ -188,5 +187,16 @@ export const TabButton = ({disabled = false, style = {}, active = false, childre
   return <Clickable
     disabled={disabled} {...props}
     {...fp.merge(computeStyle(tabButtonStyleMerged, {disabled}), {style})}
+  >{children}</Clickable>;
+};
+
+export const Link = ({disabled = false, style = {}, children, ...props}) => {
+  const linkStyle = {
+    style: {color: '#2691D0'},
+    hover: {textDecoration: 'underline'}
+  };
+  return <Clickable
+      disabled={disabled} {...props}
+      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
   >{children}</Clickable>;
 };
