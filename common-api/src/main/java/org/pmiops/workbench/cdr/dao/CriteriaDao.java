@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
+  Criteria findCriteriaByTypeAndCodeAndGroup(@Param("type") String type, @Param("code") String code, @Param("group") Boolean group);
   Criteria findCriteriaByTypeAndConceptIdAndSelectable(@Param("type") String type, @Param("conceptId") String conceptId, @Param("selectable") Boolean selectable);
 
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
