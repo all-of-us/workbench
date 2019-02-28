@@ -1,5 +1,5 @@
 import {select} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {fromJS, List} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';

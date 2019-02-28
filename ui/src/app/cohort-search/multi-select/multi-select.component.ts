@@ -1,5 +1,5 @@
 import {NgRedux} from '@angular-redux/store';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {activeParameterList, CohortSearchActions, CohortSearchState} from 'app/cohort-search/redux';
 import {TreeType} from 'generated';

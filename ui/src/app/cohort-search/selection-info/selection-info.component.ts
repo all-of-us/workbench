@@ -1,5 +1,4 @@
-
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {TreeType} from 'generated';
