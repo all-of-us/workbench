@@ -562,7 +562,6 @@ definitions:
         type: integer
         format: int64
       attributes:
-        # TODO: Concrete examples? How is this actually used?
         description: >
             Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
             Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
