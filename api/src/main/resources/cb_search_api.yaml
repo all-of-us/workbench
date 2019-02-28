@@ -563,7 +563,52 @@ definitions:
         format: int64
       attributes:
         # TODO: Concrete examples? How is this actually used?
-        description: Any applicable arguments that complete the sense of the parameter
+        description: >
+            Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
+            Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
+            Measurements and Physical Measurements have overlap in many areas such as body weight, but the
+            difference is standard(measurements) and source(physical measurements).
+            
+             Example demo age search parameter:
+             {
+               "type": "DEMO",
+               "searchParameters": [
+                 {
+                   "type": "DEMO", 
+                   "subtype": "AGE",
+                   "group": false,
+                   "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
+                 }
+               ],
+               "modifiers": []
+             } 
+             
+             Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
+             {
+               "type": "PM",
+               "searchParameters": [
+                 {
+                   "type": "PM",
+                   "subtype": "BP",
+                   "group": false,
+                   "attributes": [
+                     {
+                       "conceptId": 903118,
+                       "name": "Systolic",
+                       "operands": ["90"],
+                       "operator":"LESS_THAN_OR_EQUAL_TO"
+                     },
+                     {
+                       "conceptId": 903115,
+                       "name": "Diastolic",
+                       "operands": ["60"],
+                        "operator": "LESS_THAN_OR_EQUAL_TO"
+                      }
+                    ]
+                  }
+                ],
+                "modifiers": []
+              }
         type: "array"
         items:
           $ref: "#/definitions/Attribute"
