@@ -181,7 +181,7 @@ export class WorkbenchAccessTasks extends
   }
 }
 
-const homepageStyles = reactStyles({
+export const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
@@ -243,7 +243,7 @@ const homepageStyles = reactStyles({
   addCard: {
     display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    fontSize: '20px', lineHeight: '28px'
+    fontSize: '20px', lineHeight: '28px',  marginRight: '106px'
   }
 });
 

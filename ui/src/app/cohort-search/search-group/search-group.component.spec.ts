@@ -98,7 +98,7 @@ describe('SearchGroupComponent', () => {
       itemType: TreeType[TreeType.ICD9],
       context: {
         criteriaType: TreeType[TreeType.ICD9],
-        criteriaSubtype: null,
+        criteriaSubtype: undefined,
         role: 'includes',
         groupId: 'include0',
         itemId: 'TestId',

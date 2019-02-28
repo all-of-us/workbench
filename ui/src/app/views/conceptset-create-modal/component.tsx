@@ -32,7 +32,7 @@ export const CreateConceptSetModal = withCurrentWorkspace()
     this.state = {
       name: '',
       description: '',
-      domain: props.conceptDomainList[0] as unknown as Domain,
+      domain: props.conceptDomainList[0].domain as unknown as Domain,
       nameTouched: false,
       saving: false,
       savingError: false

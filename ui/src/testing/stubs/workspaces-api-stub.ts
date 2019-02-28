@@ -16,16 +16,60 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_ID = '1';
   static DEFAULT_WORKSPACE_DESCRIPTION = 'Stub workspace';
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
+  static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
+export const workspaceStubs = [
+  {
+    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
+    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+    description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
+    cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
+    creationTime: new Date().getTime(),
+    lastModifiedTime: new Date().getTime(),
+    researchPurpose: {
+      diseaseFocusedResearch: false,
+      methodsDevelopment: true,
+      controlSet: true,
+      aggregateAnalysis: false,
+      ancestry: false,
+      commercialPurpose: false,
+      population: false,
+      reviewRequested: false,
+      containsUnderservedPopulation: false
+    },
+    userRoles: [
+      {
+        email: 'sampleuser1@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User1',
+        role: WorkspaceAccessLevel.OWNER
+      },
+      {
+        email: 'sampleuser2@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User2',
+        role: WorkspaceAccessLevel.WRITER
+      },
+      {
+        email: 'sampleuser3@fake-research-aou.org',
+        givenName: 'Sample',
+        familyName: 'User3',
+        role: WorkspaceAccessLevel.READER
+      },
+    ]
+  }
+];
+
 export class WorkspacesApiStub extends WorkspacesApi {
-  workspaces: Workspace[];
+  public workspaces: Workspace[];
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   notebookList: FileDetail[];
 
   constructor(workspaces?: Workspace[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
-    this.workspaces = fp.defaultTo([WorkspacesApiStub.stubWorkspace()], workspaces);
+    this.workspaces = fp.defaultTo(workspaceStubs, workspaces);
     this.workspaceAccess = new Map<string, WorkspaceAccessLevel>();
     this.notebookList = WorkspacesApiStub.stubNotebookList();
   }
@@ -38,49 +82,6 @@ export class WorkspacesApiStub extends WorkspacesApi {
         'lastModifiedTime': 100
       }
     ];
-  }
-
-  static stubWorkspace(): Workspace {
-    return {
-      name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-      id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      description: WorkspaceStubVariables.DEFAULT_WORKSPACE_DESCRIPTION,
-      cdrVersionId: WorkspaceStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
-      creationTime: new Date().getTime(),
-      lastModifiedTime: new Date().getTime(),
-      researchPurpose: {
-        diseaseFocusedResearch: false,
-        methodsDevelopment: true,
-        controlSet: true,
-        aggregateAnalysis: false,
-        ancestry: false,
-        commercialPurpose: false,
-        population: false,
-        reviewRequested: false,
-        containsUnderservedPopulation: false
-      },
-      userRoles: [
-        {
-          email: 'sampleuser1@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User1',
-          role: WorkspaceAccessLevel.OWNER
-        },
-        {
-          email: 'sampleuser2@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User2',
-          role: WorkspaceAccessLevel.WRITER
-        },
-        {
-          email: 'sampleuser3@fake-research-aou.org',
-          givenName: 'Sample',
-          familyName: 'User3',
-          role: WorkspaceAccessLevel.READER
-        },
-      ]
-    };
   }
 
   getNoteBookList(workspaceNamespace: string,
@@ -116,7 +117,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     return new Promise<WorkspaceResponseListResponse>(resolve => {
       resolve({
         items: this.workspaces.map(workspace => {
-          let accessLevel = WorkspaceAccessLevel.OWNER;
+          let accessLevel = WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION;
           if (this.workspaceAccess.has(workspace.id)) {
             accessLevel = this.workspaceAccess.get(workspace.id);
           }
