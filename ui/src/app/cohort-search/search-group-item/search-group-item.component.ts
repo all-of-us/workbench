@@ -1,7 +1,7 @@
 import {NgRedux} from '@angular-redux/store';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 
-import {SearchRequest, TreeType} from 'generated';
+import {SearchRequest, TreeSubType, TreeType} from 'generated';
 import {List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -106,10 +106,18 @@ export class SearchGroupItemComponent implements OnInit, OnDestroy {
     this.enable();
   }
 
+  get itemSubtype() {
+    if (this.item.get('type') === TreeType.DEMO) {
+      const subtype = this.rawCodes.first().get('subtype');
+      return subtype === TreeSubType.DEC ? TreeSubType.AGE : subtype;
+    }
+    return null;
+  }
+
   launchWizard() {
     const codes = getCodeOptions(this.item.get('type'));
     const criteriaType = codes ? codes[0].type : this.item.get('type');
-    const criteriaSubtype = codes ? codes[0].subtype : null;
+    const criteriaSubtype = codes ? codes[0].subtype : this.itemSubtype;
     const fullTree = this.item.get('fullTree', false);
     const {role, groupId, itemId} = this;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
