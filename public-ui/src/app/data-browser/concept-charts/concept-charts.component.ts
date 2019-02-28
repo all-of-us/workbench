@@ -159,8 +159,10 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
     this.selectedUnit = unit;
     this.toDisplayMeasurementGenderAnalysis = this.analyses.measurementValueGenderAnalysis.
     find(aa => aa.unitName === unit);
-    this.toDisplayMeasurementGenderCountAnalysis = this.analyses.measurementGenderCountAnalysis.
-    find(aa => aa.unitName === unit);
+    if (this.analyses.measurementGenderCountAnalysis) {
+      this.toDisplayMeasurementGenderCountAnalysis = this.analyses.measurementGenderCountAnalysis.
+      find(aa => aa.unitName === unit);
+    }
   }
 
   public fetchChartTitle(gender: any) {
