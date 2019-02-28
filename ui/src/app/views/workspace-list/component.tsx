@@ -5,7 +5,13 @@ import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
 import {AlertDanger, AlertWarning} from 'app/components/alert';
-import {Button, CardButton, Clickable, Link, MenuItem} from 'app/components/buttons';
+import {
+  Button,
+  CardButton,
+  Clickable,
+  Link,
+  MenuItem
+} from 'app/components/buttons';
 import {Card} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
@@ -14,7 +20,12 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {displayDate, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {
+  displayDate,
+  reactStyles,
+  ReactWrapperBase,
+  withUserProfile
+} from 'app/utils/index';
 import {BugReportModal} from 'app/views/bug-report/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceShare} from 'app/views/workspace-share/component';
@@ -59,9 +70,7 @@ const styles = reactStyles({
 
 const WorkspaceCardMenu: React.FunctionComponent<{
   disabled: boolean, wp: WorkspacePermissions, onShare: Function, onDelete: Function
-}> = ({
-        disabled, wp, onShare, onDelete
-      }) => {
+}> = ({disabled, wp, onShare, onDelete}) => {
   const wsPathPrefix = 'workspaces/' + wp.workspace.namespace + '/' + wp.workspace.id;
 
   return <PopupTrigger
