@@ -9,8 +9,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NewNotebookModal} from 'app/views/new-notebook-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';

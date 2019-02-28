@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
+import * as fp from 'lodash/fp';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
@@ -11,15 +11,14 @@ import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/uti
 
 import {ParticipantCohortStatusColumns} from 'generated';
 import {
+  CohortBuilderService,
   CohortReview,
   CohortReviewService,
-  ConceptIdName,
   Filter,
   Operator,
   PageFilterType,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatuses as Request,
-  ParticipantDemographics,
   SortOrder,
 } from 'generated';
 
@@ -55,7 +54,6 @@ export class TablePage implements OnInit, OnDestroy {
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
-  concepts: ParticipantDemographics;
   genders: string[] = [];
   races: string[] = [];
   ethnicities: string[] = [];
@@ -67,7 +65,7 @@ export class TablePage implements OnInit, OnDestroy {
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
+    private builderAPI: CohortBuilderService,
   ) {}
 
   ngOnInit() {
@@ -79,11 +77,13 @@ export class TablePage implements OnInit, OnDestroy {
       this.totalParticipantCount = review.matchedParticipantCount;
     });
 
-    const {concepts} = this.route.snapshot.data;
-    this.concepts = concepts;
-    this.races = this.extractDemographics(concepts.raceList);
-    this.genders = this.extractDemographics(concepts.genderList);
-    this.ethnicities = this.extractDemographics(concepts.ethnicityList);
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    this.builderAPI.getParticipantDemographics(cdrid).subscribe(data => {
+      const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
+      this.races = extract(data.raceList);
+      this.genders = extract(data.genderList);
+      this.ethnicities = extract(data.ethnicityList);
+    });
   }
 
 
@@ -153,12 +153,6 @@ export class TablePage implements OnInit, OnDestroy {
 
   isSelected(column: string) {
     return this.isFiltered.indexOf(column) > -1;
-  }
-
-  private extractDemographics(arr: ConceptIdName[]): string[] {
-    const names = arr.map(item => item.conceptName);
-    const vals = new Set<string>(names);
-    return Array.from(vals);
   }
 
   ngOnDestroy() {
