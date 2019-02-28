@@ -23,7 +23,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 public class ElasticDocument {
   /** The Elasticsearch primitive index types we utilize. */
   private enum ElasticType {
-    KEYWORD, INTEGER, DATE, NESTED;
+    KEYWORD, INTEGER, DATE, NESTED, STRING;
 
     String lower() {
       return this.name().toLowerCase();
@@ -57,9 +57,25 @@ public class ElasticDocument {
           .build());
 
   public static final Map<String, Object> PERSON_SCHEMA = ImmutableMap.<String, Object>builder()
+      .put("birth_datetime", esType(ElasticType.DATE))
       .put("gender_concept_id", esType(ElasticType.KEYWORD))
+      .put("gender_concept_name", esType(ElasticType.STRING))
+      .put("race_concept_id", esType(ElasticType.KEYWORD))
+      .put("race_concept_name", esType(ElasticType.STRING))
+      .put("ethnicity_concept_id", esType(ElasticType.KEYWORD))
+      .put("ethnicity_concept_name", esType(ElasticType.STRING))
+      .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
       .put("condition_concept_ids", esType(ElasticType.KEYWORD))
       .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("observation_concept_ids", esType(ElasticType.KEYWORD))
+      .put("observation_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("drug_concept_ids", esType(ElasticType.KEYWORD))
+      .put("drug_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("procedure_concept_ids", esType(ElasticType.KEYWORD))
+      .put("procedure_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("measurement_concept_ids", esType(ElasticType.KEYWORD))
+      .put("measurement_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("visit_concept_ids", esType(ElasticType.KEYWORD))
       .put("events", NESTED_FOREIGN_SCHEMA)
       .build();
 
