@@ -456,6 +456,22 @@ Common.register_command({
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
 })
 
+def run_rainforest_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  # The bucket is hardcoded to staging, because that is currently the only
+  # environment we can run tests in. There is, however, an identical key in
+  # each of the other environments.
+  token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
+  common.run_inline %W{rainforest run all --token #{token}}
+end
+
+Common.register_command({
+  :invocation => "rainforesttest",
+  :description => "Runs rainforest tests.",
+  :fn => ->(*args) { run_rainforest_tests("rainforesttest", *args) }
+})
+
 def run_gradle(cmd_name, args)
   ensure_docker cmd_name, args
   begin
