@@ -113,12 +113,10 @@ const styles = reactStyles({
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px',
-    fontWeight: 500,
-    lineHeight: '22px',
-    color: '#2691D0',
-    cursor: 'pointer',
-    wordBreak: 'break-all'
+    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: '#2691D0',
+    cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
+    overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical'
   },
   cardDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
