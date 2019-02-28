@@ -11,18 +11,18 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "concept_id_or_source_concept_id",
+    "name": "is_standard",
     "type": "INTEGER"
   },
   {
     "mode": "NULLABLE",
-    "name": "type",
-    "type": "string"
+    "name": "concept_id",
+    "type": "INTEGER"
   },
   {
     "mode": "NULLABLE",
-    "name": "subtype",
-    "type": "string"
+    "name": "domain",
+    "type": "STRING"
   },
   {
     "mode": "NULLABLE",
@@ -37,6 +37,16 @@
   {
     "mode": "NULLABLE",
     "name": "visit_occurrence_id",
+    "type": "integer"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "value_as_number",
+    "type": "float"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "value_as_concept_id",
     "type": "integer"
   }
 ]

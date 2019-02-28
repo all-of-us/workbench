@@ -127,7 +127,7 @@ describe('WorkspaceShareComponent', () => {
     wrapper.update();
     wrapper.find('.hermionegrangerhogwartsedu-user-role__option')
       .findWhere(n => n.text() === fp.capitalize(WorkspaceAccessLevel[WorkspaceAccessLevel.OWNER]))
-      .simulate('click');
+      .first().simulate('click');
     wrapper.update();
     const spy = jest.spyOn(workspacesApi(), 'shareWorkspace');
     wrapper.find('[data-test-id="save"]').first().simulate('click');

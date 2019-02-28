@@ -110,8 +110,9 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   /**
    * Fetches a user by their GSuite email address.
-   *
+   * <p>
    * If the user is not found, a null value will be returned (no exception is thrown).
+   *
    * @param email
    * @return
    */
@@ -146,7 +147,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .get(GSUITE_FIELD_CONTACT_EMAIL);
   }
 
-  public static void addCustomSchemaValues(User user, String primaryEmail, String contactEmail) {
+  public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
@@ -155,17 +156,23 @@ public class DirectoryServiceImpl implements DirectoryService {
     // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
     // variable.
     aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
-    // This gives us a structured place to store researchers' contact email addresses, in
-    // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
-    aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
+
+    if (contactEmail != null) {
+      // This gives us a structured place to store researchers' contact email addresses, in
+      // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
+      aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
+    }
 
     // In addition to the custom schema value, we store each user's contact email as a secondary
     // email address with type "home". This makes it show up nicely in GSuite admin as the
     // user's "Secondary email".
-    user.setEmails(Lists.newArrayList(
-    new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true),
-    new UserEmail().setType("home").setAddress(contactEmail)))
-    .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
+    List<UserEmail> emails = Lists.newArrayList(
+        new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+    if (contactEmail != null) {
+      emails.add(new UserEmail().setType("home").setAddress(contactEmail));
+    }
+    user.setEmails(emails)
+        .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
   @Override
@@ -178,7 +185,7 @@ public class DirectoryServiceImpl implements DirectoryService {
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
         .setChangePasswordAtNextLogin(true);
-    addCustomSchemaValues(user, primaryEmail, contactEmail);
+    addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
@@ -187,7 +194,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   @Override
   public User updateUser(User user) {
     retryHandler.run((context) -> getGoogleDirectoryService().users().update(
-      user.getPrimaryEmail(), user).execute());
+        user.getPrimaryEmail(), user).execute());
     return user;
   }
 

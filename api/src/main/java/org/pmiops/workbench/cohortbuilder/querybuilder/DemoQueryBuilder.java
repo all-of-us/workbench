@@ -51,9 +51,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for the following criteria types:
- * DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
+ * DemoQueryBuilder builds SQL for BigQuery for the following criteria types: DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
  */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
@@ -86,6 +84,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   private static final String AND_TEMPLATE = "and\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
@@ -134,6 +135,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     return SELECT + String.join(AND_TEMPLATE, queryParts);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.DEMO;

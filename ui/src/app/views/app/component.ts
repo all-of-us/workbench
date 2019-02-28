@@ -152,7 +152,12 @@ export class AppComponent implements OnInit {
       'window.dataLayer = window.dataLayer || [];' +
       'function gtag(){dataLayer.push(arguments);}' +
       'gtag(\'js\', new Date());' +
-      'gtag(\'config\', \'' + environment.gaId + '\');';
+      // There is some interpolation issues here that cause some useragents to be too long
+      // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
+      // it comes in under this limit -US 2/27/18
+      'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
+      'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
+      '{\'' + environment.gaUserAgentDimension + '\': \'user_agent\'}});';
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }
