@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
+import * as fp from 'lodash/fp';
 
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 
 import {
   CohortAnnotationDefinition,
@@ -14,74 +14,50 @@ interface Annotation {
   value: ParticipantCohortAnnotation;
 }
 
-
-/*
- * Curried predicate function that matches CohortAnnotationDefinitions to
- * ParticipantCohortAnnotations - byDefinitionId(definition)(value) => true/false.
- */
-const byDefinitionId =
-  ({cohortAnnotationDefinitionId}: CohortAnnotationDefinition) =>
-  ({cohortAnnotationDefinitionId: annotationDefinitionId}: ParticipantCohortAnnotation): boolean =>
-  (cohortAnnotationDefinitionId === annotationDefinitionId);
-
-/*
- * Curried ParticipantCohortAnnotation factory - generates a blank value, given
- * a participant and a cohort review id
- */
-const valueFactory =
-  ([participantId, cohortReviewId]) =>
-  (): ParticipantCohortAnnotation =>
-  (<ParticipantCohortAnnotation>{participantId, cohortReviewId});
-
-/*
- * The identity function (useful for filtering objects by truthiness)
- */
-const identity = obj => obj;
-
 @Component({
   selector: 'app-annotation-list',
   templateUrl: './annotation-list.component.html',
   styleUrls: ['./annotation-list.component.css'],
 })
 export class AnnotationListComponent implements OnChanges {
+  annotationList: Annotation[] = [];
   @Input() participant;
+  @Input() annotations: ParticipantCohortAnnotation[];
+  @Input() annotationDefinitions: CohortAnnotationDefinition[];
+  @Input() setAnnotations: Function;
+  @Input() openCreateDefinitionModal: Function;
+  @Input() openEditDefinitionsModal: Function;
 
-  annotations$: Observable<Annotation[]>;
-  /* Determines if the children should show the datatype of the annotation */
-  showDataType = false;
-
-  constructor(private state: ReviewStateService) {}
+  constructor() {
+    this.setAnnotation = this.setAnnotation.bind(this);
+  }
 
   ngOnChanges(changes) {
-    const defs$ = this.state.annotationDefinitions$.filter(identity);
-    const factory$ = this.state.review$.filter(identity).pluck('cohortReviewId')
-      .map(rid => valueFactory([this.participant.id, rid]));
-    this.annotations$ = Observable
-      .combineLatest(defs$, factory$)
-      .map(([defs, factoryFunc]) =>
-        defs.map(definition => {
-          const vals = this.participant.annotations;
-          const value = vals.find(byDefinitionId(definition)) || factoryFunc();
-          return <Annotation>{definition, value};
-        }))
-      .do(console.dir);
+    const {cohortReviewId} = cohortReviewStore.getValue();
+    this.annotationList = this.annotationDefinitions.map(ad => {
+      return {
+        definition: ad,
+        value: this.annotations.find(a => {
+          return a.cohortAnnotationDefinitionId === ad.cohortAnnotationDefinitionId;
+        }) || {
+          participantId: this.participant.id,
+          cohortReviewId,
+          cohortAnnotationDefinitionId: ad.cohortAnnotationDefinitionId
+        }
+      };
+    });
   }
 
   openManager(): void {
-    this.state.annotationManagerOpen.next(true);
+    this.openCreateDefinitionModal();
   }
 
   openEditManager(): void {
-    this.state.editAnnotationManagerOpen.next(true);
+    this.openEditDefinitionsModal();
   }
 
-  updateAnnotation(update: ParticipantCohortAnnotation) {
-    const index = this.participant.annotations
-      .findIndex(anno => anno.annotationId === update.annotationId);
-    if (index > -1) {
-      this.participant.annotations[index] = update;
-    } else {
-      this.participant.annotations.push(update);
-    }
+  setAnnotation(cohortAnnotationDefinitionId, update: ParticipantCohortAnnotation) {
+    const filtered = fp.remove({cohortAnnotationDefinitionId}, this.annotations);
+    this.setAnnotations(filtered.concat(update.annotationId ? [update] : []));
   }
 }

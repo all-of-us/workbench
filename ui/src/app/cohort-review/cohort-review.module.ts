@@ -13,12 +13,12 @@ import {NgxPopperModule} from 'ngx-popper';
 /* Pages */
 import {CohortCommonModule} from 'app/cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
+import {AddAnnotationDefinitionModalComponent, EditAnnotationDefinitionsModalComponent} from './annotation-definition-modals/annotation-definition-modals.component';
 import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
 import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
 import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
-import { DetailAllEventsComponent } from './detail-all-events/detail-all-events.component';
 // This is a temporary measure until we have specs and APIs for overview specific charts
 import {DetailHeaderComponent} from './detail-header/detail-header.component';
 import {DetailPage} from './detail-page/detail-page';
@@ -33,12 +33,7 @@ import {ParticipantsChartsComponent} from './participants-charts/participant-cha
 import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
 import {QueryReportComponent} from './query-report/query-report.component';
-import {ReviewStateService} from './review-state.service';
 import {CohortReviewRoutingModule} from './routing/routing.module';
-import {SetAnnotationCreateComponent} from './set-annotation-create/set-annotation-create.component';
-import {SetAnnotationItemComponent} from './set-annotation-item/set-annotation-item.component';
-import {SetAnnotationListComponent} from './set-annotation-list/set-annotation-list.component';
-import {SetAnnotationModalComponent} from './set-annotation-modal/set-annotation-modal.component';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {StatusFilterComponent} from './status-filter/status-filter.component';
 import {TablePage} from './table-page/table-page';
@@ -75,10 +70,8 @@ import {TablePage} from './table-page/table-page';
     /* Annotations */
     AnnotationItemComponent,
     AnnotationListComponent,
-    SetAnnotationCreateComponent,
-    SetAnnotationItemComponent,
-    SetAnnotationListComponent,
-    SetAnnotationModalComponent,
+    AddAnnotationDefinitionModalComponent,
+    EditAnnotationDefinitionsModalComponent,
 
     /* Participant Table */
     ClearButtonFilterComponent,
@@ -92,12 +85,11 @@ import {TablePage} from './table-page/table-page';
     DetailHeaderComponent,
     DetailTabsComponent,
     DetailTabTableComponent,
-    DetailAllEventsComponent,
     ParticipantsChartsComponent,
     QueryCohortDefinitionComponent,
     QueryDescriptiveStatsComponent
   ],
-  providers: [ReviewStateService,
+  providers: [
     {
       provide: HighchartsStatic,
       useValue: highCharts

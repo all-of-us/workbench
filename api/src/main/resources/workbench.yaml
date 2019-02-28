@@ -294,6 +294,30 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
+  /v1/update-nih-token:
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: Updates a users NIH token
+      operationId: updateNihToken
+      parameters:
+        - in: body
+          name: token
+          description: the token retrieved from NIH
+          schema:
+            $ref: "#/definitions/NihToken"
+      responses:
+        200:
+          description: The user's updated profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        400:
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
   /v1/page-visits:
     post:
       tags:
@@ -344,6 +368,26 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
+  /v1/account/sync-training-status:
+    post:
+      tags:
+        - profile
+      summary: Sync moodle badge/training status
+      description: Retrieves moodleId(either from DB or call from Moodle API)
+                   and get Training status on the basis of that
+      operationId: syncTrainingStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
@@ -375,7 +419,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /v1/auth-domain/{groupName}/users:
+  /v1/auth-domain/users:
     post:
       tags:
         - authDomain
@@ -383,9 +427,9 @@ paths:
         - application/json
       responses:
         204:
-          description: Successfully Added User To Group
+          description: Successfully Updated User In Group
         403:
-          description: You must be an admin of this group in order to remove members
+          description: You must be an admin of this group in order to enable/disable members
           schema:
             $ref: '#/definitions/ErrorResponse'
         404:
@@ -397,47 +441,13 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       parameters:
-        - in: path
-          name: groupName
-          required: true
-          type: string
         - in: body
           name: request
-          description: request carrying user email to add
+          description: Request containing user email to update and a disabled status to update the user to.
           schema:
-            $ref: "#/definitions/AuthDomainRequest"
-      summary: add a user to an auth domain if you have manage groups permission
-      operationId: addUserToAuthDomain
-    delete:
-      responses:
-        204:
-          description: Successfully Removed User From Group
-        403:
-          description: You must be an admin of this group in order to remove members
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        404:
-          description: User not found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        500:
-          description: FireCloud Internal Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      parameters:
-        - in: path
-          name: groupName
-          required: true
-          type: string
-        - in: body
-          name: request
-          description: request carrying user email to add
-          schema:
-            $ref: "#/definitions/AuthDomainRequest"
-      tags:
-        - authDomain
-      summary: remove a user from an auth domain if you have manage groups permission
-      operationId: removeUserFromAuthDomain
+            $ref: "#/definitions/UpdateUserDisabledRequest"
+      summary: enable/disable a user to an auth domain if you have manage groups permission
+      operationId: updateUserDisabledStatus
 
   /v1/user/{term}:
     get:
@@ -813,6 +823,24 @@ paths:
           description: Clusters were checked and handled successfully.
           schema:
             $ref: "#/definitions/CheckClustersResponse"
+
+  /v1/cron/bulkSyncTrainingStatus:
+    get:
+      security: []
+      tags:
+        - user
+        - cron
+      description: sync moodle badge/training status for all user
+      operationId: bulkSyncTrainingStatus
+      responses:
+        200:
+          description: The user table is updated with training status.
+        404:
+          description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
@@ -1313,6 +1341,14 @@ definitions:
       username:
         type: string
 
+  # Authorities are a tool used to add discrete permissions to users. We currently
+  # have three authorities that are used:
+  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+  #      the user has requested review to approve or reject.
+  #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
+  #      and is mainly an internal authority for devs to use when setting up an environment.
+  #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
+  #      to perform actions on a user's enabled status and manual verification.
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1928,6 +1964,15 @@ definitions:
     description: Possible value for bug reports
     enum: [APPLICATION, DATA]
 
+  NihToken:
+    required:
+      - jwt
+    type: object
+    properties:
+      jwt:
+        type: string
+        description: the encoded/signed JWT
+
   Profile:
     type: object
     required:
@@ -1999,7 +2044,7 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
-      ethicsTrainingCompletionTime:
+      trainingCompletionTime:
         type: integer
         format: int64
         description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
@@ -2214,13 +2259,16 @@ definitions:
         items:
           $ref: "#/definitions/Profile"
 
-  AuthDomainRequest:
+  UpdateUserDisabledRequest:
     type: object
     required:
       - email
     properties:
       email:
         type: string
+      disabled:
+        description: Set to true to disable user in auth domain, false otherwise
+        type: boolean
 
   AuditBigQueryResponse:
     type: object

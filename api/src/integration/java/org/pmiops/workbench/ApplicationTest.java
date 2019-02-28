@@ -14,6 +14,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * This test that all application injection is done properly. It loads all JPA repositories,
+ * Services, Controllers, Components and Configurations.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestWebMvcConfig.class})
 public class ApplicationTest {

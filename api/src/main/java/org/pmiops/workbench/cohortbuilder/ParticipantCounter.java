@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.util.HashMap;
 
-import org.pmiops.workbench.cdm.DomainTableEnum;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ public class ParticipantCounter {
 
   public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
+  private static final String TABLE_PREFIX = QueryBuilderConstants.TABLE_PREFIX;
 
   private static final String PERSON_TABLE = "person";
 
@@ -53,15 +54,6 @@ public class ParticipantCounter {
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
     "group by gender, race, ageRange\n" +
       "order by gender, race, ageRange\n";
-
-  private static final String LAB_SQL_TEMPLATE =
-    "and ${tableId} in (\n" +
-      "  select concept_id\n" +
-      "  from `${projectId}.${dataSetId}.criteria`\n" +
-      "  where type = 'MEAS'\n" +
-      "    and subtype = 'LAB'\n" +
-      "    and is_selectable = 1\n" +
-      ")\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
     "and standard_concept_id != 0 \n" +
@@ -103,14 +95,11 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
-      String table = DomainTableEnum.getDenormalizedTableName(domain);
+      String table = TABLE_PREFIX + domainType.name().toLowerCase();
       String limit = Integer.toString(chartLimit);
       String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
         .replace("${table}", table);
-      String endSqlTemplate = DomainType.LAB.equals(domainType) ?
-        LAB_SQL_TEMPLATE + DOMAIN_CHART_INFO_SQL_GROUP_BY :
-        DOMAIN_CHART_INFO_SQL_GROUP_BY;
+      String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY;
       endSqlTemplate = endSqlTemplate
         .replace("${limit}", limit)
         .replace("${tableId}", STANDARD_CONCEPT_ID);

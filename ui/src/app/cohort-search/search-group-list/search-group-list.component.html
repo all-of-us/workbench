@@ -2,18 +2,15 @@
   <div class="col-header">
     <h2 class="participant-header">{{ title | titlecase }}</h2>
   </div>
+
   <div *ngFor="let group of (groups$ | async); let i = index;">
-    <app-search-group [group]="group" [index]="i" [role]="role">
+    <app-search-group [group]="group" [index]="i + index"
+                      [role]="role"
+                      (temporalLength)="getTemporalLength($event)">
     </app-search-group>
     <div class="circle-wrapper">
       <div class="and-circle">AND</div>
     </div>
   </div>
-  <button
-    *ngIf="(initShowChart$ | async)"
-    type="button"
-    class="btn btn-info-outline btn-sm">
-    DELETE GROUP
-  </button>
-  <app-search-group-select [role]="role"></app-search-group-select>
+  <app-search-group-select [role]="role" [index]="emptyIndex"></app-search-group-select>
 </div>

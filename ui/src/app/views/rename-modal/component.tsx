@@ -1,4 +1,3 @@
-import {Component, Input} from '@angular/core';
 import {validate} from 'validate.js';
 
 import {
@@ -13,10 +12,9 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 
-import {ReactWrapperBase, summarizeErrors} from 'app/utils';
+import {summarizeErrors} from 'app/utils';
 
 import * as React from 'react';
 
@@ -89,7 +87,7 @@ export class RenameModal extends React.Component<RenameModalProps, {
         message: 'already exists'
       }
     }});
-    return <Modal>
+    return <Modal loading={saving}>
       <ModalTitle>Please enter the new name for {notebookName}</ModalTitle>
       <ModalBody>
         <div style={headerStyles.formLabel}>New Name:</div>
@@ -111,22 +109,6 @@ export class RenameModal extends React.Component<RenameModalProps, {
           >Rename Notebook</Button>
         </TooltipTrigger>
       </ModalFooter>
-      {saving && <SpinnerOverlay />}
     </Modal>;
-  }
-}
-
-@Component({
-  selector: 'app-rename-modal',
-  template: '<div #root></div>'
-})
-export class RenameModalComponent extends ReactWrapperBase {
-  @Input('notebookName') notebookName: RenameModalProps['notebookName'];
-  @Input('workspace') workspace: RenameModalProps['workspace'];
-  @Input('onRename') onRename: RenameModalProps['onRename'];
-  @Input('onCancel') onCancel: RenameModalProps['onCancel'];
-
-  constructor() {
-    super(RenameModal, ['notebookName', 'workspace', 'onRename', 'onCancel']);
   }
 }

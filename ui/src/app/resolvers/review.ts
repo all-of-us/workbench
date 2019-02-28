@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {
   Cohort,
   CohortReview,
@@ -36,6 +37,9 @@ export class ReviewResolver implements Resolve<CohortReview> {
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };
 
-    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
+    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request).map(v => {
+      cohortReviewStore.next(v);
+      return v;
+    });
   }
 }

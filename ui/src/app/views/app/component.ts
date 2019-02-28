@@ -11,6 +11,7 @@ import {
 
 
 import {cookiesEnabled} from 'app/utils';
+import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
@@ -29,7 +30,7 @@ export class AppComponent implements OnInit {
   cookiesEnabled = true;
   overriddenUrl: string = null;
   private baseTitle: string;
-  private overriddenPublicUrl: string = null;
+  overriddenPublicUrl: string = null;
 
   constructor(
     @Inject(DOCUMENT) private doc: any,
@@ -93,6 +94,12 @@ export class AppComponent implements OnInit {
         // Terminal navigation events.
         this.initialSpinner = false;
       }
+      if (e instanceof NavigationEnd) {
+        const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+        urlParamsStore.next(params);
+        queryParamsStore.next(queryParams);
+        routeConfigDataStore.next(routeConfig.data);
+      }
     });
 
     this.setGTagManager();
@@ -100,6 +107,10 @@ export class AppComponent implements OnInit {
     if (this.cookiesEnabled) {
       this.setTCellAgent();
     }
+  }
+
+  getLeafRoute(route = this.activatedRoute) {
+    return route.firstChild ? this.getLeafRoute(route.firstChild) : route;
   }
 
   /**
@@ -141,7 +152,12 @@ export class AppComponent implements OnInit {
       'window.dataLayer = window.dataLayer || [];' +
       'function gtag(){dataLayer.push(arguments);}' +
       'gtag(\'js\', new Date());' +
-      'gtag(\'config\', \'' + environment.gaId + '\');';
+      // There is some interpolation issues here that cause some useragents to be too long
+      // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
+      // it comes in under this limit -US 2/27/18
+      'gtag(\'set\', \'user_agent\', \'' + window.navigator.userAgent.slice(0, 100) + '\');' +
+      'gtag(\'config\', \'' + environment.gaId + '\', {\'custom_map\': ' +
+      '{\'' + environment.gaUserAgentDimension + '\': \'user_agent\'}});';
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
   }

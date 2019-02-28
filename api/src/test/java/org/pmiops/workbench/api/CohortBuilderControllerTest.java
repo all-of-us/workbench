@@ -13,6 +13,7 @@ import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.TreeSubType;
@@ -70,7 +71,8 @@ public class CohortBuilderControllerTest {
     CdrVersionService.class,
     CdrVersionDao.class,
     BigQueryService.class,
-    ParticipantCounter.class
+    ParticipantCounter.class,
+    ElasticSearchService.class
   })
   static class Configuration {}
 

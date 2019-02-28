@@ -13,5 +13,15 @@
     "mode": "REQUIRED",
     "name": "question_concept_id",
     "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "path",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "is_main",
+    "type": "INTEGER"
   }
 ]

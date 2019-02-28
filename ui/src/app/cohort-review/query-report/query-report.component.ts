@@ -1,8 +1,8 @@
 import {AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {CohortBuilderService, Workspace} from 'generated';
+import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {Workspace} from 'generated';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -21,17 +21,14 @@ export class QueryReportComponent implements OnInit, AfterContentChecked {
   data:  Observable<List<any>>;
   workspace: Workspace;
 
-  constructor(private api: CohortBuilderService,
-    private route: ActivatedRoute,
+  constructor(
     private cdref: ChangeDetectorRef,
     private cdrVersionStorageService: CdrVersionStorageService) {}
 
   ngOnInit() {
-    const {cohort, review} = this.route.snapshot.data;
-    const wsData: WorkspaceData = this.route.snapshot.data.workspace;
-    this.workspace = wsData;
-    this.cohort = cohort;
-    this.review = review;
+    this.cohort = currentCohortStore.getValue();
+    this.workspace = currentWorkspaceStore.getValue();
+    this.review = cohortReviewStore.getValue();
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
       this.cdrDetails = resp.items.find(v => v.cdrVersionId === this.workspace.cdrVersionId);
     });

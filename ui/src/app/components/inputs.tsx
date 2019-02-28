@@ -1,4 +1,5 @@
 import * as React from 'react';
+import RSelect from 'react-select';
 
 import {withStyle} from 'app/utils/index';
 
@@ -57,20 +58,23 @@ export const ValidationError = ({children}) => {
   >{children}</div>;
 };
 
-export const TextInput = ({style = {}, onChange, invalid = false, ...props}) => {
+export const TextInput = React.forwardRef(({style = {}, onChange, invalid = false, ...props}:
+      {style?: React.CSSProperties, onChange: Function, invalid?: boolean, [key: string]: any},
+                                           ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
+    ref = {ref}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%', height: '1.5rem',
-      border: '1px solid #9a9a9a', borderRadius: 4,
+      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
       padding: '0 0.5rem',
       backgroundColor: '#fff',
       ...(invalid ? styles.unsuccessfulInput : {}),
       ...style
     }}
   />;
-};
+});
 
 export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
   return <textarea
@@ -78,7 +82,7 @@ export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     style={{
       width: '100%',
-      border: '1px solid #9a9a9a', borderRadius: 4,
+      borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
       padding: '0.25rem 0.5rem',
       backgroundColor: '#fff',
       ...(invalid ? styles.unsuccessfulInput : {}),
@@ -93,5 +97,14 @@ export const RadioButton = ({ onChange, ...props }) => {
     {...props}
     onChange={onChange}
     onClick={onChange}
+  />;
+};
+
+export const Select = ({value, options, onChange, ...props}) => {
+  return <RSelect
+    value={options.find(o => o.value === value)}
+    options={options}
+    onChange={o => onChange(o && o.value)}
+    {...props}
   />;
 };

@@ -23,7 +23,12 @@
   <app-participant-status [participant]="participant">
   </app-participant-status>
 
-  <app-annotation-list [participant]="participant">
-  </app-annotation-list>
+  <app-annotation-list
+    [participant]="participant"
+    [annotations]="annotations"
+    [annotationDefinitions]="annotationDefinitions"
+    [setAnnotations]="setAnnotations"
+    [openCreateDefinitionModal]="openCreateDefinitionModal"
+    [openEditDefinitionsModal]="openEditDefinitionsModal"
+  ></app-annotation-list>
 </div>
-

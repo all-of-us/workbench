@@ -41,5 +41,13 @@
   "mandrill": {
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
+  },
+  "elasticsearch": {
+    "host": "",
+    "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aou.nnlm.gov",
+    "enableMoodleBackend": false
   }
 }

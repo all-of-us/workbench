@@ -78,11 +78,11 @@
   </app-sliding-fab>
 </app-top-box>
 
-<app-confirm-delete-modal [resourceType]="'Concept Set'"
-                          [resource]=conceptSet
-                          [receiveDelete]=receiveDelete.bind(this)
-                          [deleting]="confirmDeleting"
-                          [closeFunction]="closeConfirmDelete.bind(this)">
+<app-confirm-delete-modal *ngIf="confirmDeleting"
+                          [resourceType]="'Concept Set'"
+                          [resourceName]=conceptSet.name
+                          [receiveDelete]=receiveDelete
+                          [closeFunction]="closeConfirmDelete">
 </app-confirm-delete-modal>
 
 <clr-modal [(clrModalOpen)]="removing" [clrModalSize]="'md'">

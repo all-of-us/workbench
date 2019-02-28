@@ -3,7 +3,6 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, UrlSegment} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {
@@ -27,7 +26,6 @@ import {ConceptAddModalComponent} from './component';
 
 class ConceptSetAddPage {
   fixture: ComponentFixture<ConceptAddModalComponent>;
-  route: UrlSegment[];
   conceptSetService: ConceptSetsService;
   workspacesService: WorkspacesService;
   workspaceNamespace: string;
@@ -39,7 +37,6 @@ class ConceptSetAddPage {
 
   constructor(testBed: typeof TestBed) {
     this.fixture = testBed.createComponent(ConceptAddModalComponent);
-    this.route = this.fixture.debugElement.injector.get(ActivatedRoute).snapshot.url;
     this.workspacesService = this.fixture.debugElement.injector.get(WorkspacesService);
     this.conceptSetService = this.fixture.debugElement.injector.get(ConceptSetsService);
     this.workspacesService.getWorkspace(
@@ -52,8 +49,6 @@ class ConceptSetAddPage {
   readPageData() {
     updateAndTick(this.fixture);
     updateAndTick(this.fixture);
-    this.workspaceNamespace = this.route[1].path;
-    this.workspaceId = this.route[2].path;
     const de = this.fixture.debugElement;
     this.save = de.query(By.css('.btn-primary'));
     const selects = de.queryAll(By.css('.concept-select'));
@@ -69,19 +64,6 @@ class ConceptSetAddPage {
 
   }
 }
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    }
-  }
-};
 
 describe('ConceptSetAddComponent', () => {
   let conceptSetAddCreatePage: ConceptSetAddPage;
@@ -101,7 +83,6 @@ describe('ConceptSetAddComponent', () => {
       providers: [
         {provide: ConceptsService, useValue: conceptServiceStub},
         {provide: ConceptSetsService, useValue: conceptSetServiceStub},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub() }
       ]
     }).compileComponents().then(() => {
@@ -177,4 +158,3 @@ describe('ConceptSetAddComponent', () => {
         expect(description).not.toBeNull();
       }));
 });
-

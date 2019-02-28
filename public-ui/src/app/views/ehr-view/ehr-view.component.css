@@ -37,3 +37,29 @@
 .domain-summary {
     margin: .65rem;
 }
+
+.search-input-full{
+    border: none;
+    box-shadow: 0 4px 12px 0 rgba(0,0,0,0.15);
+    height: 3rem;
+    width: 75%;
+    background-color: #A3D3F232;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
+    color: #000000;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+.search-icon {
+     margin-top: 1%;
+ }
+
+#search-db {
+    margin-top: 3%;
+}
+
+.toggle-link {
+    color: #262262;
+}

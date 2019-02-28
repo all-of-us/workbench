@@ -282,6 +282,8 @@ Description of arguments these scripts take are as follows.
 * instance: Cloud Sql Instance
 
 ###Examples:
+#### Generate criteria tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb generate-criteria-table --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606`
 #### Generate denormalized search tables in the BigQuery cdr only one time when it is released or as needed
 `./project.rb make-bq-denormalized-search --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
 ##### Result is
@@ -448,6 +450,12 @@ create and delete BigQuery datasets), run:
 
 By default, all tests will return just test pass / fail output and stack traces for exceptions. To get full logging, pass on the command line --project-prop verboseTestLogging=yes when running tests.
 
+To filter tests, use the [--tests flag](https://docs.gradle.org/current/userguide/java_testing.html#simple_name_pattern) on any test command:
+
+```
+./project.rb bigquerytest --tests "org.pmiops.workbench.api.CohortBuilderControllerBQTest.countSubjectsNotValidMessageException"
+```
+
 ## Manual Testing
 
 ### Backend Swagger Portals
@@ -480,3 +488,13 @@ curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json u
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
 ```
+
+### Generating survey_question_map.csv
+survey_question_map.csv is used to identify the order of appearance of the questions in actual survey pdfs.
+1. Id column is incremental and specifies the order of the questions in each survey.(Used to display the questions in the same order in databrowser)
+2. survey_concept_id holds the concept id of the survey. (can be fetched from the survey_module))
+3. question_concept_id holds the concept id of each question. (can be fetched from the survey pdf)
+4. path specifies the origin id of each question. If the question is the sub-question, then the id of the main question would be the path.
+5. is_main is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question.
+* NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones. Also, the missing questions would not be displayed as they do not have the counts in there to display.
+

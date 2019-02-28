@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
@@ -9,14 +10,20 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * TODO: delete when ui work is done.
+ */
 @Service
 public class ReviewQueryBuilder {
 
   private static final String NAMED_PARTICIPANTID_PARAM = "participantId";
   private static final String NAMED_LIMIT_PARAM = "limit";
-  private static final String TABLE_PREFIX = "p_";
+  private static final String TABLE_PREFIX = QueryBuilderConstants.TABLE_PREFIX;
 
   private static final String VISIT_COLUMNS =
+    ", visit_type as visitType\n";
+
+  private static final String OBS_VISIT_COLUMNS =
     ", visit_id as visitId\n" +
       ", visit_concept_id as visitConceptId\n";
 
@@ -24,6 +31,15 @@ public class ReviewQueryBuilder {
     ", standard_name as standardName\n" +
       ", standard_code as standardCode\n" +
       ", standard_vocabulary as standardVocabulary\n";
+
+  private static final String DRUG_COLUMNS =
+    ", route as route\n" +
+      ", dose as dose\n" +
+      ", strength as strength\n";
+
+  private static final String MEASUREMENT_COLUMNS =
+    ", unit as unit\n" +
+      ", ref_range as refRange\n";
 
   private static final String SOURCE_COLUMNS =
     ", source_name as sourceName\n" +
@@ -39,9 +55,7 @@ public class ReviewQueryBuilder {
       ", last_mention as lastMention\n";
 
   private static final String VALUE_COLUMNS =
-    ", value_concept as valueConcept\n" +
-      ", value_as_number as valueAsNumber\n" +
-      ", value_source_value as valueSourceValue\n";
+      ", value_as_number as value\n";
 
   private static final String BASE_SQL_TEMPLATE =
     "select person_id as personId\n" +
@@ -53,47 +67,54 @@ public class ReviewQueryBuilder {
       STANDARD_COLUMNS +
       SOURCE_COLUMNS +
       AGE_AT_EVENT +
-      ", visit_type as visitType\n" +
-      ", source_value as sourceValue\n" +
-      MENTION_COLUMNS;
+      VISIT_COLUMNS +
+      DRUG_COLUMNS +
+      MEASUREMENT_COLUMNS +
+      MENTION_COLUMNS +
+      VALUE_COLUMNS;
 
   private static final String CONDITION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
       SOURCE_COLUMNS +
       VISIT_COLUMNS +
-      AGE_AT_EVENT +
-      MENTION_COLUMNS;
+      AGE_AT_EVENT;
 
   private static final String PROCEDURE_SQL_TEMPLATE =
     CONDITION_SQL_TEMPLATE;
 
   private static final String DRUG_SQL_TEMPLATE =
-    CONDITION_SQL_TEMPLATE +
-      ", quantity as quantity\n" +
-      ", refills as refills\n" +
-      ", strength as strength\n" +
-      ", route as route\n";
-
-  private static final String MEASUREMENT_SQL_TEMPLATE =
-    STANDARD_COLUMNS +
-      SOURCE_COLUMNS +
-      VISIT_COLUMNS +
+    ", standard_name as standardName\n" +
+      DRUG_COLUMNS +
       AGE_AT_EVENT +
+      MENTION_COLUMNS +
+      VISIT_COLUMNS;
+
+  private static final String LAB_SQL_TEMPLATE =
+    ", standard_name as standardName\n" +
       VALUE_COLUMNS +
-      ", units as units\n" +
-      ", ref_range as refRange\n";
+      MEASUREMENT_COLUMNS +
+      AGE_AT_EVENT +
+      VISIT_COLUMNS;
+
+  private static final String VITAL_SQL_TEMPLATE =
+    LAB_SQL_TEMPLATE;
 
   private static final String OBSERVATION_SQL_TEMPLATE =
     STANDARD_COLUMNS +
       SOURCE_COLUMNS +
-      VISIT_COLUMNS +
+      OBS_VISIT_COLUMNS +
       AGE_AT_EVENT;
 
   private static final String PHYSICAL_MEASURE_SQL_TEMPLATE =
     STANDARD_COLUMNS +
-      AGE_AT_EVENT +
       VALUE_COLUMNS +
-      ", units as units\n";
+      ", unit as unit\n" +
+      AGE_AT_EVENT;
+
+  private static final String SURVEY_SQL_TEMPLATE =
+    ", survey as survey\n" +
+      ", question as question\n" +
+      ", answer as answer\n";
 
   private static final String FROM =
     "from `${projectId}.${dataSetId}.%s`\n";
@@ -115,6 +136,7 @@ public class ReviewQueryBuilder {
       "left join (select standard_code, RANK() OVER(ORDER BY COUNT(*) DESC) as rnk\n" +
       "from `${projectId}.${dataSetId}.%s`\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
+      "and standard_concept_id != 0 \n" +
       "group by standard_code\n" +
       "LIMIT @" + NAMED_LIMIT_PARAM + ") b on a.standard_code = b.standard_code\n" +
       "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
@@ -180,8 +202,12 @@ public class ReviewQueryBuilder {
         return PROCEDURE_SQL_TEMPLATE;
       case OBSERVATION:
         return OBSERVATION_SQL_TEMPLATE;
-      case MEASUREMENT:
-        return MEASUREMENT_SQL_TEMPLATE;
+      case LAB:
+        return LAB_SQL_TEMPLATE;
+      case VITAL:
+        return VITAL_SQL_TEMPLATE;
+      case SURVEY:
+        return SURVEY_SQL_TEMPLATE;
       default:
         return PHYSICAL_MEASURE_SQL_TEMPLATE;
     }

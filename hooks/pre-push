@@ -28,7 +28,7 @@ do
 
   for dir in "ui" "public-ui"; do
     pushd "${dir}" > /dev/null
-    if [ -n "`echo ${files} | grep ^${dir}\/.*\.ts$`" ]; then
+    if [ -n "`echo ${files} | grep "^${dir}\/.*\.tsx\?$"`" ]; then
       echo "Linting ${dir}..."
       if [ -x "$(command -v yarn)" ]; then
         yarn run lint

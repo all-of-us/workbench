@@ -10,6 +10,9 @@ import java.util.List;
 
 public final class QueryBuilderConstants {
 
+  //Denormalized Table constants
+  public static final String TABLE_PREFIX = "person_";
+
   //Exception messages
   public static final String EMPTY_MESSAGE = "Bad Request: Search {0} are empty.";
   public static final String NOT_VALID_MESSAGE = "Bad Request: {0} {1} \"{2}\" is not valid.";

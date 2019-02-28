@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
 
+import {currentCohortStore} from 'app/utils/navigation';
 import {Cohort, CohortsService, Workspace} from 'generated';
 
 @Injectable()
@@ -17,6 +18,9 @@ export class CohortResolver implements Resolve<Cohort> {
     // console.log(`Resolving cohort ${cid}:`);
     // console.dir(route);
 
-    return this.api.getCohort(ns, wsid, cid);
+    return this.api.getCohort(ns, wsid, cid).map(c => {
+      currentCohortStore.next(c);
+      return c;
+    });
   }
 }

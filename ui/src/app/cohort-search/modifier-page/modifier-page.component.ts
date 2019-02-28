@@ -9,7 +9,6 @@ import {
   Output
 } from '@angular/core';
 import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {
   activeCriteriaType,
   activeModifierList,
@@ -17,6 +16,7 @@ import {
   previewStatus,
 } from 'app/cohort-search/redux';
 import {dateValidator, integerAndRangeValidator} from 'app/cohort-search/validators';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderService, ModifierType, Operator, TreeType} from 'generated';
 import {fromJS, List, Map} from 'immutable';
 import * as moment from 'moment';
@@ -128,11 +128,10 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     private actions: CohortSearchActions,
     private api: CohortBuilderService,
     private cdref: ChangeDetectorRef,
-    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     this.subscription = this.modifiers$.subscribe(mods => this.existing = mods);
     this.subscription.add(this.ctype$
       .filter(ctype => !! ctype)
@@ -308,7 +307,7 @@ export class ModifierPageComponent implements OnInit, OnDestroy, AfterContentChe
     this.ngAfterContentChecked();
     this.errors = new Set();
     return this.modifiers.map(mod => {
-      const {name, inputType, min, max, maxLength, modType} = mod;
+      const {name, inputType, maxLength, modType} = mod;
       if (modType === ModifierType.ENCOUNTERS) {
         if (!vals[name].operator) {
           return;

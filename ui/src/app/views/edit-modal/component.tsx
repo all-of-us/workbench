@@ -1,5 +1,3 @@
-import {Component, Input} from '@angular/core';
-
 import {
   Button
 } from 'app/components/buttons';
@@ -12,11 +10,11 @@ import {
   ModalTitle,
 } from 'app/components/modals';
 
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 
 import {
   RecentResource,
-} from 'generated';
+} from 'generated/fetch';
 
 import * as React from 'react';
 
@@ -84,7 +82,7 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
 
   render() {
     return <React.Fragment>
-      <Modal className='editModal'>
+      <Modal loading={this.state.loading} className='editModal'>
         <ModalTitle style={{fontSize: 16}}>
           Edit {this.state.resourceType} Information
         </ModalTitle>
@@ -98,14 +96,14 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
           </div>
           <div style={{marginTop: '1rem'}}>
             <label style={styles.fieldHeader}>Description: </label>
-            <textarea value={this.state.resourceDescription}
+            <textarea value={this.state.resourceDescription || ''}
                       onChange={(e) => this.setState({resourceDescription: e.target.value})}/>
           </div>
         </ModalBody>
         <ModalFooter>
           <Button type='secondary'
                   onClick={() => this.props.onCancel()}>Cancel</Button>
-          <Button disabled={!(this.state.resourceName.length > 0)}
+          <Button disabled={!(this.state.resourceName.length > 0) || this.state.loading}
                   data-test-id='save-edit'
                   style={{marginLeft: '.5rem'}}
                   onClick={() => this.save()}>Save</Button>
@@ -113,20 +111,4 @@ export class EditModal extends React.Component<EditModalProps, EditModalState> {
       </Modal>
     </React.Fragment>;
   }
-}
-
-
-@Component({
-  selector: 'app-edit-modal',
-  template: '<div #root></div>'
-})
-export class EditModalComponent extends ReactWrapperBase {
-  @Input('resource') resource: EditModalProps['resource'];
-  @Input('onEdit') onEdit: EditModalProps['onEdit'];
-  @Input('onCancel') onCancel: EditModalProps['onCancel'];
-
-  constructor() {
-    super(EditModal, ['resource', 'onEdit', 'onCancel']);
-  }
-
 }

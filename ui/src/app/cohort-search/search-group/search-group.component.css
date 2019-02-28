@@ -5,10 +5,10 @@
   margin: 0.6rem 0;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  min-width: 100%;
+.card-block.search-item {
+  margin: 0 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom-color: rgb(195, 195, 195);
 }
 
 .temporal-sub-card-header {
@@ -17,6 +17,7 @@
   padding: .5rem .75rem;
 }
 
+.card-header,
 .card-footer {
   color: rgb(38, 34, 98);
   background-color: rgb(226, 226, 233);
@@ -25,21 +26,13 @@
   min-width: 100%;
 }
 
-.card-footer >span{
-  font-size: 14px;
-  font-weight: 600;
+:host::ng-deep clr-icon[shape=ellipsis-vertical] {
+  color: #2691D0;
 }
 
-#close-button {
-  float: right;
-  border: 1px solid rgba(215, 215, 215, 0.5);
-  background: #FFFFFF;
-  color: #2691D0;
-  margin-top: -20px;
-  margin-right: 0;
-  border-bottom: 0;
-  font-size: 10px;
-  letter-spacing: 0;
+.card-footer > span{
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .selection-button {
@@ -57,7 +50,7 @@
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
   font-weight: 100 !important;
-  width:10rem;
+  width:12rem;
   text-align: start;
 }
 .time-selection-button:hover {
@@ -135,19 +128,81 @@
   transition: right .15s ease-in;
 }
 
-.time-inputbox {
-  width: 2rem;
+.time-inputBox {
+  width: 3.4rem;
   border: 1px solid #9a9a9a;
   padding: 0.6rem;
   border-radius: 0.1rem;
   text-align: center;
 }
+
 .of-text{
-  padding-right: 12rem;
+  padding-right: 6rem;
   padding-top: 0.2rem;
   font-size: 14px;
 }
 
-clr-icon[shape^=error-standard] {
+clr-icon[shape=error-standard] {
   color: #d9534f;
 }
+
+.group-overlay {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  vertical-align: middle;
+  display: none;
+}
+
+.group-overlay.hidden,
+.group-overlay.pending {
+  display: table;
+}
+
+.group-overlay > .group-overlay-inner {
+  display: table-cell;
+  vertical-align: middle;
+  color: #E28327;
+  font-size: 18px;
+}
+
+.overlay-text > .btn.btn-link {
+  color: #2691D0;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.overlay-text > .btn.btn-link:focus {
+  border: 1px solid transparent;
+}
+
+.item-or {
+  float: right;
+  margin-right: 46%;
+  padding: 0 10px;
+  background: #ffffff;
+  color: rgb(195, 195, 195);
+}
+
+clr-icon[shape=warning-standard] {
+  color: #E28327;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toggle-no-cursor {
+  cursor: not-allowed;
+}
+
+.toggle-switch-disable {
+  pointer-events: none;
+}
+
+.form-padding {
+  padding-top: 0rem;
+}
+

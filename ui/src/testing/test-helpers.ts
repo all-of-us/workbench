@@ -57,3 +57,10 @@ export function simulateClickReact<C>(
   ReactTestUtils.Simulate.click(el);
   updateAndTick(fixture);
 }
+
+export function findElementsReact<C>(
+  fixture: ComponentFixture<C>,
+  selector: string
+) {
+  return [].slice.call(fixture.debugElement.nativeElement.querySelectorAll(selector));
+}

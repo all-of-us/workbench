@@ -6,7 +6,6 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {hasRegisteredAccess} from 'app/utils';
 
 import {
-  DataAccessLevel,
   IdVerificationStatus,
   ProfileService,
 } from 'generated';
@@ -63,7 +62,7 @@ export class UnregisteredComponent implements OnInit, OnDestroy {
               return this.profileService.submitTermsOfService();
             })
             .flatMap((p) => {
-              if (p.ethicsTrainingCompletionTime) {
+              if (p.trainingCompletionTime) {
                 return Observable.from([p]);
               }
               return this.profileService.completeEthicsTraining();

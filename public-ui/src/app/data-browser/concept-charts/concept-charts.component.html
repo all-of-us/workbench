@@ -7,7 +7,7 @@
 <div *ngIf="unitNames.length > 1 && displayMeasurementGraphs" class="col-md">
   <button *ngFor="let u of unitNames.slice(0,8)" [ngClass]="{active:selectedUnit === u}" (click)="showMeasurementGenderHistogram(u)" class="btn btn-link">{{u}} </button>
   <clr-tooltip>
-    <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+    <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
     <clr-tooltip-content clrPosition=right
                          clrSize="lg" *clrIfOpen>
       <div class="tooltip-label">Toggle here to view unit specific histograms</div>
@@ -27,7 +27,8 @@
                  [chartTitle]="gender.analysisStratumName + ' - ' + gender.countValue.toLocaleString()"
                  [chartType]="'histogram'"
                  [analysis]="toDisplayMeasurementGenderAnalysis"
-                 [backgroundColor]="backgroundColor"></app-chart>
+                 [backgroundColor]="backgroundColor"
+      ></app-chart>
     </div>
   </ng-container>
 
@@ -56,7 +57,7 @@
     <div class="col-md-4 col-xs-12">
     </div>
     <div class="col-md-4 col-xs-12 chart" *ngIf="showGraph === graphType.Age && analyses.ageAnalysis" >
-      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+      <app-chart [analysis]="analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor" [domainType]="'ehr'"> </app-chart>
     </div>
     <div class="col-md-4 col-xs-12">
     </div>

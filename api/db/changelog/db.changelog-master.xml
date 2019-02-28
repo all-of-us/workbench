@@ -61,4 +61,7 @@
   <include file="changelog/db.changelog-51-user-profile-updates.xml"/>
   <include file="changelog/db.changelog-52-user-nonce.xml"/>
   <include file="changelog/db.changelog-53-research-purpose-type.xml"/>
+  <include file="changelog/db.changelog-54-update-data-access-level.xml"/>
+  <include file="changelog/db.changelog-55-moodle-training.xml"/>
+  <include file="changelog/db.changelog-56-update-email-lowercase.xml"/>
 </databaseChangeLog>

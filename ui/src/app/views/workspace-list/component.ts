@@ -1,11 +1,10 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
+import {Subscription} from 'rxjs/Subscription';
 
+import {navigate} from 'app/utils/navigation';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
@@ -15,7 +14,6 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
-import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
@@ -39,37 +37,36 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   twoFactorEnabled: boolean;
   private profileSubscription: Subscription;
 
-  // All the things related to sharing a workspace
-  @ViewChild(WorkspaceShareComponent)
-  shareModal: WorkspaceShareComponent;
-  // TODO This is necessary to placate the sharing template - figure out how to remove it
-  selectedWorkspace: Workspace = {name: ''};
   accessLevel: WorkspaceAccessLevel;
+  username: string;
 
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
   deleting = false;
   confirmDeleting = false;
+  sharing = false;
   workspaceDeletionError = false;
-  resource: Workspace;
-  // TODO This is necessary to placate the delete error template - figure out how to remove it
   workspace: Workspace = {name: ''};
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   constructor(
     private profileStorageService: ProfileStorageService,
-    private route: ActivatedRoute,
-    private router: Router,
     private workspacesService: WorkspacesService,
-  ) {}
+  ) {
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeShare = this.closeShare.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
+  }
 
   ngOnInit(): void {
     this.workspacesLoading = true;
     this.profileSubscription = this.profileStorageService.profile$.subscribe(
       (profile) => {
+        this.username = profile.username;
         this.twoFactorEnabled = profile.twoFactorEnabled;
         if (this.firstSignIn === undefined) {
           this.firstSignIn = new Date(profile.firstSignInTime);
@@ -107,7 +104,7 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   addWorkspace(): void {
-    this.router.navigate(['workspaces/build']);
+    navigate(['workspaces/build']);
   }
 
   reloadWorkspaces(): void {
@@ -140,11 +137,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
   }
 
   receiveDelete(): void {
-    this.delete(this.resource);
+    this.delete(this.workspace);
   }
 
   openConfirmDelete(workspace: Workspace): void {
-    this.resource = workspace;
+    this.workspace = workspace;
     this.confirmDeleting = true;
   }
 
@@ -152,12 +149,15 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
     this.confirmDeleting = false;
   }
 
-  share(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
-    this.selectedWorkspace = workspace;
+  openShare(workspace: Workspace, accessLevel: WorkspaceAccessLevel): void {
+    this.workspace = workspace;
     this.accessLevel = accessLevel;
-    this.shareModal.workspace = workspace;
-    this.shareModal.accessLevel = accessLevel;
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    this.reloadWorkspaces();
   }
 
   get twoFactorBannerEnabled() {
@@ -179,7 +179,11 @@ export class WorkspaceListComponent implements OnInit, OnDestroy {
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

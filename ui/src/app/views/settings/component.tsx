@@ -64,14 +64,15 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                           (!this.state.cluster) ?
                             'Your notebook server is still being created' : undefined}
                         side='right'>
-          <Button disabled={!this.state.cluster} onClick={this.openResetClusterModal.bind(this)}
+          <Button disabled={!this.state.cluster} onClick={() => this.openResetClusterModal()}
                   data-test-id='reset-notebook-button' type='secondary'>
             Reset Notebook Server
           </Button>
         </TooltipTrigger>
       </div>
       {this.state.resetClusterModal &&
-      <Modal data-test-id='reset-notebook-modal'>
+      <Modal data-test-id='reset-notebook-modal'
+             loading={this.state.resetClusterPending}>
         <ModalTitle>Reset Notebook Server?</ModalTitle>
         <ModalBody>
           <strong>Warning:</strong> Any unsaved changes to your notebooks may be lost
@@ -89,6 +90,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
                   data-test-id='cancel-button'>Cancel</Button>
           <Button disabled={this.state.resetClusterPending}
                   onClick={() => this.resetCluster()}
+                  style={{marginLeft: '0.5rem'}}
                   data-test-id='reset-cluster-send'>Send</Button>
         </ModalFooter>
       </Modal>}

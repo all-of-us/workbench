@@ -1,6 +1,7 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import {DataAccessLevel} from 'generated';
+import {DataAccessLevel, Domain} from 'generated';
+import {Domain as FetchDomain} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -8,8 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 export const WINDOW_REF = 'window-ref';
-import {WorkspaceData} from 'app/resolvers/workspace';
-import {currentWorkspaceStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -276,3 +276,19 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
+
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withUserProfile = () => {
+  return connectBehaviorSubject(userProfileStore, 'profileState');
+};
+
+// HOC that provides a 'profileState' prop with current profile and a reload function
+export const withUrlParams = () => {
+  return connectBehaviorSubject(urlParamsStore, 'urlParams');
+};
+
+// Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
+export function generateDomain(domain: FetchDomain): Domain {
+  const d = fp.capitalize(FetchDomain[domain]);
+  return Domain[d];
+}

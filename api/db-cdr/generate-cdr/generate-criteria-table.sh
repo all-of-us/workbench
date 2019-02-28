@@ -571,25 +571,9 @@ where type = 'CPT' and est_count is not null)) )"
 echo "PPI - insert data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,domain_id,concept_id,has_attribute,path)
-select a.new_id as id, case when a.parent_id = 0 then 0 else b.new_id end as parent_id,
-a.type, a.subtype, a.code, a.name, a.is_group, a.is_selectable,
-case when a.is_selectable = 1 then 0 else null end as est_count, a.domain_id, a.concept_id, a.has_attribute,
-case
-when a.parent_id = 0 then null
-when a.subtype = 'BASICS' then regexp_replace( CONCAT(CAST(ifnull(c.new_id,-1) as STRING), '.', CAST(ifnull(b.new_id,-1) as STRING)), '(-1.)*' ,'' )
-when a.subtype = 'LIFESTYLE' then regexp_replace( CONCAT(CAST(ifnull(e.new_id,-1) as STRING), '.', CAST(ifnull(d.new_id,-1) as STRING), '.', CAST(ifnull(c.new_id,-1) as STRING), '.', CAST(ifnull(b.new_id,-1) as STRING)), '(-1.)*' ,'' )
-when a.subtype = 'OVERALLHEALTH' then regexp_replace( CONCAT(CAST(ifnull(c.new_id,-1) as STRING), '.', CAST(ifnull(b.new_id,-1) as STRING)), '(-1.)*' ,'' )
-end as path
-from (select ROW_NUMBER() OVER(order by id) + (select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as new_id, *
-  from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI') a
-left join (select ROW_NUMBER() OVER(order by id) + (select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as new_id, *
-  from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI') b on a.parent_id = b.id
-left join (select ROW_NUMBER() OVER(order by id) + (select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as new_id, *
-  from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI') c on b.parent_id = c.id
-left join (select ROW_NUMBER() OVER(order by id) + (select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as new_id, *
-  from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI') d on c.parent_id = d.id
-left join (select ROW_NUMBER() OVER(order by id) + (select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as new_id, *
-  from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI') e on d.parent_id = e.id
+select id, parent_id, type, subtype, code, name, is_group, is_selectable,
+case when is_selectable = 1 then 0 else null end as est_count, domain_id, concept_id, has_attribute, path
+from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PPI'
 order by 1"
 
 echo "PPI - generate child counts"
@@ -599,7 +583,7 @@ set x.est_count = y.cnt
 from (SELECT observation_source_concept_id as concept_id, value_as_concept_id as code, count(distinct person_id) cnt
   FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
   where observation_source_concept_id in
-  (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_selectable = 1 and concept_id != 1585747)
+  (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1 and concept_id != 1585747)
   group by 1,2) y
 where x.type = 'PPI'
 and x.concept_id = y.concept_id
@@ -611,26 +595,63 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from (select id, case when cnt is null then 0 else cnt end as cnt
 from
-(select * from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_selectable = 1 and concept_id = 1585747) a
+(select * from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and is_group = 0 and is_selectable = 1 and concept_id = 1585747) a
 left join (SELECT observation_source_concept_id as concept_id, cast(value_as_number as INT64) as code, count(distinct person_id) cnt
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
 where observation_source_concept_id = 1585747
 group by 1,2) b on a.concept_id = b.concept_id and CAST(a.name as INT64) = b.code) y
-where x.id = y.id"
+where x.type = 'PPI'
+and x.id = y.id"
+
+echo "PPI - generate question counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.criteria\` x
+set x.est_count = y.cnt
+from (SELECT observation_source_concept_id as concept_id, count(distinct person_id) cnt
+  FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+  where observation_source_concept_id in
+  (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+  where type = 'PPI' and is_group = 1 and is_selectable = 1)
+  group by 1) y
+where x.type = 'PPI'
+and x.is_group = 1
+and x.concept_id = y.concept_id"
+
+echo "PPI - generate survey counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.criteria\` x
+SET x.est_count = y.cnt
+from (
+select c.id, count(distinct person_id) cnt
+  from
+    (select * from
+      (select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+        where type = 'PPI' and parent_id = 0) a
+    left join \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\` b on a.id = b.ancestor_id) c
+    left join
+      (select a.id, b.*
+      from \`$BQ_PROJECT.$BQ_DATASET.criteria\` a,
+        (
+          SELECT person_id, concept_id
+          FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a,
+            (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
+              where type = 'PPI' and is_group = 1 and is_selectable = 1) b
+          WHERE a.observation_source_concept_id = b.concept_id
+        ) b
+      where a.concept_id = b.concept_id) d on c.descendant_id = d.id
+  group by 1) y
+where x.type = 'PPI'
+and x.id = y.id"
 
 ################################################
 # PHYSICAL MEASUREMENTS (PM)
 ################################################
 echo "PM - insert data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,domain_id, has_attribute)
-select a.new_id, case when b.new_id is not null then b.new_id else 0 end as parent_id, a.type,a.subtype,a.code,a.name,a.is_group,
-a.is_selectable, case when a.is_selectable = 1 then 0 else null end as est_count,a.concept_id,a.domain_id, a.has_attribute
-from
-(select ROW_NUMBER() OVER(ORDER BY abs(id)) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`) AS NEW_ID, *
-from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PM') a
-LEFT JOIN (select ROW_NUMBER() OVER(ORDER BY abs(id)) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`) AS NEW_ID, *
-from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PM') b on a.parent_id = b.id
+"insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,domain_id,concept_id,has_attribute, path)
+select id, parent_id, type, subtype, code, name, is_group, is_selectable,
+case when is_selectable = 1 then 0 else null end as est_count, domain_id, concept_id, has_attribute, path
+from \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\` where type = 'PM'
 order by 1"
 
 echo "PM - counts"
@@ -830,7 +851,11 @@ from
     where RELATIONSHIP_ID IN ('RxNorm - ATC name','Mapped from', 'RxNorm - ATC')
         and c1.VOCABULARY_ID = 'RxNorm' and c1.CONCEPT_CLASS_ID = 'Ingredient' and c1.STANDARD_CONCEPT = 'S'
         and c2.VOCABULARY_ID = 'ATC' and c2.CONCEPT_CLASS_ID = 'ATC 5th' and c2.STANDARD_CONCEPT = 'C'
-        and c1.concept_id in (select distinct DRUG_CONCEPT_ID from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`)) a
+        and c1.concept_id in
+            (select ANCESTOR_CONCEPT_ID
+            from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+            where DESCENDANT_CONCEPT_ID in (select distinct DRUG_CONCEPT_ID from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`))
+    ) a
 left join
     (select c1.CONCEPT_ID p_concept_id, c1.CONCEPT_CODE p_concept_code, c1.CONCEPT_NAME p_concept_name, c1.DOMAIN_ID p_DOMAIN_ID,
         c2.CONCEPT_ID atc_5, c2.CONCEPT_CODE, c2.CONCEPT_NAME, c2.DOMAIN_ID
@@ -927,14 +952,11 @@ and type = 'DRUG'"
 
 echo "DRUGS - level 5"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (ID, PARENT_ID, TYPE, SUBTYPE, CODE, NAME, IS_GROUP, IS_SELECTABLE, est_count, CONCEPT_ID, has_attribute, path)
+"insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (ID, PARENT_ID, TYPE, SUBTYPE, CODE, NAME, IS_GROUP, IS_SELECTABLE, CONCEPT_ID, has_attribute, path)
 select row_number() over (order by t.ID, upper(b.CONCEPT_NAME))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`), t.ID, 'DRUG', 'ATC',
-  b.CONCEPT_CODE, CONCAT( UPPER(SUBSTR(b.concept_name, 1, 1)), LOWER(SUBSTR(b.concept_name, 2)) ), 0, 1, de.cnt, b.CONCEPT_ID, 0, CONCAT(t.path, '.', CAST(t.ID as STRING))
+  b.CONCEPT_CODE, CONCAT( UPPER(SUBSTR(b.concept_name, 1, 1)), LOWER(SUBSTR(b.concept_name, 2)) ), 0, 1, b.CONCEPT_ID, 0, CONCAT(t.path, '.', CAST(t.ID as STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.criteria\` t
   join \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\` b on t.code = b.p_concept_code
-  join (select DRUG_CONCEPT_ID, count(distinct person_id) cnt
-    from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`
-    group by 1) de on b.concept_id = de.drug_concept_id
 where (id) not in (select PARENT_ID from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'DRUG')
 and type = 'DRUG'"
 
@@ -949,7 +971,10 @@ from
   from (select *
     from \`$BQ_PROJECT.$BQ_DATASET.concept\`
     where VOCABULARY_ID = 'RxNorm' and CONCEPT_CLASS_ID = 'Ingredient' and STANDARD_CONCEPT = 'S'
-      and concept_id in (select distinct DRUG_CONCEPT_ID from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`)) a
+      and concept_id in (select ANCESTOR_CONCEPT_ID
+      from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+      where DESCENDANT_CONCEPT_ID in (select distinct DRUG_CONCEPT_ID from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`))
+    ) a
   full join
     (select b.*
     from \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
@@ -962,23 +987,43 @@ from
 
 echo "DRUGS - add unmapped ingredients"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (ID, PARENT_ID, TYPE, SUBTYPE, CODE, NAME, IS_GROUP, IS_SELECTABLE, est_count, CONCEPT_ID, has_attribute, path)
-select row_number() over (order by t.ID, upper(a.CONCEPT_NAME))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`), t.ID, 'DRUG', 'ATC', a.CONCEPT_CODE,
-  CONCAT( UPPER(SUBSTR(a.concept_name, 1, 1)), LOWER(SUBSTR(a.concept_name, 2)) ), 0, 1, de.cnt, a.CONCEPT_ID, 0, CONCAT(t.path, '.', CAST(t.ID as STRING))
-from \`$BQ_PROJECT.$BQ_DATASET.criteria\` t
-  join (select *
-    from \`$BQ_PROJECT.$BQ_DATASET.concept\`
-    where VOCABULARY_ID = 'RxNorm'
-      and CONCEPT_CLASS_ID = 'Ingredient'
-      and STANDARD_CONCEPT = 'S'
-      and concept_id not in
-        (select CONCEPT_ID
-        from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
-        where type = 'DRUG'
-        and IS_SELECTABLE = 1)) a on UPPER(SUBSTR(a.CONCEPT_NAME, 1, 1)) = t.code and length(t.name) = 1
-  join (select DRUG_CONCEPT_ID, count(distinct person_id) cnt from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` group by 1) de on a.concept_id = de.drug_concept_id
-where t.type = 'DRUG'"
+"insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (ID, PARENT_ID, TYPE, SUBTYPE, CODE, NAME, IS_GROUP, IS_SELECTABLE, CONCEPT_ID, has_attribute, path)
+select row_number() over (order by c.ID, upper(a.CONCEPT_NAME))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.criteria\`), c.ID, 'DRUG', 'ATC', a.CONCEPT_CODE,
+  CONCAT( UPPER(SUBSTR(a.concept_name, 1, 1)), LOWER(SUBSTR(a.concept_name, 2)) ), 0, 1, a.CONCEPT_ID, 0, CONCAT(c.path, '.', CAST(c.ID as STRING))
+from (select *
+  from \`$BQ_PROJECT.$BQ_DATASET.concept\`
+  where VOCABULARY_ID = 'RxNorm' and CONCEPT_CLASS_ID = 'Ingredient' and STANDARD_CONCEPT = 'S'
+    and concept_id in (select ANCESTOR_CONCEPT_ID
+    from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+    where DESCENDANT_CONCEPT_ID in (select distinct DRUG_CONCEPT_ID from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\`))
+  ) a
+full join
+  (select b.*
+  from \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
+    left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.CONCEPT_ID_1 = b.CONCEPT_ID
+    left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.CONCEPT_ID_2 = c.CONCEPT_ID
+  where RELATIONSHIP_ID IN ('RxNorm - ATC name','Mapped from', 'RxNorm - ATC')
+    and b.VOCABULARY_ID = 'RxNorm' and b.CONCEPT_CLASS_ID = 'Ingredient' and b.STANDARD_CONCEPT = 'S'
+    and c.VOCABULARY_ID = 'ATC' and c.CONCEPT_CLASS_ID = 'ATC 5th' and c.STANDARD_CONCEPT = 'C') b on a.concept_id = b.concept_id
+join (select * from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'DRUG' and length(name) = 1) c on UPPER(SUBSTR(a.CONCEPT_NAME, 1, 1)) = c.name
+where b.CONCEPT_ID is null"
 
+echo "DRUGS - generate child counts"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$BQ_PROJECT.$BQ_DATASET.criteria\` x
+set x.est_count = y.cnt
+from
+    (select b.ANCESTOR_CONCEPT_ID as concept_id, count(distinct a.person_id) cnt
+    from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
+        join (select *
+            from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` x
+            left join \`$BQ_PROJECT.$BQ_DATASET.concept\` y on x.ANCESTOR_CONCEPT_ID = y.CONCEPT_ID
+            where VOCABULARY_ID = 'RxNorm' and CONCEPT_CLASS_ID = 'Ingredient') b on a.DRUG_CONCEPT_ID = b.DESCENDANT_CONCEPT_ID
+    group by 1) y
+where x.type = 'DRUG'
+and x.concept_id = y.concept_id"
+
+# filter out invalid brands. add rxnorm_extension brands
 echo "DRUGS - add rxnorm brand names"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id, parent_id, type, subtype, code, name, is_group, is_selectable, concept_id, has_attribute)
@@ -995,6 +1040,8 @@ FROM
     and c.STANDARD_CONCEPT = 'S'
     and c.concept_id in (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'DRUG' and subtype = 'ATC')
   ) X"
+# b.vocabulary_id in ('RxNorm','RxNorm Extension')
+# and b.invalid_reason is null
 
 echo "DRUGS - add data into ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1023,11 +1070,12 @@ select c.id, count(distinct person_id) cnt
       (select a.id, b.*
       from \`$BQ_PROJECT.$BQ_DATASET.criteria\` a,
         (
-          SELECT person_id, concept_id
-          FROM \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a,
-            (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\`
-              where type = 'DRUG' and subtype = 'ATC' and is_group = 0 and is_selectable = 1) b
-          WHERE a.drug_concept_id = b.concept_id
+          select b.ANCESTOR_CONCEPT_ID as concept_id, a.person_id
+          from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` a
+            join (select *
+              from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` x
+              left join \`$BQ_PROJECT.$BQ_DATASET.concept\` y on x.ANCESTOR_CONCEPT_ID = y.CONCEPT_ID
+              where VOCABULARY_ID = 'RxNorm' and CONCEPT_CLASS_ID = 'Ingredient') b on a.DRUG_CONCEPT_ID = b.DESCENDANT_CONCEPT_ID
         ) b
       where a.concept_id = b.concept_id) d on c.descendant_id = d.id
   group by 1) y
@@ -1053,7 +1101,7 @@ echo "MEASUREMENTS - add lab root"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,code,name,is_group,is_selectable,has_attribute, path)
 SELECT (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`)+1 as ID,
-(SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'LOINC') as parent_id,'MEAS','LAB','LP29693-6','Laboratory',1,0,0,
+(SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'LOINC') as parent_id,'MEAS','LAB','LP29693-6','Lab',1,0,0,
 (SELECT CAST(ID AS STRING) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'LOINC')"
 
 #----- clinical -----
@@ -1061,23 +1109,25 @@ echo "MEASUREMENTS - clinical - add parents"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,name,is_group,is_selectable,has_attribute, path)
 SELECT ROW_NUMBER() OVER(order by name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as ID,
-(SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN') as parent_id, 'MEAS', 'CLIN', name, 1, 0, 0,
-CONCAT((SELECT PATH FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN'), '.',
-(SELECT CAST(ID AS STRING) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN'))
-from (select distinct parent as name
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_terms_nc\` a
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.LOINC = b.concept_code
-WHERE b.concept_id in (select measurement_concept_id from \`$BQ_PROJECT.$BQ_DATASET.measurement\` group by 1)) a"
+    (SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN') as parent_id, 'MEAS', 'CLIN', name, 1, 0, 0,
+    CONCAT((SELECT PATH FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN'), '.',
+    (SELECT CAST(ID AS STRING) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN'))
+from
+    (select distinct parent as name
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_terms_nc\` a
+    left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.LOINC = b.concept_code
+    WHERE b.concept_id in (select distinct measurement_concept_id from \`$BQ_PROJECT.$BQ_DATASET.measurement\`)
+    ) a"
 
 echo "MEASUREMENTS - clinical - add children"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.criteria\` (id,parent_id,type,subtype,code,name,is_group,is_selectable,est_count,concept_id,has_attribute, path)
-select ROW_NUMBER() OVER(order by name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as ID, b.ID as parent_id, 'MEAS', 'CLIN', c.concept_code,
-c.concept_name, 0, 1, d.cnt, c.concept_id, 1, CONCAT(b.PATH, '.', CAST(b.ID AS STRING))
+select ROW_NUMBER() OVER(order by name) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`) as ID, b.ID as parent_id,
+    'MEAS', 'CLIN', c.concept_code, c.concept_name, 0, 1, d.cnt, c.concept_id, 1, CONCAT(b.PATH, '.', CAST(b.ID AS STRING))
 from \`$BQ_PROJECT.$BQ_DATASET.criteria_terms_nc\` a
-join (SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN' and is_group = 1) b on a.PARENT = b.NAME
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.LOINC = c.concept_code
-join (select measurement_concept_id, count(distinct person_id) cnt from \`$BQ_PROJECT.$BQ_DATASET.measurement\` group by 1) d on c.concept_id = d.measurement_concept_id"
+    join (SELECT * FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\` WHERE type = 'MEAS' and subtype = 'CLIN' and is_group = 1) b on a.PARENT = b.NAME
+    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.LOINC = c.concept_code
+    join (select measurement_concept_id, count(distinct person_id) cnt from \`$BQ_PROJECT.$BQ_DATASET.measurement\` group by 1) d on c.concept_id = d.measurement_concept_id"
 
 #----- laboratory -----
 echo "MEASUREMENTS - labs - temp table 0"
@@ -1158,8 +1208,8 @@ select distinct a.ID ANCESTOR_ID,
 	   left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') i on h.ID = i.PARENT_ID
 	   left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') j on i.ID = j.PARENT_ID
 	   left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') k on j.ID = k.PARENT_ID
-     left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') m on k.ID = m.PARENT_ID
-     left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') n on m.ID = n.PARENT_ID
+       left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') m on k.ID = m.PARENT_ID
+       left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and subtype = 'LAB') n on m.ID = n.PARENT_ID
  where a.IS_SELECTABLE = 0"
 
 echo "MEASUREMENTS - labs - generate parent counts"
@@ -1187,6 +1237,7 @@ select c.id, count(distinct person_id) cnt
   group by 1) y
 where x.id = y.id"
 
+# the first item in the measurement tree needs to have 'null' as a code so the logic works correctly
 echo "MEASUREMENTS - labs - clean up"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.criteria\` SET code = null where type = 'MEAS' and subtype = 'LAB' and code = 'LP29693-6'"
@@ -1424,9 +1475,8 @@ from
     (select measurement_concept_id, value_as_concept_id, b.concept_name, 'CAT' as type, CAST(count(*) as STRING) as est_count
     from \`$BQ_PROJECT.$BQ_DATASET.measurement\` a
         left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_as_concept_Id = b.concept_id
-    where value_as_concept_Id != 0
+    where value_as_concept_id != 0
         and value_as_concept_id is not null
-        and measurement_source_concept_id != 0
         and measurement_concept_id in (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'MEAS' and is_selectable = 1)
     group by 1,2,3
     ) a"

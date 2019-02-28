@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
+import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated';
 
 @Component({
   selector: 'app-sidebar-content',
@@ -9,4 +10,9 @@ import {Participant} from 'app/cohort-review/participant.model';
 })
 export class SidebarContentComponent {
   @Input() participant: Participant;
+  @Input() annotations: ParticipantCohortAnnotation[];
+  @Input() annotationDefinitions: CohortAnnotationDefinition[];
+  @Input() setAnnotations: Function;
+  @Input() openCreateDefinitionModal: Function;
+  @Input() openEditDefinitionsModal: Function;
 }

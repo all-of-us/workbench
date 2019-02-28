@@ -158,6 +158,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
                     org.pmiops.workbench.model.Analysis genderIdentityAnalysis=null;
+                    List<org.pmiops.workbench.model.QuestionConcept> subQuestions = null;
                     if(concept.getCountAnalysis() != null){
                         countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
                     }
@@ -170,7 +171,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     if(concept.getGenderIdentityAnalysis() != null){
                         genderIdentityAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderIdentityAnalysis());
                     }
-
+                    if(concept.getSubQuestions() != null) {
+                        subQuestions = concept.getSubQuestions().stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList());
+                    }
 
                     return new org.pmiops.workbench.model.QuestionConcept()
                             .conceptId(concept.getConceptId())
@@ -182,7 +185,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
                             .ageAnalysis(ageAnalysis)
-                            .genderIdentityAnalysis(genderIdentityAnalysis);
+                            .genderIdentityAnalysis(genderIdentityAnalysis)
+                            .subQuestions(subQuestions);
 
                 }
             };
@@ -452,6 +456,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Too slow and concept names wrong so we hardcode list
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
 
+        //Get the list of questions that has sub questions in survey
+        Set<Long> hasSubQuestions = questionConceptDao.findSurveyMainQuestionIds(Long.valueOf(surveyConceptId)).stream().map(QuestionConcept::getConceptId).collect(Collectors.toSet());
+
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
 
         // Get questions for survey
@@ -468,6 +475,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // Put ids in array for query to get all results at once
             List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
+                if (hasSubQuestions.contains(q.getConceptId())) {
+                    List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
+                    QuestionConcept.mapAnalysesToQuestions(subQuestions, achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestions.stream()
+                            .map(QuestionConcept::getConceptId)
+                            .map(String::valueOf)
+                            .collect(Collectors.toList())));
+                    q.setSubQuestions(subQuestions);
+                }
                 qlist.add(String.valueOf(q.getConceptId()));
             }
 

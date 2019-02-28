@@ -11,12 +11,16 @@ export const environment: Environment = {
   publicUiUrl: 'https://databrowser.researchallofus.org',
   debug: false,
   gaId: 'UA-112406425-4',
+  gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
+  shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
+  trainingUrl: 'https://aou.nnlm.gov',
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including
   // exit criteria and Jira ticket links.
-  enableTemporal: false,
   useZendeskForSupport: false,
-  enableJupyterLab: false
+  enableJupyterLab: false,
+  enableComplianceLockout: false,
+  enableDatasetBuilder: false,
 };

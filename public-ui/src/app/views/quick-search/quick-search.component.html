@@ -1,22 +1,35 @@
 <div class="row">
 
+  <div class="col-xs-12 col-sm-12 col-md-9">
+    <div class="db-header">
+      <div>
+        <img class="db-logo" [src]="dbLogo"> </div>
+      <p class="view-sub-title card-text bigger">{{dbSubTitle}} </p>
+    </div>
+  </div>
+
   <div class="col-xs-12 col-sm-12 col-md-10">
 
     <div class="page-header">
-      <h2> {{title}} </h2>
-      <p class="view-sub-title">{{subTitle}} </p>
+      <h2> {{title}}
+      <clr-tooltip>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
+        <clr-tooltip-content clrPosition=right
+                             clrSize="lg" *clrIfOpen>
+          <div class="tooltip-label">{{subTitle}}
+          </div>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      </h2>
     </div>
 
-    <div class="white-card-box flex-items-xs-middle" >
-      <div class="row search flex-items-xs-between">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
-          <div class="search-wrapper">
-            <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
-            <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
-          </div>
-        </div>
+    <div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
+      <div class="search-wrapper">
+        <clr-icon shape="search" class="input-icon-absolute is-info search-icon"></clr-icon>
+        <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
       </div>
     </div>
+
 
     <div class="row" *ngIf="loading" >
       <div class="col-xs-12 flex-xs-middle" style="text-align: center" >
@@ -29,7 +42,7 @@
 
     <h5 class="box-heading" style="display:block" *ngIf="showDataType(EHR_DATATYPE)" > EHR Domains:
       <clr-tooltip>
-        <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+        <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
         <clr-tooltip-content clrPosition=right
                              clrSize="lg" *clrIfOpen>
           <div class="tooltip-header">EHR Domains</div>
@@ -47,16 +60,16 @@
     <div class="row card-boxes" *ngIf="showDataType(EHR_DATATYPE)" >
       <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of domainResults">
           <div class="white-card-box search-result">
-            <h5 class="box-title">
+            <p class="box-title box-title-text">
               {{r.name}}
               <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=right
                                      clrSize="lg" *clrIfOpen>
                   <div class="tooltip-label">{{domainHelpText[r.domain.toLowerCase()]}}</div>
                 </clr-tooltip-content>
               </clr-tooltip>
-            </h5>
+            </p>
             <div class="card-stat">
               {{r.standardConceptCount | number}}
             </div>
@@ -70,9 +83,9 @@
             </p>
 
             <div class="card-text bottom">
-              <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-primary" (click)="viewEhrDomain(r)"> View Top 100 </button>
+              <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewEhrDomain(r)"> View Top 100 </button>
               <ng-template #searchTextButton>
-                <button class="btn btn-primary" (click)="viewEhrDomain(r)"> View Results </button>
+                <button class="btn btn-link" (click)="viewEhrDomain(r)"> View Results </button>
               </ng-template>
             </div>
           </div>
@@ -83,13 +96,13 @@
 
     </div>
 
-    <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Surveys:  </h5>
+    <h5 class="box-heading" *ngIf="showDataType(SURVEY_DATATYPE)"> Survey Questions:  </h5>
     <div class="row card-boxes" *ngIf="showDataType(SURVEY_DATATYPE)">
       <div class="col col-xl-3 col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngFor="let r of surveyResults">
         <div class="white-card-box search-result">
-          <h5 class="box-title">
+          <p class="box-title box-title-text">
             {{r.name}}
-          </h5>
+          </p>
           <div class="card-stat">
             {{r.questionCount | number}}
           </div>
@@ -101,9 +114,9 @@
           </p>
 
           <div class="card-text bottom">
-            <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-primary" (click)="viewSurvey(r)"> View Complete Survey </button>
+            <button *ngIf="!searchText.value; else searchTextButton" class="btn btn-link" (click)="viewSurvey(r)"> View Complete Survey </button>
             <ng-template #searchTextButton>
-              <button class="btn btn-primary" (click)="viewSurvey(r)"> View Results </button>
+              <button class="btn btn-link" (click)="viewSurvey(r)"> View Results </button>
             </ng-template>
           </div>
         </div>
@@ -115,22 +128,29 @@
 
     </div>
 
-    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS)"> Program Phyiscal Measurements:  </h5>
-    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS)">
-      <div class="col col-xl-4 col-lg-4 col-md-4 col-sm-4 col-xs-12">
+    <h5 class="box-heading" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0"> Program Phyiscal Measurements:  </h5>
+    <div class="row card-boxes" *ngIf="showDataType(PROGRAM_PHYSICAL_MEASUREMENTS) && matchPhysicalMeasurements(searchText.value)>0">
+      <div class="col col-xl-5 col-lg-6 col-md-6 col-sm-6 col-xs-12">
         <div class="white-card-box search-result">
-          <h5 class="box-title">
-            Program Physical Measurements
-          </h5>
-          <p class="card-text bigger">
+          <p class="box-title box-title-text">
+            Physical Measurements
+          </p>
+          <p class="card-text bigger pm-text">
             <span>Participants have the option to provide a standard set of physical measurements as part
             of the enrollment process  (“program physical measurements”).
             Use this tool to browse distributions of measurement values and counts,
             grouped by age at occurrence and gender, for each program physical measurement.</span>
           </p>
-
+          <div class="card-stat">
+            {{matchPhysicalMeasurements(searchText.value)}}
+          </div>
+          <p class="card-text bigger">
+            <span *ngIf="searchText.value; else no_search_value_pm">matching physical measurements</span>
+            <ng-template #no_search_value_pm><span>physical measurements</span></ng-template>
+            <br><br>
+          </p>
           <div class="card-text bottom">
-            <button class="btn btn-primary" [routerLink]="['physical-measurements']"> View Program Physical Measurements </button>
+            <button class="btn btn-link" [routerLink]="['physical-measurements']" [queryParams]="{searchString: searchText.value}"> View Program Physical Measurements </button>
           </div>
         </div>
       </div>

@@ -18,9 +18,24 @@ export const groupList = kind => (state): List<any> =>
 export const includeGroups = groupList('includes');
 export const excludeGroups = groupList('excludes');
 
-export const itemList = groupId => state =>
-  state.getIn(['entities', 'groups', groupId, 'items'], List()).map(itemId =>
-    state.getIn(['entities', 'items', itemId], Map()));
+export const getTemporalGroupItems = (groupId) => (state) => {
+  const itemObj = {
+    nonTemporalItems: [],
+    temporalItems: [],
+    type: []
+  };
+  const isTemporal = state.getIn(['entities', 'groups', groupId, 'temporal']);
+  state.getIn(['entities', 'groups', groupId, 'items'], List()).forEach(itemId => {
+    const item = state.getIn(['entities', 'items', itemId], Map());
+    if (item.get('temporalGroup') === 1 && isTemporal) {
+      itemObj.temporalItems.push(item);
+    } else {
+      itemObj.nonTemporalItems.push(item);
+      itemObj.type.push(item.get('type'));
+    }
+  });
+  return itemObj;
+};
 
 export const parameterList = itemId => state =>
   state.getIn(['entities', 'items', itemId, 'searchParameters'], List()).map(
@@ -28,6 +43,9 @@ export const parameterList = itemId => state =>
 
 export const getItem = itemId => state =>
   state.getIn(['entities', 'items', itemId], Map());
+
+export const getTempItem = itemId => state =>
+  state.getIn(['entities', 'items', itemId, 'temporalGroup'], false);
 
 export const getGroup = groupId => state =>
   state.getIn(['entities', 'groups', groupId], Map());
@@ -120,7 +138,11 @@ export const isAttributeLoading = (state): boolean =>
 export const participantsCount = (state): any =>
   state.getIn(['wizard', 'item', 'count'], false);
 
-
+export const isDomainNameExists = (cid: any, domain: string) => (state): boolean => {
+  const domainExists = state.getIn(['reviewChartData', 'domainCharts']).has(cid);
+  return domainExists ?
+    state.getIn(['reviewChartData', 'domainCharts', cid]).has(domain) : false;
+};
 /**
  * Criteria
  */
@@ -133,6 +155,13 @@ export const criteriaChildren =
       return state.getIn(['criteria', 'tree', kind, parentId], List());
     }
   };
+
+export const ppiAnswers = (path) => (state) => {
+  const ppiPath = path.split('.');
+  const [grandParent, parent] = ppiPath.splice(ppiPath.length - 2);
+  return state.getIn(['criteria', 'tree', 'PPI', parseInt(grandParent, 10)],
+    List()).find( i => i.get('id') === parseInt(parent, 10));
+};
 
 export const isEmpty =
   (kind: string, id: number) => (state): boolean =>

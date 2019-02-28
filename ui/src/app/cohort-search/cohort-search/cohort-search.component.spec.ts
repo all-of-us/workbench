@@ -20,6 +20,7 @@ import {OptionInfoComponent} from 'app/cohort-search/option-info/option-info.com
 import {OverviewComponent} from 'app/cohort-search/overview/overview.component';
 import {
   cancelWizard,
+  clearStore,
   CohortSearchActions,
   finishWizard,
   resetStore
@@ -32,17 +33,20 @@ import {SearchGroupSelectComponent} from 'app/cohort-search/search-group-select/
 import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.component';
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
-import {CohortBuilderService, CohortsService} from 'generated';
+import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {CohortBuilderService, CohortsService, WorkspaceAccessLevel} from 'generated';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 import {Observable} from 'rxjs/Observable';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {CohortSearchComponent} from './cohort-search.component';
 
 class MockActions {
   @dispatch() cancelWizard = cancelWizard;
   @dispatch() finishWizard = finishWizard;
   @dispatch() resetStore = resetStore;
+  @dispatch() clearStore = clearStore;
 }
 
 describe('CohortSearchComponent', () => {
@@ -105,6 +109,14 @@ describe('CohortSearchComponent', () => {
       ],
     })
       .compileComponents();
+    queryParamsStore.next({
+      criteria: '{"excludes":[],"includes":[]}'
+    });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      cdrVersionId: '1',
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   beforeEach(() => {

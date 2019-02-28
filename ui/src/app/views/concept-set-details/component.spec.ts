@@ -3,12 +3,12 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import { HighlightSearchComponent } from 'app/highlight-search/highlight-search.component';
 import {EditComponent} from 'app/icons/edit/component';
+import {currentConceptSetStore, currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetDetailsComponent} from 'app/views/concept-set-details/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
@@ -22,6 +22,7 @@ import {
   Domain,
   WorkspaceAccessLevel,
 } from 'generated';
+import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
@@ -37,32 +38,8 @@ import {
 describe('ConceptSetDetailsComponent', () => {
   let fixture: ComponentFixture<ConceptSetDetailsComponent>;
   let conceptSetsStub: ConceptSetsServiceStub;
-  let routeStub: any;
   beforeEach(fakeAsync(() => {
     conceptSetsStub = new ConceptSetsServiceStub([]);
-    routeStub = {
-      snapshot: {
-        url: [
-          {path: 'workspaces'},
-          {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-          {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-          {path: 'concepts'},
-          {path: '123'}
-        ],
-        params: {
-          'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-          'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-          'csid': 123
-        },
-        data: {
-          workspace: {
-            ...WorkspacesServiceStub.stubWorkspace(),
-            accessLevel: WorkspaceAccessLevel.OWNER,
-          },
-          conceptSet: newConceptSet()
-        }
-      }
-    };
     TestBed.configureTestingModule({
       imports: [
         BrowserAnimationsModule,
@@ -83,8 +60,16 @@ describe('ConceptSetDetailsComponent', () => {
       ],
       providers: [
         { provide: ConceptSetsService, useValue: conceptSetsStub },
-        { provide: ActivatedRoute, useFactory: () => routeStub }
       ]}).compileComponents();
+    urlParamsStore.next({
+      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      csid: 123
+    });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
   }));
 
   function newConceptSet(): ConceptSet {
@@ -104,7 +89,7 @@ describe('ConceptSetDetailsComponent', () => {
     if (!conceptSet) {
       conceptSet = newConceptSet();
     }
-    routeStub.snapshot.data.conceptSet = conceptSet;
+    currentConceptSetStore.next(conceptSet as unknown as FetchConceptSet);
     if (!conceptSetsStub.conceptSets.length) {
       conceptSetsStub.conceptSets = [conceptSet];
     }
@@ -222,8 +207,7 @@ describe('ConceptSetDetailsComponent', () => {
   }));
 
   it('should delete via action menu', fakeAsync(() => {
-    const router = TestBed.get(Router);
-    spyOn(router, 'navigate');
+    NavStore.navigate = jasmine.createSpy('navigate');
     setUpComponent();
 
     const de = fixture.debugElement;
@@ -231,7 +215,7 @@ describe('ConceptSetDetailsComponent', () => {
     simulateClick(fixture, de.query(By.css('.action-delete')));
     simulateClickReact(fixture, '[data-test-id="confirm-delete"]');
 
-    expect(router.navigate).toHaveBeenCalled();
+    expect(NavStore.navigate).toHaveBeenCalled();
     expect(conceptSetsStub.conceptSets).toEqual([]);
   }));
 

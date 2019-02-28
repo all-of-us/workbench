@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import 'rxjs/add/operator/debounceTime';
@@ -10,6 +10,7 @@ import {AchillesResult} from '../../../publicGenerated/model/achillesResult';
 import {QuestionConcept} from '../../../publicGenerated/model/questionConcept';
 import {QuestionConceptListResponse} from '../../../publicGenerated/model/questionConceptListResponse';
 import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
+import {GraphType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-survey-view',
@@ -18,7 +19,7 @@ import {SurveyModule} from '../../../publicGenerated/model/surveyModule';
 })
 
 export class SurveyViewComponent implements OnInit, OnDestroy {
-
+  graphToShow = GraphType.BiologicalSex;
   domainId: string;
   title ;
   subTitle;
@@ -32,7 +33,6 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
   surveyPdfUrl = '/assets/surveys/' + this.surveyConceptId + '.pdf';
   surveyName: string;
   conceptCodeTooltip: any;
-  genderGraph: string;
   binnedSurveyQuestions: string[] = ['1585864', '1585870', '1585873', '1585795', '1585802',
     '1585820', '1585889', '1585890'];
 
@@ -43,6 +43,7 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   /* Show answers toggle */
   showAnswer = {};
+  @ViewChild('chartElement') chartEl: ElementRef;
 
   constructor(private route: ActivatedRoute, private api: DataBrowserService) {
     this.route.params.subscribe(params => {
@@ -75,7 +76,29 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
+          q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
+            if (q.subQuestions) {
+              const matchedQuestionConcepts: QuestionConcept[] = q.subQuestions.filter(
+                w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
+              if (matchedQuestionConcepts.length === 0) {
+                q.subQuestions.push({
+                  conceptId: a.stratum3,
+                  conceptName: a.stratum4,
+                  domainId: 'ppi',
+                  conceptCode: '',
+                  countValue: a.countValue,
+                  prevalence: a.prevalence,
+                  countAnalysis: this.makeAnalysis(q.countAnalysis),
+                  genderAnalysis: this.makeAnalysis(q.genderAnalysis),
+                  ageAnalysis: this.makeAnalysis(q.ageAnalysis),
+                  genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
+                  subQuestions: null
+                });
+              }
+              q.subQuestions.map(sq => sq.selectedAnalysis = sq.genderAnalysis);
+              q.subQuestions = q.subQuestions.filter(sq => (sq.countAnalysis.results.length > 0));
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -200,23 +223,52 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  public showAnswerGraphs(q, a: AchillesResult) {
-    q.selectedAnswer = a;
+  public showAnswerGraphs(a: any) {
+    a.expanded = !a.expanded;
+  }
+
+  public resetSelectedGraphs() {
+    this.graphToShow = GraphType.None;
+  }
+
+  public selectGraph(g, q: any) {
+    this.chartEl.nativeElement.scrollIntoView(
+      { behavior: 'smooth', block: 'nearest', inline: 'start' });
+    this.resetSelectedGraphs();
+    this.graphToShow = g;
+    switch (g) {
+      case GraphType.GenderIdentity:
+        q.selectedAnalysis = q.genderIdentityAnalysis;
+        break;
+      case GraphType.Age:
+        q.selectedAnalysis = q.ageAnalysis;
+        break;
+      default:
+        q.selectedAnalysis = q.genderAnalysis;
+        break;
+    }
   }
 
   public graphAnswerClicked(achillesResult) {
     console.log('Graph answer clicked ', achillesResult);
   }
 
-  public selectSurveyGenderGraph(g) {
-      if (g === 'Gender Identity') {
-        this.genderGraph = 'GI';
-      } else {
-        this.genderGraph = 'BS';
-      }
-  }
   public convertToNum(s) {
     return Number(s);
+  }
+
+  public makeAnalysis(a) {
+    return {
+      ...a,
+      results: a.results.filter(w => w.stratum3 === a.stratum3)
+    };
+  }
+
+  public removeDescribingWords(text) {
+    if (text && text.toLowerCase().includes('none of these describe me')) {
+      text = text.substring(text.toLowerCase().indexOf('none of these describe me'));
+    }
+    return text;
   }
 
 }

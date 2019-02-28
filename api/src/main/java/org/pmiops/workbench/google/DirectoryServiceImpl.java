@@ -1,3 +1,7 @@
+/**
+ * Note: this file is tested with integration tests rather than unit tests. See
+ * src/integration/.../DirectoryServiceImplIntegrationTest.java for test cases.
+ */
 package org.pmiops.workbench.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -8,6 +12,7 @@ import com.google.api.services.admin.directory.DirectoryScopes;
 import com.google.api.services.admin.directory.model.User;
 import com.google.api.services.admin.directory.model.UserEmail;
 import com.google.api.services.admin.directory.model.UserName;
+import com.google.common.collect.Lists;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +23,10 @@ import javax.inject.Provider;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,8 +35,17 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 @Service
 public class DirectoryServiceImpl implements DirectoryService {
 
-  private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
   private static final String ALLOWED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
+  // Name of the GSuite custom schema containing AOU custom fields.
+  private static final String GSUITE_AOU_SCHEMA_NAME = "All_of_Us_Workbench";
+  // Name of the "contact email" custom field, which is stored within the AoU GSuite custom schema.
+  private static final String GSUITE_FIELD_CONTACT_EMAIL = "Contact_email_address";
+  // Name of the "institution" custom field, whose value is the same for all Workbench users.
+  private static final String GSUITE_FIELD_INSTITUTION = "Institution";
+  private static final String INSTITUTION_FIELD_VALUE = "All of Us Research Workbench";
+
+
   private static SecureRandom rnd = new SecureRandom();
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
@@ -83,11 +100,28 @@ public class DirectoryServiceImpl implements DirectoryService {
         .build();
   }
 
+  private String gSuiteDomain() {
+    return configProvider.get().googleDirectoryService.gSuiteDomain;
+  }
+
+  public User getUserByUsername(String username) {
+    return getUser(username + "@" + gSuiteDomain());
+  }
+
+  /**
+   * Fetches a user by their GSuite email address.
+   * <p>
+   * If the user is not found, a null value will be returned (no exception is thrown).
+   *
+   * @param email
+   * @return
+   */
   @Override
   public User getUser(String email) {
     try {
+      // We use the "full" projection to include custom schema fields in the Directory API response.
       return retryHandler.runAndThrowChecked((context) ->
-          getGoogleDirectoryService().users().get(email).execute());
+          getGoogleDirectoryService().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -102,39 +136,82 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Override
   public boolean isUsernameTaken(String username) {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    return getUser(username + "@" + gSuiteDomain) != null;
+    return getUserByUsername(username) != null;
+  }
+
+  // Returns a user's contact email address via the custom schema in the directory API.
+  public String getContactEmailAddress(String username) {
+    return (String) getUserByUsername(username)
+        .getCustomSchemas()
+        .get(GSUITE_AOU_SCHEMA_NAME)
+        .get(GSUITE_FIELD_CONTACT_EMAIL);
+  }
+
+  public static void addCustomSchemaAndEmails(User user, String primaryEmail, String contactEmail) {
+    // GSuite custom fields for Workbench user accounts.
+    // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
+    // was primarily set up for Moodle SSO integration.
+    Map<String, Object> aouCustomFields = new HashMap<String, Object>();
+    // The value of this field must match one of the allowed values in the Moodle installation.
+    // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
+    // variable.
+    aouCustomFields.put(GSUITE_FIELD_INSTITUTION, INSTITUTION_FIELD_VALUE);
+
+    if (contactEmail != null) {
+      // This gives us a structured place to store researchers' contact email addresses, in
+      // case we want to pass it to other systems (e.g. Zendesk or Moodle) via SAML mapped fields.
+      aouCustomFields.put(GSUITE_FIELD_CONTACT_EMAIL, contactEmail);
+    }
+
+    // In addition to the custom schema value, we store each user's contact email as a secondary
+    // email address with type "home". This makes it show up nicely in GSuite admin as the
+    // user's "Secondary email".
+    List<UserEmail> emails = Lists.newArrayList(
+        new UserEmail().setType("work").setAddress(primaryEmail).setPrimary(true));
+    if (contactEmail != null) {
+      emails.add(new UserEmail().setType("home").setAddress(contactEmail));
+    }
+    user.setEmails(emails)
+        .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
   @Override
   public User createUser(String givenName, String familyName, String username, String contactEmail) {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    String primaryEmail = username + "@" + gSuiteDomain();
     String password = randomString();
+
     User user = new User()
-        .setPrimaryEmail(username+"@"+gSuiteDomain)
+        .setPrimaryEmail(primaryEmail)
         .setPassword(password)
         .setName(new UserName().setGivenName(givenName).setFamilyName(familyName))
-        .setEmails(new UserEmail().setType("custom").setAddress(contactEmail).setCustomType("contact"))
         .setChangePasswordAtNextLogin(true);
+    addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
+
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
 
   @Override
-  public User resetUserPassword(String userKey) {
-    User user = getUser(userKey);
+  public User updateUser(User user) {
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(
+        user.getPrimaryEmail(), user).execute());
+    return user;
+  }
+
+  @Override
+  public User resetUserPassword(String email) {
+    User user = getUser(email);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run((context) -> getGoogleDirectoryService().users().update(userKey, user).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(email, user).execute());
     return user;
   }
 
   @Override
   public void deleteUser(String username) {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
     try {
       retryHandler.runAndThrowChecked((context) -> getGoogleDirectoryService().users()
-          .delete(username + "@" + gSuiteDomain).execute());
+          .delete(username + "@" + gSuiteDomain()).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.

@@ -6,6 +6,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,14 +26,11 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * VisitsQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for visit criteria types.
+ * VisitsQueryBuilder builds SQL for BigQuery for visit criteria types.
  */
 @Service
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
-  private static final String TABLE_ID = "search_visit";
-  //If the querybuilder will use modifiers then sql statement will need entry_date
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
     "select person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
@@ -41,10 +39,13 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     "concept_id in unnest(${visitConceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem inputParameters,
-                           String mention) {
+                           TemporalMention mention) {
     from(parametersEmpty()).test(inputParameters.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     List<Long> conceptIdList = new ArrayList<>();
     for (SearchParameter parameter : inputParameters.getSearchParameters()) {
@@ -60,12 +61,15 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
     String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
     List<Modifier> modifiers = inputParameters.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    String finalSql = buildTemporalSql(TABLE_ID, modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+    String finalSql = buildTemporalSql(modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
     String namedParameter = addQueryParameterValue(queryParams,
       QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.VISIT;

@@ -26,7 +26,7 @@
           </h2>
         </div>
         <div style="display: flex; flex-direction: row; align-items: center; width: 100%">
-          <div style="width: 200px;">
+          <div style="width: 200px; margin-right: 1rem;">
             <div role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-top-right">
               <span *ngIf="!writePermission" class="tooltip-content">Write permission required to create cohorts</span>
               <div class="card add-card" [ngClass]="{'disabled' : !writePermission}" (click)="!writePermission || buildCohort()">
@@ -46,8 +46,8 @@
               </div>
             </div>
           </div>
-          <div style="flex-grow: 3">
-            <app-recent-work [workspace]="workspace" [headerText]="''" style="display: flex; justify-content: flex-end"></app-recent-work>
+          <div style="flex-grow: 3; min-width: 0;">
+            <app-recent-work></app-recent-work>
           </div>
         </div>
         <div style="padding-top: 1rem;">
@@ -111,9 +111,9 @@
         </span>
       </span>
     </div>
-    <div *ngFor="let user of workspace.userRoles">
-      <div>{{user.role}}: {{user.email}}</div>
-    </div>
+      <div *ngFor="let user of workspace.userRoles">
+        <div>{{user.role}}: {{user.email}}</div>
+      </div>
     <h6>
       Workspace Information
       <app-tooltip [direction]="'top-left'">
@@ -167,12 +167,16 @@
       </div>
     </div>
     <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}?authuser={{username}}"
-        target="_blank">
+        target="_blank" rel="noopener noreferrer">
       Google Bucket
     </a>
   </div>
 </div>
-<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
+<app-workspace-share [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [onClose]="closeShare.bind(this)"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
@@ -180,9 +184,11 @@
     <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
   </div>
 </clr-modal>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <app-new-notebook-modal *ngIf="creatingNotebook"
   [workspace]="workspace"
   [existingNotebooks]="notebookList"
-  [onClose]="closeNotebookModal.bind(this)"
+  [onClose]="closeNotebookModal"
 ></app-new-notebook-modal>

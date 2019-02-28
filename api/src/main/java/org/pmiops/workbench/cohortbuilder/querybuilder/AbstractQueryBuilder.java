@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
-import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
@@ -40,11 +39,14 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * AbstractQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery.
+ * AbstractQueryBuilder is a superclass that all query builders extend. This abstract class is used to state or define
+ * general characteristics about the CB query builders. It provides implementations of the modifier and temporal
+ * queries used by the CB. The extending class just needs to call the modifier/temporal methods with proper args to get
+ * generated query for specified.
  */
 public abstract class AbstractQueryBuilder {
 
+  public static final String TABLE_ID = "search_all_domains";
   public static final String PARENT = "parent";
   public static final String CHILD = "child";
   public static final String AND = " and ";
@@ -56,35 +58,52 @@ public abstract class AbstractQueryBuilder {
   private static final String RANK_1_SQL_TEMPLATE =
     ", rank() over (partition by person_id order by entry_date${descSql}) rn";
   private static final String TEMPORAL_SQL_TEMPLATE =
-    "select person_id, visit_concept_id, entry_date${rank1Sql}\n" +
-      "from `${projectId}.${dataSetId}.${tableId}`\n" +
+    "select person_id, visit_occurrence_id, entry_date${rank1Sql}\n" +
+      "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where ${conceptIdSql}" +
       "and person_id in (${innerSql})\n";
   private static final String TEMPORAL_RANK_1_SQL_TEMPLATE =
-    "select person_id, visit_concept_id, entry_date\n" +
-    "from (${innerTemporalSql}) a\n" +
-    "where rn = 1\n";
+    "select person_id, visit_occurrence_id, entry_date\n" +
+      "from (${innerTemporalSql}) a\n" +
+      "where rn = 1\n";
   private static final String OCCURRENCES_SQL_TEMPLATE =
     "group by criteria.person_id, criteria.entry_date, criteria.concept_id\n" +
-    "having count(criteria.person_id) ";
+      "having count(criteria.person_id) ";
   private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
   private static final String EVENT_DATE_SQL_TEMPLATE = "and entry_date ";
   private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_concept_id ";
 
   /**
-   * Build a {@link QueryJobConfiguration} from the specified
-   * parameters provided.
+   * Build a query from the specified parameters provided.
    *
+   * @param queryParams
    * @param searchGroupItem
    * @param temporalMention
-   * @return
    */
   public abstract String buildQuery(Map<String, QueryParameterValue> queryParams,
                                     SearchGroupItem searchGroupItem,
-                                    String temporalMention);
+                                    TemporalMention temporalMention);
 
+  /**
+   * The {@link FactoryKey} helps determine which implementation of AbstractQueryBuilder to use:
+   *
+   * FactoryKey#CODES - {@link CodesQueryBuilder}
+   * FactoryKey#DEMO  - {@link DemoQueryBuilder}
+   * FactoryKey#VISIT - {@link VisitsQueryBuilder}
+   * FactoryKey#PM    - {@link PMQueryBuilder}
+   * FactoryKey#DRUG  - {@link DrugQueryBuilder}
+   * FactoryKey#MEAS  - {@link MeasurementQueryBuilder}
+   * FactoryKey#PPI   - {@link PPIQueryBuilder}
+   */
   public abstract FactoryKey getType();
 
+  /**
+   * Implementation of modifier CB queries.
+   *
+   * @param baseSql
+   * @param queryParams
+   * @param modifiers
+   */
   public String buildModifierSql(String baseSql, Map<String, QueryParameterValue> queryParams, List<Modifier> modifiers) {
     String ageDateAndEncounterSql = getAgeDateAndEncounterSql(queryParams, modifiers);
     //Number of Occurrences has to be last because of the group by
@@ -95,21 +114,29 @@ public abstract class AbstractQueryBuilder {
       occurrenceSql;
   }
 
-  public String buildTemporalSql(String tableId,
-                                 String innerSql,
+  /**
+   * Implementation of temporal CB queries. Please reference the following google doc for details:
+   * https://docs.google.com/document/d/1OFrG7htm8gT0QOOvzHa7l3C3Qs0JnoENuK1TDAB_1A8/edit#heading=h.zbvt2sup9sys
+   *
+   * @param innerSql
+   * @param conceptIdsSql
+   * @param queryParams
+   * @param modifiers
+   * @param mention
+   */
+  public String buildTemporalSql(String innerSql,
                                  String conceptIdsSql,
                                  Map<String, QueryParameterValue> queryParams,
                                  List<Modifier> modifiers,
-                                 String mention) {
+                                 TemporalMention mention) {
     if (mention != null) {
       String temporalSql = TEMPORAL_SQL_TEMPLATE
-        .replace("${tableId}", tableId)
         .replace("${innerSql}", innerSql)
         .replace("${conceptIdSql}", conceptIdsSql)
         .replace("${ageDateAndEncounterSql}", getAgeDateAndEncounterSql(queryParams, modifiers));
-      if (TemporalMention.ANY_MENTION.name().equals(mention)) {
+      if (TemporalMention.ANY_MENTION.equals(mention)) {
         return temporalSql.replace("${rank1Sql}", "");
-      } else if (TemporalMention.FIRST_MENTION.name().equals(mention)) {
+      } else if (TemporalMention.FIRST_MENTION.equals(mention)) {
         temporalSql = temporalSql.replace("${rank1Sql}", RANK_1_SQL_TEMPLATE.replace("${descSql}", ""));
         return TEMPORAL_RANK_1_SQL_TEMPLATE.replace("${innerTemporalSql}", temporalSql);
       } else {
@@ -121,6 +148,13 @@ public abstract class AbstractQueryBuilder {
     }
   }
 
+  /**
+   * Generate a unique parameter name and add it to the parameter map provided.
+   *
+   * @param queryParameterValueMap
+   * @param queryParameterValue
+   * @return
+   */
   protected String addQueryParameterValue(Map<String, QueryParameterValue> queryParameterValueMap,
                                           QueryParameterValue queryParameterValue) {
     String parameterName = "p" + queryParameterValueMap.size();

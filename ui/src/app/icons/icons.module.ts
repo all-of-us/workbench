@@ -1,12 +1,11 @@
 import {NgModule} from '@angular/core';
 
-import {EditComponent} from './edit/component';
-import {ExpandComponent} from './expand/component';
-import {NotebookComponent} from './notebook/component';
-import {ScrollComponent} from './scroll/component';
-import {ShareComponent} from './share/component';
-import {ShrinkComponent} from './shrink/component';
-import {TrashComponent} from './trash/component';
+import {EditComponent} from 'app/icons/edit/component';
+import {ExpandComponent} from 'app/icons/expand/component';
+import {NotebookComponent} from 'app/icons/notebook/component';
+import {ShareComponent} from 'app/icons/share/component';
+import {ShrinkComponent} from 'app/icons/shrink/component';
+import {TrashComponent} from 'app/icons/trash/component';
 
 @NgModule({
   imports: [],
@@ -15,7 +14,6 @@ import {TrashComponent} from './trash/component';
     EditComponent,
     ExpandComponent,
     NotebookComponent,
-    ScrollComponent,
     ShareComponent,
     ShrinkComponent
   ],
@@ -24,7 +22,6 @@ import {TrashComponent} from './trash/component';
     EditComponent,
     ExpandComponent,
     NotebookComponent,
-    ScrollComponent,
     ShareComponent,
     ShrinkComponent
   ],

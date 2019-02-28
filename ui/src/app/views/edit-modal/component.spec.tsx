@@ -1,6 +1,6 @@
 import {EditModal, EditModalProps, EditModalState} from 'app/views/edit-modal/component';
 import {shallow} from 'enzyme';
-import {RecentResource} from 'generated';
+import {RecentResource} from 'generated/fetch';
 import * as React from 'react';
 
 describe('EditModalComponent', () => {

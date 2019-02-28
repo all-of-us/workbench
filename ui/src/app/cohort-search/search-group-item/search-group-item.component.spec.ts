@@ -24,6 +24,7 @@ const baseItem = fromJS({
   modifiers: [],
   count: null,
   isRequesting: false,
+  status: 'active',
 });
 
 const zeroCrit = fromJS({
@@ -78,7 +79,6 @@ describe('SearchGroupItemComponent', () => {
     // Default Inputs for tests
     comp.role = 'includes';
     comp.groupId = 'include0';
-    comp.itemIndex = 0;
 
     comp.itemId = 'item001';
 
@@ -94,10 +94,10 @@ describe('SearchGroupItemComponent', () => {
   });
 
   it('Should display code type', () => {
-    expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
     itemStub.next(baseItem);
     codeStub.next(List([zeroCrit, oneCrit]));
     fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css('small.trigger'))).toBeTruthy();
 
     const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
     expect(display.childElementCount).toBe(2);
@@ -137,7 +137,10 @@ describe('SearchGroupItemComponent', () => {
       codes: false
     };
 
-    const editButton = fixture.debugElement.query(By.css('clr-icon[shape=pencil]')).parent;
+    const dropdown = fixture.debugElement.query(By.css('.dropdown-toggle'));
+    dropdown.triggerEventHandler('click', null);
+
+    const editButton = fixture.debugElement.query(By.css('button[clrdropdownitem]:first-of-type'));
     editButton.triggerEventHandler('click', null);
 
     expect(spy).toHaveBeenCalledWith({
@@ -145,19 +148,6 @@ describe('SearchGroupItemComponent', () => {
       item: baseItem,
       context: expectedContext,
     });
-  });
-
-  it('Should render an \'OR\' if it isn\'t the first item', () => {
-    comp.itemIndex = 1;
-    itemStub.next(baseItem);
-    codeStub.next(List([zeroCrit, oneCrit]));
-    fixture.detectChanges();
-
-    const display = fixture.debugElement.query(By.css('small.trigger')).nativeElement;
-    expect(display.childElementCount).toBe(3);
-
-    const trimmedText = display.textContent.replace(/\s+/g, ' ').trim();
-    expect(trimmedText).toEqual('OR Contains ICD9 Codes');
   });
 
 });

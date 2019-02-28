@@ -25,6 +25,10 @@ clr-icon[shape^=error-standard] {
   color: #d9534f;
 }
 
+clr-icon[shape^=warning-standard] {
+  color: #F57600;
+}
+
 /* Save Cohort Modal */
 /*
  * ng-deep is technically "deprecated" but there's no upgrade path and no other

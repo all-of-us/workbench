@@ -171,7 +171,7 @@ public class AuthInterceptorTest {
     when(fireCloudService.getMe()).thenReturn(me);
     when(userDao.findUserByEmail("bob@also-bad-domain.org")).thenReturn(null);
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
-    verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
   @Test

@@ -16,6 +16,11 @@
   },
   {
     "mode": "NULLABLE",
+    "name": "ethnicity",
+    "type": "string"
+  },
+  {
+    "mode": "NULLABLE",
     "name": "dob",
     "type": "timestamp"
   }

@@ -1,19 +1,31 @@
-<button
-  type="button"
-  class="btn btn-info-outline btn-sm"
-  id="close-button"
-  (click)="remove($event)">
-  DELETE GROUP
-</button>
-
-<div class="card bg-faded">
+<div [id]="group.get('id')" class="card bg-faded">
+  <div class="card-header">
+    <clr-dropdown>
+      <button type="button" clrDropdownTrigger>
+        <clr-icon shape="ellipsis-vertical" class="ellipsis-vertical"></clr-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen>
+        <button
+          type="button"
+          (click)="hide('hidden')"
+          clrDropdownItem>
+          Suppress group from total count
+        </button>
+        <button
+          type="button"
+          (click)="remove()"
+          clrDropdownItem>
+          Delete group
+        </button>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+    Group {{index + 1}}
+  </div>
   <!--********************************Temporal changes start***************************************-->
-
-  <div class="card-header" *ngIf="temporalDropdown && envFlag">
+  <div class="card-block" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="dropdownOption; else login"> {{dropdownOption}}</div>
-        <ng-template #login> Which Mention</ng-template>
+        <span>{{formatStatus(mention)}}</span>
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -23,23 +35,24 @@
           class="dropdown-item"
           type="button"
           (click)="getMentionTitle(mention)"
-          clrDropdownItem>{{mention}}</button>
+          clrDropdownItem>{{formatStatus(mention)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
     <span class="of-text"> of </span>
   </div>
   <!--**********************************Temporal changes end******************************************-->
 
-  <div *ngFor="let itemId of items; let itemIndex = index;" class="card-block">
+  <div *ngFor="let item of nonTemporalItems" class="card-block search-item">
     <app-search-group-item
       [role]="role"
       [groupId]="groupId"
-      [itemId]="itemId"
-      [itemIndex]="itemIndex">
+      [itemId]="item.get('id')">
     </app-search-group-item>
+    <div *ngIf="status === 'active'" class="item-or">OR</div>
   </div>
 
-  <div class="card-header">
+  <div class="card-block">
+    <ng-template #groupDropDown>
     <clr-dropdown>
       <button [id]="role + index + '-button'" type="button" class="btn selection-button" (click)="setMenuPosition()" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -63,15 +76,32 @@
           clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
+    </ng-template>
+    <clr-dropdown *ngIf="temporalFlag; else groupDropDown">
+      <button type="button" class="btn selection-button" clrDropdownTrigger>
+        Add Criteria <clr-icon shape="caret down"></clr-icon>
+      </button>
+      <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
+        <ng-container *ngFor="let criteria of domainTypes">
+          <button *ngIf="criteria.name !== 'Demographics'"
+                  id="criteria.type domain"
+                  class="dropdown-item"
+                  type="button"
+                  [disabled]="criteria.disabled"
+                  (click)="launchWizard(criteria)"
+                  clrDropdownItem>{{criteria.name}}</button>
+        </ng-container>
+
+      </clr-dropdown-menu>
+    </clr-dropdown>
   </div>
 
   <!--********************************Temporal changes start***************************************-->
-
-  <div class="temporal-sub-card-header" *ngIf="temporalDropdown && envFlag">
+  <app-validator-errors [form]="timeForm"></app-validator-errors>
+  <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <div *ngIf="timeDropdownOption; else time"> {{timeDropdownOption}}</div>
-        <ng-template #time> Define Time</ng-template>
+        <span>{{formatStatus(time)}}</span>
          <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -81,13 +111,34 @@
           class="dropdown-item"
           type="button"
           (click)="getTimeTitle(timeName)"
-          clrDropdownItem>{{timeName}}</button>
+          clrDropdownItem>{{formatStatus(timeName)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
-    <input class="time-inputbox" type="number" placeholder="X">
+    <form [formGroup]="timeForm" class="form-padding">
+      <input *ngIf="time !== 'DURING_SAME_ENCOUNTER_AS'"  class="time-inputBox"
+             type="number"
+             [name]="timeValue"
+             [id]="timeValue"
+             [ngModel] = "timeValue"
+             (change)="getTimeValue($event)"
+             formControlName="inputTimeValue">
+    </form>
   </div>
+  <ng-container *ngIf="temporalFlag">
+    <div *ngFor="let item of temporalItems" class="card-block search-item">
+      <app-search-group-item
+        class="test"
+        (temporalGroupValue)="getTemporalGroup($event)"
+        [role]="role"
+        [groupId]="groupId"
+        [itemId]="item.get('id')">
+      </app-search-group-item>
+      <div *ngIf="status === 'active'" class="item-or">OR</div>
+    </div>
+  </ng-container>
 
-  <div class="temporal-sub-card-header" *ngIf="temporalDropdown && envFlag">
+
+  <div class="temporal-sub-card-header" *ngIf="temporalFlag">
     <clr-dropdown>
       <button type="button" class="btn selection-button" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
@@ -98,69 +149,98 @@
                   [id]="criteria.type"
                   class="dropdown-item"
                   type="button"
-                  (click)="launchWizard(criteria)"
+                  (click)="launchWizard(criteria, 1)"
                   clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
 
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
-
-  <div class="container card-footer" *ngIf="envFlag">
-    <div class="row">
-      <div class="toggle-switch col-sm-1">
-        <input class=" ng-valid ng-dirty ng-touched" id="{{groupId}}" type="checkbox" (click)="getTemporal($event)">
-        <label class="" for="{{groupId}}">
-          <span class="solid-preview-label"></span>
-         </label>
-      </div>
-      <div class="col-sm-5">Temporal</div>
-      <div class="col-sm-6 text-right">
-        Group Count:
-        <span *ngIf="isRequesting"
-              class="spinner spinner-inline"
-              [style.vertical-align]="'middle'">
+  <ng-container>
+    <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 || !groupDiasbleFlag">
+      <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
+        <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
+          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
+                 [checked]="temporalFlag" (click)="getTemporal($event)">
+          <label class="" [for]="'toggle'+ index">
+            <span class="solid-preview-label"></span>
+          </label>
+        </div>
+        <div class="col-sm-5">Temporal</div>
+        <div class="col-sm-6 text-right">
+          Group Count:
+          <span *ngIf="isRequesting"
+                class="spinner spinner-inline"
+                [style.vertical-align]="'middle'">
         Loading...
         </span>
+          <ng-container [ngSwitch]="true">
+              <span *ngIf="!isRequesting">
+              <ng-container *ngSwitchCase="(group.get('count') !== null || temporalFlag) &&  group.get('count') !== -1">
+                {{ group.get('count') | number }}
+              </ng-container>
+              <ng-container *ngSwitchCase="(group.get('count') === null || group.get('count') === -1) && !temporalFlag">
+                 - -
+                <clr-tooltip>
+                  <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
+                  <clr-tooltip-content clrSize="lg" *clrIfOpen>
+                    <span>
+                      All criteria in this group are suppressed. Un-surpress criteria to update the group count based on the visible criteria.
+                    </span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </ng-container>
+            </span>
+                <span *ngSwitchCase="error && !temporalFlag">
+              <clr-icon
+                [popper]="errorPopper"
+                [popperTrigger]="'hover'"
+                shape="error-standard"
+                size="18"></clr-icon>
+            </span>
+                <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
+            - -
+              <clr-icon
+                [popper]="errorPopper"
+                [popperTrigger]="'hover'"
+                shape="warning-standard"
+                size="18"></clr-icon>
+            </span>
+          </ng-container>
 
-        <span *ngIf="!isRequesting">
-          {{ group.get('count') | number }}
-        </span>
-        <span *ngIf="error">
-          <clr-icon
-            [popper]="errorPopper"
-            [popperTrigger]="'hover'"
-            shape="error-standard"
-            size="18"></clr-icon>
-        </span>
+        </div>
       </div>
+
     </div>
-
-  </div>
-
+  </ng-container>
   <!--********************************Temporal changes End***************************************-->
-
-
-  <div class="card-footer text-right" *ngIf="!envFlag">
-    Group Count:
-    <span *ngIf="isRequesting"
-          class="spinner spinner-inline"
-          [style.vertical-align]="'middle'">
-      Loading...
-    </span>
-    <span *ngIf="!isRequesting">
-      {{ group.get('count') | number }}
-    </span>
-    <span *ngIf="error">
-      <clr-icon
-        [popper]="errorPopper"
-        [popperTrigger]="'hover'"
-        shape="error-standard"
-        size="18"></clr-icon>
-    </span>
+</div>
+<div
+  [id]="'overlay_' + group.get('id')"
+  class="group-overlay"
+  [class.pending]="status === 'pending'"
+  [class.hidden]="status === 'hidden'">
+  <div class="group-overlay-inner">
+    <ng-container *ngIf="status ==='pending'">
+      <clr-icon shape="exclamation-triangle" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        This group has been deleted
+        <button class="btn btn-link" (click)="undo()">UNDO</button>
+      </span>
+    </ng-container>
+    <ng-container *ngIf="status ==='hidden'">
+      <clr-icon shape="eye-hide" class="is-solid" size="56"></clr-icon>
+      <span class="overlay-text">
+        This group has been suppressed
+        <button class="btn btn-link" (click)="enable()">ENABLE</button>
+      </span>
+    </ng-container>
   </div>
 </div>
 
 <popper-content #errorPopper>
-  <p  [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="error && !temporalFlag" [style.margin]="'0'">A problem occurred and we were not able to retrieve the requested data</p>
+  <p  *ngIf="temporalFlag && warningFlag"  [style.margin]="'0'">
+    Please complete criteria selections before saving temporal relationship.
+  </p>
 </popper-content>

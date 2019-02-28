@@ -45,7 +45,8 @@
 
         <!-- show Age totals -->
         <div *ngIf="selectedConcept.analyses && selectedConcept.analyses.ageAnalysis" class="col-md-4 col-xs-12 chart-wrapper" >
-          <app-chart [analysis]="selectedConcept.analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"> </app-chart>
+          <app-chart [analysis]="selectedConcept.analyses.ageAnalysis" [pointWidth]="20" [backgroundColor]="backgroundColor"
+                     [domainType]="'physical measurements'"> </app-chart>
         </div>
 
         <!-- Todo wait on design for further dev -->

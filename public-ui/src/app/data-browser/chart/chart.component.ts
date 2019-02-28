@@ -4,6 +4,7 @@ import * as highcharts from 'highcharts';
 import {Analysis} from '../../../publicGenerated/model/analysis';
 import {Concept} from '../../../publicGenerated/model/concept';
 import {DbConfigService} from '../../utils/db-config.service';
+import {DomainType} from '../../utils/enum-defs';
 
 @Component({
   selector: 'app-chart',
@@ -20,6 +21,7 @@ export class ChartComponent implements OnChanges {
   @Input() chartType: string;
   @Input() sources = false;
   @Input() genderId: string; // Hack until measurement design of graphs gender overlay
+  @Input() domainType: DomainType;
   @Output() resultClicked = new EventEmitter<any>();
   chartOptions: any = null;
 
@@ -76,7 +78,7 @@ export class ChartComponent implements OnChanges {
       title: options.title,
       subtitle: {},
       tooltip: {
-        pointFormat: '<b>{point.y} </b><br>{series.name}'
+        pointFormat: '<b>{point.y} </b><br>'
       },
       plotOptions: {
         series: {
@@ -373,7 +375,11 @@ export class ChartComponent implements OnChanges {
       }
       return 0;
     });
-    const series = {name: seriesName, colorByPoint: true, data: data};
+    const series = {name: seriesName, colorByPoint: true, data: data,
+      tooltip: {
+        headerFormat: '<span style="font-size: 10px"><br/>',
+        pointFormat: '<b> {point.y} </b> {point.name}</span>'
+      }};
     return {
       chart: {type: (this.analysis.analysisId === this.dbc.GENDER_ANALYSIS_ID
           || this.analysis.analysisId === this.dbc.SURVEY_GENDER_ANALYSIS_ID)
@@ -433,7 +439,8 @@ export class ChartComponent implements OnChanges {
     const series = {name: seriesName, colorByPoint: true, data: data};
     return {
       chart: {type: 'column', backgroundColor: this.backgroundColor},
-      title: {text: this.analysis.analysisName, style: this.dbc.CHART_TITLE_STYLE},
+      title: {text: this.getChartTitle(this.domainType),
+        style: this.dbc.CHART_TITLE_STYLE},
       series: series,
       categories: cats,
       pointWidth: this.pointWidth,
@@ -523,6 +530,15 @@ export class ChartComponent implements OnChanges {
       xAxisTitle: unit
     };
 
+  }
+  public getChartTitle(domainType: string) {
+    if (domainType === DomainType.EHR) {
+      return 'Age At First Occurrence';
+    } else if (domainType === DomainType.SURVEYS) {
+      return 'Age When Survey Was Taken';
+    } else if (domainType === DomainType.PHYSICAL_MEASUREMENTS) {
+      return 'Age When Physical Measurement Was Taken';
+    }
   }
 
 }

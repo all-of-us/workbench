@@ -31,6 +31,8 @@ import {
   LOAD_COUNT_RESULTS,
   CANCEL_COUNT_REQUEST,
   COUNT_REQUEST_ERROR,
+  CLEAR_TOTAL_COUNT,
+  CLEAR_GROUP_COUNT,
 
   BEGIN_PREVIEW_REQUEST,
   LOAD_PREVIEW_RESULTS,
@@ -48,11 +50,19 @@ import {
   REMOVE_MODIFIER,
   SET_WIZARD_FOCUS,
   CLEAR_WIZARD_FOCUS,
+  HIDE_ITEM,
+  HIDE_GROUP,
+  ENABLE_ENTITY,
   REMOVE_ITEM,
   REMOVE_GROUP,
+  SET_ENTITY_TIMEOUT,
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
+  UPDATE_TEMPORAL,
+  UPDATE_WHICH_MENTION,
+  UPDATE_TEMPORAL_TIME,
+  UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -221,6 +231,15 @@ export const countRequestError =
   ): ActionTypes[typeof COUNT_REQUEST_ERROR] =>
   ({type: COUNT_REQUEST_ERROR, entityType, entityId, error});
 
+export const clearTotalCount =
+  (groupId?: string): ActionTypes[typeof CLEAR_TOTAL_COUNT] =>
+  ({type: CLEAR_TOTAL_COUNT, groupId});
+
+export const clearGroupCount =
+  (groupId: string
+  ): ActionTypes[typeof CLEAR_GROUP_COUNT] =>
+  ({type: CLEAR_GROUP_COUNT, groupId});
+
 export const requestPreview =
   (cdrVersionId: number, request: SearchRequest
   ): ActionTypes[typeof BEGIN_PREVIEW_REQUEST] =>
@@ -291,6 +310,21 @@ export const clearWizardFocus =
   (): ActionTypes[typeof CLEAR_WIZARD_FOCUS] =>
   ({type: CLEAR_WIZARD_FOCUS});
 
+export const hideGroup =
+  (groupId: string, status: string
+  ): ActionTypes[typeof HIDE_GROUP] =>
+    ({type: HIDE_GROUP, groupId, status});
+
+export const hideGroupItem =
+  (groupId: string, itemId: string, status: string
+  ): ActionTypes[typeof HIDE_ITEM] =>
+    ({type: HIDE_ITEM, groupId, itemId, status});
+
+export const enableEntity =
+  (entity: string, entityId: string,
+  ): ActionTypes[typeof ENABLE_ENTITY] =>
+    ({type: ENABLE_ENTITY, entity, entityId});
+
 export const removeGroup =
   (role: keyof SearchRequest, groupId: string
   ): ActionTypes[typeof REMOVE_GROUP] =>
@@ -300,6 +334,11 @@ export const removeGroupItem =
   (groupId: string, itemId: string
   ): ActionTypes[typeof REMOVE_ITEM] =>
   ({type: REMOVE_ITEM, groupId, itemId});
+
+export const setTimeoutId =
+  (entity: string, entityId: string, timeoutId: any
+  ): ActionTypes[typeof SET_ENTITY_TIMEOUT] =>
+  ({type: SET_ENTITY_TIMEOUT, entity, entityId, timeoutId});
 
 export const requestAttributes =
   (cdrVersionId: number, node: any
@@ -314,9 +353,9 @@ export const hideAttributesPage =
  * Context mgmt
  */
 export const openWizard =
-  (itemId: string, itemType: string, context: object
+  (itemId: string, itemType: string, context: object, tempGroup?: number
   ): ActionTypes[typeof OPEN_WIZARD] =>
-  ({type: OPEN_WIZARD, itemId, itemType, context});
+  ({type: OPEN_WIZARD, itemId, itemType, context, tempGroup});
 
 export const reOpenWizard =
   (item: any, context: object
@@ -332,6 +371,22 @@ export const cancelWizard =
 export const setWizardContext =
   (context: object): ActionTypes[typeof SET_WIZARD_CONTEXT] =>
   ({type: SET_WIZARD_CONTEXT, context});
+
+export const updatedTemporal =
+  (flag: boolean, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL] =>
+    ({type: UPDATE_TEMPORAL, flag, groupId});
+
+export const updateWhichMention =
+  (mention: any, groupId: any): ActionTypes[typeof UPDATE_WHICH_MENTION] =>
+    ({type: UPDATE_WHICH_MENTION, mention, groupId});
+
+export const updateTemporalTime =
+  (time: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME] =>
+    ({type: UPDATE_TEMPORAL_TIME, time, groupId});
+
+export const updateTemporalTimeValue =
+  (timeValue: any, groupId: any): ActionTypes[typeof UPDATE_TEMPORAL_TIME_VALUE] =>
+    ({type: UPDATE_TEMPORAL_TIME_VALUE, timeValue, groupId});
 
 export const loadEntities =
   (entities: any): ActionTypes[typeof LOAD_ENTITIES] =>

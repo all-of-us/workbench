@@ -18,6 +18,7 @@ const dummyItem = fromJS({
   modifiers: [],
   count: null,
   isRequesting: false,
+  status: 'active',
 });
 
 const zeroCrit = fromJS({
@@ -59,6 +60,7 @@ const groups = fromJS({
     items: [],
     count: null,
     isRequesting: false,
+    status: 'active',
   },
   exclude0: {
     id: 'exclude0',
@@ -187,6 +189,7 @@ describe('CohortSearchActions', () => {
       items: ['item002'],
       count: null,
       isRequesting: false,
+      status: 'active',
     });
     const twoGroupState = dummyState
       .updateIn(

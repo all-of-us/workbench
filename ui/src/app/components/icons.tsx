@@ -21,8 +21,8 @@ export const styles = {
   }
 };
 
-export const ClrIcon = props => {
-  return React.createElement('clr-icon', props);
+export const ClrIcon = ({className = '', ...props}) => {
+  return React.createElement('clr-icon', {class: className, ...props});
 };
 
 export const InfoIcon = ({style = {}, ...props}) =>

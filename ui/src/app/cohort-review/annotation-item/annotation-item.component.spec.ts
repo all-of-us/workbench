@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
@@ -23,7 +22,6 @@ describe('AnnotationItemComponent', () => {
       imports: [ClarityModule, ReactiveFormsModule],
       providers: [
         {provide: CohortReviewService, useValue: {}},
-        {provide: ActivatedRoute, useValue: {}},
       ],
     })
       .compileComponents();

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,13 +22,16 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -37,6 +41,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
@@ -53,9 +58,11 @@ import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
+import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
+import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -112,6 +119,8 @@ public class ProfileControllerTest {
   @Mock
   private Provider<WorkbenchConfig> configProvider;
   @Mock
+  private ComplianceService complianceTrainingService;
+  @Mock
   private MailService mailService;
 
   private ProfileController profileController;
@@ -122,12 +131,16 @@ public class ProfileControllerTest {
   private FakeClock clock;
   private User user;
 
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
   @Before
   public void setUp() throws MessagingException {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new FireCloudConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
+    config.firecloud.registeredDomainName = "";
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
 
@@ -155,7 +168,8 @@ public class ProfileControllerTest {
 
     doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
-        new FakeLongRandom(NONCE_LONG), fireCloudService, configProvider);
+        new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
+        complianceTrainingService);
     ProfileService profileService = new ProfileService(userDao);
     this.profileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
@@ -163,8 +177,8 @@ public class ProfileControllerTest {
         Providers.of(mailService));
     this.cloudProfileController = new ProfileController(profileService, userProvider, userAuthenticationProvider,
         userDao, clock, userService, fireCloudService, directoryService,
-        cloudStorageService, notebooksService, Providers.of(config),
-        cloudEnvironment, Providers.of(mailService));
+        cloudStorageService, notebooksService, Providers.of(config), cloudEnvironment,
+        Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -188,6 +202,18 @@ public class ProfileControllerTest {
   }
 
   @Test
+  public void testCreateAccount_invalidUser() throws Exception {
+    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    CreateAccountRequest accountRequest = new CreateAccountRequest();
+    accountRequest.setInvitationKey(INVITATION_KEY);
+    createAccountRequest.getProfile().setUsername("12");
+    accountRequest.setProfile(createAccountRequest.getProfile());
+    exception.expect(BadRequestException.class);
+    exception.expectMessage("Username should be at least 3 characters and not more than 64 characters");
+    profileController.createAccount(accountRequest);
+  }
+
+  @Test
   public void testSubmitDemographicSurvey_success() throws Exception {
     createUser();
     Profile profile = profileController.submitDemographicsSurvey().getBody();
@@ -195,7 +221,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+    assertThat(profile.getTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -206,7 +232,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getEthicsTrainingCompletionTime()).isNull();
+    assertThat(profile.getTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -217,7 +243,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
   @Test
@@ -242,7 +268,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getEthicsTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
 
@@ -253,20 +279,6 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenThrow(new ServerErrorException());
     profileController.createAccount(createAccountRequest);
-  }
-
-  @Test
-  public void testGetIdVerificationsForReview() throws Exception {
-    createUser();
-
-    IdVerificationListResponse response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList().size()).isEqualTo(1);
-
-    IdVerificationReviewRequest request =
-        new IdVerificationReviewRequest().newStatus(IdVerificationStatus.VERIFIED);
-    profileController.reviewIdVerification(user.getUserId(), request);
-    response = profileController.getIdVerificationsForReview().getBody();
-    assertThat(response.getProfileList()).isEmpty();
   }
 
   @Test
@@ -737,6 +749,88 @@ public class ProfileControllerTest {
     profileController.reviewIdVerification(
         user.getUserId(), request);
     verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
+  }
+
+  @Test
+  public void testUpdateNihToken() {
+    doNothing().when(fireCloudService).postNihCallback(any());
+    try {
+      createUser();
+      profileController.updateNihToken(new NihToken().jwt("test"));
+    } catch (Exception e) {
+      fail();
+    }
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateNihToken_badRequest_1() {
+    profileController.updateNihToken(null);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateNihToken_badRequest_2() {
+    profileController.updateNihToken(new NihToken());
+  }
+
+  @Test(expected = ServerErrorException.class)
+  public void testUpdateNihToken_serverError() {
+    doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
+    profileController.updateNihToken(new NihToken().jwt("test"));
+  }
+
+  @Test
+  public void testSyncTraining() throws Exception {
+    List<BadgeDetails> badgeDetail = new ArrayList<>();
+    Timestamp time = new Timestamp(12543);
+    BadgeDetails badge = new BadgeDetails();
+    badge.setName("All of us badge");
+    badge.setDateexpire("12543");
+    badgeDetail.add(badge);
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
+
+    createUser();
+
+    profileController.syncTrainingStatus();
+    verify(complianceTrainingService).getMoodleId(PRIMARY_EMAIL);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isEqualTo(time);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNotNull();
+
+  }
+
+  @Test
+  public void testSyncTrainingWithNoBadge() throws Exception {
+    List<BadgeDetails> badgeDetail = new ArrayList<>();
+
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
+
+    createUser();
+
+    profileController.syncTrainingStatus();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTermsOfServiceCompletionTime()).isNull();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
+  }
+
+  public void testSyncTrainingMoodleIdNotFound() throws Exception {
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(null);
+
+    createUser();
+
+    Profile profile = profileController.syncTrainingStatus().getBody();
+    verify(complianceTrainingService, never()).getUserBadge(any());
+    assertThat(profile.getTrainingCompletionTime()).isNull();
+  }
+
+  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
+  public void testSyncTrainingMoodleIdNotFoundWhileGetUserBadge() throws Exception {
+    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
+    when(complianceTrainingService.getUserBadge(12))
+        .thenThrow(new org.pmiops.workbench.moodle.ApiException
+            (HttpStatus.NOT_FOUND.value(), "user not found"));
+
+    createUser();
+    profileController.syncTrainingStatus().getBody();
   }
 
   private Profile createUser() throws Exception {

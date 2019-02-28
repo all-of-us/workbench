@@ -1,25 +1,18 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {currentCohortStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
+import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CreateReviewPage} from './create-review-page';
 
 describe('CreateReviewPage', () => {
   let component: CreateReviewPage;
   let fixture: ComponentFixture<CreateReviewPage>;
-  const activatedRouteStub = {
-    snapshot: {
-      data: {
-        review: {},
-        cohort: {}
-      }
-    }
-  };
-  let route;
 
   beforeEach(async(() => {
 
@@ -33,16 +26,20 @@ describe('CreateReviewPage', () => {
       ],
       providers: [
         {provide: CohortReviewService, useValue: {}},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
+    currentCohortStore.next({
+      name: '',
+      criteria: '',
+      type: '',
+    });
+    cohortReviewStore.next(cohortReviewStub);
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CreateReviewPage);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {Subject} from 'rxjs/Subject';
 
+import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
@@ -87,13 +87,13 @@ export class ConceptHomepageComponent implements OnInit {
 
   constructor(
     private conceptsService: ConceptsService,
-    private route: ActivatedRoute,
   ) {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
   }
 
   ngOnInit(): void {
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
     this.loadingDomains = true;
     this.conceptsService.getDomainInfo(this.wsNamespace, this.wsId).subscribe((response) => {
       this.conceptDomainList = response.items;
@@ -110,10 +110,11 @@ export class ConceptHomepageComponent implements OnInit {
         });
         this.selectedDomain = this.conceptDomainCounts[0];
       });
-      if (this.route.snapshot.queryParams['domain'] !== undefined) {
+      const {domain: currentDomain} = queryParamsStore.getValue();
+      if (currentDomain !== undefined) {
         this.browseDomain(
           this.conceptDomainList.find(
-            domainInfo => domainInfo.domain === this.route.snapshot.queryParams['domain']));
+            domainInfo => domainInfo.domain === currentDomain));
       }
       this.loadingDomains = false;
     });

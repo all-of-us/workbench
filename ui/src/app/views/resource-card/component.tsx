@@ -1,37 +1,23 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Router} from '@angular/router';
-
-import {Clickable} from 'app/components/buttons';
-import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger} from 'app/components/popups';
-
-import {SignInService} from 'app/services/sign-in.service';
-import {ReactWrapperBase, switchCase} from 'app/utils/index';
-import {ResourceType} from 'app/utils/resourceActions';
-
-import {
-  CohortsService,
-  ConceptSetsService,
-  NotebookRename,
-  RecentResource,
-  WorkspacesService
-} from 'generated';
-
-import {environment} from 'environments/environment';
+import {Component, Input} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-const MenuItem = ({icon, children, ...props}) => {
-  return <Clickable
-    {...props}
-    data-test-id={icon}
-    style={{
-      display: 'flex', alignItems: 'center',
-      minWidth: '5rem', height: '1.3333rem',
-      padding: '0 1rem', color: '#4A4A4A'
-    }}
-    hover={{backgroundColor: '#E0EAF1'}}
-  ><ClrIcon shape={icon}/>&nbsp;{children}</Clickable>;
-};
+import {Button, Clickable, MenuItem} from 'app/components/buttons';
+import {Card} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {PopupTrigger} from 'app/components/popups';
+import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActions';
+
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {EditModal} from 'app/views/edit-modal/component';
+import {RenameModal} from 'app/views/rename-modal/component';
+import {Domain, RecentResource} from 'generated/fetch';
+
+import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {environment} from 'environments/environment';
 
 const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
@@ -42,6 +28,7 @@ const ResourceCardMenu: React.FunctionComponent<{
   onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
 }) => {
   return <PopupTrigger
+    data-test-id='resource-card-menu'
     side='bottom'
     closeOnClick
     content={
@@ -49,7 +36,7 @@ const ResourceCardMenu: React.FunctionComponent<{
         ['notebook', () => {
           return <React.Fragment>
             <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
             {
               environment.enableJupyterLab &&
@@ -68,7 +55,7 @@ const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['cohort', () => {
           return <React.Fragment>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
+            <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
             <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
@@ -84,7 +71,9 @@ const ResourceCardMenu: React.FunctionComponent<{
     }
   >
     <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21} style={{color: '#2691D0', marginLeft: -9}}/>
+      <ClrIcon shape='ellipsis-vertical' size={21}
+               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
+                 cursor: disabled ? 'auto' : 'pointer'}}/>
     </Clickable>
   </PopupTrigger>;
 };
@@ -113,175 +102,292 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
   }
 }
 
-@Component({
-  selector: 'app-resource-card',
-  styleUrls: ['../../styles/buttons.css',
-    '../../styles/cards.css',
-    '../../styles/template.css',
-    './component.css'],
-  templateUrl: './component.html'
-})
-export class ResourceCardComponent implements OnInit {
-  resourceType: ResourceType;
-  @Input('resourceCard')
+const styles = reactStyles({
+  card: {
+    marginTop: '1rem',
+    justifyContent: 'space-between',
+    width: '200px',
+    height: '223px',
+    marginRight: '1rem',
+    padding: '0.75rem 0.75rem 0rem 0.75rem',
+    boxShadow: '0 0 0 0'
+  },
+  cardName: {
+    fontSize: '18px',
+    fontWeight: 500,
+    lineHeight: '22px',
+    color: '#2691D0',
+    cursor: 'pointer',
+    wordBreak: 'break-all'
+  },
+  lastModified: {
+    color: '#4A4A4A',
+    fontSize: '11px',
+    display: 'inline-block',
+    lineHeight: '14px',
+    fontWeight: 300,
+    marginBottom: '0.2rem'
+  },
+  resourceType: {
+    height: '22px',
+    width: 'max-content',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    borderRadius: '4px 4px 0 0',
+    display: 'flex',
+    justifyContent: 'center',
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat, sans-serif',
+    fontSize: '12px',
+    fontWeight: 500
+  },
+  cardFooter: {
+    display: 'flex',
+    flexDirection: 'column'
+  }
+});
+
+const resourceTypeStyles = reactStyles({
+  cohort: {
+    backgroundColor: '#F8C954'
+  },
+  conceptSet: {
+    backgroundColor: '#AB87B3'
+  },
+  notebook: {
+    backgroundColor: '#8BC990'
+  }
+});
+
+export interface ResourceCardProps {
   resourceCard: RecentResource;
-  @Input('cssClass')
-  cssClass: string;
-  @Output() onUpdate: EventEmitter<void | NotebookRename> = new EventEmitter();
-  wsNamespace: string;
-  wsId: string;
-  resource: any;
-  router: Router;
-  invalidResourceError = false;
-  confirmDeleting = false;
+  onUpdate: Function;
+}
 
-  renaming = false;
-  editing = false;
+export interface ResourceCardState {
+  renaming: boolean;
+  editing: boolean;
+  confirmDeleting: boolean;
+  invalidResourceError: boolean;
+}
 
-  constructor(
-    private cohortsService: CohortsService,
-    private workspacesService: WorkspacesService,
-    private conceptSetsService: ConceptSetsService,
-    private signInService: SignInService,
-    private route: Router,
-  ) {}
+export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
 
-  ngOnInit() {
-    this.wsNamespace = this.resourceCard.workspaceNamespace;
-    // RW-1298 this should be updated
-    this.wsId = this.resourceCard.workspaceFirecloudName;
-    if (this.resourceCard) {
-      if (this.resourceCard.notebook) {
-        this.resourceType = ResourceType.NOTEBOOK;
-      } else if (this.resourceCard.cohort) {
-        this.resourceType = ResourceType.COHORT;
-      } else if (this.resourceCard.conceptSet) {
-        this.resourceType = ResourceType.CONCEPT_SET;
-      } else {
-        this.resourceType = ResourceType.INVALID;
-        this.invalidResourceError = true;
-      }
+  constructor(props: ResourceCardProps) {
+    super(props);
+    this.state = {
+      editing: false,
+      renaming: false,
+      confirmDeleting: false,
+      invalidResourceError: !(props.resourceCard.notebook ||
+          props.resourceCard.cohort ||
+          props.resourceCard.conceptSet)
+    };
+  }
+
+  // TODO [1/31/19] This method is only necessary until the parent components
+  //    (notebook-list, cohort-list, conceptSet-list) have been converted and use the
+  //    fetch API models.
+  static castConceptSet(resourceCard: RecentResource): RecentResource {
+    if (resourceCard.conceptSet) {
+      const myTempConceptSet = {...resourceCard.conceptSet,
+        domain: resourceCard.conceptSet.domain as Domain};
+      return {...resourceCard, conceptSet: myTempConceptSet};
     }
+    return resourceCard;
+  }
+
+  get resourceType(): ResourceType {
+    if (this.props.resourceCard.notebook) {
+      return ResourceType.NOTEBOOK;
+    } else if (this.props.resourceCard.cohort) {
+      return ResourceType.COHORT;
+    } else if (this.props.resourceCard.conceptSet) {
+      return ResourceType.CONCEPT_SET;
+    } else {
+      return ResourceType.INVALID;
+    }
+  }
+
+  get isCohort(): boolean {
+    return this.resourceType === ResourceType.COHORT;
+  }
+
+  get isConceptSet(): boolean {
+    return this.resourceType === ResourceType.CONCEPT_SET;
+  }
+
+  get isNotebook(): boolean {
+    return this.resourceType === ResourceType.NOTEBOOK;
+  }
+
+  get actionsDisabled(): boolean {
+    return !this.writePermission;
+  }
+
+  get writePermission(): boolean {
+    return this.props.resourceCard.permission === 'OWNER'
+        || this.props.resourceCard.permission === 'WRITER';
+  }
+
+  get notebookReadOnly(): boolean {
+    return this.isNotebook
+        && this.props.resourceCard.permission === 'READER';
+  }
+
+  get displayName(): string {
+    if (this.isNotebook) {
+      return this.props.resourceCard.notebook.name.replace(/\.ipynb$/, '');
+    } else if (this.isCohort) {
+      return this.props.resourceCard.cohort.name;
+    } else if (this.isConceptSet) {
+      return this.props.resourceCard.conceptSet.name;
+    }
+  }
+
+  get displayDate(): string {
+    const date = new Date(Number(this.props.resourceCard.modifiedTime));
+    // datetime formatting to slice off weekday from readable date string
+    return date.toDateString().split(' ').slice(1).join(' ');
+  }
+
+  get description(): string {
+    if (this.isCohort) {
+      return this.props.resourceCard.cohort.description;
+    } else if (this.isConceptSet) {
+      return this.props.resourceCard.conceptSet.description;
+    }
+  }
+
+  edit(): void {
+    this.setState({editing: true});
+  }
+
+  reviewCohort(): void {
+    const {resourceCard: {workspaceNamespace, workspaceFirecloudName, cohort: {id}}} = this.props;
+    navigateByUrl(
+      `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/cohorts/${id}/review`);
+  }
+
+  closeEditModal(): void {
+    this.setState({editing: false});
   }
 
   renameNotebook(): void {
-    this.renaming = true;
+    this.setState({renaming: true});
   }
 
   cancelRename(): void {
-    this.renaming = false;
+    this.setState({renaming: false});
   }
 
   openConfirmDelete(): void {
-    this.confirmDeleting = true;
+    this.setState({confirmDeleting: true});
   }
 
   closeConfirmDelete(): void {
-    this.confirmDeleting = false;
+    this.setState({confirmDeleting: false});
   }
 
-  receiveNotebookRename(): void {
-    this.renaming = false;
-    this.onUpdate.emit();
-  }
-
-  receiveEdit(resource: RecentResource): void {
-    if (resource.cohort) {
-      this.cohortsService.updateCohort(
-        this.wsNamespace,
-        this.wsId,
-        resource.cohort.id,
-        resource.cohort
-      ).subscribe(() => {
-        this.closeEditModal();
-        this.onUpdate.emit();
-      });
-    } else if (resource.conceptSet) {
-      this.conceptSetsService.updateConceptSet(
-        this.wsNamespace,
-        this.wsId,
-        resource.conceptSet.id,
-        resource.conceptSet
-      ).subscribe(() => {
-        this.closeEditModal();
-        this.onUpdate.emit();
-      });
-    }
-  }
-
-  cloneResource(resource: RecentResource): void {
+  cloneResource(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        this.workspacesService.cloneNotebook(this.wsNamespace, this.wsId, resource.notebook.name)
-          .map(() => this.onUpdate.emit())
-          .subscribe(() => {});
+        workspacesApi().cloneNotebook(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.notebook.name)
+          .then(() => {
+            this.props.onUpdate();
+          });
         break;
       }
       case ResourceType.COHORT: {
         const url =
-          '/workspaces/' + this.wsNamespace + '/' + this.wsId + '/cohorts/build?cohortId=';
-        this.route.navigateByUrl(url + resource.cohort.id);
-        this.onUpdate.emit();
+            '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
+            this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
+        navigateByUrl(url + this.props.resourceCard.cohort.id);
+        this.props.onUpdate();
         break;
       }
     }
-  }
-
-  deleteResource(resource: RecentResource): void {
-    switch (this.resourceType) {
-      case ResourceType.NOTEBOOK: {
-        this.resource = resource.notebook;
-        break;
-      }
-      case ResourceType.COHORT: {
-        this.resource = resource.cohort;
-        break;
-      }
-      case ResourceType.CONCEPT_SET: {
-        this.resource = resource.conceptSet;
-        break;
-      }
-    }
-    this.openConfirmDelete();
   }
 
   receiveDelete(): void {
     switch (this.resourceType) {
       case ResourceType.NOTEBOOK: {
-        this.workspacesService.deleteNotebook(this.wsNamespace, this.wsId, this.resource.name)
-          .subscribe(() => {
+        workspacesApi().deleteNotebook(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.notebook.name)
+          .then(() => {
             this.closeConfirmDelete();
-            this.onUpdate.emit();
+            this.props.onUpdate();
           });
         break;
       }
       case ResourceType.COHORT: {
-        this.cohortsService.deleteCohort(this.wsNamespace, this.wsId, this.resource.id)
-          .subscribe(() => {
+        cohortsApi().deleteCohort(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.cohort.id)
+          .then(() => {
             this.closeConfirmDelete();
-            this.onUpdate.emit();
+            this.props.onUpdate();
           });
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.resource.id)
-          .subscribe(() => {
+        conceptSetsApi().deleteConceptSet(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          this.props.resourceCard.conceptSet.id)
+          .then(() => {
             this.closeConfirmDelete();
-            this.onUpdate.emit();
+            this.props.onUpdate();
           });
       }
     }
   }
 
-  openResource(resource: RecentResource, jupyterLab?: boolean): void {
+  receiveEdit(resource: RecentResource): void {
+    if (this.isCohort) {
+      cohortsApi().updateCohort(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.cohort.id,
+        resource.cohort
+      ).then( () => {
+        this.closeEditModal();
+        this.props.onUpdate();
+      });
+    } else if (this.isConceptSet) {
+      conceptSetsApi().updateConceptSet(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.props.resourceCard.conceptSet.id,
+        ResourceCard.castConceptSet(resource).conceptSet
+      ).then( () => {
+        this.closeEditModal();
+        this.props.onUpdate();
+      });
+    }
+  }
+
+  receiveNotebookRename(): void {
+    this.setState({renaming: false});
+    this.props.onUpdate();
+  }
+
+  openResource(jupyterLab?: boolean): void {
     switch (this.resourceType) {
       case ResourceType.COHORT: {
-        this.reviewCohort(resource);
+        this.reviewCohort();
         break;
       }
       case ResourceType.CONCEPT_SET: {
-        this.route.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts',
-          'sets', resource.conceptSet.id], {relativeTo: null});
+        navigate(['workspaces', this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName, 'concepts', 'sets',
+          this.props.resourceCard.conceptSet.id], {relativeTo: null});
         break;
       }
       case ResourceType.NOTEBOOK: {
@@ -292,9 +398,10 @@ export class ResourceCardComponent implements OnInit {
         if (this.notebookReadOnly) {
           queryParams.playgroundMode = true;
         }
-        this.route.navigate(
-          ['workspaces', this.wsNamespace, this.wsId, 'notebooks',
-            encodeURIComponent(this.resourceCard.notebook.name)], {
+        navigate(
+          ['workspaces', this.props.resourceCard.workspaceNamespace,
+            this.props.resourceCard.workspaceFirecloudName, 'notebooks',
+            encodeURIComponent(this.props.resourceCard.notebook.name)], {
               queryParams,
               relativeTo: null,
             });
@@ -302,48 +409,77 @@ export class ResourceCardComponent implements OnInit {
     }
   }
 
-  editCohort(): void {
-    // This ensures the cohort binding is picked up before the open resolves.
-    setTimeout(_ => this.editing = true, 0);
+  render() {
+    return <React.Fragment>
+      {this.state.invalidResourceError &&
+      <Modal>
+        <ModalTitle>Invalid Resource Type</ModalTitle>
+        <ModalBody>Please Report a Bug.</ModalBody>
+        <ModalFooter>
+          <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
+        </ModalFooter>
+      </Modal>}
+      <Card style={styles.card}
+            data-test-id='card'>
+        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+            <ResourceCardMenu disabled={this.actionsDisabled}
+                              resourceType={this.resourceType}
+                              onCloneResource={() => this.cloneResource()}
+                              onDeleteResource={() => this.openConfirmDelete()}
+                              onRenameNotebook={() => this.renameNotebook()}
+                              onEditCohort={() => this.edit()}
+                              onEditConceptSet={() => this.edit()}
+                              onReviewCohort={() => this.reviewCohort()}
+                              onOpenJupyterLabNotebook={() => this.openResource(true)}/>
+            <Clickable disabled={this.actionsDisabled && !this.notebookReadOnly}>
+              <div style={styles.cardName}
+                   data-test-id='card-name'
+                   onClick={() => this.openResource()}>{this.displayName}
+              </div>
+            </Clickable>
+          </div>
+          <div>{this.description}</div>
+        </div>
+        <div style={styles.cardFooter}>
+          <div style={styles.lastModified}>
+            Last Modified: {this.displayDate}</div>
+          <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
+               data-test-id='card-type'>
+            {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
+        </div>
+      </Card>
+      {this.state.editing && (this.isCohort  || this.isConceptSet) &&
+        <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
+                   onEdit={v => this.receiveEdit(v)}
+                   onCancel={() => this.closeEditModal()}/>}
+      {this.state.renaming && this.isNotebook &&
+        <RenameModal notebookName={this.props.resourceCard.notebook.name}
+                     workspace={{
+                       namespace: this.props.resourceCard.workspaceNamespace,
+                       name: this.props.resourceCard.workspaceFirecloudName
+                     }}
+                     onRename={() => this.receiveNotebookRename()}
+                     onCancel={() => this.cancelRename()}/>}
+      {this.state.confirmDeleting &&
+        <ConfirmDeleteModal resourceName={this.displayName}
+                            resourceType={this.resourceType}
+                            receiveDelete={() => this.receiveDelete()}
+                            closeFunction={() => this.closeConfirmDelete()}/>}
+    </React.Fragment>;
   }
+}
 
-  editConceptSet(): void {
-    this.editing = true;
+@Component ({
+  selector : 'app-resource-card',
+  template: '<div #root></div>'
+})
+export class ResourceCardComponent extends ReactWrapperBase {
+  resourceType: ResourceType;
+  @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
+  @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
+
+  constructor() {
+    super(ResourceCard, ['resourceCard', 'onUpdate']);
   }
-
-  closeEditModal(): void {
-    this.editing = false;
-  }
-
-  reviewCohort(resource: RecentResource): void {
-    const url =
-      '/workspaces/' + this.wsNamespace
-      + '/' + this.wsId + '/cohorts/' + resource.cohort.id + '/review';
-    this.route.navigateByUrl(url);
-  }
-
-  get resourceTypeInvalidError(): boolean {
-    return this.invalidResourceError;
-  }
-
-  get actionsDisabled(): boolean {
-    return !this.writePermission;
-  }
-
-  get writePermission(): boolean {
-    return this.resourceCard.permission === 'OWNER'
-      || this.resourceCard.permission === 'WRITER';
-  }
-
-  get notebookReadOnly(): boolean {
-    return this.resourceType === ResourceType.NOTEBOOK
-      && this.resourceCard.permission === 'READER';
-  }
-
-  get notebookDisplayName(): string {
-    if (this.resourceType === ResourceType.NOTEBOOK) {
-      return this.resourceCard.notebook.name.replace(/\.ipynb$/, '');
-    }
-  }
-
 }

@@ -1,0 +1,161 @@
+#This file provide the end points for moodle interactions
+# MOodle API information can be found at :
+# https://docs.moodle.org/dev/Web_service_API_functions
+
+
+swagger: '2.0'
+
+info:
+  title: Moodle
+  description: |
+    Service for Moodle Interactions.
+  version: "0.1"
+#The host will get updated as per the environment it will be aoudev.nnlm.gov for dev and test
+host: "aou.nnlm.gov"
+schemes:
+  - "https"
+basePath: /webservice/rest
+
+produces:
+  - application/json
+
+##########################################################################################
+## PATHS
+##########################################################################################
+
+paths:
+  /server.php?wsfunction=core_user_get_users_by_field&moodlewsrestformat=json:
+    get:
+      summary: Retrieves user information from Moodle.
+      description: Get user moodle information
+      tags:
+        - Moodle
+      consumes:
+        - application/json
+      operationId: getMoodleId
+      parameters:
+        - name: field
+          in: query
+          description: Input field basis of which information is received. In case of Aou its email
+          type: string
+          required: false
+        - name: values[0]
+          in: query
+          description: Value of the input field set as query which is user's email in case of Aou
+          type: string
+          required: false
+        - name: wstoken
+          in: query
+          description: Secret Token associated with All of us
+          type: string
+          required: true
+      responses:
+        200:
+          description: Moodle User Response received
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MoodleUserResponse'
+        400:
+          description: Bad request
+        500:
+          description: Moodle Internal Error
+      security:
+        - AdminSecurity: []
+
+  /server.php?wsfunction=core_badges_get_user_badges:
+   get:
+     summary: Get information of badges earned/completed by user.
+     tags:
+       - Moodle
+     consumes:
+       - application/json
+     operationId: getMoodleBadge
+     parameters:
+       - name: moodlewsrestformat
+         in: query
+         description: Format of the response which will be json for AoU
+         type: string
+         required: true
+       - name: userid
+         in: query
+         type: integer
+       - name: wstoken
+         in: query
+         description: Secret Token associated with All of us
+         type: string
+         required: true
+
+     responses:
+       200:
+         description: Badge /error response
+         schema:
+           $ref: '#/definitions/UserBadgeResponse'
+       400:
+         description: Bad request
+       500:
+         description: Moodle Internal Error
+     security:
+       - AdminSecurity: []
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+    MoodleUserResponse:
+      properties:
+        id:
+          type: integer
+          description: Moodle id
+        username:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        fullname:
+          type: string
+        email:
+          type: string
+        department:
+          type: string
+        institution:
+          type: string
+        suspended:
+          type: boolean
+        confirmed:
+          type: boolean
+
+    UserBadgeResponse:
+      required:
+        - badges
+      properties:
+        badges:
+          type: array
+          items:
+            $ref: '#/definitions/BadgeDetails'
+        exception:
+          type: string
+        errorcode:
+          type: string
+        message:
+          type: string
+
+    BadgeDetails:
+      properties:
+        name:
+          type: string
+          description: Name of the badge earned
+        description:
+          type: string
+          description: Description of the badge earned
+        badgeurl:
+          type: string
+        issuername:
+          type: string
+        dateissued:
+          type: string
+          description: When was the badge issued
+        dateexpire:
+          type: string
+          description: Expiry date of badge issued, null if set to never

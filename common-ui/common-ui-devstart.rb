@@ -41,7 +41,7 @@ def build(cmd_name, ui_name, args)
   options = BuildOptions.new.parse(cmd_name, args)
 
   common = Common.new
-  common.run_inline %W{yarn install}
+  common.run_inline %W{yarn install --frozen-lockfile --verbose}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
   # --prod (includes --aot) for other environments. Don't use full --prod in the
@@ -85,6 +85,9 @@ class CommonUiDevStart
     install_dependencies
 
     ENV["ENV_FLAG"] = "--configuration=#{options.env}"
+    if @ui_name == "public-ui"
+      ENV["ENV_FLAG"] = "--environment=#{options.env}"
+    end
     at_exit { common.run_inline %W{docker-compose down} }
 
     # Can't use swagger_regen here as it enters docker.

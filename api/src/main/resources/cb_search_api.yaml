@@ -254,31 +254,6 @@ paths:
           schema:
             $ref: "#/definitions/DemoChartInfoListResponse"
 
-  /v1/cohortbuilder/{cdrVersionId}/quicksearch/{type}/{value}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: Quick search for criteria that matches on code and name.
-      operationId: "getCriteriaTreeQuickSearch"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: value
-          type: string
-          required: true
-          description: value that should match code or name
-      responses:
-        200:
-          description: A collection of criteria
-          schema:
-            $ref: "#/definitions/CriteriaListResponse"
-
   /v1/cohortbuilder/{cdrVersionId}/demographics:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -471,10 +446,10 @@ definitions:
         default: false
       mention:
         description: first, last or any mention(used in temporal realtionships)
-        type: string
+        $ref: "#/definitions/TemporalMention"
       time:
         description: time frame between temporal items
-        type: string
+        $ref: "#/definitions/TemporalTime"
       timeValue:
         description: time value between temporal items
         type: integer

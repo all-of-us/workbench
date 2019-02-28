@@ -2,16 +2,14 @@ import {
   AfterContentChecked,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
   HostListener,
   Input,
   OnChanges,
-  OnInit,
-  Output
+  OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {dateValidator} from 'app/cohort-search/validators';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {
   AnnotationType,
   CohortAnnotationDefinition,
@@ -38,9 +36,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   readonly kinds = AnnotationType;
 
   @Input() annotation: Annotation;
-  @Input() showDataType: boolean;
-  @Output() annotationUpdate: EventEmitter<ParticipantCohortAnnotation> =
-    new EventEmitter<ParticipantCohortAnnotation>();
+  @Input() onChange: Function;
   textSpinnerFlag = false;
   successIcon = false;
   form = new FormGroup({
@@ -71,7 +67,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   constructor(
     private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
     private cdref: ChangeDetectorRef
   ) {}
 
@@ -141,9 +136,9 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
 
   handleInput() {
     /* Parameters from the path */
-    const {ns, wsid, cid} = this.route.parent.snapshot.params;
+    const {ns, wsid, cid} = urlParamsStore.getValue();
     const pid = this.annotation.value.participantId;
-    const cdrid = +(this.route.parent.snapshot.data.workspace.cdrVersionId);
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const newValue = this.isDate
       ? this.form.controls.formattedDate.value : this.form.controls.annotation.value;
     const defnId = this.annotation.definition.cohortAnnotationDefinitionId;
@@ -185,16 +180,7 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     }
     if (apiCall) {
       apiCall.toPromise().then((update) => {
-        if (update) {
-          if (update.annotationId) {
-            this.annotationUpdate.emit(update);
-          } else {
-            this.annotation.value.annotationId = undefined;
-          }
-          if (update && !annoId) {
-            this.annotation.value.annotationId = update.annotationId;
-          }
-        }
+        this.onChange(defnId, update);
         setTimeout(() => {
           this.textSpinnerFlag = false;
           this.successIcon = true;
@@ -266,4 +252,3 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     return this.annotation.definition.annotationType === AnnotationType.STRING;
   }
 }
-

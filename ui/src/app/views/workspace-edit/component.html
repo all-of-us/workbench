@@ -9,7 +9,7 @@
           <h2 class="page-header">Edit workspace "{{workspace.name}}"</h2>
         </div>
         <div *ngSwitchCase="Mode.Clone">
-          <h2 class="page-header">Clone workspace "{{oldWorkspaceName}}"</h2>
+          <h2 class="page-header">Duplicate workspace "{{oldWorkspaceName}}"</h2>
         </div>
       </ng-container>
       <div class="required-text">(Required)</div>
@@ -370,7 +370,7 @@
               <button *ngSwitchCase="Mode.Clone" class="btn add-button btn-primary"
                   [clrLoading]="savingWorkspace" (click)="cloneWorkspace()"
                   [disabled]="!allowSave">
-                Clone Workspace
+                Duplicate Workspace
               </button>
             </ng-container>
             <div *ngIf="!isValidWorkspace" class="tooltip-text">
@@ -396,7 +396,7 @@
 <!-- TODO: Factor out to component -->
 <ng-template #notFoundMessage>
   <h3>
-    Workspace {{route.snapshot.params['ns']}}/{{route.snapshot.params['wsid']}} could not be found.
+    Workspace {{oldWorkspaceNamespace}}/{{oldWorkspaceName}} could not be found.
   </h3>
 </ng-template>
 <clr-modal [(clrModalOpen)]="workspaceCreationError">

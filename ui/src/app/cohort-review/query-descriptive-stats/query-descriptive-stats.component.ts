@@ -1,5 +1,5 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -19,7 +19,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
   ];
   totalCount: number;
   enablePrint = false;
-  constructor(private state: ReviewStateService) {}
+  constructor() {}
 
   ngOnChanges() {
     if (this.demoData) {
@@ -33,7 +33,7 @@ export class QueryDescriptiveStatsComponent implements OnInit, OnChanges, OnDest
   }
 
   ngOnInit() {
-    this.subscription = this.state.review$.subscribe(review => {
+    this.subscription = cohortReviewStore.subscribe(review => {
       this.totalCount = review.matchedParticipantCount;
     });
   }

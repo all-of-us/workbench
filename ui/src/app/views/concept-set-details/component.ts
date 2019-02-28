@@ -1,6 +1,6 @@
-import {Component, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, OnInit, ViewChild} from '@angular/core';
 
+import {currentConceptSetStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 import {
@@ -18,7 +18,7 @@ import {
     './component.css'],
   templateUrl: './component.html',
 })
-export class ConceptSetDetailsComponent {
+export class ConceptSetDetailsComponent implements OnInit {
   @ViewChild(ConceptTableComponent) conceptTable;
 
   wsNamespace: string;
@@ -37,13 +37,18 @@ export class ConceptSetDetailsComponent {
 
   constructor(
     private conceptSetsService: ConceptSetsService,
-    private router: Router,
-    private route: ActivatedRoute,
   ) {
-    this.wsNamespace = this.route.snapshot.params['ns'];
-    this.wsId = this.route.snapshot.params['wsid'];
-    this.accessLevel = this.route.snapshot.data.workspace.accessLevel;
-    this.conceptSet = this.route.snapshot.data.conceptSet;
+    this.receiveDelete = this.receiveDelete.bind(this);
+    this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+  }
+
+  ngOnInit() {
+    const {ns, wsid} = urlParamsStore.getValue();
+    this.wsNamespace = ns;
+    this.wsId = wsid;
+    const {accessLevel} = currentWorkspaceStore.getValue();
+    this.accessLevel = accessLevel;
+    this.conceptSet = currentConceptSetStore.getValue() as unknown as ConceptSet;
     this.editName = this.conceptSet.name;
     this.editDescription = this.conceptSet.description;
   }
@@ -78,7 +83,7 @@ export class ConceptSetDetailsComponent {
   receiveDelete() {
     this.conceptSetsService.deleteConceptSet(this.wsNamespace, this.wsId, this.conceptSet.id)
       .subscribe(() => {
-        this.router.navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts', 'sets']);
+        navigate(['workspaces', this.wsNamespace, this.wsId, 'concepts', 'sets']);
         this.closeConfirmDelete();
       });
   }

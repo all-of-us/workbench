@@ -3,7 +3,9 @@
     <div class="col-xl-4 col-lg-6" id="include-groups">
       <app-search-group-list
         [role]="'includes'"
-        [groups$]="includeGroups$">
+        [groups$]="includeGroups$"
+        [index]="0"
+        (tempLength)="getTempObj($event)">
       </app-search-group-list>
     </div>
 
@@ -11,7 +13,8 @@
       <app-search-group-list
         *ngIf="(initShowChart$ | async)"
         [role]="'excludes'"
-        [groups$]="excludeGroups$">
+        [groups$]="excludeGroups$"
+        [index]="includeSize">
       </app-search-group-list>
     </div>
 
@@ -20,6 +23,7 @@
         *ngIf="(initShowChart$ | async)"
         [total$]="total$"
         [chartData$]="chartData$"
+        [temporal] = "tempLength"
         [isRequesting$]="isRequesting$">
       </app-overview>
     </div>

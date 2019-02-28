@@ -10,9 +10,10 @@ java_defaults: &java_defaults
     # As best I can tell (dmohs, 7 Feb '17), this is the only way to set a memory limit that Java
     # processes executed within CircleCI's docker containers will respect. Very helpful resource:
     # https://circleci.com/blog/how-to-handle-java-oom-errors/
-    # Gradle itself doesn't usually reach 1G, so as long as we can keep tasks under 3G, we should
-    # have room in Circle's 4G to get our work done.
-    JAVA_TOOL_OPTIONS: -Xmx3g
+    #
+    # In Feb 2017, this was set to 3G. But in Feb 2019 (RW-2194) we started seeing OOM errors,
+    # so we bumped this down further to 2G.
+    JAVA_TOOL_OPTIONS: -Xmx2g
     TERM: dumb
 
 jobs:
@@ -62,7 +63,7 @@ jobs:
           - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx3g
+      JAVA_TOOL_OPTIONS: -Xmx2g
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
@@ -204,15 +205,15 @@ jobs:
             ruby -r ./aou-utils/swagger.rb -e Workbench::Swagger.download_swagger_codegen_cli
       - restore_cache:
           keys:
-          - ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
           - ui-cache-
       - run:
           working_directory: ~/workbench/ui
-          command: yarn install && yarn codegen
+          command: yarn install --verbose --frozen-lockfile && yarn codegen
       - save_cache:
           paths:
-            - ~/workbench/ui/node_modules
-          key: ui-cache-{{ checksum "~/workbench/ui/package.json" }}
+            - ~/.cache/yarn
+          key: ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
           name: Lint Angular app
           working_directory: ~/workbench/ui
@@ -226,7 +227,7 @@ jobs:
           name: Run React tests (Jest)
           working_directory: ~/workbench/ui
           command: |
-            npx jest
+            yarn test-react --detectOpenHandles --forceExit --runInBand
       - run:
           name: Build with strict compilation
           working_directory: ~/workbench/ui
@@ -245,6 +246,10 @@ jobs:
       # Use the ui-build-test workspace here to avoid redoing the setup.
       - attach_workspace:
           at: .
+      - restore_cache:
+          keys:
+          - ui-cache-{{ checksum "~/workbench/ui/yarn.lock" }}
+          - ui-cache-
       - deploy:
           name: Deploy to App Engine
           working_directory: ~/workbench/ui

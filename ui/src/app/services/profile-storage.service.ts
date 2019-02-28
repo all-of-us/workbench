@@ -1,3 +1,4 @@
+import {userProfileStore} from 'app/utils/navigation';
 import {Observable} from 'rxjs/Observable';
 import {timer} from 'rxjs/observable/timer';
 import 'rxjs/Rx';
@@ -57,6 +58,7 @@ export class ProfileStorageService {
       .retryWhen(ProfileStorageService.conflictRetryPolicy())
       .subscribe((profile) => {
         this.profile.next(profile);
+        userProfileStore.next({profile, reload: () => this.reload()});
         this.activeCall = false;
       }, (err) => {
         this.errorHandlingService.profileLoadError = true;

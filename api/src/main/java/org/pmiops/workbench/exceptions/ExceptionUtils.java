@@ -70,6 +70,8 @@ public class ExceptionUtils {
 
     if (code == HttpStatus.NOT_FOUND.value()) {
       return new NotFoundException();
+    } else if (code == HttpServletResponse.SC_BAD_REQUEST) {
+      return new BadRequestException();
     } else if (code == HttpServletResponse.SC_UNAUTHORIZED) {
       return new UnauthorizedException();
     } else if (code == HttpServletResponse.SC_FORBIDDEN) {

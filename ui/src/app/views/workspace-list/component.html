@@ -49,7 +49,7 @@
                         routerLink="/workspaces/{{workspacePermissions.workspace.namespace}}/{{workspacePermissions.workspace.id}}/clone"
                         routerLinkActive="active">
                   <clr-icon shape="copy"></clr-icon>
-                  Clone
+                  Duplicate
                 </button>
                 <span role="tooltip" aria-haspopup="true" class="tooltip tooltip-sm tooltip-top-right">
                   <button class="action-item edit-item"
@@ -66,7 +66,7 @@
                   <button class="action-item share-item"
                           [disabled]="!workspacePermissions.isOwner"
                           [class.disabled]="!workspacePermissions.isOwner"
-                          (click)="share(workspacePermissions.workspace, workspacePermissions.accessLevel)">
+                          (click)="openShare(workspacePermissions.workspace, workspacePermissions.accessLevel)">
                     <clr-icon shape="share"></clr-icon>
                     Share
                   </button>
@@ -119,8 +119,9 @@
     </div>
   </app-top-box>
 </div>
-<app-bug-report></app-bug-report>
-<app-workspace-share [workspace]="selectedWorkspace" [accessLevel]="accessLevel"></app-workspace-share>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <clr-modal [(clrModalOpen)]="workspaceDeletionError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
@@ -128,8 +129,14 @@
     <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
   </div>
 </clr-modal>
-<app-confirm-delete-modal [resourceType]="'workspace'"
-                          [resource]="resource"
-                          [receiveDelete]="receiveDelete.bind(this)"
-                          [deleting]="confirmDeleting"
-                          [closeFunction]="closeConfirmDelete.bind(this)"></app-confirm-delete-modal>
+<app-confirm-delete-modal *ngIf="confirmDeleting"
+                          [resourceType]="'workspace'"
+                          [resourceName]="workspace.name"
+                          [receiveDelete]="receiveDelete"
+                          [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
+<app-workspace-share *ngIf="sharing"
+                     [onClose]="closeShare"
+                     [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>

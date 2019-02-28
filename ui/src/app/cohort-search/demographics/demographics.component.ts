@@ -1,7 +1,6 @@
 import {NgRedux, select} from '@angular-redux/store';
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {fromJS, List, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -12,6 +11,7 @@ import {
   participantsCount,
   previewStatus,
 } from 'app/cohort-search/redux';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
@@ -93,7 +93,6 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   showCalculateContainer = false;
   count: any;
   constructor(
-    private route: ActivatedRoute,
     private api: CohortBuilderService,
     private actions: CohortSearchActions,
     private ngRedux: NgRedux<CohortSearchState>
@@ -175,40 +174,40 @@ export class DemographicsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadNodesFromApi() {
-    const cdrid = this.route.snapshot.data.workspace.cdrVersionId;
-        /*
-         * Each subtype's possible criteria is loaded via the API.  Race and Gender
-         * criteria nodes become options in their respective dropdowns; deceased
-         * and age are used as templates for constructing relevant seach
-         * parameters.  Upon load we immediately map the criteria to immutable
-         * objects complete with deterministically generated `parameterId`s and
-         * sort them by count, then by name.
-         */
-    const calls = [
-            TreeSubType[TreeSubType.AGE],
-            TreeSubType[TreeSubType.DEC],
-            TreeSubType[TreeSubType.GEN],
-            TreeSubType[TreeSubType.RACE],
-            TreeSubType[TreeSubType.ETH]
-        ].map(code => {
-          this.loading[code] = true;
-          this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
-            .subscribe(response => {
-              const items = response.items
-                        .filter(item => item.parentId !== 0
-                            || code === TreeSubType[TreeSubType.DEC]);
-              items.sort(sortByCountThenName);
-              const nodes = fromJS(items).map(node => {
-                if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-                  const paramId =
-                                `param${node.get('conceptId', node.get('code'))}`;
-                  node = node.set('parameterId', paramId);
-                }
-                return node;
-              });
-              this.loadOptions(nodes, code);
-            });
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    /*
+     * Each subtype's possible criteria is loaded via the API.  Race and Gender
+     * criteria nodes become options in their respective dropdowns; deceased
+     * and age are used as templates for constructing relevant seach
+     * parameters.  Upon load we immediately map the criteria to immutable
+     * objects complete with deterministically generated `parameterId`s and
+     * sort them by count, then by name.
+     */
+    [
+      TreeSubType[TreeSubType.AGE],
+      TreeSubType[TreeSubType.DEC],
+      TreeSubType[TreeSubType.GEN],
+      TreeSubType[TreeSubType.RACE],
+      TreeSubType[TreeSubType.ETH]
+    ].forEach(code => {
+      this.loading[code] = true;
+      this.api.getCriteriaBy(cdrid, TreeType[TreeType.DEMO], code, null, null)
+        .subscribe(response => {
+          const items = response.items
+                    .filter(item => item.parentId !== 0
+                        || code === TreeSubType[TreeSubType.DEC]);
+          items.sort(sortByCountThenName);
+          const nodes = fromJS(items).map(node => {
+            if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
+              const paramId =
+                            `param${node.get('conceptId', node.get('code'))}`;
+              node = node.set('parameterId', paramId);
+            }
+            return node;
+          });
+          this.loadOptions(nodes, code);
         });
+    });
   }
 
   loadOptions(nodes: any, subtype: string) {

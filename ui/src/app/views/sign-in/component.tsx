@@ -14,11 +14,6 @@ import * as React from 'react';
 
 import {styles} from './style';
 
-interface ImagesSource {
-  backgroundImgSrc: string;
-  smallerBackgroundImgSrc: string;
-}
-
 export interface SignInProps {
   onInit: () => void;
   signIn: () => void;
@@ -110,7 +105,8 @@ export const SignInReact = withWindowSize()(
     render() {
       return <div style={styles.signedInContainer}>
         <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
-          <div style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+          <div data-test-id='template'
+               style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>
             <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>

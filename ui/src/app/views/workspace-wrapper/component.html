@@ -1,0 +1,27 @@
+<app-workspace-nav-bar *ngIf="displayNavBar"
+                       [shareFunction]="share"
+                       [deleteFunction]="openConfirmDelete"
+                       [tabPath]="tabPath"></app-workspace-nav-bar>
+
+<clr-modal [(clrModalOpen)]="workspaceDeletionError">
+  <h3 class="modal-title">Error:</h3>
+  <div class="modal-body">Could not delete workspace '{{workspace.name}}'. Please <a (click)="submitWorkspaceDeleteBugReport()">submit a bug report.</a></div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="workspaceDeletionError = false">Ok</button>
+  </div>
+</clr-modal>
+
+<app-workspace-share [onClose]="closeShare"
+                     [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>
+<app-confirm-delete-modal *ngIf="confirmDeleting"
+                          [resourceType]="'workspace'"
+                          [resourceName]="workspace.name"
+                          [receiveDelete]="receiveDelete"
+                          [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
+<router-outlet></router-outlet>

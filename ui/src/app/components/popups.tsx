@@ -171,7 +171,7 @@ export class TooltipTrigger extends React.Component {
   }
 
   render() {
-    const {children, content, ...props} = this.props;
+    const {children, content, disabled, ...props} = this.props;
     const {open} = this.state;
     if (!content) {
       return children;
@@ -193,7 +193,7 @@ export class TooltipTrigger extends React.Component {
           this.setState({open: false});
         }
       })}
-      {open && <Tooltip target={this.id} {...props}>{content}</Tooltip>}
+      {open && !disabled && <Tooltip target={this.id} {...props}>{content}</Tooltip>}
     </React.Fragment>;
   }
 }

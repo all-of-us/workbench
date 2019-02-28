@@ -109,7 +109,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     if (isBlank(username)) {
       return false;
     }
-    if (username.trim().length > 64) {
+    if (username.trim().length > 64 || username.trim().length < 3) {
       return true;
     }
     // Include alphanumeric characters, -'s, _'s, apostrophes, and single .'s in a row.
@@ -243,8 +243,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </div>
           <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
             numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-            (maximum of 64 characters).<br/>Usernames cannot begin or end with a period (.)
-            and may not contain more than one period (.) in a row.</div>}>
+            (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
+            begin or end with a period (.) and may not contain more than one period (.) in a row.
+          </div>}>
             <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
           </TooltipTrigger>
           <div style={{height: '1.5rem'}}>

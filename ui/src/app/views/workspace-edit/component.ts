@@ -1,12 +1,12 @@
 import {Location} from '@angular/common';
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {WorkspaceData, WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {deepCopy, isBlank} from 'app/utils';
+import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
@@ -201,12 +201,10 @@ export class WorkspaceEditComponent implements OnInit {
 
   constructor(
     private locationService: Location,
-    private route: ActivatedRoute,
     private workspacesService: WorkspacesService,
     private workspaceStorageService: WorkspaceStorageService,
     private cdrVersionStorageService: CdrVersionStorageService,
     public profileStorageService: ProfileStorageService,
-    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -228,8 +226,9 @@ export class WorkspaceEditComponent implements OnInit {
         underservedPopulationDetails: []
       }};
     this.mode = WorkspaceEditMode.Edit;
-    if (this.route.routeConfig.data.mode) {
-      this.mode = this.route.routeConfig.data.mode;
+    const configData = routeConfigDataStore.getValue();
+    if (configData.mode) {
+      this.mode = configData.mode;
     }
 
     this.cdrVersionStorageService.cdrVersions$.subscribe(resp => {
@@ -247,14 +246,15 @@ export class WorkspaceEditComponent implements OnInit {
     }
     if (this.mode === WorkspaceEditMode.Edit || this.mode === WorkspaceEditMode.Clone) {
       // There is an existing workspace referenced in this flow.
-      this.oldWorkspaceNamespace = this.route.snapshot.params['ns'];
-      this.oldWorkspaceName = this.route.snapshot.params['wsid'];
+      const ws = currentWorkspaceStore.getValue();
+      this.oldWorkspaceNamespace = ws.namespace;
+      this.oldWorkspaceName = ws.id;
       this.loadWorkspace();
     }
   }
 
   loadWorkspace(): void {
-    const wsData: WorkspaceData = deepCopy(this.route.snapshot.data.workspace) as WorkspaceData;
+    const wsData: WorkspaceData = deepCopy(currentWorkspaceStore.getValue()) as WorkspaceData;
     if (this.mode === WorkspaceEditMode.Edit) {
       this.workspace = wsData;
       this.accessLevel = wsData.accessLevel;
@@ -266,7 +266,7 @@ export class WorkspaceEditComponent implements OnInit {
         this.canEditResearchPurpose = false;
       }
     } else if (this.mode === WorkspaceEditMode.Clone) {
-      this.workspace.name = 'Clone of ' + wsData.name;
+      this.workspace.name = 'Duplicate of ' + wsData.name;
       this.workspace.description = wsData.description;
       this.workspace.cdrVersionId = wsData.cdrVersionId;
       const fromPurpose = wsData.researchPurpose;
@@ -328,7 +328,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.savingWorkspace = true;
     this.workspacesService.createWorkspace(this.workspace).subscribe(
       (workspace) => {
-        this.router.navigate(['workspaces', workspace.namespace, workspace.id]);
+        navigate(['workspaces', workspace.namespace, workspace.id]);
       },
       (error) => {
         if (error.status === 409) {
@@ -377,7 +377,7 @@ export class WorkspaceEditComponent implements OnInit {
         workspace: this.workspace,
       }).subscribe(
         (r: CloneWorkspaceResponse) => {
-          this.router.navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
+          navigate(['/workspaces', r.workspace.namespace, r.workspace.id]);
         },
         (error) => {
           this.resetWorkspaceEditor();
@@ -460,7 +460,7 @@ export class WorkspaceEditComponent implements OnInit {
 
   openStigmatizationLink() {
     const stigmatizationURL = `/definitions/stigmatization`;
-    const stigmatizationPage = window.open(stigmatizationURL, '_blank');
+    window.open(stigmatizationURL, '_blank');
   }
 
   clearAllFields() {

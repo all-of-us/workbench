@@ -4,18 +4,14 @@
   </div>
 </div>
 
-<div class="row ">
-  <div class="white-card-box flex-items-xs-middle col-md-8 col-sm-10 col-xs-11" >
-    <div class="row search flex-items-xs-between">
-      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
-        <div class="search-wrapper">
-          <clr-icon shape="search" class="input-icon-absolute is-info"></clr-icon>
-          <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
-        </div>
-      </div>
-    </div>
+<div class="row col-lg-12 col-md-12 col-sm-12 col-xs-12 flex-xs-middle search-input-full">
+  <div class="search-wrapper">
+    <clr-icon shape="search" class="input-icon-absolute is-info search-icon"></clr-icon>
+    <input type="text" id="search-db" placeholder="Keyword Search" [formControl]="searchText" autofocus>
   </div>
+</div>
 
+<div class="row ">
   <div class="col-md-4 col-sm-2 col-xs-1 flex-xs-middle" *ngIf="loading" >
     <span  class="spinner spinner-lg hidden-sm-down">Loading ...</span>
     <span  class="spinner spinner-md hidden-md-up hidden-xs-down"></span>
@@ -32,7 +28,7 @@
           <h5 class="box-title">
             {{ehrDomain.name}}
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
@@ -50,8 +46,7 @@
         </div>
         <div class="row grid-header top-concepts-chart" [hidden]="!showTopConcepts">
           <div class="chart-wrapper flex-xs-middle">
-            <app-chart [concepts]="top10Results" [chartTitle]="'Top 10 Medical Concepts by Descending Participant Counts'"
-                       [pointWidth]="10" [backgroundColor]="'#D9E4EA'"> </app-chart>
+            <app-chart [concepts]="top10Results" [pointWidth]="10"> </app-chart>
           </div>
         </div>
       </div>
@@ -63,7 +58,7 @@
           <h5 class="box-title" *ngIf="searchText.value.length === 0; else no_search_term">
             concepts for this domain
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
@@ -74,7 +69,7 @@
             <h5 class="box-title" *ngIf="searchText.value.length > 0">
               matching medical concepts
               <clr-tooltip>
-                <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+                <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=right
                                      clrSize="lg" *clrIfOpen>
                   <div class="tooltip-label">{{matchingConceptsHelptText}}</div>
@@ -95,16 +90,16 @@
         <div class="row expandable-grid-row col-header-row">
           <div class="col-md grid-header flex-xs-middle info-text col-border"> {{ehrDomain.name}}
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{domainHelpText[ehrDomain.domain.toLowerCase()]}}</div>
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-          <div class="col-md grid-header flex-xs-middle info-text col-border"> Synonyms
+          <div class="col-md grid-header flex-xs-middle info-text col-border"> Also Known As
             <clr-tooltip>
-            <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+            <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
                                  clrSize="lg" *clrIfOpen>
                 <div class="tooltip-header">
@@ -116,7 +111,7 @@
           </div>
           <div class="col-md-1 grid-header flex-items-xs-right info-text col-border"> Participants of <b> {{totalParticipants | number}}</b>
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=right
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">The participant counts are the total number of participants in the
@@ -130,7 +125,7 @@
           <div class="col-md-1 grid-header flex-xs-middle info-text col-border">
             Vocabulary Code
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
                 <clr-tooltip-content clrPosition=left
                              clrSize="lg" *clrIfOpen>
                   <div class="tooltip-label">
@@ -146,7 +141,7 @@
           <div class="col-md-1 grid-header flex-xs-middle info-text col-border">
             Concept Code
             <clr-tooltip>
-              <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+              <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
               <clr-tooltip-content clrPosition=bottom-left
                                    clrSize="lg" *clrIfOpen>
                 <div class="tooltip-label">{{conceptCodeHelpText}}</div>
@@ -179,12 +174,12 @@
           </div>
         </ng-template>
         <div class="col-md flex-xs-middle hand-cursor" *ngIf="r.conceptSynonyms;else noConceptSynonyms">
-          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.slice(0,2).join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="r.conceptSynonyms.join(', ')" [searchTerm]="prevSearchText"></app-highlight-search>
-          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
+          <app-highlight-search *ngIf="!showMoreSynonyms[r.conceptId]" [text]="synonymString[r.conceptId].substring(0,110)" [searchTerm]="prevSearchText"></app-highlight-search>
+          <app-highlight-search *ngIf="showMoreSynonyms[r.conceptId]" [text]="synonymString[r.conceptId]" [searchTerm]="prevSearchText"></app-highlight-search>
+          <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="synonymString[r.conceptId].length > 110 && showMoreSynonyms[r.conceptId]; else seeMore"> See Less
           </a>
           <ng-template #seeMore>
-            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="r.conceptSynonyms.length > 2"> See More
+            <a class="toggle-link" (click)="toggleSynonyms(r.conceptId)" *ngIf="synonymString[r.conceptId].length > 100"> See More
               <clr-icon shape="ellipsis-horizontal"></clr-icon>
             </a>
           </ng-template>
@@ -206,7 +201,7 @@
         </div>
         <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="r.expanded" #chartElement>
           <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence', 'Sources']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g)" class="btn btn-link">{{g}} <clr-tooltip>
-            <clr-icon clrTooltipTrigger shape="info-standard" class="info-icon"></clr-icon>
+            <clr-icon clrTooltipTrigger shape="info-standard" class="is-solid info-icon"></clr-icon>
             <clr-tooltip-content clrPosition=right
                                  clrSize="lg" *clrIfOpen>
               <div class="tooltip-label">{{showToolTip(g)}}</div>

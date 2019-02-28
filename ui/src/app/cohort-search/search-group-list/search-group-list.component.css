@@ -27,16 +27,3 @@ h2 {
   font-weight: bold;
   font-size: 16px;
 }
-
-.btn.btn-info-outline.btn-sm {
-  float: right;
-  border: 1px solid rgba(215, 215, 215, 0.5);
-  background: #FFFFFF;
-  color: #9B9B9B;
-  margin-top: -6px;
-  margin-right: 0;
-  border-bottom: 0;
-  font-size: 10px;
-  letter-spacing: 0;
-  cursor: default;
-}

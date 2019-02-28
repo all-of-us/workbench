@@ -2,7 +2,6 @@
  * OAuth2 via GAPI sign-in.
  */
 import {Injectable, NgZone} from '@angular/core';
-import {Router} from '@angular/router';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
@@ -11,9 +10,6 @@ import 'rxjs/Rx';
 
 
 declare const gapi: any;
-
-const SIGNED_IN_USER = 'signedInUser';
-
 
 @Injectable()
 export class SignInService {
@@ -24,7 +20,6 @@ export class SignInService {
   public clientId = environment.clientId;
 
   constructor(private zone: NgZone,
-    private router: Router,
     serverConfigService: ServerConfigService) {
     this.zone = zone;
 
@@ -103,7 +98,7 @@ export class SignInService {
     if (!gapi.auth2) {
       return null;
     } else {
-      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().Paa;
+      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getImageUrl();
     }
   }
 }

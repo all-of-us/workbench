@@ -28,10 +28,9 @@
 
   <!-- COUNT -->
   <div *ngIf="showCount" class="count">
-    <span class="text-muted">&#124;</span>
     <span class="badge badge-info">
-      <span *ngIf="node.get('group')">~</span>
       {{ node.get('count') | number }}
     </span>
   </div>
 </div>
+

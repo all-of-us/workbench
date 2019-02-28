@@ -2,7 +2,6 @@ import {DevToolsExtension, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
 import {combineEpics, createEpicMiddleware} from 'redux-observable';
 
-import {environment} from 'environments/environment';
 
 import {CohortSearchEpics} from './epics';
 import {rootReducer} from './reducer';
@@ -15,13 +14,13 @@ import {
 export class ConfigureStore {
 
   constructor(
-    private ngRedux: NgRedux<CohortSearchState>,
-    private epics: CohortSearchEpics,
-    private devTools: DevToolsExtension,
+    ngRedux: NgRedux<CohortSearchState>,
+    epics: CohortSearchEpics,
+    devTools: DevToolsExtension,
   ) {
 
     let storeEnhancers = [];
-    if (environment.debug && devTools.isEnabled()) {
+    if (devTools.isEnabled()) {
       storeEnhancers = [...storeEnhancers, devTools.enhancer()];
     }
 

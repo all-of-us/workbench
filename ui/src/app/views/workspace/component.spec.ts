@@ -3,7 +3,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {Http} from '@angular/http';
 import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
@@ -12,16 +11,17 @@ import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
-import {EditModalComponent} from 'app/views/edit-modal/component';
 import {RecentWorkComponent} from 'app/views/recent-work/component';
-import {RenameModalComponent} from 'app/views/rename-modal/component';
 import {ResourceCardComponent, ResourceCardMenuComponent} from 'app/views/resource-card/component';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {TopBoxComponent} from 'app/views/top-box/component';
 import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
+import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
@@ -36,6 +36,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesService
 } from 'generated';
+import {UserMetricsApi} from 'generated/fetch';
 import {
   JupyterService,
   NotebooksService,
@@ -52,32 +53,13 @@ import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
+import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';
-
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    },
-    data: {
-      workspace: {
-        ...WorkspacesServiceStub.stubWorkspace(),
-        accessLevel: WorkspaceAccessLevel.OWNER,
-      }
-    }
-  }
-};
 
 describe('WorkspaceComponent', () => {
   let fixture: ComponentFixture<WorkspaceComponent>;
@@ -94,16 +76,15 @@ describe('WorkspaceComponent', () => {
       declarations: [
         BugReportComponent,
         ConfirmDeleteModalComponent,
-        EditModalComponent,
         NewNotebookModalComponent,
         RecentWorkComponent,
-        RenameModalComponent,
         ResourceCardComponent,
         ResourceCardMenuComponent,
         ToolTipComponent,
         TopBoxComponent,
         WorkspaceComponent,
         WorkspaceNavBarComponent,
+        WorkspaceWrapperComponent,
         WorkspaceShareComponent
       ],
       providers: [
@@ -118,7 +99,6 @@ describe('WorkspaceComponent', () => {
         { provide: SignInService, useValue: SignInService },
         { provide: WorkspacesService, useValue: new WorkspacesServiceStub() },
         { provide: UserMetricsService, useValue: new UserMetricsServiceStub() },
-        { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: UserService, useValue: new UserServiceStub() },
         {
@@ -143,6 +123,11 @@ describe('WorkspaceComponent', () => {
         fixture = TestBed.createComponent(WorkspaceComponent);
         updateAndTick(fixture);
       });
+    currentWorkspaceStore.next({
+      ...WorkspacesServiceStub.stubWorkspace(),
+      accessLevel: WorkspaceAccessLevel.OWNER,
+    });
+    registerApiClient(UserMetricsApi, new UserMetricsApiStub());
   }));
 
   it('displays research purpose', fakeAsync(() => {

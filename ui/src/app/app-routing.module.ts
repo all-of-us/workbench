@@ -1,11 +1,12 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {AdminReviewIdVerificationComponent} from './views/admin-review-id-verification/component';
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserComponent} from './views/admin-user/component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
 import {ConceptSetDetailsComponent} from './views/concept-set-details/component';
@@ -20,13 +21,15 @@ import {StigmatizationPageComponent} from './views/stigmatization-page/component
 import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
-import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
+import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
 import {CohortResolver} from './resolvers/cohort';
 import {ConceptSetResolver} from './resolvers/concept-set';
 import {WorkspaceResolver} from './resolvers/workspace';
 
+import {DataPageComponent} from 'app/views/data-page/component';
+import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
 import {NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
@@ -42,7 +45,7 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
@@ -62,6 +65,10 @@ const routes: Routes = [
           title: 'Stigmatization Definition'
         }
       }, {
+        path: 'nih-callback',
+        component: HomepageComponent,
+        data: {title: 'Homepage'},
+      }, {
         path: 'workspaces',
         data: {
           breadcrumb: {
@@ -80,7 +87,7 @@ const routes: Routes = [
              * provided by the route rather than double-requesting it.
              */
             path: ':ns/:wsid',
-            component: WorkspaceNavBarComponent,
+            component: WorkspaceWrapperComponent,
             data: {
               title: 'View Workspace Details',
               breadcrumb: {
@@ -198,6 +205,27 @@ const routes: Routes = [
                 }
               },
               {
+                path: 'data',
+                component: DataPageComponent,
+                data: {
+                  title: 'Data Page',
+                  breadcrumb: {
+                    value: 'Data',
+                    intermediate: true
+                  }
+                }
+              },
+              {
+                path: 'data/datasets',
+                component: DataSetComponent,
+                data: {
+                  title: 'Dataset Page',
+                  breadcrumb: {
+                    value: 'Dataset'
+                  }
+                }
+              },
+              {
                 path: 'concepts/sets',
                 data: {
                   breadcrumb: {
@@ -232,9 +260,9 @@ const routes: Routes = [
         component: AdminReviewWorkspaceComponent,
         data: {title: 'Review Workspaces'}
       }, {
-        path: 'admin/review-id-verification',
-        component: AdminReviewIdVerificationComponent,
-        data: {title: 'Review ID Verifications'}
+        path: 'admin/user',
+        component: AdminUserComponent,
+        data: {title: 'User Admin Table'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,
@@ -258,6 +286,7 @@ const routes: Routes = [
   exports: [RouterModule],
   providers: [
     ConceptSetResolver,
+    AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
     WorkspaceResolver,

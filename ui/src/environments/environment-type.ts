@@ -18,6 +18,11 @@ export interface Environment {
   // The Google Analytics account ID for logging actions and page views.
   // Example value: 'UA-112406425-3'
   gaId: string;
+  // The Google Analytics custom dimension ID for sending User Agent
+  // info, allowing us to filter out Pingdom, Appscan, etc
+  // This value should look like 'dimension1' with the digit
+  // being the variable
+  gaUserAgentDimension: string;
   // API endpoint to use for Leonardo (notebook proxy) API calls.
   // Example value: 'https://notebooks.firecloud.org'
   leoApiUrl: string;
@@ -28,21 +33,23 @@ export interface Environment {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://public-ui-dot-all-of-us-rw-stable.appspot.com'
   publicUiUrl: string;
+  // The Shibboleth URL for linking ERA Commons accounts
+  shibbolethUrl: string;
   // The TCell API key. See RW-1682 for details.
   // Example value: 'AQEBBAEkx4iE2KxNyI7Wx08EwU1ycTM7E4FMSmaibbMUQxNU6uQvuAJt7fyABAtFYSYfgEE'
   tcellapikey: string;
   // The TCell app ID. See RW-1682 for details.
   // Example value: 'AoUNonProd-WZFW2'
   tcellappid: string;
+  // The url for Moodle integration
+  // Example value: https://aoudev.nnlm.gov
+  trainingUrl: string;
   // The base URL for the Zendesk help center / user forum.
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
 
   // Transient client-side flags.
   //
-  // Whether temporal queries should be enabled in the cohort builder UI. See
-  // RW-1443 for details.
-  enableTemporal: boolean;
   // Whether Zendesk should be used for support requests & bug reports, instead
   // of Jira. See RW-1885 for details.
   // Exit criteria: remove flag and change all code to use Zendesk after Athens
@@ -53,4 +60,15 @@ export interface Environment {
   // See RW-1966 for details.
   // Exit criteria: remove flag for Athens release.
   enableJupyterLab: boolean;
+
+  // Whether users should be redirected to link their NiH account before
+  // accessing any resources.
+  // See RW-1697 for details
+  // Exit criteria: remove flag for Athens release.
+  enableComplianceLockout: boolean;
+
+  // Whether users should be able to see the dataset builder.
+  // See RW-2169 for details
+  // Exit Criteria: remove flag for Bedford release.
+  enableDatasetBuilder: boolean;
 }

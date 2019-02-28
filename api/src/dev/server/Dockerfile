@@ -10,7 +10,7 @@ RUN apk --no-cache add openjdk8
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
 #
 
-ENV CLOUD_SDK_VERSION 217.0.0
+ENV CLOUD_SDK_VERSION 215.0.0
 
 ENV PATH /google-cloud-sdk/bin:$PATH
 

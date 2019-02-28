@@ -86,12 +86,4 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and cr.concept_id_1 = :conceptId " +
     "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
-
-  @Query(value = "select * from criteria c " +
-    "where c.type = :type " +
-    "and (match(c.name) against(:value in boolean mode) or match(c.code) against(:value in boolean mode)) " +
-    "and c.is_selectable = 1 " +
-    "order by c.code asc", nativeQuery = true)
-  List<Criteria> findCriteriaByTypeAndNameOrCode(@Param("type") String type,
-                                                 @Param("value") String value);
 }

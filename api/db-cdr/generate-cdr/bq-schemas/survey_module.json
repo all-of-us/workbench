@@ -23,5 +23,10 @@
     "mode":"REQUIRED",
     "name": "participant_count",
     "type": "INTEGER"
+  },
+  {
+    "mode":"REQUIRED",
+    "name": "order_number",
+    "type": "INTEGER"
   }
 ]

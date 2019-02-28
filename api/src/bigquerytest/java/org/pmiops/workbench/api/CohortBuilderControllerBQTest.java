@@ -7,15 +7,21 @@ import org.joda.time.Period;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
+import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.*;
@@ -28,6 +34,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.inject.Provider;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,17 +43,17 @@ import java.util.List;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class, CohortBuilderController.class,
+@Import({QueryBuilderFactory.class, BigQueryService.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
 @ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
-  @Autowired
   private CohortBuilderController controller;
 
   private CdrVersion cdrVersion;
@@ -55,10 +62,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   private BigQueryService bigQueryService;
 
   @Autowired
+  private ParticipantCounter participantCounter;
+
+  @Autowired
   private CdrVersionDao cdrVersionDao;
 
   @Autowired
+  private CriteriaDao criteriaDao;
+
+  @Autowired
+  private CdrVersionService cdrVersionService;
+
+  @Autowired
+  private CriteriaAttributeDao criteriaAttributeDao;
+
+  @Autowired
   private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
+
+  @Mock
+  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
+
 
   @Override
   public List<String> getTableNames() {
@@ -66,13 +92,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "person",
       "death",
       "criteria",
-      "search_codes",
-      "search_drug",
-      "search_measurement",
       "search_person",
-      "search_pm",
-      "search_ppi",
-      "search_visit");
+      "search_all_domains");
   }
 
   @Override
@@ -82,6 +103,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
+    testConfig.elasticsearch.enableElasticsearchBackend = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    ElasticSearchService elasticSearchService = new ElasticSearchService(configProvider);
+
+    controller = new CohortBuilderController(bigQueryService,
+      participantCounter, criteriaDao, criteriaAttributeDao,
+      cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
+      elasticSearchService, configProvider);
+
     cdrVersion = new CdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
@@ -425,7 +458,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     ppiParam.type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
+      PARAMETER, NAME, ppiParam.getName());
 
     //ppi no value as number
     ppiParam.conceptId(1L);
@@ -470,27 +503,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       SEARCH_GROUP, MENTION, param1.getValue());
 
     //temporal mention invalid
-    temporalGroup.setMention("blah");
+    temporalGroup.setMention(null);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, MENTION, temporalGroup.getMention());
 
     //temporal time null
-    temporalGroup.setMention(TemporalMention.ANY_MENTION.name());
+    temporalGroup.setMention(TemporalMention.ANY_MENTION);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal time invalid
-    temporalGroup.setTime("blah");
+    temporalGroup.setTime(null);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal timeValue null
-    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER.name());
+    temporalGroup.setTime(TemporalTime.X_DAYS_AFTER);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
 
     //temporal group is null
-    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+    temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS);
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       SEARCH_GROUP_ITEM, TEMPORAL_GROUP, searchGroupItem1.getTemporalGroup());
 
@@ -745,8 +778,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -795,8 +828,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -836,8 +869,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.X_DAYS_BEFORE.name())
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.X_DAYS_BEFORE)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -846,6 +879,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void anyMentionOfICD9Parent5DaysAfterICD10Child() throws Exception {
+    Modifier visitsModifier = new Modifier()
+      .name(ModifierType.ENCOUNTERS)
+      .operator(Operator.IN)
+      .operands(Arrays.asList("1"));
+
     SearchParameter icd9 = new SearchParameter()
       .type(TreeType.ICD9.name())
       .subtype(TreeSubType.CM.name())
@@ -860,7 +898,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroupItem icd9SGI = new SearchGroupItem()
       .type(TreeType.CONDITION.name())
       .addSearchParametersItem(icd9)
-      .temporalGroup(0);
+      .temporalGroup(0)
+      .addModifiersItem(visitsModifier);
     SearchGroupItem icd10SGI = new SearchGroupItem()
       .type(TreeType.CONDITION.name())
       .addSearchParametersItem(icd10)
@@ -870,8 +909,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(icd9SGI, icd10SGI))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.ANY_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -903,8 +942,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(visitSGI, cptSGI))
       .temporal(true)
-      .mention(TemporalMention.ANY_MENTION.name())
-      .time(TemporalTime.WITHIN_X_DAYS_OF.name())
+      .mention(TemporalMention.ANY_MENTION)
+      .time(TemporalTime.WITHIN_X_DAYS_OF)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -938,8 +977,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
-      .mention(TemporalMention.FIRST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.FIRST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -972,8 +1011,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1014,8 +1053,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS.name());
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1056,8 +1095,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchGroup temporalGroup = new SearchGroup()
       .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
       .temporal(true)
-      .mention(TemporalMention.LAST_MENTION.name())
-      .time(TemporalTime.X_DAYS_AFTER.name())
+      .mention(TemporalMention.LAST_MENTION)
+      .time(TemporalTime.X_DAYS_AFTER)
       .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
@@ -1126,7 +1165,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.EQUAL)
-      .operands(Arrays.asList("2"));
+      .operands(Arrays.asList("3"));
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1406,7 +1445,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.ICD10.name(), TreeSubType.CM.name(), 0, "9");
     SearchParameter icd10 = createSearchParameter(icd10MeasurementChild, "R92.2");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1414,7 +1453,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria icd10MeasurementParent = createCriteriaParent(TreeType.ICD10.name(), TreeSubType.CM.name());
     SearchParameter icd10 = createSearchParameter(icd10MeasurementParent, "R92");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd10), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1451,7 +1490,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(TreeType.CPT.name(), TreeSubType.CPT4.name(), 1L, "10");
     SearchParameter cpt = createSearchParameter(cptMeasurement, "0001Q");
     SearchRequest searchRequest = createSearchRequests(TreeType.PROCEDURE.name(), Arrays.asList(cpt), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1486,7 +1525,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria visitCriteria = new Criteria().type(TreeType.VISIT.name()).group(false).conceptId("10");
     SearchParameter visit = createSearchParameter(visitCriteria, null);
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1516,7 +1555,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
     .operands(Arrays.asList("1"));
     SearchRequest searchRequest = createSearchRequests(visit.getType(), Arrays.asList(visit), Arrays.asList(modifier));
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1834,11 +1873,25 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsPPI() throws Exception {
-    //value as concept id
+    //Survey
     Criteria ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name(null);
+      createCriteriaParent(TreeType.PPI.name(), TreeSubType.BASICS.name());
     SearchParameter ppi = createSearchParameter(ppiCriteria, "7");
     SearchRequest searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //Question
+    ppiCriteria =
+      createCriteriaParent(TreeType.PPI.name(), TreeSubType.BASICS.name()).conceptId("1585899");
+    ppi = createSearchParameter(ppiCriteria, null);
+    searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
+    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+
+    //value as concept id
+    ppiCriteria =
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name(null);
+    ppi = createSearchParameter(ppiCriteria, "7");
+    searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     //value as number
