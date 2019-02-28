@@ -277,12 +277,12 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
-// HOC that provides a 'workspace' prop with current WorkspaceData
+// HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
   return connectBehaviorSubject(currentCohortStore, 'cohort');
 };
 
-// HOC that provides a 'workspace' prop with current WorkspaceData
+// HOC that provides a 'conceptSet' prop with current ConceptSet
 export const withCurrentConceptSet = () => {
   return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
 };
@@ -292,12 +292,12 @@ export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
 };
 
-// HOC that provides a 'profileState' prop with current profile and a reload function
+// HOC that provides a 'urlParams' prop with the current url params object
 export const withUrlParams = () => {
   return connectBehaviorSubject(urlParamsStore, 'urlParams');
 };
 
-// HOC that provides a 'profileState' prop with current profile and a reload function
+// HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };

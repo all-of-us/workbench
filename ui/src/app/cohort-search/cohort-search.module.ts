@@ -30,6 +30,8 @@ import {SearchGroupComponent} from './search-group/search-group.component';
 import {SelectionInfoComponent} from './selection-info/selection-info.component';
 import {TreeComponent} from './tree/tree.component';
 
+import {BreadcrumbType} from 'app/utils/navigation';
+
 /* Other Objects */
 import {CohortSearchActions, CohortSearchEpics, ConfigureStore} from './redux';
 import {SafeHtmlPipe} from './safe-html.pipe';
@@ -40,7 +42,7 @@ const routes: Routes = [{
   component: CohortSearchComponent,
   data: {
     title: 'Build Cohort Criteria',
-    breadcrumb: 'cohortAdd'
+    breadcrumb: BreadcrumbType.CohortAdd
   },
 }];
 

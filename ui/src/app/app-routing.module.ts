@@ -31,7 +31,7 @@ import {WorkspaceResolver} from './resolvers/workspace';
 import {DataPageComponent} from 'app/views/data-page/component';
 import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
-import {NavStore} from './utils/navigation';
+import {BreadcrumbType, NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
 
 declare let gtag: Function;
@@ -76,7 +76,7 @@ const routes: Routes = [
             component: WorkspaceListComponent,
             data: {
               title: 'View Workspaces',
-              breadcrumb: 'workspaces'
+              breadcrumb: BreadcrumbType.Workspaces
             }
           },
           {
@@ -95,7 +95,7 @@ const routes: Routes = [
                 component: WorkspaceComponent,
                 data: {
                   title: 'View Workspace Details',
-                  breadcrumb: 'workspace'
+                  breadcrumb: BreadcrumbType.Workspace
                 }
               }, {
                 path: 'edit',
@@ -103,7 +103,7 @@ const routes: Routes = [
                 data: {
                   title: 'Edit Workspace',
                   mode: WorkspaceEditMode.Edit,
-                  breadcrumb: 'workspaceEdit'
+                  breadcrumb: BreadcrumbType.WorkspaceEdit
                 }
               }, {
                 path: 'clone',
@@ -111,7 +111,7 @@ const routes: Routes = [
                 data: {
                   title: 'Clone Workspace',
                   mode: WorkspaceEditMode.Clone,
-                  breadcrumb: 'workspaceClone'
+                  breadcrumb: BreadcrumbType.WorkspaceClone
                 }
               },
               {
@@ -122,14 +122,14 @@ const routes: Routes = [
                     component: NotebookListComponent,
                     data: {
                       title: 'View Notebooks',
-                      breadcrumb: 'workspace'
+                      breadcrumb: BreadcrumbType.Workspace
                     }
                   }, {
                     path: ':nbName',
                     component: NotebookRedirectComponent,
                     data: {
                       title: 'Notebook',
-                      breadcrumb: 'notebook',
+                      breadcrumb: BreadcrumbType.Notebook,
                       minimizeChrome: true
                     }
                   }
@@ -142,7 +142,7 @@ const routes: Routes = [
                     component: CohortListComponent,
                     data: {
                       title: 'View Cohorts',
-                      breadcrumb: 'workspace'
+                      breadcrumb: BreadcrumbType.Workspace
                     },
                   },
                   {
@@ -166,7 +166,7 @@ const routes: Routes = [
                 component: ConceptHomepageComponent,
                 data: {
                   title: 'Search Concepts',
-                  breadcrumb: 'workspace'
+                  breadcrumb: BreadcrumbType.Workspace
                 }
               },
               {
@@ -174,7 +174,7 @@ const routes: Routes = [
                 component: DataPageComponent,
                 data: {
                   title: 'Data Page',
-                  breadcrumb: 'workspace'
+                  breadcrumb: BreadcrumbType.Workspace
                 }
               },
               {
@@ -182,7 +182,7 @@ const routes: Routes = [
                 component: DataSetComponent,
                 data: {
                   title: 'Dataset Page',
-                  breadcrumb: 'dataset'
+                  breadcrumb: BreadcrumbType.Dataset
                 }
               },
               {
@@ -192,14 +192,14 @@ const routes: Routes = [
                   component: ConceptSetListComponent,
                   data: {
                     title: 'View Concept Sets',
-                    breadcrumb: 'workspace'
+                    breadcrumb: BreadcrumbType.Workspace
                   }
                 }, {
                   path: ':csid',
                   component: ConceptSetDetailsComponent,
                   data: {
                     title: 'Concept Set',
-                    breadcrumb: 'conceptSet'
+                    breadcrumb: BreadcrumbType.ConceptSet
                   },
                   resolve: {
                     conceptSet: ConceptSetResolver,

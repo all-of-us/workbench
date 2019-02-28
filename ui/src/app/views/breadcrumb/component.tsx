@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {ReactWrapperBase, withCurrentCohort, withCurrentConceptSet, withCurrentWorkspace, withRouteConfigData, withUrlParams} from 'app/utils/index';
-import {navigateByUrl} from 'app/utils/navigation';
+import {BreadcrumbType, navigateByUrl} from 'app/utils/navigation';
 
 const styles = {
   firstLink: {
@@ -18,63 +18,64 @@ const styles = {
   }
 };
 
-export const getTrail = (type, data) => {
+// Generates a trail of breadcrumbs based on currently loaded data.
+export const getTrail = (type: BreadcrumbType, data): {label: string, url: string}[] => {
   const {workspace, cohort, conceptSet, urlParams: {ns, wsid, cid, csid, pid, nbName}} = data;
   const prefix = `/workspaces/${ns}/${wsid}`;
   switch (type) {
-    case 'workspaces':
+    case BreadcrumbType.Workspaces:
       return [
         {label: 'Workspaces', url: '/workspaces'}
       ];
-    case 'workspace':
+    case BreadcrumbType.Workspace:
       return [
-        ...getTrail('workspaces', data),
+        ...getTrail(BreadcrumbType.Workspaces, data),
         {label: workspace ? workspace.name : '...', url: prefix}
       ];
-    case 'workspaceEdit':
+    case BreadcrumbType.WorkspaceEdit:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Edit Workspace', url: `${prefix}/edit`}
       ];
-    case 'workspaceClone':
+    case BreadcrumbType.WorkspaceClone:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Duplicate Workspace', url: `${prefix}/clone`}
       ];
-    case 'notebook':
+    case BreadcrumbType.Notebook:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Notebooks', url: `${prefix}/notebooks`},
         {
           label: nbName && decodeURIComponent(nbName).replace(/\.ipynb$/, ''),
           url: `${prefix}/notebooks/${nbName}`
         }
       ];
-    case 'conceptSet':
+    case BreadcrumbType.ConceptSet:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Concept Sets', url: `${prefix}/concepts/sets`},
         {label: conceptSet ? conceptSet.name : '...', url: `${prefix}/concepts/sets/${csid}`}
       ];
-    case 'cohort':
+    case BreadcrumbType.Cohort:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Cohorts', url: `${prefix}/cohorts`},
         {label: cohort ? cohort.name : '...', url: `${prefix}/cohorts/${cid}/review/participants`}
       ];
-    case 'participant':
+    case BreadcrumbType.Participant:
       return [
-        ...getTrail('cohort', data),
+        ...getTrail(BreadcrumbType.Cohort, data),
         {label: `Participant ${pid}`, url: `${prefix}/cohorts/${cid}/review/participants/${pid}`}
       ];
-    case 'cohortAdd':
+    case BreadcrumbType.CohortAdd:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Build Cohort Criteria', url: `${prefix}/cohorts/build`}
       ];
-    case 'dataset':
+    case BreadcrumbType.Dataset:
       return [
-        ...getTrail('workspace', data),
+        ...getTrail(BreadcrumbType.Workspace, data),
         {label: 'Dataset', url: `${prefix}/data/datasets`}
       ];
     default: return [];

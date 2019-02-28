@@ -1,8 +1,10 @@
+import {BreadcrumbType} from 'app/utils/navigation';
+
 import {getTrail} from './component';
 
 describe('getTrail', () => {
   it('works', () => {
-    const trail = getTrail('participant', {
+    const trail = getTrail(BreadcrumbType.Participant, {
       workspace: {name: 'TestW'},
       cohort: {name: 'TestC'},
       urlParams: {ns: 'testns', wsid: 'testwsid', cid: 88, pid: 77}

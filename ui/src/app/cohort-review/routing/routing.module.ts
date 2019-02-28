@@ -7,8 +7,8 @@ import {TablePage} from 'app/cohort-review/table-page/table-page';
 
 import {DemographicConceptMapsResolver} from './demographic-concept-maps.resolver';
 
-import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
 import {ReviewResolver} from 'app/resolvers/review';
+import {BreadcrumbType} from 'app/utils/navigation';
 
 
 const routes: Routes = [{
@@ -16,7 +16,7 @@ const routes: Routes = [{
   component: PageLayout,
   data: {
     title: 'Review Cohort Participants',
-    breadcrumb: 'cohort'
+    breadcrumb: BreadcrumbType.Cohort
   },
   resolve: {
     review: ReviewResolver,
@@ -28,19 +28,13 @@ const routes: Routes = [{
       concepts: DemographicConceptMapsResolver,
     },
     data: {
-      breadcrumb: 'cohort'
+      breadcrumb: BreadcrumbType.Cohort
     }
   }, {
     path: 'participants/:pid',
     component: DetailPage,
     data: {
-      breadcrumb: 'participant'
-    }
-  }, {
-    path: 'report',
-    component: QueryReportComponent,
-    data: {
-      breadcrumb: 'report'
+      breadcrumb: BreadcrumbType.Participant
     }
   }],
 }];
