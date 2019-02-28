@@ -41,8 +41,8 @@ export class ConceptChartsComponent implements OnChanges, OnInit, OnDestroy {
   selectedUnit: string;
   genderResults: AchillesResult[] = [];
   displayMeasurementGraphs = false;
-  toDisplayMeasurementGenderAnalysis: any;
-  toDisplayMeasurementGenderCountAnalysis: any;
+  toDisplayMeasurementGenderAnalysis: Analysis;
+  toDisplayMeasurementGenderCountAnalysis: Analysis;
   graphType = GraphType;
 
   constructor(private api: DataBrowserService, public dbc: DbConfigService) { }
