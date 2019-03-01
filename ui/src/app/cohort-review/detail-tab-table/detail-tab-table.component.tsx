@@ -201,7 +201,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         });
         this.getParticipantData();
       }
-      // this.dt.filter(this.state.checkedItems[this.props.domain]['standardVocabulary'], 'standardVocabulary', 'in');
     }
 
     getParticipantData() {
@@ -285,9 +284,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
-
-
-
     updateData = (event, colName, namesArray) => {
       const {checkedItems} = this.state;
       if (event.target.checked) {
@@ -310,9 +306,24 @@ export const DetailTabTable = withCurrentWorkspace()(
               .indexOf(event.target.name), 1);
         }
       }
+      this.getErrorMessage(event.target.name);
       this.dt.filter(checkedItems[colName], colName, 'in');
       this.setState({checkedItems: checkedItems});
       this.props.getFilteredData(checkedItems);
+    }
+
+    getErrorMessage = (name?) => {
+      const {data, checkedItems} = this.state;
+      if (checkedItems) {
+        for (const col in checkedItems) {
+          // checkedItems[col].includes(name);
+          if (checkedItems[col].find( i => i !== name)) {
+            return  'New Error message from jon';
+          }
+        }
+      } else if (data !== null) {
+        return  'No ' + this.props.tabname + ' Data';
+      }
     }
 
     addAllOption(arr) {
@@ -335,7 +346,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       this.addAllOption(names);
       let fl: any;
-      return ( <React.Fragment>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+      return ( <div>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           { names.map((i, index) => (
             <div key={index}>
@@ -347,12 +358,11 @@ export const DetailTabTable = withCurrentWorkspace()(
             </div>
           ))}
         </OverlayPanel>
-      </React.Fragment>);
+      </div>);
     }
 
     render() {
-
-      const {data, checkedItems, loading, start, sortField, sortOrder} = this.state;
+      const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
@@ -377,7 +387,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-          {/*{filterColName && this.getColumnValue(col.name)}*/}
         </React.Fragment>;
 
         return <Column
@@ -411,7 +420,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
+          emptyMessage={this.getErrorMessage()}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
