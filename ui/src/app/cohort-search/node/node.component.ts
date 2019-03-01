@@ -131,6 +131,7 @@ export class NodeComponent implements OnInit, OnDestroy {
               : stripHtml(this.node.get('name'));
             this.node = this.node.set('name', displayName);
             if (selectedIds[0] === parentId) {
+              this.actions.setScrollId(null);
               setTimeout(() => this.actions.setScrollId(parentId));
             }
           }
