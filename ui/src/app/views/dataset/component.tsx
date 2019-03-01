@@ -106,7 +106,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   receiveDelete() {
     const {resource, rType} = this.state;
     let call;
-    const id = rType === ResourceType.COHORT ? resource.cohort.id : resource.conceptSet.id;
+    const id = this.getCurrentResource().id;
     const {workspaceNamespace, workspaceFirecloudName} = resource;
     if (rType === ResourceType.CONCEPT_SET) {
       call = conceptSetsApi().deleteConceptSet(workspaceNamespace, workspaceFirecloudName, id);
@@ -124,8 +124,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   }
 
   receiveEdit(resource: RecentResource): void {
-    const {rType} = this.state;
-    const updatedResource = rType === ResourceType.COHORT ? resource.cohort : resource.conceptSet;
+    const updatedResource = this.getCurrentResource();
     const {workspaceNamespace, workspaceFirecloudName} = resource;
     const {id} = updatedResource;
     let call;
@@ -133,7 +132,6 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       call = cohortsApi().updateCohort(workspaceNamespace, workspaceFirecloudName,
         id, updatedResource as Cohort);
     } else if (resource.conceptSet) {
-      this.setState({loadingConceptSets: true});
       call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
         id, updatedResource);
     }
@@ -264,7 +262,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       onClose={() => {this.setState({ creatingConceptSet: false}); }}
       conceptDomainList={conceptDomainList}
       existingConceptSets={conceptSetList}/>}
-      {this.state.confirmDeleting &&
+      {this.state.confirmDeleting && currentResource &&
       <ConfirmDeleteModal resourceName={currentResource.name}
                           resourceType={rType}
                           receiveDelete={() => this.receiveDelete()}
