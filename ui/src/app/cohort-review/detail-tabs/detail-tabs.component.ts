@@ -184,7 +184,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitId
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -192,7 +192,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Physical Measurements',
