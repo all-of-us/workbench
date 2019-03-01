@@ -120,7 +120,7 @@ SELECT P.PERSON_ID,
     T.QUANTITY as dose,
     '' as strength,
     case when C3.CONCEPT_NAME is null then '' else C3.CONCEPT_NAME end as ROUTE,
-    'Drug' as domain
+    'DRUG' as domain
 FROM
 (SELECT DRUG_EXPOSURE_ID, a.PERSON_ID, a.DRUG_CONCEPT_ID, a.DRUG_SOURCE_CONCEPT_ID, DRUG_EXPOSURE_START_DATE, DRUG_EXPOSURE_START_DATETIME, VISIT_OCCURRENCE_ID,
 NUM_MENTIONS, FIRST_MENTION, LAST_MENTION, QUANTITY, ROUTE_CONCEPT_ID
@@ -158,7 +158,7 @@ SELECT P.PERSON_ID,
 	case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
 	CAST(FLOOR(DATE_DIFF(a.CONDITION_START_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
 	case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
-	'Condition' as domain
+	'CONDITION' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.CONDITION_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.CONDITION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
@@ -194,7 +194,7 @@ SELECT m.person_id,
               end as ref_range,
     CAST(FLOOR(DATE_DIFF(m.measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as age_at_event,
     case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
-    'Lab' as domain
+    'LAB' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on m.measurement_concept_id = c1.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on m.measurement_source_concept_id = c2.concept_id
@@ -231,7 +231,7 @@ SELECT m.person_id,
               end as ref_range,
     CAST(FLOOR(DATE_DIFF(m.measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as age_at_event,
     case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
-    'Vital' as domain
+    'VITAL' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on m.measurement_concept_id = c1.concept_id
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on m.measurement_source_concept_id = c2.concept_id
@@ -261,7 +261,7 @@ SELECT P.PERSON_ID,
      case when c2.VOCABULARY_ID is null then 'None' else c2.VOCABULARY_ID end as SOURCE_VOCABULARY,
      case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
      CAST(FLOOR(DATE_DIFF(t.OBSERVATION_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-     'Observation' as domain
+     'OBSERVATION' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` t
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on t.OBSERVATION_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on t.OBSERVATION_SOURCE_CONCEPT_ID = c2.CONCEPT_ID
@@ -291,7 +291,7 @@ SELECT P.PERSON_ID,
      case when VALUE_AS_NUMBER is null then VALUE_AS_CONCEPT_ID else VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
      c3.CONCEPT_NAME AS UNIT,
      CAST(FLOOR(DATE_DIFF(t.MEASUREMENT_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-     'PM' as domain,
+     'PHYSICAL_MEASURE' as domain,
      case when c4.concept_name is null then '' else c4.concept_name end as visit_type
 FROM
 (select *
@@ -326,7 +326,7 @@ SELECT P.PERSON_ID,
      case when c2.CONCEPT_ID is null then 0 else c2.CONCEPT_ID end as SOURCE_CONCEPT_ID,
      CAST(FLOOR(DATE_DIFF(a.PROCEDURE_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
      case when c3.concept_name is null then '' else c3.concept_name end as visit_type,
-     'Procedure' as domain
+     'PROCEDURE' as domain
 FROM \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c1 on a.PROCEDURE_CONCEPT_ID = c1.CONCEPT_ID
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c2 on a.PROCEDURE_SOURCE_CONCEPT_ID = c2.CONCEPT_ID

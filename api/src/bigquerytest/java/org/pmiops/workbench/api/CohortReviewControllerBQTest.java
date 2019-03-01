@@ -87,9 +87,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final String NAMESPACE = "aou-test";
   private static final String NAME = "test";
   private static final Long PARTICIPANT_ID = 102246L;
+  private static final Long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private ParticipantData expectedCondition1;
   private ParticipantData expectedCondition2;
+  private ParticipantData expectedCondition3;
   private ParticipantData expectedPhysicalMeasure1;
   private ParticipantData expectedPhysicalMeasure2;
   private ParticipantData expectedLab1;
@@ -178,13 +180,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   public List<String> getTableNames() {
     return Arrays.asList(
       "person_all_events",
-      "person_condition",
-      "person_procedure",
-      "person_observation",
-      "person_lab",
-      "person_vital",
-      "person_drug",
-      "person_physical_measure",
       "person",
       "search_person",
       "search_all_domains",
@@ -369,26 +364,37 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(21)
       .domainType(DomainType.ALL_EVENTS);
     expectedCondition1 = new Condition()
-      .visitType("visitType")
+      .visitType("visit")
       .standardVocabulary("SNOMED")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("0020")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .itemDate("2008-07-22 05:00:00 UTC")
-      .standardName("name1")
+      .standardName("SNOMED")
       .ageAtEvent(28)
       .domainType(DomainType.CONDITION);
     expectedCondition2 = new Condition()
-      .visitType("visitType")
+      .visitType("visit")
       .standardVocabulary("SNOMED")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("0021")
       .sourceVocabulary("ICD9CM")
       .sourceName("Typhoid and paratyphoid fevers")
       .itemDate("2008-08-01 05:00:00 UTC")
-      .standardName("name2")
+      .standardName("SNOMED")
       .ageAtEvent(28)
+      .domainType(DomainType.CONDITION);
+    expectedCondition3 = new Condition()
+      .visitType("visit")
+      .standardVocabulary("CPT4")
+      .standardCode("002")
+      .sourceCode("Varivax")
+      .sourceVocabulary("CPT4")
+      .sourceName("name")
+      .itemDate("2001-12-03 05:00:00 UTC")
+      .standardName("name")
+      .ageAtEvent(21)
       .domainType(DomainType.CONDITION);
     expectedPhysicalMeasure1 = new PhysicalMeasurement()
       .value("1.0")
@@ -445,10 +451,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(29)
       .domainType(DomainType.VITAL);
     expectedProcedure1 = new Procedure()
-      .visitType("visitType")
+      .visitType("visit")
       .standardVocabulary("ICD10CM")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("val")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-03 05:00:00 UTC")
@@ -456,10 +462,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(29)
       .domainType(DomainType.PROCEDURE);
     expectedProcedure2 = new Procedure()
-      .visitType("visitType")
+      .visitType("visit")
       .standardVocabulary("CPT4")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("val")
       .sourceVocabulary("CPT4")
       .sourceName("name")
       .itemDate("2009-12-04 05:00:00 UTC")
@@ -467,47 +473,47 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(29)
       .domainType(DomainType.PROCEDURE);
     expectedObservation1 = new Observation()
-      .visitId(1L)
+      .visitType("visit")
       .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-03 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedObservation2 = new Observation()
-      .visitId(1L)
+      .visitType("visit")
       .ageAtEvent(29)
       .standardVocabulary("ICD10CM")
       .standardName("name")
       .standardCode("002")
-      .sourceCode("004")
+      .sourceCode("sourceValue")
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-04 05:00:00 UTC")
       .domainType(DomainType.OBSERVATION);
     expectedDrug1 = new Drug()
-      .visitType("visitType")
+      .visitType("visit")
       .route("route")
       .strength("str")
       .dose("1.0")
       .numMentions("2")
-      .firstMention("2001-12-03 05:00:00 UTC")
-      .lastMention("2001-12-03 05:00:00 UTC")
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
       .domainType(DomainType.DRUG);
     expectedDrug2 = new Drug()
-      .visitType("visitType")
+      .visitType("visit")
       .route("route")
       .strength("str")
       .dose("1.0")
       .numMentions("2")
-      .firstMention("2001-12-03 05:00:00 UTC")
-      .lastMention("2001-12-03 05:00:00 UTC")
+      .firstMention("2008-08-01 05:00:00 UTC")
+      .lastMention("2008-08-01 05:00:00 UTC")
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
@@ -543,6 +549,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     ParticipantCohortStatus participantCohortStatus = new ParticipantCohortStatus()
       .participantKey(key);
     participantCohortStatusDao.save(participantCohortStatus);
+
+    ParticipantCohortStatusKey key2 = new ParticipantCohortStatusKey()
+      .participantId(PARTICIPANT_ID2)
+      .cohortReviewId(review.getCohortReviewId());
+    ParticipantCohortStatus participantCohortStatus2 = new ParticipantCohortStatus()
+      .participantKey(key2);
+    participantCohortStatusDao.save(participantCohortStatus2);
   }
 
   @After
@@ -599,7 +612,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1, expectedCondition2), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition3, expectedCondition1, expectedCondition2), 3);
 
     //added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -614,7 +627,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2, expectedCondition1), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2, expectedCondition1, expectedCondition3), 3);
   }
 
   @Test
@@ -643,7 +656,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         testFilter)
       .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition3), 3);
 
     //page 2 should have 1 item
     testFilter.page(1);
@@ -657,7 +670,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         PARTICIPANT_ID,
         testFilter)
       .getBody();
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2), 2);
+    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1), 3);
   }
 
   @Test
@@ -1152,7 +1165,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         NAME,
         cohort.getCohortId(),
         cdrVersion.getCdrVersionId(),
-        PARTICIPANT_ID,
+        PARTICIPANT_ID2,
         testFilter)
       .getBody();
 
@@ -1167,7 +1180,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         NAME,
         cohort.getCohortId(),
         cdrVersion.getCdrVersionId(),
-        PARTICIPANT_ID,
+        PARTICIPANT_ID2,
         testFilter)
       .getBody();
 
@@ -1194,7 +1207,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         NAME,
         cohort.getCohortId(),
         cdrVersion.getCdrVersionId(),
-        PARTICIPANT_ID,
+        PARTICIPANT_ID2,
         testFilter)
       .getBody();
 
@@ -1217,7 +1230,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         NAME,
         cohort.getCohortId(),
         cdrVersion.getCdrVersionId(),
-        PARTICIPANT_ID,
+        PARTICIPANT_ID2,
         testFilter)
       .getBody();
 
@@ -1248,11 +1261,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         null)
       .getBody();
 
-    ParticipantChartData expectedData1 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name1").standardVocabulary("SNOMED").startDate("2008-07-22");
-    ParticipantChartData expectedData2 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("name2").standardVocabulary("SNOMED").startDate("2008-08-01");
-    assertThat(response.getItems().size()).isEqualTo(2);
+    ParticipantChartData expectedData1 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("SNOMED").standardVocabulary("SNOMED").startDate("2008-07-22");
+    ParticipantChartData expectedData2 = new ParticipantChartData().ageAtEvent(28).rank(1).standardName("SNOMED").standardVocabulary("SNOMED").startDate("2008-08-01");
+    ParticipantChartData expectedData3 = new ParticipantChartData().ageAtEvent(21).rank(1).standardName("name").standardVocabulary("CPT4").startDate("2001-12-03");
+    assertThat(response.getItems().size()).isEqualTo(3);
     assertThat(expectedData1).isIn(response.getItems());
     assertThat(expectedData2).isIn(response.getItems());
+    assertThat(expectedData3).isIn(response.getItems());
   }
 
   @Test

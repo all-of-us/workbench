@@ -18,7 +18,6 @@ public class ParticipantCounter {
 
   public static final String STANDARD_CONCEPT_ID = "standard_concept_id";
   private CohortQueryBuilder cohortQueryBuilder;
-  private static final String TABLE_PREFIX = QueryBuilderConstants.TABLE_PREFIX;
 
   private static final String PERSON_TABLE = "person";
 
@@ -48,7 +47,7 @@ public class ParticipantCounter {
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
     "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n" +
-      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "from `${projectId}.${dataSetId}." + QueryBuilderConstants.REVIEW_TABLE + "` " + QueryBuilderConstants.REVIEW_TABLE + "\n" +
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
@@ -56,6 +55,7 @@ public class ParticipantCounter {
       "order by gender, race, ageRange\n";
 
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
+    "and domain = '${domain}'\n" +
     "and standard_concept_id != 0 \n" +
       "group by name, conceptId\n" +
       "order by count desc, name asc\n" +
@@ -95,15 +95,11 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      String table = TABLE_PREFIX + domainType.name().toLowerCase();
-      String limit = Integer.toString(chartLimit);
-      String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
-        .replace("${table}", table);
-      String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY;
-      endSqlTemplate = endSqlTemplate
-        .replace("${limit}", limit)
-        .replace("${tableId}", STANDARD_CONCEPT_ID);
-      return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate, table);
+      String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY
+        .replace("${limit}", Integer.toString(chartLimit))
+        .replace("${tableId}", STANDARD_CONCEPT_ID)
+        .replace("${domain}", domainType.name());
+      return buildQuery(participantCriteria, DOMAIN_CHART_INFO_SQL_TEMPLATE, endSqlTemplate, QueryBuilderConstants.REVIEW_TABLE);
     }
 
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
