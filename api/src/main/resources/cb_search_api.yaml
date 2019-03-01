@@ -431,7 +431,7 @@ definitions:
 
   SearchGroup:
     description: >
-      A SearchGroup is a container for groups of criteria which are `AND`ed together.
+      A SearchGroup is a container for groups of criteria which are `OR`ed together.
     type: object
     required:
       - temporal
@@ -489,7 +489,31 @@ definitions:
         items:
           $ref: "#/definitions/SearchParameter"
       modifiers:
-        description: criteria by operation or predicate
+        description: >
+          Predicates to apply to the search parameters. Aggregate modifiers
+          (i.e. NUM_OF_OCCURRENCES) are applied independently to each
+          SearchParameter and furthermore, are applied independently to any
+          group elements within those SearchParameters.
+
+          Consider the following example query scenario.
+
+          Example criteria tree:
+          - parent
+            - child1
+            - child2
+
+          Curated dataset contains 1 participant with 1 event each of concepts
+          child1 and child2. Search request is made on "parent", with a modifier of
+          {type: NUM_OF_OCCURRENCES, operands: [2]}.
+
+          This does not match - the participant would need to have at least 2
+          events of type child1 and/or of child2 and/or of parent (in the event
+          that "parent" corresponds to a real concept in the data).
+
+          Additionally, aggregate modifiers are applied secondarily to other
+          modifiers. For example, combining the AGE_AT_EVENT with
+          NUM_OF_OCCURRENCES - first we filter down all events by the age
+          predicate, then we count occurrences.
         type: "array"
         items:
           $ref: "#/definitions/Modifier"
@@ -522,7 +546,7 @@ definitions:
         description: The name of the generating Criterion
         type: string
       value:
-        description: The Value of the Criteria within its Category Tree
+        description: The Criteria code (or name if querying for Deceased)
         type: string
       type:
         description: The type of the generating Criterion
@@ -534,11 +558,56 @@ definitions:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
       conceptId:
-        description: The concept id that maps to concept table.
+        description: The concept id that maps to concept table, if any.
         type: integer
         format: int64
       attributes:
-        description: Any applicable arguments that complete the sense of the parameter
+        description: >
+            Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
+            Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
+            Measurements and Physical Measurements have overlap in many areas such as body weight, but the
+            difference is standard(measurements) and source(physical measurements).
+            
+             Example demo age search parameter:
+             {
+               "type": "DEMO",
+               "searchParameters": [
+                 {
+                   "type": "DEMO", 
+                   "subtype": "AGE",
+                   "group": false,
+                   "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
+                 }
+               ],
+               "modifiers": []
+             } 
+             
+             Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
+             {
+               "type": "PM",
+               "searchParameters": [
+                 {
+                   "type": "PM",
+                   "subtype": "BP",
+                   "group": false,
+                   "attributes": [
+                     {
+                       "conceptId": 903118,
+                       "name": "Systolic",
+                       "operands": ["90"],
+                       "operator":"LESS_THAN_OR_EQUAL_TO"
+                     },
+                     {
+                       "conceptId": 903115,
+                       "name": "Diastolic",
+                       "operands": ["60"],
+                        "operator": "LESS_THAN_OR_EQUAL_TO"
+                      }
+                    ]
+                  }
+                ],
+                "modifiers": []
+              }
         type: "array"
         items:
           $ref: "#/definitions/Attribute"
