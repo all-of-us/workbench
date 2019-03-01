@@ -17,13 +17,34 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                            @Param("parentId") Long parentId);
 
-  @Query(value = "")
-  List<Criteria> findCriteriaChildrenByTypeAndParentConceptIds(String type, String subtype, Set<Long> parentConceptId);
+  @Query(value = "select * from criteria a join " +
+      "(select CONCAT( '%.', id, '%') as path from criteria where concept_id in (:conceptIds)) b " +
+      "on a.path like b.path " +
+      "where type = :type " +
+      "and subtype = :subtype " +
+      "and is_group = 0 " +
+      "and is_selectable = 1", nativeQuery = true)
+  List<Criteria> findCriteriaChildrenByTypeAndParentConceptIds(String type,
+                                                               String subtype,
+                                                               Set<Long> parentConceptIds);
 
-  @Query(value = "")
-  List<Criteria> findCriteriaChildrenByTypeAndParentCodeRegex(String type, String subtype, String parentCodeRegex);
+  @Query(value = "select cr " +
+    "from criteria cr " +
+    "where type = :type " +
+    "and subtype = :subtype " +
+    "and code REGEXP :parentCodeRegex " +
+    "and is_group = 0 " +
+    "and is_selectable = 1")
+  List<Criteria> findCriteriaChildrenByTypeAndParentCodeRegex(String type,
+                                                              String subtype,
+                                                              String parentCodeRegex);
 
-  @Query(value = "")
+  @Query(value = "select cr " +
+    "from criteria cr " +
+    "where type = :type " +
+    "and subtype = :subtype " +
+    "and is_group = 0 " +
+    "and is_selectable = 1")
   List<Criteria> findCriteriaChildrenByType(String type, String subtype);
 
   @Query(value = "select * " +

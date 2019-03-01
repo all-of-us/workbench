@@ -11,10 +11,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
+import com.google.rpc.BadRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import jdk.nashorn.internal.ir.annotations.Immutable;
 import joptsimple.internal.Strings;
@@ -25,6 +27,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -39,6 +42,8 @@ import org.pmiops.workbench.model.TreeType;
  * class are used internally to track metadata during request processing.
  */
 public final class ElasticFilters {
+
+  private static final Logger log = Logger.getLogger(ElasticFilters.class.getName());
 
   /**
    * ElasticFilterResponse wraps value and attaches some additional metadata regarding the
@@ -135,51 +140,13 @@ public final class ElasticFilters {
             break;
           case EVENT_DATE:
           case AGE_AT_EVENT:
-            RangeQueryBuilder rq;
-            Object left, right = null;
-            if (ModifierType.EVENT_DATE.equals(mod.getName())) {
-              rq = QueryBuilders.rangeQuery("events.start_date");
-              left = mod.getOperands().get(0);
-              if (mod.getOperands().size() > 1) {
-                right = mod.getOperands().get(1);
-              }
-            } else {
-              rq = QueryBuilders.rangeQuery("events.age_at_start");
-              left = Integer.parseInt(mod.getOperands().get(0));
-              if (mod.getOperands().size() > 1) {
-                right = Integer.parseInt(mod.getOperands().get(1));
-              }
-            }
-            switch (mod.getOperator()) {
-              case LESS_THAN:
-                rq.lt(left);
-                break;
-              case GREATER_THAN:
-                rq.gt(left);
-                break;
-              case LESS_THAN_OR_EQUAL_TO:
-                rq.lte(left);
-                break;
-              case GREATER_THAN_OR_EQUAL_TO:
-                rq.gte(left);
-                break;
-              case BETWEEN:
-                rq.gt(left).lt(right);
-                break;
-              case LIKE:
-              case IN:
-              case EQUAL:
-              case NOT_EQUAL:
-              default:
-                throw new RuntimeException("Bad operator for date modifier: " + mod.getOperator());
-            }
-            modFilters.add(rq);
+            modFilters.add(dateModifierToQuery(mod));
             break;
           case ENCOUNTERS:
             modFilters.add(QueryBuilders.termsQuery("events.visit_concept_id", mod.getOperands()));
             break;
           default:
-            throw new RuntimeException("Unknown modifier type: " + mod.getName());
+            throw new BadRequestException("Unknown modifier type: " + mod.getName());
         }
       }
       for (SearchParameter param : sgi.getSearchParameters()) {
@@ -203,6 +170,50 @@ public final class ElasticFilters {
     }
 
     return filter;
+  }
+
+  private static QueryBuilder dateModifierToQuery(Modifier mod) {
+    RangeQueryBuilder rq;
+    Object left, right = null;
+    if (ModifierType.EVENT_DATE.equals(mod.getName())) {
+      rq = QueryBuilders.rangeQuery("events.start_date");
+      left = mod.getOperands().get(0);
+      if (mod.getOperands().size() > 1) {
+        right = mod.getOperands().get(1);
+      }
+    } else if (ModifierType.AGE_AT_EVENT.equals(mod.getName())) {
+      rq = QueryBuilders.rangeQuery("events.age_at_start");
+      left = Integer.parseInt(mod.getOperands().get(0));
+      if (mod.getOperands().size() > 1) {
+        right = Integer.parseInt(mod.getOperands().get(1));
+      }
+    } else {
+      throw new RuntimeException("modifier is not a date modifier type: " + mod.getName());
+    }
+    switch (mod.getOperator()) {
+      case LESS_THAN:
+        rq.lt(left);
+        break;
+      case GREATER_THAN:
+        rq.gt(left);
+        break;
+      case LESS_THAN_OR_EQUAL_TO:
+        rq.lte(left);
+        break;
+      case GREATER_THAN_OR_EQUAL_TO:
+        rq.gte(left);
+        break;
+      case BETWEEN:
+        rq.gt(left).lt(right);
+        break;
+      case LIKE:
+      case IN:
+      case EQUAL:
+      case NOT_EQUAL:
+      default:
+        throw new BadRequestException("Bad operator for date modifier: " + mod.getOperator());
+    }
+    return rq;
   }
 
   private static boolean isStandardConcept(SearchParameter param) {
@@ -259,7 +270,7 @@ public final class ElasticFilters {
   }
 
   private Map<SearchParameter, Set<Long>> buildCriteriaGroupLookup(SearchRequest req) {
-    // Three categories of criteria groups are currently queryable:
+    // Three categories of criteria groups are currently supported in a SearchRequest:
     // 1. Groups with only tree types specified, e.g. PPI.
     // 2. Groups with tree types & a criteria code specified, e.g. ICD9/ICD10.
     // 3. Groups with tree types & a concept ID specified, e.g. drugs.
@@ -276,10 +287,12 @@ public final class ElasticFilters {
           if (!param.getGroup()) {
             continue;
           }
-          Preconditions.checkArgument(
-              !TreeType.SNOMED.toString().equals(param.getType()),
-              "SNOMED groups are poly-hierarchical; the SearchRequest does not encode enough " +
-                  "information to determine which criteria ID should be used");
+          if (TreeType.SNOMED.toString().equals(param.getType())) {
+            log.warning("Received a SNOMED group in a search request - this indicates a client " +
+                "bug. SNOMED concepts are poly-hierarchical; the SearchRequest does not encode " +
+                "enough information to determine which criteria ID should be used");
+            throw new BadRequestException("Invalid criteria group of type SNOMED");
+          }
 
           FullTreeType treeKey = FullTreeType.fromParam(param);
           if (param.getConceptId() != null) {
