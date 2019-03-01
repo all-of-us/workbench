@@ -38,7 +38,7 @@ public class ElasticDocument {
       .put("source_concept_id", 1)
       .put("start_date", 2)
       .put("age_at_start", 3)
-      .put("visit_type_concept_id", 4)
+      .put("visit_concept_id", 4)
       .put("value_as_number", 5)
       .put("value_as_concept", 6)
       .build();
@@ -46,22 +46,26 @@ public class ElasticDocument {
   private static final Map<String, Object> NESTED_FOREIGN_SCHEMA = ImmutableMap.of(
       "type", ElasticType.NESTED.lower(),
       "properties", ImmutableMap.builder()
-          .put("concept_id", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
-          .put("source_concept_id", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
+          .put("concept_id", esType(ElasticType.KEYWORD))
+          .put("source_concept_id", esType(ElasticType.KEYWORD))
           // Domain-dependent fields follow (may be unpopulated).
-          .put("start_date", ImmutableMap.of("type", ElasticType.DATE.lower()))
-          .put("age_at_start", ImmutableMap.of("type", ElasticType.INTEGER.lower()))
-          .put("visit_type_concept_id", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
-          .put("value_as_number", ImmutableMap.of("type", ElasticType.INTEGER.lower()))
-          .put("value_as_concept", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
+          .put("start_date", esType(ElasticType.DATE))
+          .put("age_at_start", esType(ElasticType.INTEGER))
+          .put("visit_concept_id", esType(ElasticType.KEYWORD))
+          .put("value_as_number", esType(ElasticType.INTEGER))
+          .put("value_as_concept", esType(ElasticType.KEYWORD))
           .build());
 
   public static final Map<String, Object> PERSON_SCHEMA = ImmutableMap.<String, Object>builder()
-      .put("gender_concept_id", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
-      .put("condition_concept_ids", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
-      .put("condition_source_concept_ids", ImmutableMap.of("type", ElasticType.KEYWORD.lower()))
-      .put("conditions", NESTED_FOREIGN_SCHEMA)
+      .put("gender_concept_id", esType(ElasticType.KEYWORD))
+      .put("condition_concept_ids", esType(ElasticType.KEYWORD))
+      .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("events", NESTED_FOREIGN_SCHEMA)
       .build();
+
+  private static Map<String, Object> esType(ElasticType t) {
+    return ImmutableMap.of("type", t.lower());
+  }
 
   public final String id;
   public final XContentBuilder source;

@@ -9,7 +9,8 @@ SELECT
   ec.concept_name ethnicity_concept_name,
   condition_concept_ids,
   condition_source_concept_ids,
-  conditions
+  /* TODO(calbach): Expand this to UNION events across all domains. */
+  conditions AS events
 FROM
   `{BQ_DATASET}.person` p
 LEFT JOIN (
@@ -21,7 +22,7 @@ LEFT JOIN (
         condition_source_concept_id AS source_concept_id,
         condition_start_date AS start_date,
         DATE_DIFF(condition_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_type_concept_id,
+        v.visit_concept_id,
         NULL AS value_as_number,
         NULL AS value_as_concept)) conditions
   FROM
