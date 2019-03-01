@@ -18,7 +18,6 @@ SELECT
   measurement_concept_ids,
   measurement_source_concept_ids,
   visit_concept_ids,
-  /* TODO(calbach): Index value_as_number, value_as_concept. */
   ARRAY_CONCAT(observations, conditions, drugs, procedures, measurements) AS events
 FROM
   `{BQ_DATASET}.person` p
@@ -31,7 +30,9 @@ LEFT JOIN (
         observation_source_concept_id AS source_concept_id,
         observation_date AS start_date,
         DATE_DIFF(observation_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_concept_id)) observations
+        v.visit_concept_id,
+        CAST(NULL as FLOAT64) as value_as_number,
+        CAST(NULL as INT64) as value_as_concept_id)) observations
   FROM
     `{BQ_DATASET}.observation` ob
   LEFT JOIN
@@ -57,7 +58,9 @@ LEFT JOIN (
         condition_source_concept_id AS source_concept_id,
         condition_start_date AS start_date,
         DATE_DIFF(condition_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_concept_id)) conditions
+        v.visit_concept_id,
+        CAST(NULL as FLOAT64) as value_as_number,
+        CAST(NULL as INT64) as value_as_concept_id)) conditions
   FROM
     `{BQ_DATASET}.condition_occurrence` co
   LEFT JOIN
@@ -83,7 +86,9 @@ LEFT JOIN (
         drug_source_concept_id AS source_concept_id,
         drug_exposure_start_date AS start_date,
         DATE_DIFF(drug_exposure_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_concept_id)) drugs
+        v.visit_concept_id,
+        CAST(NULL as FLOAT64) as value_as_number,
+        CAST(NULL as INT64) as value_as_concept_id)) drugs
   FROM
     `{BQ_DATASET}.drug_exposure` d
   LEFT JOIN
@@ -109,7 +114,9 @@ LEFT JOIN (
         procedure_source_concept_id AS source_concept_id,
         procedure_date AS start_date,
         DATE_DIFF(procedure_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_concept_id)) procedures
+        v.visit_concept_id,
+        CAST(NULL as FLOAT64) as value_as_number,
+        CAST(NULL as INT64) as value_as_concept_id)) procedures
   FROM
     `{BQ_DATASET}.procedure_occurrence` pr
   LEFT JOIN
@@ -135,7 +142,9 @@ LEFT JOIN (
         measurement_source_concept_id AS source_concept_id,
         measurement_date AS start_date,
         DATE_DIFF(measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
-        v.visit_concept_id)) measurements
+        v.visit_concept_id,
+        value_as_number,
+        value_as_concept_id)) measurements
   FROM
     `{BQ_DATASET}.measurement` m
   LEFT JOIN

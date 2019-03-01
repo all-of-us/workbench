@@ -23,7 +23,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 public class ElasticDocument {
   /** The Elasticsearch primitive index types we utilize. */
   private enum ElasticType {
-    KEYWORD, INTEGER, DATE, NESTED, STRING;
+    KEYWORD, INTEGER, DATE, NESTED, TEXT;
 
     String lower() {
       return this.name().toLowerCase();
@@ -40,7 +40,7 @@ public class ElasticDocument {
       .put("age_at_start", 3)
       .put("visit_concept_id", 4)
       .put("value_as_number", 5)
-      .put("value_as_concept", 6)
+      .put("value_as_concept_id", 6)
       .build();
 
   private static final Map<String, Object> NESTED_FOREIGN_SCHEMA = ImmutableMap.of(
@@ -53,18 +53,17 @@ public class ElasticDocument {
           .put("age_at_start", esType(ElasticType.INTEGER))
           .put("visit_concept_id", esType(ElasticType.KEYWORD))
           .put("value_as_number", esType(ElasticType.INTEGER))
-          .put("value_as_concept", esType(ElasticType.KEYWORD))
+          .put("value_as_concept_id", esType(ElasticType.KEYWORD))
           .build());
 
   public static final Map<String, Object> PERSON_SCHEMA = ImmutableMap.<String, Object>builder()
       .put("birth_datetime", esType(ElasticType.DATE))
       .put("gender_concept_id", esType(ElasticType.KEYWORD))
-      .put("gender_concept_name", esType(ElasticType.STRING))
+      .put("gender_concept_name", esType(ElasticType.TEXT))
       .put("race_concept_id", esType(ElasticType.KEYWORD))
-      .put("race_concept_name", esType(ElasticType.STRING))
+      .put("race_concept_name", esType(ElasticType.TEXT))
       .put("ethnicity_concept_id", esType(ElasticType.KEYWORD))
-      .put("ethnicity_concept_name", esType(ElasticType.STRING))
-      .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
+      .put("ethnicity_concept_name", esType(ElasticType.TEXT))
       .put("condition_concept_ids", esType(ElasticType.KEYWORD))
       .put("condition_source_concept_ids", esType(ElasticType.KEYWORD))
       .put("observation_concept_ids", esType(ElasticType.KEYWORD))
@@ -174,6 +173,7 @@ public class ElasticDocument {
           break;
         case DATE:
         case KEYWORD:
+        case TEXT:
           if (isRepeated) {
             val = fv.getRepeatedValue().stream().map(FieldValue::getStringValue).collect(Collectors.toList());
           } else {
