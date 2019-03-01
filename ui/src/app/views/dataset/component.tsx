@@ -5,6 +5,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
+import {ResourceListItem} from 'app/components/resources';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
@@ -14,7 +15,6 @@ import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
-import {ResourceCardMenu} from 'app/views/resource-card/component';
 import {
   Cohort,
   ConceptSet,
@@ -40,29 +40,12 @@ export const styles = {
   }
 };
 
-const ResourceListItem: React.FunctionComponent <
-  {conceptSet: ConceptSet, openConfirmDelete: Function, edit: Function}
-  > = ({conceptSet, openConfirmDelete, edit}) => {
-    return<div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
-      height: '1.5rem', display: 'flex'}}>
-      <div style={{width: '.75rem', paddingTop: 5, paddingLeft: 10}}>
-        <ResourceCardMenu disabled={false}
-                          resourceType={ResourceType.CONCEPT_SET}
-                          onDeleteResource={openConfirmDelete}
-                          onEditConceptSet={edit}/>
-      </div>
-      <input type='checkbox' value={conceptSet.name} style={{height: 17, width: 17,
-        marginLeft: 10, marginTop: 10, marginRight: 10, backgroundColor: '#7CC79B'}}/>
-      <div style={{lineHeight: '1.5rem'}}>{conceptSet.name}</div>
-    </div>;
-  };
-
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], loadingConceptSets: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
-    rType: ResourceType
+    rType: ResourceType, selectedConceptSets: ConceptSet[]
   }> {
 
   constructor(props) {
@@ -75,7 +58,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       confirmDeleting: false,
       editing: false,
       resource: undefined,
-      rType: undefined
+      rType: undefined,
+      selectedConceptSets: []
     };
   }
 
@@ -101,7 +85,6 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   convertResource(r: ConceptSet | Cohort, rType: ResourceType): RecentResource {
     const {workspace} = this.props;
     this.setState({rType: rType});
-    console.log(rType);
     return convertToResource(r, workspace.namespace, workspace.id,
       workspace.accessLevel as unknown as WorkspaceAccessLevel, rType);
   }
@@ -113,18 +96,10 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
 
   closeConfirmDelete(): void {
     this.setState({confirmDeleting: false});
-    if (this.state.rType === ResourceType.CONCEPT_SET) {
-      const deleted = this.state.resource.conceptSet;
-      const updatedList = fp.filter(conceptSet => conceptSet.id !== deleted.id,
-        this.state.conceptSetList);
-      this.setState({conceptSetList: updatedList});
-    }
-    this.setState({resource: undefined, rType: undefined});
   }
 
   edit(r: Cohort | ConceptSet, rType: ResourceType): void {
     const rc = this.convertResource(r, rType);
-    console.log(rType);
     this.setState({editing: true, resource: rc});
   }
 
@@ -142,7 +117,13 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     } else {
       call = cohortsApi().deleteCohort(...argList);
     }
-
+    if (this.state.rType === ResourceType.CONCEPT_SET) {
+      const deleted = this.state.resource.conceptSet;
+      const updatedList = fp.filter(conceptSet => conceptSet.id !== deleted.id,
+        this.state.conceptSetList);
+      this.setState({conceptSetList: updatedList});
+    }
+    this.setState({resource: undefined, rType: undefined});
     call.then(() => this.closeConfirmDelete());
   }
 
@@ -169,6 +150,23 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     });
     this.setState({editing: false, conceptSetList: updatedList,
       resource: undefined, rType: undefined});
+  }
+
+  select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
+    if (rtype === ResourceType.CONCEPT_SET) {
+      const origSelected = this.state.selectedConceptSets;
+      const selected = fp.filter((c) => c.id === resource.id, origSelected);
+      if (selected.length > 0) {
+        this.setState({selectedConceptSets: fp.remove((c) => c.id === resource.id, origSelected)});
+      } else {
+        this.setState({selectedConceptSets: origSelected.concat(origSelected)});
+      }
+    } else {
+      // else = cohort
+      //  determine if already in selected
+      //  remove if it is
+      //  add if it isn't
+    }
   }
 
   getCurrentResource(): Cohort | ConceptSet {
@@ -225,6 +223,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                                             ResourceType.CONCEPT_SET);
                                         }
                                       }
+                                      onSelect={
+                                        () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                      }
                                       edit={
                                         () => this.edit(conceptSet, ResourceType.CONCEPT_SET)
                                       }/>)
@@ -266,10 +267,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       onClose={() => {this.setState({ creatingConceptSet: false}); }}
       conceptDomainList={conceptDomainList}
       existingConceptSets={conceptSetList}/>}
-      {console.log(resource)}
       {this.state.confirmDeleting &&
-      // This throws a type error in the logs, figure out how to fix that
-      //  Functions as it's supposed to
       <ConfirmDeleteModal resourceName={currentResource.name}
                           resourceType={rType}
                           receiveDelete={() => this.receiveDelete()}
