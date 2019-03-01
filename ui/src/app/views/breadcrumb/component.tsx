@@ -112,7 +112,7 @@ const Breadcrumb = fp.flow(
     {urlParams, workspace, conceptSet, cohort}
   );
   const first = fp.dropRight(1, trail);
-  const last = fp.last(trail) as any;
+  const last = fp.last(trail);
   return <div style={{marginLeft: '3.25rem', display: 'inline-block'}}>
     {first.map(({label, url}, i) => {
       return <React.Fragment key={i}>
