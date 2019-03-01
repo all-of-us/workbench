@@ -62,7 +62,7 @@ describe('DataPage', () => {
     expect(wrapper.find(ResourceCard).length).toBe(resourceCardsExpected);
   });
 
-  it('should show only cohorts when selected', async() => {
+  it('should show only conceptSets when selected', async() => {
     const wrapper = mount(<DataPage />);
     const resourceCardsExpected = ConceptSetsApiStub.stubConceptSets().length;
     await waitOneTickAndUpdate(wrapper);
