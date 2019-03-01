@@ -107,15 +107,11 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     const {resource, rType} = this.state;
     let call;
     const id = rType === ResourceType.COHORT ? resource.cohort.id : resource.conceptSet.id;
-    const argList = [resource.workspaceNamespace,
-      resource.workspaceFirecloudName, id];
+    const {workspaceNamespace, workspaceFirecloudName} = resource;
     if (rType === ResourceType.CONCEPT_SET) {
-      // these also throw errors in the logs
-      // functions correctly, and I think is so pretty, but
-      // I don't like all the errors in the logs, so torn.
-      call = conceptSetsApi().deleteConceptSet(...argList);
+      call = conceptSetsApi().deleteConceptSet(workspaceNamespace, workspaceFirecloudName, id);
     } else {
-      call = cohortsApi().deleteCohort(...argList);
+      call = cohortsApi().deleteCohort(workspaceNamespace, workspaceFirecloudName, id);
     }
     if (this.state.rType === ResourceType.CONCEPT_SET) {
       const deleted = this.state.resource.conceptSet;
@@ -130,15 +126,16 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   receiveEdit(resource: RecentResource): void {
     const {rType} = this.state;
     const updatedResource = rType === ResourceType.COHORT ? resource.cohort : resource.conceptSet;
-    const argList = [resource.workspaceNamespace,
-      resource.workspaceFirecloudName, updatedResource.id,
-      updatedResource];
+    const {workspaceNamespace, workspaceFirecloudName} = resource;
+    const {id} = updatedResource;
     let call;
     if (resource.cohort) {
-      call = cohortsApi().updateCohort(...argList);
+      call = cohortsApi().updateCohort(workspaceNamespace, workspaceFirecloudName,
+        id, updatedResource as Cohort);
     } else if (resource.conceptSet) {
       this.setState({loadingConceptSets: true});
-      call = conceptSetsApi().updateConceptSet(...argList);
+      call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
+        id, updatedResource);
     }
     call.then(() => this.closeEditModal());
   }
