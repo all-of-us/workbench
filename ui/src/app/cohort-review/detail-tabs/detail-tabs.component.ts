@@ -115,6 +115,24 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
   conditionTitle: string;
   chartLoadedSpinner = false;
   summaryActive = false;
+  filterState = {
+    ALL_EVENTS: {
+      standardVocabulary: [],
+      domain: [],
+    },
+    PROCEDURE: {
+      standardVocabulary: [],
+    },
+    CONDITION: {
+      standardVocabulary: [],
+    },
+    OBSERVATION: {
+      standardVocabulary: [],
+    },
+    PHYSICAL_MEASURE: {
+      standardVocabulary: [],
+    },
+  };
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
@@ -131,7 +149,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       value: value,
       domain: domain,
       age: ageAtEvent,
-    }
+    },
   };
 
   readonly tabs = [{
@@ -147,7 +165,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
       visitType: visitType,
-    }
+    },
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
@@ -285,6 +303,12 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         );
       })
       .subscribe();
+  }
+
+  filteredData(checkedItems: any) {
+    // console.log(this.filterState);
+    // console.log(checkedItems);
+    //  this.filterState = checkedItems;
   }
 
   ngOnDestroy() {

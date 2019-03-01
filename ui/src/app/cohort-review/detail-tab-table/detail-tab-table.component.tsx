@@ -5,14 +5,14 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
-import {MultiSelect} from 'primereact/multiSelect';
 import * as React from 'react';
-import * as fp from "lodash/fp";
-import {Checkbox} from "primereact/checkbox";
+
+
 
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
@@ -158,6 +158,8 @@ export interface DetailTabTableProps {
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
+  filteredTab: any;
+  getFilteredData: Function;
 }
 
 export interface DetailTabTableState {
@@ -166,10 +168,14 @@ export interface DetailTabTableState {
   start: number;
   sortField: string;
   sortOrder: number;
+  check: boolean;
+  checkedItems: any;
+
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    dt: any;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -178,6 +184,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
+        check: false,
+        checkedItems: props.filteredTab,
       };
     }
 
@@ -193,6 +201,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         });
         this.getParticipantData();
       }
+      // this.dt.filter(this.state.checkedItems[this.props.domain]['standardVocabulary'], 'standardVocabulary', 'in');
     }
 
     getParticipantData() {
@@ -270,25 +279,65 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
+
+
+
+    updateData = (event, colName, namesArray) => {
+      const {checkedItems} = this.state;
+      if (event.target.checked) {
+        if (event.target.name === 'SelectAll') {
+          checkedItems[this.props.domain][colName] = namesArray ;
+        } else {
+          checkedItems[this.props.domain][colName].push(event.target.name);
+        }
+      } else {
+        if (event.target.name === 'SelectAll') {
+          checkedItems[this.props.domain][colName] = [];
+        } else {
+          if (checkedItems[this.props.domain][colName].find(s => s === 'SelectAll')) {
+            checkedItems[this.props.domain][colName]
+              .splice(checkedItems[this.props.domain][colName]
+                .indexOf('SelectAll'), 1);
+          }
+          checkedItems[this.props.domain][colName]
+            .splice(checkedItems[this.props.domain][colName]
+              .indexOf(event.target.name), 1);
+        }
+      }
+      this.dt.filter(checkedItems[this.props.domain][colName], colName, 'in');
+      this.setState({checkedItems: checkedItems});
+      console.log(checkedItems);
+      this.props.getFilteredData(checkedItems);
+    }
+
+    addAllOption(arr) {
+      arr.push('SelectAll');
+    }
+
     getColumnValue(colName) {
-      const {data} = this.state;
+      const {data, checkedItems} = this.state;
       let names = [];
-      if(data) {
+      if (data) {
         names = [...fp.uniq(data.map(item => {
-          if(colName === 'standardVocabulary') {
-           return item.standardVocabulary;
-          } else if(colName === 'domain') {
+          if (colName === 'standardVocabulary') {
+            return item.standardVocabulary;
+          } else if (colName === 'domain') {
             return item.domain;
           }
 
         }))];
       }
+
+      this.addAllOption(names);
       let fl: any;
       return ( <React.Fragment>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
-        <OverlayPanel ref={(el) => {fl = el;}} showCloseIcon={true} dismissable={true}>
-          { names.map(i => (
-            <div key={i}>
-              <input type='checkbox'/>
+        <OverlayPanel ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          { names.map((i, index) => (
+            <div key={index}>
+              <input type='checkbox' name={i}
+                     checked={checkedItems[this.props.domain][colName].find(j => i === j)}
+                     onChange={($event) => this.updateData($event, colName, names)}
+              />
               <label> {i} </label>
             </div>
           ))}
@@ -297,7 +346,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, start, sortField, sortOrder} = this.state;
+
+      const {data, checkedItems, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
@@ -313,8 +363,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-         const filterColName = col.name === 'standardVocabulary' || col.name === 'domain' ;
-
+        const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
         const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
@@ -323,7 +372,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-          {filterColName && this.getColumnValue(col.name)}
+          {/*{filterColName && this.getColumnValue(col.name)}*/}
         </React.Fragment>;
 
         return <Column
@@ -333,12 +382,15 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           sortable
+          filter={filterColName && true}
+          filterElement= {filterColName && this.getColumnValue(col.name)}
           body={colName && this.overlayTemplate}/>;
       });
 
       return <div style={styles.container}>
         <style>{css}</style>
         {data && <DataTable
+          ref={(el) => this.dt = el}
           style={styles.table}
           value={data}
           sortField={sortField}
@@ -373,6 +425,8 @@ export class DetailTabTableComponent extends ReactWrapperBase {
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
+  @Input('filteredTab') filteredTab: DetailTabTableProps['filteredTab'];
+  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
 
   constructor() {
     super(DetailTabTable, [
@@ -381,6 +435,8 @@ export class DetailTabTableComponent extends ReactWrapperBase {
       'domain',
       'filterType',
       'participantId',
+      'filteredTab',
+      'getFilteredData',
     ]);
   }
 }
