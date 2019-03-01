@@ -137,16 +137,16 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
         id, updatedResource);
     }
-    call.then(() => this.closeEditModal());
-  }
-
-  closeEditModal(): void {
     const edited = this.state.resource.conceptSet;
     const updatedList = this.state.conceptSetList.map((conceptSet) => {
       return edited.id === conceptSet.id ? edited : conceptSet;
     });
-    this.setState({editing: false, conceptSetList: updatedList,
-      resource: undefined, rType: undefined});
+    this.setState({conceptSetList: updatedList, resource: undefined, rType: undefined});
+    call.then(() => this.closeEditModal());
+  }
+
+  closeEditModal(): void {
+    this.setState({editing: false});
   }
 
   select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
