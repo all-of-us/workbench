@@ -70,10 +70,6 @@ const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
 };
-const visitId = {
-  name: 'visitId',
-  displayName: 'Visit ID',
-};
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
@@ -184,7 +180,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitId
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -192,7 +188,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Physical Measurements',

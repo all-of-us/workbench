@@ -883,10 +883,9 @@ definitions:
           ageAtEvent:
             type: integer
             description: The age at event for the participant
-          visitId:
-            type: integer
-            format: int64
-            description: The visit Id of this data
+          visitType:
+            type: string
+            description: The visit type of this data
 
   Drug:
     allOf:
