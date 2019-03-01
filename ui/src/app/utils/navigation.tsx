@@ -28,3 +28,16 @@ export const navigate = (...args) => {
 export const navigateByUrl = (...args) => {
   return NavStore.navigateByUrl(...args);
 };
+
+export enum BreadcrumbType {
+  Workspaces = 'Workspaces',
+  Workspace = 'Workspace',
+  WorkspaceEdit = 'WorkspaceEdit',
+  WorkspaceClone = 'WorkspaceClone',
+  Notebook = 'Notebook',
+  ConceptSet = 'ConceptSet',
+  Cohort = 'Cohort',
+  Participant = 'Participant',
+  CohortAdd = 'CohortAdd',
+  Dataset = 'Dataset',
+}
