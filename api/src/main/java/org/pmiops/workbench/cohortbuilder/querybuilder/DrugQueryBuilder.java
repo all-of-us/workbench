@@ -37,9 +37,13 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       "where ";
 
   private static final String CHILD_ONLY_TEMPLATE =
-    "concept_id in unnest(${childConceptIds})\n";
+    "concept_id in (select descendant_id\n" +
+      "from `${projectId}.${dataSetId}.criteria_ancestor`\n" +
+      "where ancestor_id in unnest(${childConceptIds}))\n";
 
-  private static final String PARENT_CRITERIA = "select a.concept_id from\n" +
+  private static final String PARENT_CRITERIA = "select descendant_id\n" +
+    "from `${projectId}.${dataSetId}.criteria_ancestor`\n" +
+    "where ancestor_id in (select a.concept_id from\n" +
     "`${projectId}.${dataSetId}.criteria` a\n" +
     "join (select CONCAT( '%.', CAST(id as STRING), '%') as path\n" +
     "from `${projectId}.${dataSetId}.criteria`\n" +
@@ -48,7 +52,7 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
     "and is_group = 0\n" +
     "and is_selectable = 1\n" +
     "and type = 'DRUG'\n" +
-    "and subtype = 'ATC'";
+    "and subtype = 'ATC')";
 
   private static final String BOTH_TEMPLATE =
     "concept_id in (" + PARENT_CRITERIA + " or\n" +
