@@ -1,16 +1,23 @@
 package org.pmiops.workbench.elasticsearch;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import com.google.api.client.util.Sets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import jdk.nashorn.internal.ir.annotations.Immutable;
+import joptsimple.internal.Strings;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -24,6 +31,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 
 /**
@@ -72,48 +80,18 @@ public final class ElasticFilters {
       TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
 
   private final CriteriaDao criteriaDao;
-  private final Map<String, Set<Long>> criteriaToConceptChildren;
+
   private boolean processed = false;
+  private Map<SearchParameter, Set<Long>> childrenByCriteriaGroup;
   private boolean isApproximate = false;
 
   private ElasticFilters(CriteriaDao criteriaDao) {
     this.criteriaDao = criteriaDao;
-    this.criteriaToConceptChildren = Maps.newHashMap();
   }
 
   private QueryBuilder process(SearchRequest req) {
     Preconditions.checkArgument(!processed);
-
-    for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
-      for (SearchGroupItem sgi : sg.getItems()) {
-        for (SearchParameter param : sgi.getSearchParameters()) {
-          if (!param.getGroup()) {
-            continue;
-          }
-          Preconditions.checkArgument(
-              !TreeType.SNOMED.toString().equals(param.getType()),
-              "SNOMED groups are poly-hierarchical; the SearchRequest does not encode enough " +
-                  "information to determine which criteria ID should be used");
-
-          // TODO: This two-step lookup is gross - dig into why we don't seem to have enough
-          // information available in the SearchRequest to more directly translate a criteria
-          // selection into a set of concept IDs. Also there is no uniqueness guarantee on codes
-          // nor do we seem to have documentation of what a "criteria code" is and where it comes
-          // from. Lastly, the code gets stuff into param.getValue() - this seems to be undocumented
-          // and unclear whether that field is polymorphic.
-          Criteria parent = criteriaDao.findCriteriaByTypeAndCodeAndGroup(param.getType(), param.getValue(), true);
-
-          // TODO: Try to batch this request for all search params.
-          Set<Long> children = criteriaDao.findCriteriaChildrenByTypeAndParentId(
-              param.getType(), parent.getId())
-              .stream()
-              .map(Criteria::getConceptId)
-              .map(Long::parseLong)
-              .collect(Collectors.toSet());
-          criteriaToConceptChildren.put(param.getValue(), children);
-        }
-      }
-    }
+    childrenByCriteriaGroup = buildCriteriaGroupLookup(req);
 
     BoolQueryBuilder filter = QueryBuilders.boolQuery();
     for (SearchGroup sg : req.getIncludes()) {
@@ -138,10 +116,6 @@ public final class ElasticFilters {
     }
 
     for (SearchGroupItem sgi : sg.getItems()) {
-      // TODO(calbach): Support all domains.
-      TreeType itemType = TreeType.valueOf(sgi.getType());
-      Preconditions.checkArgument(TreeType.CONDITION == itemType, "got item type: " + itemType);
-
       // Note: Later we could investigate starting with an inexpensive presence filter; would need
       // to map each concept ID into the right domain first though.
       BoolQueryBuilder sgiFilter = QueryBuilders.boolQuery();
@@ -241,7 +215,7 @@ public final class ElasticFilters {
     for (SearchParameter param : params) {
       if (param.getGroup()) {
         out.addAll(
-            criteriaToConceptChildren.get(param.getValue())
+            childrenByCriteriaGroup.get(param)
                 .stream()
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
@@ -250,5 +224,133 @@ public final class ElasticFilters {
       }
     }
     return out;
+  }
+
+  private static class FullTreeType {
+    final TreeType type;
+    final TreeSubType subType;
+    private FullTreeType(TreeType type, TreeSubType subType) {
+      this.type = type;
+      this.subType = subType;
+    }
+
+    static FullTreeType fromParam(SearchParameter param) {
+      return new FullTreeType(
+          TreeType.valueOf(param.getType()), TreeSubType.valueOf(param.getSubtype()));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      FullTreeType that = (FullTreeType) o;
+      return type == that.type &&
+          subType == that.subType;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(type, subType);
+    }
+  }
+
+  private Map<SearchParameter, Set<Long>> buildCriteriaGroupLookup(SearchRequest req) {
+    // Three categories of criteria groups are currently queryable:
+    // 1. Groups with only tree types specified, e.g. PPI.
+    // 2. Groups with tree types & a criteria code specified, e.g. ICD9/ICD10.
+    // 3. Groups with tree types & a concept ID specified, e.g. drugs.
+    Map<FullTreeType, Set<Long>> childrenByTreeType = Maps.newHashMap();
+    Map<FullTreeType, Map<String, Set<Long>>> childrenByParentCode = Maps.newHashMap();
+    Map<FullTreeType, Map<Long, Set<Long>>> childrenByParentConcept = Maps.newHashMap();
+
+    // Within each category/tree type combination, we can batch MySQL requests to translate these
+    // groups into child concept IDs. First we build up maps to denote which groups to query and
+    // which will eventually hold the results (for now, we mark them with an empty set).
+    for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
+      for (SearchGroupItem sgi : sg.getItems()) {
+        for (SearchParameter param : sgi.getSearchParameters()) {
+          if (!param.getGroup()) {
+            continue;
+          }
+          Preconditions.checkArgument(
+              !TreeType.SNOMED.toString().equals(param.getType()),
+              "SNOMED groups are poly-hierarchical; the SearchRequest does not encode enough " +
+                  "information to determine which criteria ID should be used");
+
+          FullTreeType treeKey = FullTreeType.fromParam(param);
+          if (param.getConceptId() != null) {
+            childrenByParentConcept.putIfAbsent(treeKey, Maps.newHashMap());
+            childrenByParentConcept.get(treeKey)
+                .putIfAbsent(param.getConceptId(), Sets.newHashSet());
+          } else if (param.getValue() != null) {
+            childrenByParentCode.putIfAbsent(treeKey, Maps.newHashMap());
+            childrenByParentCode.get(treeKey).putIfAbsent(param.getValue(), Sets.newHashSet());
+          } else {
+            childrenByTreeType.putIfAbsent(treeKey, Sets.newHashSet());
+          }
+        }
+      }
+    }
+
+    // Now we get the child concept IDs for each batch.
+    for (FullTreeType treeType : childrenByParentConcept.keySet()) {
+      Map<Long, Set<Long>> byParent = childrenByParentConcept.get(treeType);
+      List<Criteria> criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentConceptIds(
+          treeType.type.toString(), treeType.subType.toString(), byParent.keySet());
+      for (Criteria c : criteriaList) {
+        byParent.putIfAbsent(c.getParentId(), Sets.newHashSet());
+        byParent.get(c.getParentId()).add(Long.parseLong(c.getConceptId()));
+      }
+    }
+    for (FullTreeType treeType : childrenByParentCode.keySet()) {
+      Map<String, Set<Long>> byParent = childrenByParentCode.get(treeType);
+      List<Criteria> criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentCodeRegex(
+          treeType.type.toString(), treeType.subType.toString(),
+          String.format("^(%s)", Strings.join(byParent.keySet(), "|")));
+      for (Criteria c : criteriaList) {
+        // Technically this could scale poorly with many concept groups. We don't expect this number
+        // to be very high as it requires a user action to add a group, but a better data structure
+        // could be used here if this becomes too slow.
+        for (String parentCode : byParent.keySet()) {
+          if (c.getCode().startsWith(parentCode)) {
+            byParent.putIfAbsent(parentCode, Sets.newHashSet());
+            byParent.get(parentCode).add(Long.parseLong(c.getConceptId()));
+          }
+        }
+      }
+    }
+    for (FullTreeType treeType : childrenByTreeType.keySet()) {
+      childrenByTreeType.get(treeType).addAll(
+          criteriaDao.findCriteriaChildrenByType(
+              treeType.type.toString(), treeType.subType.toString())
+              .stream()
+              .map(c -> Long.parseLong(c.getConceptId()))
+              .collect(Collectors.toSet()));
+    }
+
+    // Finally, we unpack the results and map them back to the original SearchParameters.
+    ImmutableMap.Builder<SearchParameter, Set<Long>> builder = ImmutableMap.builder();
+    for (SearchGroup sg : Iterables.concat(req.getIncludes(), req.getExcludes())) {
+      for (SearchGroupItem sgi : sg.getItems()) {
+        for (SearchParameter param : sgi.getSearchParameters()) {
+          if (!param.getGroup()) {
+            continue;
+          }
+          FullTreeType treeKey = FullTreeType.fromParam(param);
+          if (param.getConceptId() != null) {
+            builder.put(param, childrenByParentConcept.get(treeKey).get(param.getConceptId()));
+          } else if (param.getValue() != null) {
+            builder.put(param, childrenByParentCode.get(treeKey).get(param.getValue()));
+          } else {
+            builder.put(param, childrenByTreeType.get(treeKey));
+          }
+        }
+      }
+    }
+    return builder.build();
   }
 }

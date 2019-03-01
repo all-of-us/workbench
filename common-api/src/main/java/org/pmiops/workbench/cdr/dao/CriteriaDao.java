@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.Set;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.springframework.data.domain.Pageable;
@@ -11,11 +12,19 @@ import java.util.List;
 
 public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
-  Criteria findCriteriaByTypeAndCodeAndGroup(@Param("type") String type, @Param("code") String code, @Param("group") Boolean group);
   Criteria findCriteriaByTypeAndConceptIdAndSelectable(@Param("type") String type, @Param("conceptId") String conceptId, @Param("selectable") Boolean selectable);
 
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                            @Param("parentId") Long parentId);
+
+  @Query(value = "")
+  List<Criteria> findCriteriaChildrenByTypeAndParentConceptIds(String type, String subtype, Set<Long> parentConceptId);
+
+  @Query(value = "")
+  List<Criteria> findCriteriaChildrenByTypeAndParentCodeRegex(String type, String subtype, String parentCodeRegex);
+
+  @Query(value = "")
+  List<Criteria> findCriteriaChildrenByType(String type, String subtype);
 
   @Query(value = "select * " +
     "from criteria " +
