@@ -995,6 +995,7 @@ m1.measurement_source_concept_id not in (select distinct measurement_concept_id 
 group by stratum_1,stratum_3,stratum_4,stratum_5"
 
 # Generating biological sex counts for measurement concepts for each unit
+## Eg: If heart rate 3027018 has 20000 participants, this query calculates the individual biological sex participant counts for each unit beats/min,second ,no units ,etc per measurement.
 echo "Inserting unit specific biological sex counts for each measurement concept"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
