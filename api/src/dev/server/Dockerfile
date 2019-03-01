@@ -22,6 +22,7 @@ RUN apk --no-cache add \
         libc6-compat \
         openssh-client \
         git \
+        make \
     && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
     rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -55,7 +56,7 @@ ENV GRADLE_USER_HOME /.gradle
 # It never makes sense for Gradle to run a daemon within a docker container.
 ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
 
-RUN apk --no-cache add ruby ruby-json ruby-io-console
+RUN apk --no-cache add ruby ruby-dev ruby-rdoc ruby-irb ruby-json ruby-io-console
 
 RUN curl https://services.gradle.org/distributions/gradle-4.3.1-bin.zip -L > /tmp/gradle.zip
 WORKDIR /tmp
@@ -64,7 +65,11 @@ RUN unzip gradle.zip && rm gradle.zip \
 ENV PATH="$PATH:/gradle/bin"
 WORKDIR /
 
+RUN apk add gcc libc-dev g++
+
 RUN gem install --no-document googleauth
+
+RUN gem install rainforest-cli
 
 COPY with-mysql-login.sh /usr/local/bin
 COPY with-uid.sh /usr/local/bin
