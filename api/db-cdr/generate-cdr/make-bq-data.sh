@@ -459,6 +459,7 @@ fi
 ##########################
 # Update rolled up counts #
 ##########################
+# Replacing the individual participant counts of snomed condition concepts with the rolled up counts
 echo "Updating rolled up counts in achilles results from criteria (for snomed conditions)"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
@@ -620,6 +621,7 @@ group by d2.domain_id,c.vocabulary_id"
 ###############################################################
 # Update the path of concepts in achilles_results to fetch tree
 ###############################################################
+# Eg: essential hypertension concept has path clinical finiding -> Finding by site -> Disorder of cardiovascular system -> Hypertensive disorder -> Essential hypertension. Storing the concept id path of tree in achilles results.
 echo "Updating path of concept in achilles results to fetch tree later"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
