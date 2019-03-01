@@ -58,9 +58,7 @@ public class ReviewQueryBuilder {
       "question as question,\n" +
       "answer as answer\n" +
       "from `${projectId}.${dataSetId}.person_survey`\n" +
-      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n" +
-      "order by %s %s, data_id\n" +
-      "limit %d offset %d\n";
+      "where person_id = @" + NAMED_PARTICIPANTID_PARAM + "\n";
 
   private static final String COUNT_TEMPLATE =
     "select count(*) as count\n" +
@@ -92,8 +90,9 @@ public class ReviewQueryBuilder {
                                           DomainType domain,
                                           PageRequest pageRequest) {
     boolean isSurvey = DomainType.SURVEY.equals(domain);
+    boolean isAllEvents = DomainType.ALL_EVENTS.equals(domain);
     String finalSql = isSurvey ? SURVEY_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
-    if (!DomainType.ALL_EVENTS.equals(domain)) {
+    if (!isAllEvents && !isSurvey) {
       finalSql = finalSql + DOMAIN_SQL;
     }
     finalSql = finalSql + ORDER_BY;
@@ -104,7 +103,7 @@ public class ReviewQueryBuilder {
       pageRequest.getPage() * pageRequest.getPageSize());
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
-    if (!isSurvey) {
+    if (!isAllEvents && !isSurvey) {
       params.put(NAMED_DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
     }
     return QueryJobConfiguration
@@ -117,13 +116,14 @@ public class ReviewQueryBuilder {
   public QueryJobConfiguration buildCountQuery(Long participantId,
                                                DomainType domain) {
     boolean isSurvey = DomainType.SURVEY.equals(domain);
+    boolean isAllEvents = DomainType.ALL_EVENTS.equals(domain);
     String finalSql = isSurvey ? COUNT_SURVEY_TEMPLATE : COUNT_TEMPLATE;
-    if (!DomainType.ALL_EVENTS.equals(domain)) {
+    if (!isAllEvents && !isSurvey) {
       finalSql = finalSql + DOMAIN_SQL;
     }
     Map<String, QueryParameterValue> params = new HashMap<>();
     params.put(NAMED_PARTICIPANTID_PARAM, QueryParameterValue.int64(participantId));
-    if (!isSurvey) {
+    if (!isAllEvents && !isSurvey) {
       params.put(NAMED_DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
     }
     return QueryJobConfiguration
