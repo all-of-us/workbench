@@ -270,7 +270,9 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
 
   constructor(
     private reviewAPI: CohortReviewService,
-  ) {}
+  ) {
+    this.filteredData = this.filteredData.bind(this);
+  }
 
   ngOnInit() {
     this.subscription = Observable
@@ -301,10 +303,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  filteredData(checkedItems: any) {
-    // console.log(this.filterState);
-    // console.log(checkedItems);
-    //  this.filterState = checkedItems;
+  filteredData(_domain: string, checkedItems: any) {
+    this.filterState[_domain] = checkedItems;
   }
 
   ngOnDestroy() {

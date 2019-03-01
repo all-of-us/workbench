@@ -164,6 +164,7 @@ export interface DetailTabTableProps {
 
 export interface DetailTabTableState {
   data: Array<any>;
+  filteredData: Array<any>;
   loading: boolean;
   start: number;
   sortField: string;
@@ -175,11 +176,11 @@ export interface DetailTabTableState {
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    dt: any;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
         data: null,
+        filteredData: null,
         loading: true,
         start: 0,
         sortField: null,
@@ -206,7 +207,6 @@ export const DetailTabTable = withCurrentWorkspace()(
     getParticipantData() {
       try {
         const {cdrVersionId, id, namespace} = this.props.workspace;
-        const {checkedItems} = this.state;
         const {cid} = urlParamsStore.getValue();
         const pageFilterRequest = {
           page: 0,
@@ -236,11 +236,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
-          for (const col in checkedItems) {
-            if (checkedItems[col].length) {
-              this.dt.filter(checkedItems[col], col, 'in');
-            }
-          }
+          this.filterData();
         });
       } catch (error) {
         console.log(error);
@@ -307,13 +303,27 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       this.getErrorMessage(event.target.name);
-      this.dt.filter(checkedItems[colName], colName, 'in');
       this.setState({checkedItems: checkedItems});
-      this.props.getFilteredData(checkedItems);
+      this.props.getFilteredData(colName, checkedItems);
+      this.filterData();
+    }
+
+    filterData() {
+      const {checkedItems} = this.state;
+      let {data, start} = this.state;
+      for (const col in checkedItems) {
+        if (checkedItems[col].length) {
+          data = data.filter(row => checkedItems[col].includes(row[col]));
+        }
+      }
+      if (data.length < start + rows) {
+        start = Math.floor(data.length / rows) * rows;
+      }
+      this.setState({filteredData: data, start: start});
     }
 
     getErrorMessage = (name?) => {
-      const {data, checkedItems} = this.state;
+      const {filteredData, checkedItems} = this.state;
       if (checkedItems) {
         for (const col in checkedItems) {
           // checkedItems[col].includes(name);
@@ -321,7 +331,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             return  'New Error message from jon';
           }
         }
-      } else if (data !== null) {
+      } else if (filteredData !== null) {
         return  'No ' + this.props.tabname + ' Data';
       }
     }
@@ -362,15 +372,15 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, start, sortField, sortOrder} = this.state;
+      const {filteredData, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      if (data !== null) {
-        const lastRowOfPage = (start + rows) > data.length
-          ? start + rows - (start + rows - data.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${data.length} records `;
+      if (filteredData !== null) {
+        const lastRowOfPage = (start + rows) > filteredData.length
+          ? start + rows - (start + rows - filteredData.length) : start + rows;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (data && data.length > rows) {
+      if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
 
@@ -403,20 +413,19 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{css}</style>
-        {data && <DataTable
-          ref={(el) => this.dt = el}
+        {filteredData && <DataTable
           style={styles.table}
-          value={data}
+          value={filteredData}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          paginatorTemplate={filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
-          totalRecords={data.length}
+          totalRecords={filteredData.length}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
