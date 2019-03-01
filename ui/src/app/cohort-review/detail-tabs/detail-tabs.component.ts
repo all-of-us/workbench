@@ -70,10 +70,6 @@ const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
 };
-const visitId = {
-  name: 'visitId',
-  displayName: 'Visit ID',
-};
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
