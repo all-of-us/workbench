@@ -21,7 +21,7 @@
     "creationTime": "2018-09-20 00:00:01Z",
     "releaseNumber": 2,
     "numParticipants": 946237,
-    "cdrDbName": "synth_r_2018q3_1",
-    "publicDbName": "synth_p_2018q3_1"
+    "cdrDbName": "cdr20190215_test",
+    "publicDbName": "public20190215_test"
   }
 ]
