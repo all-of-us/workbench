@@ -19,7 +19,7 @@ import org.elasticsearch.client.RestHighLevelClient;
  */
 public final class ElasticUtils {
   private static final Logger log = Logger.getLogger(ElasticUtils.class.getName());
-  private static final int BATCH_SIZE = 500;
+  private static final int BATCH_SIZE = 200;
 
   // Recommended document type for all indices is "_doc" (types are being deprecated):
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html

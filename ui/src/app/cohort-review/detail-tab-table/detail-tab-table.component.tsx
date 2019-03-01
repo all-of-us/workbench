@@ -34,9 +34,9 @@ const css = `
   body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
     border-bottom: 1px solid #c8c8c8;
   }
-  body .p-datatable .p-column-title {
-    display: flex;
-  }
+  // body .p-datatable .p-column-title {
+  //   display: flex;
+  // }
   .pi.pi-sort,
   .pi.pi-sort-up,
   .pi.pi-sort-down {
@@ -81,25 +81,46 @@ const css = `
     background: #fafafa;
     color: rgba(0, 0, 0, .5);
   }
-  body .p-overlaypanel .p-overlaypanel-close {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-close {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
     color: #0086C1;
   }
-  body .p-overlaypanel {
+  body .labOverlay.p-overlaypanel {
     top: 19px!important;
     left: 0px!important;
     width:9.5rem;
   }
-  body .p-overlaypanel .p-overlaypanel-close:hover {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-close:hover {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
     color: #0086C1;
   }
-  body .p-overlaypanel .p-overlaypanel-content {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-content {
     padding: 0.6rem 0.6rem;
+    font-size: 13px;
+  }
+    body .filterOverlay.p-overlaypanel .p-overlaypanel-close {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+  }
+  body .filterOverlay.p-overlaypanel {
+    top: 1.6rem!important;
+    left: auto!important;
+    width:9.5rem;
+  }
+  body .filterOverlay.p-overlaypanel .p-overlaypanel-close:hover {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+  }
+  body .filterOverlay.p-overlaypanel .p-overlaypanel-content {
+    padding: 0.7em 0em;
     font-size: 13px;
   }
   `;
@@ -148,6 +169,10 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
+  filterBorder: {
+    paddingTop: '0.5rem',
+    borderTop: '1px solid #ccc',
+  }
 });
 const rows = 25;
 
@@ -269,7 +294,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-            <OverlayPanel ref={(el) => {vl = el; }} showCloseIcon={true} dismissable={true}>
+            <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+                          showCloseIcon={true} dismissable={true}>
               {(rowData.refRange &&  column.field === 'value') &&
                 <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
               {(rowData.unit && column.field === 'value') &&
@@ -328,7 +354,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         for (const col in checkedItems) {
           // checkedItems[col].includes(name);
           if (checkedItems[col].find( i => i !== name)) {
-            return  'New Error message from jon';
+            return  'There is data, but it is all currently hidden. Please check your filters';
           }
         }
       } else if (filteredData !== null) {
@@ -356,19 +382,20 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       this.addAllOption(names);
       let fl: any;
-      return ( <div>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
-        <OverlayPanel ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+      return ( <span>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           { names.map((i, index) => (
-            <div key={index}>
-              <input type='checkbox' name={i}
+            <div key={index} style={{borderTop: i === 'SelectAll' ? '1px solid #ccc' : 'none',
+              padding: i === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={i}
                      checked={checkedItems[colName].includes(i)}
-                     onChange={($event) => this.updateData($event, colName, names)}
-              />
-              <label> {i} </label>
+                     onChange={($event) => this.updateData($event, colName, names)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {i} </label>
             </div>
           ))}
         </OverlayPanel>
-      </div>);
+      </span>);
     }
 
     render() {

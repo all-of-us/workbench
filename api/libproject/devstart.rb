@@ -1211,7 +1211,8 @@ def create_local_es_index(cmd_name, *args)
   create_flags = ([
     ['--query-project-id', 'all-of-us-ehr-dev'],
     ['--es-base-url', 'http://elastic:9200'],
-    ['--cdr-version', 'synth_r_2019_q1'],
+    # Matches cdr_versions_local.json
+    ['--cdr-version', 'cdr'],
     ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
     ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
     ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],

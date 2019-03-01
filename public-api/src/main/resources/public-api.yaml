@@ -627,6 +627,11 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Analysis"
+      measurementGenderCountAnalysis:
+        description: measurement gender count by unit analysis
+        type: array
+        items:
+          $ref: "#/definitions/Analysis"
 
   ConceptAnalysisListResponse:
     type: object
