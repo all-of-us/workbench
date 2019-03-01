@@ -207,6 +207,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     getParticipantData() {
       try {
         const {cdrVersionId, id, namespace} = this.props.workspace;
+        const {checkedItems} = this.state;
         const {cid} = urlParamsStore.getValue();
         const pageFilterRequest = {
           page: 0,
@@ -236,6 +237,11 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
+          for (const col in checkedItems) {
+            if (checkedItems[col].length) {
+              this.dt.filter(checkedItems[col], col, 'in');
+            }
+          }
         });
       } catch (error) {
         console.log(error);
@@ -286,27 +292,26 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {checkedItems} = this.state;
       if (event.target.checked) {
         if (event.target.name === 'SelectAll') {
-          checkedItems[this.props.domain][colName] = namesArray ;
+          checkedItems[colName] = namesArray ;
         } else {
-          checkedItems[this.props.domain][colName].push(event.target.name);
+          checkedItems[colName].push(event.target.name);
         }
       } else {
         if (event.target.name === 'SelectAll') {
-          checkedItems[this.props.domain][colName] = [];
+          checkedItems[colName] = [];
         } else {
-          if (checkedItems[this.props.domain][colName].find(s => s === 'SelectAll')) {
-            checkedItems[this.props.domain][colName]
-              .splice(checkedItems[this.props.domain][colName]
+          if (checkedItems[colName].find(s => s === 'SelectAll')) {
+            checkedItems[colName]
+              .splice(checkedItems[colName]
                 .indexOf('SelectAll'), 1);
           }
-          checkedItems[this.props.domain][colName]
-            .splice(checkedItems[this.props.domain][colName]
+          checkedItems[colName]
+            .splice(checkedItems[colName]
               .indexOf(event.target.name), 1);
         }
       }
-      this.dt.filter(checkedItems[this.props.domain][colName], colName, 'in');
+      this.dt.filter(checkedItems[colName], colName, 'in');
       this.setState({checkedItems: checkedItems});
-      console.log(checkedItems);
       this.props.getFilteredData(checkedItems);
     }
 
@@ -335,7 +340,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           { names.map((i, index) => (
             <div key={index}>
               <input type='checkbox' name={i}
-                     checked={checkedItems[this.props.domain][colName].find(j => i === j)}
+                     checked={checkedItems[colName].includes(i)}
                      onChange={($event) => this.updateData($event, colName, names)}
               />
               <label> {i} </label>

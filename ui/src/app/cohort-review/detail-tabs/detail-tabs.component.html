@@ -34,7 +34,7 @@
       <div>
         <app-detail-tab-table
           [getFilteredData]=filteredData
-          [filteredTab]="filterState"
+          [filteredTab]="filterState[allEvents.domain]"
           [tabname]="allEvents.name"
           [columns]="allEvents.columns"
           [filterType]="allEvents.filterType"
@@ -69,7 +69,7 @@
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
         [getFilteredData]=filteredData
-        [filteredTab]="filterState"
+        [filteredTab]="filterState[tab.domain]"
         [tabname]="tab.name"
         [columns]="tab.columns"
         [filterType]="tab.filterType"
