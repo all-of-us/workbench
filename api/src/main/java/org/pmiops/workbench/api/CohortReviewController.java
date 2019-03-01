@@ -792,7 +792,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
         .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-        .visitId(bigQueryService.getLong(row, rm.get("visitId")))
+        .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .domainType(DomainType.OBSERVATION);
     } else if (domain.equals(DomainType.LAB)) {

@@ -11,7 +11,7 @@ import java.util.List;
 public final class QueryBuilderConstants {
 
   //Denormalized Table constants
-  public static final String TABLE_PREFIX = "person_";
+  public static final String REVIEW_TABLE = "person_all_events";
 
   //Exception messages
   public static final String EMPTY_MESSAGE = "Bad Request: Search {0} are empty.";
