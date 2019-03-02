@@ -8,17 +8,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.SetMultimap;
-import com.google.rpc.BadRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import joptsimple.internal.Strings;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -312,22 +307,45 @@ public final class ElasticFilters {
     // Now we get the child concept IDs for each batch.
     for (FullTreeType treeType : childrenByParentConcept.keySet()) {
       Map<Long, Set<Long>> byParent = childrenByParentConcept.get(treeType);
-      List<Criteria> criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentConceptIds(
-          treeType.type.toString(), treeType.subType.toString(), byParent.keySet());
-      for (Criteria c : criteriaList) {
+      Set<String> parentConceptIds =
+          byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
+
+      List<Criteria> parents = Lists.newArrayList();
+      List<Criteria> leaves = Lists.newArrayList();
+      criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
+          treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
+          .forEach(c -> {
+            if (parentConceptIds.contains(c.getConceptId())) {
+              parents.add(c);
+            } else {
+              leaves.add(c);
+            }
+          });
+
+      for (Criteria c : leaves) {
+        // Technically this could scale poorly with many criteria groups. We don't expect this
+        // number to be very high as it requires a user action to add a group, but a better data
+        // structure could be used here if this becomes too slow.
+        for (Criteria parent : parents) {
+          if (c.getCode().startsWith(parent.getCode())) {
+            long parentConceptId = Long.parseLong(parent.getConceptId());
+            byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
+            byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+          }
+        }
+      }
+      for (Criteria c : leaves) {
         byParent.putIfAbsent(c.getParentId(), Sets.newHashSet());
         byParent.get(c.getParentId()).add(Long.parseLong(c.getConceptId()));
       }
     }
     for (FullTreeType treeType : childrenByParentCode.keySet()) {
       Map<String, Set<Long>> byParent = childrenByParentCode.get(treeType);
-      List<Criteria> criteriaList = criteriaDao.findCriteriaChildrenByTypeAndParentCodeRegex(
+      List<Criteria> criteriaList = criteriaDao.findCriteriaLeavesByTypeAndParentCodeRegex(
           treeType.type.toString(), treeType.subType.toString(),
           String.format("^(%s)", Strings.join(byParent.keySet(), "|")));
       for (Criteria c : criteriaList) {
-        // Technically this could scale poorly with many concept groups. We don't expect this number
-        // to be very high as it requires a user action to add a group, but a better data structure
-        // could be used here if this becomes too slow.
+        // See above comment on performance, this has the same characteristics.
         for (String parentCode : byParent.keySet()) {
           if (c.getCode().startsWith(parentCode)) {
             byParent.putIfAbsent(parentCode, Sets.newHashSet());
@@ -338,7 +356,7 @@ public final class ElasticFilters {
     }
     for (FullTreeType treeType : childrenByTreeType.keySet()) {
       childrenByTreeType.get(treeType).addAll(
-          criteriaDao.findCriteriaChildrenByType(
+          criteriaDao.findCriteriaLeavesByType(
               treeType.type.toString(), treeType.subType.toString())
               .stream()
               .map(c -> Long.parseLong(c.getConceptId()))

@@ -2,6 +2,9 @@ package org.pmiops.workbench.elasticsearch;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
@@ -10,6 +13,9 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.elasticsearch.ElasticFilters.ElasticFilterResponse;
+import org.pmiops.workbench.model.Modifier;
+import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -38,43 +44,221 @@ public class ElasticFiltersTest {
   @Autowired
   private CriteriaDao criteriaDao;
 
+  private static Criteria icd9Criteria() {
+    return new Criteria()
+        .domainId("Condition")
+        .type(TreeType.ICD9.toString())
+        .subtype(TreeSubType.CM.toString())
+        .attribute(Boolean.FALSE);
+  }
+
+  private SearchParameter leafParam2;
+
   @Before
   public void setUp() {
-    criteriaDao.save(new Criteria()
+    criteriaDao.save(icd9Criteria()
         .id(1)
         .code("001")
-        .conceptId("1")
-        .domainId("Condition")
+        .conceptId("771")
         .group(true)
         .selectable(false)
         .parentId(0)
-        .type(TreeType.ICD9.toString())
-        .subtype(TreeSubType.CM.toString())
-        .attribute(Boolean.FALSE)
         .path("001"));
-    criteriaDao.save(new Criteria()
+    criteriaDao.save(icd9Criteria()
         .id(2)
         .code("001.002")
-        .conceptId("2")
-        .domainId("Condition")
+        .conceptId("772")
         .group(false)
         .selectable(true)
         .parentId(1)
-        .type(TreeType.ICD9.toString())
+        .path("1.2"));
+    criteriaDao.save(icd9Criteria()
+        .id(3)
+        .code("001.003")
+        .conceptId("773")
+        .group(true)
+        .selectable(true)
+        .parentId(1)
+        .path("1.3"));
+    criteriaDao.save(icd9Criteria()
+        .id(4)
+        .code("001.003.004")
+        .conceptId("774")
+        .group(false)
+        .selectable(true)
+        .parentId(3)
+        .path("1.3.4"));
+    criteriaDao.save(new Criteria()
+        .id(5)
+        .code("005")
+        .conceptId("775")
+        .domainId("Condition")
+        .type(TreeType.SNOMED.toString())
         .subtype(TreeSubType.CM.toString())
         .attribute(Boolean.FALSE)
-        .path("1.2"));
+        .group(false)
+        .selectable(true)
+        .parentId(0)
+        .path("005"));
+
+    leafParam2 = new SearchParameter()
+        .conceptId(772L)
+        .type(TreeType.ICD9.toString())
+        .subtype(TreeSubType.CM.toString())
+        .group(false);
+  }
+
+  private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
+    return singleNestedQueryOccurrences(1, inners);
+  }
+
+  private static final QueryBuilder singleNestedQueryOccurrences(int n, QueryBuilder... inners) {
+    BoolQueryBuilder b = QueryBuilders.boolQuery();
+    for (QueryBuilder in : inners) {
+      b.filter(in);
+    }
+    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().filter(
+        QueryBuilders.boolQuery().should(
+            QueryBuilders.functionScoreQuery(
+                QueryBuilders.nestedQuery(
+                    "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total)
+            ).setMinScore(n)
+        )
+    ));
   }
 
   @Test
-  public void testFromCohortSearch() {
+  public void testLeafQuery() {
     ElasticFilterResponse<QueryBuilder> resp =
         ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
-        .addIncludesItem(new SearchGroup()
-        .addItemsItem(new SearchGroupItem()
-        .addSearchParametersItem(new SearchParameter()
-        .conceptId(2L)))));
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(leafParam2))));
     assertThat(resp.isApproximate()).isFalse();
-    assertThat(resp.value()).isEqualTo(QueryBuilders.boolQuery());
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
+  }
+
+  @Test
+  public void testParentConceptQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(new SearchParameter()
+                        .conceptId(773L)
+                        .type(TreeType.ICD9.toString())
+                        .subtype(TreeSubType.CM.toString())
+                        .group(true)))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("774"))));
+  }
+
+  @Test
+  public void testParentCodeQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(new SearchParameter()
+                        .value("001")
+                        .type(TreeType.ICD9.toString())
+                        .subtype(TreeSubType.CM.toString())
+                        .group(true)))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772", "774"))));
+  }
+
+  @Test
+  public void testParentTreeQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(new SearchParameter()
+                        .type(TreeType.ICD9.toString())
+                        .subtype(TreeSubType.CM.toString())
+                        .group(true)))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772", "774"))));
+  }
+
+  @Test
+  public void testAgeModifierQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(leafParam2)
+                    .addModifiersItem(
+                        new Modifier()
+                            .name(ModifierType.AGE_AT_EVENT)
+                            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                            .addOperandsItem("18"))
+                )));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
+        QueryBuilders.rangeQuery("events.age_at_start").gte(18)));
+  }
+
+  @Test
+  public void testDateModifierQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(leafParam2)
+                    .addModifiersItem(
+                        new Modifier()
+                            .name(ModifierType.EVENT_DATE)
+                            .operator(Operator.BETWEEN)
+                            .addOperandsItem("12/25/1988")
+                            .addOperandsItem("12/27/1988"))
+                )));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
+        QueryBuilders.rangeQuery("events.start_date").gt("12/25/1988").lt("12/27/1988")));
+  }
+
+  @Test
+  public void testVisitsModifierQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(leafParam2)
+                    .addModifiersItem(
+                        new Modifier()
+                            .name(ModifierType.ENCOUNTERS)
+                            .operator(Operator.IN)
+                            .addOperandsItem("123"))
+                )));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
+        QueryBuilders.termsQuery("events.visit_concept_id", ImmutableList.of("123"))));
+  }
+
+    @Test
+  public void testNumOfOccurrencesModifierQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(leafParam2)
+                    .addModifiersItem(
+                        new Modifier()
+                            .name(ModifierType.NUM_OF_OCCURRENCES)
+                            .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                            .addOperandsItem("13"))
+                )));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQueryOccurrences(
+        13, QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
 }
