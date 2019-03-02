@@ -77,7 +77,9 @@ public final class ElasticFilters {
   }
 
   /**
-   * A hand-maintained mapping of which criteria trees map to standard vs source concept IDs.
+   * A hand-maintained mapping of which criteria trees map to standard vs source concept IDs. This
+   * indicates which concept ID field we should be querying against for a SearchRequest on a given
+   * tree.
    * TODO(RW-2249): Document or encode this more centrally.
    */
   private static Set<TreeType> STANDARD_TREES = ImmutableSet.of(
