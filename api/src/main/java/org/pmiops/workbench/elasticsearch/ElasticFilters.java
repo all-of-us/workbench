@@ -76,6 +76,10 @@ public final class ElasticFilters {
     return new ElasticFilterResponse<>(q, f.isApproximate);
   }
 
+  /**
+   * A hand-maintained mapping of which criteria trees map to standard vs source concept IDs.
+   * TODO(RW-2249): Document or encode this more centrally.
+   */
   private static Set<TreeType> STANDARD_TREES = ImmutableSet.of(
       TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
 
@@ -144,6 +148,8 @@ public final class ElasticFilters {
             throw new BadRequestException("Unknown modifier type: " + mod.getName());
         }
       }
+
+      // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         BoolQueryBuilder b = QueryBuilders.boolQuery()

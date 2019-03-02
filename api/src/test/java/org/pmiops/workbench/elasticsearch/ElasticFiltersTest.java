@@ -56,6 +56,10 @@ public class ElasticFiltersTest {
 
   @Before
   public void setUp() {
+    // Generate a simple test criteria tree
+    // 1
+    // | - 2
+    // | - 3 - 4
     criteriaDao.save(icd9Criteria()
         .id(1)
         .code("001")
