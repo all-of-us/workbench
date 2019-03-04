@@ -67,7 +67,7 @@ public class ElasticFiltersTest {
         .group(true)
         .selectable(false)
         .parentId(0)
-        .path("001"));
+        .path("1"));
     criteriaDao.save(icd9Criteria()
         .id(2)
         .code("001.002")
@@ -103,7 +103,7 @@ public class ElasticFiltersTest {
         .group(false)
         .selectable(true)
         .parentId(0)
-        .path("005"));
+        .path("5"));
 
     leafParam2 = new SearchParameter()
         .conceptId(772L)

@@ -33,7 +33,7 @@ import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 
 /**
- * Utility for conversion of Cohort Builder request into Elasticserach filters. Instances of this
+ * Utility for conversion of Cohort Builder request into Elasticsearch filters. Instances of this
  * class are used internally to track metadata during request processing.
  */
 public final class ElasticFilters {
@@ -84,6 +84,12 @@ public final class ElasticFilters {
    */
   private static Set<TreeType> STANDARD_TREES = ImmutableSet.of(
       TreeType.SNOMED, TreeType.DRUG, TreeType.MEAS, TreeType.VISIT);
+  /**
+   * Criteria trees which are coded hierarchically, e.g. parent code "001", child code "001.002".
+   * TODO(RW-2249): Why aren't all trees coded this way?
+   */
+  private static Set<TreeType> HIERARCHICAL_CODE_TREES =
+      ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
   private final CriteriaDao criteriaDao;
 
@@ -303,6 +309,10 @@ public final class ElasticFilters {
             childrenByParentConcept.get(treeKey)
                 .putIfAbsent(param.getConceptId(), Sets.newHashSet());
           } else if (param.getValue() != null) {
+            if (!HIERARCHICAL_CODE_TREES.contains(treeKey.type)) {
+              throw new BadRequestException(
+                  "Search on criteria group by code is unsupported in tree " + treeKey.type);
+            }
             childrenByParentCode.putIfAbsent(treeKey, Maps.newHashMap());
             childrenByParentCode.get(treeKey).putIfAbsent(param.getValue(), Sets.newHashSet());
           } else {
@@ -335,16 +345,14 @@ public final class ElasticFilters {
         // number to be very high as it requires a user action to add a group, but a better data
         // structure could be used here if this becomes too slow.
         for (Criteria parent : parents) {
-          if (c.getCode().startsWith(parent.getCode())) {
+          String parentId = Long.toString(parent.getId());
+          if (c.getPath().startsWith(parentId + ".") ||
+              c.getPath().contains("." + parentId + ".")) {
             long parentConceptId = Long.parseLong(parent.getConceptId());
             byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
             byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
           }
         }
-      }
-      for (Criteria c : leaves) {
-        byParent.putIfAbsent(c.getParentId(), Sets.newHashSet());
-        byParent.get(c.getParentId()).add(Long.parseLong(c.getConceptId()));
       }
     }
     for (FullTreeType treeType : childrenByParentCode.keySet()) {
