@@ -163,6 +163,7 @@ export interface DetailTabTableState {
   start: number;
   sortField: string;
   sortOrder: number;
+  expandedRows: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -174,7 +175,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         loading: true,
         start: 0,
         sortField: null,
-        sortOrder: 1
+        sortOrder: 1,
+        expandedRows: null
       };
     }
 
@@ -266,7 +268,13 @@ export const DetailTabTable = withCurrentWorkspace()(
             </OverlayPanel>
       </div>;
     }
+    rowExpansionTemplate = () => {
+      // const src = "showcase/resources/demo/images/car/" + data.brand + ".png";
 
+      return  (
+        <div>HEELLOOO</div>
+      );
+    }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
@@ -295,6 +303,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         </React.Fragment>;
 
         return <Column
+          expander={col.name === 'standardName' ? true : col.name !== 'standardName' }
           style={styles.tableBody}
           bodyStyle={styles.columnBody}
           key={col.name}
@@ -307,6 +316,9 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <div style={styles.container}>
         <style>{css}</style>
         {data && <DataTable
+          expandedRows={this.state.expandedRows}
+          onRowToggle={(e) => this.setState({expandedRows:e.data})}
+          rowExpansionTemplate={this.rowExpansionTemplate}
           style={styles.table}
           value={data}
           sortField={sortField}
