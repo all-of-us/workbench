@@ -255,6 +255,7 @@ public class ProfileControllerTest {
     testConfig.firecloud = new FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "";
     testConfig.access = new AccessConfig();
+    testConfig.access.enableEraCommons = true;
 
     when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
@@ -777,7 +778,7 @@ public class ProfileControllerTest {
 
   @Test(expected = ServerErrorException.class)
   public void testUpdateNihToken_serverError() {
-    doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
+    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
   }
 
