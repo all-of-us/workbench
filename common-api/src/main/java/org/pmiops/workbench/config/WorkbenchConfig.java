@@ -89,6 +89,8 @@ public class WorkbenchConfig {
     public boolean enableMoodleBackend;
   }
 
+  // The access object specifies whether each of the following access requirements block access
+  // to the workbench.
   public static class AccessConfig {
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;

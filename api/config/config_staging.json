@@ -50,8 +50,6 @@
     "host": "aou.nnlm.gov",
     "enableMoodleBackend": false
   },
-  // The access object specifies whether each of the following
-  // access requirements block access to the workbench.
   "access": {
     "enableComplianceTraining": false,
     "enableEraCommons": false
