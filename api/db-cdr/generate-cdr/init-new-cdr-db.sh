@@ -5,7 +5,7 @@
 set -xeuo pipefail
 IFS=$'\n\t'
 
-USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD|publicYYYYMMDD>"
+USAGE="./init-new-cdr-db.sh [--drop-if-exists] --cdr-db-name cdrYYYYMMDD|publicYYYYMMDD> --version-flag cdr|public"
 DROP_IF_EXISTS="N"
 VERSION_FLAG="cdr"
 RUN_LIST="schema"
