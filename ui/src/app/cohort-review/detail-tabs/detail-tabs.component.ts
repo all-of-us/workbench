@@ -305,7 +305,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .subscribe();
 
     this.subscription.add(filterStateStore.subscribe(filterState => {
-      this.filterState = filterState === null ? initialfilterState : filterState;
+      this.filterState = filterState === null
+        ? JSON.parse(JSON.stringify(initialfilterState)) : filterState;
     }));
   }
 
