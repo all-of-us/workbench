@@ -91,7 +91,7 @@ export class SettingsReact extends React.Component<{}, SettingsState> {
           <Button disabled={this.state.resetClusterPending}
                   onClick={() => this.resetCluster()}
                   style={{marginLeft: '0.5rem'}}
-                  data-test-id='reset-cluster-send'>Send</Button>
+                  data-test-id='reset-cluster-send'>Reset</Button>
         </ModalFooter>
       </Modal>}
     </React.Fragment>;
