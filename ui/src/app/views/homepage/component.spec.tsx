@@ -107,7 +107,7 @@ describe('HomepageComponent', () => {
     profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
       ...profile,
-      eraLinkedNihUsername: 'test',
+      eraLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -117,7 +117,6 @@ describe('HomepageComponent', () => {
 
   it('should show access tasks dashboard if the user has no nih username', async () => {
     profileApi.profile.trainingCompletionTime = 1;
-
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
