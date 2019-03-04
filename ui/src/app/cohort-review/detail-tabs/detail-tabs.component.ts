@@ -96,6 +96,25 @@ const answer = {
   displayName: 'Answer',
 };
 
+const initialfilterState = {
+  ALL_EVENTS: {
+    standardVocabulary: [],
+    domain: [],
+  },
+  PROCEDURE: {
+    standardVocabulary: [],
+  },
+  CONDITION: {
+    standardVocabulary: [],
+  },
+  OBSERVATION: {
+    standardVocabulary: [],
+  },
+  PHYSICAL_MEASURE: {
+    standardVocabulary: [],
+  },
+};
+
 @Component({
   selector: 'app-detail-tabs',
   templateUrl: './detail-tabs.component.html',
@@ -286,7 +305,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .subscribe();
 
     this.subscription.add(filterStateStore.subscribe(filterState => {
-      this.filterState = filterState;
+      this.filterState = filterState === null
+        ? JSON.parse(JSON.stringify(initialfilterState)) : filterState;
     }));
   }
 

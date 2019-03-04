@@ -202,7 +202,6 @@ export interface DetailTabTableState {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
     constructor(props: DetailTabTableProps) {
-
       super(props);
       this.state = {
         data: null,
@@ -224,6 +223,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
+          filteredData: null,
           loading: true,
         });
         this.getParticipantData();
@@ -308,8 +308,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      const {checkedItems} = this.state;
-
+      const {checkedItems, data} = this.state;
       if (event.target.checked) {
         if (event.target.name === 'SelectAll') {
           checkedItems[colName] = namesArray ;
@@ -333,7 +332,9 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.getErrorMessage(event.target.name);
       this.setState({checkedItems: checkedItems});
       this.props.getFilteredData(colName, checkedItems);
-      this.filterData();
+      if (data) {
+        this.filterData();
+      }
     }
 
     filterData() {
@@ -373,7 +374,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data) {
         names = [...fp.uniq(data.map(item => {
           if (colName === 'standardVocabulary') {
-
             return item.standardVocabulary;
           } else if (colName === 'domain') {
             return item.domain;
@@ -410,7 +410,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-
       if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
