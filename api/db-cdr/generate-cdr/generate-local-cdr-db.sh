@@ -53,7 +53,7 @@ echo "Starting generate-local-cdr-db ${startDate}"
 
 # Init the local cdr database
 echo "Initializing new cdr db $CDR_DB_NAME"
-if ./generate-cdr/init-new-cdr-db.sh --drop-if-exists Y --cdr-db-name $CDR_DB_NAME
+if ./generate-cdr/init-new-cdr-db.sh --drop-if-exists Y --cdr-db-name $CDR_DB_NAME --version-flag $CDR_DB_PREFIX
 then
   echo "Local MYSQL CDR Initialized"
 else

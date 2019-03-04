@@ -9,14 +9,14 @@
 
     <validCheckSum>ANY</validCheckSum>
 
-    <delete tableName="criteria_relationship"/>
 
-    <loadData tableName="criteria_relationship" file="csv/criteria_relationship.csv" encoding="UTF-8" quotchar='"'>
+    <delete tableName="concept_relationship"/>
+
+    <loadData tableName="concept_relationship" file="csv/concept_relationship.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id_1" type="NUMERIC"/>
       <column name="concept_id_2" type="NUMERIC"/>
       <column name="relationship_id" type="STRING"/>
     </loadData>
   </changeSet>
 </databaseChangeLog>
-
 
