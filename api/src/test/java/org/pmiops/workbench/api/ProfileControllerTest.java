@@ -33,6 +33,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -754,7 +756,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    when(nihApi.nihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+    when(fireCloudService.postNihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
