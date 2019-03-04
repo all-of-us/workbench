@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {ReviewStatus} from 'generated';
 
@@ -8,13 +8,13 @@ import {ReviewStatus} from 'generated';
   templateUrl: './page-layout.html',
   styleUrls: ['./page-layout.css']
 })
-export class PageLayout implements OnInit {
+export class PageLayout implements OnDestroy, OnInit {
 
   subscription: any;
   create = false;
   constructor() {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     const review = cohortReviewStore.getValue();
 
     if (review.reviewStatus === ReviewStatus.NONE) {
@@ -23,6 +23,10 @@ export class PageLayout implements OnInit {
       const {ns, wsid, cid} = urlParamsStore.getValue();
       navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
     }
+  }
+
+  ngOnDestroy(): void {
+    filterStateStore.next(null);
   }
 
   reviewCreated(created: boolean) {
