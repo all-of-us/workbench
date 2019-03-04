@@ -201,6 +201,7 @@ export interface DetailTabTableState {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
     dt: any;
+    names = [];
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -215,6 +216,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     componentDidMount() {
+
       this.getParticipantData();
     }
 
@@ -261,6 +263,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
+
           for (const col in checkedItems) {
             if (checkedItems[col].length) {
               this.dt.filter(checkedItems[col], col, 'in');
@@ -310,6 +313,55 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
+    getErrorMessage = (name?) => {
+      const {data, checkedItems} = this.state;
+      if (checkedItems) {
+        for (const col in checkedItems) {
+          if (checkedItems[col].find( i => i !== name)) {
+            return  'There is data, but it is all currently hidden. Please check your filters';
+          }
+        }
+      } else if (data !== null) {
+        return  'No ' + this.props.tabname + ' Data';
+      }
+    }
+
+    addAllOption(arr) {
+      arr.push('SelectAll');
+    }
+
+    getColumnValue(colName) {
+      const {data, checkedItems} = this.state;
+      let names = [];
+      if (data) {
+        names = [...fp.uniq(data.map(item => {
+          if (colName === 'standardVocabulary') {
+            return item.standardVocabulary;
+          } else if (colName === 'domain') {
+            return item.domain;
+          }
+        }))];
+      }
+      this.addAllOption(names);
+      if(checkedItems[colName].find(i => i === 'SelectAll')){
+        checkedItems[colName] = names;
+      }
+      let fl: any;
+      return ( <span>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          {names.map((i, index) => (
+            <div key={index} style={{borderTop: i === 'SelectAll' ? '1px solid #ccc' : 'none',
+              padding: i === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={i}
+                     checked={checkedItems[colName].includes(i)}
+                     onChange={($event) => this.updateData($event, colName, names)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {i} </label>
+            </div>
+          ))}
+        </OverlayPanel>
+      </span>);
+    }
     updateData = (event, colName, namesArray) => {
       const {checkedItems} = this.state;
       if (event.target.checked) {
@@ -336,56 +388,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.dt.filter(checkedItems[colName], colName, 'in');
       this.setState({checkedItems: checkedItems});
       this.props.getFilteredData(checkedItems);
-    }
-
-    getErrorMessage = (name?) => {
-      const {data, checkedItems} = this.state;
-      if (checkedItems) {
-        for (const col in checkedItems) {
-          // checkedItems[col].includes(name);
-          if (checkedItems[col].find( i => i !== name)) {
-            return  'There is data, but it is all currently hidden. Please check your filters';
-          }
-        }
-      } else if (data !== null) {
-        return  'No ' + this.props.tabname + ' Data';
-      }
-    }
-
-    addAllOption(arr) {
-      arr.push('SelectAll');
-    }
-
-    getColumnValue(colName) {
-      const {data, checkedItems} = this.state;
-      let names = [];
-      if (data) {
-        names = [...fp.uniq(data.map(item => {
-          if (colName === 'standardVocabulary') {
-            return item.standardVocabulary;
-          } else if (colName === 'domain') {
-            return item.domain;
-          }
-
-        }))];
-      }
-
-      this.addAllOption(names);
-      let fl: any;
-      return ( <span>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          { names.map((i, index) => (
-            <div key={index} style={{borderTop: i === 'SelectAll' ? '1px solid #ccc' : 'none',
-              padding: i === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
-              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={i}
-                     checked={checkedItems[colName].includes(i)}
-                     onChange={($event) => this.updateData($event, colName, names)}/>
-              <label style={{paddingLeft: '0.4rem'}}> {i} </label>
-            </div>
-          ))}
-        </OverlayPanel>
-      </span>);
     }
 
     render() {
