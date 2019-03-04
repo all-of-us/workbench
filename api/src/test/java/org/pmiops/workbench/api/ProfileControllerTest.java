@@ -252,6 +252,7 @@ public class ProfileControllerTest {
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.firecloud = new FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "";
+    testConfig.access = new AccessConfig();
 
     when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
@@ -753,7 +754,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    doNothing().when(fireCloudService).postNihCallback(any());
+    when(nihApi.nihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
