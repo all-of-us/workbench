@@ -316,6 +316,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
+  setFirstVisit() {
+    this.setState({firstVisit: true});
+    profileApi().updatePageVisits({ page: this.pageId});
+  }
+
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
@@ -327,12 +332,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       if (profile.pageVisits) {
         if (!profile.pageVisits.some(v => v.page === this.pageId)) {
-          this.setState({firstVisit: true});
-          profileApi().updatePageVisits({ page: this.pageId});
+          this.setFirstVisit();
         }
         if (profile.pageVisits.some(v => v.page === 'moodle')) {
           this.setState({firstVisitTraining: false});
         }
+      } else {
+        // page visits is null; is first visit
+        this.setFirstVisit();
       }
 
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
