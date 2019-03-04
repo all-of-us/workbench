@@ -355,7 +355,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {filteredData, checkedItems} = this.state;
       if (checkedItems) {
         for (const col in checkedItems) {
-          // checkedItems[col].includes(name);
           if (checkedItems[col].find( i => i !== name)) {
             return  'There is data, but it is all currently hidden. Please check your filters';
           }
@@ -379,16 +378,17 @@ export const DetailTabTable = withCurrentWorkspace()(
           } else if (colName === 'domain') {
             return item.domain;
           }
-
         }))];
       }
-
       this.addAllOption(names);
+      if(checkedItems[colName].find(i => i === 'SelectAll')){
+        checkedItems[colName] = names;
+      }
       let fl: any;
       return ( <span>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          { names.map((i, index) => (
+          {names.map((i, index) => (
             <div key={index} style={{borderTop: i === 'SelectAll' ? '1px solid #ccc' : 'none',
               padding: i === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={i}
