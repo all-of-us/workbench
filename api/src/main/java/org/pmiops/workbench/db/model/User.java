@@ -68,6 +68,8 @@ public class User {
   private Integer billingProjectRetries;
   private Integer moodleId;
   private Timestamp trainingExpirationTime;
+  private String eraLinkedNihUsername;
+  private Timestamp eraLinkExpireTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -422,5 +424,19 @@ public class User {
 
   public void setTrainingExpirationTime( Timestamp trainingExpirationTime) {
     this.trainingExpirationTime = trainingExpirationTime;
+  }
+
+  @Column(name = "era_linked_nih_username")
+  public String getEraLinkedNihUsername() { return eraLinkedNihUsername; }
+
+  public void setEraLinkedNihUsername( String eraLinkedNihUsername) {
+    this.eraLinkedNihUsername = eraLinkedNihUsername;
+  }
+
+  @Column(name = "era_link_expire_time")
+  public Timestamp getEraLinkExpireTime() { return eraLinkExpireTime; }
+
+  public void setEraLinkExpireTime( Timestamp eraLinkExpireTime) {
+    this.eraLinkExpireTime = eraLinkExpireTime;
   }
 }

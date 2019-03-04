@@ -373,11 +373,6 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Profile> getProfileResponse(User user) {
     Profile profile = profileService.getProfile(user);
     // Note: The following requires that the current request is authenticated.
-    NihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus != null) {
-      profile.setLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      profile.setLinkExpireTime(nihStatus.getLinkExpireTime());
-    }
     return ResponseEntity.ok(profile);
   }
 
@@ -493,7 +488,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
     User user = userProvider.get();
-    Profile profile = profileService.getProfile(user);
     try {
       userService.syncUserTraining(user);
     } catch(NotFoundException ex) {
@@ -501,7 +495,19 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return ResponseEntity.ok(profile);
+    return getProfileResponse(user);
+  }
+
+  @Override
+  public ResponseEntity<Profile> syncEraCommonsStatus() {
+    User user = userProvider.get();
+    NihStatus nihStatus = fireCloudService.getNihStatus();
+    if (nihStatus != null) {
+      user.setEraLinkedNihUsername(nihStatus.getLinkedNihUsername());
+      user.setEraLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+    }
+    userDao.save(user);
+    return getProfileResponse(user);
   }
 
   @Override
@@ -701,11 +707,16 @@ public class ProfileController implements ProfileApiDelegate {
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
-      fireCloudService.postNihCallback(wrapper);
+      NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
+      if (nihStatus.getLinkedNihUsername() == null) {
+        log.log(Level.WARNING, "No Username Found when updating nih token");
+      }
       User user = initializeUserIfNeeded();
+      user.setEraLinkedNihUsername(nihStatus.getLinkedNihUsername());
+      user.setEraLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
       return getProfileResponse(user);
-    } catch (Exception e) {
-      throw new ServerErrorException("Unable to update NIH token", e);
+    } catch (WorkbenchException e) {
+      throw e;
     }
   }
 

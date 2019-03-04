@@ -96,7 +96,7 @@ describe('HomepageComponent', () => {
     const newProfile = {
       ...profile,
       pageVisits: [{page: 'homepage'}],
-      linkedNihUsername: 'test'
+      eraLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -107,7 +107,7 @@ describe('HomepageComponent', () => {
     profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
       ...profile,
-      linkedNihUsername: 'test',
+      eraLinkedNihUsername: 'test',
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -126,7 +126,7 @@ describe('HomepageComponent', () => {
   it('should show access tasks dashboard if the user has not completed training', async () => {
     const newProfile = {
       ...profile,
-      linkedNihUsername: 'test'
+      eraLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -145,7 +145,7 @@ describe('HomepageComponent', () => {
     profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
         ...profile,
-      linkedNihUsername: 'test',
+      eraLinkedNihUsername: 'test',
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();

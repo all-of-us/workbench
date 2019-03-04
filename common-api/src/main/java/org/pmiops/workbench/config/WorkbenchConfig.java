@@ -19,6 +19,7 @@ public class WorkbenchConfig {
   public MandrillConfig mandrill;
   public ElasticsearchConfig elasticsearch; 
   public MoodleConfig moodle;
+  public AccessConfig access;
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -86,5 +87,10 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
+  }
+
+  public static class AccessConfig {
+    public boolean enableComplianceTraining;
+    public boolean enableEraCommons;
   }
 }

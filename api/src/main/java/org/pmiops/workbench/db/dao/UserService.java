@@ -100,9 +100,11 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
+        && (!configProvider.get().access.enableEraCommons || user.getEraLinkedNihUsername() != null)
         && user.getDemographicSurveyCompletionTime() != null
-        && user.getTrainingCompletionTime() != null
+        && (!configProvider.get().access.enableComplianceTraining || user.getTrainingCompletionTime() != null)
         && user.getTermsOfServiceCompletionTime() != null
         && !user.getDisabled()
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());

@@ -334,8 +334,13 @@ export const Homepage = withUserProfile()(class extends React.Component<
           this.setState({firstVisitTraining: false});
         }
       }
-
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      try {
+        const syncEraCommonsStatus = await profileApi().syncEraCommonsStatus();
+        this.setState({eraCommonsLinked: !!syncEraCommonsStatus.eraLinkedNihUsername});
+      } catch (ex) {
+        this.setState({eraCommonsLinked: false});
+        console.error('error fetching era commons linking status');
+      }
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();
