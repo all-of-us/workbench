@@ -317,6 +317,7 @@ export class ChartComponent implements OnChanges {
       minPointLength: 3,
       pointWidth: 5,
       xAxisTitle: null,
+      tooltip: {pointFormat: '<b>{point.y} </b>'},
     };
 
   }
