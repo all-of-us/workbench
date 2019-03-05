@@ -158,6 +158,7 @@ public final class ElasticFilters {
       }
 
       // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
+      // TODO(calbach): Handle non-code values, e.g. question answers here.
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         BoolQueryBuilder b = QueryBuilders.boolQuery()
@@ -278,14 +279,18 @@ public final class ElasticFilters {
     }
   }
 
+  /**
+   * Extracts all criteria groups in the given search request and produces a lookup map from group
+   * parameter to set of matching child concept ids.
+   */
   private Map<SearchParameter, Set<Long>> buildCriteriaGroupLookup(SearchRequest req) {
     // Three categories of criteria groups are currently supported in a SearchRequest:
-    // 1. Groups with only tree types specified, e.g. PPI.
+    // 1. Groups with tree types & a concept ID specified, e.g. drugs.
     // 2. Groups with tree types & a criteria code specified, e.g. ICD9/ICD10.
-    // 3. Groups with tree types & a concept ID specified, e.g. drugs.
-    Map<FullTreeType, Set<Long>> childrenByTreeType = Maps.newHashMap();
-    Map<FullTreeType, Map<String, Set<Long>>> childrenByParentCode = Maps.newHashMap();
+    // 3. Groups with only tree types specified, e.g. PPI surveys (the basics).
     Map<FullTreeType, Map<Long, Set<Long>>> childrenByParentConcept = Maps.newHashMap();
+    Map<FullTreeType, Map<String, Set<Long>>> childrenByParentCode = Maps.newHashMap();
+    Map<FullTreeType, Set<Long>> childrenByTreeType = Maps.newHashMap();
 
     // Within each category/tree type combination, we can batch MySQL requests to translate these
     // groups into child concept IDs. First we build up maps to denote which groups to query and
@@ -333,7 +338,7 @@ public final class ElasticFilters {
       criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
           treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
           .forEach(c -> {
-            if (parentConceptIds.contains(c.getConceptId())) {
+            if (c.getGroup()) {
               parents.add(c);
             } else {
               leaves.add(c);
@@ -347,7 +352,8 @@ public final class ElasticFilters {
         for (Criteria parent : parents) {
           String parentId = Long.toString(parent.getId());
           if (c.getPath().startsWith(parentId + ".") ||
-              c.getPath().contains("." + parentId + ".")) {
+              c.getPath().contains("." + parentId + ".") ||
+              c.getPath().endsWith("." + parentId)) {
             long parentConceptId = Long.parseLong(parent.getConceptId());
             byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
             byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));

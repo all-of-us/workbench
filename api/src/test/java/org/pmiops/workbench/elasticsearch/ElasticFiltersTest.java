@@ -52,6 +52,13 @@ public class ElasticFiltersTest {
         .attribute(Boolean.FALSE);
   }
 
+  private static Criteria basicsCriteria() {
+    return new Criteria()
+        .domainId("Observation")
+        .type(TreeType.PPI.toString())
+        .subtype(TreeSubType.BASICS.toString())
+        .attribute(Boolean.FALSE);
+  }
   private SearchParameter leafParam2;
 
   @Before
@@ -67,7 +74,7 @@ public class ElasticFiltersTest {
         .group(true)
         .selectable(false)
         .parentId(0)
-        .path("1"));
+        .path(""));
     criteriaDao.save(icd9Criteria()
         .id(2)
         .code("001.002")
@@ -75,7 +82,7 @@ public class ElasticFiltersTest {
         .group(false)
         .selectable(true)
         .parentId(1)
-        .path("1.2"));
+        .path("1"));
     criteriaDao.save(icd9Criteria()
         .id(3)
         .code("001.003")
@@ -83,7 +90,7 @@ public class ElasticFiltersTest {
         .group(true)
         .selectable(true)
         .parentId(1)
-        .path("1.3"));
+        .path("1"));
     criteriaDao.save(icd9Criteria()
         .id(4)
         .code("001.003.004")
@@ -91,7 +98,9 @@ public class ElasticFiltersTest {
         .group(false)
         .selectable(true)
         .parentId(3)
-        .path("1.3.4"));
+        .path("1.3"));
+
+    // Singleton SNOMED code.
     criteriaDao.save(new Criteria()
         .id(5)
         .code("005")
@@ -103,7 +112,42 @@ public class ElasticFiltersTest {
         .group(false)
         .selectable(true)
         .parentId(0)
-        .path("5"));
+        .path(""));
+
+    // Four node PPI tree, survey, question, 2 answers.
+    criteriaDao.save(basicsCriteria()
+        .id(6)
+        .code("006")
+        .group(true)
+        .selectable(true)
+        .parentId(0)
+        .path(""));
+    criteriaDao.save(basicsCriteria()
+        .id(7)
+        .code("007")
+        .conceptId("777")
+        .group(true)
+        .selectable(true)
+        .parentId(6)
+        .path("6"));
+    criteriaDao.save(basicsCriteria()
+        .id(8)
+        .code("008")
+        // Concept ID matches the question.
+        .conceptId("777")
+        .group(false)
+        .selectable(true)
+        .parentId(7)
+        .path("6.7"));
+    criteriaDao.save(basicsCriteria()
+        .id(9)
+        .code("009")
+        // Concept ID matches the question.
+        .conceptId("777")
+        .group(false)
+        .selectable(true)
+        .parentId(7)
+        .path("6.7"));
 
     leafParam2 = new SearchParameter()
         .conceptId(772L)
@@ -188,6 +232,22 @@ public class ElasticFiltersTest {
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772", "774"))));
+  }
+
+  @Test
+  public void testPPIQuestionQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+        ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+            .addIncludesItem(new SearchGroup()
+                .addItemsItem(new SearchGroupItem()
+                    .addSearchParametersItem(new SearchParameter()
+                        .type(TreeType.PPI.toString())
+                        .subtype(TreeSubType.BASICS.toString())
+                        .conceptId(777L)
+                        .group(true)))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+        QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
   }
 
   @Test
