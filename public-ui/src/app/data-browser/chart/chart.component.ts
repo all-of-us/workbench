@@ -79,7 +79,7 @@ export class ChartComponent implements OnChanges {
       title: options.title,
       subtitle: {},
       tooltip: {
-        formatter: function (tooltip) {
+        formatter: function(tooltip) {
           if (this.point.y <= 20) {
             return this.point.name + ' <= ' + '<b>' + this.point.y + '</b>';
           }
