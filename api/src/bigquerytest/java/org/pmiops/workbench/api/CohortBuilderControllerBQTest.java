@@ -178,7 +178,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     //pm no attributes
     Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null);
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, "1");
     SearchParameter pmParam = createSearchParameter(pm, null);
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, EMPTY_MESSAGE, ATTRIBUTES);
@@ -381,21 +381,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
       PARAMETER, SUBTYPE, pmParam.getSubtype());
 
-    //pm no value
-    pmParam.subtype(TreeSubType.PREG.name());
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, pmParam.getValue());
-
     //pm no attribute name
     Attribute pmAttr = new Attribute();
     pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, NAME, pmAttr.getName());
+      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
 
     //pm no operator
-    pmAttr.name("HEIGHT");
+    pmParam.conceptId(1L);
+    pmAttr.name("NUM");
     pmParam.attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
@@ -528,7 +523,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //pm operands not one
     Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("1", "2")).conceptId(1L);
     Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null);
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, "1");
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, ONE_OPERAND_MESSAGE, ATTRIBUTE, pmAttr.getName(),
@@ -559,7 +554,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     //pm operands not two
     Attribute pmAttr = new Attribute().name("Height").operator(Operator.BETWEEN).operands(Arrays.asList("1")).conceptId(1L);
     Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null);
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, "1");
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, TWO_OPERAND_MESSAGE, ATTRIBUTE,
@@ -596,9 +591,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       demoAttr.getName());
 
     //pm operands not a number
-    Attribute pmAttr = new Attribute().name("Height").operator(Operator.EQUAL).operands(Arrays.asList("z")).conceptId(1L);
+    Attribute pmAttr = new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("z")).conceptId(1L);
     Criteria pm =
-      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, null);
+      createCriteriaChild(TreeType.PM.name(), TreeSubType.HEIGHT.name(), 0, "1");
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE,
@@ -1764,7 +1759,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(bpSearchParameter), new ArrayList<>());
 
     List<Attribute> hrAttributes = Arrays.asList(
-      new Attribute().name("Heart Rate").operator(Operator.EQUAL).operands(Arrays.asList("71"))
+      new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("71"))
     );
     SearchParameter hrSearchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), hrAttributes);
     hrSearchParameter.conceptId(903126L);
@@ -1773,7 +1768,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
     List<Attribute> irrAttributes = Arrays.asList(
-      new Attribute().name(TreeSubType.HR.toString()).operator(Operator.EQUAL).operands(Arrays.asList("4262985"))
+      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("4262985"))
     );
     SearchParameter heartRateIrr = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR.name(), irrAttributes);
     heartRateIrr.conceptId(1586218L);
@@ -1796,7 +1791,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsHeartRate() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(TreeSubType.HR_DETAIL.toString()).operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("45"))
+      new Attribute().name("NUM").operator(Operator.GREATER_THAN_OR_EQUAL_TO).operands(Arrays.asList("45"))
     );
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), "1586218");
     searchParameter.attributes(attributes);
@@ -1809,7 +1804,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsHeight() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Height").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("168"))
+      new Attribute().name("NUM").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("168"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HEIGHT.name(), attributes);
     searchParameter.conceptId(903133L);
@@ -1821,7 +1816,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsWeight() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Weight").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("201"))
+      new Attribute().name("NUM").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("201"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WEIGHT.name(), attributes);
     searchParameter.conceptId(903121L);
@@ -1833,7 +1828,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBMI() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("BMI").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("263"))
+      new Attribute().name("NUM").operator(Operator.LESS_THAN_OR_EQUAL_TO).operands(Arrays.asList("263"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.BMI.name(), attributes);
     searchParameter.conceptId(903124L);
@@ -1845,7 +1840,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectWaistCircumference() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Waist").operator(Operator.EQUAL).operands(Arrays.asList("31"))
+      new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("31"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WC.name(), attributes);
     searchParameter.conceptId(903135L);
@@ -1857,7 +1852,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectHipCircumference() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("Hip").operator(Operator.EQUAL).operands(Arrays.asList("33"))
+      new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("33"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HC.name(), attributes);
     searchParameter.conceptId(903136L);
@@ -1869,7 +1864,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectPregnant() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(TreeSubType.PREG.toString()).operator(Operator.EQUAL).operands(Arrays.asList("45877994"))
+      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("45877994"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.PREG.name(), attributes);
     searchParameter.conceptId(903120L);
@@ -1881,7 +1876,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectWheelChairUser() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name(TreeSubType.WHEEL.toString()).operator(Operator.EQUAL).operands(Arrays.asList("4023190"))
+      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("4023190"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WHEEL.name(), attributes);
     searchParameter.conceptId(903111L);

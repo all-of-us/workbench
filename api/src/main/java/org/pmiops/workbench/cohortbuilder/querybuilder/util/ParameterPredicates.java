@@ -15,8 +15,8 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 
 public class ParameterPredicates {
 
-  private static final String SYSTOLIC = "Systolic";
-  private static final String DIASTOLIC = "Diastolic";
+  private static final int SYSTOLIC = 903118;
+  private static final int DIASTOLIC = 903115;
 
   private static final List<String> ICD_TYPES =
     Arrays.asList(TreeType.ICD9.toString(),
@@ -172,7 +172,7 @@ public class ParameterPredicates {
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> !SYSTOLIC.equalsIgnoreCase(a.getName()) && !DIASTOLIC.equalsIgnoreCase(a.getName()))
+      .filter(a -> SYSTOLIC != a.getConceptId() && DIASTOLIC != a.getConceptId())
       .collect(Collectors.toList()).size() != 0;
   }
 

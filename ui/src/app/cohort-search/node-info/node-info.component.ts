@@ -19,7 +19,7 @@ import {
   subtreeSelected,
 } from 'app/cohort-search/redux';
 import {stripHtml} from 'app/cohort-search/utils';
-import {TreeSubType, TreeType} from 'generated';
+import {Operator, TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -161,6 +161,18 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
               attributes = PREDEFINED_ATTRIBUTES[key];
             }
           });
+        } else if (this.node.get('subtype') === TreeSubType.WHEEL ||
+          this.node.get('subtype') === TreeSubType.PREG ||
+          this.node.get('subtype') === TreeSubType.HRIRR ||
+          this.node.get('subtype') === TreeSubType.HRNOIRR) {
+          attributes.push({'name': 'CAT', 'operator': Operator.IN, 'operands': [this.node.get('code')]});
+        } else if (this.node.get('type') === TreeType.PPI && !this.node.get('group')) {
+          if (this.node.get('code') === '') {
+            attributes.push({'name': 'CAT', 'operator': Operator.IN, 'operands': [this.node.get('name')]});
+          } else {
+            attributes.push({'name': 'NUM', 'operator': Operator.EQUAL, 'operands': [this.node.get('code')]});
+          }
+
         }
         const param = this.node.set('parameterId', this.paramId)
           .set('attributes', attributes).set('name', modifiedName);
@@ -179,7 +191,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           name: this.node.get('subtype'),
           operator: null,
           operands: [null],
-          conceptId: this.node.get('conceptId', null),
           MIN: 0,
           MAX: 10000
         }];
