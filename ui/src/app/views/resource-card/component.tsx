@@ -44,7 +44,6 @@ export class ResourceCardMenuComponent extends ReactWrapperBase {
 
 const styles = reactStyles({
   card: {
-    marginTop: '1rem',
     justifyContent: 'space-between',
     width: '200px',
     height: '223px',
