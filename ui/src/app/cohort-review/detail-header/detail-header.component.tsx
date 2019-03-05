@@ -4,14 +4,29 @@ import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {CohortReview, PageFilterRequest, PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-
+const styles = reactStyles({
+  navigation: {
+    display: 'inline-block',
+    padding: '1rem 0.25rem',
+    border: '1px solid #cccccc',
+    borderRadius: '5px',
+    background: '#fafafa',
+  },
+  buttons: {
+    display: 'inline',
+    fontSize: '12px',
+    color: '#2691D0',
+    border: '1px solid #2691D0',
+    borderRadius: '3px',
+  }
+});
 export interface DetailHeaderProps {
   participant: Participant;
   workspace: WorkspaceData;
@@ -137,31 +152,32 @@ export const DetailHeader = withCurrentWorkspace()(
     render() {
       const {participant} = this.props;
       const {isFirstParticipant, isLastParticipant} = this.state;
+      const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <button
           type='button'
           className='btn btn-sm'
-          title='Go Back to the Participant Table'
+          title='Go Back to the review set table'
           onClick={() => this.backToTable()}>
-          Table
+          Back to review set
         </button>
-        <h4>Participant { participant.id }</h4>
-        <div className='btn-group btn-sm'>
+        <h4>{cohort.name}</h4>
+        <div>{cohort.description}</div>
+        <div style={styles.navigation}>
           <button
             type='button'
-            className='btn btn-prev'
             title='Go To the Prior Participant'
             disabled={isFirstParticipant}
             onClick={() => this.previous()}>
-            Prev
+            <i className='pi pi-angle-left' />
           </button>
+          <span>Participant { participant.id }</span>
           <button
             type='button'
-            className='btn btn-next'
             title='Go To the Next Participant'
             disabled={isLastParticipant}
             onClick={() => this.next()}>
-            Next
+            <i className='pi pi-angle-right' />
           </button>
         </div>
       </div>;
