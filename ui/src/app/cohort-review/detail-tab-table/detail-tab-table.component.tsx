@@ -333,19 +333,18 @@ export const DetailTabTable = withCurrentWorkspace()(
               .indexOf(event.target.name), 1);
         }
       }
-      this.getErrorMessage(event.target.name);
       this.setState({checkedItems: checkedItems});
       this.props.getFilteredData(colName, checkedItems);
       if (data) {
         this.filterData();
       }
+      this.getErrorMessage(event.target.name);
     }
 
     filterData() {
       const {checkedItems} = this.state;
       let {data, start} = this.state;
       const empty = [];
-
       for (const col in checkedItems) {
         if (checkedItems[col].length) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
@@ -355,8 +354,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       if (!empty.includes(false)) {
-        if (data && data.length > 0) {
-          // if selected tab does not have cheked items but have data
+        if (checkedItems === undefined) {
+          // as some tab does not have filtered items but have data
           this.setState({filteredData: data, start: start});
         } else {
           this.setState({filteredData: []});
@@ -374,9 +373,11 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length === 0) {
         return  'No ' + this.props.tabname + ' Data';
       } else {
-        if ((filteredData && filteredData.length === 0)) {
+        if (filteredData && filteredData.length === 0) {
           for (const col in checkedItems) {
-            if (checkedItems[col].find( i => i !== name)) {
+            if (checkedItems[col].find( i => i !== name) || filteredData !== null) {
+              // filtered data null  or if item selected from different participants not
+              // exist in next/previous participants need to show this below message
               return 'There is data, but it is all currently hidden. Please check your filters';
             }
           }
