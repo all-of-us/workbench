@@ -704,7 +704,9 @@ export class CohortSearchActions {
     }
     if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
-    } else if (immParam.get('code') && TreeType.PM !== immParam.get('type')) {
+    } else if (immParam.get('code') &&
+      TreeType.PM !== immParam.get('type') &&
+      TreeType.PPI !== immParam.get('type')) {
       param.value = immParam.get('code');
     }
     return param;

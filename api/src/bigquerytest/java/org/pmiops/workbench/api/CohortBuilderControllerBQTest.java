@@ -204,123 +204,104 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       createCriteriaChild(null, null, 0, null);
     SearchParameter icd9 = createSearchParameter(icd9ConditionChild, "001.1");
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, icd9.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, icd9.getType());
 
     //icd9 bad type
     icd9.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, icd9.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, icd9.getType());
 
     //icd9 no subtype
     icd9.type(TreeType.ICD9.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, icd9.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, icd9.getSubtype());
 
     //icd9 bad subtype
     icd9.subtype("badsubtype");
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, icd9.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, icd9.getSubtype());
 
     //icd9 child no concept id
     icd9.subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, icd9.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, icd9.getConceptId());
 
     //icd9 parent no code
     icd9.group(true).value(null);
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CODE, icd9.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CODE, icd9.getValue());
 
     //icd9 parent empty code
     icd9.group(true).value("");
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(icd9), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CODE, icd9.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CODE, icd9.getValue());
 
     //snomed no type
     Criteria snomedCrtieria =
       createCriteriaChild(null, null, 0, null);
     SearchParameter snomed = createSearchParameter(snomedCrtieria, "");
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, snomed.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, snomed.getType());
 
     //snomed bad type
     snomed.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, snomed.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, snomed.getType());
 
     //snomed child no concept id
     snomed.type(TreeType.SNOMED.name()).subtype(TreeSubType.CM.name());
     searchRequest = createSearchRequests(TreeType.CONDITION.name(), Arrays.asList(snomed), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, snomed.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, snomed.getConceptId());
 
     //demo no type
     Criteria demo =
       createCriteriaChild(null, null, 0, null);
     SearchParameter demoParam = createSearchParameter(demo, null);
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, demoParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, demoParam.getType());
 
     //demo bad type
     demoParam.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, demoParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, demoParam.getType());
 
     //demo no subtype
     demoParam.type(TreeType.DEMO.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, demoParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, demoParam.getSubtype());
 
     //demo bad subtype
     demoParam.subtype(TreeSubType.HEIGHT.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, demoParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, demoParam.getSubtype());
 
     //demo no concept id for gender
     demoParam.subtype(TreeSubType.GEN.name());
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, demoParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, demoParam.getConceptId());
 
     //demo no concept id for gender
     Attribute age = new Attribute().name("Age");
     demoParam.subtype(TreeSubType.AGE.name()).attributes(Arrays.asList(age));
     searchRequest = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demoParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, age.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, age.getOperator());
 
     //drug no type
     Criteria drug =
       createCriteriaChild(null, null, 0, null);
     SearchParameter drugParam = createSearchParameter(drug, null);
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, drugParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, drugParam.getType());
 
     //drug bad type
     drugParam.type("blah");
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, drugParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, drugParam.getType());
 
     //drug no concept id
     drugParam.type(TreeType.DRUG.name());
     searchRequest = createSearchRequests(TreeType.DRUG.name(), Arrays.asList(drugParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, drugParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, drugParam.getConceptId());
 
     //meas no type
     Criteria meas =
@@ -328,125 +309,111 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Attribute measAttr = new Attribute();
     SearchParameter measParam = createSearchParameter(meas, null).attributes(Arrays.asList(measAttr));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, measParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, measParam.getType());
 
     //meas bad type
     measParam.type("blah");
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, measParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, measParam.getType());
 
     //meas no concept id
     measParam.type(TreeType.MEAS.name());
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, measParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, measParam.getConceptId());
 
     //meas no attr name
     measParam.conceptId(1L);
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, NAME, measAttr.getName());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, NAME, measAttr.getName());
 
     //meas no operator
     measParam.attributes(Arrays.asList(measAttr.name("name")));
     searchRequest = createSearchRequests(TreeType.MEAS.name(), Arrays.asList(measParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, measAttr.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, measAttr.getOperator());
 
     //pm no type
     Criteria pm =
       createCriteriaChild(null, null, 0, null);
     SearchParameter pmParam = createSearchParameter(pm, null);
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, pmParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, pmParam.getType());
 
     //pm bad type
     pmParam.type("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, pmParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, pmParam.getType());
 
     //pm no subtype
     pmParam.type(TreeType.PM.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, pmParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, pmParam.getSubtype());
 
     //pm bad subtype
     pmParam.subtype("blah");
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, SUBTYPE, pmParam.getSubtype());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, pmParam.getSubtype());
 
     //pm no attribute name
     Attribute pmAttr = new Attribute();
     pmParam.subtype(TreeSubType.HEIGHT.name()).attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, pmParam.getConceptId());
 
     //pm no operator
     pmParam.conceptId(1L);
     pmAttr.name("NUM");
     pmParam.attributes(Arrays.asList(pmAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      ATTRIBUTE, OPERATOR, pmAttr.getOperator());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, pmAttr.getOperator());
 
     //visit no type
     Criteria visit =
       createCriteriaChild(null, null, 0, null);
     SearchParameter visitParam = createSearchParameter(visit, null);
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, visitParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, visitParam.getType());
 
     //visit bad type
     visitParam.type("blah");
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, visitParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, visitParam.getType());
 
     //visit no concept id
     visitParam.type(TreeType.VISIT.name());
     searchRequest = createSearchRequests(TreeType.VISIT.name(), Arrays.asList(visitParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, visitParam.getConceptId());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, visitParam.getConceptId());
 
     //ppi no type
     Criteria ppi =
       createCriteriaChild(null, null, 0, null);
     SearchParameter ppiParam = createSearchParameter(ppi, null);
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, ppiParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, ppiParam.getType());
 
     //ppi bad type
     ppiParam.type("blah");
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, TYPE, ppiParam.getType());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, TYPE, ppiParam.getType());
 
     //ppi no concept id
+    Attribute attr = new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    ppiParam.attributes(Arrays.asList(attr));
     ppiParam.type(TreeType.PPI.name());
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, NAME, ppiParam.getName());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, ppiParam.getConceptId());
 
-    //ppi no value as number
-    ppiParam.conceptId(1L);
+    //ppi no attribute name
+    attr = new Attribute().name("").operator(Operator.EQUAL).operands(Arrays.asList("1"));
+    ppiParam.attributes(Arrays.asList(attr));
+    ppiParam.setConceptId(1L);
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, NAME, ppiParam.getName());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, NAME, attr.getName());
 
-    //ppi value not a number
-    ppiParam.value("name");
+    //ppi no operator
+    attr = new Attribute().name("NUM").operands(Arrays.asList("1"));
+    ppiParam.attributes(Arrays.asList(attr));
     searchRequest = createSearchRequests(TreeType.PPI.name(), Arrays.asList(ppiParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, ppiParam.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, null);
   }
 
   @Test
@@ -475,33 +442,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest()
       .includes(Arrays.asList(temporalGroup));
     //temporal mention null
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, MENTION, param1.getValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, param1.getValue());
 
     //temporal mention invalid
     temporalGroup.setMention(null);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, MENTION, temporalGroup.getMention());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, MENTION, temporalGroup.getMention());
 
     //temporal time null
     temporalGroup.setMention(TemporalMention.ANY_MENTION);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, TIME, temporalGroup.getTime());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal time invalid
     temporalGroup.setTime(null);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, TIME, temporalGroup.getTime());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME, temporalGroup.getTime());
 
     //temporal timeValue null
     temporalGroup.setTime(TemporalTime.X_DAYS_AFTER);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP, TIME_VALUE, temporalGroup.getTimeValue());
 
     //temporal group is null
     temporalGroup.setTime(TemporalTime.DURING_SAME_ENCOUNTER_AS);
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      SEARCH_GROUP_ITEM, TEMPORAL_GROUP, searchGroupItem1.getTemporalGroup());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, SEARCH_GROUP_ITEM, TEMPORAL_GROUP, searchGroupItem1.getTemporalGroup());
 
     //temporal group not valid
     searchGroupItem1.setTemporalGroup(2);
@@ -682,9 +643,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsBPMessageException() throws Exception {
-    Attribute sysAttr = new Attribute().name("Systolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
-    Attribute diaAttr = new Attribute().name("Diastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
-    Attribute nonDiaAttr = new Attribute().name("NotDiastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
+    Attribute sysAttr = new Attribute().name("Systolic").operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(903118L);
+    Attribute diaAttr = new Attribute().name("Diastolic").operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(903115L);
+    Attribute nonDiaAttr = new Attribute().name("NotDiastolic").operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(1L);
 
     //only 1 attribute
     Criteria pm =
@@ -698,11 +659,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
-
-    //no conceptId on attribute
-    pmParam.attributes(Arrays.asList(sysAttr, diaAttr));
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, sysAttr.getConceptId());
   }
 
   @Test
@@ -1768,7 +1724,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
     List<Attribute> irrAttributes = Arrays.asList(
-      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("4262985"))
+      new Attribute().name("CAT").operator(Operator.IN).operands(Arrays.asList("4262985"))
     );
     SearchParameter heartRateIrr = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR.name(), irrAttributes);
     heartRateIrr.conceptId(1586218L);
@@ -1864,7 +1820,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectPregnant() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("45877994"))
+      new Attribute().name("CAT").operator(Operator.IN).operands(Arrays.asList("45877994"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.PREG.name(), attributes);
     searchParameter.conceptId(903120L);
@@ -1876,7 +1832,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectWheelChairUser() throws Exception {
     List<Attribute> attributes = Arrays.asList(
-      new Attribute().name("CAT").operator(Operator.EQUAL).operands(Arrays.asList("4023190"))
+      new Attribute().name("CAT").operator(Operator.IN).operands(Arrays.asList("4023190"))
     );
     SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WHEEL.name(), attributes);
     searchParameter.conceptId(903111L);
@@ -1902,16 +1858,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     //value as concept id
+    List<Attribute> attributes = Arrays.asList(
+      new Attribute().name("CAT").operator(Operator.IN).operands(Arrays.asList("7"))
+    );
     ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name(null);
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5");
     ppi = createSearchParameter(ppiCriteria, "7");
+    ppi.attributes(attributes);
     searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     //value as number
+    attributes = Arrays.asList(
+      new Attribute().name("NUM").operator(Operator.EQUAL).operands(Arrays.asList("7"))
+    );
     ppiCriteria =
-      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5").name("7");
+      createCriteriaChild(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0, "5");
     ppi = createSearchParameter(ppiCriteria, null);
+    ppi.attributes(attributes);
     searchRequest = createSearchRequests(ppiCriteria.getType(), Arrays.asList(ppi), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
