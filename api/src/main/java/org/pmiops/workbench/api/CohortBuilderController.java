@@ -95,7 +95,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       public org.pmiops.workbench.model.CriteriaAttribute apply(CriteriaAttribute criteria) {
         return new org.pmiops.workbench.model.CriteriaAttribute()
           .id(criteria.getId())
-          .conceptId(criteria.getConceptId())
           .valueAsConceptId(criteria.getValueAsConceptId())
           .conceptName(criteria.getConceptName())
           .type(criteria.getType())

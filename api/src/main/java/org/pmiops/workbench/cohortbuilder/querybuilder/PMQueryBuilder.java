@@ -94,8 +94,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       validateSearchParameter(parameter);
       List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
-      boolean isValueAsNumber = PM_TYPES_VALUE_AS_NUMBER.contains(parameter.getSubtype());
+//      boolean isValueAsNumber = PM_TYPES_VALUE_AS_NUMBER.contains(parameter.getSubtype());
         for (Attribute attribute : parameter.getAttributes()) {
+          boolean isValueAsNumber = attribute.getName().equalsIgnoreCase("NUM");
           validateAttribute(attribute, isBP);
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
@@ -149,15 +150,13 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     Long conceptId = param.getConceptId();
     from(typeBlank().or(pmTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, type);
     from(subtypeBlank().or(pmSubtypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, SUBTYPE, subtype);
-    if (PM_TYPES_VALUE_AS_NUMBER.contains(param.getSubtype())) {
       from(notAnyAttr().and(attributesEmpty())).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
       if (param.getSubtype().equals(TreeSubType.BP.name())) {
         from(notAnyAttr().and(notTwoAttributes())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
         from(notAnyAttr().and(notSystolicAndDiastolic())).test(param).throwException(BP_TWO_ATTRIBUTE_MESSAGE);
+      } else {
+        from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
       }
-    } else {
-      from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, conceptId);
-    }
   }
 
   private void validateAttribute(Attribute attr, boolean isBP) {

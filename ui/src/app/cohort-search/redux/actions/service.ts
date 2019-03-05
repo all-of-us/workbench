@@ -7,7 +7,7 @@ import {
   SearchGroupItem,
   SearchParameter,
   SearchRequest,
-  TreeSubType
+  TreeSubType, TreeType
 } from 'generated';
 
 import {stripHtml} from 'app/cohort-search/utils';
@@ -704,7 +704,7 @@ export class CohortSearchActions {
     }
     if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
-    } else if (immParam.get('code')) {
+    } else if (immParam.get('code') && TreeType.PM !== immParam.get('type')) {
       param.value = immParam.get('code');
     }
     return param;

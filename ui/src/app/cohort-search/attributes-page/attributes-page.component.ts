@@ -99,7 +99,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                 this.attrs.NUM.push({
                   name: 'NUM',
                   operator: null,
-                  operands: [null],
+                  operands: [],
                   conceptId: attr.conceptId,
                   [attr.conceptName]: attr.estCount
                 });
@@ -272,20 +272,20 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       name += 'Any)';
       attrs.push({
         name: 'ANY',
-        operator: null,
-        operands: [null],
-        conceptId: this.node.get('conceptId')
+        operands: []
       });
     } else {
       this.attrs.NUM.forEach((attr, i) => {
         const paramAttr = {
-          name: attr.name,
+          name: 'NUM',
           operator: attr.operator,
           operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
           conceptId: attr.conceptId
         };
         if (this.form.value.NUM['num' + i].operator === 'ANY') {
           paramAttr.name = 'ANY';
+          delete(paramAttr.operator);
+          paramAttr.operands = [];
           if (i === 0) {
             name += 'Any';
           }
@@ -310,12 +310,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       }, []);
       if (catOperands.length) {
         attrs.push({name: 'CAT', operator: Operator.IN, operands: catOperands});
-      }
-      if (this.attrs.NUM.length && catOperands.length) {
-        attrs = attrs.map(attr => {
-          attr.name = 'BOTH';
-          return attr;
-        });
       }
       name += (this.isPM && attrs[0].name !== 'ANY'
         ? this.units[this.node.get('subtype')]

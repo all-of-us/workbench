@@ -362,7 +362,6 @@ definitions:
     type: object
     required:
       - id
-      - conceptId
       - valueAsConceptId
       - conceptName
       - type
@@ -370,10 +369,6 @@ definitions:
     properties:
       id:
         description: id of the criteria
-        type: integer
-        format: int64
-      conceptId:
-        description: conceptId of the concept
         type: integer
         format: int64
       valueAsConceptId:
