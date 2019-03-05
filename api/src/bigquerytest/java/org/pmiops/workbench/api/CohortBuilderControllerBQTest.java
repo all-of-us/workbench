@@ -109,7 +109,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    ElasticSearchService elasticSearchService = new ElasticSearchService(configProvider);
+    ElasticSearchService elasticSearchService = new ElasticSearchService(criteriaDao, configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
       participantCounter, criteriaDao, criteriaAttributeDao,
