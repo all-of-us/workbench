@@ -10,6 +10,7 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
+import ReviewDomainChartsComponent from '../review-domain-charts/review-domain-charts';
 
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
@@ -145,6 +146,10 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
+  chartContainer: {
+    width: '32rem',
+marginLeft: '-18rem'
+  }
 });
 const rows = 25;
 
@@ -164,10 +169,12 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: any;
+  visible: boolean;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    // visible = false
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -176,8 +183,10 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        expandedRows: null
+        expandedRows: null,
+        visible: false,
       };
+      // this.toggleChart = this.toggleChart.bind(this);
     }
 
     componentDidMount() {
@@ -268,12 +277,22 @@ export const DetailTabTable = withCurrentWorkspace()(
             </OverlayPanel>
       </div>;
     }
-    rowExpansionTemplate = () => {
-      // const src = "showcase/resources/demo/images/car/" + data.brand + ".png";
 
-      return  (
-        <div>HEELLOOO</div>
-      );
+    toggleChart = (e) => {
+       console.log(e.target);
+       console.log(e.target.id);
+       this.setState({visible: !this.state.visible})
+    }
+
+    isExpandable = (rowData, column) => {
+      // console.log(rowData);
+      // console.log(column.field);
+      return <React.Fragment  key={rowData.standardName}>
+        {rowData.standardName}  <i className='pi pi-chart-bar' id={rowData.standardName} style={styles.caretIcon}  onClick={(e) =>this.toggleChart(e)}/>
+        {this.state.visible && <div style={styles.chartContainer}>
+          <ReviewDomainChartsComponent orgData={this.state.data}/>
+        </div>}
+        </React.Fragment>
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
@@ -287,11 +306,13 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
+        const standardName = col.name === 'standardName' && this.props.tabname === 'Vitals';
+        const overlayTemplate = colName && this.overlayTemplate;
+        const expandableTemplate = standardName && this.isExpandable;
         const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
@@ -303,22 +324,17 @@ export const DetailTabTable = withCurrentWorkspace()(
         </React.Fragment>;
 
         return <Column
-          expander={col.name === 'standardName' ? true : col.name !== 'standardName' }
           style={styles.tableBody}
           bodyStyle={styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
           sortable
-          body={colName && this.overlayTemplate}/>;
+          body={expandableTemplate || overlayTemplate}/>;
       });
-
       return <div style={styles.container}>
         <style>{css}</style>
         {data && <DataTable
-          expandedRows={this.state.expandedRows}
-          onRowToggle={(e) => this.setState({expandedRows:e.data})}
-          rowExpansionTemplate={this.rowExpansionTemplate}
           style={styles.table}
           value={data}
           sortField={sortField}
