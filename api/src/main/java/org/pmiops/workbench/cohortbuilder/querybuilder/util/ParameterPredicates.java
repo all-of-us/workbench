@@ -121,10 +121,6 @@ public class ParameterPredicates {
     return sp -> !TreeType.VISIT.toString().equalsIgnoreCase(sp.getType());
   }
 
-  public static Predicate<SearchParameter> snomedTypeInvalid() {
-    return sp -> !TreeType.SNOMED.toString().equalsIgnoreCase(sp.getType());
-  }
-
   public static Predicate<SearchParameter> ppiTypeInvalid() {
     return sp -> !TreeType.PPI.toString().equalsIgnoreCase(sp.getType());
   }
@@ -151,18 +147,6 @@ public class ParameterPredicates {
 
   public static Predicate<SearchParameter> subTypeGenRaceEth() {
     return sp -> DEMO_GEN_RACE_ETH_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
-  }
-
-  public static Predicate<SearchParameter> valueNull() {
-    return sp -> sp.getValue() == null;
-  }
-
-  public static Predicate<SearchParameter> valueNotNumber() {
-    return sp -> !NumberUtils.isNumber(sp.getValue());
-  }
-
-  public static Predicate<SearchParameter> nameNotNumber() {
-    return sp -> !NumberUtils.isNumber(sp.getName());
   }
 
   public static Predicate<SearchParameter> notTwoAttributes() {
