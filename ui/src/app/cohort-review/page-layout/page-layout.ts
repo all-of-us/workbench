@@ -2,7 +2,8 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService, CohortsService, PageFilterType, ReviewStatus, SortOrder} from 'generated';
+import {CohortReviewService, CohortsService, PageFilterType, SortOrder} from 'generated';
+import {ReviewStatus} from 'generated/fetch';
 
 @Component({
   templateUrl: './page-layout.html',

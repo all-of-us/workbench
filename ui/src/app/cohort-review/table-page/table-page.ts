@@ -7,20 +7,22 @@ import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/c
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
-import {ParticipantCohortStatusColumns} from 'generated';
 import {
   CohortBuilderService,
   CohortReview,
-  CohortReviewService,
+  ConceptIdName,
   Filter,
   Operator,
   PageFilterType,
+  ParticipantCohortStatusColumns,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatuses as Request,
   SortOrder,
-} from 'generated';
+} from 'generated/fetch';
+import {from} from 'rxjs/observable/from';
 
 function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {
   return (filter instanceof MultiSelectFilterComponent);
@@ -64,7 +66,6 @@ export class TablePage implements OnInit, OnDestroy {
   reportInit = false;
 
   constructor(
-    private reviewAPI: CohortReviewService,
     private builderAPI: CohortBuilderService,
   ) {}
 
@@ -143,8 +144,8 @@ export class TablePage implements OnInit, OnDestroy {
     console.log('Participant page request parameters:');
     console.dir(query);
 
-    return this.reviewAPI
-      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
+    return from(cohortReviewApi()
+      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query))
       .do(_ => this.loading = false)
       .subscribe(review => {
         cohortReviewStore.next(review);
