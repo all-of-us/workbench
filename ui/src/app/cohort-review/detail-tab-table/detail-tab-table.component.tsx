@@ -345,6 +345,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {checkedItems} = this.state;
       let {data, start} = this.state;
       const empty = [];
+
       for (const col in checkedItems) {
         if (checkedItems[col].length) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
@@ -354,7 +355,12 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       if (!empty.includes(false)) {
-        this.setState({filteredData: []});
+        if (data && data.length > 0) {
+          // if selected tab does not have cheked items but have data
+          this.setState({filteredData: data, start: start});
+        } else {
+          this.setState({filteredData: []});
+        }
       } else {
         if (data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
