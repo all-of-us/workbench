@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService, CohortsService, PageFilterRequest, PageFilterType, ParticipantCohortStatusColumns, ReviewStatus, SortOrder} from 'generated';
+import {CohortReviewService, CohortsService, PageFilterType, ReviewStatus, SortOrder} from 'generated';
 
 @Component({
   templateUrl: './page-layout.html',
@@ -22,10 +22,9 @@ export class PageLayout implements OnInit, OnDestroy {
     this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
       page: 0,
       pageSize: 25,
-      sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
-    } as PageFilterRequest).subscribe(review => {
+    }).subscribe(review => {
       cohortReviewStore.next(review);
       if (review.reviewStatus === ReviewStatus.NONE) {
         this.reviewPresent = false;
@@ -35,6 +34,8 @@ export class PageLayout implements OnInit, OnDestroy {
       }
     });
     this.cohortsAPI.getCohort(ns, wsid, cid).subscribe(cohort => {
+      // This effectively makes the 'current cohort' available to child components, by using
+      // the `withCurrentCohort` HOC. In addition, this store is used to render the breadcrumb.
       currentCohortStore.next(cohort);
       this.cohortLoaded = true;
     });

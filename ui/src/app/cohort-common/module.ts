@@ -18,6 +18,5 @@ import {ValidatorErrorsComponent} from './validator-errors/validator-errors.comp
     ComboChartComponent,
     ValidatorErrorsComponent
   ],
-  providers: []
 })
 export class CohortCommonModule {}
