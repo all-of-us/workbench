@@ -83,7 +83,7 @@ export class ChartComponent implements OnChanges {
           if (this.point.y <= 20) {
             return this.point.name + ' <= ' + '<b>' + this.point.y + '</b>';
           }
-          // If not null, use the default formatter
+          // If not <= 20, use the default formatter
           return tooltip.defaultFormatter.call(this, tooltip);
         }
       },
