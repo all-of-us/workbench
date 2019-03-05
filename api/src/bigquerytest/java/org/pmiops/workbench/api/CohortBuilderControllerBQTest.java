@@ -385,20 +385,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     pmParam.subtype(TreeSubType.PREG.name());
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, pmParam.getValue());
-
-    //pm value not a number
-    pmParam.value("z");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>()
-    );
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, VALUE, pmParam.getValue());
-
-    //pm no concept id
-    pmParam.value("10");
-    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
-    assertMessageException(searchRequest, NOT_VALID_MESSAGE,
-      PARAMETER, CONCEPT_ID, pmParam.getConceptId());
+      PARAMETER, CONCEPT_ID, pmParam.getValue());
 
     //pm no attribute name
     Attribute pmAttr = new Attribute();
@@ -701,6 +688,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBPMessageException() throws Exception {
     Attribute sysAttr = new Attribute().name("Systolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
+    Attribute diaAttr = new Attribute().name("Diastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
     Attribute nonDiaAttr = new Attribute().name("NotDiastolic").operator(Operator.EQUAL).operands(Arrays.asList("90"));
 
     //only 1 attribute
@@ -715,6 +703,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     pmParam.attributes(Arrays.asList(sysAttr, nonDiaAttr));
     searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
+
+    //no conceptId on attribute
+    pmParam.attributes(Arrays.asList(sysAttr, diaAttr));
+    searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
+    assertMessageException(searchRequest, NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, sysAttr.getConceptId());
   }
 
   @Test
@@ -1779,8 +1772,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
-    SearchParameter heartRateIrr = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR.name(), "1586218");
-    heartRateIrr.value("4262985");
+    List<Attribute> irrAttributes = Arrays.asList(
+      new Attribute().name(TreeSubType.HR.toString()).operator(Operator.EQUAL).operands(Arrays.asList("4262985"))
+    );
+    SearchParameter heartRateIrr = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.HR.name(), irrAttributes);
+    heartRateIrr.conceptId(1586218L);
     SearchGroupItem heartRateIrrSearchGroupItem = new SearchGroupItem().type(TreeType.PM.name()).searchParameters(Arrays.asList(heartRateIrr)).modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
@@ -1872,8 +1868,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectPregnant() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.PREG.name(), "903120");
-    searchParameter.value("45877994");
+    List<Attribute> attributes = Arrays.asList(
+      new Attribute().name(TreeSubType.PREG.toString()).operator(Operator.EQUAL).operands(Arrays.asList("45877994"))
+    );
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.PREG.name(), attributes);
+    searchParameter.conceptId(903120L);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
@@ -1881,8 +1880,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectWheelChairUser() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "903111");
-    searchParameter.value("4023190");
+    List<Attribute> attributes = Arrays.asList(
+      new Attribute().name(TreeSubType.WHEEL.toString()).operator(Operator.EQUAL).operands(Arrays.asList("4023190"))
+    );
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WHEEL.name(), attributes);
+    searchParameter.conceptId(903111L);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
@@ -1921,8 +1923,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getDemoChartInfo() throws Exception {
-    SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.WHEEL.name(), "903111");
-    searchParameter.value("4023190");
+    List<Attribute> attributes = Arrays.asList(
+      new Attribute().name(TreeSubType.WHEEL.toString()).operator(Operator.EQUAL).operands(Arrays.asList("4023190"))
+    );
+    SearchParameter searchParameter = createPMSearchCriteriaWithAttributes(TreeType.PM.name(), TreeSubType.WHEEL.name(), attributes);
+    searchParameter.conceptId(903111L);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
 
     DemoChartInfoListResponse response = controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
