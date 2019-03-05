@@ -77,7 +77,7 @@ public final class QueryBuilderConstants {
     .build();
 
   //Physical Measurement types that have attributes
-  public static final List<String> PM_TYPES_WITH_ATTR =
+  public static final List<String> PM_TYPES_VALUE_AS_NUMBER =
     Arrays.asList(TreeSubType.BP.name(),
       TreeSubType.HR_DETAIL.toString(),
       TreeSubType.HEIGHT.name(),
