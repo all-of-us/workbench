@@ -2,13 +2,13 @@ import {ChangeDetectorRef, Component, EventEmitter, OnInit, Output} from '@angul
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {
   Cohort,
-  CohortReview,
-  CohortReviewService,
   CreateReviewRequest,
-} from 'generated';
+} from 'generated/fetch';
+import {CohortReview} from 'generated/fetch';
 
 
 @Component({
@@ -28,7 +28,6 @@ export class CreateReviewPage implements OnInit {
   });
 
   constructor(
-    private reviewAPI: CohortReviewService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -63,8 +62,8 @@ export class CreateReviewPage implements OnInit {
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
     const request = <CreateReviewRequest>{size: this.numParticipants.value};
 
-    this.reviewAPI.createCohortReview(ns, wsid, cid, cdrid, request)
-      .subscribe(_ => {
+    cohortReviewApi().createCohortReview(ns, wsid, cid, cdrid, request)
+      .then(_ => {
         this.creating = false;
         this.created.emit(true);
         navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);

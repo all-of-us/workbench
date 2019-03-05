@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
@@ -8,15 +7,10 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
-import {
-  CohortReview,
-  PageFilterType,
-  ParticipantCohortStatus,
-  ParticipantCohortStatusColumns,
-  ReviewStatus,
-  SortOrder
-} from 'generated/fetch';
+import {CohortReview, PageFilterRequest, PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 import * as React from 'react';
+import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 
 export interface DetailHeaderProps {
   participant: Participant;
@@ -52,7 +46,7 @@ export const DetailHeader = withCurrentWorkspace()(
       }
     }
 
-    update() {
+    update = () => {
       const review = cohortReviewStore.getValue();
       const participant = this.props.participant;
       const statuses = review.participantCohortStatuses;
@@ -74,7 +68,7 @@ export const DetailHeader = withCurrentWorkspace()(
       const totalPages = Math.floor(review.reviewSize / review.pageSize);
 
       this.setState({
-        afterId: statuses[index - 1] && statuses[index - 1]['participantId'],
+        afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
         isFirstParticipant: review.page === 0 && index === 0,
         isLastParticipant: (review.page + 1) === totalPages && (index + 1) === statuses.length,
         priorId: statuses[index - 1] && statuses[index - 1]['participantId']
@@ -86,15 +80,15 @@ export const DetailHeader = withCurrentWorkspace()(
       navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
     }
 
-    previous() {
+    previous = () => {
       this.navigate(true);
     }
 
-    next() {
+    next = () => {
       this.navigate(false);
     }
 
-    private navigate(left: boolean) {
+    navigate = (left: boolean) => {
       const {afterId, isFirstParticipant, isLastParticipant, priorId} = this.state;
       const id = left ? priorId : afterId;
       const hasNext = !(left ? isFirstParticipant : isLastParticipant);
@@ -123,20 +117,19 @@ export const DetailHeader = withCurrentWorkspace()(
       }
     }
 
-    private callAPI = (page: number, size: number): Observable<CohortReview> => {
+    callAPI = (page: number, size: number): Observable<CohortReview> => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
       const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
       const request = {
         page: page,
         pageSize: size,
-        sortColumn: ParticipantCohortStatusColumns.PARTICIPANTID,
         sortOrder: SortOrder.Asc,
         pageFilterType: PageFilterType.ParticipantCohortStatuses
-      };
-      return cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request);
+      } as PageFilterRequest;
+      return from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
     }
 
-    private navigateById = (id: number): void => {
+    navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
       navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
     }

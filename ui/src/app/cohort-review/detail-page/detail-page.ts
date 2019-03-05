@@ -1,11 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from 'app/cohort-review/participant.model';
+import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortAnnotationDefinition, CohortAnnotationDefinitionService, CohortReviewService, ParticipantCohortAnnotation} from 'generated';
+import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
 
 @Component({
   templateUrl: './detail-page.html',
@@ -20,10 +22,7 @@ export class DetailPage implements OnInit, OnDestroy {
   annotations: ParticipantCohortAnnotation[];
   annotationDefinitions: CohortAnnotationDefinition[];
   subscriptions: Subscription[] = [];
-  constructor(
-    private reviewAPI: CohortReviewService,
-    private defsAPI: CohortAnnotationDefinitionService
-  ) {
+  constructor() {
     this.setAnnotations = this.setAnnotations.bind(this);
     this.openCreateDefinitionModal = this.openCreateDefinitionModal.bind(this);
     this.closeCreateDefinitionModal = this.closeCreateDefinitionModal.bind(this);
@@ -40,13 +39,13 @@ export class DetailPage implements OnInit, OnDestroy {
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
         return Observable.forkJoin(
-          this.reviewAPI
-            .getParticipantCohortStatus(ns, wsid, +cid, +cdrVersionId, +pid)
+          from(cohortReviewApi()
+            .getParticipantCohortStatus(ns, wsid, +cid, +cdrVersionId, +pid))
             .do(ps => {
               this.participant = Participant.fromStatus(ps);
             }),
-          this.reviewAPI
-            .getParticipantCohortAnnotations(ns, wsid, +cid, +cdrVersionId, +pid)
+          from(cohortReviewApi()
+            .getParticipantCohortAnnotations(ns, wsid, +cid, +cdrVersionId, +pid))
             .do(({items}) => {
               this.annotations = items;
             }),
@@ -59,7 +58,7 @@ export class DetailPage implements OnInit, OnDestroy {
 
   loadAnnotationDefinitions() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
-    return this.defsAPI.getCohortAnnotationDefinitions(ns, wsid, +cid)
+    return from(cohortAnnotationDefinitionApi().getCohortAnnotationDefinitions(ns, wsid, +cid))
       .do(({items}) => {
         this.annotationDefinitions = items;
       });

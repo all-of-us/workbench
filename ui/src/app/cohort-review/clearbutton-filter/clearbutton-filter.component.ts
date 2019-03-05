@@ -6,7 +6,7 @@ import {Participant} from 'app/cohort-review/participant.model';
 
 import {
   ParticipantCohortStatusColumns,
-} from 'generated';
+} from 'generated/fetch';
 import {Subject} from 'rxjs/Subject';
 import {Subscription} from 'rxjs/Subscription';
 

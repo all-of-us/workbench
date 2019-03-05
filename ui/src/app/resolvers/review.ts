@@ -1,23 +1,24 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {
   Cohort,
   CohortReview,
-  CohortReviewService,
   PageFilterType,
   ParticipantCohortStatusColumns,
   ParticipantCohortStatuses,
   SortOrder,
   Workspace,
-} from 'generated';
+} from 'generated/fetch';
 
 @Injectable()
 export class ReviewResolver implements Resolve<CohortReview> {
 
-  constructor(private api: CohortReviewService) {}
+  constructor() {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<CohortReview> {
     const ns: Workspace['namespace'] = route.params.ns;
@@ -36,8 +37,8 @@ export class ReviewResolver implements Resolve<CohortReview> {
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };
-
-    return this.api.getParticipantCohortStatuses(ns, wsid, cid, cdrid, request).map(v => {
+    const observable = from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request))
+    return observable.map(v => {
       cohortReviewStore.next(v);
       return v;
     });
