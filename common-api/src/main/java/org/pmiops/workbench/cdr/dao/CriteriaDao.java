@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
+import java.util.Set;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,43 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
 
   List<Criteria> findCriteriaByTypeAndParentIdOrderByIdAsc(@Param("type") String type,
                                                            @Param("parentId") Long parentId);
+
+  /**
+   * This query returns the parents in addition to the leaves in order to allow the client to
+   * determine the relationship between the returned Criteria. Parent concept IDs are not otherwise
+   * encoded in Criteria children.
+   */
+  @Query(value = "select a.* from criteria a join " +
+      "(select CONCAT( '%.', id, '%') as path, id from criteria " +
+      " where concept_id in (:parentConceptIds) and " +
+      " type = :type and subtype = :subtype and is_group = 1) b " +
+      "on (a.path like b.path OR a.id = b.id) " +
+      "where type = :type " +
+      "and subtype = :subtype " +
+      "and (concept_id in (:parentConceptIds) OR (is_group = 0 and is_selectable = 1))",
+      nativeQuery = true)
+  List<Criteria> findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
+      @Param("type") String type, @Param("subtype") String subtype,
+      @Param("parentConceptIds") Set<String> parentConceptIds);
+
+  @Query(value = "select * " +
+    "from criteria " +
+    "where type = :type " +
+    "and subtype = :subtype " +
+    "and code regexp :parentCodeRegex " +
+    "and is_group = 0 " +
+    "and is_selectable = 1", nativeQuery = true)
+  List<Criteria> findCriteriaLeavesByTypeAndParentCodeRegex(@Param("type") String type,
+                                                            @Param("subtype") String subtype,
+                                                            @Param("parentCodeRegex") String parentCodeRegex);
+
+  @Query(value = "select cr " +
+    "from Criteria cr " +
+    "where type = ?1 " +
+    "and subtype = ?2 " +
+    "and is_group = 0 " +
+    "and is_selectable = 1")
+  List<Criteria> findCriteriaLeavesByType(String type, String subtype);
 
   @Query(value = "select * " +
     "from criteria " +

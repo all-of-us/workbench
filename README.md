@@ -381,6 +381,59 @@ Alternatively if you want to make a local database from csvs in gcs
 ##### Result
 1) mysql db is in your local mysql for development. You need to alter your env per above to use it.
 
+
+## Elasticsearch
+
+Elasticsearch is being integrated as an auxilliary backed on top of the BigQuery
+CDR for cohort building. Currently it can only be run via docker-compose on a
+local instance. See the full design:
+https://docs.google.com/document/d/1N_TDTOi-moTH6wrXn1Ix4dwUlw4j8GT9OsL9yXYXYmY/edit
+
+### Indexing
+
+```
+./project.rb create-local-es-index
+```
+
+### Development
+
+As of 3/4/19, you'll need to enable Elasticsearch locally to utilize it in the
+Cohort Builder.
+
+```
+sed -i 's/\("enableElasticsearchBackend": \)false/\1true/' config/config_local.json
+```
+
+#### Example criteria
+
+Currently the default setting for the indexer is to only index ~1000
+to keep the local data size small. Some example criteria that will match this
+default dataset:
+
+- Conditions ICD9: Group 250 Diabetes mellitus
+- Drugs: Acetaminophen
+- PPI: Anything (support for individual answers coming soon)
+- Procedures CPT: 99213
+
+#### Elasticsearch Direct Queries
+
+Requires that Elastic is running (via run-api or dev-up).
+
+Show the top 5 standard condition concept IDs:
+
+```
+curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
+```
+
+The above IDs can be cross-referenced against the Criteria table in SQL or
+BigQuery to determine cohort builder search targets.
+
+Dump all participants matching a condition source concept ID (disclaimer: large):
+
+```
+curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
+```
+
 ###
 ## Cohort Builder
 
