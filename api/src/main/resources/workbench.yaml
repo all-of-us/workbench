@@ -2091,10 +2091,10 @@ definitions:
         description: Timestamp when the user requests identity verification.
       twoFactorEnabled:
         type: boolean
-      eraLinkedNihUsername:
+      eraCommonsLinkedNihUsername:
         type: string
         description: The user's NIH username
-      eraLinkExpireTime:
+      eraCommonsLinkExpireTime:
         type: integer
         description: The FireCloud-calculated expiration time
         format: int64

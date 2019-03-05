@@ -101,7 +101,7 @@ public class UserService {
 
   private void updateDataAccessLevel(User user) {
     boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
-        && (!configProvider.get().access.enableEraCommons || user.getEraLinkedNihUsername() != null)
+        && (!configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null)
         && user.getDemographicSurveyCompletionTime() != null
         && (!configProvider.get().access.enableComplianceTraining || user.getTrainingCompletionTime() != null)
         && user.getTermsOfServiceCompletionTime() != null
@@ -206,6 +206,18 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
+        return user;
+      }
+    });
+  }
+
+  public User setEraCommonsStatus(String linkedNihUsername, Timestamp linkExpireTime, Timestamp completionTime) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setEraCommonsLinkedNihUsername(linkedNihUsername);
+        user.setEraCommonsLinkExpireTime(linkExpireTime);
+        user.setEraCommonsCompletionTime(completionTime);
         return user;
       }
     });

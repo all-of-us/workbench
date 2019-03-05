@@ -503,8 +503,15 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
     if (nihStatus != null) {
-      user.setEraLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      user.setEraLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+      if ((nihStatus.getLinkedNihUsername() != null &&
+          nihStatus.getLinkedNihUsername() != user.getEraCommonsLinkedNihUsername()) ||
+          nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+        user.setEraCommonsCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+      }
+      user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+      user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+    } else {
+      user.setEraCommonsCompletionTime(null);
     }
     userDao.save(user);
     return getProfileResponse(user);
@@ -712,8 +719,21 @@ public class ProfileController implements ProfileApiDelegate {
         log.log(Level.WARNING, "No Username Found when updating nih token");
       }
       User user = initializeUserIfNeeded();
-      user.setEraLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      user.setEraLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+      if (nihStatus != null) {
+        Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+        if ((nihStatus.getLinkedNihUsername() != null &&
+            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+          eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+        }
+        user = userService.setEraCommonsStatus(
+            nihStatus.getLinkedNihUsername(),
+            new Timestamp(nihStatus.getLinkExpireTime()),
+            eraCommonsCompletionTime
+        );
+      } else {
+        user = userService.setEraCommonsStatus(null, null, null);
+      }
       return getProfileResponse(user);
     } catch (WorkbenchException e) {
       throw e;

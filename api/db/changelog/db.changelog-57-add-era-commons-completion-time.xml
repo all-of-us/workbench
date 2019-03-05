@@ -6,8 +6,9 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="blrubenst" id="db.changelog-57-add-era-commons-completion-time">
     <addColumn tableName="user">
-      <column name="era_linked_nih_username" type="varchar(255)"/>
-      <column name="era_link_expire_time" type="datetime"/>
+      <column name="era_commons_linked_nih_username" type="varchar(255)"/>
+      <column name="era_commons_link_expire_time" type="datetime"/>
+      <column name="era_commons_completion_time" type="datetime"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

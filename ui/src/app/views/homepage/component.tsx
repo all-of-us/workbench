@@ -333,7 +333,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
         }
       }
       try {
-        this.setState({eraCommonsLinked: !!profile.eraLinkedNihUsername});
+        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
         console.error('error fetching era commons linking status');

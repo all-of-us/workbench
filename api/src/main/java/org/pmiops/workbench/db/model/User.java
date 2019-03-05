@@ -68,8 +68,9 @@ public class User {
   private Integer billingProjectRetries;
   private Integer moodleId;
   private Timestamp trainingExpirationTime;
-  private String eraLinkedNihUsername;
-  private Timestamp eraLinkExpireTime;
+  private String eraCommonsLinkedNihUsername;
+  private Timestamp eraCommonsLinkExpireTime;
+  private Timestamp eraCommonsCompletionTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -426,17 +427,24 @@ public class User {
     this.trainingExpirationTime = trainingExpirationTime;
   }
 
-  @Column(name = "era_linked_nih_username")
-  public String getEraLinkedNihUsername() { return eraLinkedNihUsername; }
+  @Column(name = "era_commons_linked_nih_username")
+  public String getEraCommonsLinkedNihUsername() { return eraCommonsLinkedNihUsername; }
 
-  public void setEraLinkedNihUsername( String eraLinkedNihUsername) {
-    this.eraLinkedNihUsername = eraLinkedNihUsername;
+  public void setEraCommonsLinkedNihUsername( String eraCommonsLinkedNihUsername) {
+    this.eraCommonsLinkedNihUsername = eraCommonsLinkedNihUsername;
   }
 
-  @Column(name = "era_link_expire_time")
-  public Timestamp getEraLinkExpireTime() { return eraLinkExpireTime; }
+  @Column(name = "era_commons_link_expire_time")
+  public Timestamp getEraCommonsLinkExpireTime() { return eraCommonsLinkExpireTime; }
 
-  public void setEraLinkExpireTime( Timestamp eraLinkExpireTime) {
-    this.eraLinkExpireTime = eraLinkExpireTime;
+  public void setEraCommonsLinkExpireTime( Timestamp eraCommonsLinkExpireTime) {
+    this.eraCommonsLinkExpireTime = eraCommonsLinkExpireTime;
+  }
+
+  @Column(name = "era_commons_completion_time")
+  public Timestamp getEraCommonsCompletionTime() { return eraCommonsCompletionTime; }
+
+  public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
+    this.eraCommonsCompletionTime = eraCommonsCompletionTime;
   }
 }
