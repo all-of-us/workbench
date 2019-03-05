@@ -46,13 +46,20 @@ then
   exit 1
 fi
 
+if [[ ${BUCKET} =~ .*public.* ]]
+then
+  VERSION_FLAG="public"
+else
+  VERSION_FLAG="cdr"
+fi
+
 startDate=$(date)
 echo " Starting generate-cloudsql-db $DATABASE from bucket $BUCKET $startDate"
 
 
 # Init the local database
 echo "Initializing new  $DATABASE"
-if ./generate-cdr/init-new-cdr-db.sh --drop-if-exists --cdr-db-name ${DATABASE}
+if ./generate-cdr/init-new-cdr-db.sh --drop-if-exists --cdr-db-name ${DATABASE} --version-flag ${VERSION_FLAG}
 then
   echo "Success"
 else

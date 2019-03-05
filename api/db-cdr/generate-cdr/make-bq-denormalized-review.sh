@@ -51,12 +51,9 @@ fi
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(person_all_events)
-for t in "${create_tables[@]}"
-do
-    bq --project=$BQ_PROJECT rm -f $BQ_DATASET.$t
-    bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/$t.json --time_partitioning_type=DAY --clustering_fields person_id,domain $BQ_DATASET.$t
-done
+
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.person_survey
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/person_survey.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.person_survey
 
 #########################################
 # insert survey data into person_survey #
@@ -92,6 +89,10 @@ left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
 left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
 where ancestor_id in
 (select id from \`$BQ_PROJECT.$BQ_DATASET.criteria\` where type = 'PPI' and parent_id = 0)) y on x.concept_id = y.concept_id"
+
+# Create bq tables we have json schema for
+bq --project=$BQ_PROJECT rm -f $BQ_DATASET.person_all_events
+bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/person_all_events.json --time_partitioning_type=DAY --clustering_fields person_id,domain $BQ_DATASET.person_all_events
 
 ###########################################
 # insert drug data into person_all_events #
