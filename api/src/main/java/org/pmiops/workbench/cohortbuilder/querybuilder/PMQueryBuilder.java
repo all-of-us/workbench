@@ -103,14 +103,14 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
           if (attribute.getName().equals(ANY)) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             String namedParameterConceptId = addQueryParameterValue(queryParams,
-                QueryParameterValue.int64(attribute.getConceptId()));
+                QueryParameterValue.int64(isBP ? attribute.getConceptId() : parameter.getConceptId()));
             tempQueryParts.add(tempSql
               .replace("${conceptId}", "@" + namedParameterConceptId));
           } else {
             boolean isBetween = attribute.getOperator().equals(Operator.BETWEEN);
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE + VALUE_AS_NUMBER : VALUE_AS_NUMBER_SQL_TEMPLATE;
             String namedParameterConceptId = addQueryParameterValue(queryParams,
-                QueryParameterValue.int64(attribute.getConceptId()));
+                QueryParameterValue.int64(isBP ? attribute.getConceptId() : parameter.getConceptId()));
             String namedParameter1 = addQueryParameterValue(queryParams,
                 QueryParameterValue.float64(new Float(attribute.getOperands().get(0))));
             String valueExpression;
@@ -183,7 +183,7 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
       from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
       from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-      from(attrConceptIdNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, conceptId);
+//      from(attrConceptIdNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, CONCEPT_ID, conceptId);
       from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
       from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
       from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
