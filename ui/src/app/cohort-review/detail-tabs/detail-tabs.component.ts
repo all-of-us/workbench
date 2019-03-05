@@ -98,20 +98,20 @@ const answer = {
 
 const initialfilterState = {
   ALL_EVENTS: {
-    standardVocabulary: [],
-    domain: [],
+    standardVocabulary: ['SelectAll'],
+    domain: ['SelectAll'],
   },
   PROCEDURE: {
-    standardVocabulary: [],
+    standardVocabulary: ['SelectAll'],
   },
   CONDITION: {
-    standardVocabulary: [],
+    standardVocabulary: ['SelectAll'],
   },
   OBSERVATION: {
-    standardVocabulary: [],
+    standardVocabulary: ['SelectAll'],
   },
   PHYSICAL_MEASURE: {
-    standardVocabulary: [],
+    standardVocabulary: ['SelectAll'],
   },
 };
 

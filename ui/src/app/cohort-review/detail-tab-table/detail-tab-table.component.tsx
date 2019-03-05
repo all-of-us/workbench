@@ -194,13 +194,13 @@ export interface DetailTabTableState {
   start: number;
   sortField: string;
   sortOrder: number;
-  check: boolean;
   checkedItems: any;
 
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    test: boolean;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -210,7 +210,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        check: false,
         checkedItems: props.filteredTab,
       };
     }
@@ -295,15 +294,15 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-            <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
-                          showCloseIcon={true} dismissable={true}>
-              {(rowData.refRange &&  column.field === 'value') &&
-                <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
-              {(rowData.unit && column.field === 'value') &&
-                <div>Units: {rowData.unit}</div>}
-              {nameField &&
-                <div>Route: {rowData.route}</div>}
-            </OverlayPanel>
+        <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+                      showCloseIcon={true} dismissable={true}>
+          {(rowData.refRange &&  column.field === 'value') &&
+          <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+          {(rowData.unit && column.field === 'value') &&
+          <div>Units: {rowData.unit}</div>}
+          {nameField &&
+          <div>Route: {rowData.route}</div>}
+        </OverlayPanel>
       </div>;
     }
 
@@ -314,10 +313,15 @@ export const DetailTabTable = withCurrentWorkspace()(
           checkedItems[colName] = namesArray ;
         } else {
           checkedItems[colName].push(event.target.name);
+          if (namesArray.length - 1 === checkedItems[colName].length) {
+            // we have to add selectall when everything is selected
+            checkedItems[colName].push('SelectAll');
+          }
         }
       } else {
         if (event.target.name === 'SelectAll') {
           checkedItems[colName] = [];
+          this.setState({filteredData: checkedItems});
         } else {
           if (checkedItems[colName].find(s => s === 'SelectAll')) {
             checkedItems[colName]
@@ -340,27 +344,37 @@ export const DetailTabTable = withCurrentWorkspace()(
     filterData() {
       const {checkedItems} = this.state;
       let {data, start} = this.state;
+      const empty = [];
       for (const col in checkedItems) {
         if (checkedItems[col].length) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
+          empty.push(false);
+        } else {
+          empty.push(true);
         }
       }
-      if (data.length < start + rows) {
-        start = Math.floor(data.length / rows) * rows;
+      if (!empty.includes(false)) {
+        this.setState({filteredData: []});
+      } else {
+        if (data.length < start + rows) {
+          start = Math.floor(data.length / rows) * rows;
+        }
+        this.setState({filteredData: data, start: start});
       }
-      this.setState({filteredData: data, start: start});
     }
 
     getErrorMessage = (name?) => {
-      const {filteredData, checkedItems} = this.state;
-      if (checkedItems) {
-        for (const col in checkedItems) {
-          if (checkedItems[col].find( i => i !== name)) {
-            return  'There is data, but it is all currently hidden. Please check your filters';
+      const {data, checkedItems, filteredData} = this.state;
+      if (data && data.length === 0) {
+        return  'No ' + this.props.tabname + ' Data';
+      } else {
+        if ((filteredData && filteredData.length === 0)) {
+          for (const col in checkedItems) {
+            if (checkedItems[col].find( i => i !== name)) {
+              return 'There is data, but it is all currently hidden. Please check your filters';
+            }
           }
         }
-      } else if (filteredData !== null) {
-        return  'No ' + this.props.tabname + ' Data';
       }
     }
 
@@ -385,7 +399,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         checkedItems[colName] = names;
       }
       let fl: any;
-      return ( <span>  <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+
+      return ( <span>  {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {names.map((i, index) => (
@@ -493,3 +508,4 @@ export class DetailTabTableComponent extends ReactWrapperBase {
     ]);
   }
 }
+
