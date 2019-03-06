@@ -503,15 +503,21 @@ public class ProfileController implements ProfileApiDelegate {
     User user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
     if (nihStatus != null) {
+      Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
       if ((nihStatus.getLinkedNihUsername() != null &&
-          nihStatus.getLinkedNihUsername() != user.getEraCommonsLinkedNihUsername()) ||
+          !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
           nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-        user.setEraCommonsCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+        eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+      } else if (nihStatus.getLinkedNihUsername() == null) {
+        eraCommonsCompletionTime = null;
       }
-      user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+      user = userService.setEraCommonsStatus(
+          nihStatus.getLinkedNihUsername(),
+          new Timestamp(nihStatus.getLinkExpireTime()),
+          eraCommonsCompletionTime
+      );
     } else {
-      user.setEraCommonsCompletionTime(null);
+      user = userService.setEraCommonsStatus(null, null, null);
     }
     userDao.save(user);
     return getProfileResponse(user);
@@ -725,6 +731,8 @@ public class ProfileController implements ProfileApiDelegate {
             !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
             nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
           eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+        } else if (nihStatus.getLinkedNihUsername() == null) {
+          eraCommonsCompletionTime = null;
         }
         user = userService.setEraCommonsStatus(
             nihStatus.getLinkedNihUsername(),
