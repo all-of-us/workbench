@@ -12,21 +12,60 @@ import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 const styles = reactStyles({
+  backBtn: {
+    padding: 0,
+    border: 0,
+    fontSize: '14px',
+    color: '#2691d0',
+    background: 'transparent',
+    cursor: 'pointer',
+  },
+  title: {
+    marginTop: 0,
+    fontSize: '20px',
+    color: '#262262',
+  },
+  description: {
+    margin: '0.75rem 0',
+    color: '#000000',
+  },
   navigation: {
     display: 'inline-block',
-    padding: '1rem 0.25rem',
+    padding: '1rem 0.4rem',
     border: '1px solid #cccccc',
     borderRadius: '5px',
     background: '#fafafa',
   },
-  buttons: {
-    display: 'inline',
+  navBtn: {
+    display: 'inline-block',
     fontSize: '12px',
-    color: '#2691D0',
-    border: '1px solid #2691D0',
+    padding: '5px',
     borderRadius: '3px',
+  },
+  icon: {
+    display: 'block',
+    fontSize: '12px',
+  },
+  participantText: {
+    fontSize: '14px',
+    color: '#262262',
+    padding: '0 1rem'
   }
 });
+const navBtnStyles = {
+  navBtnActive: {
+    ...styles.navBtn,
+    color: '#2691D0',
+    border: '1px solid #2691D0',
+    cursor: 'pointer',
+  },
+  navBtnDisabled: {
+    ...styles.navBtn,
+    color: '#cccccc',
+    border: '1px solid #cccccc',
+    cursor: 'not-allowed',
+  },
+}
 export interface DetailHeaderProps {
   participant: Participant;
   workspace: WorkspaceData;
@@ -155,29 +194,31 @@ export const DetailHeader = withCurrentWorkspace()(
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <button
+          style={styles.backBtn}
           type='button'
-          className='btn btn-sm'
           title='Go Back to the review set table'
           onClick={() => this.backToTable()}>
           Back to review set
         </button>
-        <h4>{cohort.name}</h4>
-        <div>{cohort.description}</div>
+        <h4 style={styles.title}>{cohort.name}</h4>
+        <div style={styles.description}>{cohort.description}</div>
         <div style={styles.navigation}>
           <button
+            style={isFirstParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
             type='button'
             title='Go To the Prior Participant'
             disabled={isFirstParticipant}
             onClick={() => this.previous()}>
-            <i className='pi pi-angle-left' />
+            <i style={styles.icon} className='pi pi-angle-left' />
           </button>
-          <span>Participant { participant.id }</span>
+          <span style={styles.participantText}>Participant { participant.id }</span>
           <button
+            style={isLastParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
             type='button'
             title='Go To the Next Participant'
             disabled={isLastParticipant}
             onClick={() => this.next()}>
-            <i className='pi pi-angle-right' />
+            <i style={styles.icon} className='pi pi-angle-right' />
           </button>
         </div>
       </div>;
