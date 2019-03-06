@@ -33,9 +33,9 @@ export const participantAnnotationStub = {
   cohortAnnotationDefinitionId: 1,
   cohortReviewId: 1,
   participantId: 1,
-}
+};
 
-export class CohortReviewServiceStub extends CohortReviewApi{
+export class CohortReviewServiceStub extends CohortReviewApi {
   protected configuration;
   basePath;
   fetch;
