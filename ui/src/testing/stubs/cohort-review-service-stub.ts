@@ -9,7 +9,8 @@ import {
   ParticipantCohortAnnotationListResponse,
   ParticipantCohortStatus,
   ParticipantDataListResponse,
-  ReviewStatus
+  ReviewStatus,
+  SortOrder
 } from 'generated/fetch';
 
 export const cohortReviewStub = {
@@ -29,14 +30,25 @@ export const cohortReviewStub = {
   sortColumn: '',
 };
 
-export const participantAnnotationStub = {
+const participantAnnotationStub = {
   cohortAnnotationDefinitionId: 1,
   cohortReviewId: 1,
   participantId: 1,
 };
 
+const participantDataListResponseStub = {
+  items: [],
+  count: 1,
+  pageRequest: {
+    page: 1,
+    pageSize: 25,
+    sortOrder: SortOrder.Asc,
+    sortColumn: 'test'
+  }
+}
+
 export class CohortReviewServiceStub extends CohortReviewApi {
-  protected configuration;
+  configuration;
   basePath;
   fetch;
 
@@ -49,7 +61,8 @@ export class CohortReviewServiceStub extends CohortReviewApi {
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {
-    return new Promise<ParticipantDataListResponse>(resolve => resolve());
+    return new Promise<ParticipantDataListResponse>(resolve =>
+      resolve(participantDataListResponseStub));
   }
   getParticipantChartData(): Promise<ParticipantChartDataListResponse> {
     return new Promise<ParticipantChartDataListResponse>(resolve => resolve({items: []}));
@@ -71,10 +84,12 @@ export class CohortReviewServiceStub extends CohortReviewApi {
     return new Promise<EmptyResponse>(resolve => resolve({}));
   }
   updateParticipantCohortAnnotation(): Promise<ParticipantCohortAnnotation> {
-    return new Promise<ParticipantCohortAnnotation>(resolve => resolve());
+    return new Promise<ParticipantCohortAnnotation>(resolve =>
+      resolve({cohortAnnotationDefinitionId: 1, cohortReviewId: 1, participantId: 1}));
   }
   updateParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
-    return new Promise<ParticipantCohortStatus>(resolve => resolve());
+    return new Promise<ParticipantCohortStatus>(resolve =>
+      resolve({participantId: 1, status: CohortStatus.NOTREVIEWED}));
   }
   createCohortReview() {
     // return Observable.of({});
