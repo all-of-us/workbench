@@ -12,6 +12,22 @@ export const cohortStub = {
   type: '',
 };
 
+const criteriaStub = {
+  id: 1,
+  parentId: 0,
+  type: 'ICD9',
+  subtype: '',
+  code: '123',
+  name: 'Test',
+  count: 1,
+  group: false,
+  selectable: true,
+  conceptId: 123,
+  domainId: '',
+  hasAttributes: false,
+  path: '0',
+};
+
 export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   constructor() {
@@ -19,7 +35,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   getDemoChartInfo(): Promise<DemoChartInfoListResponse> {
-    return new Promise<DemoChartInfoListResponse>(resolve => resolve());
+    return new Promise<DemoChartInfoListResponse>(resolve => resolve({items: []}));
   }
 
   countParticipants(): Promise<number> {
@@ -27,30 +43,31 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   getCriteriaAttributeByConceptId(): Promise<CriteriaAttributeListResponse> {
-    return new Promise<CriteriaAttributeListResponse>(resolve => resolve());
+    return new Promise<CriteriaAttributeListResponse>(resolve => resolve({items: []}));
   }
 
   getCriteriaAutoComplete(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve());
+    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
   getCriteriaBy(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve());
+    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
   getDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve());
+    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
   getDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
-    return new Promise<CriteriaListResponse>(resolve => resolve());
+    return new Promise<CriteriaListResponse>(resolve => resolve({items: []}));
   }
 
   getPPICriteriaParent(): Promise<Criteria> {
-    return new Promise<Criteria>(resolve => resolve());
+    return new Promise<Criteria>(resolve => resolve(criteriaStub));
   }
 
   getParticipantDemographics(): Promise<ParticipantDemographics> {
-    return new Promise<ParticipantDemographics>(resolve => resolve());
+    return new Promise<ParticipantDemographics>(resolve =>
+      resolve({genderList: [], ethnicityList: [], raceList: []}));
   }
 }
