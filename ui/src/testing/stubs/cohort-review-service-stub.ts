@@ -45,7 +45,7 @@ const participantDataListResponseStub = {
     sortOrder: SortOrder.Asc,
     sortColumn: 'test'
   }
-}
+};
 
 export class CohortReviewServiceStub extends CohortReviewApi {
   configuration;
