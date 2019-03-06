@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,6 +52,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<GoogleCredential> googleCredentialProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<GoogleCredential> fcAdminCredsProvider;
   private final ServiceAccounts serviceAccounts;
@@ -91,6 +93,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
+    this.googleCredentialProvider = googleCredentialProvider;
+    this.workbenchConfig = workbenchConfig;
     this.retryHandler = retryHandler;
     this.serviceAccounts = serviceAccounts;
     this.fcAdminCredsProvider = fcAdminCredsProvider;

@@ -90,4 +90,6 @@ public interface FireCloudService {
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
 
+  ApiClient getApiClientWithImpersonation(String email);
+
 }
