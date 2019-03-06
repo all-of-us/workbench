@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -211,13 +213,30 @@ public class UserService {
     });
   }
 
-  public User setEraCommonsStatus(String linkedNihUsername, Timestamp linkExpireTime, Timestamp completionTime) {
+  public User setEraCommonsStatus(NihStatus nihStatus) {
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        user.setEraCommonsLinkedNihUsername(linkedNihUsername);
-        user.setEraCommonsLinkExpireTime(linkExpireTime);
-        user.setEraCommonsCompletionTime(completionTime);
+        if (nihStatus.getLinkedNihUsername() == null) {
+          log.log(Level.WARNING, "No Username Found when updating nih token");
+        }
+        if (nihStatus != null) {
+          Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+          if ((nihStatus.getLinkedNihUsername() != null &&
+              !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+              nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+            eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+          } else if (nihStatus.getLinkedNihUsername() == null) {
+            eraCommonsCompletionTime = null;
+          }
+          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+          user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+          user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+        } else {
+          user.setEraCommonsLinkedNihUsername(null);
+          user.setEraCommonsLinkExpireTime(null);
+          user.setEraCommonsCompletionTime(null);
+        }
         return user;
       }
     });

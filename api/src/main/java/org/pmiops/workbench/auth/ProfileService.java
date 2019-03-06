@@ -91,6 +91,9 @@ public class ProfileService {
     if (user.getEraCommonsLinkExpireTime() != null) {
       profile.setEraCommonsLinkExpireTime(user.getEraCommonsLinkExpireTime().getTime());
     }
+    if (user.getEraCommonsCompletionTime() != null) {
+      profile.setEraCommonsCompletionTime(user.getEraCommonsCompletionTime().getTime());
+    }
     if (user.getDemographicSurveyCompletionTime() != null) {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
           .getTime());

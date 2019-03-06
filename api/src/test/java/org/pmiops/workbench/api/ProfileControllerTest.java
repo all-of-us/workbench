@@ -779,6 +779,22 @@ public class ProfileControllerTest {
   }
 
   @Test
+  public void testSyncEraCommons() throws Exception {
+    NihStatus nihStatus = new NihStatus();
+    String linkedUsername = "linked";
+    nihStatus.setLinkedNihUsername(linkedUsername);
+    nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
+    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    createUser();
+
+    profileController.syncEraCommonsStatus();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+  }
+
+  @Test
   public void testSyncTraining() throws Exception {
     List<BadgeDetails> badgeDetail = new ArrayList<>();
     Timestamp time = new Timestamp(12543);

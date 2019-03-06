@@ -502,23 +502,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     User user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus != null) {
-      Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
-      if ((nihStatus.getLinkedNihUsername() != null &&
-          !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
-          nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-        eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
-      } else if (nihStatus.getLinkedNihUsername() == null) {
-        eraCommonsCompletionTime = null;
-      }
-      user = userService.setEraCommonsStatus(
-          nihStatus.getLinkedNihUsername(),
-          new Timestamp(nihStatus.getLinkExpireTime()),
-          eraCommonsCompletionTime
-      );
-    } else {
-      user = userService.setEraCommonsStatus(null, null, null);
-    }
+    userService.setEraCommonsStatus(nihStatus);
     userDao.save(user);
     return getProfileResponse(user);
   }
@@ -721,27 +705,8 @@ public class ProfileController implements ProfileApiDelegate {
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
       NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
-      if (nihStatus.getLinkedNihUsername() == null) {
-        log.log(Level.WARNING, "No Username Found when updating nih token");
-      }
       User user = initializeUserIfNeeded();
-      if (nihStatus != null) {
-        Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
-        if ((nihStatus.getLinkedNihUsername() != null &&
-            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
-            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-          eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
-        } else if (nihStatus.getLinkedNihUsername() == null) {
-          eraCommonsCompletionTime = null;
-        }
-        user = userService.setEraCommonsStatus(
-            nihStatus.getLinkedNihUsername(),
-            new Timestamp(nihStatus.getLinkExpireTime()),
-            eraCommonsCompletionTime
-        );
-      } else {
-        user = userService.setEraCommonsStatus(null, null, null);
-      }
+      user = userService.setEraCommonsStatus(nihStatus);
       return getProfileResponse(user);
     } catch (WorkbenchException e) {
       throw e;
