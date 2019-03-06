@@ -1,5 +1,16 @@
-import {CohortReview, ParticipantDataListResponse, ReviewStatus} from 'generated/fetch';
-import {Observable} from 'rxjs/Observable';
+import {
+  CohortChartDataListResponse,
+  CohortReview,
+  CohortReviewApi,
+  CohortStatus,
+  EmptyResponse,
+  ParticipantChartDataListResponse,
+  ParticipantCohortAnnotation,
+  ParticipantCohortAnnotationListResponse,
+  ParticipantCohortStatus,
+  ParticipantDataListResponse,
+  ReviewStatus
+} from 'generated/fetch';
 
 export const cohortReviewStub = {
   cohortReviewId: 1,
@@ -18,27 +29,57 @@ export const cohortReviewStub = {
   sortColumn: '',
 };
 
-export class CohortReviewServiceStub {
+export const participantAnnotationStub = {
+  cohortAnnotationDefinitionId: 1,
+  cohortReviewId: 1,
+  participantId: 1,
+}
 
-  constructor() {}
+export class CohortReviewServiceStub extends CohortReviewApi{
+  protected configuration;
+  basePath;
+  fetch;
 
-  getParticipantCohortStatuses(): Observable<CohortReview> {
-    return Observable.of(cohortReviewStub);
+  constructor() {
+    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
 
-  getParticipantData(): Observable<ParticipantDataListResponse> {
-    return Observable.of(<ParticipantDataListResponse> {items: []});
+  getParticipantCohortStatuses(): Promise<CohortReview> {
+    return new Promise<CohortReview>(resolve => resolve(cohortReviewStub));
   }
-  getParticipantChartData(): Observable<ParticipantDataListResponse> {
-    return Observable.of(<ParticipantDataListResponse> {items: []});
+
+  getParticipantData(): Promise<ParticipantDataListResponse> {
+    return new Promise<ParticipantDataListResponse>(resolve => resolve());
   }
-  getCohortChartData(): Observable<ParticipantDataListResponse> {
-    return Observable.of(<ParticipantDataListResponse> {items: []});
+  getParticipantChartData(): Promise<ParticipantChartDataListResponse> {
+    return new Promise<ParticipantChartDataListResponse>(resolve => resolve({items: []}));
   }
-  getParticipantCohortStatus() {
-    return Observable.of({});
+  getCohortChartData(): Promise<CohortChartDataListResponse> {
+    return new Promise<CohortChartDataListResponse>(resolve => resolve({count: 1, items: []}));
   }
-  getParticipantCohortAnnotations() {
-    return Observable.of({items: []});
+  getParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
+    return new Promise<ParticipantCohortStatus>(resolve =>
+      resolve({participantId: 1, status: CohortStatus.NOTREVIEWED}));
+  }
+  getParticipantCohortAnnotations(): Promise<ParticipantCohortAnnotationListResponse> {
+    return new Promise<ParticipantCohortAnnotationListResponse>(resolve => resolve({items: []}));
+  }
+  createParticipantCohortAnnotation() {
+    return new Promise<ParticipantCohortAnnotation>(resolve => resolve(participantAnnotationStub));
+  }
+  deleteParticipantCohortAnnotation() {
+    return new Promise<EmptyResponse>(resolve => resolve({}));
+  }
+  updateParticipantCohortAnnotation(): Promise<ParticipantCohortAnnotation> {
+    return new Promise<ParticipantCohortAnnotation>(resolve => resolve());
+  }
+  updateParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
+    return new Promise<ParticipantCohortStatus>(resolve => resolve());
+  }
+  createCohortReview() {
+    // return Observable.of({});
+    return new Promise<CohortReview>(resolve => {
+      resolve(cohortReviewStub);
+    });
   }
 }
