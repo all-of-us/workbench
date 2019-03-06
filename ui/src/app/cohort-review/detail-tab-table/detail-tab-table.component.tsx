@@ -170,11 +170,12 @@ export interface DetailTabTableState {
   sortOrder: number;
   expandedRows: any;
   visible: boolean;
+   // visibleComponentKey: Array<any>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    // visible = false
+    visibleComponentKey: Array<any>;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -185,8 +186,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortOrder: 1,
         expandedRows: null,
         visible: false,
+         // visibleComponentKey: null,
       };
-      // this.toggleChart = this.toggleChart.bind(this);
     }
 
     componentDidMount() {
@@ -266,7 +267,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'value' && <span>{rowData.value}</span>}
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
-        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
+        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => {vl.toggle(e);
+        console.log(e)}}/>}
             <OverlayPanel ref={(el) => {vl = el; }} showCloseIcon={true} dismissable={true}>
               {(rowData.refRange &&  column.field === 'value') &&
                 <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
@@ -279,23 +281,27 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     toggleChart = (e) => {
-       console.log(e.target);
-       console.log(e.target.id);
-       this.setState({visible: !this.state.visible})
+       // console.log(e.target);
+        console.log(e.target.id);
+      const isItemSelected =  this.visibleComponentKey.find(i => i.standardName === e.target.id );
+      const {visible} = this.state
+      this.setState({visible: isItemSelected});
+      console.log(isItemSelected);
     }
 
     isExpandable = (rowData, column) => {
-      // console.log(rowData);
-      // console.log(column.field);
-      return <React.Fragment  key={rowData.standardName}>
+      const { visible } = this.state;
+console.log(visible);
+      return <React.Fragment>
         {rowData.standardName}  <i className='pi pi-chart-bar' id={rowData.standardName} style={styles.caretIcon}  onClick={(e) =>this.toggleChart(e)}/>
-        {this.state.visible && <div style={styles.chartContainer}>
-          <ReviewDomainChartsComponent orgData={this.state.data}/>
-        </div>}
-        </React.Fragment>
+      {visible && <div id={rowData.standardName} style={styles.chartContainer}>
+        <ReviewDomainChartsComponent orgData={this.state.data}/>
+      </div>}
+      </React.Fragment>
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
+      this.visibleComponentKey = data;
       let pageReportTemplate;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
