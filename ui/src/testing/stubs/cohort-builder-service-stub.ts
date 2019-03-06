@@ -1,6 +1,11 @@
 import {DemoChartInfoListResponse} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
+export const cohortStub = {
+  name: 'Test Cohort',
+  criteria: '{}',
+  type: '',
+};
 
 export class CohortBuilderServiceStub {
 
@@ -13,4 +18,18 @@ export class CohortBuilderServiceStub {
   getParticipantDemographics() {
     return Observable.of({raceList: [], genderList: [], ethnicityList: []});
   }
+
+  countParticipants() {}
+
+  getCriteriaAttributeByConceptId() {}
+
+  getCriteriaAutoComplete() {}
+
+  getCriteriaBy() {}
+
+  getDrugBrandOrIngredientByValue() {}
+
+  getDrugIngredientByConceptId() {}
+
+  getPPICriteriaParent() {}
 }

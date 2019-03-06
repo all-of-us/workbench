@@ -5,8 +5,10 @@ import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderApi, CohortReviewApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
@@ -20,14 +22,13 @@ describe('OverviewPage', () => {
   let fixture: ComponentFixture<OverviewPage>;
 
   beforeEach(async(() => {
-
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [ ComboChartComponent, OverviewPage, ParticipantsChartsComponent],
       imports: [ClarityModule, NgxChartsModule, NgxPopperModule],
       providers: [
         {provide: NgRedux},
-        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
-        {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
       ],
     })
       .compileComponents();
