@@ -1,10 +1,9 @@
 import {AnnotationType} from 'generated';
-import {Observable} from 'rxjs/Observable';
 import {
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionApi, CohortAnnotationDefinitionListResponse,
   EmptyResponse
-} from '../../generated/fetch';
+} from 'generated/fetch';
 
 export const cohortAnnotationDefinitionStub = {
   cohortAnnotationDefinitionId: 1,
