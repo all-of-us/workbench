@@ -14,6 +14,7 @@ import {
   openWizard,
   REMOVE_GROUP,
   removeGroup,
+  setTimeoutId
 } from 'app/cohort-search/redux';
 import {SearchGroupItemComponent} from 'app/cohort-search/search-group-item/search-group-item.component';
 import {SearchGroupComponent} from './search-group.component';
@@ -31,6 +32,7 @@ const group = fromJS({
 class MockActions {
   @dispatch() removeGroup = removeGroup;
   @dispatch() openWizard = openWizard;
+  @dispatch() setTimeoutId = setTimeoutId;
 
   generateId(prefix?: string): string {
     return 'TestId';

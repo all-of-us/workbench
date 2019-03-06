@@ -3,6 +3,7 @@ import {
   CohortReview,
   CohortReviewApi,
   CohortStatus,
+  DomainType,
   EmptyResponse,
   ParticipantChartDataListResponse,
   ParticipantCohortAnnotation,
@@ -23,7 +24,7 @@ export const cohortReviewStub = {
   reviewedCount: 1,
   queryResultSize: 1,
   reviewStatus: ReviewStatus.CREATED,
-  participantCohortStatuses: [],
+  participantCohortStatuses: [{participantId: 1, status: CohortStatus.NOTREVIEWED}],
   page: 1,
   pageSize: 1,
   sortOrder: '',
@@ -36,8 +37,15 @@ const participantAnnotationStub = {
   participantId: 1,
 };
 
+const participantDataStub = {
+  itemDate: '',
+  standardName: '',
+  ageAtEvent: 22,
+  domainType: DomainType.CONDITION
+};
+
 const participantDataListResponseStub = {
-  items: [],
+  items: [participantDataStub],
   count: 1,
   pageRequest: {
     page: 1,
@@ -45,6 +53,20 @@ const participantDataListResponseStub = {
     sortOrder: SortOrder.Asc,
     sortColumn: 'test'
   }
+};
+
+const participantChartDataStub = {
+  standardName: '',
+  standardVocabulary: '',
+  startDate: '',
+  ageAtEvent: 22,
+  rank: 1
+};
+
+const cohortChartDataStub = {
+  name: 'Test',
+  conceptId: 123,
+  count: 1
 };
 
 export class CohortReviewServiceStub extends CohortReviewApi {
@@ -65,10 +87,12 @@ export class CohortReviewServiceStub extends CohortReviewApi {
       resolve(participantDataListResponseStub));
   }
   getParticipantChartData(): Promise<ParticipantChartDataListResponse> {
-    return new Promise<ParticipantChartDataListResponse>(resolve => resolve({items: []}));
+    return new Promise<ParticipantChartDataListResponse>(resolve =>
+      resolve({items: [participantChartDataStub]}));
   }
   getCohortChartData(): Promise<CohortChartDataListResponse> {
-    return new Promise<CohortChartDataListResponse>(resolve => resolve({count: 1, items: []}));
+    return new Promise<CohortChartDataListResponse>(resolve =>
+      resolve({count: 1, items: [cohortChartDataStub]}));
   }
   getParticipantCohortStatus(): Promise<ParticipantCohortStatus> {
     return new Promise<ParticipantCohortStatus>(resolve =>
@@ -92,7 +116,6 @@ export class CohortReviewServiceStub extends CohortReviewApi {
       resolve({participantId: 1, status: CohortStatus.NOTREVIEWED}));
   }
   createCohortReview() {
-    // return Observable.of({});
     return new Promise<CohortReview>(resolve => {
       resolve(cohortReviewStub);
     });
