@@ -6,11 +6,11 @@ import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {navigate} from 'app/utils/navigation';
+import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
@@ -43,9 +43,10 @@ export const styles = {
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
-    conceptSetList: ConceptSet[], loadingConceptSets: boolean,
-    confirmDeleting: boolean, editing: boolean, resource: RecentResource,
-    rType: ResourceType, selectedConceptSets: ConceptSet[]
+    conceptSetList: ConceptSet[], cohortList: Cohort[], loadingCohorts: boolean,
+    loadingConceptSets: boolean, confirmDeleting: boolean, editing: boolean,
+    resource: RecentResource, rType: ResourceType, selectedConceptSets: ConceptSet[],
+    selectedCohorts: Cohort[]
   }> {
 
   constructor(props) {
@@ -54,12 +55,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       creatingConceptSet: false,
       conceptDomainList: undefined,
       conceptSetList: [],
+      cohortList: [],
       loadingConceptSets: true,
+      loadingCohorts: true,
       confirmDeleting: false,
       editing: false,
       resource: undefined,
       rType: undefined,
-      selectedConceptSets: []
+      selectedConceptSets: [],
+      selectedCohorts: []
     };
   }
 
@@ -74,9 +78,11 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   async loadResources() {
     try {
       const {namespace, id} = this.props.workspace;
-      const conceptSets = await Promise.resolve(conceptSetsApi()
-        .getConceptSetsInWorkspace(namespace, id));
-      this.setState({conceptSetList: conceptSets.items, loadingConceptSets: false});
+      const [conceptSets, cohorts] = await Promise.all([
+        conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
+        cohortsApi().getCohortsInWorkspace(namespace, id)]);
+      this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
+        loadingConceptSets: false, loadingCohorts: false});
     } catch (error) {
       console.log(error);
     }
@@ -104,20 +110,23 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   }
 
   receiveDelete() {
-    const {resource, rType} = this.state;
+    const {rType} = this.state;
+    const {namespace, id} = this.props.workspace;
     let call;
-    const id = this.getCurrentResource().id;
-    const {workspaceNamespace, workspaceFirecloudName} = resource;
+    const resourceId = this.getCurrentResource().id;
     if (rType === ResourceType.CONCEPT_SET) {
-      call = conceptSetsApi().deleteConceptSet(workspaceNamespace, workspaceFirecloudName, id);
+      call = conceptSetsApi().deleteConceptSet(namespace, id, resourceId);
     } else {
-      call = cohortsApi().deleteCohort(workspaceNamespace, workspaceFirecloudName, id);
+      call = cohortsApi().deleteCohort(namespace, id, resourceId);
     }
     if (this.state.rType === ResourceType.CONCEPT_SET) {
-      const deleted = this.state.resource.conceptSet;
-      const updatedList = fp.filter(conceptSet => conceptSet.id !== deleted.id,
+      const updatedList = fp.filter(conceptSet => conceptSet.id !== resourceId,
         this.state.conceptSetList);
       this.setState({conceptSetList: updatedList});
+    } else {
+      const updatedList = fp.filter(cohort => cohort.id !== resourceId,
+        this.state.cohortList);
+      this.setState({cohortList: updatedList});
     }
     this.setState({resource: undefined, rType: undefined});
     call.then(() => this.closeConfirmDelete());
@@ -128,23 +137,38 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     const {workspaceNamespace, workspaceFirecloudName} = resource;
     const {id} = updatedResource;
     let call;
+    let updatedConceptSetList = this.state.conceptSetList;
+    let updatedCohortList = this.state.cohortList;
     if (resource.cohort) {
       call = cohortsApi().updateCohort(workspaceNamespace, workspaceFirecloudName,
         id, updatedResource as Cohort);
+      updatedCohortList = this.state.cohortList.map((cohort) => {
+        return updatedResource.id === cohort.id ? (updatedResource as Cohort) : cohort;
+      });
     } else if (resource.conceptSet) {
       call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
         id, updatedResource);
+      updatedConceptSetList = this.state.conceptSetList.map((conceptSet) => {
+        return updatedResource.id === conceptSet.id ? (updatedResource as ConceptSet) : conceptSet;
+      });
     }
-    const edited = this.state.resource.conceptSet;
-    const updatedList = this.state.conceptSetList.map((conceptSet) => {
-      return edited.id === conceptSet.id ? edited : conceptSet;
-    });
-    this.setState({conceptSetList: updatedList, resource: undefined, rType: undefined});
+    this.setState({conceptSetList: updatedConceptSetList, cohortList: updatedCohortList,
+      resource: undefined, rType: undefined});
     call.then(() => this.closeEditModal());
   }
 
   closeEditModal(): void {
     this.setState({editing: false});
+  }
+
+  clone(cohort: Cohort): void {
+    const {namespace, id} = this.props.workspace;
+    navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cohort.id}`);
+  }
+
+  review(cohort: Cohort): void {
+    const {namespace, id} = this.props.workspace;
+    navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/${cohort.id}/review`);
   }
 
   select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -154,13 +178,16 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       if (selected.length > 0) {
         this.setState({selectedConceptSets: fp.remove((c) => c.id === resource.id, origSelected)});
       } else {
-        this.setState({selectedConceptSets: origSelected.concat(origSelected)});
+        this.setState({selectedConceptSets: (origSelected).concat(selected)});
       }
     } else {
-      // else = cohort
-      //  determine if already in selected
-      //  remove if it is
-      //  add if it isn't
+      const origSelected = this.state.selectedCohorts;
+      const selected = fp.filter((c) => c.id === resource.id, origSelected);
+      if (selected.length > 0) {
+        this.setState({selectedCohorts: fp.remove((c) => c.id === resource.id, origSelected)});
+      } else {
+        this.setState({selectedCohorts: (origSelected).concat(selected)});
+      }
     }
   }
 
@@ -177,9 +204,11 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       conceptDomainList,
       conceptSetList,
       loadingConceptSets,
+      loadingCohorts,
       resource,
       rType
     } = this.state;
+    console.log(loadingCohorts);
     const currentResource = this.getCurrentResource();
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
@@ -190,28 +219,51 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
         <div style={{display: 'flex'}}>
           <div style={{marginLeft: '1.5rem', marginRight: '1.5rem', width: '33%'}}>
             <h2>Select Cohorts</h2>
-            <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
+            <div style={{backgroundColor: 'white', border: '1px solid #E5E5E5', height: '10rem'}}>
               <div style={styles.selectBoxHeader}>
                 Cohorts
                 <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
-              {/*TODO: load cohorts and display here*/}
-              <div style={{height: '8rem'}}/>
+              {this.state.cohortList.length > 0 && !loadingCohorts &&
+                this.state.cohortList.map(cohort =>
+                <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
+                                  openConfirmDelete={
+                                    () => {
+                                      return this.openConfirmDelete(cohort, ResourceType.COHORT);
+                                    }
+                                  }
+                                  onSelect={
+                                    () => this.select(cohort, ResourceType.COHORT)
+                                  }
+                                  edit={
+                                    () => this.edit(cohort, ResourceType.COHORT)
+                                  }
+                                  onClone={
+                                    () => this.clone(cohort)
+                                  }
+                                  onReview={
+                                    () => this.review(cohort)
+                                  }/>
+                )
+              }
+              {loadingCohorts && <Spinner style={{position: 'relative', top: '2rem',
+                left: '10rem'}}/>}
             </div>
           </div>
           <div style={{width: '58%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
               <div style={{flexGrow: 1, borderRight: '1px solid #E5E5E5'}}>
-                <div style={{...styles.selectBoxHeader}}>
+                <div style={styles.selectBoxHeader}>
                   Concept Sets
                   <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
                            onClick={() => this.setState({creatingConceptSet: true})}/>
                 </div>
                 {this.state.conceptSetList.length > 0 && !loadingConceptSets &&
                   this.state.conceptSetList.map(conceptSet =>
-                    <ResourceListItem key={conceptSet.id} conceptSet={conceptSet}
+                    <ResourceListItem key={conceptSet.id} resource={conceptSet}
+                                      rType={ResourceType.CONCEPT_SET}
                                       openConfirmDelete={
                                         () => {
                                           return this.openConfirmDelete(conceptSet,
@@ -225,7 +277,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                                         () => this.edit(conceptSet, ResourceType.CONCEPT_SET)
                                       }/>)
                 }
-                {loadingConceptSets && <SpinnerOverlay/>}
+                {loadingConceptSets && <Spinner style={{position: 'relative', top: '2rem',
+                  left: '10rem'}}/>}
               </div>
               <div style={{flexGrow: 1}}>
                 <div style={styles.selectBoxHeader}>
