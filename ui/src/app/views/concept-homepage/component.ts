@@ -2,7 +2,6 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {Subject} from 'rxjs/Subject';
 
 import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
-import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 
@@ -59,9 +58,6 @@ export class ConceptHomepageComponent implements OnInit {
   @ViewChild(ConceptTableComponent)
   conceptTable: ConceptTableComponent;
 
-  @ViewChild(ConceptAddModalComponent)
-  conceptAddModal: ConceptAddModalComponent;
-
   @ViewChild(ToolTipComponent)
   toolTip: ToolTipComponent;
 
@@ -85,9 +81,13 @@ export class ConceptHomepageComponent implements OnInit {
   maxConceptFetch = 100;
   conceptsSavedText = '';
 
+  conceptAddOpen: boolean = false;
+
   constructor(
     private conceptsService: ConceptsService,
   ) {
+    this.closeAddModal = this.closeAddModal.bind(this);
+    this.afterConceptsSaved = this.afterConceptsSaved.bind(this);
   }
 
   ngOnInit(): void {
@@ -121,7 +121,11 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   openAddModal(): void {
-    this.conceptAddModal.open();
+    this.conceptAddOpen = true;
+  }
+
+  closeAddModal(): void {
+    this.conceptAddOpen = false;
   }
 
   selectDomain(domainCount: DomainCount) {
@@ -304,6 +308,7 @@ export class ConceptHomepageComponent implements OnInit {
     this.conceptTable.selectedConcepts.length = 0;
     this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
     this.cloneCacheConcepts();
+    this.conceptAddOpen = false;
   }
 
   setConceptsSaveText() {
