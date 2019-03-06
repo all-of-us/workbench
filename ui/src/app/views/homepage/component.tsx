@@ -194,9 +194,11 @@ export const homepageStyles = reactStyles({
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
-  contentWrapper: {
-    flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
-    justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'
+  contentWrapperLeft: {
+    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '35%'
+  },
+  contentWrapperRight: {
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '65%'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -440,7 +442,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                        firstVisitTraining={firstVisitTraining}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
-                    <div style={{display: 'flex', flexDirection: 'column', paddingLeft: '3%'}}>
+                    <div style={homepageStyles.contentWrapperLeft}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
@@ -461,7 +463,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         <div style={{color: '#fff', height: '1.9rem'}}>
                           <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                         </div>
-                        <RecentWork dark={true}/>
+                        <RecentWork dark={true} cardMarginTop='0'/>
                       </div>
                     </div>
                   </div>)
@@ -469,7 +471,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
         </div>
-        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+        <div style={homepageStyles.contentWrapperRight}>
           <div style={homepageStyles.quickRow}>
             <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
             {quickTourResources.map((thumbnail, i) => {
