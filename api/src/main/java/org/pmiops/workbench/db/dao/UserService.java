@@ -217,11 +217,11 @@ public class UserService {
     return updateWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
-        if (nihStatus.getLinkedNihUsername() == null) {
-          log.log(Level.WARNING, "No Username Found when updating nih token");
-        }
         if (nihStatus != null) {
           Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+          // NihStatus should never come back from firecloud with an empty linked username.
+          // If that is the case, there is an error with FC, because we should get a 404
+          // in that case. Leaving the null checking in for code safety reasons
           if ((nihStatus.getLinkedNihUsername() != null &&
               !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
               nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
