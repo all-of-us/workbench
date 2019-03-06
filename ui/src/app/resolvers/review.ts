@@ -37,7 +37,8 @@ export class ReviewResolver implements Resolve<CohortReview> {
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
     };
-    const observable = from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request))
+    const observable = from(cohortReviewApi()
+      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
     return observable.map(v => {
       cohortReviewStore.next(v);
       return v;
