@@ -29,7 +29,9 @@ export class HighlightSearchComponent implements OnChanges, OnDestroy {
       for (let i = 0; i < matches.length; i++) {
         this.words.push(splits[i], matches[i]);
       }
-      this.words.push(splits[splits.length - 1]);
+      if (splits.length > matches.length) {
+        this.words.push(splits[splits.length - 1]);
+      }
     } else {
       this.words = [this.text];
     }
