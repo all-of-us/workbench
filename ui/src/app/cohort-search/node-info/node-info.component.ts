@@ -161,18 +161,26 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
               attributes = PREDEFINED_ATTRIBUTES[key];
             }
           });
-        } else if (this.node.get('subtype') === TreeSubType.WHEEL ||
-          this.node.get('subtype') === TreeSubType.PREG ||
-          this.node.get('subtype') === TreeSubType.HRIRR ||
-          this.node.get('subtype') === TreeSubType.HRNOIRR) {
-          attributes.push({'name': 'CAT', 'operator': Operator.IN, 'operands': [this.node.get('code')]});
+        } else if (this.isPMCat) {
+          attributes.push({
+            name: 'CAT',
+            operator: Operator.IN,
+            operands: [this.node.get('code')]
+          });
         } else if (this.node.get('type') === TreeType.PPI && !this.node.get('group')) {
           if (this.node.get('code') === '') {
-            attributes.push({'name': 'CAT', 'operator': Operator.IN, 'operands': [this.node.get('name')]});
+            attributes.push({
+              name: 'CAT',
+              operator: Operator.IN,
+              operands: [this.node.get('name')]
+            });
           } else {
-            attributes.push({'name': 'NUM', 'operator': Operator.EQUAL, 'operands': [this.node.get('code')]});
+            attributes.push({
+              name: 'NUM',
+              operator: Operator.EQUAL,
+              operands: [this.node.get('code')]
+            });
           }
-
         }
         const param = this.node.set('parameterId', this.paramId)
           .set('attributes', attributes).set('name', modifiedName);
@@ -233,5 +241,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isDisabled() {
     return this.isSelected || this.isSelectedChild;
+  }
+
+  get isPMCat() {
+    return this.node.get('subtype') === TreeSubType.WHEEL ||
+      this.node.get('subtype') === TreeSubType.PREG ||
+      this.node.get('subtype') === TreeSubType.HRIRR ||
+      this.node.get('subtype') === TreeSubType.HRNOIRR;
   }
 }
