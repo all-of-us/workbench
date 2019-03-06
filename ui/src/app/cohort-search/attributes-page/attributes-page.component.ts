@@ -265,16 +265,17 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return stripHtml(this.node.get('name'));
   }
 
-  getParamWithAttributes() {
-    let name = this.node.get('name', '') + ' (';
-    let attrs = [];
+  get paramWithAttributes() {
+    let name;
+    const attrs = [];
     if (this.attrs.EXISTS) {
-      name += 'Any)';
+      name = this.node.get('name', '') + ' (Any)';
       attrs.push({
         name: 'ANY',
         operands: []
       });
     } else {
+      name = this.paramName;
       this.attrs.NUM.forEach((attr, i) => {
         const paramAttr = {
           name: 'NUM',
@@ -284,20 +285,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         };
         if (this.form.value.NUM['num' + i].operator === 'ANY') {
           paramAttr.name = 'ANY';
-          delete(paramAttr.operator);
           paramAttr.operands = [];
-          if (i === 0) {
-            name += 'Any';
-          }
-        } else {
-          if (i > 0) {
-            name += ' / ';
-          }
-          if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-            name += attr.name + ' ';
-          }
-          name += this.options.find(option => option.value === attr.operator).display
-            + attr.operands.join('-');
+          delete(paramAttr.operator);
         }
         attrs.push(paramAttr);
       });
@@ -321,13 +310,34 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       .set('attributes', fromJS(attrs));
   }
 
+  get paramName() {
+    let name = this.node.get('name', '') + ' (';
+    this.attrs.NUM.forEach((attr, i) => {
+      if (this.form.value.NUM['num' + i].operator === 'ANY') {
+        if (i === 0) {
+          name += 'Any';
+        }
+      } else {
+        if (i > 0) {
+          name += ' / ';
+        }
+        if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
+          name += attr.name + ' ';
+        }
+        name += this.options.find(option => option.value === attr.operator).display
+          + attr.operands.join('-');
+      }
+    });
+    return name;
+  }
+
   requestPreview() {
-    const param = this.getParamWithAttributes();
+    const param = this.paramWithAttributes;
     this.actions.requestAttributePreview(param);
   }
 
   addAttrs() {
-    const param = this.getParamWithAttributes();
+    const param = this.paramWithAttributes;
     this.actions.addParameter(param);
     this.actions.hideAttributesPage();
   }
