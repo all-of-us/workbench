@@ -65,7 +65,7 @@ const navBtnStyles = {
     border: '1px solid #cccccc',
     cursor: 'not-allowed',
   },
-}
+};
 export interface DetailHeaderProps {
   participant: Participant;
   workspace: WorkspaceData;
