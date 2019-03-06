@@ -185,14 +185,16 @@
   <ng-container>
     <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 || !groupDiasbleFlag">
       <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
-        <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
-          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
-                 [checked]="temporalFlag" (click)="getTemporal($event)">
-          <label class="" [for]="'toggle'+ index">
-            <span class="solid-preview-label"></span>
-          </label>
+        <div class="col-sm-6 temporal-container">
+          <div class="toggle-switch" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
+            <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
+                   [checked]="temporalFlag" (click)="getTemporal($event)">
+            <label [for]="'toggle'+ index">
+              <span class="solid-preview-label"></span>
+            </label>
+          </div>
+          <div class="temporal-text">Temporal</div>
         </div>
-        <div class="col-sm-5">Temporal</div>
         <div class="col-sm-6 text-right">
           Group Count:
           <span *ngIf="isRequesting"
