@@ -1,11 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
-import javax.inject.Provider;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +30,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Provider;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
+
 @Service
 // TODO: consider retrying internally when FireCloud returns a 503
 public class FireCloudServiceImpl implements FireCloudService {
@@ -46,7 +52,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
+  private final Provider<GoogleCredential> googleCredentialProvider;
   private final FirecloudRetryHandler retryHandler;
+  private final WorkbenchConfig workbenchConfig;
+  private final HttpTransport httpTransport;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -57,6 +66,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
 
+  private static final List<String> FIRECLOUD_API_OAUTH_SCOPES = Arrays.asList(
+      "openid", "profile", "email", "https://www.googleapis.com/auth/cloud-billing");
+
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
@@ -64,7 +76,11 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
       @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
       Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
-      Provider<StatusApi> statusApiProvider, FirecloudRetryHandler retryHandler) {
+      Provider<StatusApi> statusApiProvider,
+      FirecloudRetryHandler retryHandler,
+      @Qualifier("fireCloudAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
+      WorkbenchConfig workbenchConfig,
+      HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -73,7 +89,60 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
+    this.googleCredentialProvider = googleCredentialProvider;
+    this.workbenchConfig = workbenchConfig;
     this.retryHandler = retryHandler;
+    this.httpTransport = httpTransport;
+  }
+
+  /**
+   * Given an email address of an AoU user, generates a FireCloud ApiClient instance with an access
+   * token suitable for accessing data for that user, outside the context of a user-triggered
+   * request.
+   * <p>
+   * This method uses Google's support for domain-wide delegation in the OAuth flow; see
+   * https://developers.google.com/admin-sdk/directory/v1/guides/delegation for more info.
+   *
+   * @param userEmail
+   * @return
+   */
+  public ApiClient getApiClientWithImpersonation(String userEmail) {
+    // Get credentials for the firecloud-admin Service Account. This account has been granted
+    // domain-wide delegation for the OAuth scopes used by FireCloud, meaning we can impersonate
+    // users in FireCloud API calls using this service account's credentials.
+    GoogleCredential googleCredential = googleCredentialProvider.get();
+
+    // Build derived credentials for impersonating the target user.
+    GoogleCredential delegatedCredential = new GoogleCredential.Builder()
+        .setJsonFactory(getDefaultJsonFactory())
+        .setTransport(httpTransport)
+        .setServiceAccountUser(userEmail)
+        .setServiceAccountId(googleCredential.getServiceAccountId())
+        .setServiceAccountScopes(FIRECLOUD_API_OAUTH_SCOPES)
+        .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
+        .setServiceAccountPrivateKeyId(googleCredential.getServiceAccountPrivateKeyId())
+        .setTokenServerEncodedUrl(googleCredential.getTokenServerEncodedUrl())
+        .build();
+
+    // Initiate the OAuth flow to populate the access token.
+    try {
+      delegatedCredential.refreshToken();
+    } catch (IOException e) {
+      log.severe("Error refreshing access token for offline FireCloud API client.");
+      return null;
+    }
+
+    // Create a new ApiClient instance and attach it to the provided API instance.
+    ApiClient apiClient = new ApiClient();
+    apiClient.setDebugging(true);
+    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
+    //apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
+    apiClient.setAccessToken(delegatedCredential.getAccessToken());
+    System.out.println("Access token: " + delegatedCredential.getAccessToken());
+    apiClient.addDefaultHeader(FireCloudConfig.X_APP_ID_HEADER,
+        FireCloudConfig.X_APP_ID_HEADER_VALUE);
+
+    return apiClient;
   }
 
   private void checkAndAddRegistered(WorkspaceIngest workspaceIngest) {

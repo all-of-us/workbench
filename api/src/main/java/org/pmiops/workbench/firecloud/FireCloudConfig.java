@@ -24,8 +24,8 @@ public class FireCloudConfig {
 
   private static final String END_USER_API_CLIENT = "endUserApiClient";
   private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
-  private static final String X_APP_ID_HEADER = "X-App-ID";
-  private static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
+  public static final String X_APP_ID_HEADER = "X-App-ID";
+  public static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
 
   public static final String END_USER_GROUPS_API = "endUserGroupsApi";
   public static final String ALL_OF_US_GROUPS_API = "allOfUsGroupsApi";

@@ -1060,6 +1060,38 @@ Common.register_command({
   :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
 })
 
+def fetch_firecloud_user_profile(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--username=[username]",
+      String,
+      ->(opts, v) { opts.username = v},
+      "The AoU username to look up (e.g. 'gjordan'")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle --info fetchFireCloudUserProfile
+       -PappArgs=["#{op.opts.username}"]}
+  end
+end
+
+Common.register_command({
+  :invocation => "fetch-firecloud-user-profile",
+  :description => "Fetches and logs FireCloud profile data for an AoU user.\n",
+  :fn => ->(*args) {fetch_firecloud_user_profile("fetch-firecloud-user-profile", *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false

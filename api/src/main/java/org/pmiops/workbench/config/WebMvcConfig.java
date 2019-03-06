@@ -79,7 +79,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    * in use in cloud environments working when that happens.
    */
   @Lazy
-  @Bean
+  @Bean(name="gsuiteAdminCredentials")
   public GoogleCredential gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");

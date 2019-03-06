@@ -26,6 +26,7 @@ public interface CloudStorageService {
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();
   public GoogleCredential getGSuiteAdminCredentials() throws IOException;
+  public GoogleCredential getFireCloudAdminCredentials() throws IOException;
 
   public void deleteBlob(BlobId blobId);
   public String getMoodleApiKey();

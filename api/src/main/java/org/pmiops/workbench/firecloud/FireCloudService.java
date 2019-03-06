@@ -87,4 +87,6 @@ public interface FireCloudService {
 
   void postNihCallback(JWTWrapper wrapper);
 
+  ApiClient getApiClientWithImpersonation(String email);
+
 }
