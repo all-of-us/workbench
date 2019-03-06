@@ -7,7 +7,7 @@ import {DataSet} from 'app/views/dataset/component';
 import {WorkspaceAccessLevel} from 'generated';
 import {CohortsApi, ConceptsApi, ConceptSetsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
+import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
@@ -34,5 +34,22 @@ describe('DataSet', () => {
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
+
+//  it should load all concept sets related to workspace
+  it ('should display all concepts sets in workspace', async() => {
+    const wrapper = mount(<DataSet />);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
+      .toBe(ConceptSetsApiStub.stubConceptSets().length);
+  });
+//  it should load all cohorts related to workspace
+
+  it('should display all cohorts in workspace', async() => {
+    const wrapper = mount(<DataSet/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="cohort-list-item"]').length)
+      .toBe(exampleCohortStubs.length);
+  })
+
 
 });

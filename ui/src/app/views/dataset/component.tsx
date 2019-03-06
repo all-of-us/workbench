@@ -208,7 +208,6 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       resource,
       rType
     } = this.state;
-    console.log(loadingCohorts);
     const currentResource = this.getCurrentResource();
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
@@ -228,6 +227,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
               {this.state.cohortList.length > 0 && !loadingCohorts &&
                 this.state.cohortList.map(cohort =>
                 <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
+                                  data-test-id='cohort-list-item'
                                   openConfirmDelete={
                                     () => {
                                       return this.openConfirmDelete(cohort, ResourceType.COHORT);
@@ -263,6 +263,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                 {this.state.conceptSetList.length > 0 && !loadingConceptSets &&
                   this.state.conceptSetList.map(conceptSet =>
                     <ResourceListItem key={conceptSet.id} resource={conceptSet}
+                                      data-test-id='concept-set-list-item'
                                       rType={ResourceType.CONCEPT_SET}
                                       openConfirmDelete={
                                         () => {
