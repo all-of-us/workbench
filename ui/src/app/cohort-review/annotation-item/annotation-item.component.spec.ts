@@ -3,7 +3,9 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
-import {CohortAnnotationDefinition, CohortReviewService, ParticipantCohortAnnotation} from 'generated';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {CohortAnnotationDefinition, CohortReviewApi, ParticipantCohortAnnotation} from 'generated/fetch';
+import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {AnnotationItemComponent} from './annotation-item.component';
 
 interface Annotation {
@@ -16,13 +18,11 @@ describe('AnnotationItemComponent', () => {
   let fixture: ComponentFixture<AnnotationItemComponent>;
 
   beforeEach(async(() => {
-
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [AnnotationItemComponent, ValidatorErrorsComponent],
       imports: [ClarityModule, ReactiveFormsModule],
-      providers: [
-        {provide: CohortReviewService, useValue: {}},
-      ],
+      providers: [],
     })
       .compileComponents();
   }));

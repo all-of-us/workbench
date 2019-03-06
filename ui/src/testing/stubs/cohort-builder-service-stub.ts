@@ -1,5 +1,10 @@
-import {DemoChartInfoListResponse} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {
+  CohortBuilderApi, Criteria,
+  CriteriaAttributeListResponse,
+  CriteriaListResponse,
+  DemoChartInfoListResponse,
+  ParticipantDemographics
+} from 'generated/fetch';
 
 export const cohortStub = {
   name: 'Test Cohort',
@@ -7,27 +12,45 @@ export const cohortStub = {
   type: '',
 };
 
-export class CohortBuilderServiceStub {
+export class CohortBuilderServiceStub extends CohortBuilderApi {
 
-  constructor() {}
-
-  getDemoChartInfo(): Observable<DemoChartInfoListResponse> {
-    return Observable.of(<DemoChartInfoListResponse> {items: []});
+  constructor() {
+    super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
   }
 
-  countParticipants() {}
+  getDemoChartInfo(): Promise<DemoChartInfoListResponse> {
+    return new Promise<DemoChartInfoListResponse>(resolve => resolve());
+  }
 
-  getCriteriaAttributeByConceptId() {}
+  countParticipants(): Promise<number> {
+    return new Promise<number>(resolve => resolve(1));
+  }
 
-  getCriteriaAutoComplete() {}
+  getCriteriaAttributeByConceptId(): Promise<CriteriaAttributeListResponse> {
+    return new Promise<CriteriaAttributeListResponse>(resolve => resolve());
+  }
 
-  getCriteriaBy() {}
+  getCriteriaAutoComplete(): Promise<CriteriaListResponse> {
+    return new Promise<CriteriaListResponse>(resolve => resolve());
+  }
 
-  getDrugBrandOrIngredientByValue() {}
+  getCriteriaBy(): Promise<CriteriaListResponse> {
+    return new Promise<CriteriaListResponse>(resolve => resolve());
+  }
 
-  getDrugIngredientByConceptId() {}
+  getDrugBrandOrIngredientByValue(): Promise<CriteriaListResponse> {
+    return new Promise<CriteriaListResponse>(resolve => resolve());
+  }
 
-  getPPICriteriaParent() {}
+  getDrugIngredientByConceptId(): Promise<CriteriaListResponse> {
+    return new Promise<CriteriaListResponse>(resolve => resolve());
+  }
 
-  getParticipantDemographics() {}
+  getPPICriteriaParent(): Promise<Criteria> {
+    return new Promise<Criteria>(resolve => resolve());
+  }
+
+  getParticipantDemographics(): Promise<ParticipantDemographics> {
+    return new Promise<ParticipantDemographics>(resolve => resolve());
+  }
 }
