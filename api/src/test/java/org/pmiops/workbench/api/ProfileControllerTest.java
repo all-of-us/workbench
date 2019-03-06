@@ -143,6 +143,9 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
+    config.access = new AccessConfig();
+    config.access.enableEraCommons = false;
+    config.access.enableComplianceTraining = false;
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
 
@@ -251,13 +254,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.firecloud = new FireCloudConfig();
-    testConfig.firecloud.registeredDomainName = "";
-    testConfig.access = new AccessConfig();
-    testConfig.access.enableEraCommons = true;
-
-    when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
