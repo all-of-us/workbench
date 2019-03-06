@@ -9,8 +9,10 @@ import {QueryDescriptiveStatsComponent} from 'app/cohort-review/query-descriptiv
 import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReviewService, DataAccessLevel, WorkspaceAccessLevel} from 'generated';
+import {DataAccessLevel, WorkspaceAccessLevel} from 'generated';
+import {CohortBuilderApi, CohortReviewApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
@@ -44,6 +46,8 @@ describe('QueryReportComponent', () => {
   };
 
   beforeEach(async(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [
         ComboChartComponent,
@@ -69,8 +73,6 @@ describe('QueryReportComponent', () => {
               creationTime: 0
             }]
           })},
-        {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
-        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ]
     })
       .compileComponents();

@@ -1,4 +1,4 @@
-import {CohortReview, ParticipantDataListResponse} from 'generated';
+import {CohortReview, ParticipantDataListResponse, ReviewStatus} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 
 export const cohortReviewStub = {
@@ -10,7 +10,7 @@ export const cohortReviewStub = {
   reviewSize: 1,
   reviewedCount: 1,
   queryResultSize: 1,
-  reviewStatus: 'CREATED' as 'CREATED',
+  reviewStatus: ReviewStatus.CREATED,
   participantCohortStatuses: [],
   page: 1,
   pageSize: 1,
