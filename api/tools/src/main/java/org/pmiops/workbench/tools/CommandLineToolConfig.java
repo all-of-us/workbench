@@ -4,29 +4,21 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
-import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
-import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
 import org.springframework.retry.backoff.ThreadWaitSleeper;
-import org.springframework.web.context.annotation.RequestScope;
 
 import java.io.IOException;
-
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
