@@ -7,7 +7,8 @@ import {
   SearchGroupItem,
   SearchParameter,
   SearchRequest,
-  TreeSubType, TreeType
+  TreeSubType,
+  TreeType
 } from 'generated';
 
 import {stripHtml} from 'app/cohort-search/utils';
