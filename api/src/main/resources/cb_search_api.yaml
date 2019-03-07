@@ -289,7 +289,6 @@ definitions:
       - id
       - parentId
       - type
-      - code
       - name
       - group
       - selectable
@@ -309,15 +308,13 @@ definitions:
         format: int64
       type:
         description: The tree type of this criteria, see TreeType.
-        # TODO: Use TreeType enum?
+        # TODO(RW-2278): Use TreeType enum.
         type: string
       subtype:
         description: The tree subtype of this criteria, see TreeSubType.
-        # TODO: Use TreeSubType enum?
+        # TODO(RW-2278): Use TreeSubType enum.
         type: string
       code:
-        # TODO: Some of the criteria table has null codes, but it's required
-        # here. What does that mean and how does that manifest in the API?
         description: >
           Code that identifies this criteria. In some vocabularies such as ICD9
           and ICD10, this code captures the tree hierarchy, e.g. '001.002.003'.
@@ -364,11 +361,10 @@ definitions:
         format: int64
       domainId:
         description: >
-          # TODO: More detail - what does this represent exactly? What is the
-          # relationship to the tree type?
-          clue to determine which OMOP tables to search, but these only exist
-          for leaves in the tree. Parents don't have domain ids and concept
-          id will be used in the case that a parent is selectable.
+          # TODO: Remove this field.
+          Deprecated. Clue to determine which OMOP tables to search, but these
+          only exist for leaves in the tree. Parents don't have domain ids and
+          concept id will be used in the case that a parent is selectable.
         type: string
       hasAttributes:
         description: >
