@@ -142,20 +142,40 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
   </TooltipTrigger>;
 };
 
-const cardButtonStyle = {
+const cardButtonBase = {
   style: {
-    ...cardStyles.card,
-    alignItems: 'flex-start', alignContent: 'left',
-    marginTop: '1.9rem', justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
-    fontSize: 18, fontWeight: 500, lineHeight: '22px',
+    alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
+    justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
+
 };
 
-export const CardButton = ({disabled = false, style = {}, children, ...props}) => {
+const cardButtonStyle = {
+  large: {
+    style: {
+      ...cardStyles.workspaceCard, ...cardButtonBase.style,
+      boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+      fontSize: 20, lineHeight: '28px',
+    },
+    disabledStyle: {...cardButtonBase.disabledStyle}
+  },
+
+  small: {
+    style : {
+      ...cardStyles.resourceCard, ...cardButtonBase.style,
+      fontSize: 18, lineHeight: '22px',
+      minWidth: '200px', maxWidth: '200px', minHeight: '105px', maxHeight: '105px',
+      marginTop: '1rem', marginRight: '1rem',
+    },
+    disabledStyle: {...cardButtonBase.disabledStyle}
+  }
+};
+
+export const CardButton = ({type = 'large', disabled = false, style = {}, children, ...props}) => {
   return <Clickable
     disabled={disabled} {...props}
-    {...fp.merge(computeStyle(cardButtonStyle, {disabled}), {style})}
+    {...fp.merge(computeStyle(cardButtonStyle[type], {disabled}), {style})}
   >{children}</Clickable>;
 };
 
