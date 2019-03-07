@@ -3,7 +3,7 @@ import {Component, Input} from '@angular/core';
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 
-import {CohortStatus, ParticipantCohortStatusColumns} from 'generated';
+import {CohortStatus, ParticipantCohortStatusColumns} from 'generated/fetch';
 
 @Component({
   selector: 'app-status-filter',

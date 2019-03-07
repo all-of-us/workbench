@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {ParticipantChartData} from 'generated';
+import {ParticipantChartData} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';

@@ -1,4 +1,4 @@
-import {CohortStatus, ParticipantCohortStatus} from 'generated';
+import {CohortStatus, ParticipantCohortStatus} from 'generated/fetch';
 
 export class Participant implements ParticipantCohortStatus {
 

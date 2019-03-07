@@ -18,9 +18,10 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {StatusFilterComponent} from 'app/cohort-review/status-filter/status-filter.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore} from 'app/utils/navigation';
-import {CohortBuilderService} from 'generated';
-import {CohortReviewService, DataAccessLevel} from 'generated';
+import {DataAccessLevel} from 'generated';
+import {CohortBuilderApi, CohortReviewApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
@@ -47,6 +48,8 @@ describe('TablePage', () => {
   };
   let route;
   beforeEach(async(() => {
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
 
     TestBed.configureTestingModule({
       declarations: [
@@ -68,7 +71,6 @@ describe('TablePage', () => {
         NgxChartsModule],
       providers: [
         {provide: NgRedux},
-        {provide: CohortReviewService},
         { provide: CdrVersionStorageService,
           useValue: new CdrVersionStorageServiceStub({
             defaultCdrVersionId: WorkspacesServiceStub.stubWorkspace().cdrVersionId,
@@ -81,9 +83,7 @@ describe('TablePage', () => {
           })},
         {provide: CohortSearchActions},
         {provide: APP_BASE_HREF, useValue: '/'},
-        {provide: CohortBuilderService, useValue: new CohortBuilderServiceStub()},
         {provide: ActivatedRoute, useValue: activatedRouteStub},
-        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ],
     })
       .compileComponents();

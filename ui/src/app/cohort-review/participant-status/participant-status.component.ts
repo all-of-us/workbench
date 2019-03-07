@@ -1,17 +1,18 @@
 import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 import {Participant} from 'app/cohort-review/participant.model';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {
-  CohortReviewService,
   CohortStatus,
   ModifyCohortStatusRequest,
   ParticipantCohortStatus,
-} from 'generated';
+} from 'generated/fetch';
 
 const validStatuses = [
   CohortStatus.INCLUDED,
@@ -52,9 +53,7 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
   statusControl = new FormControl();
   subscription: Subscription;
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-  ) {}
+  constructor() {}
 
   ngOnChanges() {
 
@@ -87,7 +86,8 @@ export class ParticipantStatusComponent implements OnInit, OnDestroy, OnChanges 
     const request = <ModifyCohortStatusRequest>{status};
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    return this.reviewAPI.updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request);
+    return from(cohortReviewApi()
+      .updateParticipantCohortStatus(ns, wsid, cid, cdrid, pid, request));
   }
 
   participantOptionChange(status) {

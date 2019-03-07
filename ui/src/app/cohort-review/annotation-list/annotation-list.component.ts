@@ -6,7 +6,7 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {
   CohortAnnotationDefinition,
   ParticipantCohortAnnotation,
-} from 'generated';
+} from 'generated/fetch';
 
 
 interface Annotation {

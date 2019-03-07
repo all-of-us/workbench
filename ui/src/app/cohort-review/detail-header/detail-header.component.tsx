@@ -30,9 +30,10 @@ const styles = reactStyles({
     margin: '0.75rem 0',
     color: '#000000',
   },
-  navigation: {
-    display: 'inline-block',
-    padding: '1rem 0.4rem',
+  headerSection: {
+    float: 'left',
+    height: '100%',
+    marginRight: '1rem',
     border: '1px solid #cccccc',
     borderRadius: '5px',
     background: '#fafafa',
@@ -54,6 +55,14 @@ const styles = reactStyles({
   }
 });
 const navBtnStyles = {
+  navigation: {
+    ...styles.headerSection,
+    padding: '1.15rem 0.4rem',
+  },
+  radios: {
+    ...styles.headerSection,
+    padding: '0.5rem',
+  },
   navBtnActive: {
     ...styles.navBtn,
     color: '#2691D0',
@@ -212,38 +221,44 @@ export const DetailHeader = withCurrentWorkspace()(
         </button>
         <h4 style={styles.title}>{cohort.name}</h4>
         <div style={styles.description}>{cohort.description}</div>
-        <div style={styles.navigation}>
-          <button
-            style={isFirstParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
-            type='button'
-            title='Go To the Prior Participant'
-            disabled={isFirstParticipant}
-            onClick={() => this.previous()}>
-            <i style={styles.icon} className='pi pi-angle-left' />
-          </button>
-          <span style={styles.participantText}>Participant { participant.id }</span>
-          <button
-            style={isLastParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
-            type='button'
-            title='Go To the Next Participant'
-            disabled={isLastParticipant}
-            onClick={() => this.next()}>
-            <i style={styles.icon} className='pi pi-angle-right' />
-          </button>
-        </div>
-        <div style={styles.navigation}>
-          <RadioButton
-            name='vocab'
-            value='source'
-            onChange={this.vocabChange}
-            checked={filterState.vocab === 'source'} />
-          <label className='p-radiobutton-label'>View Source Concepts</label>
-          <RadioButton
-            name='vocab'
-            value='standard'
-            onChange={this.vocabChange}
-            checked={filterState.vocab === 'standard'} />
-          <label className='p-radiobutton-label'>View Standard Concepts</label>
+        <div className='p-grid' style={{height: '3.5rem'}}>
+          <div className='p-col' style={navBtnStyles.navigation}>
+            <button
+              style={isFirstParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
+              type='button'
+              title='Go To the Prior Participant'
+              disabled={isFirstParticipant}
+              onClick={() => this.previous()}>
+              <i style={styles.icon} className='pi pi-angle-left' />
+            </button>
+            <span style={styles.participantText}>Participant { participant.id }</span>
+            <button
+              style={isLastParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
+              type='button'
+              title='Go To the Next Participant'
+              disabled={isLastParticipant}
+              onClick={() => this.next()}>
+              <i style={styles.icon} className='pi pi-angle-right' />
+            </button>
+          </div>
+          <div className='p-col' style={navBtnStyles.radios}>
+            <div>
+              <RadioButton
+                name='vocab'
+                value='source'
+                onChange={this.vocabChange}
+                checked={filterState.vocab === 'source'} />
+              <label className='p-radiobutton-label'>View Source Concepts</label>
+            </div>
+            <div>
+              <RadioButton
+                name='vocab'
+                value='standard'
+                onChange={this.vocabChange}
+                checked={filterState.vocab === 'standard'} />
+              <label className='p-radiobutton-label'>View Standard Concepts</label>
+            </div>
+          </div>
         </div>
       </div>;
     }

@@ -1,16 +1,15 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
-import {Observable} from 'rxjs/Observable';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 
-import {
-  CohortBuilderService,
-  ParticipantDemographics,
-} from 'generated';
+import {ParticipantDemographics} from 'generated/fetch';
+import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 
 @Injectable()
 export class DemographicConceptMapsResolver implements Resolve<ParticipantDemographics> {
 
-  constructor(private builderAPI: CohortBuilderService) {}
+  constructor() {}
 
   resolve(route: ActivatedRouteSnapshot): Observable<ParticipantDemographics> {
     const cdrid = +route.parent.data.workspace.cdrVersionId;
@@ -19,6 +18,6 @@ export class DemographicConceptMapsResolver implements Resolve<ParticipantDemogr
     console.log(`cdr id: ${cdrid}`);
     console.dir(route);
 
-    return this.builderAPI.getParticipantDemographics(cdrid);
+    return from(cohortBuilderApi().getParticipantDemographics(cdrid));
   }
 }

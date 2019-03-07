@@ -3,13 +3,14 @@ import * as fp from 'lodash/fp';
 
 import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
-} from 'generated';
+} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
@@ -218,9 +219,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }];
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     this.subscription = Observable
@@ -236,8 +235,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
               conditionTitle: '',
               items: []
             };
-            return this.reviewAPI
-              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10)
+            return from(cohortReviewApi()
+              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10))
               .do(({items}) => {
                 this.chartData[domainName] = {
                   loading: false,

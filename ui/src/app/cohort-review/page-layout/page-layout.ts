@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
-import {ReviewStatus} from 'generated';
+import {ReviewStatus} from 'generated/fetch';
 
 @Component({
   templateUrl: './page-layout.html',

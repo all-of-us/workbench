@@ -9,14 +9,14 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {dateValidator} from 'app/cohort-search/validators';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {
   AnnotationType,
   CohortAnnotationDefinition,
-  CohortReviewService,
   ModifyParticipantCohortAnnotationRequest,
   ParticipantCohortAnnotation,
-} from 'generated';
+} from 'generated/fetch';
 import * as moment from 'moment';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -66,7 +66,6 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
   }
 
   constructor(
-    private reviewAPI: CohortReviewService,
     private cdref: ChangeDetectorRef
   ) {}
 
@@ -157,13 +156,13 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
     if (annoId !== undefined) {
       // If the new value isn't anything, this is a delete
       if (newValue === '' || newValue === null) {
-        apiCall = this.reviewAPI
+        apiCall = cohortReviewApi()
           .deleteParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId);
       } else {
         const request = <ModifyParticipantCohortAnnotationRequest>{
           [this.valuePropertyName]: newValue,
         };
-        apiCall = this.reviewAPI
+        apiCall = cohortReviewApi()
           .updateParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, annoId, request);
       }
     } else {
@@ -174,12 +173,12 @@ export class AnnotationItemComponent implements OnInit, OnChanges, AfterContentC
           ...this.annotation.value,
           [this.valuePropertyName]: newValue,
         };
-        apiCall = this.reviewAPI
+        apiCall = cohortReviewApi()
           .createParticipantCohortAnnotation(ns, wsid, cid, cdrid, pid, request);
       }
     }
     if (apiCall) {
-      apiCall.toPromise().then((update) => {
+      apiCall.then((update) => {
         this.onChange(defnId, update);
         setTimeout(() => {
           this.textSpinnerFlag = false;

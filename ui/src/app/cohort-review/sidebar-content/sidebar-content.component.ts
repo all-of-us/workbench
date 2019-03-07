@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated';
+import {CohortAnnotationDefinition, ParticipantCohortAnnotation} from 'generated/fetch';
 
 @Component({
   selector: 'app-sidebar-content',
