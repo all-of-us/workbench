@@ -31,9 +31,9 @@ const styles = {
   },
   resourceTypeButton: {
     width: '33%',
-    marginRight: '1rem',
-    height: '223px',
     justifyContent: 'flex-start',
+    maxWidth: 'none',
+    margin: '1.9rem 1rem 0 0'
   },
   resourceTypeButtonLast: {
     marginRight: '0rem'
@@ -46,7 +46,8 @@ const styles = {
   },
   cardText: {
     color: '#000000',
-    fontSize: '14px'
+    fontSize: '14px',
+    lineHeight: '22px'
   },
   tabContainer: {
     display: 'flex',
