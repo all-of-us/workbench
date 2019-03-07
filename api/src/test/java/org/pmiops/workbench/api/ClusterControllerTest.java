@@ -99,6 +99,7 @@ public class ClusterControllerTest {
       WorkbenchConfig config = new WorkbenchConfig();
       config.server = new WorkbenchConfig.ServerConfig();
       config.server.apiBaseUrl = API_BASE_URL;
+      config.access.enableComplianceTraining = true;
       return config;
     }
     @Bean
