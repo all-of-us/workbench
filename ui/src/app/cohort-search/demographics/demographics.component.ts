@@ -187,8 +187,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const attr = fromJS(<Attribute>{
           name: 'Age',
           operator: Operator.BETWEEN,
-          operands: [minAge.toString(), maxAge.toString()],
-          conceptId: this.ageNode.get('conceptId', null)
+          operands: [minAge.toString(), maxAge.toString()]
         });
         const paramId = `age-param${this.ageNode.get('id')}`;
         this.selectedNode = this.ageNode
@@ -307,8 +306,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
                 const attr = fromJS(<Attribute>{
                     name: 'Age',
                     operator: Operator.BETWEEN,
-                    operands: [lo, hi],
-                    conceptId: this.ageNode.get('conceptId', null)
+                    operands: [lo, hi]
                 });
                 const paramId = `age-param${this.ageNode.get('id')}`;
                 return this.ageNode
