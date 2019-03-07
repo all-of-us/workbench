@@ -66,4 +66,5 @@
   <include file="changelog/db.changelog-56-update-email-lowercase.xml"/>
   <include file="changelog/db.changelog-57-add-era-commons-entries.xml"/>
   <include file="changelog/db.changelog-58-update-access-modules.xml"/>
+  <include file="changelog/db.changelog-59-cluster-config-override.xml"/>
 </databaseChangeLog>

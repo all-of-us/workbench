@@ -76,12 +76,18 @@ public class UserService {
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  private User updateWithRetries(Function<User, User> modifyUser) {
+  private User updateUserWithRetries(Function<User, User> modifyUser) {
     User user = userProvider.get();
-    return updateWithRetries(modifyUser, user);
+    return updateUserWithRetries(modifyUser, user);
   }
 
-  private User updateWithRetries(Function<User, User> userModifier, User user) {
+  /**
+   * Updates a user record with a modifier function.
+   *
+   * Ensures that the data access level for the user reflects the state of other fields on the
+   * user; handles conflicts with concurrent updates by retrying.
+   */
+    public User updateUserWithRetries(Function<User, User> userModifier, User user) {
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -196,7 +202,7 @@ public class UserService {
 
   public User submitTermsOfService() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setTermsOfServiceCompletionTime(timestamp);
@@ -207,7 +213,7 @@ public class UserService {
 
   public User submitEthicsTraining() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setTrainingCompletionTime(timestamp);
@@ -218,7 +224,7 @@ public class UserService {
 
   public User submitDemographicSurvey() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
@@ -257,7 +263,7 @@ public class UserService {
   }
 
   public User setClusterRetryCount(int clusterRetryCount) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setClusterCreateRetries(clusterRetryCount);
@@ -267,7 +273,7 @@ public class UserService {
   }
 
   public User setBillingRetryCount(int billingRetryCount) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setBillingProjectRetries(billingRetryCount);
@@ -277,7 +283,7 @@ public class UserService {
   }
 
   public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setFreeTierBillingProjectName(name);
@@ -289,7 +295,7 @@ public class UserService {
 
   public User setDisabledStatus(Long userId, boolean disabled) {
     User user = userDao.findUserByUserId(userId);
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setDisabled(disabled);
@@ -308,7 +314,7 @@ public class UserService {
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
     User user = userDao.findUserByUserId(userId);
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setIdVerificationIsValid(blockscoreVerificationIsValid);

@@ -844,6 +844,30 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/admin/clusters/setConfigOverride:
+    post:
+      summary: Sets an override for the default cluster creation request.
+      description: >
+        Clusters are created with a default machine configuration. Setting this
+        override changes that configuration for subsequent cluster creations.
+        After making this change, a cluster reset is required for the change to
+        take effect. Currently requires MANAGE_CLUSTERS authority.
+      operationId: setClusterConfigOverride
+      tags:
+        - cluster
+      parameters:
+        - in: body
+          name: body
+          description: Override request.
+          schema:
+            $ref: "#/definitions/SetClusterConfigOverrideRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
+
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
   # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
@@ -1399,13 +1423,15 @@ definitions:
         type: string
 
   # Authorities are a tool used to add discrete permissions to users. We currently
-  # have three authorities that are used:
+  # define the following authorities:
   #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
   #      the user has requested review to approve or reject.
   #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
   #      and is mainly an internal authority for devs to use when setting up an environment.
   #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
+  #   4) MANAGE_CLUSTERS: Ability to administratively interact with notebook clusters, e.g. setting
+  #      overrides for the default cluster configuration.
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1415,7 +1441,8 @@ definitions:
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         MANAGE_GROUP,
-        REVIEW_ID_VERIFICATION
+        REVIEW_ID_VERIFICATION,
+        MANAGE_CLUSTERS
     ]
 
   PageVisit:
@@ -1697,6 +1724,29 @@ definitions:
     properties:
       approved:
         type: boolean
+
+  ClusterConfigOverride:
+    properties:
+      masterDiskSize:
+        description: Master persistent disk size in GB.
+        type: integer
+        format: int32
+      machineType:
+        description: GCE machine type, e.g. n1-standard-2.
+        type: string
+
+  SetClusterConfigOverrideRequest:
+    description: >
+      Request to override cluster configuration for a given user. Set override
+      to null to clear it.
+    type: object
+    required:
+      - userEmail
+    properties:
+      userEmail:
+        type: string
+      override:
+        $ref: "#/definitions/ClusterConfigOverride"
 
   IdVerificationReviewRequest:
     type: object

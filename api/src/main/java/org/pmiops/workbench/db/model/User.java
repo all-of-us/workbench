@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +30,23 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 @Entity
 @Table(name = "user")
 public class User {
+
+  /**
+   * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
+   * represents cluster configuration overrides we support on a per-user basis for their notebook
+   * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
+   *
+   * Any changes to this class should produce backwards-compatible JSON.
+   */
+  public static class ClusterConfigOverride {
+    // Master persistent disk size in GB.
+    public Integer masterDiskSize;
+    // GCE machine type, e.g. n1-standard-2.
+    public String machineType;
+
+    public ClusterConfigOverride() {}
+  }
+
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify
@@ -48,7 +66,7 @@ public class User {
   private Short freeTierBillingProjectStatus;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
-  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<WorkspaceUserRole>();
+  private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
   private Timestamp trainingCompletionTime;
@@ -57,10 +75,10 @@ public class User {
   private Short emailVerificationStatus;
   private Boolean requestedIdVerification;
   private Timestamp idVerificationRequestTime;
-  private Set<PageVisit> pageVisits = new HashSet<PageVisit>();
+  private Set<PageVisit> pageVisits = new HashSet<>();
+  private String clusterConfigOverride;
 
-  private List<InstitutionalAffiliation> institutionalAffiliations =
-      new ArrayList<InstitutionalAffiliation>();
+  private List<InstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
   private Boolean twoFactorEnabled = false;
@@ -288,6 +306,29 @@ public class User {
   }
   public void setIdVerificationIsValid(Boolean value) {
     idVerificationIsValid = value;
+  }
+
+  @Column(name = "cluster_config_override")
+  public String getClusterConfigOverrideRaw() {
+    return clusterConfigOverride;
+  }
+  public void setClusterConfigOverrideRaw(String value) {
+    clusterConfigOverride = value;
+  }
+
+  @Transient
+  public ClusterConfigOverride getClusterConfigOverride() {
+    if (clusterConfigOverride == null) {
+      return null;
+    }
+    return new Gson().fromJson(clusterConfigOverride, ClusterConfigOverride.class);
+  }
+  public void setClusterConfigOverride(ClusterConfigOverride value) {
+    String rawValue = null;
+    if (value != null) {
+      rawValue = new Gson().toJson(value);
+    }
+    setClusterConfigOverrideRaw(rawValue);
   }
 
   @Column(name = "terms_of_service_completion_time")

@@ -4,10 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.User.ClusterConfigOverride;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -30,20 +34,28 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Provider<User> userProvider;
   private final NotebooksRetryHandler retryHandler;
 
   @Autowired
   public NotebooksServiceImpl(
       @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider, NotebooksRetryHandler retryHandler) {
+      Provider<WorkbenchConfig> workbenchConfigProvider, Provider<User> userProvider,
+      NotebooksRetryHandler retryHandler) {
     this.clusterApiProvider = clusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.userProvider = userProvider;
     this.retryHandler = retryHandler;
   }
 
-  private ClusterRequest createFirecloudClusterRequest(String userEmail) {
+  private ClusterRequest createFirecloudClusterRequest(
+      String userEmail, @Nullable ClusterConfigOverride clusterOverride) {
+    if (clusterOverride == null) {
+      clusterOverride = new ClusterConfigOverride();
+    }
+
     WorkbenchConfig config = workbenchConfigProvider.get();
     return new ClusterRequest()
         .labels(ImmutableMap.of(
@@ -58,15 +70,17 @@ public class NotebooksServiceImpl implements NotebooksService {
             .combinedExtensions(ImmutableMap.<String, String>of())
             .labExtensions(ImmutableMap.<String, String>of()))
         .machineConfig(new MachineConfig()
-            .masterDiskSize(20 /* GB */)
-            .masterMachineType("n1-standard-2"));
+            .masterDiskSize(Optional.ofNullable(clusterOverride.masterDiskSize).orElse(20 /* GB */))
+            .masterMachineType(Optional.ofNullable(clusterOverride.machineType).orElse("n1-standard-2")));
   }
 
   @Override
-  public Cluster createCluster(String googleProject, String clusterName, String userEmail) {
+  public Cluster createCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
+    User user = userProvider.get();
     return retryHandler.run((context) ->
-        clusterApi.createClusterV2(googleProject, clusterName, createFirecloudClusterRequest(userEmail)));
+        clusterApi.createClusterV2(googleProject, clusterName,
+            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfigOverride())));
   }
 
   @Override

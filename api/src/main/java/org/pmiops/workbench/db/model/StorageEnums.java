@@ -41,6 +41,7 @@ public final class StorageEnums {
       .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
       .put(Authority.MANAGE_GROUP, (short) 1)
       .put(Authority.REVIEW_ID_VERIFICATION, (short) 2)
+      .put(Authority.MANAGE_CLUSTERS, (short) 3)
       .build();
 
   public static Authority authorityFromStorage(Short authority) {

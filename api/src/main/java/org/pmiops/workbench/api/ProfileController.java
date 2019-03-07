@@ -359,7 +359,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     try {
       this.notebooksService.createCluster(
-          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME);
       log.log(Level.INFO, String.format("created cluster %s/%s",
           user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
