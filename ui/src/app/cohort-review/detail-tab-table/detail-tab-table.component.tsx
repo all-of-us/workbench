@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -10,7 +11,6 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
-import ReviewDomainChartsComponent from '../review-domain-charts/review-domain-charts';
 
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
@@ -298,9 +298,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     rowExpansionTemplate = () => {
-     return <div>
-       <ReviewDomainChartsComponent orgData={this.state.data}/>
-      </div>
+      return <ReviewDomainChartsComponent orgData={this.state.data}/>;
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
@@ -320,7 +318,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         const colName = col.name === 'value' || col.name === 'standardName';
         const standardName = col.name === 'graph' && this.props.tabname === 'Vitals';
         const overlayTemplate = colName && this.overlayTemplate;
-        const header =   <React.Fragment>
+        const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
             style={styles.columnHeader}>
@@ -328,7 +326,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </span>
           {(asc && !standardName) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {(desc && !standardName)  && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-        </React.Fragment>
+        </React.Fragment>;
 
         return <Column
           expander={standardName && true}
