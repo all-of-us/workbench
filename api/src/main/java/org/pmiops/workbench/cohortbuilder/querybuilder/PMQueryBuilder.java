@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -69,9 +70,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
         for (Attribute attribute : parameter.getAttributes()) {
-          boolean isValueAsNumber = attribute.getName().equalsIgnoreCase("NUM");
-          validateAttribute(attribute, isBP);
-          if (attribute.getName().equals(ANY)) {
+          boolean isValueAsNumber = AttrName.NUM.equals(attribute.getName());
+          validateAttribute(attribute);
+          if (AttrName.ANY.equals(attribute.getName())) {
             String tempSql = isBP ? BP_INNER_SQL_TEMPLATE : BASE_SQL_TEMPLATE;
             String namedParameterConceptId = addQueryParameterValue(queryParams, QueryParameterValue.int64(
               isBP ? attribute.getConceptId() : parameter.getConceptId()));
@@ -132,9 +133,9 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       }
   }
 
-  private void validateAttribute(Attribute attr, boolean isBP) {
-    if (!ANY.equals(attr.getName())) {
-      String name = attr.getName();
+  private void validateAttribute(Attribute attr) {
+    if (!AttrName.ANY.equals(attr.getName())) {
+      String name = attr.getName() == null ? null : attr.getName().name();
       String oper = operatorText.get(attr.getOperator());
       from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
       from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);

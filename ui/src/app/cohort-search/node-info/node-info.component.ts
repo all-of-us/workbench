@@ -19,7 +19,7 @@ import {
   subtreeSelected,
 } from 'app/cohort-search/redux';
 import {stripHtml} from 'app/cohort-search/utils';
-import {Operator, TreeSubType, TreeType} from 'generated';
+import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -163,20 +163,20 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           });
         } else if (this.isPMCat) {
           attributes.push({
-            name: 'CAT',
+            name: AttrName.CAT,
             operator: Operator.IN,
             operands: [this.node.get('code')]
           });
         } else if (this.node.get('type') === TreeType.PPI && !this.node.get('group')) {
           if (this.node.get('code') === '') {
             attributes.push({
-              name: 'CAT',
+              name: AttrName.CAT,
               operator: Operator.IN,
               operands: [this.node.get('name')]
             });
           } else {
             attributes.push({
-              name: 'NUM',
+              name: AttrName.NUM,
               operator: Operator.EQUAL,
               operands: [this.node.get('code')]
             });
