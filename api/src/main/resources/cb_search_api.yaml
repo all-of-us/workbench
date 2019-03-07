@@ -362,7 +362,6 @@ definitions:
     type: object
     required:
       - id
-      - conceptId
       - valueAsConceptId
       - conceptName
       - type
@@ -370,10 +369,6 @@ definitions:
     properties:
       id:
         description: id of the criteria
-        type: integer
-        format: int64
-      conceptId:
-        description: conceptId of the concept
         type: integer
         format: int64
       valueAsConceptId:
@@ -627,8 +622,8 @@ definitions:
       - operands
     properties:
       name:
-        type: string
         description: the name of the attribute
+        $ref: "#/definitions/AttrName"
       operator:
         $ref: "#/definitions/Operator"
       operands:
@@ -700,6 +695,11 @@ definitions:
     type: string
     description: time refers to the amount of time in reference to temporal mentions
     enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
+
+  AttrName:
+    type: string
+    description: Name that descibes the type of attribute
+    enum: [ANY, NUM, CAT, AGE]
 
   DemoChartInfoListResponse:
     type: object

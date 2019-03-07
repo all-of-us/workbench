@@ -385,7 +385,6 @@ public class CohortBuilderControllerTest {
   private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {
     return new org.pmiops.workbench.model.CriteriaAttribute()
       .id(criteriaAttribute.getId())
-      .conceptId(criteriaAttribute.getConceptId())
       .valueAsConceptId(criteriaAttribute.getValueAsConceptId())
       .conceptName(criteriaAttribute.getConceptName())
       .type(criteriaAttribute.getType())
