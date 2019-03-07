@@ -25,40 +25,6 @@
     </ng-template>
   </clr-tab>
 
-  <!-- All Events: the "combined tabs" view -->
-  <clr-tab>
-    <button clrTabLink id="detail-{{ allEvents.name | lowercase }}-tab" title="{{ allEvents.name | titlecase }}">
-      {{ allEvents.name | titlecase }}
-    </button>
-    <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
-      <div>
-        <app-detail-tab-table
-          [tabname]="allEvents.name"
-          [columns]="allEvents.columns[vocab]"
-          [filterType]="allEvents.filterType"
-          [domain]="allEvents.domain"
-          [participantId]="participantId">
-        </app-detail-tab-table>
-        <div *ngIf="false" class="details">
-          <h4>Details</h4>
-          <div *ngIf="detailsLoading" class="spinner">Loading...</div>
-          <div *ngIf="!detailsLoading && !details">No data</div>
-          <div *ngIf="!detailsLoading && details">
-            <div><b>Start Date:</b> <small>{{ details.itemDate | date:'yyyy-MM-dd HH:mm:ss' }}</small></div>
-            <div *ngIf="details.dataType == 'ParticipantVisit'"><b>End Date:</b> <small>{{ details.endDate | date:'yyyy-MM-dd HH:mm:ss' }}</small></div>
-            <div><b>Standard Vocabulary:</b> <small>{{ details.standardVocabulary }}</small></div>
-            <div><b>Standard Name:</b> <small>{{ details.standardName }}</small></div>
-            <div><b>Source Value:</b> <small>{{ details.valueSource }}</small></div>
-            <div *ngIf="details.dataType == 'ParticipantDrug'"><b>Signature:</b> <small>{{ details.signature }}</small></div>
-            <div><b>Source Vocabulary:</b> <small>{{ details.sourceVocabulary }}</small></div>
-            <div><b>Source Name:</b> <small>{{ details.sourceName }}</small></div>
-            <div><b>Age At Event:</b> <small>{{ details.age }}</small></div>
-          </div>
-        </div>
-      </div>
-    </clr-tab-content>
-  </clr-tab>
-
   <!-- Individual Tab Views -->
   <clr-tab *ngFor="let tab of tabs">
     <button clrTabLink id="detail-{{ tab.name | lowercase }}-tab" title="{{ tab.name | titlecase }}">

@@ -43,15 +43,15 @@ const standardCode = {
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
-  displayName: 'Source Vocabulary',
+  displayName: 'Vocabulary',
 };
 const sourceName = {
   name: 'sourceName',
-  displayName: 'Source Name',
+  displayName: 'Name',
 };
 const sourceCode = {
   name: 'sourceCode',
-  displayName: 'Source Code',
+  displayName: 'Code',
 };
 const value = {
   name: 'value',
@@ -106,7 +106,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
   summaryActive = false;
   filterState: any;
   vocab: string;
-  readonly allEvents = {
+
+  readonly tabs = [{
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
@@ -119,9 +120,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         itemDate, visitType, sourceCode, sourceVocabulary, sourceName, value, domain, ageAtEvent
       ],
     }
-  };
-
-  readonly tabs = [{
+  }, {
     name: 'Conditions',
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
