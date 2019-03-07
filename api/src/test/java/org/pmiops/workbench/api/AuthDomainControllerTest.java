@@ -58,8 +58,6 @@ public class AuthDomainControllerTest {
   private Provider<User> userProvider;
   @Mock
   private ComplianceService complianceService;
-  @Mock
-  private Provider<WorkbenchConfig> configProvider;
   @Autowired
   private UserDao userDao;
   

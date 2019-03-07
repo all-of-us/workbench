@@ -112,7 +112,7 @@ public class UserService {
     boolean complianceTrainingNotExpired = user.getComplianceTrainingExpirationTime() == null ||
       current.before(user.getComplianceTrainingExpirationTime());
     boolean complianceTrainingCompliant = complianceTrainingNotExpired && (user.getComplianceTrainingCompletionTime() != null ||
-      user.getComplianceTrainingBypassTime() != null | !configProvider.get().access.enableComplianceTraining);
+      user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining);
     boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
       user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
       Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);

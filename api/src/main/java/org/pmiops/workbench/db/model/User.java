@@ -82,7 +82,6 @@ public class User {
   private Timestamp emailVerificationCompletionTime;
   private Timestamp emailVerificationBypassTime;
   private Timestamp idVerificationCompletionTime;
-  private Timestamp idVerificationExpirationTime;
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
