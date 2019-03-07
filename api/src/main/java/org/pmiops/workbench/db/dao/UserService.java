@@ -108,11 +108,11 @@ public class UserService {
     // user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
     boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
+    Timestamp current = new Timestamp(clock.instant().toEpochMilli());
     boolean complianceTrainingNotExpired = user.getComplianceTrainingExpirationTime() == null ||
       current < user.getComplianceTrainingExpirationTime();
     boolean complianceTrainingCompliant = complianceTrainingNotExpired && (user.getComplianceTrainingCompletionTime() != null ||
       user.getComplianceTrainingBypassTime() != null | !configProvider.get().access.enableComplianceTraining);
-    Timestamp current = new Timestamp(clock.instant().toEpochMilli());
     boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
       user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
       Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
