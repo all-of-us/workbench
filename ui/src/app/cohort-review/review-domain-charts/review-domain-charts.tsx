@@ -1,10 +1,10 @@
-import * as React from 'react';
-import * as highCharts from "highcharts";
+import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
-import * as fp from "lodash/fp";
-import * as moment from "moment";
+import * as React from 'react';
 
-export class ReviewDomainChartsComponent extends React.Component<{orgData: Array<any>}, {data: Array<any> }> {
+
+export class ReviewDomainChartsComponent extends React.Component<
+  {orgData: Array<any>}, {data: Array<any> }> {
   constructor(props) {
     super(props);
     this.state = {

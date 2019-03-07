@@ -98,7 +98,7 @@ const answer = {
 const graph = {
   name: 'graph',
   displayName: ' '
-}
+};
 
 @Component({
   selector: 'app-detail-tabs',
