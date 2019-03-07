@@ -111,10 +111,9 @@ public class UserService {
     boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
     Timestamp current = new Timestamp(clock.instant().toEpochMilli());
-    boolean idVerificationNotExpired = user.idVerificiationExpirationTime == null || current < user.idVerificationExpirationTime;
-    boolean idVerificationCompliant = idVerificationNotExpired && (user.getIdVerificationCompletionTime() != null ||
+    boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
       user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
-      Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false));
+      Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null
         && !user.getDisabled()
