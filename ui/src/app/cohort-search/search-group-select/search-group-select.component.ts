@@ -16,6 +16,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
 
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
+  position = 'bottom-left';
 
   demoOpen = false;
   demoMenuHover = false;
@@ -24,12 +25,12 @@ export class SearchGroupSelectComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     /* Open nested menu on hover */
-    const demoItem = document.getElementById('DEMO');
+    const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
         setTimeout(() => {
-          const demoMenu = document.getElementById('demo-menu');
+          const demoMenu = document.getElementById('demo-menu-' + this.index);
           demoMenu.addEventListener('mouseenter', () => this.demoMenuHover = true);
           demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
         });
@@ -49,5 +50,10 @@ export class SearchGroupSelectComponent implements AfterViewInit {
     const role = this.role;
     const context = {criteriaType, criteriaSubtype, role, groupId, itemId, fullTree, codes};
     this.actions.openWizard(itemId, criteria.type, context);
+  }
+
+  setMenuPosition() {
+    const dropdown = document.getElementById(this.role + '-button').getBoundingClientRect();
+    this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }
 }
