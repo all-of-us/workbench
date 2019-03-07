@@ -28,9 +28,11 @@ public class ReviewQueryBuilder {
       "standard_name as standardName,\n" +
       "standard_code as standardCode,\n" +
       "standard_vocabulary as standardVocabulary,\n" +
+      "standard_concept_id as standardConceptId,\n" +
       "source_name as sourceName,\n" +
       "source_code as sourceCode,\n" +
       "source_vocabulary as sourceVocabulary,\n" +
+      "source_concept_id as sourceConceptId,\n" +
       "age_at_event as ageAtEvent,\n" +
       "visit_type as visitType,\n" +
       "route as route,\n" +
