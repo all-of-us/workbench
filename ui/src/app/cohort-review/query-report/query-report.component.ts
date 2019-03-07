@@ -1,5 +1,6 @@
 import {AfterContentChecked, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {WorkspaceData} from 'app/resolvers/workspace';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
