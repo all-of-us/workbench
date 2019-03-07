@@ -371,8 +371,10 @@ definitions:
           id will be used in the case that a parent is selectable.
         type: string
       hasAttributes:
-        # TODO: More detail - what are attributes and what does "are needed" mean?
-        description: specifies if extra attributes are needed
+        description: >
+          Whether this criteria has associated attributes which can be filtered
+          by value during a search, for example a blood pressure measurement
+          critieria might have an associated measurement value attribute.
         type: boolean
       path:
         description: >
