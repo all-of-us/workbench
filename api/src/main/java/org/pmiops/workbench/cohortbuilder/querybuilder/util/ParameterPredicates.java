@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -163,7 +164,7 @@ public class ParameterPredicates {
   public static Predicate<SearchParameter> notAnyAttr() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> ANY.equalsIgnoreCase(a.getName()))
+      .filter(a -> AttrName.ANY.equals(a.getName()))
       .collect(Collectors.toList()).size() == 0;
   }
 }
