@@ -48,7 +48,6 @@ public final class QueryBuilderConstants {
   public static final String CONCEPT_ID = "Concept Id";
   public static final String CODE = "Code";
   public static final String NAME = "Name";
-  public static final String VALUE = "Value";
   public static final String NUMERICAL = "NUM";
   public static final String CATEGORICAL = "CAT";
   public static final String BOTH = "BOTH";
