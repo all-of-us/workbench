@@ -81,7 +81,7 @@ export class ConceptHomepageComponent implements OnInit {
   maxConceptFetch = 100;
   conceptsSavedText = '';
 
-  conceptAddOpen: boolean = false;
+  conceptAddOpen = false;
 
   constructor(
     private conceptsService: ConceptsService,
