@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 
-import {CohortResolver} from 'app/resolvers/cohort';
 import {ComboChartComponent} from './combo-chart/combo-chart.component';
 import {ValidatorErrorsComponent} from './validator-errors/validator-errors.component';
 
@@ -19,8 +18,5 @@ import {ValidatorErrorsComponent} from './validator-errors/validator-errors.comp
     ComboChartComponent,
     ValidatorErrorsComponent
   ],
-  providers: [
-    CohortResolver
-  ]
 })
 export class CohortCommonModule {}
