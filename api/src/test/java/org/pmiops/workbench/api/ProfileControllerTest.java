@@ -148,6 +148,8 @@ public class ProfileControllerTest {
     config.access.enableComplianceTraining = false;
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableComplianceTraining = true;
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
