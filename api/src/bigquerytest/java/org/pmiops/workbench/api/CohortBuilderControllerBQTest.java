@@ -644,7 +644,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsBPMessageException() throws Exception {
     Attribute sysAttr = new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(903118L);
-    Attribute diaAttr = new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(903115L);
     Attribute nonDiaAttr = new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("90")).conceptId(1L);
 
     //only 1 attribute
