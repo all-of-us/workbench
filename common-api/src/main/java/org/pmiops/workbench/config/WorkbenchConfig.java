@@ -94,5 +94,7 @@ public class WorkbenchConfig {
   public static class AccessConfig {
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
+    public boolean enableDataUseAgreement;
+    public boolean enableIdVerification;
   }
 }

@@ -742,6 +742,36 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/admin/users/{userId}/bypass-access-requirement/{moduleName}:
+    post:
+      tags:
+        - profile
+      consumes:
+        - application/json
+      description: >
+        Updates the given user to bypass the request access requirement,
+        e.g. "eraCommons", or "twoFactorAuth"
+      parameters:
+        - $ref: '#/parameters/userId'
+        - in: path
+          name: moduleName
+          description: name of module to be bypassed
+          required: true
+          type: string
+        - in: body
+          name: bypassed
+          schema:
+            type: boolean
+          description: >
+            Whether the requirement should be bypassed or not. Defaults to
+            true, so an empty body  will cause the requirement to be bypassed.
+      operationId: bypassAccessRequirement
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
   /v1/admin/users/id-verification/list:
     get:
       tags:

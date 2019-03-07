@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="ustutsman" id="db.changelog-58-update-access-modules">
+    <addColumn tableName="user">
+      <column name="data_use_agreement_completion_time" type="datetime"/>
+      <column name="data_use_agreement_bypass_time" type="datetime"/>
+      <column name="compliance_training_expiration_time" type="datetime"/>
+      <column name="compliance_training_completion_time" type="datetime"/>
+      <column name="compliance_training_bypass_time" type="datetime"/>
+      <column name="beta_access_completion_time" type="datetime"/>
+      <column name="beta_access_bypass_time" type="datetime"/>
+      <column name="email_verification_completion_time" type="datetime"/>
+      <column name="email_verification_bypass_time" type="datetime"/>
+      <column name="era_commons_bypass_time" type="datetime"/>
+      <column name="id_verification_completion_time" type="datetime"/>
+      <column name="id_verification_bypass_time" type="datetime"/>
+      <column name="two_factor_auth_completion_time" type="datetime"/>
+      <column name="two_factor_auth_bypass_time" type="datetime"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

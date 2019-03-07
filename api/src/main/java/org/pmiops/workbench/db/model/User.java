@@ -71,6 +71,21 @@ public class User {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
+  private Timestamp betaAccessCompletionTime;
+  private Timestamp betaAccessBypassTime;
+  private Timestamp dataUseAgreementCompletionTime;
+  private Timestamp dataUseAgreementBypassTime;
+  private Timestamp complianceTrainingExpirationTime;
+  private Timestamp complianceTrainingCompletionTime;
+  private Timestamp complianceTrainingBypassTime;
+  private Timestamp eraCommonsBypassTime;
+  private Timestamp emailVerificationCompletionTime;
+  private Timestamp emailVerificationBypassTime;
+  private Timestamp idVerificationCompletionTime;
+  private Timestamp idVerificationExpirationTime;
+  private Timestamp idVerificationBypassTime;
+  private Timestamp twoFactorAuthCompletionTime;
+  private Timestamp twoFactorAuthBypassTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -447,4 +462,103 @@ public class User {
   public void setEraCommonsCompletionTime(Timestamp eraCommonsCompletionTime) {
     this.eraCommonsCompletionTime = eraCommonsCompletionTime;
   }
+
+  @Column(name = "data_use_agreement_completion_time")
+  public Timestamp getDataUseAgreementCompletionTime() {return dataUseAgreementCompletionTime; }
+
+  public void setDataUseAgreementCompletionTime(Timestamp dataUseAgreementCompletionTime) {
+    this.dataUseAgreementCompletionTime = dataUseAgreementCompletionTime;
+  }
+
+  @Column(name = "data_use_agreement_bypass_time")
+  public Timestamp getDataUseAgreementBypassTime() {return dataUseAgreementBypassTime; }
+
+  public void setDataUseAgreementBypassTime(Timestamp dataUseAgreementBypassTime) {
+    this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
+  }
+
+  @Column(name = "compliance_training_expiration_time")
+  public Timestamp getComplianceTrainingExpirationTime() {return complianceTrainingExpirationTime; }
+
+  public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
+    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
+  }
+
+  @Column(name = "compliance_training_completion_time")
+  public Timestamp getComplianceTrainingCompletionTime() {return complianceTrainingCompletionTime; }
+
+  public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
+    this.complianceTrainingCompletionTime = complianceTrainingExpirationTime;
+  }
+
+  @Column(name = "compliance_training_bypass_time")
+  public Timestamp getComplianceTrainingBypassTime() {return complianceTrainingBypassTime; }
+
+  public void setComplianceTrainingBypassTime(Timestamp complianceTrainingExpirationTime) {
+    this.complianceTrainingBypassTime = complianceTrainingBypassTime;
+  }
+
+  @Column(name = "beta_access_completion_time")
+  public Timestamp getBetaAccessCompletionTime() {return betaAccessCompletionTime; }
+
+  public void setBetaAccessCompletionTime(Timestamp betaAccessCompletionTime) {
+    this.betaAccessCompletionTime = betaAccessCompletionTime;
+  }
+
+  @Column(name = "beta_access_bypass_time")
+  public Timestamp getBetaAccessBypassTime() {return betaAccessBypassTime; }
+
+  public void setBetaAccessBypassTime(Timestamp betaAccessBypassTime) {
+    this.betaAccessBypassTime = betaAccessBypassTime;
+  }
+
+  @Column(name = "email_verification_completion_time")
+  public Timestamp getEmailVerificationCompletionTime() {return emailVerificationCompletionTime; }
+
+  public void setEmailVerificationCompletionTime(Timestamp emailVerificationCompletionTime) {
+    this.emailVerificationCompletionTime = emailVerificationCompletionTime;
+  }
+
+  @Column(name = "email_verification_bypass_time")
+  public Timestamp getEmailVerificationBypassTime() {return emailVerificationBypassTime; }
+
+  public void setEmailVerificationBypassTime(Timestamp emailVerificationBypassTime) {
+    this.emailVerificationBypassTime = emailVerificationBypassTime;
+  }
+
+  @Column(name = "era_commons_bypass_time")
+  public Timestamp getEraCommonsBypassTime() {return eraCommonsBypassTime; }
+
+  public void setEraCommonsBypassTime(Timestamp eraCommonsBypassTime) {
+    this.eraCommonsBypassTime = eraCommonsBypassTime;
+  }
+
+  @Column(name = "id_verification_completion_time")
+  public Timestamp getIdVerificationCompletionTime() {return idVerificationCompletionTime;}
+
+  public void setIdVerificationCompletionTime(Timestamp idVerificationCompletionTime) {
+    this.idVerificationCompletionTime = idVerificationCompletionTime;
+  }
+
+  @Column(name = "id_verification_bypass_time")
+  public Timestamp getIdVerificationBypassTime() {return idVerificationBypassTime; }
+
+  public void setIdVerificationBypassTime(Timestamp idVerificationBypassTime) {
+    this.idVerificationBypassTime = idVerificationBypassTime;
+  }
+
+  @Column(name = "two_factor_auth_completion_time")
+  public Timestamp getTwoFactorAuthCompletionTime() {return twoFactorAuthCompletionTime; }
+
+  public void setTwoFactorAuthCompletionTime(Timestamp twoFactorAuthCompletionTime) {
+    this.twoFactorAuthCompletionTime = twoFactorAuthCompletionTime;
+  }
+
+  @Column(name = "two_factor_auth_bypass_time")
+  public Timestamp getTwoFactorAuthBypassTime() {return twoFactorAuthBypassTime; }
+
+  public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
+    this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
+  }
+
 }
