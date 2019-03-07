@@ -72,16 +72,6 @@ public final class QueryBuilderConstants {
     .put(Operator.BETWEEN, "Between")
     .build();
 
-  //Physical Measurement types that have attributes
-  public static final List<String> PM_TYPES_VALUE_AS_NUMBER =
-    Arrays.asList(TreeSubType.BP.name(),
-      TreeSubType.HR_DETAIL.toString(),
-      TreeSubType.HEIGHT.name(),
-      TreeSubType.WEIGHT.name(),
-      TreeSubType.BMI.name(),
-      TreeSubType.WC.name(),
-      TreeSubType.HC.name());
-
 
   private QueryBuilderConstants(){}
 }
