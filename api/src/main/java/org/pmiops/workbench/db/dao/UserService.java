@@ -110,7 +110,7 @@ public class UserService {
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
     Timestamp current = new Timestamp(clock.instant().toEpochMilli());
     boolean complianceTrainingNotExpired = user.getComplianceTrainingExpirationTime() == null ||
-      current < user.getComplianceTrainingExpirationTime();
+      current.before(user.getComplianceTrainingExpirationTime());
     boolean complianceTrainingCompliant = complianceTrainingNotExpired && (user.getComplianceTrainingCompletionTime() != null ||
       user.getComplianceTrainingBypassTime() != null | !configProvider.get().access.enableComplianceTraining);
     boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
