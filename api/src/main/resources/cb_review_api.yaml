@@ -792,6 +792,12 @@ definitions:
       standardName:
         type: string
         description: The standard name of this data
+      standardCode:
+        type: string
+        description: The standard code of this data
+      sourceCode:
+        type: string
+        description: The source code of this data
       ageAtEvent:
         type: integer
         description: The age at event for the participant
@@ -805,18 +811,12 @@ definitions:
           standardVocabulary:
             type: string
             description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
           sourceVocabulary:
             type: string
             description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
           visitType:
             type: string
             description: The visit type of this data
@@ -842,18 +842,12 @@ definitions:
           standardVocabulary:
             type: string
             description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
           sourceVocabulary:
             type: string
             description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
           visitType:
             type: string
             description: The visit type of this data
@@ -868,18 +862,12 @@ definitions:
           standardName:
             type: string
             description: The standard name of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
           sourceVocabulary:
             type: string
             description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
           ageAtEvent:
             type: integer
             description: The age at event for the participant
@@ -923,18 +911,12 @@ definitions:
           standardVocabulary:
             type: string
             description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
           sourceVocabulary:
             type: string
             description: The source vocabulary type of this data
           sourceName:
             type: string
             description: The source name of this data.
-          sourceCode:
-            type: string
-            description: The source code of this data
           value:
             type: string
             description: The source value of this data
@@ -1007,9 +989,6 @@ definitions:
           standardVocabulary:
             type: string
             description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
           value:
             type: string
             description: The source value of this data
