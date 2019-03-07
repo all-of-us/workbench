@@ -68,7 +68,6 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
       validateSearchParameter(parameter);
       List<String> tempQueryParts = new ArrayList<String>();
       boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
-//      boolean isValueAsNumber = PM_TYPES_VALUE_AS_NUMBER.contains(parameter.getSubtype());
         for (Attribute attribute : parameter.getAttributes()) {
           boolean isValueAsNumber = attribute.getName().equalsIgnoreCase("NUM");
           validateAttribute(attribute, isBP);
