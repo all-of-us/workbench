@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.Operator;
@@ -27,17 +28,14 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.measTypeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ANY;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.BOTH;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CATEGORICAL;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CATEGORICAL_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NAME;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NUMERICAL;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS_NUMERIC_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERATOR;
@@ -82,7 +80,7 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
       validateSearchParameter(parameter);
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        if (attribute.getName().equals(ANY)) {
+        if (AttrName.ANY.equals(attribute.getName())) {
           conceptIds.add(parameter.getConceptId());
           if (!queryParts.contains("(" + CONCEPT_ID_IN_TEMPLATE + ")\n")) {
             queryParts.add("(" + CONCEPT_ID_IN_TEMPLATE + ")\n");
@@ -91,14 +89,10 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
           String namedParameter = addQueryParameterValue(queryParams,
             QueryParameterValue.int64(parameter.getConceptId()));
           String queryPartSql = CONCEPT_ID_EQUAL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
-          if (attribute.getName().equals(NUMERICAL)) {
+          if (AttrName.NUM.equals(attribute.getName())) {
             queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
-          } else if (attribute.getName().equals(CATEGORICAL)) {
+          } else if (AttrName.CAT.equals(attribute.getName())) {
             queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
-          } else if (attribute.getName().equals(BOTH) && attribute.getOperator().equals(Operator.IN)) {
-            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
-          } else {
-            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
           }
         }
       }
@@ -126,8 +120,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateAttribute(Attribute attr) {
-    if (!ANY.equals(attr.getName())) {
-      String name = attr.getName();
+    if (!AttrName.ANY.equals(attr.getName())) {
+      String name = attr.getName() == null ? null : attr.getName().name();
       String oper = operatorText.get(attr.getOperator());
       from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
       from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);

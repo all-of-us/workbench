@@ -239,11 +239,6 @@ export const homepageStyles = reactStyles({
   bottomLinks: {
     color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
     top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
-  },
-  addCard: {
-    display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    fontSize: '20px', lineHeight: '28px',  marginRight: '106px'
   }
 });
 
@@ -316,6 +311,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
+  setFirstVisit() {
+    this.setState({firstVisit: true});
+    profileApi().updatePageVisits({ page: this.pageId});
+  }
+
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
@@ -327,12 +327,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       if (profile.pageVisits) {
         if (!profile.pageVisits.some(v => v.page === this.pageId)) {
-          this.setState({firstVisit: true});
-          profileApi().updatePageVisits({ page: this.pageId});
+          this.setFirstVisit();
         }
         if (profile.pageVisits.some(v => v.page === 'moodle')) {
           this.setState({firstVisitTraining: false});
         }
+      } else {
+        // page visits is null; is first visit
+        this.setFirstVisit();
       }
 
       this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
@@ -447,7 +449,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                       disabled={billingProjectInitialized}>
                         <CardButton disabled={!billingProjectInitialized}
                                     onClick={() => navigate(['workspaces/build'])}
-                                    style={homepageStyles.addCard}>
+                                    style={{margin: '1.9rem 106px 0 3%'}}>
                           Create a <br/> New Workspace
                           <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                         </CardButton>

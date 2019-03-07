@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 
@@ -13,7 +14,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 public class AttributePredicates {
 
   public static Predicate<Attribute> categoricalAndNotIn() {
-    return a -> CATEGORICAL.equalsIgnoreCase(a.getName()) &&
+    return a -> AttrName.CAT.equals(a.getName()) &&
       !a.getOperator().equals(Operator.IN);
   }
 
@@ -42,7 +43,7 @@ public class AttributePredicates {
   }
 
   public static Predicate<Attribute> nameBlank() {
-    return a -> StringUtils.isBlank(a.getName());
+    return a -> a.getName() == null;
   }
 
   public static Predicate<Attribute> operandsNotNumbers() {
@@ -51,9 +52,5 @@ public class AttributePredicates {
       .stream()
       .filter(o -> !NumberUtils.isNumber(o))
       .collect(Collectors.toList()).isEmpty();
-  }
-
-  public static Predicate<Attribute> attrConceptIdNull() {
-    return a -> a.getConceptId() == null;
   }
 }

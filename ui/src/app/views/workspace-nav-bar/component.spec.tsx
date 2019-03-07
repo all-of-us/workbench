@@ -1,4 +1,4 @@
-import {currentWorkspaceStore, NavStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceNavBarReact} from 'app/views/workspace-nav-bar/component';
 import {mount} from 'enzyme';
 import {WorkspaceAccessLevel} from 'generated';
@@ -21,6 +21,7 @@ describe('WorkspaceNavBarComponent', () => {
     props = {};
 
     currentWorkspaceStore.next(workspace);
+    urlParamsStore.next({ns: workspace.namespace, wsid: workspace.id});
   });
 
   it('should render', () => {
@@ -65,4 +66,3 @@ describe('WorkspaceNavBarComponent', () => {
   });
 
 });
-
