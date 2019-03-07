@@ -25,12 +25,12 @@ export class SearchGroupSelectComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     /* Open nested menu on hover */
-    const demoItem = document.getElementById('DEMO');
+    const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
         setTimeout(() => {
-          const demoMenu = document.getElementById('demo-menu');
+          const demoMenu = document.getElementById('demo-menu-' + this.index);
           demoMenu.addEventListener('mouseenter', () => this.demoMenuHover = true);
           demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
         });

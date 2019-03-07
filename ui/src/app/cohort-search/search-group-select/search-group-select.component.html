@@ -31,12 +31,12 @@
             clrDropdownItem>{{criteria.name}}</button>
           <ng-container *ngIf="criteria.children">
             <button
-              [id]="criteria.type"
+              [id]="criteria.type + '-' + index"
               class="dropdown-item"
               type="button"
               clrDropdownTrigger>{{criteria.name}}</button>
             <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
-              <clr-dropdown-menu id="demo-menu">
+              <clr-dropdown-menu [id]="'demo-menu-' + index">
                 <button
                   *ngFor="let child of criteria.children"
                   [id]="child.subtype"
