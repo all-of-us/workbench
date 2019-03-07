@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.User.ClusterConfigOverride;
+import org.pmiops.workbench.db.model.User.ClusterConfig;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -37,7 +37,7 @@ import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.SetClusterConfigOverrideRequest;
+import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
-
 
   // Writing this file to a directory on a Leonardo cluster will result in
   // delocalization of saved files back to a given GCS location. See
@@ -245,22 +244,21 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.MANAGE_CLUSTERS})
-  public ResponseEntity<EmptyResponse> setClusterConfigOverride(
-      SetClusterConfigOverrideRequest body) {
+  public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
     User user = userDao.findUserByEmail(body.getUserEmail());
     if (user == null) {
       throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
     }
-    String oldOverride = user.getClusterConfigOverrideRaw();
+    String oldOverride = user.getClusterConfigRaw();
 
-    final ClusterConfigOverride override =
-        body.getOverride() != null ? new ClusterConfigOverride() : null;
+    final ClusterConfig override =
+        body.getClusterConfig() != null ? new ClusterConfig() : null;
     if (override != null) {
-      override.masterDiskSize = body.getOverride().getMasterDiskSize();
-      override.machineType = body.getOverride().getMachineType();
+      override.masterDiskSize = body.getClusterConfig().getMasterDiskSize();
+      override.machineType = body.getClusterConfig().getMachineType();
     }
     userService.updateUserWithRetries((u) -> {
-      u.setClusterConfigOverride(override);
+      u.setClusterConfig(override);
       return u;
     }, user);
     userService.logAdminUserAction(

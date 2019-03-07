@@ -38,13 +38,13 @@ public class User {
    *
    * Any changes to this class should produce backwards-compatible JSON.
    */
-  public static class ClusterConfigOverride {
+  public static class ClusterConfig {
     // Master persistent disk size in GB.
     public Integer masterDiskSize;
     // GCE machine type, e.g. n1-standard-2.
     public String machineType;
 
-    public ClusterConfigOverride() {}
+    public ClusterConfig() {}
   }
 
   private long userId;
@@ -309,26 +309,26 @@ public class User {
   }
 
   @Column(name = "cluster_config_override")
-  public String getClusterConfigOverrideRaw() {
+  public String getClusterConfigRaw() {
     return clusterConfigOverride;
   }
-  public void setClusterConfigOverrideRaw(String value) {
+  public void setClusterConfigRaw(String value) {
     clusterConfigOverride = value;
   }
 
   @Transient
-  public ClusterConfigOverride getClusterConfigOverride() {
+  public ClusterConfig getClusterConfig() {
     if (clusterConfigOverride == null) {
       return null;
     }
-    return new Gson().fromJson(clusterConfigOverride, ClusterConfigOverride.class);
+    return new Gson().fromJson(clusterConfigOverride, ClusterConfig.class);
   }
-  public void setClusterConfigOverride(ClusterConfigOverride value) {
+  public void setClusterConfig(ClusterConfig value) {
     String rawValue = null;
     if (value != null) {
       rawValue = new Gson().toJson(value);
     }
-    setClusterConfigOverrideRaw(rawValue);
+    setClusterConfigRaw(rawValue);
   }
 
   @Column(name = "terms_of_service_completion_time")

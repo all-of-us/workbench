@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.User.ClusterConfigOverride;
+import org.pmiops.workbench.db.model.User.ClusterConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -51,9 +51,9 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   private ClusterRequest createFirecloudClusterRequest(
-      String userEmail, @Nullable ClusterConfigOverride clusterOverride) {
+      String userEmail, @Nullable ClusterConfig clusterOverride) {
     if (clusterOverride == null) {
-      clusterOverride = new ClusterConfigOverride();
+      clusterOverride = new ClusterConfig();
     }
 
     WorkbenchConfig config = workbenchConfigProvider.get();
@@ -80,7 +80,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     User user = userProvider.get();
     return retryHandler.run((context) ->
         clusterApi.createClusterV2(googleProject, clusterName,
-            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfigOverride())));
+            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfig())));
   }
 
   @Override

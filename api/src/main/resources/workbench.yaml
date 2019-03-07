@@ -844,7 +844,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  /v1/admin/clusters/setConfigOverride:
+  /v1/admin/clusters/updateConfig:
     post:
       summary: Sets an override for the default cluster creation request.
       description: >
@@ -852,7 +852,7 @@ paths:
         override changes that configuration for subsequent cluster creations.
         After making this change, a cluster reset is required for the change to
         take effect. Currently requires MANAGE_CLUSTERS authority.
-      operationId: setClusterConfigOverride
+      operationId: updateClusterConfig
       tags:
         - cluster
       parameters:
@@ -860,7 +860,7 @@ paths:
           name: body
           description: Override request.
           schema:
-            $ref: "#/definitions/SetClusterConfigOverrideRequest"
+            $ref: "#/definitions/UpdateClusterConfigRequest"
       responses:
         200:
           description: success
@@ -1725,7 +1725,7 @@ definitions:
       approved:
         type: boolean
 
-  ClusterConfigOverride:
+  ClusterConfig:
     properties:
       masterDiskSize:
         description: Master persistent disk size in GB.
@@ -1735,7 +1735,7 @@ definitions:
         description: GCE machine type, e.g. n1-standard-2.
         type: string
 
-  SetClusterConfigOverrideRequest:
+  UpdateClusterConfigRequest:
     description: >
       Request to override cluster configuration for a given user. Set override
       to null to clear it.
@@ -1745,8 +1745,8 @@ definitions:
     properties:
       userEmail:
         type: string
-      override:
-        $ref: "#/definitions/ClusterConfigOverride"
+      clusterConfig:
+        $ref: "#/definitions/ClusterConfig"
 
   IdVerificationReviewRequest:
     type: object

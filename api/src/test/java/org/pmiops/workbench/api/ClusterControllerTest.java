@@ -39,12 +39,12 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
-import org.pmiops.workbench.model.ClusterConfigOverride;
+import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.SetClusterConfigOverrideRequest;
+import org.pmiops.workbench.model.SetClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -252,44 +252,44 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testSetClusterConfigOverride() {
-    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfigOverride(
-        new SetClusterConfigOverrideRequest().
+  public void testSetClusterConfig() {
+    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfig(
+        new SetClusterConfigRequest().
             userEmail(OTHER_USER_EMAIL).
-            override(new ClusterConfigOverride()
+            override(new ClusterConfig()
                 .machineType("n1-standard-4")
                 .masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfigOverride().machineType).isEqualTo("n1-standard-4");
-    assertThat(updatedUser.getClusterConfigOverride().masterDiskSize).isEqualTo(100);
+    assertThat(updatedUser.getClusterConfig().machineType).isEqualTo("n1-standard-4");
+    assertThat(updatedUser.getClusterConfig().masterDiskSize).isEqualTo(100);
   }
 
   @Test
-  public void testSetClusterConfigOverrideClear() {
-    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfigOverride(
-        new SetClusterConfigOverrideRequest().
+  public void testSetClusterConfigClear() {
+    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfig(
+        new SetClusterConfigRequest().
             userEmail(OTHER_USER_EMAIL).
-            override(new ClusterConfigOverride()
+            override(new ClusterConfig()
                 .machineType("n1-standard-4")
                 .masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    response = this.clusterController.setClusterConfigOverride(
-        new SetClusterConfigOverrideRequest().
+    response = this.clusterController.setClusterConfig(
+        new SetClusterConfigRequest().
             userEmail(OTHER_USER_EMAIL)
             .override(null));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfigOverride()).isNull();
+    assertThat(updatedUser.getClusterConfig()).isNull();
   }
 
   @Test(expected=NotFoundException.class)
-  public void testSetClusterConfigOverrideUserNotFound() {
-    this.clusterController.setClusterConfigOverride(
-        new SetClusterConfigOverrideRequest().userEmail("not-found@researchallofus.org"));
+  public void testSetClusterConfigUserNotFound() {
+    this.clusterController.setClusterConfig(
+        new SetClusterConfigRequest().userEmail("not-found@researchallofus.org"));
   }
 
   @Test
