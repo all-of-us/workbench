@@ -41,25 +41,19 @@ const standardCode = {
   name: 'standardCode',
   displayName: 'Code',
 };
-
-/*
-  * TODO - uncomment below code when we will have source code and standard code radio button filter.
-  */
-//
-// const sourceVocabulary = {
-//   name: 'sourceVocabulary',
-//   classNames: ['vocab-col'],
-//   displayName: 'Source Vocabulary',
-// };
-// const sourceName = {
-//   name: 'sourceName',
-//   displayName: 'Source Name',
-// };
-// const sourceCode = {
-//   name: 'sourceCode',
-//   displayName: 'Source Code',
-// };
-
+const sourceVocabulary = {
+  name: 'sourceVocabulary',
+  classNames: ['vocab-col'],
+  displayName: 'Source Vocabulary',
+};
+const sourceName = {
+  name: 'sourceName',
+  displayName: 'Source Name',
+};
+const sourceCode = {
+  name: 'sourceCode',
+  displayName: 'Source Code',
+};
 const value = {
   name: 'value',
   displayName: 'Value',
@@ -101,25 +95,6 @@ const graph = {
   displayName: ' '
 };
 
-const initialfilterState = {
-  ALL_EVENTS: {
-    standardVocabulary: ['Select All'],
-    domain: ['Select All'],
-  },
-  PROCEDURE: {
-    standardVocabulary: ['Select All'],
-  },
-  CONDITION: {
-    standardVocabulary: ['Select All'],
-  },
-  OBSERVATION: {
-    standardVocabulary: ['Select All'],
-  },
-  PHYSICAL_MEASURE: {
-    standardVocabulary: ['Select All'],
-  },
-};
-
 @Component({
   selector: 'app-detail-tabs',
   templateUrl: './detail-tabs.component.html',
@@ -127,7 +102,6 @@ const initialfilterState = {
 })
 export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
-  data;
   participantId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -136,147 +110,117 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
   conditionTitle: string;
   summaryActive = false;
   filterState: any;
+  vocab: string;
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, visitType, standardCode, standardVocabulary, standardName, value,
-      domain, ageAtEvent
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      visitType: visitType,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      value: value,
-      domain: domain,
-      age: ageAtEvent,
-    },
+    columns: {
+      standard: [
+        itemDate, visitType, standardCode, standardVocabulary, standardName, value,
+        domain, ageAtEvent
+      ],
+      source: [
+        itemDate, visitType, sourceCode, sourceVocabulary, sourceName, value, domain, ageAtEvent
+      ],
+    }
   };
 
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      age: ageAtEvent,
-      visitType: visitType,
-    },
+    columns: {
+      standard: [
+        itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+      ],
+      source: [
+        itemDate, sourceCode, sourceVocabulary, sourceName, ageAtEvent, visitType
+      ],
+    }
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      age: ageAtEvent,
-      visitType: visitType,
+    columns: {
+      standard: [
+        itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+      ],
+      source: [
+        itemDate, sourceCode, sourceVocabulary, sourceName, ageAtEvent, visitType
+      ],
     }
   }, {
     name: 'Drugs',
     domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardName, ageAtEvent, numMentions,
-      firstMention, lastMention, visitType
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      visitType: visitType,
+    columns: {
+      standard: [
+        itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
+      ],
+      source: [
+        itemDate, sourceName, ageAtEvent, numMentions, firstMention, lastMention, visitType
+      ],
     }
   }, {
     name: 'Observations',
     domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      age: ageAtEvent,
-      visitType: visitType,
+    columns: {
+      standard: [
+        itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
+      ],
+      source: [
+        itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, visitType
+      ],
     }
   }, {
     name: 'Physical Measurements',
     domain: DomainType.PHYSICALMEASURE,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      standardName: standardName,
-      value: value,
-      age: ageAtEvent,
+    columns: {
+      standard: [
+        itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
+      ],
+      source: [
+        itemDate, sourceCode, sourceVocabulary, sourceName, value, ageAtEvent
+      ],
     }
   }, {
     name: 'Labs',
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
-    ],
-    reverseEnum: {
-      graph: graph,
-      itemDate: itemDate,
-      itemTime: itemTime,
-      standardName: standardName,
-      value: value,
-      age: ageAtEvent,
-      visitType: visitType
+    columns: {
+      standard: [
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+      ],
+      source: [
+        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
+      ],
     }
   }, {
     name: 'Vitals',
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType,
-    ],
-    reverseEnum: {
-      graph: graph,
-      itemDate: itemDate,
-      itemTime: itemTime,
-      standardName: standardName,
-      value: value,
-      age: ageAtEvent,
-      visitType: visitType
+    columns: {
+      standard: [
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
+      ],
+      source: [
+        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
+      ],
     }
   }, {
     name: 'Surveys',
     domain: DomainType.SURVEY,
     filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, survey, question, answer
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      survey: survey,
-      question: question,
-      answer: answer
+    columns: {
+      standard: [
+        itemDate, survey, question, answer
+      ],
+      source: [
+        itemDate, survey, question, answer
+      ],
     }
   }];
 
@@ -313,8 +257,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       .subscribe();
 
     this.subscription.add(filterStateStore.subscribe(filterState => {
-      this.filterState = filterState === null
-        ? JSON.parse(JSON.stringify(initialfilterState)) : filterState;
+      this.vocab = filterState.vocab;
+      this.filterState = filterState;
     }));
   }
 
