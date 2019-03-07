@@ -1830,11 +1830,18 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
   with_cloud_proxy_and_db(gcc) do
-    common.status "Copying service account key to GCS..."
+    common.status "Copying GSuite service account key to GCS..."
     gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
     common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
         --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
     common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
+
+    common.status "Copying FireCloud service account key to GCS..."
+    firecloud_admin_creds_file = Tempfile.new("firecloud-admin-sa.json").path
+    common.run_inline %W{gcloud iam service-accounts keys create #{firecloud_admin_creds_file}
+        --iam-account=firecloud-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+    common.run_inline %W{gsutil cp #{firecloud_admin_creds_file} gs://#{gcc.project}-credentials/firecloud-admin-sa.json}
+
 
     common.status "Setting up databases and users..."
     create_workbench_db
