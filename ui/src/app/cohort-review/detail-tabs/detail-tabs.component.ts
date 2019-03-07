@@ -94,6 +94,10 @@ const answer = {
   name: 'answer',
   displayName: 'Answer',
 };
+const graph = {
+  name: 'graph',
+  displayName: ' '
+}
 
 @Component({
   selector: 'app-detail-tabs',
@@ -228,9 +232,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType,
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,

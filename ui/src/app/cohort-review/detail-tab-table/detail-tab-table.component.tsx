@@ -100,6 +100,18 @@ const css = `
     padding: 0.6rem 0.6rem;
     font-size: 13px;
   }
+  .pi-chevron-right:before {
+    content: "\\E96D"!important;
+    color: rgb(0, 134, 193);
+    font-size: 0.8rem;
+    line-height: 0rem;
+}
+ .pi-chevron-down:before {
+    content: "\\E96D";
+    color: rgb(0, 134, 193);
+    font-size: 0.8rem;
+    line-height: 0rem;
+}
   `;
 
 const styles = reactStyles({
@@ -126,8 +138,19 @@ const styles = reactStyles({
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
-    lineHeight: '0.6rem'
+    lineHeight: '0.6rem',
   },
+  graphColumnBody: {
+    background: '#ffffff',
+    padding: '5px',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    lineHeight: '0.6rem',
+    width: '2rem',
+  },
+
   filterIcon: {
     color: '#0086C1',
     fontSize: '0.5rem',
@@ -146,9 +169,9 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
-  chartContainer: {
-    width: '32rem',
-marginLeft: '-18rem'
+  graphStyle: {
+    borderLeft: 'none',
+    width: '2rem',
   }
 });
 const rows = 25;
@@ -169,13 +192,10 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: any;
-  visible: boolean;
-   // visibleComponentKey: Array<any>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    visibleComponentKey: Array<any>;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -185,8 +205,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortField: null,
         sortOrder: 1,
         expandedRows: null,
-        visible: false,
-         // visibleComponentKey: null,
       };
     }
 
@@ -267,8 +285,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'value' && <span>{rowData.value}</span>}
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
-        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => {vl.toggle(e);
-        console.log(e)}}/>}
+        && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
             <OverlayPanel ref={(el) => {vl = el; }} showCloseIcon={true} dismissable={true}>
               {(rowData.refRange &&  column.field === 'value') &&
                 <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
@@ -280,28 +297,13 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
-    toggleChart = (e) => {
-       // console.log(e.target);
-        console.log(e.target.id);
-      const isItemSelected =  this.visibleComponentKey.find(i => i.standardName === e.target.id );
-      const {visible} = this.state
-      this.setState({visible: isItemSelected});
-      console.log(isItemSelected);
-    }
-
-    isExpandable = (rowData, column) => {
-      const { visible } = this.state;
-console.log(visible);
-      return <React.Fragment>
-        {rowData.standardName}  <i className='pi pi-chart-bar' id={rowData.standardName} style={styles.caretIcon}  onClick={(e) =>this.toggleChart(e)}/>
-      {visible && <div id={rowData.standardName} style={styles.chartContainer}>
-        <ReviewDomainChartsComponent orgData={this.state.data}/>
-      </div>}
-      </React.Fragment>
+    rowExpansionTemplate = () => {
+     return <div>
+       <ReviewDomainChartsComponent orgData={this.state.data}/>
+      </div>
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
-      this.visibleComponentKey = data;
       let pageReportTemplate;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
@@ -316,31 +318,34 @@ console.log(visible);
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const standardName = col.name === 'standardName' && this.props.tabname === 'Vitals';
+        const standardName = col.name === 'graph' && this.props.tabname === 'Vitals';
         const overlayTemplate = colName && this.overlayTemplate;
-        const expandableTemplate = standardName && this.isExpandable;
-        const header = <React.Fragment>
+        const header =   <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-        </React.Fragment>;
+          {(asc && !standardName) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {(desc && !standardName)  && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+        </React.Fragment>
 
         return <Column
+          expander={standardName && true}
           style={styles.tableBody}
-          bodyStyle={styles.columnBody}
+          bodyStyle={standardName ? styles.graphColumnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
+          headerStyle={standardName && styles.graphStyle}
           sortable
-          body={expandableTemplate || overlayTemplate}/>;
+          body={overlayTemplate}/>;
       });
-      return <div style={styles.container}>
+      return <div style={styles.container} >
         <style>{css}</style>
-        {data && <DataTable
+        {data && <DataTable  expandedRows={this.state.expandedRows}
+          onRowToggle={(e) => this.setState({expandedRows: e.data})}
+          rowExpansionTemplate={this.rowExpansionTemplate}
           style={styles.table}
           value={data}
           sortField={sortField}
