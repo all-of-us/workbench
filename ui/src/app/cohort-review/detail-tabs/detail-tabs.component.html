@@ -34,7 +34,7 @@
       <div>
         <app-detail-tab-table
           [tabname]="allEvents.name"
-          [columns]="allEvents.columns"
+          [columns]="allEvents.columns[vocab]"
           [filterType]="allEvents.filterType"
           [domain]="allEvents.domain"
           [participantId]="participantId">
@@ -67,7 +67,7 @@
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
         [tabname]="tab.name"
-        [columns]="tab.columns"
+        [columns]="tab.columns[vocab]"
         [filterType]="tab.filterType"
         [domain]="tab.domain"
         [participantId]="participantId">

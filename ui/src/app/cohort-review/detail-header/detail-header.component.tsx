@@ -1,13 +1,14 @@
 import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
 import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {CohortReview, PageFilterRequest, PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
@@ -76,6 +77,7 @@ export interface DetailHeaderState {
   isLastParticipant: boolean;
   priorId: number;
   afterId: number;
+  filterState: any;
 }
 
 export const DetailHeader = withCurrentWorkspace()(
@@ -87,6 +89,7 @@ export const DetailHeader = withCurrentWorkspace()(
         isLastParticipant: undefined,
         priorId: undefined,
         afterId: undefined,
+        filterState: filterStateStore.getValue()
       };
     }
 
@@ -188,9 +191,16 @@ export const DetailHeader = withCurrentWorkspace()(
       navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
     }
 
+    vocabChange = (event: any) => {
+      const {filterState} = this.state;
+      filterState.vocab = event.value;
+      filterStateStore.next(filterState);
+      this.setState({filterState: filterState});
+    }
+
     render() {
       const {participant} = this.props;
-      const {isFirstParticipant, isLastParticipant} = this.state;
+      const {filterState, isFirstParticipant, isLastParticipant} = this.state;
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <button
@@ -220,6 +230,20 @@ export const DetailHeader = withCurrentWorkspace()(
             onClick={() => this.next()}>
             <i style={styles.icon} className='pi pi-angle-right' />
           </button>
+        </div>
+        <div style={styles.navigation}>
+          <RadioButton
+            name='vocab'
+            value='source'
+            onChange={this.vocabChange}
+            checked={filterState.vocab === 'source'} />
+          <label className='p-radiobutton-label'>View Source Concepts</label>
+          <RadioButton
+            name='vocab'
+            value='standard'
+            onChange={this.vocabChange}
+            checked={filterState.vocab === 'standard'} />
+          <label className='p-radiobutton-label'>View Standard Concepts</label>
         </div>
       </div>;
     }

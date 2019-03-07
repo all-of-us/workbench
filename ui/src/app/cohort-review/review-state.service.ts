@@ -4,4 +4,29 @@ import {
   CohortReview,
 } from 'generated/fetch';
 
+const initialFilterState = {
+  global: {},
+  tabs: {
+    ALL_EVENTS: {
+      standardVocabulary: [],
+      domain: [],
+    },
+    PROCEDURE: {
+      standardVocabulary: [],
+    },
+    CONDITION: {
+      standardVocabulary: [],
+    },
+    OBSERVATION: {
+      standardVocabulary: [],
+    },
+    PHYSICAL_MEASURE: {
+      standardVocabulary: [],
+    },
+  },
+  vocab: 'standard',
+};
+
 export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
+export const filterStateStore =
+  new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
