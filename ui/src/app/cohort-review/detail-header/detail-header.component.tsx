@@ -52,12 +52,30 @@ const styles = reactStyles({
     fontSize: '14px',
     color: '#262262',
     padding: '0 1rem'
-  }
+  },
+  filterHeader: {
+    height: '33%',
+    borderBottom: '1px solid #216FB4',
+  },
+  filterTab: {
+    margin: '0 0.25rem',
+    fontSize: '12px',
+    color: '#2691d0',
+    border: 0,
+    background: 'transparent',
+    cursor: 'pointer',
+  },
+  filterBody: {
+    height: '63%',
+  },
 });
-const navBtnStyles = {
+const otherStyles = {
   navigation: {
     ...styles.headerSection,
     padding: '1.15rem 0.4rem',
+  },
+  filters: {
+    ...styles.headerSection,
   },
   radios: {
     ...styles.headerSection,
@@ -75,6 +93,11 @@ const navBtnStyles = {
     border: '1px solid #cccccc',
     cursor: 'not-allowed',
   },
+  tabActive: {
+    ...styles.filterTab,
+    borderBottom: '2px solid #216FB4',
+    fontWeight: 600,
+  }
 };
 export interface DetailHeaderProps {
   participant: Participant;
@@ -87,6 +110,7 @@ export interface DetailHeaderState {
   priorId: number;
   afterId: number;
   filterState: any;
+  filterTab: string;
 }
 
 export const DetailHeader = withCurrentWorkspace()(
@@ -98,7 +122,8 @@ export const DetailHeader = withCurrentWorkspace()(
         isLastParticipant: undefined,
         priorId: undefined,
         afterId: undefined,
-        filterState: filterStateStore.getValue()
+        filterState: filterStateStore.getValue(),
+        filterTab: 'date'
       };
     }
 
@@ -209,7 +234,7 @@ export const DetailHeader = withCurrentWorkspace()(
 
     render() {
       const {participant} = this.props;
-      const {filterState, isFirstParticipant, isLastParticipant} = this.state;
+      const {filterState, filterTab, isFirstParticipant, isLastParticipant} = this.state;
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <button
@@ -222,9 +247,9 @@ export const DetailHeader = withCurrentWorkspace()(
         <h4 style={styles.title}>{cohort.name}</h4>
         <div style={styles.description}>{cohort.description}</div>
         <div className='p-grid' style={{height: '3.5rem'}}>
-          <div className='p-col' style={navBtnStyles.navigation}>
+          <div className='p-col' style={otherStyles.navigation}>
             <button
-              style={isFirstParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
+              style={isFirstParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive}
               type='button'
               title='Go To the Prior Participant'
               disabled={isFirstParticipant}
@@ -233,7 +258,7 @@ export const DetailHeader = withCurrentWorkspace()(
             </button>
             <span style={styles.participantText}>Participant { participant.id }</span>
             <button
-              style={isLastParticipant ? navBtnStyles.navBtnDisabled : navBtnStyles.navBtnActive}
+              style={isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive}
               type='button'
               title='Go To the Next Participant'
               disabled={isLastParticipant}
@@ -241,7 +266,31 @@ export const DetailHeader = withCurrentWorkspace()(
               <i style={styles.icon} className='pi pi-angle-right' />
             </button>
           </div>
-          <div className='p-col' style={navBtnStyles.radios}>
+          <div className='p-col' style={otherStyles.filters}>
+            <div style={styles.filterHeader}>
+              <button
+                style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setState({filterTab: 'date'})}>
+                Date Range
+              </button>
+              <button
+                style={filterTab === 'age' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setState({filterTab: 'age'})}>
+                Age Range
+              </button>
+              <button
+                style={filterTab === 'visits' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.setState({filterTab: 'visits'})}>
+                Visits
+              </button>
+            </div>
+            <div style={styles.filterBody}>
+              {filterTab === 'date' && <div>Date Range</div>}
+              {filterTab === 'age' && <div>Age Range</div>}
+              {filterTab === 'visits' && <div>Visits</div>}
+            </div>
+          </div>
+          <div className='p-col' style={otherStyles.radios}>
             <div>
               <RadioButton
                 name='vocab'
