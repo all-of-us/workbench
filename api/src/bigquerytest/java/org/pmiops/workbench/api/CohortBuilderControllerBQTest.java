@@ -650,8 +650,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Criteria pm =
       createCriteriaChild(TreeType.PM.name(), TreeSubType.BP.name(), 0, null);
     SearchParameter pmParam = createSearchParameter(pm, null).attributes(Arrays.asList(sysAttr));
-    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>()
-    );
+    SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(pmParam), new ArrayList<>());
     assertMessageException(searchRequest, BP_TWO_ATTRIBUTE_MESSAGE);
 
     //2 but not systolic and diastolic
