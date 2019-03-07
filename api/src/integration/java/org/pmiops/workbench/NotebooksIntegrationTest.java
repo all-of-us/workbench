@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
+import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
@@ -27,10 +28,11 @@ public class NotebooksIntegrationTest {
   @Mock
   private NotebooksApi notebooksApi;
 
-  private final NotebooksServiceImpl notebooksService = new NotebooksServiceImpl(
+  private final NotebooksService notebooksService = new NotebooksServiceImpl(
       Providers.of(clusterApi),
       Providers.of(notebooksApi),
       Providers.of(createConfig()),
+      Providers.of(null),
       new NotebooksRetryHandler(new NoBackOffPolicy()));
 
   @Test
