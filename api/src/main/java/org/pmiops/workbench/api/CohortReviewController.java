@@ -69,6 +69,8 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Survey;
 import org.pmiops.workbench.model.Vital;
+import org.pmiops.workbench.model.VocabularyListResponse;
+import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -513,6 +515,24 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     response.setPageRequest(pageRequest);
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<VocabularyListResponse> getVocabularies(String workspaceNamespace, String workspaceId, Long cohortId, Long cdrVersionId) {
+    validateRequestAndSetCdrVersion(workspaceNamespace, workspaceId, cohortId, cdrVersionId, WorkspaceAccessLevel.WRITER);
+
+    TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
+      reviewQueryBuilder.buildVocabularyDataQuery()));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+
+    VocabularyListResponse response = new VocabularyListResponse();
+    for (List<FieldValue> row : result.iterateAll()) {
+      response.addItemsItem(new Vocabulary()
+        .domain(bigQueryService.getString(row, rm.get("domain")))
+        .type(bigQueryService.getString(row, rm.get("type")))
+        .vocabulary(bigQueryService.getString(row, rm.get("vocabulary"))));
+    }
     return ResponseEntity.ok(response);
   }
 

@@ -70,8 +70,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return new org.pmiops.workbench.model.Criteria()
           .id(criteria.getId())
           .parentId(criteria.getParentId())
-          .type(criteria.getType())
-          .subtype(criteria.getSubtype())
+          .type(TreeType.fromValue(criteria.getType()))
+          .subtype(TreeSubType.fromValue(criteria.getSubtype()))
           .code(criteria.getCode())
           .name(criteria.getName())
           .count(StringUtils.isEmpty(criteria.getCount()) ? null : new Long(criteria.getCount()))
@@ -95,7 +95,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       public org.pmiops.workbench.model.CriteriaAttribute apply(CriteriaAttribute criteria) {
         return new org.pmiops.workbench.model.CriteriaAttribute()
           .id(criteria.getId())
-          .conceptId(criteria.getConceptId())
           .valueAsConceptId(criteria.getValueAsConceptId())
           .conceptName(criteria.getConceptName())
           .type(criteria.getType())

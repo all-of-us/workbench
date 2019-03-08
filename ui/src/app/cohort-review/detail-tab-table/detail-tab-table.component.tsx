@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';

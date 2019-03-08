@@ -56,6 +56,8 @@ import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vital;
+import org.pmiops.workbench.model.Vocabulary;
+import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -1505,6 +1507,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertEquals(new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
     assertEquals(new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
     assertEquals(new CohortChartData().name("name8").conceptId(8L).count(1L), response.getItems().get(2));
+  }
+
+  @Test
+  public void getVocabularies() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    VocabularyListResponse response = controller.getVocabularies(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId()).getBody();
+    assertEquals(27, response.getItems().size());
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"), response.getItems().get(0));
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD10CM"), response.getItems().get(1));
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"), response.getItems().get(2));
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {

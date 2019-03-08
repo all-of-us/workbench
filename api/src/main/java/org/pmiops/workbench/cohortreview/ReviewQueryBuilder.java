@@ -88,6 +88,22 @@ public class ReviewQueryBuilder {
       "and rnk <= @" + NAMED_LIMIT_PARAM + "\n" +
       "order by rank, standardName, startDate\n";
 
+  private static final String VOCAB_DATA_TEMPLATE =
+    "SELECT distinct 'Standard' as type, 'ALL_EVENTS' as domain, standard_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Standard' as type, domain, standard_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Source' as type, 'ALL_EVENTS' as domain, source_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "where domain in ('CONDITION', 'PROCEDURE')\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Source' as type, domain, source_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "where domain in ('CONDITION', 'PROCEDURE')\n" +
+    "order by type, domain, vocabulary";
+
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
                                           PageRequest pageRequest) {
@@ -147,6 +163,13 @@ public class ReviewQueryBuilder {
     return QueryJobConfiguration
       .newBuilder(finalSql)
       .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  public QueryJobConfiguration buildVocabularyDataQuery() {
+    return QueryJobConfiguration
+      .newBuilder(VOCAB_DATA_TEMPLATE)
       .setUseLegacySql(false)
       .build();
   }

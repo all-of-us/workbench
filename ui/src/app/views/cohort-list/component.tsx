@@ -21,7 +21,7 @@ import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
 
 import {FadeBox} from 'app/components/containers';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 
 const styles = reactStyles({

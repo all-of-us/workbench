@@ -377,15 +377,14 @@ public class CohortBuilderControllerTest {
       .name(criteria.getName())
       .parentId(criteria.getParentId())
       .selectable(criteria.getSelectable())
-      .subtype(criteria.getSubtype())
-      .type(criteria.getType())
+      .subtype(TreeSubType.fromValue(criteria.getSubtype()))
+      .type(TreeType.fromValue(criteria.getType()))
       .path(criteria.getPath());
   }
 
   private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {
     return new org.pmiops.workbench.model.CriteriaAttribute()
       .id(criteriaAttribute.getId())
-      .conceptId(criteriaAttribute.getConceptId())
       .valueAsConceptId(criteriaAttribute.getValueAsConceptId())
       .conceptName(criteriaAttribute.getConceptName())
       .type(criteriaAttribute.getType())
