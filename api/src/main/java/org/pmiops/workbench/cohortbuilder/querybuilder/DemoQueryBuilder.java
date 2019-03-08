@@ -152,7 +152,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   private void validateAttributes(SearchParameter param) {
     from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
     param.getAttributes().forEach(attr -> {
-      String name = attr.getName();
+      String name = attr.getName() == null ? null : attr.getName().name();
       String oper = operatorText.get(attr.getOperator());
       from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
       from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);

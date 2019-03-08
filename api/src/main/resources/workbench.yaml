@@ -388,6 +388,25 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/account/sync-era-commons-status:
+    post:
+      tags:
+        - profile
+      summary: Sync era commons status
+      description: Retrieves era commons id from firecloud
+      operationId: syncEraCommonsStatus
+      responses:
+        200:
+          description: The user's profile.
+          schema:
+            $ref: "#/definitions/Profile"
+        404:
+          description: User not found
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
@@ -2072,14 +2091,18 @@ definitions:
         description: Timestamp when the user requests identity verification.
       twoFactorEnabled:
         type: boolean
-      linkedNihUsername:
+      eraCommonsLinkedNihUsername:
         type: string
         description: The user's NIH username
-      linkExpireTime:
+      eraCommonsLinkExpireTime:
         type: integer
         description: The FireCloud-calculated expiration time
         format: int64
         default: 0
+      eraCommonsCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed era commons linking.
 
   InstitutionalAffiliation:
     type: object

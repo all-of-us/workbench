@@ -175,8 +175,7 @@ export class WorkbenchAccessTasks extends
             <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
           </AlertWarning>}
         </div>
-      </div>
-    </React.Fragment>;
+      </div>;
   }
 }
 
@@ -337,8 +336,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      try {
+        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
+      } catch (ex) {
+        this.setState({eraCommonsLinked: false});
+        console.error('error fetching era commons linking status');
+      }
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();
