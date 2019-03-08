@@ -52,8 +52,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<GoogleCredential> googleCredentialProvider;
-  private final Provider<GoogleCredential.Builder> credentialBuilderProvider;
+  private final Provider<GoogleCredential> firecloudCredentialProvider;
+  private final GoogleCredential.Builder credentialBuilder;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<GoogleCredential> fcAdminCredsProvider;
   private final ServiceAccounts serviceAccounts;
@@ -94,8 +94,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.googleCredentialProvider = googleCredentialProvider;
-    this.credentialBuilderProvider = credentialBuilderProvider;
+    this.firecloudCredentialProvider = firecloudCredentialProvider;
+    this.credentialBuilder = credentialBuilder;
     this.retryHandler = retryHandler;
     this.serviceAccounts = serviceAccounts;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
