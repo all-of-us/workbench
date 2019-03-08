@@ -73,6 +73,7 @@ public class ProfileService {
     profile.setRequestedIdVerification(user.getRequestedIdVerification());
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     profile.setDisabled(user.getDisabled());
+    profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
     if (user.getIdVerificationIsValid() == null) {
       profile.setIdVerificationStatus(IdVerificationStatus.UNVERIFIED);
     } else if (!user.getIdVerificationIsValid()) {
@@ -86,6 +87,12 @@ public class ProfileService {
     }
     if (user.getTrainingCompletionTime() != null) {
       profile.setTrainingCompletionTime(user.getTrainingCompletionTime().getTime());
+    }
+    if (user.getEraCommonsLinkExpireTime() != null) {
+      profile.setEraCommonsLinkExpireTime(user.getEraCommonsLinkExpireTime().getTime());
+    }
+    if (user.getEraCommonsCompletionTime() != null) {
+      profile.setEraCommonsCompletionTime(user.getEraCommonsCompletionTime().getTime());
     }
     if (user.getDemographicSurveyCompletionTime() != null) {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()

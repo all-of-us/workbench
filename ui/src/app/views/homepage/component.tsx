@@ -120,8 +120,7 @@ export class WorkbenchAccessTasks extends
   render() {
     const {trainingWarningOpen} = this.state;
     const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
-    return <React.Fragment>
-      <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
+    return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
@@ -176,8 +175,7 @@ export class WorkbenchAccessTasks extends
             <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
           </AlertWarning>}
         </div>
-      </div>
-    </React.Fragment>;
+      </div>;
   }
 }
 
@@ -336,8 +334,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      try {
+        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
+      } catch (ex) {
+        this.setState({eraCommonsLinked: false});
+        console.error('error fetching era commons linking status');
+      }
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();

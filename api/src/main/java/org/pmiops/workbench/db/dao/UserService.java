@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -101,8 +102,9 @@ public class UserService {
 
   private void updateDataAccessLevel(User user) {
     boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
+        && (!(configProvider.get().access.enableEraCommons) || user.getEraCommonsCompletionTime() != null)
         && user.getDemographicSurveyCompletionTime() != null
-        && user.getTrainingCompletionTime() != null
+        && (!(configProvider.get().access.enableComplianceTraining) || user.getTrainingCompletionTime() != null)
         && user.getTermsOfServiceCompletionTime() != null
         && !user.getDisabled()
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
@@ -205,6 +207,35 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
+        return user;
+      }
+    });
+  }
+
+  public User setEraCommonsStatus(NihStatus nihStatus) {
+    return updateWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        if (nihStatus != null) {
+          Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+          // NihStatus should never come back from firecloud with an empty linked username.
+          // If that is the case, there is an error with FC, because we should get a 404
+          // in that case. Leaving the null checking in for code safety reasons
+          if ((nihStatus.getLinkedNihUsername() != null &&
+              !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+              nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+            eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+          } else if (nihStatus.getLinkedNihUsername() == null) {
+            eraCommonsCompletionTime = null;
+          }
+          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+          user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+          user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+        } else {
+          user.setEraCommonsLinkedNihUsername(null);
+          user.setEraCommonsLinkExpireTime(null);
+          user.setEraCommonsCompletionTime(null);
+        }
         return user;
       }
     });
