@@ -76,7 +76,7 @@ public class User {
   private Boolean requestedIdVerification;
   private Timestamp idVerificationRequestTime;
   private Set<PageVisit> pageVisits = new HashSet<>();
-  private String clusterConfigOverride;
+  private String clusterConfigDefault;
 
   private List<InstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
@@ -308,27 +308,27 @@ public class User {
     idVerificationIsValid = value;
   }
 
-  @Column(name = "cluster_config_override")
-  public String getClusterConfigRaw() {
-    return clusterConfigOverride;
+  @Column(name = "cluster_config_default")
+  public String getClusterConfigDefaultRaw() {
+    return clusterConfigDefault;
   }
-  public void setClusterConfigRaw(String value) {
-    clusterConfigOverride = value;
+  public void setClusterConfigDefaultRaw(String value) {
+    clusterConfigDefault = value;
   }
 
   @Transient
-  public ClusterConfig getClusterConfig() {
-    if (clusterConfigOverride == null) {
+  public ClusterConfig getClusterConfigDefault() {
+    if (clusterConfigDefault == null) {
       return null;
     }
-    return new Gson().fromJson(clusterConfigOverride, ClusterConfig.class);
+    return new Gson().fromJson(clusterConfigDefault, ClusterConfig.class);
   }
-  public void setClusterConfig(ClusterConfig value) {
+  public void setClusterConfigDefault(ClusterConfig value) {
     String rawValue = null;
     if (value != null) {
       rawValue = new Gson().toJson(value);
     }
-    setClusterConfigRaw(rawValue);
+    setClusterConfigDefaultRaw(rawValue);
   }
 
   @Column(name = "terms_of_service_completion_time")

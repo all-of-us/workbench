@@ -262,8 +262,8 @@ public class ClusterControllerTest {
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfig().machineType).isEqualTo("n1-standard-4");
-    assertThat(updatedUser.getClusterConfig().masterDiskSize).isEqualTo(100);
+    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-4");
+    assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
   }
 
   @Test
@@ -283,7 +283,7 @@ public class ClusterControllerTest {
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfig()).isNull();
+    assertThat(updatedUser.getClusterConfigDefault()).isNull();
   }
 
   @Test(expected=NotFoundException.class)

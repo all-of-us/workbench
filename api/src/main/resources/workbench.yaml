@@ -465,7 +465,7 @@ paths:
           description: Request containing user email to update and a disabled status to update the user to.
           schema:
             $ref: "#/definitions/UpdateUserDisabledRequest"
-      summary: enable/disable a user to an auth domain if you have manage groups permission
+      summary: enable/disable a user to an auth domain if you have ID verification authority
       operationId: updateUserDisabledStatus
 
   /v1/user/{term}:
@@ -851,7 +851,7 @@ paths:
         Clusters are created with a default machine configuration. Setting this
         override changes that configuration for subsequent cluster creations.
         After making this change, a cluster reset is required for the change to
-        take effect. Currently requires MANAGE_CLUSTERS authority.
+        take effect. Currently requires DEVELOPER authority.
       operationId: updateClusterConfig
       tags:
         - cluster
@@ -1426,12 +1426,11 @@ definitions:
   # define the following authorities:
   #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
   #      the user has requested review to approve or reject.
-  #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
-  #      and is mainly an internal authority for devs to use when setting up an environment.
+  #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+  #      administrative endpoints, including group management and cluster
+  #      management. Intended to be granted for devops needs, e.g. for oncall.
   #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
-  #   4) MANAGE_CLUSTERS: Ability to administratively interact with notebook clusters, e.g. setting
-  #      overrides for the default cluster configuration.
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -1440,9 +1439,8 @@ definitions:
         # Java fields by default; this has no side-effect currently as there is
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
-        MANAGE_GROUP,
-        REVIEW_ID_VERIFICATION,
-        MANAGE_CLUSTERS
+        DEVELOPER,
+        REVIEW_ID_VERIFICATION
     ]
 
   PageVisit:

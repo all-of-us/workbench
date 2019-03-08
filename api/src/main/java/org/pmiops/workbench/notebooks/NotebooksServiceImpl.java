@@ -1,7 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,7 +79,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     User user = userProvider.get();
     return retryHandler.run((context) ->
         clusterApi.createClusterV2(googleProject, clusterName,
-            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfig())));
+            createFirecloudClusterRequest(user.getEmail(), user.getClusterConfigDefault())));
   }
 
   @Override

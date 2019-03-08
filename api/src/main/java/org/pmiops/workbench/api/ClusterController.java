@@ -243,13 +243,13 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.MANAGE_CLUSTERS})
+  @AuthorityRequired({Authority.DEVELOPER})
   public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
     User user = userDao.findUserByEmail(body.getUserEmail());
     if (user == null) {
       throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
     }
-    String oldOverride = user.getClusterConfigRaw();
+    String oldOverride = user.getClusterConfigDefaultRaw();
 
     final ClusterConfig override =
         body.getClusterConfig() != null ? new ClusterConfig() : null;
@@ -258,7 +258,7 @@ public class ClusterController implements ClusterApiDelegate {
       override.machineType = body.getClusterConfig().getMachineType();
     }
     userService.updateUserWithRetries((u) -> {
-      u.setClusterConfig(override);
+      u.setClusterConfigDefault(override);
       return u;
     }, user);
     userService.logAdminUserAction(
