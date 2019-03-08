@@ -1472,10 +1472,10 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       NAME,
       cohort.getCohortId(),
       cdrVersion.getCdrVersionId()).getBody();
-    assertEquals(3, response.getItems().size());
-    assertEquals(new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
-    assertEquals(new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
-    assertEquals(new CohortChartData().name("name8").conceptId(8L).count(1L), response.getItems().get(2));
+    assertEquals(27, response.getItems().size());
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"), response.getItems().get(0));
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD10CM"), response.getItems().get(1));
+    assertEquals(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"), response.getItems().get(2));
   }
 
   private void assertResponse(ParticipantDataListResponse response, PageRequest expectedPageRequest, List<ParticipantData> expectedData, int totalCount) {
