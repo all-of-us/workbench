@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.gson.Gson;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -1635,26 +1634,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabBothCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute categorical = new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"));
-    lab.attributes(Arrays.asList(categorical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothNumerical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
-    lab.attributes(Arrays.asList(numerical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
@@ -1751,8 +1730,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), "1586218");
     searchParameter.attributes(attributes);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
-    Gson gson = new Gson();
-    System.out.println(gson.toJson(searchRequest));
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
