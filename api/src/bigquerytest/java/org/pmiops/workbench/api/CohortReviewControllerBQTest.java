@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.gson.Gson;
-import com.sun.xml.internal.org.jvnet.fastinfoset.VocabularyApplicationData;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.After;
 import org.junit.Before;
