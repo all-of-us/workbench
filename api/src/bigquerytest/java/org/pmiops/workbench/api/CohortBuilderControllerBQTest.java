@@ -92,6 +92,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       "person",
       "death",
       "criteria",
+      "criteria_ancestor",
       "search_person",
       "search_all_domains");
   }
