@@ -502,8 +502,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     User user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
-    userService.setEraCommonsStatus(nihStatus);
-    userDao.save(user);
+    user = userService.setEraCommonsStatus(nihStatus);
     return getProfileResponse(user);
   }
 
