@@ -341,7 +341,7 @@ dependencies {
   toolsCompile 'commons-cli:commons-cli:1.4'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'org.mockito:mockito-core:2.18.3'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
@@ -505,6 +505,16 @@ task backfillGSuiteUserData(type: JavaExec) {
 task elasticSearchIndexer(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See api/project.rb fetch-firecloud-user-profiles
+task fetchFireCloudUserProfile(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)

@@ -143,7 +143,7 @@ public class UserMetricsControllerTest {
         .thenReturn(workspaceResponse2);
 
     when(cloudStorageService.blobsExist(anyListOf(BlobId.class))).then((i) -> {
-      List<BlobId> ids = i.getArgumentAt(0, List.class);
+      List<BlobId> ids = i.getArgument(0);
       if (ids.contains(null)) {
         throw new NullPointerException();
       }
