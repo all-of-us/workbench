@@ -256,6 +256,7 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
+    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
@@ -264,6 +265,10 @@ public class ProfileControllerTest {
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     profile = profileController.submitTermsOfService().getBody();
+    profile.setDataUseAgreementCompletionTime(timestamp);
+    profile.setEraCommonsCompletionTime(timestamp);
+    profile.setComplianceTrainingCompletionTime(timestamp);
+    userService.updateDataAccessLevel(profile);
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
     verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
 
