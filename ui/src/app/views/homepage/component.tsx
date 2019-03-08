@@ -119,8 +119,7 @@ export class WorkbenchAccessTasks extends
   render() {
     const {trainingWarningOpen} = this.state;
     const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
-    return <React.Fragment>
-      <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
+    return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%', padding: '3% 0 0 3%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
           <div style={{marginLeft: '1rem', flexDirection: 'column'}}>
@@ -194,10 +193,10 @@ export const homepageStyles = reactStyles({
     border: 'none', marginTop: '1rem'
   },
   contentWrapperLeft: {
-    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '35%'
+    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '40%'
   },
   contentWrapperRight: {
-    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '65%'
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -453,7 +452,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         </CardButton>
                       </TooltipTrigger>
                     </div>
-                    <div style={{display: 'flex', flexDirection: 'column', width: '100%'}}>
+                    <div style={homepageStyles.contentWrapperRight}>
                       <a onClick={() => navigate(['workspaces'])}
                          style={{fontSize: '14px', color: '#FFFFFF'}}>
                         See All Workspaces</a>
@@ -469,7 +468,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
         </div>
-        <div style={homepageStyles.contentWrapperRight}>
+        <div>
           <div style={homepageStyles.quickRow}>
             <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
             {quickTourResources.map((thumbnail, i) => {
