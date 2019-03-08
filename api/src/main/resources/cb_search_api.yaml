@@ -308,12 +308,10 @@ definitions:
         format: int64
       type:
         description: The tree type of this criteria, see TreeType.
-        # TODO(RW-2278): Use TreeType enum.
-        type: string
+        $ref: "#/definitions/TreeType"
       subtype:
         description: The tree subtype of this criteria, see TreeSubType.
-        # TODO(RW-2278): Use TreeSubType enum.
-        type: string
+        $ref: "#/definitions/TreeSubType"
       code:
         description: >
           Code that identifies this criteria. In some vocabularies such as ICD9
