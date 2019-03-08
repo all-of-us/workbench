@@ -32,6 +32,9 @@
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
+        [getFilteredData]=filteredData
+        [filterState]="filterState"
+        [updateState]="updateState"
         [tabname]="tab.name"
         [columns]="tab.columns[vocab]"
         [filterType]="tab.filterType"

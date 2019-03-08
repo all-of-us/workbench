@@ -155,10 +155,14 @@ export interface DetailTabTableProps {
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
+  filterState: any;
+  getFilteredData: Function;
+  updateState: number;
 }
 
 export interface DetailTabTableState {
   data: Array<any>;
+  filteredData: Array<any>;
   loading: boolean;
   start: number;
   sortField: string;
@@ -171,6 +175,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
+        filteredData: null,
         loading: true,
         start: 0,
         sortField: null,
@@ -186,9 +191,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
+          filteredData: null,
           loading: true,
         });
         this.getParticipantData();
+      } else if (prevProps.updateState !== this.props.updateState) {
+        this.filterData();
       }
     }
 
@@ -224,6 +232,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
+          this.filterData();
         });
       } catch (error) {
         console.log(error);
@@ -267,16 +276,40 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
+    filterData() {
+      let {data, start} = this.state;
+      const {filterState} = this.props;
+      const {age, date, visits} = filterState.global;
+      if (date.min && date.max) {
+        data = data.filter(item => {
+          const itemDate = Date.parse(item.itemDate);
+          return itemDate > date.min.getTime() && itemDate < date.max.getTime();
+        });
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY] && age.min && age.max) {
+        data = data.filter(item => item.ageAtEvent > age.min && item.ageAtEvent < age.max);
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY]
+        && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
+        && visits) {
+        data = data.filter(item => visits.includes(item.visitType));
+      }
+      if (data.length < start + rows) {
+        start = Math.floor(data.length / rows) * rows;
+      }
+      this.setState({filteredData: data, start: start});
+    }
+
     render() {
-      const {data, loading, start, sortField, sortOrder} = this.state;
+      const {filteredData, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      if (data !== null) {
-        const lastRowOfPage = (start + rows) > data.length
-          ? start + rows - (start + rows - data.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${data.length} records `;
+      if (filteredData !== null) {
+        const lastRowOfPage = (start + rows) > filteredData.length
+          ? start + rows - (start + rows - filteredData.length) : start + rows;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (data && data.length > rows) {
+      if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
 
@@ -306,23 +339,23 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{css}</style>
-        {data && <DataTable
+        {filteredData && <DataTable
           style={styles.table}
-          value={data}
+          value={filteredData}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          paginatorTemplate={filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
-          totalRecords={data.length}
+          totalRecords={filteredData.length}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
+          emptyMessage={filteredData !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
@@ -341,6 +374,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
+  @Input('filterState') filterState: DetailTabTableProps['filterState'];
+  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
+  @Input('updateState') updateState: DetailTabTableProps['updateState'];
 
   constructor() {
     super(DetailTabTable, [
@@ -349,6 +385,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
       'domain',
       'filterType',
       'participantId',
+      'filterState',
+      'getFilteredData',
+      'updateState',
     ]);
   }
 }

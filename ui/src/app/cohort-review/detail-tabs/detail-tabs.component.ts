@@ -106,6 +106,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
   conditionTitle: string;
   summaryActive = false;
   filterState: any;
+  updateState = 0;
   vocab: string;
 
   readonly tabs = [{
@@ -219,7 +220,9 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }];
 
-  constructor() {}
+  constructor() {
+    this.filteredData = this.filteredData.bind(this);
+  }
 
   ngOnInit() {
     this.subscription = Observable
@@ -252,7 +255,13 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     this.subscription.add(filterStateStore.subscribe(filterState => {
       this.vocab = filterState.vocab;
       this.filterState = filterState;
+      this.updateState++;
     }));
+  }
+
+  filteredData(_domain: string, checkedItems: any) {
+    this.filterState[_domain] = checkedItems;
+    filterStateStore.next(this.filterState);
   }
 
   ngOnDestroy() {
