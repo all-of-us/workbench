@@ -1,6 +1,6 @@
 # Domain-wide delegation in AoU RW
 
-The All of Us backend uses a Google OAuth technique called `domain-wide delegation` in a few places to 
+The All of Us backend uses `domain-wide delegation of authority` in a few places to 
 carry out administrative and maintenance tasks.
 
 ## Background

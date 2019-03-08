@@ -1071,7 +1071,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
       "--username=[username]",
       String,
       ->(opts, v) { opts.username = v},
-      "The AoU username to look up (e.g. 'gjordan'")
+      "The AoU username to fetch FireCloud data for (e.g. 'gjordan'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
