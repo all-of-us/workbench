@@ -7,7 +7,6 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
