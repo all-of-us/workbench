@@ -702,7 +702,7 @@ public class ProfileController implements ProfileApiDelegate {
         user.setTwoFactorAuthBypassTime(valueToSet);
         break;
       default:
-        break;
+        throw new BadRequestException("There is no access module named: " + moduleName);
     }
     saveUserWithConflictHandling(user);
     return ResponseEntity.ok(new EmptyResponse());

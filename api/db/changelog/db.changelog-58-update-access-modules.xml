@@ -8,7 +8,6 @@
     <addColumn tableName="user">
       <column name="data_use_agreement_completion_time" type="datetime"/>
       <column name="data_use_agreement_bypass_time" type="datetime"/>
-      <column name="compliance_training_expiration_time" type="datetime"/>
       <column name="compliance_training_completion_time" type="datetime"/>
       <column name="compliance_training_bypass_time" type="datetime"/>
       <column name="beta_access_completion_time" type="datetime"/>

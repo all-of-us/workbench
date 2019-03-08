@@ -108,13 +108,11 @@ public class UserService {
     // user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
     boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
-    Timestamp current = new Timestamp(clock.instant().toEpochMilli());
-    boolean complianceTrainingNotExpired = user.getComplianceTrainingExpirationTime() == null ||
-      current.before(user.getComplianceTrainingExpirationTime());
-    boolean complianceTrainingCompliant = complianceTrainingNotExpired && (user.getComplianceTrainingCompletionTime() != null ||
-      user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining);
+    boolean complianceTrainingCompliant = user.getComplianceTrainingCompletionTime() != null ||
+      user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
     boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
       user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
+    // TODO: can be removed once we totally move off old validation
       Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null

@@ -75,7 +75,6 @@ public class User {
   private Timestamp betaAccessBypassTime;
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
-  private Timestamp complianceTrainingExpirationTime;
   private Timestamp complianceTrainingCompletionTime;
   private Timestamp complianceTrainingBypassTime;
   private Timestamp eraCommonsBypassTime;
@@ -476,24 +475,17 @@ public class User {
     this.dataUseAgreementBypassTime = dataUseAgreementBypassTime;
   }
 
-  @Column(name = "compliance_training_expiration_time")
-  public Timestamp getComplianceTrainingExpirationTime() {return complianceTrainingExpirationTime; }
-
-  public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
-    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
-  }
-
   @Column(name = "compliance_training_completion_time")
   public Timestamp getComplianceTrainingCompletionTime() {return complianceTrainingCompletionTime; }
 
   public void setComplianceTrainingCompletionTime(Timestamp complianceTrainingCompletionTime) {
-    this.complianceTrainingCompletionTime = complianceTrainingExpirationTime;
+    this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
 
   @Column(name = "compliance_training_bypass_time")
   public Timestamp getComplianceTrainingBypassTime() {return complianceTrainingBypassTime; }
 
-  public void setComplianceTrainingBypassTime(Timestamp complianceTrainingExpirationTime) {
+  public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
     this.complianceTrainingBypassTime = complianceTrainingBypassTime;
   }
 

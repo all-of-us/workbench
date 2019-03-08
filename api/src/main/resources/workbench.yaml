@@ -771,6 +771,14 @@ paths:
           description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
+        403:
+          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        400:
+          description: No module exists with name submitted
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
   /v1/admin/users/id-verification/list:
     get:
