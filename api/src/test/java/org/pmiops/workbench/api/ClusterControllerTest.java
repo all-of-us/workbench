@@ -44,7 +44,7 @@ import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.SetClusterConfigRequest;
+import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -253,10 +253,10 @@ public class ClusterControllerTest {
 
   @Test
   public void testSetClusterConfig() {
-    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfig(
-        new SetClusterConfigRequest().
-            userEmail(OTHER_USER_EMAIL).
-            override(new ClusterConfig()
+    ResponseEntity<EmptyResponse> response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(new ClusterConfig()
                 .machineType("n1-standard-4")
                 .masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
@@ -267,19 +267,19 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testSetClusterConfigClear() {
-    ResponseEntity<EmptyResponse> response = this.clusterController.setClusterConfig(
-        new SetClusterConfigRequest().
-            userEmail(OTHER_USER_EMAIL).
-            override(new ClusterConfig()
+  public void testUpdateClusterConfigClear() {
+    ResponseEntity<EmptyResponse> response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(new ClusterConfig()
                 .machineType("n1-standard-4")
                 .masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    response = this.clusterController.setClusterConfig(
-        new SetClusterConfigRequest().
-            userEmail(OTHER_USER_EMAIL)
-            .override(null));
+    response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(null));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
@@ -287,9 +287,9 @@ public class ClusterControllerTest {
   }
 
   @Test(expected=NotFoundException.class)
-  public void testSetClusterConfigUserNotFound() {
-    this.clusterController.setClusterConfig(
-        new SetClusterConfigRequest().userEmail("not-found@researchallofus.org"));
+  public void testUpdateClusterConfigUserNotFound() {
+    this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest().userEmail("not-found@researchallofus.org"));
   }
 
   @Test

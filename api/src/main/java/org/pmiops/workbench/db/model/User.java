@@ -43,8 +43,6 @@ public class User {
     public Integer masterDiskSize;
     // GCE machine type, e.g. n1-standard-2.
     public String machineType;
-
-    public ClusterConfig() {}
   }
 
   private long userId;
