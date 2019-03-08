@@ -8,10 +8,21 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {CohortReview, PageFilterRequest, PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {Calendar} from 'primereact/calendar';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
+import * as moment from 'moment';
+const css = `
+  .p-calendar > .p-inputtext {
+    width: 140px;
+  }
+  .p-calendar > .p-calendar-button {
+    color: #216FB4;
+    background: transparent;
+  }
+`;
 const styles = reactStyles({
   backBtn: {
     padding: 0,
@@ -55,7 +66,7 @@ const styles = reactStyles({
   },
   filterHeader: {
     height: '33%',
-    borderBottom: '1px solid #216FB4',
+    borderBottom: '1px solid #216fb4',
   },
   filterTab: {
     margin: '0 0.25rem',
@@ -67,6 +78,11 @@ const styles = reactStyles({
   },
   filterBody: {
     height: '63%',
+  },
+  resetBtn: {
+    border: '1px solid #2691d0',
+    borderRadius: '3px',
+    background: 'transparent',
   },
 });
 const otherStyles = {
@@ -84,7 +100,7 @@ const otherStyles = {
   navBtnActive: {
     ...styles.navBtn,
     color: '#2691D0',
-    border: '1px solid #2691D0',
+    border: '1px solid #2691d0',
     cursor: 'pointer',
   },
   navBtnDisabled: {
@@ -232,11 +248,45 @@ export const DetailHeader = withCurrentWorkspace()(
       this.setState({filterState: filterState});
     }
 
+    setFilter = (value: any, type: string, field?: string) => {
+      const {filterState} = this.state;
+      switch (type) {
+        case 'age':
+          filterState.global[type][field] = value;
+          filterStateStore.next(filterState);
+          break;
+        case 'date':
+          filterState.global[type][field] = value;
+          if (typeof value === 'object') {
+            filterStateStore.next(filterState);
+          }
+          break;
+        case 'visits':
+          filterState.global[type] = value;
+          filterStateStore.next(filterState);
+          break;
+      }
+      this.setState({filterState: filterState});
+    }
+
+    clearFilters = () => {
+      const {filterState} = this.state;
+      filterState.global = {
+        date: {min: null, max: null},
+        age: {min: null, max: null},
+        visits: null
+      };
+      filterStateStore.next(filterState);
+      this.setState({filterState: filterState});
+    }
+
     render() {
       const {participant} = this.props;
       const {filterState, filterTab, isFirstParticipant, isLastParticipant} = this.state;
+      const {age, date, visits} = filterState.global;
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
+        <style>{css}</style>
         <button
           style={styles.backBtn}
           type='button'
@@ -283,9 +333,43 @@ export const DetailHeader = withCurrentWorkspace()(
                 onClick={() => this.setState({filterTab: 'visits'})}>
                 Visits
               </button>
+              <button
+                style={filterTab === 'visits' ? otherStyles.tabActive : styles.filterTab}
+                onClick={() => this.clearFilters()}>
+                RESET FILTER
+              </button>
             </div>
             <div style={styles.filterBody}>
-              {filterTab === 'date' && <div>Date Range</div>}
+              {filterTab === 'date' && <div>
+                Select Date Range:
+                <div>
+                  <Calendar
+                    style={{width: '140px'}}
+                    dateFormat='yy-mm-dd'
+                    value={date.max}
+                    onChange={(e) => this.setFilter(e.value, 'date', 'max')}
+                    monthNavigator={true}
+                    yearNavigator={true}
+                    yearRange='1940:2018'
+                    showIcon={true}
+                  />
+                </div>
+                <div>
+                  and
+                </div>
+                <div>
+                  <Calendar
+                    style={{width: '140px'}}
+                    dateFormat='yy-mm-dd'
+                    value={date.min}
+                    onChange={(e) => this.setFilter(e.value, 'date', 'min')}
+                    monthNavigator={true}
+                    yearNavigator={true}
+                    yearRange='1940:2018'
+                    showIcon={true}
+                  />
+                </div>
+              </div>}
               {filterTab === 'age' && <div>Age Range</div>}
               {filterTab === 'visits' && <div>Visits</div>}
             </div>

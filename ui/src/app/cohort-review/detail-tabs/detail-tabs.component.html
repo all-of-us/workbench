@@ -33,9 +33,10 @@
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
         [getFilteredData]=filteredData
-        [filteredTab]="filterState[tab.domain]"
+        [filterState]="filterState"
+        [updateState]="updateState"
         [tabName]="tab.name"
-        [columns]="tab.columns"
+        [columns]="tab.columns[vocab]"
         [filterType]="tab.filterType"
         [domain]="tab.domain"
         [participantId]="participantId">

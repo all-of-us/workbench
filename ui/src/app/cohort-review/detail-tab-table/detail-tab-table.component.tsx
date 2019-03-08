@@ -113,8 +113,9 @@ export interface DetailTabTableProps {
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
-  filteredTab: any;
+  filterState: any;
   getFilteredData: Function;
+  updateState: number;
 }
 
 export interface DetailTabTableState {
@@ -157,6 +158,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           loading: true,
         });
         this.getParticipantData();
+      } else if (prevProps.updateState !== this.props.updateState) {
+        this.filterData();
       }
     }
 
@@ -275,6 +278,22 @@ export const DetailTabTable = withCurrentWorkspace()(
     filterData() {
       const {checkedItems} = this.state;
       let {data, start} = this.state;
+      const {filterState} = this.props;
+      const {age, date, visits} = filterState.global;
+      if (date.min && date.max) {
+        data = data.filter(item => {
+          const itemDate = Date.parse(item.itemDate);
+          return itemDate > date.min.getTime() && itemDate < date.max.getTime();
+        });
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY] && age.min && age.max) {
+        data = data.filter(item => item.ageAtEvent > age.min && item.ageAtEvent < age.max);
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY]
+        && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
+        && visits) {
+        data = data.filter(item => visits.includes(item.visitType));
+      }
       const empty = [];
       for (const col in checkedItems) {
         if (checkedItems[col].length) {
@@ -478,8 +497,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
-  @Input('filteredTab') filteredTab: DetailTabTableProps['filteredTab'];
+  @Input('filterState') filterState: DetailTabTableProps['filterState'];
   @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
+  @Input('updateState') updateState: DetailTabTableProps['updateState'];
 
   constructor() {
     super(DetailTabTable, [
@@ -488,9 +508,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
       'domain',
       'filterType',
       'participantId',
-      'filteredTab',
+      'filterState',
       'getFilteredData',
+      'updateState',
     ]);
   }
 }
-

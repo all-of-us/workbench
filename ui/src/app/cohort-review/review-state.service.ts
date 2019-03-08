@@ -5,7 +5,17 @@ import {
 } from 'generated/fetch';
 
 const initialFilterState = {
-  global: {},
+  global: {
+    date: {
+      min: null,
+      max: null
+    },
+    age: {
+      min: null,
+      max: null
+    },
+    visits: null
+  },
   tabs: {
     ALL_EVENTS: {
       standardVocabulary: [],

@@ -110,6 +110,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
   conditionTitle: string;
   summaryActive = false;
   filterState: any;
+  updateState = 0;
   vocab: string;
 
   readonly tabs = [{
@@ -258,6 +259,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     this.subscription.add(filterStateStore.subscribe(filterState => {
       this.vocab = filterState.vocab;
       this.filterState = filterState;
+      this.updateState++;
     }));
   }
 
