@@ -53,8 +53,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<GoogleCredential> googleCredentialProvider;
+  private final Provider<GoogleCredential.Builder> credentialBuilderProvider;
   private final FirecloudRetryHandler retryHandler;
-  private final WorkbenchConfig workbenchConfig;
   private final HttpTransport httpTransport;
 
   private static final String MEMBER_ROLE = "member";
@@ -79,7 +79,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
       @Qualifier("fireCloudAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
-      WorkbenchConfig workbenchConfig,
+      Provider<GoogleCredential.Builder> credentialBuilderProvider,
       HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
@@ -90,7 +90,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.googleCredentialProvider = googleCredentialProvider;
-    this.workbenchConfig = workbenchConfig;
+    this.credentialBuilderProvider = credentialBuilderProvider;
     this.retryHandler = retryHandler;
     this.httpTransport = httpTransport;
   }
@@ -101,7 +101,7 @@ public class FireCloudServiceImpl implements FireCloudService {
    * request.
    * <p>
    * This method uses Google's support for domain-wide delegation in the OAuth flow; see
-   * https://developers.google.com/admin-sdk/directory/v1/guides/delegation for more info.
+   * /api/docs/domain-wide-delegation.md for more details.
    *
    * @param userEmail
    * @return
@@ -113,7 +113,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     GoogleCredential googleCredential = googleCredentialProvider.get();
 
     // Build derived credentials for impersonating the target user.
-    GoogleCredential delegatedCredential = new GoogleCredential.Builder()
+    GoogleCredential impersonatedUserCredential = credentialBuilderProvider.get()
         .setJsonFactory(getDefaultJsonFactory())
         .setTransport(httpTransport)
         .setServiceAccountUser(userEmail)
@@ -126,19 +126,18 @@ public class FireCloudServiceImpl implements FireCloudService {
 
     // Initiate the OAuth flow to populate the access token.
     try {
-      delegatedCredential.refreshToken();
+      impersonatedUserCredential.refreshToken();
     } catch (IOException e) {
-      log.severe("Error refreshing access token for offline FireCloud API client.");
+      log.severe("Error refreshing access token for impersonated FireCloud API client.");
       return null;
     }
 
     // Create a new ApiClient instance and attach it to the provided API instance.
     ApiClient apiClient = new ApiClient();
     apiClient.setDebugging(true);
-    apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
-    //apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
-    apiClient.setAccessToken(delegatedCredential.getAccessToken());
-    System.out.println("Access token: " + delegatedCredential.getAccessToken());
+    apiClient.setBasePath(configProvider.get().firecloud.baseUrl);
+    apiClient.setDebugging(configProvider.get().firecloud.debugEndpoints);
+    apiClient.setAccessToken(impersonatedUserCredential.getAccessToken());
     apiClient.addDefaultHeader(FireCloudConfig.X_APP_ID_HEADER,
         FireCloudConfig.X_APP_ID_HEADER_VALUE);
 
