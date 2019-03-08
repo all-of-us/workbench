@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.gson.Gson;
+import com.sun.xml.internal.org.jvnet.fastinfoset.VocabularyApplicationData;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.After;
 import org.junit.Before;
@@ -56,6 +57,8 @@ import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vital;
+import org.pmiops.workbench.model.Vocabulary;
+import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -1455,6 +1458,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       cdrVersion.getCdrVersionId(),
       DomainType.PROCEDURE.name(),
       10).getBody();
+    assertEquals(3, response.getItems().size());
+    assertEquals(new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
+    assertEquals(new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
+    assertEquals(new CohortChartData().name("name8").conceptId(8L).count(1L), response.getItems().get(2));
+  }
+
+  @Test
+  public void getVocabularies() throws Exception {
+    stubMockFirecloudGetWorkspace();
+
+    VocabularyListResponse response = controller.getVocabularies(NAMESPACE,
+      NAME,
+      cohort.getCohortId(),
+      cdrVersion.getCdrVersionId()).getBody();
     assertEquals(3, response.getItems().size());
     assertEquals(new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
     assertEquals(new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
