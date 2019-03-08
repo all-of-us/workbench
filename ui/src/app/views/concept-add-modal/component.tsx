@@ -80,6 +80,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       const conceptSets = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
       const conceptSetsInDomain = conceptSets.items
           .filter((conceptset) => conceptset.domain === this.props.selectedDomain.domain);
+
       this.setState({
         conceptSets: conceptSetsInDomain,
         existingSetSelected: (conceptSetsInDomain.length > 0),
@@ -158,7 +159,8 @@ export const ConceptAddModal = withCurrentWorkspace()
     });
 
     return <Modal>
-          <ModalTitle>Add {selectedConceptsInDomain.length} Concepts to
+          <ModalTitle data-test-id='add-concept-title'>
+            Add {selectedConceptsInDomain.length} Concepts to
             {' '}{selectedDomain.name} Concept Set</ModalTitle>
           {loading ?
               <div style={{display: 'flex', justifyContent: 'center'}}>
@@ -174,6 +176,7 @@ export const ConceptAddModal = withCurrentWorkspace()
                   <RadioButton value={existingSetSelected}
                              checked={existingSetSelected}
                              disabled={conceptSets.length === 0}
+                             data-test-id='toggle-existing-set'
                              onChange={() => {
                                this.setState({existingSetSelected: true});
                              }}/>
@@ -183,6 +186,7 @@ export const ConceptAddModal = withCurrentWorkspace()
               <RadioButton value={!existingSetSelected}
                            checked={!existingSetSelected}
                            style={{marginLeft: '0.7rem'}}
+                           data-test-id='toggle-new-set'
                            onChange={() => {
                              this.setState({existingSetSelected: false});
 
@@ -191,17 +195,19 @@ export const ConceptAddModal = withCurrentWorkspace()
             </div>
           </ModalBody>
           {existingSetSelected ? (
-              <ModalBody>
+              <ModalBody data-test-id='add-to-existing'>
                 <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
                         onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
-                  {conceptSets.map((set: ConceptSet, i) => <option key={i} value={i}>
-                    {set.name}
-                  </option>)}
+                  {conceptSets.map((set: ConceptSet, i) =>
+                      <option data-test-id='existing-set' key={i} value={i}>
+                        {set.name}
+                      </option>)}
                 </select>
               </ModalBody>
               ) :
-            (<ModalBody>
+            (<ModalBody data-test-id='create-new-set'>
               <TextInput placeholder='Name' value={newSetName}
+                         data-test-id='create-new-set-name'
                          onChange={(v) => {
                            this.setState({newSetName: v, nameTouched: true});
                          }}/>
