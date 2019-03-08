@@ -1,58 +1,63 @@
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
-
+import * as moment from 'moment';
 
 export class ReviewDomainChartsComponent extends React.Component<
-  {orgData: Array<any>}, {data: Array<any> }> {
+  {orgData: any, unitName: any}, {}> {
   constructor(props) {
     super(props);
-    this.state = {
-      data: this.props.orgData,
-    };
+    // this.state = {
+    //   data: this.props.orgData,
+    // };
+  }
+  componentDidMount() {
+    // console.log(this.props.orgData)
   }
 
+
   getOptions() {
+     console.log(this.props.orgData)
     // const {chartData: {conditionTitle, items}} = this.props;
     // const names = ['', ...fp.uniq(items.map(item => item.standardName))];
     // const nameIndexes = fp.mapValues(n => +n, fp.invert(names));
-    // const data = items.map(({startDate, standardName, standardVocabulary, ageAtEvent}) => {
-    //   return {
-    //     x: moment(startDate, 'YYYY-MM-DD').unix(),
-    //     y: nameIndexes[standardName],
-    //     ageAtEvent,
-    //     standardName,
-    //     standardVocabulary,
-    //   };
-    // });
+    const values = this.props.orgData.map(val => {
+      return  val.values
+    });
+    const date = this.props.orgData.map(val => {
+      // return moment(val.date, 'YYYY-MM-DD').unix()
+       return val.date
+    });
+     console.log(date);
     return {
-      chart: {
-        zoomType: 'xy',
-      },
+      // chart: {
+      //   zoomType: 'xy',
+      // },
       // credits: {
       //   enabled: false
       // },
       title: {
-        text: 'Solar Employment Growth by Sector, 2010-2016'
+        text: this.props.unitName
       },
+
       // xAxis: {
-      //       //   title: {
-      //       //     enabled: true,
-      //       //     text: 'Entry Date',
-      //       //   },
-      //       //   // labels: {
-      //       //   //   formatter: function() {
-      //       //   //     return moment.unix(this.value).format('YYYY');
-      //       //   //   },
-      //       //   // },
-      //       //   startOnTick: true,
-      //       //   endOnTick: true,
-      //       //   tickInterval: 40 * 3600 * 1000,
-      //       // },
+      //         title: {
+      //           enabled: true,
+      //           text: 'Entry Date',
+      //         },
+      //         labels: {
+      //           formatter: function() {
+      //             return moment.unix(this.value).format('YYYY');
+      //           },
+      //         },
+      //         startOnTick: true,
+      //         endOnTick: true,
+      //         tickInterval: 40 * 3600 * 1000,
+      //       },
       yAxis: {
-        title: {
-          text: 'Number of Employees'
-        }
+        // title: {
+        //   text: 'Number of Employees'
+        // }
       },
       legend: {
         layout: 'vertical',
@@ -64,25 +69,37 @@ export class ReviewDomainChartsComponent extends React.Component<
           label: {
             connectorAllowed: false
           },
-          pointStart: 2010
+          // pointStart: 2010
         }
       },
-      // tooltip: {
-      //   pointFormatter() {
-      //     return `<div><b>Date: </b>${moment.unix(this.x).format('MM-DD-YYYY')}<br/>
-      //       <b>Standard Vocab: </b>${this.standardVocabulary}<br/>
-      //       <b>Standard Name: </b>${this.standardName}<br/>
-      //       <b>Age at Event: </b>${this.ageAtEvent}<br/></div>`;
-      //   },
-      //   style: {
-      //     color: '#565656',
-      //     fontSize: 12
-      //   },
-      //   shared: true
-      // },
+      tooltip: {
+        pointFormatter() {
+          return `
+            <b>Value: </b>${this.y}<br/>`;
+        },
+        style: {
+          color: '#565656',
+          fontSize: 12
+        },
+        shared: true
+      },
+      xAxis: {
+        // title: {
+        //   text: 'Number of Months'
+        // },
+        categories: date,
+        // labels: {
+        //   formatter: function() {
+        //     return moment.unix(this.value).format('YYYY');
+        //   },
+        // },
+        // tickInterval: 12 * 3600 * 1000,
+      },
       series: [{
-        name: 'Installation',
-        data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+        name: 'Vitals',
+        data: values,
+        turboThreshold: 5000,
+        showInLegend: false,
       }],
       responsive: {
         rules: [{
@@ -100,14 +117,15 @@ export class ReviewDomainChartsComponent extends React.Component<
       }
     };
   }
+
+
   render() {
-    // console.log(this.state.data);
     return (
       <div>
         <HighchartsReact
           highcharts={highCharts}
           options={this.getOptions()}
-        />;
+        />
       </div>
     );
   }

@@ -191,7 +191,7 @@ export interface DetailTabTableState {
   start: number;
   sortField: string;
   sortOrder: number;
-  expandedRows: any;
+  expandedRows: Array<any>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -297,8 +297,36 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
-    rowExpansionTemplate = () => {
-      return <ReviewDomainChartsComponent orgData={this.state.data}/>;
+    groupByData(objectArray, property) {
+      return objectArray.reduce(function (acc, obj) {
+        let key = obj[property];
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(obj);
+        return acc;
+      }, {});
+    }
+
+    rowExpansionTemplate = (rowData: any) => {
+       const {data} = this.state;
+      const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
+      const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
+      const unitKey = Object.keys(unitsObj);
+      console.log(unitKey);
+       return unitKey.map((k, i) => {
+        const valueArray = unitsObj[k].map(v => {
+         return {
+            values: parseInt(v.value),
+            date: v.itemDate
+          }
+        })
+        // console.log(valueArray.values);
+        return <React.Fragment key={i}>
+           <ReviewDomainChartsComponent orgData={valueArray} unitName={k}/>;
+         </React.Fragment>
+      })
+          // return <ReviewDomainChartsComponent orgData={data} unitName={'test'}/>;
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
