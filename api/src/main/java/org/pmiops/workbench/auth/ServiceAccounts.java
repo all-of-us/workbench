@@ -8,6 +8,10 @@ import java.util.List;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 
 public final class ServiceAccounts {
+
+  public static final String FIRECLOUD_ADMIN_CREDS = "firecloudAdminCredentials";
+  public static final String GSUITE_ADMIN_CREDS = "gsuiteAdminCredentials";
+
   /**
    * Retrieves an access token for the Workbench server service account. This
    * should be used carefully, as this account is generally more privileged than

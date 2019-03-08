@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
@@ -52,8 +53,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<GoogleCredential> googleCredentialProvider;
-  private final Provider<GoogleCredential.Builder> credentialBuilderProvider;
+  private final Provider<GoogleCredential> firecloudCredentialProvider;
+  private final GoogleCredential.Builder credentialBuilder;
   private final FirecloudRetryHandler retryHandler;
   private final HttpTransport httpTransport;
 
@@ -66,6 +67,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String RAWLS_STATUS_NAME = "Rawls";
   private static final String GOOGLE_BUCKETS_STATUS_NAME = "GoogleBuckets";
 
+  // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
+  // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
   private static final List<String> FIRECLOUD_API_OAUTH_SCOPES = Arrays.asList(
       "openid", "profile", "email", "https://www.googleapis.com/auth/cloud-billing");
 
@@ -78,8 +81,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
-      @Qualifier("fireCloudAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
-      Provider<GoogleCredential.Builder> credentialBuilderProvider,
+      @Qualifier(ServiceAccounts.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> firecloudCredentialProvider,
+      GoogleCredential.Builder credentialBuilder,
       HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
@@ -89,31 +92,29 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.googleCredentialProvider = googleCredentialProvider;
-    this.credentialBuilderProvider = credentialBuilderProvider;
+    this.firecloudCredentialProvider = firecloudCredentialProvider;
+    this.credentialBuilder = credentialBuilder;
     this.retryHandler = retryHandler;
     this.httpTransport = httpTransport;
   }
 
   /**
    * Given an email address of an AoU user, generates a FireCloud ApiClient instance with an access
-   * token suitable for accessing data for that user, outside the context of a user-triggered
-   * request.
+   * token suitable for accessing data on behalf of that user.
    * <p>
-   * This method uses Google's support for domain-wide delegation in the OAuth flow; see
+   * This relies on domain-wide delegation of authority in Google's OAuth flow; see
    * /api/docs/domain-wide-delegation.md for more details.
    *
    * @param userEmail
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) {
-    // Get credentials for the firecloud-admin Service Account. This account has been granted
-    // domain-wide delegation for the OAuth scopes used by FireCloud, meaning we can impersonate
-    // users in FireCloud API calls using this service account's credentials.
-    GoogleCredential googleCredential = googleCredentialProvider.get();
+    // Load credentials for the firecloud-admin Service Account. This account has been granted
+    // domain-wide delegation for the OAuth scopes required by FireCloud.
+    GoogleCredential googleCredential = firecloudCredentialProvider.get();
 
-    // Build derived credentials for impersonating the target user.
-    GoogleCredential impersonatedUserCredential = credentialBuilderProvider.get()
+    // Build derived csredentials for impersonating the target user.
+    GoogleCredential impersonatedUserCredential = credentialBuilder
         .setJsonFactory(getDefaultJsonFactory())
         .setTransport(httpTransport)
         .setServiceAccountUser(userEmail)

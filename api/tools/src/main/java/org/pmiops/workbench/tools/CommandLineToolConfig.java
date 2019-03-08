@@ -4,6 +4,9 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
+import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
@@ -11,6 +14,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -29,6 +33,7 @@ import java.io.IOException;
  */
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+@Import({RetryConfig.class, CommonConfig.class})
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
 // Scan the FireCloud module, for FireCloudService bean.
@@ -47,7 +52,7 @@ public class CommandLineToolConfig {
    * @return
    */
   @Lazy
-  @Bean(name="gsuiteAdminCredentials")
+  @Bean(name=ServiceAccounts.GSUITE_ADMIN_CREDS)
   GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
@@ -57,7 +62,7 @@ public class CommandLineToolConfig {
   }
 
   @Lazy
-  @Bean(name="fireCloudAdminCredentials")
+  @Bean(name=ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
   GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();

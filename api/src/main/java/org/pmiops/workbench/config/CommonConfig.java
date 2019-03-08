@@ -1,6 +1,7 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -28,4 +29,7 @@ public class CommonConfig {
 
   @Bean
   Random random() { return new SecureRandom(); }
+  
+  @Bean
+  GoogleCredential.Builder googleCredentialBuilder() { return new GoogleCredential.Builder(); }
 }

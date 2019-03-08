@@ -75,8 +75,8 @@ public class FireCloudServiceImplTest {
 
   @Before
   public void setUp() {
-    // We want to partially mock the credential builder: the builder methods should act as normal,
-    // but we'll mock out .build() to instead return a pre-baked GoogleCredential mock.
+    // Partially mock the credential builder: the builder methods should act as normal, but we'll
+    // mock out .build() to instead return a pre-baked GoogleCredential mock.
     credentialBuilder = mock(GoogleCredential.Builder.class, Mockito.CALLS_REAL_METHODS);
 
     workbenchConfig = new WorkbenchConfig();
@@ -89,7 +89,7 @@ public class FireCloudServiceImplTest {
         Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
         Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()),
         Providers.of(fireCloudCredential),
-        Providers.of(credentialBuilder),
+        credentialBuilder,
         httpTransport);
   }
 

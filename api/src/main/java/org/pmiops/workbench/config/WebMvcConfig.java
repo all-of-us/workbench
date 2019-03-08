@@ -2,12 +2,17 @@ package org.pmiops.workbench.config;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.oauth2.model.Userinfoplus;
-import com.google.apphosting.api.ApiProxy;
+
 import java.io.IOException;
 import java.io.InputStream;
+import javax.inject.Provider;
 import javax.servlet.ServletContext;
+
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
@@ -16,6 +21,7 @@ import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
@@ -30,6 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @EnableWebMvc
 @Configuration
+@Import(CacheSpringConfiguration.class)
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
@@ -77,9 +84,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    *
    * We may in future rotate key files in production, but will be sure to keep the ones currently
    * in use in cloud environments working when that happens.
+   *
+   * TODO(gjuggler): should we start pulling this file from GCS instead?
    */
   @Lazy
-  @Bean(name="gsuiteAdminCredentials")
+  @Bean(name=ServiceAccounts.GSUITE_ADMIN_CREDS)
   public GoogleCredential gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
@@ -88,6 +97,21 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Bean
+  public CloudStorageService cloudStorageService(Provider<WorkbenchConfig> workbenchConfig) {
+    return new CloudStorageServiceImpl(workbenchConfig);
+  }
+
+  /**
+   * Service account credentials for FireCloud administration. This Service Account has been enabled
+   * for domain-wide delegation of authority.
+   */
+  @Lazy
+  @Bean(name= ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  public GoogleCredential firecloudAdminCredential(CloudStorageService cloudStorageService) throws IOException {
+    return cloudStorageService.getFireCloudAdminCredentials();
   }
 
   @Override

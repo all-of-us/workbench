@@ -1,10 +1,14 @@
 package org.pmiops.workbench;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.auth.http.HttpTransportFactory;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
@@ -15,6 +19,8 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.test.Providers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
 import java.nio.charset.Charset;
@@ -39,6 +45,10 @@ public class FireCloudIntegrationTest {
   @Mock
   private NihApi nihApi;
 
+  @Autowired
+  @Qualifier(ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  private GoogleCredential fireCloudAdminCredential;
+
   private FireCloudServiceImpl fireCloudService;
 
   @Before
@@ -55,7 +65,10 @@ public class FireCloudIntegrationTest {
         Providers.of(nihApi),
         Providers.of(workspacesApi),
         Providers.of(new FireCloudConfig().statusApi(config)),
-        new FirecloudRetryHandler(new NoBackOffPolicy())
+        new FirecloudRetryHandler(new NoBackOffPolicy()),
+        Providers.of(fireCloudAdminCredential),
+        new GoogleCredential.Builder(),
+        new ApacheHttpTransport()
     );
   }
 
