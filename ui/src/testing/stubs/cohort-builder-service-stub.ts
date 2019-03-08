@@ -9,4 +9,8 @@ export class CohortBuilderServiceStub {
   getDemoChartInfo(): Observable<DemoChartInfoListResponse> {
     return Observable.of(<DemoChartInfoListResponse> {items: []});
   }
+
+  getParticipantDemographics() {
+    return Observable.of({raceList: [], genderList: [], ethnicityList: []});
+  }
 }

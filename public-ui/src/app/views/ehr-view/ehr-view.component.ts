@@ -252,4 +252,12 @@ export class EhrViewComponent implements OnInit, OnDestroy {
   public toggleTopConcepts() {
     this.showTopConcepts = !this.showTopConcepts;
   }
+
+  public checkCount(count: number) {
+    if (count <= 20) {
+      return '<= ' + count;
+    } else {
+      return count;
+    }
+  }
 }

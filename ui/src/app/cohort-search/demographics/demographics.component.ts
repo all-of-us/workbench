@@ -12,7 +12,7 @@ import {
 } from 'app/cohort-search/redux';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 
-import {Attribute, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
+import {Attribute, AttrName, CohortBuilderService, Operator, TreeSubType, TreeType} from 'generated';
 
 const minAge = 18;
 const maxAge = 120;
@@ -185,10 +185,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         this.ageNodes = nodes.toJS();
         this.calculateAgeCount();
         const attr = fromJS(<Attribute>{
-          name: 'Age',
+          name: AttrName.AGE,
           operator: Operator.BETWEEN,
-          operands: [minAge.toString(), maxAge.toString()],
-          conceptId: this.ageNode.get('conceptId', null)
+          operands: [minAge.toString(), maxAge.toString()]
         });
         const paramId = `age-param${this.ageNode.get('id')}`;
         this.selectedNode = this.ageNode
@@ -305,10 +304,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
             .distinctUntilChanged()
             .map(([lo, hi]) => {
                 const attr = fromJS(<Attribute>{
-                    name: 'Age',
+                    name: AttrName.AGE,
                     operator: Operator.BETWEEN,
-                    operands: [lo, hi],
-                    conceptId: this.ageNode.get('conceptId', null)
+                    operands: [lo, hi]
                 });
                 const paramId = `age-param${this.ageNode.get('id')}`;
                 return this.ageNode

@@ -1,4 +1,4 @@
-import { Operator, TreeSubType, TreeType } from 'generated';
+import { AttrName, Operator, TreeSubType, TreeType } from 'generated';
 
 export const PROGRAM_TYPES = [
   { name: 'Surveys', type: TreeType.PPI, subtype: null },
@@ -46,13 +46,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Hypotensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['90'],
       operator: Operator.LESSTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['60'],
       operator: Operator.LESSTHANOREQUALTO
     }
@@ -60,13 +60,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Normal': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['120'],
       operator: Operator.LESSTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['80'],
       operator: Operator.LESSTHANOREQUALTO
     }
@@ -74,13 +74,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Pre-Hypertensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['121', '139'],
       operator: Operator.BETWEEN
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['81', '89'],
       operator: Operator.BETWEEN
     }
@@ -88,13 +88,13 @@ export const PREDEFINED_ATTRIBUTES = {
   'Hypertensive': [
     {
       conceptId: 903118,
-      name: 'Systolic',
+      name: AttrName.NUM,
       operands: ['140'],
       operator: Operator.GREATERTHANOREQUALTO
     },
     {
       conceptId: 903115,
-      name: 'Diastolic',
+      name: AttrName.NUM,
       operands: ['90'],
       operator: Operator.GREATERTHANOREQUALTO
     }

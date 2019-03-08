@@ -1,4 +1,4 @@
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {Profile} from 'generated';
 import {Cohort, ConceptSet} from 'generated/fetch';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';

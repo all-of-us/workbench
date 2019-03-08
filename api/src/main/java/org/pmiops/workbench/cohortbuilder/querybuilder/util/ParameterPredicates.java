@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -15,8 +16,8 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 
 public class ParameterPredicates {
 
-  private static final String SYSTOLIC = "Systolic";
-  private static final String DIASTOLIC = "Diastolic";
+  private static final int SYSTOLIC = 903118;
+  private static final int DIASTOLIC = 903115;
 
   private static final List<String> ICD_TYPES =
     Arrays.asList(TreeType.ICD9.toString(),
@@ -121,10 +122,6 @@ public class ParameterPredicates {
     return sp -> !TreeType.VISIT.toString().equalsIgnoreCase(sp.getType());
   }
 
-  public static Predicate<SearchParameter> snomedTypeInvalid() {
-    return sp -> !TreeType.SNOMED.toString().equalsIgnoreCase(sp.getType());
-  }
-
   public static Predicate<SearchParameter> ppiTypeInvalid() {
     return sp -> !TreeType.PPI.toString().equalsIgnoreCase(sp.getType());
   }
@@ -153,18 +150,6 @@ public class ParameterPredicates {
     return sp -> DEMO_GEN_RACE_ETH_SUBTYPES.stream().anyMatch(sp.getSubtype()::equalsIgnoreCase);
   }
 
-  public static Predicate<SearchParameter> valueNull() {
-    return sp -> sp.getValue() == null;
-  }
-
-  public static Predicate<SearchParameter> valueNotNumber() {
-    return sp -> !NumberUtils.isNumber(sp.getValue());
-  }
-
-  public static Predicate<SearchParameter> nameNotNumber() {
-    return sp -> !NumberUtils.isNumber(sp.getName());
-  }
-
   public static Predicate<SearchParameter> notTwoAttributes() {
     return sp -> sp.getAttributes().size() != 2;
   }
@@ -172,14 +157,14 @@ public class ParameterPredicates {
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> !SYSTOLIC.equalsIgnoreCase(a.getName()) && !DIASTOLIC.equalsIgnoreCase(a.getName()))
+      .filter(a -> SYSTOLIC != a.getConceptId() && DIASTOLIC != a.getConceptId())
       .collect(Collectors.toList()).size() != 0;
   }
 
   public static Predicate<SearchParameter> notAnyAttr() {
     return sp -> sp.getAttributes()
       .stream()
-      .filter(a -> ANY.equalsIgnoreCase(a.getName()))
+      .filter(a -> AttrName.ANY.equals(a.getName()))
       .collect(Collectors.toList()).size() == 0;
   }
 }

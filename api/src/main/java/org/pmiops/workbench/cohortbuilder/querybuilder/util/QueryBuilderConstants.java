@@ -48,12 +48,8 @@ public final class QueryBuilderConstants {
   public static final String CONCEPT_ID = "Concept Id";
   public static final String CODE = "Code";
   public static final String NAME = "Name";
-  public static final String VALUE = "Value";
-  public static final String NUMERICAL = "NUM";
-  public static final String CATEGORICAL = "CAT";
   public static final String BOTH = "BOTH";
   public static final String LAB = "LAB";
-  public static final String ANY = "ANY";
 
   //Display text for modifiers
   public static ImmutableMap<ModifierType, String> modifierText = ImmutableMap.<ModifierType, String>builder()
@@ -75,16 +71,6 @@ public final class QueryBuilderConstants {
     .put(Operator.IN, "In")
     .put(Operator.BETWEEN, "Between")
     .build();
-
-  //Physical Measurement types that have attributes
-  public static final List<String> PM_TYPES_WITH_ATTR =
-    Arrays.asList(TreeSubType.BP.name(),
-      TreeSubType.HR_DETAIL.toString(),
-      TreeSubType.HEIGHT.name(),
-      TreeSubType.WEIGHT.name(),
-      TreeSubType.BMI.name(),
-      TreeSubType.WC.name(),
-      TreeSubType.HC.name());
 
 
   private QueryBuilderConstants(){}
