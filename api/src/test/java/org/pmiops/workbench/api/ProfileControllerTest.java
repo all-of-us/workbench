@@ -264,11 +264,11 @@ public class ProfileControllerTest {
     profileController.reviewIdVerification(profile.getUserId(), reviewStatus);
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    user = userProvider.get();
+    user.setDataUseAgreementCompletionTime(timestamp);
+    user.setEraCommonsCompletionTime(timestamp);
+    user.setComplianceTrainingCompletionTime(timestamp);
     profile = profileController.submitTermsOfService().getBody();
-    profile.setDataUseAgreementCompletionTime(timestamp);
-    profile.setEraCommonsCompletionTime(timestamp);
-    profile.setComplianceTrainingCompletionTime(timestamp);
-    userService.updateDataAccessLevel(profile);
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
     verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
 
