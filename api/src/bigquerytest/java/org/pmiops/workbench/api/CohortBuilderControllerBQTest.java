@@ -1633,26 +1633,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabBothCategorical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute categorical = new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"));
-    lab.attributes(Arrays.asList(categorical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsLabBothNumerical() throws Exception {
-    Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
-    SearchParameter lab = createSearchParameter(labCriteria, null);
-    Attribute numerical = new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("1.0"));
-    lab.attributes(Arrays.asList(numerical));
-    SearchRequest searchRequest = createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
-    assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
   public void countSubjectsLabNumericalAnyAgeAtEvent() throws Exception {
     Criteria labCriteria = new Criteria().type(TreeType.MEAS.name()).subtype(TreeSubType.LAB.name()).group(false).conceptId("3");
     SearchParameter lab = createSearchParameter(labCriteria, null);
