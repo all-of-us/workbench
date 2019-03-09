@@ -22,13 +22,19 @@ import org.springframework.web.context.annotation.RequestScope;
 @org.springframework.context.annotation.Configuration
 public class FireCloudConfig {
 
-  private static final String END_USER_API_CLIENT = "endUserApiClient";
-  private static final String ALL_OF_US_API_CLIENT = "allOfUsApiClient";
   public static final String X_APP_ID_HEADER = "X-App-ID";
   public static final String X_APP_ID_HEADER_VALUE = "AoU-RW";
 
+  // Bean names used to differentiate between an API client authenticated as the end user (via
+  // UserAuthentication) and an API client authenticated as the service account user (via
+  // the service account access token).
+  //
+  // Some groups of FireCloud APIs will use one, while some will use the other.
+  //
+  public static final String END_USER_API_CLIENT = "endUserApiClient";
   public static final String END_USER_GROUPS_API = "endUserGroupsApi";
-  public static final String ALL_OF_US_GROUPS_API = "allOfUsGroupsApi";
+  public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
+  public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
 
   private static final List<String> BILLING_SCOPES = ImmutableList.of(
       "https://www.googleapis.com/auth/userinfo.profile",
@@ -37,7 +43,7 @@ public class FireCloudConfig {
 
   @Bean(name=END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient fireCloudApiClient(UserAuthentication userAuthentication,
+  public ApiClient endUserApiClient(UserAuthentication userAuthentication,
       WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
@@ -47,7 +53,7 @@ public class FireCloudConfig {
     return apiClient;
   }
 
-  @Bean(name=ALL_OF_US_API_CLIENT)
+  @Bean(name= SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient allOfUsApiClient(WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig) {
@@ -81,7 +87,7 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingApi billingApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
+  public BillingApi billingApi(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     // Billing calls are made by the AllOfUs service account, rather than using the end user's
     // credentials.
     BillingApi api = new BillingApi();
@@ -89,16 +95,16 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = ALL_OF_US_GROUPS_API)
+  @Bean(name= SERVICE_ACCOUNT_GROUPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public GroupsApi groupsApi(@Qualifier(ALL_OF_US_API_CLIENT) ApiClient apiClient) {
+  public GroupsApi groupsApi(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     // Group/Auth Domain creation and addition are made by the AllOfUs service account
     GroupsApi api = new GroupsApi();
     api.setApiClient(apiClient);
     return api;
   }
 
-  @Bean(name = END_USER_GROUPS_API)
+  @Bean(name=END_USER_GROUPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public GroupsApi groupApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     // When checking for membership in groups, we use the end user credentials.

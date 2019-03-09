@@ -69,14 +69,17 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
   // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
-  private static final List<String> FIRECLOUD_API_OAUTH_SCOPES = Arrays.asList(
-      "openid", "profile", "email", "https://www.googleapis.com/auth/cloud-billing");
+  public static final List<String> FIRECLOUD_API_OAUTH_SCOPES = Arrays.asList(
+      "openid",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/cloud-billing");
 
   @Autowired
   public FireCloudServiceImpl(Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
-      @Qualifier(FireCloudConfig.ALL_OF_US_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_GROUPS_API) Provider<GroupsApi> groupsApiProvider,
       @Qualifier(FireCloudConfig.END_USER_GROUPS_API) Provider<GroupsApi> endUserGroupsApiProvider,
       Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
       Provider<StatusApi> statusApiProvider,
