@@ -11,6 +11,7 @@ public final class ServiceAccounts {
 
   public static final String FIRECLOUD_ADMIN_CREDS = "firecloudAdminCredentials";
   public static final String GSUITE_ADMIN_CREDS = "gsuiteAdminCredentials";
+  public static final String DEFAULT_SERVICE_ACCOUNT_CREDS = "defaultServiceAccountCredentials";
 
   /**
    * Retrieves an access token for the Workbench server service account. This
