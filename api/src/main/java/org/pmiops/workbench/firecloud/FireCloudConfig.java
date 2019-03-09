@@ -105,7 +105,7 @@ public class FireCloudConfig {
     return api;
   }
 
-  @Bean(name = END_USER_GROUPS_API)
+  @Bean(name=END_USER_GROUPS_API)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public GroupsApi groupApi(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
     // When checking for membership in groups, we use the end user credentials.
