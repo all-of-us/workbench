@@ -278,12 +278,13 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     filterData() {
       let {data, start} = this.state;
-      const {filterState} = this.props;
-      const {age, date, visits} = filterState.global;
-      if (date.min && date.max) {
+      const {filterState: {global: {age, date, visits}}} = this.props;
+      if (date.min || date.max) {
+        const min = date.min ? date.min.getTime() : 0;
+        const max = date.max ? date.max.getTime() : 9999999999999;
         data = data.filter(item => {
           const itemDate = Date.parse(item.itemDate);
-          return itemDate > date.min.getTime() && itemDate < date.max.getTime();
+          return itemDate > min && itemDate < max;
         });
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY] && age.min && age.max) {
