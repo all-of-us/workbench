@@ -15,12 +15,16 @@ import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 import * as moment from 'moment';
 const css = `
-  .p-calendar > .p-inputtext {
+  body .p-calendar.p-calendar-w-btn > .p-inputtext {
     width: 140px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-right: 1px solid #212121;
   }
   .p-calendar > .p-calendar-button {
     color: #216FB4;
     background: transparent;
+    border: 0;
   }
 `;
 const styles = reactStyles({
@@ -66,6 +70,7 @@ const styles = reactStyles({
   },
   filterHeader: {
     height: '33%',
+    marginBottom: '0.5rem',
     borderBottom: '1px solid #216fb4',
   },
   filterTab: {
@@ -77,9 +82,15 @@ const styles = reactStyles({
     cursor: 'pointer',
   },
   filterBody: {
-    height: '63%',
+    paddingLeft: '0.5rem',
   },
   resetBtn: {
+    float: 'right',
+    lineHeight: '16px',
+    padding: '0 2px',
+    margin: '5px 5px 0 0',
+    fontSize: '11px',
+    color: '#2691d0',
     border: '1px solid #2691d0',
     borderRadius: '3px',
     background: 'transparent',
@@ -88,13 +99,16 @@ const styles = reactStyles({
 const otherStyles = {
   navigation: {
     ...styles.headerSection,
+    width: '20%',
     padding: '1.15rem 0.4rem',
   },
   filters: {
     ...styles.headerSection,
+    width: '40%',
   },
   radios: {
     ...styles.headerSection,
+    width: '20%',
     padding: '0.5rem',
   },
   navBtnActive: {
@@ -296,8 +310,8 @@ export const DetailHeader = withCurrentWorkspace()(
         </button>
         <h4 style={styles.title}>{cohort.name}</h4>
         <div style={styles.description}>{cohort.description}</div>
-        <div className='p-grid' style={{height: '3.5rem'}}>
-          <div className='p-col' style={otherStyles.navigation}>
+        <div style={{height: '3.5rem'}}>
+          <div style={otherStyles.navigation}>
             <button
               style={isFirstParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive}
               type='button'
@@ -316,7 +330,7 @@ export const DetailHeader = withCurrentWorkspace()(
               <i style={styles.icon} className='pi pi-angle-right' />
             </button>
           </div>
-          <div className='p-col' style={otherStyles.filters}>
+          <div style={otherStyles.filters}>
             <div style={styles.filterHeader}>
               <button
                 style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}
@@ -334,15 +348,17 @@ export const DetailHeader = withCurrentWorkspace()(
                 Visits
               </button>
               <button
-                style={filterTab === 'visits' ? otherStyles.tabActive : styles.filterTab}
+                style={styles.resetBtn}
                 onClick={() => this.clearFilters()}>
                 RESET FILTER
               </button>
             </div>
             <div style={styles.filterBody}>
               {filterTab === 'date' && <div>
-                Select Date Range:
-                <div>
+                <div style={{float: 'left', width: '25%'}}>
+                  Select Date Range:
+                </div>
+                <div style={{float: 'left', width: '30%'}}>
                   <Calendar
                     style={{width: '140px'}}
                     dateFormat='yy-mm-dd'
@@ -354,10 +370,10 @@ export const DetailHeader = withCurrentWorkspace()(
                     showIcon={true}
                   />
                 </div>
-                <div>
+                <div style={{float: 'left', width: '10%', marginLeft: '0.5rem'}}>
                   and
                 </div>
-                <div>
+                <div style={{float: 'left', width: '30%'}}>
                   <Calendar
                     style={{width: '140px'}}
                     dateFormat='yy-mm-dd'
@@ -374,7 +390,7 @@ export const DetailHeader = withCurrentWorkspace()(
               {filterTab === 'visits' && <div>Visits</div>}
             </div>
           </div>
-          <div className='p-col' style={otherStyles.radios}>
+          <div style={otherStyles.radios}>
             <div>
               <RadioButton
                 name='vocab'
