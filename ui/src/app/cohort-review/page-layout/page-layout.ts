@@ -1,8 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {cohortReviewStore, filterStateStore, vocabOptions} from 'app/cohort-review/review-state.service';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CohortsService} from 'generated';
 import {PageFilterType, ReviewStatus, SortOrder} from 'generated/fetch';
 
 @Component({
@@ -12,14 +11,12 @@ import {PageFilterType, ReviewStatus, SortOrder} from 'generated/fetch';
 export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
-  constructor(
-    private cohortsAPI: CohortsService
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrId, {
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
@@ -33,7 +30,7 @@ export class PageLayout implements OnInit, OnDestroy {
         navigate(['workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants']);
       }
     });
-    this.cohortsAPI.getCohort(ns, wsid, cid).subscribe(cohort => {
+    cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
       // This effectively makes the 'current cohort' available to child components, by using
       // the `withCurrentCohort` HOC. In addition, this store is used to render the breadcrumb.
       currentCohortStore.next(cohort);
