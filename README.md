@@ -123,12 +123,12 @@ different API server. To connect to your own API server running at
 `localhost:8081`, pass `--configuration=local`.
 
 To run react UI tests:
-```$xslt
+```Shell
 yarn test-react
 ```
 
 Other useful yarn commands:
-```$xslt
+```Shell
 # To lint the UI and automatically fix issues:
 yarn lint --fix
 ```
@@ -137,7 +137,7 @@ yarn lint --fix
 #### Legacy startup
 You can also run the UI through project.rb. NOTE: this is slower and not recommended.  
 From the `ui/` directory,
-```
+```Shell
 ./project.rb dev-up
 ```
 
