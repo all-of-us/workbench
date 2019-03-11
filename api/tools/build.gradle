@@ -172,7 +172,7 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'org.json:json:20160810'
   compile 'javax.inject:javax.inject:1'
-  compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
+  compile 'org.springframework.retry:spring-retry'
   compile 'javax.servlet:javax.servlet-api:3.1.0'
   compile 'org.springframework:spring-core'
   compile 'org.springframework:spring-web'
