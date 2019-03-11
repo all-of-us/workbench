@@ -101,12 +101,27 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
-        && (!(configProvider.get().access.enableEraCommons) || user.getEraCommonsCompletionTime() != null)
-        && user.getDemographicSurveyCompletionTime() != null
-        && (!(configProvider.get().access.enableComplianceTraining) || user.getTrainingCompletionTime() != null)
-        && user.getTermsOfServiceCompletionTime() != null
+    boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
+      user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
+    // TODO: Add in when we add this module
+    // boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
+    // user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
+    boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
+      !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
+    boolean complianceTrainingCompliant = user.getComplianceTrainingCompletionTime() != null ||
+      user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
+    boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
+      user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
+    // TODO: can be removed once we totally move off old validation
+      Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
+    // TODO: can take out other checks once we're entirely moved over to the 'module' columns
+    boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null
         && !user.getDisabled()
+    // TODO: Add when we add this module
+    //  && dataUseAgreementCompliant
+        && complianceTrainingCompliant
+        && eraCommonsCompliant
+        && idVerificationCompliant
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
