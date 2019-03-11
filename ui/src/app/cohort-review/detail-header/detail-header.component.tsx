@@ -15,13 +15,15 @@ import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 import * as moment from 'moment';
 const css = `
-  body .p-calendar.p-calendar-w-btn > .p-inputtext {
+  body .p-calendar.p-calendar-w-btn > .p-inputtext,
+  body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
     width: 140px;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     border-right: 1px solid #212121;
   }
-  .p-calendar > .p-calendar-button {
+  .p-calendar > .p-calendar-button,
+   .p-calendar > .p-calendar-button:enabled:hover {
     color: #216FB4;
     background: transparent;
     border: 0;
@@ -296,8 +298,13 @@ export const DetailHeader = withCurrentWorkspace()(
 
     render() {
       const {participant} = this.props;
-      const {filterState, filterTab, isFirstParticipant, isLastParticipant} = this.state;
-      const {age, date, visits} = filterState.global;
+      const {
+        filterState: {global: {age, date, visits}},
+        filterState,
+        filterTab,
+        isFirstParticipant,
+        isLastParticipant
+      } = this.state;
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <style>{css}</style>
@@ -362,11 +369,11 @@ export const DetailHeader = withCurrentWorkspace()(
                   <Calendar
                     style={{width: '140px'}}
                     dateFormat='yy-mm-dd'
-                    value={date.max}
-                    onChange={(e) => this.setFilter(e.value, 'date', 'max')}
+                    value={date.min}
+                    onChange={(e) => this.setFilter(e.value, 'date', 'min')}
                     monthNavigator={true}
                     yearNavigator={true}
-                    yearRange='1940:2018'
+                    yearRange='1941:2018'
                     showIcon={true}
                   />
                 </div>
@@ -377,8 +384,8 @@ export const DetailHeader = withCurrentWorkspace()(
                   <Calendar
                     style={{width: '140px'}}
                     dateFormat='yy-mm-dd'
-                    value={date.min}
-                    onChange={(e) => this.setFilter(e.value, 'date', 'min')}
+                    value={date.max}
+                    onChange={(e) => this.setFilter(e.value, 'date', 'max')}
                     monthNavigator={true}
                     yearNavigator={true}
                     yearRange='1940:2018'
