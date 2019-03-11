@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -53,17 +53,21 @@ public class FireCloudIntegrationTest {
   private GroupsApi allOfUsGroupsApi;
   @Mock
   private GroupsApi endUserGroupsApi;
+  @Mock
+  private ProfileApi profileApi;
+  @Mock
+  private NihApi nihApi;
 
   // N.B. this will load the default service account credentials for whatever AoU environment
   // is set when running integration tests. This should be the test environment.
   @Autowired
-  @Qualifier(ServiceAccounts.DEFAULT_SERVICE_ACCOUNT_CREDS)
+  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   private GoogleCredential serviceAccountCredential;
 
   private WorkbenchEnvironment workbenchEnvironment;
 
   @Autowired
-  @Qualifier(ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
   private GoogleCredential fireCloudAdminCredential;
 
   @Before

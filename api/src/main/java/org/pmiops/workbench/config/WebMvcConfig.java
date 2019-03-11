@@ -1,6 +1,8 @@
 package org.pmiops.workbench.config;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.oauth2.model.Userinfoplus;
 
 import java.io.IOException;
@@ -8,7 +10,7 @@ import java.io.InputStream;
 import javax.inject.Provider;
 import javax.servlet.ServletContext;
 
-import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -55,6 +57,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   private SecurityHeadersInterceptor securityHeadersInterceptor;
 
   @Bean
+  HttpTransport httpTransport() {
+    return UrlFetchTransport.getDefaultInstance();
+  }
+
+  @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public UserAuthentication userAuthentication() {
     return (UserAuthentication) SecurityContextHolder.getContext().getAuthentication();
@@ -88,7 +95,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    * TODO(gjuggler): should we start pulling this file from GCS instead?
    */
   @Lazy
-  @Bean(name=ServiceAccounts.GSUITE_ADMIN_CREDS)
+  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
   public GoogleCredential gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
@@ -109,7 +116,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    * for domain-wide delegation of authority.
    */
   @Lazy
-  @Bean(name= ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  @Bean(name= Constants.FIRECLOUD_ADMIN_CREDS)
   public GoogleCredential firecloudAdminCredential(CloudStorageService cloudStorageService) throws IOException {
     return cloudStorageService.getFireCloudAdminCredentials();
   }

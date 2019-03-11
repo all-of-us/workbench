@@ -5,12 +5,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
-import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.model.Config;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -19,7 +17,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
@@ -46,7 +43,7 @@ public class IntegrationTestConfig {
    * @return
    */
   @Lazy
-  @Bean(name=ServiceAccounts.GSUITE_ADMIN_CREDS)
+  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
   GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
@@ -56,7 +53,7 @@ public class IntegrationTestConfig {
   }
 
   @Lazy
-  @Bean(name=ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  @Bean(name=Constants.FIRECLOUD_ADMIN_CREDS)
   GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();
@@ -66,7 +63,7 @@ public class IntegrationTestConfig {
   }
 
   @Lazy
-  @Bean(name=ServiceAccounts.DEFAULT_SERVICE_ACCOUNT_CREDS)
+  @Bean(name= Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   GoogleCredential defaultServiceAccountCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getDefaultServiceAccountCredentials();

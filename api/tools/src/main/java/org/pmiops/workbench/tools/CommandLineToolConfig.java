@@ -1,10 +1,11 @@
 package org.pmiops.workbench.tools;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
-import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -52,7 +53,7 @@ public class CommandLineToolConfig {
    * @return
    */
   @Lazy
-  @Bean(name=ServiceAccounts.GSUITE_ADMIN_CREDS)
+  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
   GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
@@ -62,7 +63,7 @@ public class CommandLineToolConfig {
   }
 
   @Lazy
-  @Bean(name=ServiceAccounts.FIRECLOUD_ADMIN_CREDS)
+  @Bean(name=Constants.FIRECLOUD_ADMIN_CREDS)
   GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();
