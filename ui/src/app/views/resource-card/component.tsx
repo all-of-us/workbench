@@ -102,6 +102,7 @@ const resourceTypeStyles = reactStyles({
 export interface ResourceCardProps {
   resourceCard: RecentResource;
   onUpdate: Function;
+  marginTop: string;
 }
 
 export interface ResourceCardState {
@@ -112,6 +113,9 @@ export interface ResourceCardState {
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
+  public static defaultProps = {
+    marginTop: '1rem'
+  };
 
   constructor(props: ResourceCardProps) {
     super(props);
@@ -350,6 +354,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   render() {
+    const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
       <Modal>
@@ -359,7 +364,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
         </ModalFooter>
       </Modal>}
-      <ResourceCardBase style={styles.card}
+      <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
             data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -418,8 +423,9 @@ export class ResourceCardComponent extends ReactWrapperBase {
   resourceType: ResourceType;
   @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
   @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
+  @Input('marginTop') marginTop: ResourceCardProps['marginTop'];
 
   constructor() {
-    super(ResourceCard, ['resourceCard', 'onUpdate']);
+    super(ResourceCard, ['resourceCard', 'onUpdate', 'marginTop']);
   }
 }

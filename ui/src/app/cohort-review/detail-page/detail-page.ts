@@ -31,6 +31,7 @@ export class DetailPage implements OnInit, OnDestroy {
     this.openEditDefinitionsModal = this.openEditDefinitionsModal.bind(this);
     this.closeEditDefinitionsModal = this.closeEditDefinitionsModal.bind(this);
     this.setAnnotationDefinitions = this.setAnnotationDefinitions.bind(this);
+    this.setParticipant = this.setParticipant.bind(this);
   }
 
   ngOnInit() {
@@ -104,5 +105,9 @@ export class DetailPage implements OnInit, OnDestroy {
 
   setAnnotationDefinitions(v) {
     this.annotationDefinitions = v;
+  }
+
+  setParticipant(v) {
+    this.participant = v;
   }
 }

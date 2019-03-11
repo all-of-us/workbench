@@ -65,4 +65,5 @@
   <include file="changelog/db.changelog-55-moodle-training.xml"/>
   <include file="changelog/db.changelog-56-update-email-lowercase.xml"/>
   <include file="changelog/db.changelog-57-add-era-commons-entries.xml"/>
+  <include file="changelog/db.changelog-58-update-access-modules.xml"/>
 </databaseChangeLog>

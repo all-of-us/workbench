@@ -53,6 +53,8 @@
   },
   "access": {
     "enableComplianceTraining": false,
-    "enableEraCommons": false
+    "enableEraCommons": false,
+    "enableDataUseAgreement": false,
+    "enableIdVerification": false
   }
 }

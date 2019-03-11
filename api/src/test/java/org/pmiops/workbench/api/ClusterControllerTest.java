@@ -99,6 +99,8 @@ public class ClusterControllerTest {
       WorkbenchConfig config = new WorkbenchConfig();
       config.server = new WorkbenchConfig.ServerConfig();
       config.server.apiBaseUrl = API_BASE_URL;
+      config.access = new WorkbenchConfig.AccessConfig();
+      config.access.enableComplianceTraining = true;
       return config;
     }
     @Bean
@@ -148,6 +150,8 @@ public class ClusterControllerTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableComplianceTraining = true;
     User user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);

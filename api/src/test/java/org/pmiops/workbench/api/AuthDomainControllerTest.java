@@ -74,6 +74,8 @@ public class AuthDomainControllerTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableDataUseAgreement = true;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(12345), fireCloudService, Providers.of(config),
