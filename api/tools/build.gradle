@@ -87,10 +87,12 @@ sourceSets {
                   // org.pmiops.workbench.model (Swagger-generated classes),
                   // so we selectively whitelist as needed.
                   'org/pmiops/workbench/auth/Constants.java',
+                  'org/pmiops/workbench/auth/ServiceAccounts.java',
                   'org/pmiops/workbench/config/CdrBigQuerySchemaConfig.java',
                   'org/pmiops/workbench/config/CommonConfig.java',
                   'org/pmiops/workbench/config/RetryConfig.java',
                   'org/pmiops/workbench/config/WorkbenchConfig.java',
+                  'org/pmiops/workbench/config/WorkbenchEnvironment.java',
                   'org/pmiops/workbench/exceptions/*.java',
                   'org/pmiops/workbench/firecloud/ApiException.java',
                   'org/pmiops/workbench/google/CloudStorageService.java',
@@ -170,10 +172,12 @@ dependencies {
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'org.json:json:20160810'
   compile 'javax.inject:javax.inject:1'
-  compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
+  compile 'org.springframework.retry:spring-retry'
   compile 'javax.servlet:javax.servlet-api:3.1.0'
-  compile 'org.springframework:spring-core:5.1.5.RELEASE'
-  compile 'org.springframework:spring-web:5.1.5.RELEASE'
+  compile 'org.springframework:spring-core'
+  compile 'org.springframework:spring-web'
+  compile "com.google.appengine:appengine:${GAE_VERSION}"
+  compile "com.google.appengine:appengine-api-1.0-sdk:${GAE_VERSION}"
 }
 
 
