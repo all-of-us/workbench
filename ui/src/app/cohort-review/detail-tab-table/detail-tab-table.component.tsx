@@ -13,6 +13,7 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
+
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
   body .p-datatable .p-sortable-column.p-highlight {
@@ -145,9 +146,35 @@ const css = `
     color: black;
   }
 
-  body .p-tabview-selected:hover {
-     color: black;
-     background-color: transparent!important;
+  body .p-tabview.p-tabview-top .p-tabview-nav 
+  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom 
+  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-left 
+  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-right 
+  .p-tabview-nav li.p-highlight:hover a {
+    border: none;
+    background-color: transparent;
+    color: black;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav 
+  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom 
+  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-left 
+  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-right 
+  .p-tabview-nav li.p-highlight:focus a {
+    border: none;
+    background-color: transparent;
+    color: black;
+  }
+  body .p-tabview.p-tabview-top 
+  .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a, 
+  body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a, 
+  body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
+  body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a {
+    background-color: transparent;
+    border-bottom: 3px solid #007ad9!important;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    color: black;
   }
 
   `;
@@ -211,7 +238,7 @@ const styles = reactStyles({
     borderLeft: 'none',
     width: '2rem',
   },
-  tabChange: {
+  testHeader: {
 
   }
 });
@@ -357,7 +384,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
       const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
       const unitKey = Object.keys(unitsObj);
-      return <TabView  style={styles.tabChange}>
+      return <TabView>
         {unitKey.map((k, i) => {
           { this.valueArray = unitsObj[k].map(v => {
             return {
@@ -369,14 +396,14 @@ export const DetailTabTable = withCurrentWorkspace()(
           return <TabPanel header={k} key={i}>
             <ReviewDomainChartsComponent orgData={this.valueArray} unitName={k}/>
           </TabPanel>;
-        })};
+        })}
       </TabView>;
-
     }
 
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
+      let noMatch;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
           ? start + rows - (start + rows - data.length) : start + rows;
@@ -386,7 +413,16 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
+      if(data !== null) {
+        noMatch =  data.filter(m => {
+          // console.log(m.standardName);
+          m.standardName === 'No matching concept'
+        })
+      }
+      console.log(this.state.expandedRows);
       const columns = this.props.columns.map((col) => {
+
+        // console.log(col);
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
