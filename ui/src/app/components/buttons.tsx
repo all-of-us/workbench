@@ -51,6 +51,19 @@ const buttonVariants = {
     },
     hover: {backgroundColor: colors.purple[0], color: '#ffffff'}
   },
+  secondaryLight: {
+    style: {
+      ...styles.base,
+      border: '1px solid', borderRadius: '0.2rem', borderColor: '#0077b7',
+      backgroundColor: 'transparent',
+      color: '#0077b7'
+    },
+    disabledStyle: {
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+    },
+    hover: {backgroundColor: colors.blue[4], color: '#000'}
+  },
   darklingPrimary: {
     style: {
       ...styles.base,

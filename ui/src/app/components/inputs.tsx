@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
+import Switch from 'react-toggle-switch'
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -178,3 +179,13 @@ export class DatePicker extends React.Component<
     </div>;
   }
 }
+
+export const Toggle = ({name, enabled, onToggle, ...props}) => {
+
+  return <div style={{display: 'flex', flexDirection: 'row'}}>
+    <Switch onClick={onToggle} on={enabled}/>
+    {name}
+    {...props}
+  </div>;
+
+};

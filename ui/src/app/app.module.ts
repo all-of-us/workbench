@@ -22,6 +22,7 @@ import {WorkspaceStorageService} from './services/workspace-storage.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 
 import {AdminReviewWorkspaceComponent} from './views/admin-review-workspace/component';
+import {AdminUserBypassComponent} from './views/admin-user-bypass/component';
 import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
@@ -134,6 +135,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminReviewWorkspaceComponent,
+    AdminUserBypassComponent,
     AdminUserComponent,
     AppComponent,
     BreadcrumbComponent,
