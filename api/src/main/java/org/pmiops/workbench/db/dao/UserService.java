@@ -234,7 +234,7 @@ public class UserService {
   }
 
   public User setEraCommonsStatus(NihStatus nihStatus) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         if (nihStatus != null) {
