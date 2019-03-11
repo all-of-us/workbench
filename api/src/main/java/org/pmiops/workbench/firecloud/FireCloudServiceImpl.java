@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.api.BillingApi;
@@ -53,10 +54,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<NihApi> nihApiProvider;
   private final Provider<WorkspacesApi> workspacesApiProvider;
   private final Provider<StatusApi> statusApiProvider;
-  private final Provider<GoogleCredential> firecloudCredentialProvider;
-  private final GoogleCredential.Builder credentialBuilder;
   private final FirecloudRetryHandler retryHandler;
-  private final HttpTransport httpTransport;
+  private final Provider<GoogleCredential> firecloudCredentialProvider;
+  private final ServiceAccounts serviceAccounts;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -84,9 +84,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<NihApi> nihApiProvider, Provider<WorkspacesApi> workspacesApiProvider,
       Provider<StatusApi> statusApiProvider,
       FirecloudRetryHandler retryHandler,
-      @Qualifier(ServiceAccounts.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> firecloudCredentialProvider,
-      GoogleCredential.Builder credentialBuilder,
-      HttpTransport httpTransport) {
+      ServiceAccounts serviceAccounts,
+      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> firecloudCredentialProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -95,10 +94,9 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.nihApiProvider = nihApiProvider;
     this.workspacesApiProvider = workspacesApiProvider;
     this.statusApiProvider = statusApiProvider;
-    this.firecloudCredentialProvider = firecloudCredentialProvider;
-    this.credentialBuilder = credentialBuilder;
     this.retryHandler = retryHandler;
-    this.httpTransport = httpTransport;
+    this.serviceAccounts = serviceAccounts;
+    this.firecloudCredentialProvider = firecloudCredentialProvider;
   }
 
   /**
@@ -111,32 +109,15 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @param userEmail
    * @return
    */
-  public ApiClient getApiClientWithImpersonation(String userEmail) {
+  public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
     // Load credentials for the firecloud-admin Service Account. This account has been granted
     // domain-wide delegation for the OAuth scopes required by FireCloud.
     GoogleCredential googleCredential = firecloudCredentialProvider.get();
 
-    // Build derived csredentials for impersonating the target user.
-    GoogleCredential impersonatedUserCredential = credentialBuilder
-        .setJsonFactory(getDefaultJsonFactory())
-        .setTransport(httpTransport)
-        .setServiceAccountUser(userEmail)
-        .setServiceAccountId(googleCredential.getServiceAccountId())
-        .setServiceAccountScopes(FIRECLOUD_API_OAUTH_SCOPES)
-        .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
-        .setServiceAccountPrivateKeyId(googleCredential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(googleCredential.getTokenServerEncodedUrl())
-        .build();
+    GoogleCredential impersonatedUserCredential = serviceAccounts.getImpersonatedCredential(
+        googleCredential, userEmail, FIRECLOUD_API_OAUTH_SCOPES
+    );
 
-    // Initiate the OAuth flow to populate the access token.
-    try {
-      impersonatedUserCredential.refreshToken();
-    } catch (IOException e) {
-      log.severe("Error refreshing access token for impersonated FireCloud API client.");
-      return null;
-    }
-
-    // Create a new ApiClient instance and attach it to the provided API instance.
     ApiClient apiClient = new ApiClient();
     apiClient.setDebugging(true);
     apiClient.setBasePath(configProvider.get().firecloud.baseUrl);

@@ -46,7 +46,7 @@ public class NotebooksConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
     try {
       apiClient.setAccessToken(
-          ServiceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
+          new ServiceAccounts().workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);

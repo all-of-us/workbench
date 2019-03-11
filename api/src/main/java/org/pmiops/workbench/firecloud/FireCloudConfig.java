@@ -61,7 +61,7 @@ public class FireCloudConfig {
     apiClient.setBasePath(workbenchConfig.firecloud.baseUrl);
     try {
       apiClient.setAccessToken(
-          ServiceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
+          new ServiceAccounts().workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);

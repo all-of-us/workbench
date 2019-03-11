@@ -1,15 +1,14 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -35,11 +34,9 @@ import java.util.ArrayList;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
@@ -63,22 +60,17 @@ public class FireCloudServiceImplTest {
   @Mock
   private GoogleCredential fireCloudCredential;
   @Mock
-  private GoogleCredential impersonatedCredential;
+  private ServiceAccounts serviceAccounts;
   @Mock
-  private HttpTransport httpTransport;
+  private GoogleCredential impersonatedCredential;
 
   private WorkbenchConfig workbenchConfig;
-  private GoogleCredential.Builder credentialBuilder;
 
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
   public void setUp() {
-    // Partially mock the credential builder: the builder methods should act as normal, but we'll
-    // mock out .build() to instead return a pre-baked GoogleCredential mock.
-    credentialBuilder = mock(GoogleCredential.Builder.class, Mockito.CALLS_REAL_METHODS);
-
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
@@ -88,9 +80,8 @@ public class FireCloudServiceImplTest {
         Providers.of(profileApi), Providers.of(billingApi), Providers.of(groupsApi),
         Providers.of(endUserGroupsApi), Providers.of(nihApi), Providers.of(workspacesApi),
         Providers.of(statusApi), new FirecloudRetryHandler(new NoBackOffPolicy()),
-        Providers.of(fireCloudCredential),
-        credentialBuilder,
-        httpTransport);
+        serviceAccounts,
+        Providers.of(fireCloudCredential));
   }
 
   @Test
@@ -200,18 +191,13 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testGetApiClientWithImpersonation() throws IOException {
-    // Avoid actually generating derived credentials by swapping in a mocked GoogleCredential when
-    // the builder is invoked.
-    doReturn(impersonatedCredential).when(credentialBuilder).build();
-    // Skip the refreshToken process which actually calls OAuth endpoints.
-    when(impersonatedCredential.refreshToken()).thenReturn(true);
+    when(serviceAccounts.getImpersonatedCredential(any(),
+        eq("asdf@fake-research-aou.org"), any())).thenReturn(impersonatedCredential);
+
     // Pretend we retrieved the given access token.
     when(impersonatedCredential.getAccessToken()).thenReturn("impersonated-access-token");
 
     ApiClient apiClient = service.getApiClientWithImpersonation("asdf@fake-research-aou.org");
-
-    // The Credential builder should be called with the impersonated username.
-    verify(credentialBuilder).setServiceAccountUser("asdf@fake-research-aou.org");
 
     // The impersonated access token should be assigned to the generated API client.
     OAuth oauth = (OAuth) apiClient.getAuthentication("googleoauth");
