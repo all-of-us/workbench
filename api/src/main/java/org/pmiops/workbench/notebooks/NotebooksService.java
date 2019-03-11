@@ -13,12 +13,11 @@ public interface NotebooksService {
   String DEFAULT_CLUSTER_NAME = "all-of-us";
 
   /**
-   * Creates a notebooks cluster.
+   * Creates a notebooks cluster owned by the current authenticated user.
    * @param googleProject the google project that will be used for this notebooks cluster
    * @param clusterName the user assigned/auto-generated name for this notebooks cluster
-   * @param userEmail a string containing the user who is creating the cluster's email
    */
-  Cluster createCluster(String googleProject, String clusterName, String userEmail)
+  Cluster createCluster(String googleProject, String clusterName)
       throws WorkbenchException;
 
   /**

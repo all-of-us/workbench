@@ -465,7 +465,7 @@ paths:
           description: Request containing user email to update and a disabled status to update the user to.
           schema:
             $ref: "#/definitions/UpdateUserDisabledRequest"
-      summary: enable/disable a user to an auth domain if you have manage groups permission
+      summary: enable/disable a user to an auth domain if you have ID verification authority
       operationId: updateUserDisabledStatus
 
   /v1/user/{term}:
@@ -843,6 +843,31 @@ paths:
           description: success
           schema:
             $ref: "#/definitions/EmptyResponse"
+
+  /v1/admin/clusters/updateConfig:
+    post:
+      summary: Sets default cluster creation request parameters for a user.
+      description: >
+        Clusters are created with a default machine configuration. Setting this
+        override changes that configuration for subsequent cluster creations.
+        This change only takes effect after a new cluster creation, e.g. due to
+        standard cluster expiration (~2w) or via manual reset. Requires
+        DEVELOPER authority.
+      operationId: updateClusterConfig
+      tags:
+        - cluster
+      parameters:
+        - in: body
+          name: body
+          description: Cluster config update request.
+          schema:
+            $ref: "#/definitions/UpdateClusterConfigRequest"
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
 
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
@@ -1399,11 +1424,12 @@ definitions:
         type: string
 
   # Authorities are a tool used to add discrete permissions to users. We currently
-  # have three authorities that are used:
+  # define the following authorities:
   #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
   #      the user has requested review to approve or reject.
-  #   2) MANAGE_GROUP: This is mainly only used once to create authorization domains in firecloud
-  #      and is mainly an internal authority for devs to use when setting up an environment.
+  #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+  #      administrative endpoints, including group management and cluster
+  #      management. Intended to be granted for devops needs, e.g. for oncall.
   #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
   Authority:
@@ -1414,7 +1440,7 @@ definitions:
         # Java fields by default; this has no side-effect currently as there is
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
-        MANAGE_GROUP,
+        DEVELOPER,
         REVIEW_ID_VERIFICATION
     ]
 
@@ -1697,6 +1723,30 @@ definitions:
     properties:
       approved:
         type: boolean
+
+  ClusterConfig:
+    properties:
+      masterDiskSize:
+        description: Master persistent disk size in GB.
+        type: integer
+        format: int32
+      machineType:
+        description: GCE machine type, e.g. n1-standard-2.
+        type: string
+
+  UpdateClusterConfigRequest:
+    description: >
+      Request to update the default cluster configuration for a given user.
+      Fields of the config may be omitted, in which case a default will be used.
+      Set clusterConfig to null to clear it.
+    type: object
+    required:
+      - userEmail
+    properties:
+      userEmail:
+        type: string
+      clusterConfig:
+        $ref: "#/definitions/ClusterConfig"
 
   IdVerificationReviewRequest:
     type: object
