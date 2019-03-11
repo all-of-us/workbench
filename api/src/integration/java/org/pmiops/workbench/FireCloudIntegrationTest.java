@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -106,9 +107,8 @@ public class FireCloudIntegrationTest {
         Providers.of(workspacesApi),
         Providers.of(new StatusApi(apiClient)),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
-        Providers.of(fireCloudAdminCredential),
-        new GoogleCredential.Builder(),
-        new ApacheHttpTransport()
+        new ServiceAccounts(),
+        Providers.of(fireCloudAdminCredential)
     );
   }
 

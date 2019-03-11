@@ -145,6 +145,7 @@ sourceSets {
 
 compileJava.dependsOn ':generateApi'
 compileJava.dependsOn ':generateNotebooksClient'
+compileJava.dependsOn ':generateFireCloudClient'
 
 repositories {   // repositories for Jar's you access in your code
   jcenter()
