@@ -85,7 +85,7 @@ export const ResourceListItem: React.FunctionComponent <
                           onReviewCohort={onReview}/>
 
       </div>
-      <input type='checkbox' value={resource.name} onClick={() => {onSelect()}}
+      <input type='checkbox' value={resource.name} onClick={onSelect}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
                marginRight: 10, backgroundColor: '#7CC79B'}}/>
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>
