@@ -1,6 +1,8 @@
 package org.pmiops.workbench.config;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -51,6 +53,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private SecurityHeadersInterceptor securityHeadersInterceptor;
+
+  @Bean
+  HttpTransport httpTransport() {
+    return UrlFetchTransport.getDefaultInstance();
+  }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
