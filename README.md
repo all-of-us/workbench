@@ -129,6 +129,9 @@ yarn test-react
 
 Other useful yarn commands:
 ```Shell
+# To upgrade yarn packages:
+yarn
+
 # To lint the UI and automatically fix issues:
 yarn lint --fix
 ```
