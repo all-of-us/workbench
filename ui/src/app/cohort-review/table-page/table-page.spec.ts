@@ -2,7 +2,6 @@ import {NgRedux} from '@angular-redux/store';
 import { APP_BASE_HREF } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
@@ -19,7 +18,7 @@ import {StatusFilterComponent} from 'app/cohort-review/status-filter/status-filt
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentCohortStore} from 'app/utils/navigation';
+import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {DataAccessLevel} from 'generated';
 import {CohortBuilderApi, CohortReviewApi} from 'generated/fetch';
 import {NgxPopperModule} from 'ngx-popper';
@@ -27,6 +26,7 @@ import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-se
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {TablePage} from './table-page';
 
 
@@ -35,18 +35,6 @@ describe('TablePage', () => {
   let component: TablePage;
   let fixture: ComponentFixture<TablePage>;
 
-  const activatedRouteStub = {
-    snapshot: {
-      data: {
-        concepts: {
-          raceList: [],
-          genderList: [],
-          ethnicityList: [],
-        },
-      },
-    },
-  };
-  let route;
   beforeEach(async(() => {
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
@@ -83,7 +71,6 @@ describe('TablePage', () => {
           })},
         {provide: CohortSearchActions},
         {provide: APP_BASE_HREF, useValue: '/'},
-        {provide: ActivatedRoute, useValue: activatedRouteStub},
       ],
     })
       .compileComponents();
@@ -93,12 +80,12 @@ describe('TablePage', () => {
       type: '',
     });
     cohortReviewStore.next(cohortReviewStub);
+    currentWorkspaceStore.next(workspaceDataStub);
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TablePage);
     component = fixture.componentInstance;
-    route = new ActivatedRoute();
     fixture.detectChanges();
   });
 

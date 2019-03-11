@@ -328,6 +328,23 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/vocabularies:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a collection of OMOP vocabularies per cdrVersionId.
+      operationId: "getVocabularies"
+      responses:
+        200:
+          description: A collection of OMOP vocabularies.
+          schema:
+            $ref: "#/definitions/VocabularyListResponse"
+
   # Cohort Annotation Definition Controller ###################################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
     parameters:
@@ -608,6 +625,33 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ParticipantChartData"
+
+  VocabularyListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Vocabulary"
+
+  Vocabulary:
+    type: object
+    required:
+      - type
+      - domain
+      - vocabulary
+    properties:
+      type:
+        type: string
+        description: Source or Standard
+      domain:
+        type: string
+        description: OMOP domain
+      vocabulary:
+        type: string
+        description: Vocabulary
 
   CohortChartDataListResponse:
     type: object

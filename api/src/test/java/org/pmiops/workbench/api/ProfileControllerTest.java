@@ -33,6 +33,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -141,6 +143,9 @@ public class ProfileControllerTest {
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
+    config.access = new AccessConfig();
+    config.access.enableEraCommons = false;
+    config.access.enableComplianceTraining = false;
     config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
 
@@ -249,11 +254,6 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.firecloud = new FireCloudConfig();
-    testConfig.firecloud.registeredDomainName = "";
-
-    when(configProvider.get()).thenReturn(testConfig);
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
@@ -753,7 +753,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testUpdateNihToken() {
-    doNothing().when(fireCloudService).postNihCallback(any());
+    when(fireCloudService.postNihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
@@ -774,8 +774,24 @@ public class ProfileControllerTest {
 
   @Test(expected = ServerErrorException.class)
   public void testUpdateNihToken_serverError() {
-    doThrow(new GatewayTimeoutException()).when(fireCloudService).postNihCallback(any());
+    doThrow(new ServerErrorException()).when(fireCloudService).postNihCallback(any());
     profileController.updateNihToken(new NihToken().jwt("test"));
+  }
+
+  @Test
+  public void testSyncEraCommons() throws Exception {
+    NihStatus nihStatus = new NihStatus();
+    String linkedUsername = "linked";
+    nihStatus.setLinkedNihUsername(linkedUsername);
+    nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
+    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+
+    createUser();
+
+    profileController.syncEraCommonsStatus();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
   @Test

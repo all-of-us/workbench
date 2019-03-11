@@ -70,4 +70,8 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<ParticipantDemographics>(resolve =>
       resolve({genderList: [], ethnicityList: [], raceList: []}));
   }
+
+  getParticipantDemographics() {
+    return Observable.of({raceList: [], genderList: [], ethnicityList: []});
+  }
 }

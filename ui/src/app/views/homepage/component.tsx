@@ -120,8 +120,7 @@ export class WorkbenchAccessTasks extends
   render() {
     const {trainingWarningOpen} = this.state;
     const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
-    return <React.Fragment>
-      <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
+    return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
           <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
@@ -176,8 +175,7 @@ export class WorkbenchAccessTasks extends
             <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
           </AlertWarning>}
         </div>
-      </div>
-    </React.Fragment>;
+      </div>;
   }
 }
 
@@ -239,11 +237,6 @@ export const homepageStyles = reactStyles({
   bottomLinks: {
     color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
     top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
-  },
-  addCard: {
-    display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    fontSize: '20px', lineHeight: '28px',  marginRight: '106px'
   }
 });
 
@@ -341,8 +334,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
         // page visits is null; is first visit
         this.setFirstVisit();
       }
-
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      try {
+        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
+      } catch (ex) {
+        this.setState({eraCommonsLinked: false});
+        console.error('error fetching era commons linking status');
+      }
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();
@@ -454,7 +451,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                       disabled={billingProjectInitialized}>
                         <CardButton disabled={!billingProjectInitialized}
                                     onClick={() => navigate(['workspaces/build'])}
-                                    style={homepageStyles.addCard}>
+                                    style={{margin: '1.9rem 106px 0 3%'}}>
                           Create a <br/> New Workspace
                           <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                         </CardButton>

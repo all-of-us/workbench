@@ -55,6 +55,10 @@ export class ConceptSetsServiceStub {
     return target;
   }
 
+  public getConceptSet(ns, wsid, csid) {
+    return Observable.of(this.mustFindConceptSet(csid));
+  }
+
   public getConceptSetsInWorkspace(
     workspaceNamespace: string, workspaceId: string): Observable<ConceptSetListResponse> {
     return new Observable<ConceptSetListResponse>(observer => {
