@@ -11,8 +11,8 @@ const initialFilterState = {
       max: null
     },
     age: {
-      min: null,
-      max: null
+      min: '',
+      max: ''
     },
     visits: null
   },

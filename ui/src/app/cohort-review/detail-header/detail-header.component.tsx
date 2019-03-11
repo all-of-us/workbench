@@ -14,16 +14,17 @@ import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 import * as moment from 'moment';
+import {TextInput} from '../../components/inputs';
 const css = `
   body .p-calendar.p-calendar-w-btn > .p-inputtext,
   body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
-    width: 140px;
+    width: 80%;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     border-right: 1px solid #212121;
   }
   .p-calendar > .p-calendar-button,
-   .p-calendar > .p-calendar-button:enabled:hover {
+  .p-calendar > .p-calendar-button:enabled:hover {
     color: #216FB4;
     background: transparent;
     border: 0;
@@ -85,6 +86,7 @@ const styles = reactStyles({
   },
   filterBody: {
     paddingLeft: '0.5rem',
+    fontSize: '12px',
   },
   resetBtn: {
     float: 'right',
@@ -367,7 +369,7 @@ export const DetailHeader = withCurrentWorkspace()(
                 </div>
                 <div style={{float: 'left', width: '30%'}}>
                   <Calendar
-                    style={{width: '140px'}}
+                    style={{width: '100%'}}
                     dateFormat='yy-mm-dd'
                     value={date.min}
                     onChange={(e) => this.setFilter(e.value, 'date', 'min')}
@@ -382,7 +384,7 @@ export const DetailHeader = withCurrentWorkspace()(
                 </div>
                 <div style={{float: 'left', width: '30%'}}>
                   <Calendar
-                    style={{width: '140px'}}
+                    style={{width: '100%'}}
                     dateFormat='yy-mm-dd'
                     value={date.max}
                     onChange={(e) => this.setFilter(e.value, 'date', 'max')}
@@ -393,7 +395,28 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'age' && <div>Age Range</div>}
+              {filterTab === 'age' && <div>
+                <div style={{float: 'left', width: '25%'}}>
+                  Age Range
+                </div>
+                <div style={{float: 'left', width: '30%'}}>
+                  <TextInput
+                    type='number'
+                    value={age.min}
+                    onChange={(e) => this.setFilter(e, 'age', 'min')}
+                  />
+                </div>
+                <div style={{float: 'left', width: '10%', marginLeft: '0.5rem'}}>
+                  and
+                </div>
+                <div style={{float: 'left', width: '30%'}}>
+                  <TextInput
+                    type='number'
+                    value={age.max}
+                    onChange={(e) => this.setFilter(e, 'age', 'max')}
+                  />
+                </div>
+              </div>}
               {filterTab === 'visits' && <div>Visits</div>}
             </div>
           </div>

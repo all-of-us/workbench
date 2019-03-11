@@ -287,8 +287,10 @@ export const DetailTabTable = withCurrentWorkspace()(
           return itemDate > min && itemDate < max;
         });
       }
-      if (this.props.domain !== DomainType[DomainType.SURVEY] && age.min && age.max) {
-        data = data.filter(item => item.ageAtEvent > age.min && item.ageAtEvent < age.max);
+      if (this.props.domain !== DomainType[DomainType.SURVEY] && (age.min || age.max)) {
+        const min = age.min || 0;
+        const max = age.max || 120;
+        data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY]
         && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
