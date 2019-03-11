@@ -15,6 +15,7 @@ See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instruc
   * [Python](https://www.python.org/downloads/) >= 2.7.9
     * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
+  * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
@@ -111,16 +112,36 @@ This will start up the public API on http://localhost:8083/.
 
 From the `ui/` directory:
 ```Shell
+yarn dev-up
+```
+
+You can view your local UI server at http://localhost:4200/.  
+
+By default, this connects to our test API server. Use `--configuration=$ENV` to
+use an alternate `src/environments/environment.$ENV.ts` file and connect to a
+different API server. To connect to your own API server running at
+`localhost:8081`, pass `--configuration=local`.
+
+To run react UI tests:
+```$xslt
+yarn test-react
+```
+
+Other useful yarn commands:
+```$xslt
+# To lint the UI and automatically fix issues:
+yarn lint --fix
+```
+
+
+#### Legacy startup
+You can also run the UI through project.rb. NOTE: this is slower and not recommended.  
+From the `ui/` directory,
+```
 ./project.rb dev-up
 ```
 
-After webpack finishes the build, you can view your local UI server at
-http://localhost:4200/. You can view the tests at http://localhost:9876/debug.html.
-
-By default, this connects to our test API server. Use `--environment=$ENV` to
-use an alternate `src/environments/environment.$ENV.ts` file and connect to a
-different API server. To connect to your own API server running at
-`localhost:8081`, pass `--environment=local`.
+[legacy] UI tests in Angular can be run and viewed at http://localhost:9876/index.html.
 
 Other available operations may be discovered by running:
 ```Shell
