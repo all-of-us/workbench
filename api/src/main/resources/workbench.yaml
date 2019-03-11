@@ -846,19 +846,20 @@ paths:
 
   /v1/admin/clusters/updateConfig:
     post:
-      summary: Sets an override for the default cluster creation request.
+      summary: Sets default cluster creation request parameters for a user.
       description: >
         Clusters are created with a default machine configuration. Setting this
         override changes that configuration for subsequent cluster creations.
-        After making this change, a cluster reset is required for the change to
-        take effect. Currently requires DEVELOPER authority.
+        This change only takes effect after a new cluster creation, e.g. due to
+        standard cluster expiration (~2w) or via manual reset. Requires
+        DEVELOPER authority.
       operationId: updateClusterConfig
       tags:
         - cluster
       parameters:
         - in: body
           name: body
-          description: Override request.
+          description: Cluster config update request.
           schema:
             $ref: "#/definitions/UpdateClusterConfigRequest"
       responses:
@@ -1735,8 +1736,9 @@ definitions:
 
   UpdateClusterConfigRequest:
     description: >
-      Request to override cluster configuration for a given user. Set override
-      to null to clear it.
+      Request to update the default cluster configuration for a given user.
+      Fields of the config may be omitted, in which case a default will be used.
+      Set clusterConfig to null to clear it.
     type: object
     required:
       - userEmail
