@@ -119,10 +119,12 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     }
     if (this.state.rType === ResourceType.CONCEPT_SET) {
       this.setState({conceptSetList: fp.without([this.getCurrentResource() as ConceptSet],
-        this.state.conceptSetList)});
+        this.state.conceptSetList), selectedConceptSetIds: fp.without([resourceId],
+          this.state.selectedConceptSetIds)});
     } else {
       this.setState({cohortList: fp.without([this.getCurrentResource() as Cohort],
-        this.state.cohortList)});
+        this.state.cohortList), selectedCohortIds: fp.without([resourceId],
+          this.state.selectedCohortIds)});
     }
     this.setState({resource: undefined, rType: undefined});
     call.then(() => this.closeConfirmDelete());
