@@ -1,7 +1,7 @@
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
-import * as moment from 'moment';
+
 
 export class ReviewDomainChartsComponent extends React.Component<
   {orgData: any, unitName: any}, {}> {
@@ -17,22 +17,22 @@ export class ReviewDomainChartsComponent extends React.Component<
 
 
   getOptions() {
-     console.log(this.props.orgData)
     // const {chartData: {conditionTitle, items}} = this.props;
     // const names = ['', ...fp.uniq(items.map(item => item.standardName))];
     // const nameIndexes = fp.mapValues(n => +n, fp.invert(names));
     const values = this.props.orgData.map(val => {
-      return  val.values
+      return  val.values;
     });
     const date = this.props.orgData.map(val => {
       // return moment(val.date, 'YYYY-MM-DD').unix()
-       return val.date
+      return val.date;
     });
-     console.log(date);
+     // console.log(date);
     return {
-      // chart: {
-      //   zoomType: 'xy',
-      // },
+      chart: {
+        type: 'line',
+        zoomType: 'xy',
+      },
       // credits: {
       //   enabled: false
       // },
@@ -122,6 +122,7 @@ export class ReviewDomainChartsComponent extends React.Component<
   render() {
     return (
       <div>
+        {/*hello*/}
         <HighchartsReact
           highcharts={highCharts}
           options={this.getOptions()}

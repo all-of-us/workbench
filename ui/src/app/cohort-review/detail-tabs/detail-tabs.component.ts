@@ -217,9 +217,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,

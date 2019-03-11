@@ -10,6 +10,7 @@ import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
 const css = `
@@ -105,13 +106,50 @@ const css = `
     color: rgb(0, 134, 193);
     font-size: 0.8rem;
     line-height: 0rem;
-}
+  }
  .pi-chevron-down:before {
     content: "\\E96D";
     color: rgb(0, 134, 193);
     font-size: 0.8rem;
     line-height: 0rem;
-}
+  }
+  body .p-tabview.p-tabview-top,
+  body .p-tabview.p-tabview-bottom,
+  body .p-tabview.p-tabview-left, body
+  .p-tabview.p-tabview-right {
+    margin: 1rem 11rem;
+    background-color: transparent;
+  }
+
+  body .p-tabview.p-tabview-top .p-tabview-nav li a,
+  body .p-tabview.p-tabview-bottom .p-tabview-nav li a,
+  body .p-tabview.p-tabview-left .p-tabview-nav li a,
+  body .p-tabview.p-tabview-right .p-tabview-nav li a {
+    border: none;
+    background-color: transparent;
+  }
+	body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
+	body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
+	body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
+	body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
+    background-color: none!important;
+    border-bottom: 3px solid #007ad9!important;
+    color: black;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
+  body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
+  body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
+  body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
+    background-color: transparent!important;
+    border: none;
+    color: black;
+  }
+
+  body .p-tabview-selected:hover {
+     color: black;
+     background-color: transparent!important;
+  }
+
   `;
 
 const styles = reactStyles({
@@ -172,6 +210,9 @@ const styles = reactStyles({
   graphStyle: {
     borderLeft: 'none',
     width: '2rem',
+  },
+  tabChange: {
+
   }
 });
 const rows = 25;
@@ -192,10 +233,12 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
+  openClickedTab: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    valueArray: any;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -204,7 +247,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        expandedRows: null,
+        expandedRows: [],
+        openClickedTab: {}
       };
     }
 
@@ -297,9 +341,9 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
-    groupByData(objectArray, property) {
-      return objectArray.reduce(function (acc, obj) {
-        let key = obj[property];
+    groupByData = (objectArray: any, property: any) => {
+      return objectArray.reduce((acc, obj) => {
+        const key = obj[property];
         if (!acc[key]) {
           acc[key] = [];
         }
@@ -309,25 +353,27 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     rowExpansionTemplate = (rowData: any) => {
-       const {data} = this.state;
+      const {data} = this.state;
       const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
       const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
       const unitKey = Object.keys(unitsObj);
-      console.log(unitKey);
-       return unitKey.map((k, i) => {
-        const valueArray = unitsObj[k].map(v => {
-         return {
-            values: parseInt(v.value),
-            date: v.itemDate
-          }
-        })
-        // console.log(valueArray.values);
-        return <React.Fragment key={i}>
-           <ReviewDomainChartsComponent orgData={valueArray} unitName={k}/>;
-         </React.Fragment>
-      })
-          // return <ReviewDomainChartsComponent orgData={data} unitName={'test'}/>;
+      return <TabView  style={styles.tabChange}>
+        {unitKey.map((k, i) => {
+          { this.valueArray = unitsObj[k].map(v => {
+            return {
+              values: parseInt(v.value, 10),
+              date: v.itemDate,
+              standardConceptId: v.standardConceptId
+            };
+          }); }
+          return <TabPanel header={k} key={i}>
+            <ReviewDomainChartsComponent orgData={this.valueArray} unitName={k}/>
+          </TabPanel>;
+        })};
+      </TabView>;
+
     }
+
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
@@ -344,7 +390,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const standardName = col.name === 'graph' && this.props.tabname === 'Vitals';
+        const standardName = col.name === 'graph' &&
+          (this.props.tabname === 'Vitals' || this.props.tabname === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
