@@ -317,7 +317,6 @@ describe('CohortSearchActions', () => {
     expect(demoParam).toEqual({
       parameterId: 'paramF',
       name: 'Female',
-      value: 'F',
       type: TreeType[TreeType.DEMO],
       subtype: 'GEN',
       group: false,

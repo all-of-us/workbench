@@ -1,17 +1,26 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
-import {WorkspaceData} from 'app/resolvers/workspace';
-import {conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {ResourceListItem} from 'app/components/resources';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
+import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
+import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
+import {EditModal} from 'app/views/edit-modal/component';
 import {
+  Cohort,
   ConceptSet,
   DomainInfo,
+  RecentResource,
+  WorkspaceAccessLevel,
 } from 'generated/fetch';
 
 export const styles = {
@@ -34,14 +43,23 @@ export const styles = {
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
-    conceptSetList: ConceptSet[]}> {
+    conceptSetList: ConceptSet[], loadingConceptSets: boolean,
+    confirmDeleting: boolean, editing: boolean, resource: RecentResource,
+    rType: ResourceType, selectedConceptSets: ConceptSet[]
+  }> {
 
   constructor(props) {
     super(props);
     this.state = {
       creatingConceptSet: false,
       conceptDomainList: undefined,
-      conceptSetList: []
+      conceptSetList: [],
+      loadingConceptSets: true,
+      confirmDeleting: false,
+      editing: false,
+      resource: undefined,
+      rType: undefined,
+      selectedConceptSets: []
     };
   }
 
@@ -58,15 +76,111 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       const {namespace, id} = this.props.workspace;
       const conceptSets = await Promise.resolve(conceptSetsApi()
         .getConceptSetsInWorkspace(namespace, id));
-      this.setState({conceptSetList: conceptSets.items});
+      this.setState({conceptSetList: conceptSets.items, loadingConceptSets: false});
     } catch (error) {
       console.log(error);
     }
   }
 
+  convertResource(r: ConceptSet | Cohort, rType: ResourceType): RecentResource {
+    const {workspace} = this.props;
+    this.setState({rType: rType});
+    return convertToResource(r, workspace.namespace, workspace.id,
+      workspace.accessLevel as unknown as WorkspaceAccessLevel, rType);
+  }
+
+  openConfirmDelete(r: ConceptSet, rType: ResourceType): void {
+    const rc = this.convertResource(r, rType);
+    this.setState({confirmDeleting: true, resource: rc});
+  }
+
+  closeConfirmDelete(): void {
+    this.setState({confirmDeleting: false});
+  }
+
+  edit(r: Cohort | ConceptSet, rType: ResourceType): void {
+    const rc = this.convertResource(r, rType);
+    this.setState({editing: true, resource: rc});
+  }
+
+  receiveDelete() {
+    const {resource, rType} = this.state;
+    let call;
+    const id = this.getCurrentResource().id;
+    const {workspaceNamespace, workspaceFirecloudName} = resource;
+    if (rType === ResourceType.CONCEPT_SET) {
+      call = conceptSetsApi().deleteConceptSet(workspaceNamespace, workspaceFirecloudName, id);
+    } else {
+      call = cohortsApi().deleteCohort(workspaceNamespace, workspaceFirecloudName, id);
+    }
+    if (this.state.rType === ResourceType.CONCEPT_SET) {
+      const deleted = this.state.resource.conceptSet;
+      const updatedList = fp.filter(conceptSet => conceptSet.id !== deleted.id,
+        this.state.conceptSetList);
+      this.setState({conceptSetList: updatedList});
+    }
+    this.setState({resource: undefined, rType: undefined});
+    call.then(() => this.closeConfirmDelete());
+  }
+
+  receiveEdit(resource: RecentResource): void {
+    const updatedResource = this.getCurrentResource();
+    const {workspaceNamespace, workspaceFirecloudName} = resource;
+    const {id} = updatedResource;
+    let call;
+    if (resource.cohort) {
+      call = cohortsApi().updateCohort(workspaceNamespace, workspaceFirecloudName,
+        id, updatedResource as Cohort);
+    } else if (resource.conceptSet) {
+      call = conceptSetsApi().updateConceptSet(workspaceNamespace, workspaceFirecloudName,
+        id, updatedResource);
+    }
+    const edited = this.state.resource.conceptSet;
+    const updatedList = this.state.conceptSetList.map((conceptSet) => {
+      return edited.id === conceptSet.id ? edited : conceptSet;
+    });
+    this.setState({conceptSetList: updatedList, resource: undefined, rType: undefined});
+    call.then(() => this.closeEditModal());
+  }
+
+  closeEditModal(): void {
+    this.setState({editing: false});
+  }
+
+  select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
+    if (rtype === ResourceType.CONCEPT_SET) {
+      const origSelected = this.state.selectedConceptSets;
+      const selected = fp.filter((c) => c.id === resource.id, origSelected);
+      if (selected.length > 0) {
+        this.setState({selectedConceptSets: fp.remove((c) => c.id === resource.id, origSelected)});
+      } else {
+        this.setState({selectedConceptSets: origSelected.concat(origSelected)});
+      }
+    } else {
+      // else = cohort
+      //  determine if already in selected
+      //  remove if it is
+      //  add if it isn't
+    }
+  }
+
+  getCurrentResource(): Cohort | ConceptSet {
+    if (this.state.resource) {
+      return fp.compact([this.state.resource.cohort, this.state.resource.conceptSet])[0];
+    }
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
-    const {creatingConceptSet, conceptDomainList, conceptSetList} = this.state;
+    const {
+      creatingConceptSet,
+      conceptDomainList,
+      conceptSetList,
+      loadingConceptSets,
+      resource,
+      rType
+    } = this.state;
+    const currentResource = this.getCurrentResource();
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Datasets</h2>
@@ -89,14 +203,29 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
           <div style={{width: '58%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-              <div style={{flexGrow: 1}}>
-                <div style={{...styles.selectBoxHeader, borderRight: '1px solid #E5E5E5'}}>
+              <div style={{flexGrow: 1, borderRight: '1px solid #E5E5E5'}}>
+                <div style={{...styles.selectBoxHeader}}>
                   Concept Sets
                   <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
                            onClick={() => this.setState({creatingConceptSet: true})}/>
                 </div>
-                {/*TODO: display concept sets here*/}
-                <div style={{height: '8rem', borderRight: '1px solid #E5E5E5'}}/>
+                {this.state.conceptSetList.length > 0 && !loadingConceptSets &&
+                  this.state.conceptSetList.map(conceptSet =>
+                    <ResourceListItem key={conceptSet.id} conceptSet={conceptSet}
+                                      openConfirmDelete={
+                                        () => {
+                                          return this.openConfirmDelete(conceptSet,
+                                            ResourceType.CONCEPT_SET);
+                                        }
+                                      }
+                                      onSelect={
+                                        () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                      }
+                                      edit={
+                                        () => this.edit(conceptSet, ResourceType.CONCEPT_SET)
+                                      }/>)
+                }
+                {loadingConceptSets && <SpinnerOverlay/>}
               </div>
               <div style={{flexGrow: 1}}>
                 <div style={styles.selectBoxHeader}>
@@ -133,6 +262,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       onClose={() => {this.setState({ creatingConceptSet: false}); }}
       conceptDomainList={conceptDomainList}
       existingConceptSets={conceptSetList}/>}
+      {this.state.confirmDeleting && currentResource &&
+      <ConfirmDeleteModal resourceName={currentResource.name}
+                          resourceType={rType}
+                          receiveDelete={() => this.receiveDelete()}
+                          closeFunction={() => this.closeConfirmDelete()}/>}
+      {this.state.editing && resource &&
+      <EditModal resource={resource}
+                 onEdit={e => this.receiveEdit(e)}
+                 onCancel={() => this.closeEditModal()}/>}
     </React.Fragment>;
   }
 

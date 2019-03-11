@@ -5,7 +5,7 @@ import {PopupTrigger} from 'app/components/popups';
 import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon/component';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
-import {withCurrentWorkspace} from 'app/utils/index';
+import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {WorkspaceAccessLevel} from 'generated';
@@ -60,10 +60,15 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
-export const WorkspaceNavBarReact = withCurrentWorkspace()(props => {
-  const {shareFunction, deleteFunction, workspace, tabPath} = props;
-  const {namespace, id, accessLevel} = workspace;
-  const isNotOwner = accessLevel !== WorkspaceAccessLevel.OWNER;
+export const WorkspaceNavBarReact = fp.flow(
+  withCurrentWorkspace(),
+  withUrlParams(),
+)(props => {
+  const {
+    shareFunction, deleteFunction, workspace, tabPath,
+    urlParams: {ns: namespace, wsid: id}
+  } = props;
+  const isNotOwner = !workspace || workspace.accessLevel !== WorkspaceAccessLevel.OWNER;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
 

@@ -50,6 +50,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
   });
   demoOpen = false;
   demoMenuHover = false;
+  position = 'bottom-left';
 
   constructor(private actions: CohortSearchActions, private ngRedux: NgRedux<CohortSearchState>) {}
 
@@ -242,5 +243,11 @@ export class SearchGroupComponent implements AfterViewInit, OnInit, OnDestroy {
     const nonTempWarningFlag =
       !this.nonTemporalItems.filter(t => t.get('status') === 'active').length;
     return tempWarningFlag || nonTempWarningFlag;
+  }
+
+  setMenuPosition() {
+    const id = this.role + this.index + '-button';
+    const dropdown = document.getElementById(id).getBoundingClientRect();
+    this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }
 }

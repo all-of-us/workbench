@@ -152,7 +152,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihCallback() throws Exception {
-    doNothing().when(nihApi).nihCallback(any());
+    when(nihApi.nihCallback(any())).thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       service.postNihCallback(any());
     } catch (Exception e) {
@@ -162,13 +162,13 @@ public class FireCloudServiceImplTest {
 
   @Test(expected = BadRequestException.class)
   public void testNihCallbackBadRequest() throws Exception {
-    doThrow(new ApiException(400, "Bad Request")).when(nihApi).nihCallback(any());
+    when(nihApi.nihCallback(any())).thenThrow(new ApiException(400, "Bad Request"));
     service.postNihCallback(any());
   }
 
   @Test(expected = ServerErrorException.class)
   public void testNihCallbackServerError() throws Exception {
-    doThrow(new ApiException(500, "Internal Server Error")).when(nihApi).nihCallback(any());
+    when(nihApi.nihCallback(any())).thenThrow(new ApiException(500, "Internal Server Error"));
     service.postNihCallback(any());
   }
 

@@ -373,11 +373,6 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Profile> getProfileResponse(User user) {
     Profile profile = profileService.getProfile(user);
     // Note: The following requires that the current request is authenticated.
-    NihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus != null) {
-      profile.setLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      profile.setLinkExpireTime(nihStatus.getLinkExpireTime());
-    }
     return ResponseEntity.ok(profile);
   }
 
@@ -493,7 +488,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
     User user = userProvider.get();
-    Profile profile = profileService.getProfile(user);
     try {
       userService.syncUserTraining(user);
     } catch(NotFoundException ex) {
@@ -501,7 +495,15 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return ResponseEntity.ok(profile);
+    return getProfileResponse(user);
+  }
+
+  @Override
+  public ResponseEntity<Profile> syncEraCommonsStatus() {
+    User user = userProvider.get();
+    NihStatus nihStatus = fireCloudService.getNihStatus();
+    user = userService.setEraCommonsStatus(nihStatus);
+    return getProfileResponse(user);
   }
 
   @Override
@@ -610,7 +612,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     if (updatedProfile.getContactEmail() != null &&
         !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
-      // See RW-1588.
+      // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
     List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
@@ -701,11 +703,12 @@ public class ProfileController implements ProfileApiDelegate {
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
-      fireCloudService.postNihCallback(wrapper);
+      NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
       User user = initializeUserIfNeeded();
+      user = userService.setEraCommonsStatus(nihStatus);
       return getProfileResponse(user);
-    } catch (Exception e) {
-      throw new ServerErrorException("Unable to update NIH token", e);
+    } catch (WorkbenchException e) {
+      throw e;
     }
   }
 

@@ -23,7 +23,7 @@ export class CohortReviewServiceStub {
   constructor() {}
 
   getParticipantCohortStatuses(): Observable<CohortReview> {
-    return Observable.of(<CohortReview> {});
+    return Observable.of(cohortReviewStub);
   }
 
   getParticipantData(): Observable<ParticipantDataListResponse> {
