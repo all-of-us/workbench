@@ -397,11 +397,12 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             text='To fulfill program requirements, All of Us requests the following information'/>
         <WorkspaceEditSection header='Describe your research purpose'
             tooltip={toolTipText.researchPurpose}
-            text={['Please include the ', <strong>research question</strong>, '\, the ', <strong>
-                    plan for use of the data </strong>, 'to answer the research question, and the',
-              <strong> expected outcome/benefit </strong>, 'of the research information will ' +
-                    'be posted publicly on the All of Us website to inform the research ' +
-                    'participants.']} required>
+            text={['Please include the ', <strong key='question'>research question</strong>,
+              '\, the ', <strong key='plan'> plan for use of the data </strong>,
+              'to answer the research question, and the',
+              <strong key = 'benefit'> expected outcome/benefit </strong>,
+              'of the research information will be posted publicly on the All of Us website to ' +
+              'inform the research participants.']} required>
           <TextArea value={this.state.workspace.description}
                     onChange={v => this.setState(fp.set(['workspace', 'description'], v))}/>
         </WorkspaceEditSection>
