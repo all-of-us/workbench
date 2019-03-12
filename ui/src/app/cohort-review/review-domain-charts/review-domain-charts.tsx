@@ -30,7 +30,7 @@ export class ReviewDomainChartsComponent extends React.Component<
      // console.log(date);
     return {
       chart: {
-        type: 'line',
+        type: 'spline',
         zoomType: 'xy',
       },
       // credits: {
@@ -55,6 +55,7 @@ export class ReviewDomainChartsComponent extends React.Component<
       //         tickInterval: 40 * 3600 * 1000,
       //       },
       yAxis: {
+        lineWidth: 2
         // title: {
         //   text: 'Number of Employees'
         // }

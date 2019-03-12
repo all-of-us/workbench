@@ -103,7 +103,7 @@ const css = `
     font-size: 13px;
   }
   .pi-chevron-right:before {
-    content: "\\E96D"!important;
+    content: "\\E96D";
     color: rgb(0, 134, 193);
     font-size: 0.8rem;
     line-height: 0rem;
@@ -113,6 +113,12 @@ const css = `
     color: rgb(0, 134, 193);
     font-size: 0.8rem;
     line-height: 0rem;
+  }
+  .graphExpander .pi-chevron-right {
+    display: none;
+  }
+   .graphExpander body .p-datatable .p-datatable-tbody > tr > td  {
+    border: none!important;
   }
   body .p-tabview.p-tabview-top,
   body .p-tabview.p-tabview-bottom,
@@ -203,16 +209,17 @@ const styles = reactStyles({
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
+    borderBottom: 'none',
     lineHeight: '0.6rem',
   },
   graphColumnBody: {
-    background: '#ffffff',
-    padding: '5px',
-    verticalAlign: 'top',
-    textAlign: 'left',
-    borderLeft: 0,
-    borderRight: 0,
-    lineHeight: '0.6rem',
+    // background: '#ffffff',
+    // padding: '5px',
+    // verticalAlign: 'top',
+    // textAlign: 'left',
+    // borderLeft: 0,
+    // borderRight: 0,
+    // lineHeight: '0.6rem',
     width: '2rem',
   },
 
@@ -384,7 +391,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
       const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
       const unitKey = Object.keys(unitsObj);
-      return <TabView>
+      return rowData.standardName === 'No matching concept' ? <div>NO Data to show</div>  : <TabView>
         {unitKey.map((k, i) => {
           { this.valueArray = unitsObj[k].map(v => {
             return {
@@ -399,11 +406,14 @@ export const DetailTabTable = withCurrentWorkspace()(
         })}
       </TabView>;
     }
-
+    hideGraphIcon = (rowData: any) => {
+      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept'
+          return {'graphExpander' : noConcept};
+    }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      // let noMatch;
+       let noMatch;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
           ? start + rows - (start + rows - data.length) : start + rows;
@@ -413,20 +423,11 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-      // if (data !== null) {
-      //   noMatch =  data.filter(m => {
-      //     // console.log(m.standardName);
-      //     m.standardName === 'No matching concept'
-      //   })
-      // }
-      console.log(this.state.expandedRows);
-      const columns = this.props.columns.map((col) => {
-
-        // console.log(col);
+        const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const standardName = col.name === 'graph' &&
+        const isExpanderNeeded = col.name === 'graph'  &&
           (this.props.tabname === 'Vitals' || this.props.tabname === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
@@ -435,18 +436,18 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {(asc && !standardName) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {(desc && !standardName)  && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {(desc && !isExpanderNeeded)  && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
 
         return <Column
-          expander={standardName && true}
+          expander={isExpanderNeeded}
           style={styles.tableBody}
-          bodyStyle={standardName ? styles.graphColumnBody : styles.columnBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody && styles.columnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
-          headerStyle={standardName && styles.graphStyle}
+          headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
           body={overlayTemplate}/>;
       });
@@ -455,6 +456,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         {data && <DataTable  expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
+          rowClassName = {this.hideGraphIcon}
           style={styles.table}
           value={data}
           sortField={sortField}
