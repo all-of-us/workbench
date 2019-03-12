@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -53,11 +54,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private SecurityHeadersInterceptor securityHeadersInterceptor;
-
-  @Bean
-  HttpTransport httpTransport() {
-    return UrlFetchTransport.getDefaultInstance();
-  }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
