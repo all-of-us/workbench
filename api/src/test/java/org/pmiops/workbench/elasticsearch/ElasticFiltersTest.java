@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.elasticsearch.ElasticFilters.ElasticFilterResponse;
+import org.pmiops.workbench.model.AttrName;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.Operator;
@@ -33,6 +35,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -46,7 +50,6 @@ public class ElasticFiltersTest {
 
   private static Criteria icd9Criteria() {
     return new Criteria()
-        .domainId("Condition")
         .type(TreeType.ICD9.toString())
         .subtype(TreeSubType.CM.toString())
         .attribute(Boolean.FALSE);
@@ -54,12 +57,13 @@ public class ElasticFiltersTest {
 
   private static Criteria basicsCriteria() {
     return new Criteria()
-        .domainId("Observation")
         .type(TreeType.PPI.toString())
         .subtype(TreeSubType.BASICS.toString())
         .attribute(Boolean.FALSE);
   }
   private SearchParameter leafParam2;
+  private SearchParameter ageParam;
+  private Attribute ageAttr;
 
   @Before
   public void setUp() {
@@ -154,6 +158,16 @@ public class ElasticFiltersTest {
         .type(TreeType.ICD9.toString())
         .subtype(TreeSubType.CM.toString())
         .group(false);
+
+    ageAttr = new Attribute()
+      .name(AttrName.AGE)
+      .operator(Operator.EQUAL)
+      .operands(Arrays.asList("38"));
+    ageParam = new SearchParameter()
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.AGE.toString())
+      .group(false)
+      .attributes(Arrays.asList(ageAttr));
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
@@ -251,7 +265,7 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testAgeModifierQuery() {
+  public void testAgeAtEventModifierQuery() {
     ElasticFilterResponse<QueryBuilder> resp =
         ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
             .addIncludesItem(new SearchGroup()
@@ -308,7 +322,7 @@ public class ElasticFiltersTest {
         QueryBuilders.termsQuery("events.visit_concept_id", ImmutableList.of("123"))));
   }
 
-    @Test
+  @Test
   public void testNumOfOccurrencesModifierQuery() {
     ElasticFilterResponse<QueryBuilder> resp =
         ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
@@ -324,5 +338,17 @@ public class ElasticFiltersTest {
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQueryOccurrences(
         13, QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
+  }
+
+  @Test
+  public void testAgeQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(ageParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
   }
 }
