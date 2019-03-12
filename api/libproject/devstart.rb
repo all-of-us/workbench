@@ -463,7 +463,7 @@ def run_rainforest_tests(cmd_name, *args)
   # environment we can run tests in. There is, however, an identical key in
   # each of the other environments.
   token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
-  common.run_inline %W{rainforest run all --token #{token}}
+  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
 end
 
 Common.register_command({

@@ -32,7 +32,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
     this.userDao = userDao;
   }
 
-  @AuthorityRequired({Authority.MANAGE_GROUP})
+  @AuthorityRequired({Authority.DEVELOPER})
   @Override
   public ResponseEntity<EmptyResponse> createAuthDomain(String groupName) {
     fireCloudService.createGroup(groupName);

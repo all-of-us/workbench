@@ -28,9 +28,8 @@ import {
 
 const styles = reactStyles({
   mainHeader: {
-    color: '#FFFFFF', fontSize: 28, fontWeight: 400, width: '25.86%',
-    display: 'flex', minWidth: '17.4rem', marginLeft: '4%', marginTop: '4%',
-    letterSpacing: 'normal'
+    color: '#FFFFFF', fontSize: 28, fontWeight: 400,
+    display: 'flex', letterSpacing: 'normal'
   },
   minorHeader: {
     color: '#FFFFFF', fontSize: 18, fontWeight: 600, display: 'flex',
@@ -121,9 +120,9 @@ export class WorkbenchAccessTasks extends
     const {trainingWarningOpen} = this.state;
     const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
     return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
-        <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
+        <div style={{display: 'flex', flexDirection: 'column', width: '50%', padding: '3% 0 0 3%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
-          <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
+          <div style={{marginLeft: '1rem', flexDirection: 'column'}}>
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
             <div style={styles.text}>Please login to your eRA Commons account and complete
@@ -193,9 +192,11 @@ export const homepageStyles = reactStyles({
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
-  contentWrapper: {
-    flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
-    justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'
+  contentWrapperLeft: {
+    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '40%'
+  },
+  contentWrapperRight: {
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -223,7 +224,7 @@ export const homepageStyles = reactStyles({
     flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'scroll'
   },
   linksBlock: {
-    display: 'flex', marginBottom: '1.4rem', marginLeft: '1.4rem',
+    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
     flexDirection: 'column', flexShrink: 1, minWidth: 0
   },
   bottomBanner: {
@@ -437,15 +438,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                        trainingCompleted={trainingCompleted}
                                        firstVisitTraining={firstVisitTraining}/>
                 ) : (
-                  <div>
-                    <div style={homepageStyles.contentWrapper}>
+                  <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                    <div style={homepageStyles.contentWrapperLeft}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
-                      <a onClick={() => navigate(['workspaces'])}
-                         style={{marginTop: '2.3rem', fontSize: '14px', color: '#FFFFFF'}}>
-                        See All Workspaces</a>
-
-                    </div>
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
                                       disabled={billingProjectInitialized}>
@@ -456,70 +451,77 @@ export const Homepage = withUserProfile()(class extends React.Component<
                           <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                         </CardButton>
                       </TooltipTrigger>
-                      <div style={{marginRight: '3%', flexGrow: 1, minWidth: 0}}>
-                        <div style={{color: '#fff', marginLeft: '1rem'}}>
-                          Your Last Accessed Items</div>
-                        <RecentWork dark={true}/>
+                    </div>
+                    <div style={homepageStyles.contentWrapperRight}>
+                      <a onClick={() => navigate(['workspaces'])}
+                         style={{fontSize: '14px', color: '#FFFFFF'}}>
+                        See All Workspaces</a>
+                      <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
+                        <div style={{color: '#fff', height: '1.9rem'}}>
+                          <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
+                        </div>
+                        <RecentWork dark={true} cardMarginTop='0'/>
                       </div>
                     </div>
-                  </div>
-                )
+                  </div>)
                 ) :
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
         </div>
-        <div style={homepageStyles.quickRow}>
-          <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
-          {quickTourResources.map((thumbnail, i) => {
-            return <React.Fragment key={i}>
-              <Clickable onClick={thumbnail.onClick}
-                         data-test-id={'quick-tour-resource-' + i}>
-                <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
-                     src={thumbnail.src}/>
-              </Clickable>
-            </React.Fragment>
-            ;
-          })}
-        </div>
         <div>
-          <div style={homepageStyles.footer}>
-            <div style={homepageStyles.footerInner}>
-              <div style={homepageStyles.footerTitle}>
-                How to Use the All of Us Researcher Workbench</div>
-              <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <TooltipTrigger content='Coming Soon' side='left'>
-                  <a href='#' style={{color: '#fff'}}>See all documentation</a>
-                </TooltipTrigger>
-              </div>
-              <div style={{display: 'flex', flexDirection: 'row',
-                width: '87.34%', justifyContent: 'space-between'}}>
-                {footerLinks.map((col, i) => {
-                  return <React.Fragment key={i}>
-                    <div style={homepageStyles.linksBlock}>
-                      <div style={homepageStyles.footerText}>
-                        <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
-                        <ul style={{color: '#83C3EC'}}>
-                          {col.links.map((link, ii) => {
-                            return <li key={ii}>
-                              <a href='#' style={{color: '#83C3EC'}}>{link}</a>
-                            </li>;
-                          } )}
-                        </ul>
-                      </div>
-                    </div>
-                  </React.Fragment>;
-                })}
-              </div>
-            </div>
+          <div style={homepageStyles.quickRow}>
+            <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
+            {quickTourResources.map((thumbnail, i) => {
+              return <React.Fragment key={i}>
+                <Clickable onClick={thumbnail.onClick}
+                           data-test-id={'quick-tour-resource-' + i}>
+                  <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                       src={thumbnail.src}/>
+                </Clickable>
+              </React.Fragment>;
+            })}
           </div>
-          <div style={homepageStyles.bottomBanner}>
-            <div style={homepageStyles.logo}>
-              <img src='/assets/images/all-of-us-logo-footer.svg'/>
+          <div>
+            <div style={homepageStyles.footer}>
+              <div style={homepageStyles.footerInner}>
+                <div style={homepageStyles.footerTitle}>
+                  How to Use the All of Us Researcher Workbench</div>
+                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                  <TooltipTrigger content='Coming Soon' side='left'>
+                    <a href='#' style={{color: '#fff'}}>See all documentation</a>
+                  </TooltipTrigger>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'row',
+                  width: '87.34%', justifyContent: 'space-between'}}>
+                  {footerLinks.map((col, i) => {
+                    return <React.Fragment key={i}>
+                      <div style={homepageStyles.linksBlock}>
+                        <div style={homepageStyles.footerText}>
+                          <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
+                          <ul style={{color: '#83C3EC'}}>
+                            {col.links.map((link, ii) => {
+                              return <li key={ii}>
+                                <a href='#' style={{color: '#83C3EC'}}>{link}</a>
+                              </li>;
+                            } )}
+                          </ul>
+                        </div>
+                      </div>
+                    </React.Fragment>;
+                  })}
+                </div>
+              </div>
             </div>
-            <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
-            <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+            <div style={homepageStyles.bottomBanner}>
+              <div style={homepageStyles.logo}>
+                <img src='/assets/images/all-of-us-logo-footer.svg'/>
+              </div>
+              <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
+              <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+            </div>
           </div>
         </div>
+
       </div>
 
       {quickTour &&
@@ -540,7 +542,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 });
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="height: 100%"></div>'
 })
 export class HomepageComponent extends ReactWrapperBase {
   constructor() {
