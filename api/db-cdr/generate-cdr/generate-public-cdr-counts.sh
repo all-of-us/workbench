@@ -69,17 +69,11 @@ then
   exit 1
 fi
 
-#Check cdr_version is not empty and of form YYYYMMDD
+#Check cdr_version is not empty
 if [ -z "${CDR_VERSION}" ]
 then
   echo -e "Usage: $USAGE"
   echo -e "Missing cdr version name"
-  exit 1
-elif [[ $CDR_VERSION =~ ^$|^[0-9]{4}(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])$ ]]; then
-  echo "New CDR VERSION will be $CDR_VERSION"
-else
-  echo "CDR Version doesn't match required format YYYYMMDD"
-  echo "Usage: $USAGE"
   exit 1
 fi
 
@@ -88,7 +82,7 @@ then
   BIN_SIZE=20
 fi
 
-PUBLIC_DATASET=public$CDR_VERSION
+PUBLIC_DATASET=$CDR_VERSION
 
 startDate=$(date)
 echo $(date) "Starting generate-public-cdr-counts $startDate"
