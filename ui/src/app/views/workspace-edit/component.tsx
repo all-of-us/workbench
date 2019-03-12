@@ -363,11 +363,10 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
     updateUnderserverPopulation(populationDetails) {
-      this.setState(
-          fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], populationDetails));
-      this.setState(
-          fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'], (populationDetails.length > 0))
-      )
+      this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'],
+        populationDetails));
+      this.setState(fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'],
+        (populationDetails.length > 0)));
     }
 
     render() {
