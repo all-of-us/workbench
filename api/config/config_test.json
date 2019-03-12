@@ -46,5 +46,15 @@
   "elasticsearch": {
     "host": "",
     "enableElasticsearchBackend": false
+  },
+  "moodle": {
+    "host": "aoudev.nnlm.gov",
+    "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
+    "enableDataUseAgreement": true,
+    "enableIdVerification": true
   }
 }

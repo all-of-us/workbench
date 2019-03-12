@@ -1,4 +1,4 @@
-import {TreeSubType} from 'generated';
+import {TemporalMention, TemporalTime, TreeSubType} from 'generated';
 import {fromJS, List, Map, Set} from 'immutable';
 import {Reducer} from 'redux';
 
@@ -9,9 +9,8 @@ import {
   activeRole,
   CohortSearchState,
   getGroup,
-  getItem,
   initialState,
-  SR_ID,
+  SR_ID
 } from './store';
 
 /* tslint:disable:ordered-imports */
@@ -74,6 +73,10 @@ import {
   OPEN_WIZARD,
   REOPEN_WIZARD,
   WIZARD_FINISH,
+  UPDATE_TEMPORAL,
+  UPDATE_WHICH_MENTION,
+  UPDATE_TEMPORAL_TIME,
+  UPDATE_TEMPORAL_TIME_VALUE,
   WIZARD_CANCEL,
   SET_WIZARD_CONTEXT,
   SHOW_ATTRIBUTES_PAGE,
@@ -293,7 +296,12 @@ export const rootReducer: Reducer<CohortSearchState> =
           );
 
       case CLEAR_TOTAL_COUNT:
-        return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], 0);
+        const temporalActive = state.getIn(['entities', 'groups', action.groupId, 'temporal']);
+        if (temporalActive) {
+          return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], null);
+        } else {
+          return state.setIn(['entities', 'searchRequests', SR_ID, 'count'], -1);
+        }
 
       case CLEAR_GROUP_COUNT:
         return state.setIn(['entities', 'groups', action.groupId, 'count'], -1);
@@ -400,15 +408,8 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ITEM: {
-        const activeItems = state.getIn(['entities', 'groups', action.groupId, 'items'])
-          .filter(itemId => {
-            const item = getItem(itemId)(state);
-            return item.get('id') !== action.itemId && item.get('status') === 'active';
-          });
-        if (!activeItems.size) {
-          state = state.setIn(['entities', 'groups', action.groupId, 'count'], null);
-        }
-        return state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
+        return state = state.setIn(['entities', 'groups', action.groupId, 'count'], null)
+          .setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }
 
       case HIDE_GROUP:
@@ -459,7 +460,7 @@ export const rootReducer: Reducer<CohortSearchState> =
             searchParameters: [],
             modifiers: [],
             count: null,
-            temporalGroup: 0,
+            temporalGroup: action.tempGroup ? action.tempGroup : 0,
             isRequesting: false,
             status: 'active'
           },
@@ -489,7 +490,6 @@ export const rootReducer: Reducer<CohortSearchState> =
         const itemId = item.get('id');
         const groupId = activeGroupId(state);
         const groupItems = ['entities', 'groups', groupId, 'items'];
-
         if (item.get('searchParameters', List()).isEmpty()) {
           return state
             .updateIn(groupItems, List(),
@@ -499,7 +499,6 @@ export const rootReducer: Reducer<CohortSearchState> =
             .deleteIn(['entities', 'items', itemId])
             .set('wizard', Map({open: false}));
         }
-
         const setUnique = element => list =>
           list.includes(element) ? list : list.push(element);
 
@@ -538,6 +537,48 @@ export const rootReducer: Reducer<CohortSearchState> =
         return state
           .mergeDeepIn(['wizard'], action.context)
           .deleteIn(['criteria', 'subtree']);
+
+      case UPDATE_TEMPORAL: {
+        const groupItems = ['entities', 'groups', action.groupId, 'temporal'];
+        const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
+        const time = ['entities', 'groups', action.groupId, 'time'];
+        const mention = ['entities', 'groups', action.groupId, 'mention'];
+        const group = getGroup(action.groupId)(state);
+        // below if is to set the state in default values
+        if (group.get('timeValue') === 0 && group.get('time') === ''
+          && group.get('mention') === '') {
+          return state
+            .setIn(timeValue, '')
+            .setIn(time, TemporalTime.DURINGSAMEENCOUNTERAS)
+            .setIn(mention, TemporalMention.ANYMENTION)
+            .setIn(groupItems, action.flag);
+        }
+        return state
+          .setIn(groupItems, action.flag);
+      }
+
+      case UPDATE_WHICH_MENTION: {
+        const groupItems = ['entities', 'groups', action.groupId, 'mention'];
+        return state.setIn(groupItems, action.mention);
+      }
+
+      case UPDATE_TEMPORAL_TIME: {
+        const groupItems = ['entities', 'groups', action.groupId, 'time'];
+        const timeValue = ['entities', 'groups', action.groupId, 'timeValue'];
+        if ((action.time) !== TemporalTime.DURINGSAMEENCOUNTERAS) {
+          return state
+            .setIn(groupItems, action.time)
+            .setIn(timeValue, 1);
+        }
+        return state
+          .setIn(groupItems, action.time)
+          .setIn(timeValue, '');
+      }
+
+      case UPDATE_TEMPORAL_TIME_VALUE: {
+        const groupItems = ['entities', 'groups', action.groupId, 'timeValue'];
+        return state.setIn(groupItems, action.timeValue);
+      }
 
       case LOAD_ENTITIES:
         return state.set('entities', action.entities);

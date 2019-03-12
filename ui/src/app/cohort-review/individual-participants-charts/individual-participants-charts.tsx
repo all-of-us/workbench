@@ -1,87 +1,36 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {ParticipantChartData} from 'generated';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 
-interface DisplayParticipantChartData extends ParticipantChartData {
-  yAxisValue?: number;
-  newStartDate?: number;
-}
+import {ReactWrapperBase} from 'app/utils/index';
 
-interface ChartData {
-  loading: boolean;
-  conditionTitle: string;
-  items: Array<DisplayParticipantChartData>;
-}
-
-export interface ChartReactProps {
-  chartData: ChartData;
-  chartKey: number;
-}
-
-export class IndividualParticipantsReactCharts extends React.Component<ChartReactProps> {
-  props: ChartReactProps;
-  chartOptions = {};
-  trimmedData = [];
-  duplicateItems = [];
-  yAxisNames = [''];
+export class IndividualParticipantsCharts extends React.Component<{
+  chartData: {
+    loading: boolean,
+    conditionTitle: string,
+    items: ParticipantChartData[]
+  }
+}> {
   chart: any;
 
-  setYaxisValue() {
-    let yAxisValue = 1;
-    this.props.chartData.items.reverse().map(items => { // find standardName in duplicate items
-      const duplicateFound = this.duplicateItems.find(
-        findName =>
-          findName.name === items.standardName
-      );
-
-      // duplicate items found return true otherwise push the the item in duplicateItems array
-      if (duplicateFound) {
-        Object.assign(items, {
-          yAxisValue: duplicateFound.yAxisValue,
-          // format date to unix timestamp
-          newStartDate: moment(items.startDate, 'YYYY-MM-DD').unix()
-        });
-        return true;
-      }
-      this.duplicateItems.push({name: items.standardName, yAxisValue});
-      Object.assign(items, {
-        yAxisValue,
-        newStartDate: moment(items.startDate, 'YYYY-MM-DD').unix() // format date to unix timestamp
-      });
-      yAxisValue++;
-    });
-
-    this.props.chartData.items.map(i => {
-      const temp = {
-        x: i.newStartDate,
-        y: i.yAxisValue,
-        ageAtEvent: i.ageAtEvent,
-        standardName: i.standardName,
-        rank: i.rank,
-        startDate: moment.unix(i.newStartDate).format('MM-DD-YYYY'),
-        standardVocabulary: i.standardVocabulary,
+  getOptions() {
+    const {chartData: {conditionTitle, items}} = this.props;
+    const names = ['', ...fp.uniq(items.map(item => item.standardName))];
+    const nameIndexes = fp.mapValues(n => +n, fp.invert(names));
+    const data = items.map(({startDate, standardName, standardVocabulary, ageAtEvent}) => {
+      return {
+        x: moment(startDate, 'YYYY-MM-DD').unix(),
+        y: nameIndexes[standardName],
+        ageAtEvent,
+        standardName,
+        standardVocabulary,
       };
-      this.trimmedData.push(temp);
-      this.trimmedData.reverse();
     });
-    this.duplicateItems.map(d => {
-      this.yAxisNames.push(d.name.substring(0, 13));
-    });
-
-    if (this.trimmedData.length) {
-      this.getChartsData();
-    }
-  }
-
-  getChartsData() {
-    const names = this.yAxisNames;
-    const header = this.props.chartData.conditionTitle;
-
-    this.chartOptions = {
+    return {
       chart: {
         type: 'scatter',
         zoomType: 'xy',
@@ -90,7 +39,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         enabled: false
       },
       title: {
-        text: 'Top' + ' ' + header + ' ' + 'over Time',
+        text: `Top ${conditionTitle} over Time`,
       },
       xAxis: {
         title: {
@@ -109,11 +58,11 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
       yAxis: [{
         title: {
           enabled: true,
-          text: header,
+          text: conditionTitle,
         },
         labels: {
           formatter: function() {
-            return names[this.value];
+            return names[this.value] && names[this.value].substring(0, 13);
           }
         },
         tickInterval: 1,
@@ -147,13 +96,12 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
         }
       },
       tooltip: {
-
-        pointFormat: '<div>' +
-          '<b>Date:</b>{point.startDate}<br/>' +
-          '<b>Standard Vocab:</b>{point.standardVocabulary}<br/>' +
-          '<b>Standard Name:</b>{point.standardName}<br/>' +
-          '<b>Age at Event:</b>{point.ageAtEvent}<br/>' +
-          '</div>',
+        pointFormatter() {
+          return `<div><b>Date: </b>${moment.unix(this.x).format('MM-DD-YYYY')}<br/>
+            <b>Standard Vocab: </b>${this.standardVocabulary}<br/>
+            <b>Standard Name: </b>${this.standardName}<br/>
+            <b>Age at Event: </b>${this.ageAtEvent}<br/></div>`;
+        },
         style: {
           color: '#565656',
           fontSize: 12
@@ -163,7 +111,7 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
       series: [{
         type: 'scatter',
         name: 'Details',
-        data: this.trimmedData,
+        data,
         turboThreshold: 5000,
         showInLegend: false,
       }],
@@ -189,52 +137,27 @@ export class IndividualParticipantsReactCharts extends React.Component<ChartReac
   }
 
   render() {
-    const chartData = this.props.chartData;
-    if (!chartData.loading && chartData.items.length) {
-      this.setYaxisValue();
-      const ScatterChart = () => <div>
-        <HighchartsReact
-          highcharts={highCharts}
-          options={this.chartOptions}
-          callback={this.getChartObj}
-        />
-      </div>;
-      return <ScatterChart/>;
+    const {chartData: {loading, items}} = this.props;
+    if (!loading && items.length) {
+      return <HighchartsReact
+        highcharts={highCharts}
+        options={this.getOptions()}
+        callback={this.getChartObj}
+      />;
     }
-    return <div/>;
+    return null;
   }
 }
 
 @Component({
   selector: 'app-individual-participants-charts',
-  template: `<div class="react-chart chart-container"></div>`,
+  template: '<div #root></div>',
   styleUrls: ['./individual-participants-charts.css']
 })
-export class IndividualParticipantsChartsComponent implements OnChanges, OnInit {
-  @Input() chartData: ChartData;
-  @Input() chartKey = 0;
-  @Input() shouldReRender: boolean;
-  componentClass = 'react-chart';
+export class IndividualParticipantsChartsComponent extends ReactWrapperBase {
+  @Input() chartData;
 
-  constructor() {}
-
-  ngOnChanges(): void {
-    this.triggerReRender();
+  constructor() {
+    super(IndividualParticipantsCharts, ['chartData']);
   }
-
-  ngOnInit(): void {
-    this.triggerReRender();
-  }
-
-  triggerReRender(): void {
-    ReactDOM.render(React.createElement(IndividualParticipantsReactCharts,
-      {
-        chartData: this.chartData,
-        chartKey: this.chartKey,
-      }),
-      document.getElementsByClassName(this.componentClass)[this.chartKey]);
-  }
-
 }
-
-

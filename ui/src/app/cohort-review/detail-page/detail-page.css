@@ -5,7 +5,6 @@
   /*border: 1px solid rgb(86, 86, 86);*/
   border-radius: 2px;
   height: 100%;
-  z-index: 1;
   background-color: #E2E2EA;
   display: flex;
   margin-right: -0.6rem;
@@ -39,13 +38,16 @@
   overflow-x: hidden;
   flex: 1;
   padding-top:0.35rem;
+  padding-bottom: 0.35rem;
+  color: #4A4A4A;
 }
 
 .sidebar-content.sidebar-open {
   /*margin-left: 0.25rem;*/
-  width: 413px;
+  width: 385px;
   border-left: 1rem solid #728FA3;
   padding-left: 0.5rem;
+  padding-right: 1rem;
 }
 
 .sidebar-handle.sidebar-open {

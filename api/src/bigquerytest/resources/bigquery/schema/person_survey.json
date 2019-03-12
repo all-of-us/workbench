@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "person_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "data_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "start_datetime",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "survey",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "question",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "answer",
+    "type": "STRING"
+  }
+]

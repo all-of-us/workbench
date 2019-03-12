@@ -1,11 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import * as fp from 'lodash/fp';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
-
-import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
-import {BugReportComponent} from 'app/views/bug-report/component';
-import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -31,33 +29,28 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   tabPath: string;
   displayNavBar = true;
   confirmDeleting = false;
+  username: string;
 
-  @ViewChild(BugReportComponent)
-  bugReportComponent: BugReportComponent;
+  bugReportOpen: boolean;
+  bugReportDescription = '';
 
   private subscriptions = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workspacesService: WorkspacesService
+    private workspacesService: WorkspacesService,
+    private workspaceStorageService: WorkspaceStorageService
   ) {
     this.share = this.share.bind(this);
+    this.closeShare = this.closeShare.bind(this);
     this.openConfirmDelete = this.openConfirmDelete.bind(this);
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.closeBugReport = this.closeBugReport.bind(this);
   }
 
   ngOnInit(): void {
-    const handleData = (data) => {
-      const workspace = <WorkspaceData> data.workspace;
-      currentWorkspaceStore.next(workspace);
-      this.workspace = workspace;
-      this.accessLevel = workspace.accessLevel;
-    };
-    handleData(this.route.snapshot.data);
-    this.subscriptions.push(this.route.data.subscribe(handleData));
-
     this.tabPath = this.getTabPath();
 
     this.subscriptions.push(
@@ -68,6 +61,16 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
     }));
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid}) => this.workspaceStorageService.getWorkspace(ns, wsid))
+      .subscribe(workspace => {
+        this.workspace = workspace;
+        this.accessLevel = workspace.accessLevel;
+        currentWorkspaceStore.next(workspace);
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -112,12 +115,23 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   share(): void {
-    this.shareModal.open();
+    this.sharing = true;
+  }
+
+  closeShare(): void {
+    this.sharing = false;
+    // TODO: RW-1919 - remove this
+    window.location.reload();
   }
 
   submitWorkspaceDeleteBugReport(): void {
     this.workspaceDeletionError = false;
-    this.bugReportComponent.reportBug();
-    this.bugReportComponent.bugReport.shortDescription = 'Could not delete workspace.';
+    // this.bugReportComponent.reportBug();
+    this.bugReportDescription = 'Could not delete workspace.';
+    this.bugReportOpen = true;
+  }
+
+  closeBugReport(): void {
+    this.bugReportOpen = false;
   }
 }

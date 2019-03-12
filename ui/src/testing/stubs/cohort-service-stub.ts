@@ -12,7 +12,6 @@ import {
 import {convertToResources, ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 
-import {CohortsApiStub} from './cohorts-api-stub';
 
 export let DEFAULT_COHORT_ID = 1;
 export let DEFAULT_COHORT_ID_2 = 2;

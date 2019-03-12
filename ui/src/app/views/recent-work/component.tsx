@@ -7,7 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll/component';
 import {cohortsApi, conceptSetsApi, userMetricsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
 import {ResourceCard} from 'app/views/resource-card/component';
@@ -21,11 +21,16 @@ export const RecentWork = (fp.flow as any)(
   measureRef: React.Ref<any>,
   contentRect: {client: {width: number}},
   dark: boolean,
+  cardMarginTop: string
 }, {
   loading: boolean,
   offset: number,
   resources: RecentResource[]
 }> {
+  public static defaultProps = {
+    cardMarginTop: '1rem'
+  };
+
   constructor(props) {
     super(props);
     this.state = {loading: false, resources: [], offset: 0};
@@ -68,7 +73,7 @@ export const RecentWork = (fp.flow as any)(
   }
 
   render() {
-    const {contentRect, measureRef, workspace} = this.props;
+    const {contentRect, measureRef, workspace, cardMarginTop} = this.props;
     const {offset, resources, loading} = this.state;
     const limit = (contentRect.client.width - 24) / 224;
     const shade = workspace ? 'light' : 'dark';
@@ -76,7 +81,7 @@ export const RecentWork = (fp.flow as any)(
       <div style={{display: 'flex', position: 'relative',
         paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
         {resources.slice(offset, offset + limit).map((resource, i) => {
-          return <ResourceCard key={i}
+          return <ResourceCard key={i} marginTop={cardMarginTop}
             resourceCard={resource} onUpdate={() => this.loadResources()}
           />;
         })}
@@ -102,7 +107,8 @@ export const RecentWork = (fp.flow as any)(
 })
 export class RecentWorkComponent extends ReactWrapperBase {
   @Input('dark') dark: boolean;
+  @Input('cardMarginTop') cardMarginTop: string;
   constructor() {
-    super(RecentWork, ['dark']);
+    super(RecentWork, ['dark', 'cardMarginTop']);
   }
 }

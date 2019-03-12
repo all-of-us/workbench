@@ -19,12 +19,11 @@ import {
   ConceptsService,
   DomainInfo,
   StandardConceptFilter,
-  WorkspaceAccessLevel,
 } from 'generated';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {simulateClick, simulateEvent, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 
@@ -160,8 +159,8 @@ describe('ConceptHomepageComponent', () => {
   }));
 
   it('should display the selected concepts on header', fakeAsync(() => {
-    const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
-        .and.callThrough();
+    spyOn(TestBed.get(ConceptsService), 'searchConcepts')
+      .and.callThrough();
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement
       .query(By.css('.standard-concepts-checkbox')).children[0]);
@@ -181,8 +180,8 @@ describe('ConceptHomepageComponent', () => {
   }));
 
   it('should display the selected concepts on sliding button', fakeAsync(() => {
-    const spy = spyOn(TestBed.get(ConceptsService), 'searchConcepts')
-        .and.callThrough();
+    spyOn(TestBed.get(ConceptsService), 'searchConcepts')
+      .and.callThrough();
 
     const searchTerm = 'test';
     simulateClick(fixture, fixture.debugElement

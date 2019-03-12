@@ -5,6 +5,7 @@ import {environment} from 'environments/environment';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {AlertClose, AlertWarning} from 'app/components/alert';
 import {
   Button,
   CardButton,
@@ -27,9 +28,8 @@ import {
 
 const styles = reactStyles({
   mainHeader: {
-    color: '#FFFFFF', fontSize: 28, fontWeight: 400, width: '25.86%',
-    display: 'flex', minWidth: '17.4rem', marginLeft: '4%', marginTop: '4%',
-    letterSpacing: 'normal'
+    color: '#FFFFFF', fontSize: 28, fontWeight: 400,
+    display: 'flex', letterSpacing: 'normal'
   },
   minorHeader: {
     color: '#FFFFFF', fontSize: 18, fontWeight: 600, display: 'flex',
@@ -93,13 +93,15 @@ export interface WorkbenchAccessTasksProps {
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
+  firstVisitTraining: boolean;
 }
 
 export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps, {}> {
+    React.Component<WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}> {
 
   constructor(props: WorkbenchAccessTasksProps) {
     super(props);
+    this.state = {trainingWarningOpen: !props.firstVisitTraining};
   }
 
   static redirectToNiH(): void {
@@ -109,19 +111,21 @@ export class WorkbenchAccessTasks extends
     window.location.assign(url);
   }
 
-  static redirectToTraining(): void {
+  static async redirectToTraining() {
+    await profileApi().updatePageVisits({page: 'moodle'});
     window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
   render() {
-    return <React.Fragment>
-      <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
-        <div style={{display: 'flex', flexDirection: 'column', width: '50%'}}>
+    const {trainingWarningOpen} = this.state;
+    const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
+    return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
+        <div style={{display: 'flex', flexDirection: 'column', width: '50%', padding: '3% 0 0 3%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
-          <div style={{marginLeft: '2rem', flexDirection: 'column'}}>
+          <div style={{marginLeft: '1rem', flexDirection: 'column'}}>
             <div style={styles.minorHeader}>In order to get access to data and tools
               please complete the following:</div>
-            <div style={styles.text}>Please login to your ERA Commons account and complete
+            <div style={styles.text}>Please login to your eRA Commons account and complete
               the online training courses in order to gain full access to the Researcher
               Workbench data and tools.</div>
           </div>
@@ -130,21 +134,21 @@ export class WorkbenchAccessTasks extends
           <div style={{...styles.infoBox, flexDirection: 'column'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
               <div style={{flexDirection: 'column', width: '70%'}}>
-                <div style={styles.infoBoxHeader}>Login to ERA Commons</div>
+                <div style={styles.infoBoxHeader}>Login to eRA Commons</div>
                 <div style={styles.infoBoxBody}>Clicking the login link will bring you
-                  to the ERA Commons Portal and redirect you back to the
+                  to the eRA Commons Portal and redirect you back to the
                   Workbench once you are logged in.</div>
               </div>
               <AccountLinkingButton failed={false}
-                                    completed={this.props.eraCommonsLinked}
+                                    completed={eraCommonsLinked}
                                     defaultText='Login'
                                     completedText='Linked'
                                     failedText='Error Linking Accounts'
                                     onClick={WorkbenchAccessTasks.redirectToNiH}/>
             </div>
-            {this.props.eraCommonsError && <Error data-test-id='era-commons-error'>
+            {eraCommonsError && <Error data-test-id='era-commons-error'>
               <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {this.props.eraCommonsError} Please try again!
+              Error Linking NIH Username: {eraCommonsError} Please try again!
             </Error>}
           </div>
           <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
@@ -155,19 +159,26 @@ export class WorkbenchAccessTasks extends
                 outstanding training material to be completed.</div>
             </div>
             <AccountLinkingButton failed={false}
-                                  completed={this.props.trainingCompleted}
-                                  defaultText='Complete Training'
+                                  completed={trainingCompleted}
+                                  defaultText={'Complete Training'}
                                   completedText='Completed'
                                   failedText=''
                                   onClick={WorkbenchAccessTasks.redirectToTraining}/>
           </div>
+          {trainingWarningOpen && !trainingCompleted &&
+          <AlertWarning>
+            <ClrIcon shape='exclamation-triangle' class='is-solid'
+                     style={{width: '8%', height: '40px', marginRight: '.1rem'}}/>
+            <div>It may take several minutes for Moodle to update your Online Training
+            status once you have completed compliance training.</div>
+            <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
+          </AlertWarning>}
         </div>
-      </div>
-    </React.Fragment>;
+      </div>;
   }
 }
 
-const homepageStyles = reactStyles({
+export const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
@@ -181,9 +192,11 @@ const homepageStyles = reactStyles({
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
     border: 'none', marginTop: '1rem'
   },
-  contentWrapper: {
-    flexDirection: 'row', height: '17.47%', marginBottom: '0.5rem',
-    justifyContent: 'flex-start', flexWrap: 'nowrap', display: 'flex'
+  contentWrapperLeft: {
+    display: 'flex', flexDirection: 'column', paddingLeft: '3%', width: '40%'
+  },
+  contentWrapperRight: {
+    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '60%'
   },
   quickRow: {
     display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
@@ -211,7 +224,7 @@ const homepageStyles = reactStyles({
     flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'scroll'
   },
   linksBlock: {
-    display: 'flex', marginBottom: '1.4rem', marginLeft: '1.4rem',
+    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
     flexDirection: 'column', flexShrink: 1, minWidth: 0
   },
   bottomBanner: {
@@ -225,11 +238,6 @@ const homepageStyles = reactStyles({
   bottomLinks: {
     color: '#9B9B9B', fontSize: '0.7rem', height: '1rem', left: '5.5rem',
     top: '2rem', marginLeft: '2.5rem', position: 'relative', fontWeight: 400
-  },
-  addCard: {
-    display: 'flex', height: '223px', width: '300px', marginLeft: '3%',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    fontSize: '20px', lineHeight: '28px'
   }
 });
 
@@ -241,6 +249,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     eraCommonsError: string,
     eraCommonsLinked: boolean,
     firstVisit: boolean,
+    firstVisitTraining: boolean,
     quickTour: boolean,
     trainingCompleted: boolean,
     videoOpen: boolean,
@@ -248,7 +257,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
-  private profileTimer: NodeJS.Timer;
 
   constructor(props: any) {
     super(props);
@@ -259,6 +267,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       firstVisit: undefined,
+      firstVisitTraining: true,
       quickTour: false,
       trainingCompleted: undefined,
       videoOpen: false,
@@ -301,19 +310,37 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }
   }
 
+  setFirstVisit() {
+    this.setState({firstVisit: true});
+    profileApi().updatePageVisits({ page: this.pageId});
+  }
+
   async callProfile() {
     const {profileState: {profile, reload}} = this.props;
 
     if (fp.isEmpty(profile)) {
-      this.profileTimer = setTimeout(() => {
+      setTimeout(() => {
         reload();
       }, 10000);
     } else {
-      if (!profile.pageVisits.some(v => v.page === this.pageId)) {
-        this.setState({firstVisit: true});
-        profileApi().updatePageVisits({ page: this.pageId});
+
+      if (profile.pageVisits) {
+        if (!profile.pageVisits.some(v => v.page === this.pageId)) {
+          this.setFirstVisit();
+        }
+        if (profile.pageVisits.some(v => v.page === 'moodle')) {
+          this.setState({firstVisitTraining: false});
+        }
+      } else {
+        // page visits is null; is first visit
+        this.setFirstVisit();
       }
-      this.setState({eraCommonsLinked: !!profile.linkedNihUsername});
+      try {
+        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
+      } catch (ex) {
+        this.setState({eraCommonsLinked: false});
+        console.error('error fetching era commons linking status');
+      }
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();
@@ -364,8 +391,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
   render() {
     const {billingProjectInitialized, videoOpen, accessTasksLoaded,
-        accessTasksRemaining, eraCommonsLinked, eraCommonsError, trainingCompleted,
-        quickTour, videoLink, firstVisit} = this.state;
+        accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
+        trainingCompleted, quickTour, videoLink} = this.state;
     const quickTourResources = [
       {
         src: '/assets/images/QT-thumbnail.svg',
@@ -408,91 +435,93 @@ export const Homepage = withUserProfile()(class extends React.Component<
               (accessTasksRemaining ?
                 (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
                                        eraCommonsError={eraCommonsError}
-                                       trainingCompleted={trainingCompleted}/>
+                                       trainingCompleted={trainingCompleted}
+                                       firstVisitTraining={firstVisitTraining}/>
                 ) : (
-                  <div>
-                    <div style={homepageStyles.contentWrapper}>
+                  <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                    <div style={homepageStyles.contentWrapperLeft}>
                       <div style={styles.mainHeader}>Researcher Workbench</div>
-                      <a onClick={() => navigate(['workspaces'])}
-                         style={{marginTop: '2.3rem', fontSize: '14px', color: '#FFFFFF'}}>
-                        See All Workspaces</a>
-
-                    </div>
-                    <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
                                       disabled={billingProjectInitialized}>
                         <CardButton disabled={!billingProjectInitialized}
                                     onClick={() => navigate(['workspaces/build'])}
-                                    style={homepageStyles.addCard}>
+                                    style={{margin: '1.9rem 106px 0 3%'}}>
                           Create a <br/> New Workspace
                           <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
                         </CardButton>
                       </TooltipTrigger>
-                      <div style={{marginRight: '3%', flexGrow: 1, minWidth: 0}}>
-                        <div style={{color: '#fff', marginLeft: '1rem'}}>
-                          Your Last Accessed Items</div>
-                        <RecentWork dark={true}/>
+                    </div>
+                    <div style={homepageStyles.contentWrapperRight}>
+                      <a onClick={() => navigate(['workspaces'])}
+                         style={{fontSize: '14px', color: '#FFFFFF'}}>
+                        See All Workspaces</a>
+                      <div style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
+                        <div style={{color: '#fff', height: '1.9rem'}}>
+                          <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
+                        </div>
+                        <RecentWork dark={true} cardMarginTop='0'/>
                       </div>
                     </div>
-                  </div>
-                )
+                  </div>)
                 ) :
               <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </div>
         </div>
-        <div style={homepageStyles.quickRow}>
-          <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
-          {quickTourResources.map((thumbnail, i) => {
-            return <React.Fragment key={i}>
-              <Clickable onClick={thumbnail.onClick}
-                         data-test-id={'quick-tour-resource-' + i}>
-                <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
-                     src={thumbnail.src}/>
-              </Clickable>
-            </React.Fragment>
-            ;
-          })}
-        </div>
         <div>
-          <div style={homepageStyles.footer}>
-            <div style={homepageStyles.footerInner}>
-              <div style={homepageStyles.footerTitle}>
-                How to Use the All of Us Researcher Workbench</div>
-              <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                <TooltipTrigger content='Coming Soon' side='left'>
-                  <a href='#' style={{color: '#fff'}}>See all documentation</a>
-                </TooltipTrigger>
-              </div>
-              <div style={{display: 'flex', flexDirection: 'row',
-                width: '87.34%', justifyContent: 'space-between'}}>
-                {footerLinks.map((col, i) => {
-                  return <React.Fragment key={i}>
-                    <div style={homepageStyles.linksBlock}>
-                      <div style={homepageStyles.footerText}>
-                        <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
-                        <ul style={{color: '#83C3EC'}}>
-                          {col.links.map((link, ii) => {
-                            return <li key={ii}>
-                              <a href='#' style={{color: '#83C3EC'}}>{link}</a>
-                            </li>;
-                          } )}
-                        </ul>
-                      </div>
-                    </div>
-                  </React.Fragment>;
-                })}
-              </div>
-            </div>
+          <div style={homepageStyles.quickRow}>
+            <div style={homepageStyles.quickTourLabel}>Quick Tour & Videos</div>
+            {quickTourResources.map((thumbnail, i) => {
+              return <React.Fragment key={i}>
+                <Clickable onClick={thumbnail.onClick}
+                           data-test-id={'quick-tour-resource-' + i}>
+                  <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                       src={thumbnail.src}/>
+                </Clickable>
+              </React.Fragment>;
+            })}
           </div>
-          <div style={homepageStyles.bottomBanner}>
-            <div style={homepageStyles.logo}>
-              <img src='/assets/images/all-of-us-logo-footer.svg'/>
+          <div>
+            <div style={homepageStyles.footer}>
+              <div style={homepageStyles.footerInner}>
+                <div style={homepageStyles.footerTitle}>
+                  How to Use the All of Us Researcher Workbench</div>
+                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                  <TooltipTrigger content='Coming Soon' side='left'>
+                    <a href='#' style={{color: '#fff'}}>See all documentation</a>
+                  </TooltipTrigger>
+                </div>
+                <div style={{display: 'flex', flexDirection: 'row',
+                  width: '87.34%', justifyContent: 'space-between'}}>
+                  {footerLinks.map((col, i) => {
+                    return <React.Fragment key={i}>
+                      <div style={homepageStyles.linksBlock}>
+                        <div style={homepageStyles.footerText}>
+                          <div style={{color: 'white', marginTop: '2%'}}>{col.title}</div>
+                          <ul style={{color: '#83C3EC'}}>
+                            {col.links.map((link, ii) => {
+                              return <li key={ii}>
+                                <a href='#' style={{color: '#83C3EC'}}>{link}</a>
+                              </li>;
+                            } )}
+                          </ul>
+                        </div>
+                      </div>
+                    </React.Fragment>;
+                  })}
+                </div>
+              </div>
             </div>
-            <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
-            <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+            <div style={homepageStyles.bottomBanner}>
+              <div style={homepageStyles.logo}>
+                <img src='/assets/images/all-of-us-logo-footer.svg'/>
+              </div>
+              <div style={homepageStyles.bottomLinks}>Privacy Policy</div>
+              <div style={homepageStyles.bottomLinks}>Terms of Service</div>
+            </div>
           </div>
         </div>
+
       </div>
 
       {quickTour &&
@@ -513,7 +542,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 });
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="height: 100%"></div>'
 })
 export class HomepageComponent extends ReactWrapperBase {
   constructor() {

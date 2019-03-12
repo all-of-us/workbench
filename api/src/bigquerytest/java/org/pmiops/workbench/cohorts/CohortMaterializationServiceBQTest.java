@@ -174,7 +174,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary", "criteria", "search_codes");
+    return Arrays.asList("person", "concept", "condition_occurrence", "observation", "vocabulary", "criteria", "search_all_domains");
   }
 
   @Override

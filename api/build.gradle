@@ -202,6 +202,9 @@ configurations {
   integrationRuntime.extendsFrom testRuntime
   bigquerytestCompile.extendsFrom testCompile
   bigquerytestRuntime.extendsFrom testRuntime
+
+  toolsImplementation.extendsFrom implementation
+  toolsRuntimeOnly.extendsFrom runtimeOnly
 }
 
 // Required for the swagger plugin's `validateSwagger` task
@@ -226,6 +229,17 @@ sourceSets {
       compileClasspath += main.output + test.output + generated.output
       runtimeClasspath += main.output + test.output + generated.output
       srcDir file('src/integration/java')
+    }
+  }
+  tools {
+    compileClasspath += main.output + generated.output
+    runtimeClasspath += main.output + generated.output
+
+    resources {
+      srcDir "tools/src/main/resources"
+    }
+    java {
+      srcDirs = ['tools/src/main/java']
     }
   }
   bigquerytest {
@@ -275,6 +289,7 @@ dependencies {
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 
   providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version:'3.1.0'
+
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'mysql:mysql-connector-java:8.0.11'
@@ -321,8 +336,12 @@ dependencies {
   // https://github.com/GoogleCloudPlatform/google-cloud-java/issues/1502
   compile 'org.json:json:20160810'
 
+  compile 'com.github.fge:json-patch:1.9'
+
+  toolsCompile 'commons-cli:commons-cli:1.4'
+
   testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'org.mockito:mockito-core:2.18.3'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"
   testCompile 'com.google.truth:truth:0.42'
@@ -342,6 +361,7 @@ dependencies {
   generatedCompile 'com.google.code.gson:gson:2.8.5'
   generatedCompile 'joda-time:joda-time:2.10'
   generatedCompile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.6'
+
 }
 
 swaggerSources {
@@ -448,3 +468,45 @@ task incrementalHotSwap(type: IncrementalHotSwapTask) {
 incrementalHotSwap.dependsOn compileJava
 
 task listProjectAPIs(type: GenerateAPIListingTask, dependsOn: generateMergedSwagger)
+
+
+// Define database-related Spring Boot properties required for running
+// command-line tools. These are set up elsewhere for the main App Engine
+// runtime.
+//
+// These system variables will have been set by the project.rb script before
+// this task is executed.
+//
+// N.B. these properties should be kept roughly in sync with the App Engine configuration
+// XML file under src/main/webapp/WEB-INF/appengine-web.xml
+def db_host = System.getenv("DB_HOST")
+def db_port = System.getenv("DB_PORT")
+
+def commandLineSpringProperties = [
+  'spring.datasource.driver-class-name': 'com.mysql.jdbc.Driver',
+  // Our database isn't configured to allow outside connections (which is good),
+  // so our connections are either local or through the encrypted proxy.
+  'spring.datasource.url': "jdbc:mysql://${db_host}:${db_port}/workbench?useSSL=false",
+  'spring.datasource.username': System.getenv("WORKBENCH_DB_USER"),
+  'spring.datasource.password': System.getenv("WORKBENCH_DB_PASSWORD")
+]
+
+// See api/project.rb backfill-gsuite-user-data
+task backfillGSuiteUserData(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillGSuiteUserData"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See api/project.rb create-local-es-index
+task elasticSearchIndexer(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}

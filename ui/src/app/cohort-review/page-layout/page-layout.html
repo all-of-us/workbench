@@ -2,8 +2,9 @@
   CohortReview main content outlet
   Pages: Overview, Table (participant master), Detail
 -->
-<div class="cohort-review-wrapper">
+<div class="cohort-review-wrapper" *ngIf="cohortLoaded && reviewPresent === true">
   <router-outlet></router-outlet>
 </div>
 
-<app-create-review-page *ngIf="create" (created)="reviewCreated($event)"></app-create-review-page>
+<app-create-review-page *ngIf="cohortLoaded && reviewPresent === false" (created)="reviewCreated($event)"></app-create-review-page>
+<div *ngIf="!cohortLoaded || reviewPresent === undefined" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

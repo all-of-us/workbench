@@ -72,12 +72,35 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
         this.survey = this.surveyResult.survey;
         this.surveyName = this.survey.name;
         // Add Did not answer to each question
+        // some questions seem to be a topic name and do not seem to have results
+        this.surveyResult.items = this.surveyResult.items.filter(q => q.countAnalysis !== null);
         for (const q of this.surveyResult.items) {
           // Get did not answer count for question and count % for each answer
           // Todo -- add this to api maybe
           let didNotAnswerCount  = this.survey.participantCount;
           q.selectedAnalysis = q.genderAnalysis;
           for (const a of q.countAnalysis.results) {
+            if (q.subQuestions) {
+              const matchedQuestionConcepts: QuestionConcept[] = q.subQuestions.filter(
+                w => w.conceptName.toLowerCase() === a.stratum4.toLowerCase());
+              if (matchedQuestionConcepts.length === 0) {
+                q.subQuestions.push({
+                  conceptId: a.stratum3,
+                  conceptName: a.stratum4,
+                  domainId: 'ppi',
+                  conceptCode: '',
+                  countValue: a.countValue,
+                  prevalence: a.prevalence,
+                  countAnalysis: this.makeAnalysis(q.countAnalysis),
+                  genderAnalysis: this.makeAnalysis(q.genderAnalysis),
+                  ageAnalysis: this.makeAnalysis(q.ageAnalysis),
+                  genderIdentityAnalysis: this.makeAnalysis(q.genderIdentityAnalysis),
+                  subQuestions: null
+                });
+              }
+              q.subQuestions.map(sq => sq.selectedAnalysis = sq.genderAnalysis);
+              q.subQuestions = q.subQuestions.filter(sq => (sq.countAnalysis.results.length > 0));
+            }
             didNotAnswerCount = didNotAnswerCount - a.countValue;
             a.countPercent = this.countPercentage(a.countValue);
           }
@@ -234,6 +257,20 @@ export class SurveyViewComponent implements OnInit, OnDestroy {
 
   public convertToNum(s) {
     return Number(s);
+  }
+
+  public makeAnalysis(a) {
+    return {
+      ...a,
+      results: a.results.filter(w => w.stratum3 === a.stratum3)
+    };
+  }
+
+  public removeDescribingWords(text) {
+    if (text && text.toLowerCase().includes('none of these describe me')) {
+      text = text.substring(text.toLowerCase().indexOf('none of these describe me'));
+    }
+    return text;
   }
 
 }

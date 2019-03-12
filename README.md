@@ -15,6 +15,7 @@ See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instruc
   * [Python](https://www.python.org/downloads/) >= 2.7.9
     * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
+  * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
@@ -111,16 +112,39 @@ This will start up the public API on http://localhost:8083/.
 
 From the `ui/` directory:
 ```Shell
+yarn dev-up
+```
+
+You can view your local UI server at http://localhost:4200/.  
+
+By default, this connects to our test API server. Use `--configuration=$ENV` to
+use an alternate `src/environments/environment.$ENV.ts` file and connect to a
+different API server. To connect to your own API server running at
+`localhost:8081`, pass `--configuration=local`.
+
+To run react UI tests:
+```Shell
+yarn test-react
+```
+
+Other useful yarn commands:
+```Shell
+# To upgrade yarn packages:
+yarn
+
+# To lint the UI and automatically fix issues:
+yarn lint --fix
+```
+
+
+#### Legacy startup
+You can also run the UI through project.rb. NOTE: this is slower and not recommended.  
+From the `ui/` directory,
+```Shell
 ./project.rb dev-up
 ```
 
-After webpack finishes the build, you can view your local UI server at
-http://localhost:4200/. You can view the tests at http://localhost:9876/debug.html.
-
-By default, this connects to our test API server. Use `--environment=$ENV` to
-use an alternate `src/environments/environment.$ENV.ts` file and connect to a
-different API server. To connect to your own API server running at
-`localhost:8081`, pass `--environment=local`.
+[legacy] UI tests in Angular can be run and viewed at http://localhost:9876/index.html.
 
 Other available operations may be discovered by running:
 ```Shell
@@ -381,6 +405,59 @@ Alternatively if you want to make a local database from csvs in gcs
 ##### Result
 1) mysql db is in your local mysql for development. You need to alter your env per above to use it.
 
+
+## Elasticsearch
+
+Elasticsearch is being integrated as an auxilliary backed on top of the BigQuery
+CDR for cohort building. Currently it can only be run via docker-compose on a
+local instance. See the full design:
+https://docs.google.com/document/d/1N_TDTOi-moTH6wrXn1Ix4dwUlw4j8GT9OsL9yXYXYmY/edit
+
+### Indexing
+
+```
+./project.rb create-local-es-index
+```
+
+### Development
+
+As of 3/4/19, you'll need to enable Elasticsearch locally to utilize it in the
+Cohort Builder.
+
+```
+sed -i 's/\("enableElasticsearchBackend": \)false/\1true/' config/config_local.json
+```
+
+#### Example criteria
+
+Currently the default setting for the indexer is to only index ~1000
+to keep the local data size small. Some example criteria that will match this
+default dataset:
+
+- Conditions ICD9: Group 250 Diabetes mellitus
+- Drugs: Acetaminophen
+- PPI: Anything (support for individual answers coming soon)
+- Procedures CPT: 99213
+
+#### Elasticsearch Direct Queries
+
+Requires that Elastic is running (via run-api or dev-up).
+
+Show the top 5 standard condition concept IDs:
+
+```
+curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
+```
+
+The above IDs can be cross-referenced against the Criteria table in SQL or
+BigQuery to determine cohort builder search targets.
+
+Dump all participants matching a condition source concept ID (disclaimer: large):
+
+```
+curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
+```
+
 ###
 ## Cohort Builder
 
@@ -488,3 +565,13 @@ curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json u
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
 ```
+
+### Generating survey_question_map.csv
+survey_question_map.csv is used to identify the order of appearance of the questions in actual survey pdfs.
+1. Id column is incremental and specifies the order of the questions in each survey.(Used to display the questions in the same order in databrowser)
+2. survey_concept_id holds the concept id of the survey. (can be fetched from the survey_module))
+3. question_concept_id holds the concept id of each question. (can be fetched from the survey pdf)
+4. path specifies the origin id of each question. If the question is the sub-question, then the id of the main question would be the path.
+5. is_main is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question.
+* NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones. Also, the missing questions would not be displayed as they do not have the counts in there to display.
+

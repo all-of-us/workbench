@@ -1,7 +1,6 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentConceptSetStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 import {
@@ -9,6 +8,7 @@ import {
   ConceptSetsService,
   WorkspaceAccessLevel,
 } from 'generated';
+import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../styles/buttons.css',
@@ -19,7 +19,7 @@ import {
     './component.css'],
   templateUrl: './component.html',
 })
-export class ConceptSetDetailsComponent implements OnInit {
+export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
   @ViewChild(ConceptTableComponent) conceptTable;
 
   wsNamespace: string;
@@ -38,21 +38,27 @@ export class ConceptSetDetailsComponent implements OnInit {
 
   constructor(
     private conceptSetsService: ConceptSetsService,
-    private route: ActivatedRoute,
   ) {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
   }
 
   ngOnInit() {
-    const {ns, wsid} = urlParamsStore.getValue();
+    const {ns, wsid, csid} = urlParamsStore.getValue();
     this.wsNamespace = ns;
     this.wsId = wsid;
     const {accessLevel} = currentWorkspaceStore.getValue();
     this.accessLevel = accessLevel;
-    this.conceptSet = this.route.snapshot.data.conceptSet;
-    this.editName = this.conceptSet.name;
-    this.editDescription = this.conceptSet.description;
+    this.conceptSetsService.getConceptSet(ns, wsid, csid).subscribe(conceptSet => {
+      currentConceptSetStore.next(conceptSet as unknown as FetchConceptSet);
+      this.conceptSet = conceptSet;
+      this.editName = conceptSet.name;
+      this.editDescription = conceptSet.description;
+    });
+  }
+
+  ngOnDestroy() {
+    currentConceptSetStore.next(undefined);
   }
 
   validateEdits(): boolean {

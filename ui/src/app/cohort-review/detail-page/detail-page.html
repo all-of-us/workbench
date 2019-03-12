@@ -1,33 +1,57 @@
-<div class="detail-page" [class.sidebar-open]="sidebarOpen">
+<div
+  class="spinner spinner-inverse"
+  style="position: absolute; top: 45%; left: 50%;"
+  *ngIf="!(participant && annotations && annotationDefinitions)"
+></div>
+<ng-container *ngIf="participant && annotations && annotationDefinitions">
+  <div class="detail-page" [class.sidebar-open]="sidebarOpen">
 
-  <app-detail-header [participant]="participant" (navigationClicked)="getNavigatedParticipantId($event)">
-  </app-detail-header>
+    <app-detail-header [participant]="participant">
+    </app-detail-header>
 
-  <!-- Tab data stubbed in detail-tabs class -->
-  <app-detail-tabs [clickedParticipantId]="participantId">
-  </app-detail-tabs>
-</div>
-<!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
-  <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
-<!--</div>-->
-<div class="detail-sidebar">
-  <div class="sidebar-handle" (click)="toggleSidebar()">
-    <clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>
+    <!-- Tab data stubbed in detail-tabs class -->
+    <app-detail-tabs>
+    </app-detail-tabs>
   </div>
-  <!-- Sidebar left column (always visible) -->
   <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
     <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
   <!--</div>-->
-  <!-- Sidebar content -->
-  <div class="sidebar-content" id="review-sidebar-content" [class.sidebar-open]="sidebarOpen">
-    <app-sidebar-content [participant]="participant">
-    </app-sidebar-content>
+  <div class="detail-sidebar">
+    <div class="sidebar-handle" (click)="toggleSidebar()">
+      <clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>
+    </div>
+    <!-- Sidebar left column (always visible) -->
+    <!--<div class="sidebar-handle" (click)="toggleSidebar()">-->
+      <!--<clr-icon class= "angle-icon"shape="angle-double" [dir]="angleDir" size="29"></clr-icon>-->
+    <!--</div>-->
+    <!-- Sidebar content -->
+    <div class="sidebar-content" id="review-sidebar-content" [class.sidebar-open]="sidebarOpen">
+      <app-sidebar-content
+        [participant]="participant"
+        [setParticipant]="setParticipant"
+        [annotations]="annotations"
+        [annotationDefinitions]="annotationDefinitions"
+        [setAnnotations]="setAnnotations"
+        [openCreateDefinitionModal]="openCreateDefinitionModal"
+        [openEditDefinitionsModal]="openEditDefinitionsModal"
+        ></app-sidebar-content>
+    </div>
   </div>
-</div>
 
-<!--
-  set-annotation-modal: A manager for creating, updating, removing annotation
-  definitions (i.e. set wide annotations)
--->
-<app-set-annotation-modal>
-</app-set-annotation-modal>
+  <!--
+    set-annotation-modal: A manager for creating, updating, removing annotation
+    definitions (i.e. set wide annotations)
+  -->
+  <app-edit-annotation-definitions-modal
+    *ngIf="editingDefinitions"
+    [onClose]="closeEditDefinitionsModal"
+    [annotationDefinitions]="annotationDefinitions"
+    [setAnnotationDefinitions]="setAnnotationDefinitions"
+  ></app-edit-annotation-definitions-modal>
+  <app-add-annotation-definition-modal
+    *ngIf="creatingDefinition"
+    [annotationDefinitions]="annotationDefinitions"
+    [onCancel]="closeCreateDefinitionModal"
+    [onCreate]="definitionCreated"
+  ></app-add-annotation-definition-modal>
+</ng-container>

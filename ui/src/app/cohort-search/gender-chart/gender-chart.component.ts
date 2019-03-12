@@ -42,7 +42,6 @@ export class GenderChartComponent {
     }
   };
 
-  private _raw: any;
   private _data: any = [];
 
   /**
@@ -51,7 +50,6 @@ export class GenderChartComponent {
    * Attaches the raw data to the component for debugging purposes.
    */
   @Input() set data(raw) {
-    this._raw = raw;
     this._data = raw
       .map(datum => datum.update('gender', code => this.codeMap[code]))
       .groupBy(datum => datum.get('gender', 'Unknown'))

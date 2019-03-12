@@ -50,7 +50,7 @@
   color: rgb(114, 114, 114);
   border-color: rgb(195, 195, 195);
   font-weight: 100 !important;
-  width:10rem;
+  width:12rem;
   text-align: start;
 }
 .time-selection-button:hover {
@@ -128,15 +128,16 @@
   transition: right .15s ease-in;
 }
 
-.time-inputbox {
-  width: 2rem;
+.time-inputBox {
+  width: 3.4rem;
   border: 1px solid #9a9a9a;
   padding: 0.6rem;
   border-radius: 0.1rem;
   text-align: center;
 }
+
 .of-text{
-  padding-right: 12rem;
+  padding-right: 6rem;
   padding-top: 0.2rem;
   font-size: 14px;
 }
@@ -177,7 +178,7 @@ clr-icon[shape=error-standard] {
 
 .item-or {
   float: right;
-  margin-right: 50%;
+  margin-right: 46%;
   padding: 0 10px;
   background: #ffffff;
   color: rgb(195, 195, 195);
@@ -186,3 +187,22 @@ clr-icon[shape=error-standard] {
 clr-icon[shape=warning-standard] {
   color: #E28327;
 }
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toggle-no-cursor {
+  cursor: not-allowed;
+}
+
+.toggle-switch-disable {
+  pointer-events: none;
+}
+
+.form-padding {
+  padding-top: 0rem;
+}
+

@@ -1,7 +1,6 @@
 import {dispatch, NgRedux} from '@angular-redux/store';
 import {Injectable} from '@angular/core';
 
-import {environment} from 'environments/environment';
 
 import {
   SearchGroup,
@@ -102,6 +101,10 @@ export class CohortSearchActions {
   @dispatch() _finishWizard = ActionFuncs.finishWizard;
   @dispatch() _cancelWizard = ActionFuncs.cancelWizard;
   @dispatch() setWizardContext = ActionFuncs.setWizardContext;
+  @dispatch() _updatedTemporal = ActionFuncs.updatedTemporal;
+  @dispatch() _updateWhichMention = ActionFuncs.updateWhichMention;
+  @dispatch() _updateTemporalTime = ActionFuncs.updateTemporalTime;
+  @dispatch() _updateTemporalTimeValue = ActionFuncs.updateTemporalTimeValue;
 
   @dispatch() loadEntities = ActionFuncs.loadEntities;
   @dispatch() _resetStore = ActionFuncs.resetStore;
@@ -118,6 +121,51 @@ export class CohortSearchActions {
     }
     this.addId(newId);
     return newId;
+  }
+
+  getGroupItem(groupId, role) {
+    const group = getGroup(groupId)(this.state);
+    const itemId = group.get('id');
+    const temporal = group.get('temporal');
+    const groupItems = group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    const [temporalGroupItems, nonTemporalGroupItems] =
+      this.getActiveTemporalGroups(groupItems, itemId);
+    if (temporal) {
+      if (temporalGroupItems && nonTemporalGroupItems) {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount(groupId);
+      } else {
+        this.clearGroupCount(groupId);
+        this.clearTotalCount(groupId);
+        this.cancelTotalIfRequesting();
+      }
+    } else {
+      this.requestGroupCount(role, groupId);
+      this.requestTotalCount(groupId);
+    }
+  }
+
+  updateTemporal(flag: boolean, groupId: string, role: keyof SearchRequest) {
+    this._updatedTemporal(flag, groupId);
+    this.getGroupItem(groupId, role);
+  }
+
+  updateWhichMention(mention: any, groupId: string, role: keyof SearchRequest) {
+    this._updateWhichMention(mention, groupId);
+    this.getGroupItem(groupId, role);
+  }
+
+  updateTemporalTime(time: any, groupId: string, role: keyof SearchRequest) {
+    this._updateTemporalTime(time, groupId);
+    this.getGroupItem(groupId, role);
+  }
+
+  updateTemporalTimeValue(timeValue: any, groupId: string, role: keyof SearchRequest) {
+    this._updateTemporalTimeValue(timeValue, groupId);
+    this.getGroupItem(groupId, role);
   }
 
   genSuffix(): string {
@@ -144,11 +192,25 @@ export class CohortSearchActions {
     return !groupList('includes')(this.state)
       .merge(groupList('excludes')(this.state))
       .filter(
-        grp => grp.get('status') === 'active'
-          && grp.get('id') !== ingoreGroupId
-          && this.hasActiveItems(grp)
-      )
-      .isEmpty();
+        grp => {
+          const temporal = grp.get('temporal');
+          if (temporal) {
+            const groupItems = grp
+              .get('items', List())
+              .map(id => getItem(id)(this.state))
+              .filterNot(it => it.get('status') === 'deleted');
+            const  [temporalGroupItems, nonTemporalGroupItems] =
+              this.getActiveTemporalGroups(groupItems);
+            return grp.get('status') === 'active'
+              && grp.get('id') !== ingoreGroupId
+              && (temporalGroupItems && nonTemporalGroupItems);
+          } else {
+            return grp.get('status') === 'active'
+              && grp.get('id') !== ingoreGroupId
+              && this.hasActiveItems(grp);
+          }
+        }
+      ).isEmpty();
   }
 
   get state() {
@@ -167,8 +229,22 @@ export class CohortSearchActions {
 
     if (!selections.isEmpty()) {
       this.requestItemCount(role, itemId);
-      this.requestGroupCount(role, groupId);
-      this.requestTotalCount(groupId);
+      const group = getGroup(groupId)(this.state);
+      if (group.get('temporal')) {
+        const groupItems = group
+          .get('items', List())
+          .map(id => getItem(id)(this.state))
+          .filterNot(it => it.get('status') === 'deleted');
+        const [temporalGroupItems, nonTemporalGroupItems] =
+          this.getActiveTemporalGroups(groupItems);
+        if (temporalGroupItems && nonTemporalGroupItems) {
+          this.requestGroupCount(role, groupId);
+          this.requestTotalCount(groupId);
+        }
+      } else {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount(groupId);
+      }
     }
   }
 
@@ -221,19 +297,42 @@ export class CohortSearchActions {
     }
   }
 
+  getActiveTemporalGroups(groupItems, itemId?) {
+    const temporalGroupItems = !groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 1)
+        .isEmpty();
+    const  nonTemporalGroupItems = !groupItems
+        .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+          && it.get('temporalGroup') === 0)
+        .isEmpty();
+    return [temporalGroupItems, nonTemporalGroupItems];
+  }
+
+
   removeGroupItem(
     role: keyof SearchRequest,
     groupId: string,
     itemId: string,
     status?: string
   ): void {
-    const groupItems = (getGroup(groupId)(this.state))
+    const group = getGroup(groupId)(this.state);
+    const temporal = group.get('temporal');
+    const groupItems = group
       .get('items', List())
       .map(id => getItem(id)(this.state))
       .filterNot(it => it.get('status') === 'deleted');
-    const isOnlyActiveChild = groupItems
+    let temporalGroupItems;
+    let nonTemporalGroupItems;
+    let isOnlyActiveChild;
+    if (temporal) {
+      [temporalGroupItems, nonTemporalGroupItems] =
+        this.getActiveTemporalGroups(groupItems, itemId);
+    } else {
+      isOnlyActiveChild = groupItems
       .filter(it => it.get('id') !== itemId && it.get('status') === 'active')
-      .isEmpty();
+        .isEmpty();
+    }
     if (!status) {
       this._removeGroupItem(groupId, itemId);
       this.removeId(itemId);
@@ -241,21 +340,23 @@ export class CohortSearchActions {
       const item = getItem(itemId)(this.state);
       const hasItems = !item.get('searchParameters', List()).isEmpty();
       const countIsNonZero = item.get('count') !== 0;
-
       this.cancelIfRequesting('items', itemId);
       this.cancelIfRequesting('groups', groupId);
       this.hideGroupItem(groupId, itemId, status);
-
-      if (hasItems && (countIsNonZero || isOnlyActiveChild)) {
-        if (isOnlyActiveChild) {
+      const onlyChild = (!temporal && isOnlyActiveChild) ||
+        (temporal && (!temporalGroupItems || !nonTemporalGroupItems));
+      if (hasItems && (countIsNonZero || onlyChild)) {
+        if (onlyChild) {
           if (groupItems.size === 1 && status === 'pending') {
             this.clearGroupCount(groupId);
           }
           if (this.otherGroupsWithActiveItems(groupId)) {
-            this.requestTotalCount(groupId);
+            if (!temporal || group.get('count') !== null) {
+              this.requestTotalCount(groupId);
+            }
           } else {
             this.cancelTotalIfRequesting();
-            this.clearTotalCount();
+            this.clearTotalCount(groupId);
           }
         } else {
           this.requestTotalCount();
@@ -267,16 +368,49 @@ export class CohortSearchActions {
 
   enableGroup(group: any) {
     const groupId = group.get('id');
+    const temporal = group.get('temporal');
+    const groupItems = group
+      .get('items', List())
+      .map(id => getItem(id)(this.state))
+      .filterNot(it => it.get('status') === 'deleted');
+    const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
     this.enableEntity('groups', groupId);
-    if (this.hasActiveItems(group)) {
+    if (temporal) {
+      if ((temporalGroupItems && nonTemporalGroupItems) ||
+        this.otherGroupsWithActiveItems(groupId)) {
+        this.requestTotalCount();
+      }
+    } else if (this.hasActiveItems(group) || this.otherGroupsWithActiveItems(groupId)) {
       this.requestTotalCount();
     }
   }
 
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
-    this.enableEntity('items', itemId);
-    this.requestGroupCount(role, groupId);
-    this.requestTotalCount();
+    const group = getGroup(groupId)(this.state);
+    const temporal = group.get('temporal');
+
+    if (temporal) {
+      const groupItems = group
+        .get('items', List())
+        .map(id => getItem(id)(this.state))
+        .filterNot(it => it.get('status') === 'deleted');
+      const item = getItem(itemId)(this.state);
+      const temporalGroupItems = !groupItems
+          .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
+            && it.get('temporalGroup') !== item.get('temporalGroup'))
+          .isEmpty();
+      this.enableEntity('items', itemId);
+      if (temporalGroupItems) {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount();
+      }
+    } else {
+      this.enableEntity('items', itemId);
+      this.requestGroupCount(role, groupId);
+      this.requestTotalCount();
+    }
+
+
   }
 
   fetchCriteria(kind: string, parentId: number): void {
@@ -421,6 +555,7 @@ export class CohortSearchActions {
    * @param outdatedGroup: string
    */
   requestTotalCount(outdatedGroupId?: string): void {
+    // const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
     this.cancelTotalIfRequesting();
     const included = includeGroups(this.state);
 
@@ -513,6 +648,14 @@ export class CohortSearchActions {
     }
     const searchGroup = <SearchGroup>{id: groupId, items, temporal};
     if (temporal) {
+      const groupItems = group
+        .get('items', List())
+        .map(id => getItem(id)(this.state))
+        .filterNot(it => it.get('status') === 'deleted');
+      const [temporalGroupItems, nonTemporalGroupItems] = this.getActiveTemporalGroups(groupItems);
+      if (!temporalGroupItems || !nonTemporalGroupItems) {
+        return;
+      }
       searchGroup.mention = group.get('mention');
       searchGroup.time = group.get('time');
       searchGroup.timeValue = group.get('timeValue');
@@ -562,7 +705,9 @@ export class CohortSearchActions {
     }
     if (TreeSubType[TreeSubType.DEC] === immParam.get('subtype')) {
       param.value = immParam.get('name');
-    } else if (immParam.get('code')) {
+    } else if (immParam.get('code') &&
+      (TreeType.ICD9 === immParam.get('type') ||
+      TreeType.ICD10 === immParam.get('type'))) {
       param.value = immParam.get('code');
     }
     return param;
@@ -598,6 +743,9 @@ export class CohortSearchActions {
             this.addId(param.parameterId);
             return param.parameterId;
           });
+          if (!group.temporal) {
+            item.temporalGroup = 0;
+          }
           item.count = 0;
           item.isRequesting = false;
           item.status = 'active';
@@ -605,6 +753,11 @@ export class CohortSearchActions {
           this.addId(item.id);
           return item.id;
         });
+
+        group.mention = group.mention ? group.mention : '';
+        group.time = group.time ? group.time : '';
+        group.timeValue = group.timeValue ? group.timeValue : 0;
+        group.timeFrame = group.timeFrame ? group.timeFrame : '';
         group.count = 0;
         group.isRequesting = false;
         group.status = 'active';

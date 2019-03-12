@@ -2,12 +2,11 @@ import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable, MenuItem} from 'app/components/buttons';
-import {Card} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
+import {Button, Clickable} from 'app/components/buttons';
+import {ResourceCardBase} from 'app/components/card';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {PopupTrigger} from 'app/components/popups';
-import {reactStyles, ReactWrapperBase, switchCase} from 'app/utils';
+import {ResourceCardMenu} from 'app/components/resources';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
@@ -17,66 +16,7 @@ import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {environment} from 'environments/environment';
 
-const ResourceCardMenu: React.FunctionComponent<{
-  disabled: boolean, resourceType: ResourceType, onRenameNotebook: Function,
-  onOpenJupyterLabNotebook: any, onCloneResource: Function, onDeleteResource: Function,
-  onEditCohort: Function, onReviewCohort: Function, onEditConceptSet: Function
-}> = ({
-  disabled, resourceType, onRenameNotebook, onOpenJupyterLabNotebook, onCloneResource,
-  onDeleteResource, onEditCohort, onReviewCohort, onEditConceptSet
-}) => {
-  return <PopupTrigger
-    data-test-id='resource-card-menu'
-    side='bottom'
-    closeOnClick
-    content={
-      switchCase(resourceType,
-        ['notebook', () => {
-          return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onRenameNotebook}>Rename</MenuItem>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
-            {
-              environment.enableJupyterLab &&
-              /*
-               This does not support both playground mode and jupyterLab yet,
-               that is a work in progress. We do not need to worry about that
-               here, because the menu will not open if you do not have write
-               access, and playground mode is currently only enabled if you do
-               not have write access.
-              */
-              <MenuItem icon='grid-view' onClick={onOpenJupyterLabNotebook}>
-                Open in Jupyter Lab
-              </MenuItem>
-            }
-          </React.Fragment>;
-        }],
-        ['cohort', () => {
-          return <React.Fragment>
-            <MenuItem icon='copy' onClick={onCloneResource}>Clone</MenuItem>
-            <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
-            <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
-          </React.Fragment>;
-        }],
-        ['conceptSet', () => {
-          return <React.Fragment>
-            <MenuItem icon='pencil' onClick={onEditConceptSet}>Edit</MenuItem>
-            <MenuItem icon='trash' onClick={onDeleteResource}>Delete</MenuItem>
-          </React.Fragment>;
-        }]
-      )
-    }
-  >
-    <Clickable disabled={disabled} data-test-id='resource-menu'>
-      <ClrIcon shape='ellipsis-vertical' size={21}
-               style={{color: disabled ? '#9B9B9B' : '#2691D0', marginLeft: -9,
-                 cursor: disabled ? 'auto' : 'pointer'}}/>
-    </Clickable>
-  </PopupTrigger>;
-};
 
 @Component({
   selector: 'app-resource-card-menu',
@@ -106,19 +46,19 @@ const styles = reactStyles({
   card: {
     marginTop: '1rem',
     justifyContent: 'space-between',
-    width: '200px',
-    height: '223px',
     marginRight: '1rem',
     padding: '0.75rem 0.75rem 0rem 0.75rem',
     boxShadow: '0 0 0 0'
   },
   cardName: {
-    fontSize: '18px',
-    fontWeight: 500,
-    lineHeight: '22px',
-    color: '#2691D0',
-    cursor: 'pointer',
-    wordBreak: 'break-all'
+    fontSize: '18px', fontWeight: 500, lineHeight: '22px', color: '#2691D0',
+    cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
+    overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
+    WebkitBoxOrient: 'vertical'
+  },
+  cardDescription: {
+    textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
+    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
   },
   lastModified: {
     color: '#4A4A4A',
@@ -162,6 +102,7 @@ const resourceTypeStyles = reactStyles({
 export interface ResourceCardProps {
   resourceCard: RecentResource;
   onUpdate: Function;
+  marginTop: string;
 }
 
 export interface ResourceCardState {
@@ -172,6 +113,9 @@ export interface ResourceCardState {
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
+  public static defaultProps = {
+    marginTop: '1rem'
+  };
 
   constructor(props: ResourceCardProps) {
     super(props);
@@ -410,6 +354,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   render() {
+    const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
       <Modal>
@@ -419,7 +364,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
         </ModalFooter>
       </Modal>}
-      <Card style={styles.card}
+      <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
             data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -439,7 +384,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
               </div>
             </Clickable>
           </div>
-          <div>{this.description}</div>
+          <div style={styles.cardDescription}>{this.description}</div>
         </div>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified}>
@@ -448,7 +393,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                data-test-id='card-type'>
             {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
         </div>
-      </Card>
+      </ResourceCardBase>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
         <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
                    onEdit={v => this.receiveEdit(v)}
@@ -478,8 +423,9 @@ export class ResourceCardComponent extends ReactWrapperBase {
   resourceType: ResourceType;
   @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
   @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
+  @Input('marginTop') marginTop: ResourceCardProps['marginTop'];
 
   constructor() {
-    super(ResourceCard, ['resourceCard', 'onUpdate']);
+    super(ResourceCard, ['resourceCard', 'onUpdate', 'marginTop']);
   }
 }

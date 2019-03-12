@@ -109,6 +109,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     public static final long MEASUREMENT_GENDER_ANALYSIS_ID = 1900;
     public static final long MEASUREMENT_AGE_ANALYSIS_ID = 1901;
+    public static final long MEASUREMENT_GENDER_UNIT_ANALYSIS_ID = 1910;
 
     public static final long MALE = 8507;
     public static final long FEMALE = 8532;
@@ -158,6 +159,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     org.pmiops.workbench.model.Analysis genderAnalysis=null;
                     org.pmiops.workbench.model.Analysis ageAnalysis=null;
                     org.pmiops.workbench.model.Analysis genderIdentityAnalysis=null;
+                    List<org.pmiops.workbench.model.QuestionConcept> subQuestions = null;
                     if(concept.getCountAnalysis() != null){
                         countAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getCountAnalysis());
                     }
@@ -170,7 +172,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     if(concept.getGenderIdentityAnalysis() != null){
                         genderIdentityAnalysis = TO_CLIENT_ANALYSIS.apply(concept.getGenderIdentityAnalysis());
                     }
-
+                    if(concept.getSubQuestions() != null) {
+                        subQuestions = concept.getSubQuestions().stream().map(TO_CLIENT_QUESTION_CONCEPT).collect(Collectors.toList());
+                    }
 
                     return new org.pmiops.workbench.model.QuestionConcept()
                             .conceptId(concept.getConceptId())
@@ -182,7 +186,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .countAnalysis(countAnalysis)
                             .genderAnalysis(genderAnalysis)
                             .ageAnalysis(ageAnalysis)
-                            .genderIdentityAnalysis(genderIdentityAnalysis);
+                            .genderIdentityAnalysis(genderIdentityAnalysis)
+                            .subQuestions(subQuestions);
 
                 }
             };
@@ -242,7 +247,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                             .ethnicityAnalysis(ca.getEthnicityAnalysis())
                             .measurementValueGenderAnalysis(ca.getMeasurementValueGenderAnalysis())
                             .measurementValueAgeAnalysis(ca.getMeasurementValueAgeAnalysis())
-                            .measurementDistributionAnalysis(ca.getMeasurementDistributionAnalysis());
+                            .measurementDistributionAnalysis(ca.getMeasurementDistributionAnalysis())
+                            .measurementGenderCountAnalysis(ca.getMeasurementGenderCountAnalysis());
                 }
             };
 
@@ -452,6 +458,9 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         // Too slow and concept names wrong so we hardcode list
         // List<Concept> genders = conceptDao.findByConceptClassId("Gender");
 
+        //Get the list of questions that has sub questions in survey
+        Set<Long> hasSubQuestions = questionConceptDao.findSurveyMainQuestionIds(Long.valueOf(surveyConceptId)).stream().map(QuestionConcept::getConceptId).collect(Collectors.toSet());
+
         long longSurveyConceptId = Long.parseLong(surveyConceptId);
 
         // Get questions for survey
@@ -468,6 +477,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
             // Put ids in array for query to get all results at once
             List<String> qlist = new ArrayList();
             for (QuestionConcept q : questions) {
+                if (hasSubQuestions.contains(q.getConceptId())) {
+                    List<QuestionConcept> subQuestions = questionConceptDao.findSubSurveyQuestions(surveyConceptId, q.getConceptId());
+                    QuestionConcept.mapAnalysesToQuestions(subQuestions, achillesAnalysisDao.findSurveyAnalysisResults(surveyConceptId, subQuestions.stream()
+                            .map(QuestionConcept::getConceptId)
+                            .map(String::valueOf)
+                            .collect(Collectors.toList())));
+                    q.setSubQuestions(subQuestions);
+                }
                 qlist.add(String.valueOf(q.getConceptId()));
             }
 
@@ -494,6 +511,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
         analysisIds.add(MEASUREMENT_GENDER_ANALYSIS_ID);
         analysisIds.add(MEASUREMENT_AGE_ANALYSIS_ID);
         analysisIds.add(MEASUREMENT_DIST_ANALYSIS_ID);
+        analysisIds.add(MEASUREMENT_GENDER_UNIT_ANALYSIS_ID);
 
         List<AchillesResultDist> overallDistResults = achillesResultDistDao.fetchByAnalysisIdsAndConceptIds(new ArrayList<Long>( Arrays.asList(MEASUREMENT_GENDER_DIST_ANALYSIS_ID,MEASUREMENT_AGE_DIST_ANALYSIS_ID) ),conceptIds);
 
@@ -518,7 +536,6 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 }
             }
         }
-
         for(String conceptId: conceptIds){
             ConceptAnalysis conceptAnalysis=new ConceptAnalysis();
 
@@ -539,7 +556,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                 Long analysisId = (Long)pair.getKey();
                 AchillesAnalysis aa = (AchillesAnalysis)pair.getValue();
                 //aa.setUnitName(unitName);
-                if(analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !Strings.isNullOrEmpty(domainId)) {
+                if(analysisId != MEASUREMENT_GENDER_UNIT_ANALYSIS_ID && analysisId != MEASUREMENT_GENDER_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_ANALYSIS_ID && analysisId != MEASUREMENT_DIST_ANALYSIS_ID && analysisId != MEASUREMENT_AGE_DIST_ANALYSIS_ID && !Strings.isNullOrEmpty(domainId)) {
                     aa.setResults(aa.getResults().stream().filter(ar -> ar.getStratum3().equalsIgnoreCase(domainId)).collect(Collectors.toList()));
                 }
                 if(analysisId == GENDER_ANALYSIS_ID){
@@ -558,7 +575,7 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     addEthnicityStratum(aa);
                     conceptAnalysis.setEthnicityAnalysis(TO_CLIENT_ANALYSIS.apply(aa));
                 }else if(analysisId == MEASUREMENT_GENDER_ANALYSIS_ID){
-                    HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_GENDER_DIST_ANALYSIS_ID);
                     if (distResults != null) {
@@ -582,9 +599,8 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                     }
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueGenderAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
-
                 }else if(analysisId == MEASUREMENT_AGE_ANALYSIS_ID){
-                    HashMap<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
                     List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
                     HashMap<String,List<AchillesResultDist>> distResults = analysisDistResults.get(MEASUREMENT_AGE_DIST_ANALYSIS_ID);
                     if (distResults != null) {
@@ -604,10 +620,20 @@ public class DataBrowserController implements DataBrowserApiDelegate {
                         }else {
                                 unitSeperateAnalysis.add(aa);
                         }
-
                     }
                     isMeasurement = true;
                     conceptAnalysis.setMeasurementValueAgeAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
+                }else if(analysisId == MEASUREMENT_GENDER_UNIT_ANALYSIS_ID){
+                    Map<String,List<AchillesResult>> results = seperateUnitResults(aa);
+                    List<AchillesAnalysis> unitSeperateAnalysis = new ArrayList<>();
+                    for(String unit: results.keySet()){
+                        AchillesAnalysis unitGenderCountAnalysis = new AchillesAnalysis(aa);
+                        unitGenderCountAnalysis.setResults(results.get(unit));
+                        unitGenderCountAnalysis.setUnitName(unit);
+                        unitSeperateAnalysis.add(unitGenderCountAnalysis);
+                    }
+                    isMeasurement = true;
+                    conceptAnalysis.setMeasurementGenderCountAnalysis(unitSeperateAnalysis.stream().map(TO_CLIENT_ANALYSIS).collect(Collectors.toList()));
                 }
             }
 
@@ -845,18 +871,14 @@ public class DataBrowserController implements DataBrowserApiDelegate {
 
     public static HashMap<String,List<AchillesResult>> seperateUnitResults(AchillesAnalysis aa){
         List<String> distinctUnits = new ArrayList<>();
-
         for(AchillesResult ar:aa.getResults()){
             if(!distinctUnits.contains(ar.getStratum2()) && !Strings.isNullOrEmpty(ar.getStratum2())){
                 distinctUnits.add(ar.getStratum2());
             }
         }
-
         Multimap<String, AchillesResult> resultsWithUnits = Multimaps
                 .index(aa.getResults(), AchillesResult::getStratum2);
-
         HashMap<String,List<AchillesResult>> seperatedResults = new HashMap<>();
-
         for(String key:resultsWithUnits.keySet()){
             seperatedResults.put(key,new ArrayList<>(resultsWithUnits.get(key)));
         }

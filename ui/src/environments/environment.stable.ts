@@ -11,11 +11,12 @@ export const environment: Environment = {
   publicUiUrl: 'https://public-ui-dot-all-of-us-rw-stable.appspot.com',
   debug: false,
   gaId: 'UA-112406425-3',
+  gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   trainingUrl: 'https://aou.nnlm.gov',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
-  enableTemporal: false,
   useZendeskForSupport: false,
   enableJupyterLab: false,
-  enableComplianceLockout: false
+  enableComplianceLockout: false,
+  enableDatasetBuilder: false,
 };

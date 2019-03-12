@@ -1,5 +1,4 @@
-
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {TreeType} from 'generated';
@@ -12,7 +11,6 @@ import {TreeType} from 'generated';
 export class SelectionInfoComponent {
   @Input() parameter;
   @Input() indexes;
-  @Output() demoItems = new EventEmitter<any>();
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -21,9 +19,7 @@ export class SelectionInfoComponent {
     const paramId = this.parameter.get('parameterId');
     const path = this.parameter.get('path');
     const id = this.parameter.get('id');
-    const type = this._type;
     this.actions.removeParameter(paramId, path, id);
-    this.demoItems.emit ({paramId, type});
   }
 
   get _type()     { return typeDisplay(this.parameter); }

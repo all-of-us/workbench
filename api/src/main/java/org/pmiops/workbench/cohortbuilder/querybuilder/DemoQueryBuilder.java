@@ -7,6 +7,7 @@ import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
@@ -50,9 +51,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderC
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
- * DemoQueryBuilder is an object that builds {@link QueryJobConfiguration}
- * for BigQuery for the following criteria types:
- * DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
+ * DemoQueryBuilder builds SQL for BigQuery for the following criteria types: DEMO_GEN, DEMO_AGE, DEMO_RACE and DEMO_DEC.
  */
 @Service
 public class DemoQueryBuilder extends AbstractQueryBuilder {
@@ -85,10 +84,13 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
 
   private static final String AND_TEMPLATE = "and\n";
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String buildQuery(Map<String, QueryParameterValue> queryParams,
                            SearchGroupItem searchGroupItem,
-                           String temporalMention) {
+                           TemporalMention temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
     from(containsAgeAndDec()).test(searchGroupItem.getSearchParameters()).throwException(AGE_DEC_MESSAGE);
     ListMultimap<TreeSubType, Object> paramMap = getMappedParameters(searchGroupItem.getSearchParameters());
@@ -133,6 +135,9 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
     return SELECT + String.join(AND_TEMPLATE, queryParts);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public FactoryKey getType() {
     return FactoryKey.DEMO;
@@ -147,7 +152,7 @@ public class DemoQueryBuilder extends AbstractQueryBuilder {
   private void validateAttributes(SearchParameter param) {
     from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
     param.getAttributes().forEach(attr -> {
-      String name = attr.getName();
+      String name = attr.getName() == null ? null : attr.getName().name();
       String oper = operatorText.get(attr.getOperator());
       from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
       from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);

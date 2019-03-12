@@ -456,6 +456,19 @@ else
     exit 1
 fi
 
+##########################
+# Update rolled up counts #
+##########################
+# Replacing the individual participant counts of snomed condition concepts with the rolled up counts
+echo "Updating rolled up counts in achilles results from criteria (for snomed conditions)"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+SET ar.count_value = cr1.est_count
+FROM
+\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
+WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
+and analysis_id=3000 and ar.stratum_3='Condition' "
+
 ###########################
 # concept with count cols #
 ###########################
@@ -475,7 +488,6 @@ on c.concept_id=cs.concept_id group by c.concept_id,c.concept_name,c.domain_id,c
 # Update counts and prevalence in concept
 q="select count_value from \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` a where a.analysis_id = 1"
 person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
-
 
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
@@ -519,8 +531,7 @@ set d.participant_count = r.count_value from
 \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
 where r.analysis_id = 3000 and r.stratum_1 = CAST(d.concept_id AS STRING)
 and r.stratum_3 = d.domain_id
-and r.stratum_2 is null
-"
+and r.stratum_2 is null"
 
 ##########################################
 # survey count updates                   #
@@ -563,11 +574,11 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set sm.question_count=num_questions from
 (select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
 \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
-  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm2
-    on r.stratum_1 = CAST(sm2.concept_id AS STRING)
+  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_question_map\` sq
+    on r.stratum_1 = CAST(sq.survey_concept_id AS STRING)
   join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` qc
-    on r.stratum_2 = CAST(qc.concept_id AS STRING)
-where r.analysis_id = 3110 and qc.count_value > 0
+    on sq.question_concept_id = qc.concept_id
+where r.analysis_id = 3110 and qc.count_value > 0 and sq.is_main=1
   group by survey_concept_id)
 where CAST(sm.concept_id AS STRING) = survey_concept_id
 "
@@ -606,3 +617,24 @@ join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"
+
+###############################################################
+# Update the path of concepts in achilles_results to fetch tree
+###############################################################
+# Eg: essential hypertension concept has path clinical finiding -> Finding by site -> Disorder of cardiovascular system -> Hypertensive disorder -> Essential hypertension. Storing the concept id path of tree in achilles results.
+echo "Updating path of concept in achilles results to fetch tree later"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+set ar.stratum_5=(select path from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` where synonyms like ('%rank1%') and cast(concept_id as string)=ar.stratum_1
+and type='SNOMED')
+where ar.analysis_id=3000 and ar.stratum_3='Condition' "
+
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
+set ar.stratum_5=concepts
+from
+(select string_agg(cast(concept_id as string)) as concepts,parent from (
+select cr.*,ar2.stratum_1 as parent from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar2
+join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr on cast(cr.id as string) in UNNEST(split(ar2.stratum_5,'.')) where ar2.analysis_id=3000
+and ar2.stratum_3='Condition' and cr.type='SNOMED' order by cr.id asc)
+group by parent) where parent=ar.stratum_1 and ar.analysis_id=3000 and ar.stratum_3='Condition' "

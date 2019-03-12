@@ -1,5 +1,11 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
+import Calendar from 'react-calendar/dist/entry.nostyle';
+import RSelect from 'react-select';
 
+import {Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import {PopupTrigger} from 'app/components/popups';
 import {withStyle} from 'app/utils/index';
 
 export const styles = {
@@ -75,6 +81,19 @@ export const TextInput = React.forwardRef(({style = {}, onChange, invalid = fals
   />;
 });
 
+export const NumberInput = ({style = {}, value, onChange, ...props}) => {
+  return <TextInput
+    {...props}
+    type='number'
+    value={fp.cond([
+      [fp.isUndefined, () => undefined],
+      [fp.isNull, () => ''],
+      [fp.stubTrue, v => v.toString()]
+    ])(value)}
+    onChange={onChange ? (v => onChange(v === '' ? null : +v)) : undefined}
+  />;
+};
+
 export const TextArea = ({style = {}, onChange, invalid = false, ...props}) => {
   return <textarea
     {...props}
@@ -98,3 +117,64 @@ export const RadioButton = ({ onChange, ...props }) => {
     onClick={onChange}
   />;
 };
+
+export const CheckBox = ({onChange, ...props}) => {
+  return <input
+    type='checkbox'
+    onChange={onChange ? (e => onChange(e.target.checked)) : undefined}
+    {...props}
+  />;
+};
+
+export const Select = ({value, options, onChange, ...props}) => {
+  return <RSelect
+    value={options.find(o => o.value === value)}
+    options={options}
+    onChange={o => onChange(o && o.value)}
+    {...props}
+  />;
+};
+
+export class DatePicker extends React.Component<
+  {value: Date, onChange: Function}
+> {
+  popup: React.RefObject<any>;
+  constructor(props) {
+    super(props);
+    this.popup = React.createRef();
+  }
+
+  render() {
+    const {value, onChange, ...props} = this.props;
+    return <div
+      style={{
+        display: 'flex',
+        width: '100%', height: '1.5rem',
+        borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
+        padding: '0 0.5rem',
+        color: '#565656', backgroundColor: '#fff',
+      }}
+    >
+      <PopupTrigger
+        ref={this.popup}
+        content={<Calendar
+          {...props}
+          value={value}
+          onChange={v => {
+            this.popup.current.close();
+            onChange(v);
+          }}
+        />}
+      >
+        <Clickable style={{display: 'flex', alignItems: 'center', flex: 1}}>
+          <div style={{flex: 1}}>{value && value.toLocaleDateString()}</div>
+          <ClrIcon style={{flex: 'none'}} shape='calendar' />
+        </Clickable>
+      </PopupTrigger>
+      <Clickable
+        style={{display: 'flex', alignItems: 'center', flex: 'none', marginLeft: '0.5rem'}}
+        onClick={() => onChange(null)}
+      ><ClrIcon shape='times' /></Clickable>
+    </div>;
+  }
+}

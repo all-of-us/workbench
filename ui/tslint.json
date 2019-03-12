@@ -6,6 +6,7 @@
     "node_modules/tslint-eslint-rules/dist/rules"
   ],
   "rules": {
+    "no-unused-variable": [true, {"ignore-pattern": "^_$"}],
     "no-relative-imports": [
       true,
       "allow-siblings"

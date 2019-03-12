@@ -56,7 +56,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {UserMetricsServiceStub} from 'testing/stubs/user-metrics-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 
 import {NewNotebookModalComponent} from 'app/views/new-notebook-modal/component';
 import {updateAndTick} from 'testing/test-helpers';

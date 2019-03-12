@@ -1,11 +1,10 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptAddModalComponent} from 'app/views/concept-add-modal/component';
 import {ConceptSetListComponent} from 'app/views/concept-set-list/component';
 import {CreateConceptSetModalComponent} from 'app/views/conceptset-create-modal/component';
@@ -19,13 +18,12 @@ import {
   CohortsService,
   ConceptSetsService,
   ConceptsService,
-  WorkspaceAccessLevel,
   WorkspacesService,
 } from 'generated';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
-import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {
   findElementsReact,
   setupModals,
@@ -38,30 +36,10 @@ import {SignInService} from 'app/services/sign-in.service';
 import {ToolTipComponent} from 'app/views/tooltip/component';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConceptSetsApi} from 'generated/fetch';
+import {ConceptsApi, ConceptSetsApi} from 'generated/fetch';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
+import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 
-
-const activatedRouteStub  = {
-  snapshot: {
-    url: [
-      {path: 'workspaces'},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS},
-      {path: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID},
-      {path: 'concepts'}
-    ],
-    params: {
-      'ns': WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      'wsid': WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
-    },
-    data: {
-      workspace: {
-        ...WorkspacesServiceStub.stubWorkspace(),
-        accessLevel: WorkspaceAccessLevel.OWNER,
-      }
-    }
-  }
-};
 
 describe('ConceptSetListComponent', () => {
   let fixture: ComponentFixture<ConceptSetListComponent>;
@@ -90,11 +68,11 @@ describe('ConceptSetListComponent', () => {
         {provide: SignInService},
         {provide: ConceptsService, useValue: new ConceptsServiceStub()},
         {provide: ConceptSetsService, useValue: new ConceptSetsServiceStub()},
-        {provide: ActivatedRoute, useValue: activatedRouteStub}
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(ConceptSetListComponent);
       registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
+      registerApiClient(ConceptsApi, new ConceptsApiStub());
       setupModals(fixture);
       // This tick initializes the component.
       tick();
@@ -103,6 +81,7 @@ describe('ConceptSetListComponent', () => {
       // This finishes the page reloading.
       updateAndTick(fixture);
     });
+    currentWorkspaceStore.next(workspaceDataStub);
   }));
 
 

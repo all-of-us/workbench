@@ -1,6 +1,6 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ReviewStateService} from 'app/cohort-review/review-state.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import * as fp from 'lodash/fp';
+
 import {typeToTitle} from 'app/cohort-search/utils';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
@@ -8,6 +8,7 @@ import {
   DomainType,
   PageFilterType,
 } from 'generated';
+import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
@@ -16,10 +17,10 @@ const itemDate = {
   classNames: ['date-col'],
   displayName: 'Date',
 };
-const endDate = {
-  name: 'endDate',
-  classNames: ['date-col'],
-  displayName: 'End Date',
+const itemTime = {
+  name: 'itemTime',
+  classNames: ['time-col'],
+  displayName: 'Time',
 };
 const domain = {
   name: 'domain',
@@ -28,44 +29,38 @@ const domain = {
 const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
-  displayName: 'Standard Vocabulary',
+  displayName: 'Vocabulary',
 };
 const standardName = {
   name: 'standardName',
-  displayName: 'Standard Name',
+  displayName: 'Name',
 };
 const standardCode = {
   name: 'standardCode',
-  displayName: 'Standard Code',
+  displayName: 'Code',
 };
-const sourceVocabulary = {
-  name: 'sourceVocabulary',
-  classNames: ['vocab-col'],
-  displayName: 'Source Vocabulary',
-};
-const sourceName = {
-  name: 'sourceName',
-  displayName: 'Source Name',
-};
-const signature = {
-  name: 'signature',
-  displayName: 'Signature',
-};
-const valueConcept = {
-  name: 'valueConcept',
-  displayName: 'Concept Value',
-};
-const valueSource = {
-  name: 'valueSource',
-  displayName: 'Source Value',
-};
-const valueNumber = {
-  name: 'valueNumber',
-  displayName: 'Value As Number',
-};
-const sourceCode = {
-  name: 'sourceCode',
-  displayName: 'Source Code',
+
+/*
+  * TODO - uncomment below code when we will have source code and standard code radio button filter.
+  */
+//
+// const sourceVocabulary = {
+//   name: 'sourceVocabulary',
+//   classNames: ['vocab-col'],
+//   displayName: 'Source Vocabulary',
+// };
+// const sourceName = {
+//   name: 'sourceName',
+//   displayName: 'Source Name',
+// };
+// const sourceCode = {
+//   name: 'sourceCode',
+//   displayName: 'Source Code',
+// };
+
+const value = {
+  name: 'value',
+  displayName: 'Value',
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
@@ -74,10 +69,6 @@ const ageAtEvent = {
 const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
-};
-const visitId = {
-  name: 'visitId',
-  displayName: 'Visit ID',
 };
 const numMentions = {
   name: 'numMentions',
@@ -91,174 +82,108 @@ const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
 };
-const quantity = {
-  name: 'quantity',
-  displayName: 'Quantity',
+const survey = {
+  name: 'survey',
+  displayName: 'Survey Name',
 };
-const refills = {
-  name: 'refills',
-  displayName: 'Refills',
+const question = {
+  name: 'question',
+  displayName: 'Question',
 };
-const strength = {
-  name: 'strength',
-  displayName: 'Strength',
+const answer = {
+  name: 'answer',
+  displayName: 'Answer',
 };
-const dataRoute = {
-  name: 'route',
-  displayName: 'Route',
-};
-const units = {
-  name: 'units',
-  displayName: 'Units',
-};
-const labRefRange = {
-  name: 'labRefRange',
-  displayName: 'Lab Reference Range',
-};
-
 
 @Component({
   selector: 'app-detail-tabs',
   templateUrl: './detail-tabs.component.html',
   styleUrls: ['./detail-tabs.component.css']
 })
-export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
+export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   data;
-  participantsId: any;
+  participantId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
   chartLoadedSpinner = false;
-  @Input() clickedParticipantId: number;
   summaryActive = false;
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, visitType, numMentions,
-      firstMention, lastMention, valueSource, sourceName, sourceCode, sourceVocabulary
+      itemDate, visitType, standardCode, standardVocabulary, standardName, value,
+      domain, ageAtEvent
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      age: ageAtEvent,
       visitType: visitType,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      valueSource: valueSource,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
+      standardCode: standardCode,
+      standardVocabulary: standardVocabulary,
+      standardName: standardName,
+      value: value,
+      domain: domain,
+      age: ageAtEvent,
     }
   };
 
-  // TODO add Surveys tab when we have data to show
   readonly tabs = [{
     name: 'Conditions',
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
-      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      standardCode: standardCode,
       standardName: standardName,
+      standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      visitId: visitId,
+      age: ageAtEvent,
+      visitType: visitType,
     }
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, sourceName, sourceCode, sourceVocabulary, ageAtEvent, numMentions,
-      firstMention, lastMention, standardCode, standardName, standardVocabulary, visitId
+      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      age: ageAtEvent,
-      numMentions: numMentions,
-      firstMention: firstMention,
-      lastMention: lastMention,
-      standardCode: standardCode,
       standardName: standardName,
+      standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      visitId: visitId,
+      age: ageAtEvent,
+      visitType: visitType,
     }
   }, {
     name: 'Drugs',
     domain: DomainType.DRUG,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, ageAtEvent, numMentions, firstMention,
-      lastMention, quantity, refills, strength, dataRoute, sourceName, sourceCode,
-      sourceVocabulary, visitId
+      itemDate, standardName, ageAtEvent, numMentions,
+      firstMention, lastMention, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
       standardName: standardName,
-      standardCode: standardCode,
       age: ageAtEvent,
       numMentions: numMentions,
       firstMention: firstMention,
       lastMention: lastMention,
-      quantity: quantity,
-      refills: refills,
-      strength: strength,
-      route: dataRoute,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      visitId: visitId,
-    }
-  }, {
-    name: 'Measurements',
-    domain: DomainType.MEASUREMENT,
-    filterType: PageFilterType.ReviewFilter,
-    columns: [
-      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
-      valueSource, units, ageAtEvent, labRefRange, sourceName, sourceCode, visitId
-    ],
-    reverseEnum: {
-      itemDate: itemDate,
-      standardName: standardName,
-      standardCode: standardCode,
-      standardVocabulary: standardVocabulary,
-      valueConcept: valueConcept,
-      valueNumber: valueNumber,
-      valueSource: valueSource,
-      units: units,
-      age: ageAtEvent,
-      labRefRange: labRefRange,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Observations',
     domain: DomainType.OBSERVATION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, sourceName,
-      sourceCode, sourceVocabulary, visitId
+      itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
     ],
     reverseEnum: {
       itemDate: itemDate,
@@ -266,85 +191,99 @@ export class DetailTabsComponent implements OnChanges, OnInit, OnDestroy {
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
-      sourceName: sourceName,
-      sourceCode: sourceCode,
-      sourceVocabulary: sourceVocabulary,
-      visitId: visitId,
+      visitType: visitType,
     }
   }, {
     name: 'Physical Measurements',
     domain: DomainType.PHYSICALMEASURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, standardName, standardCode, standardVocabulary, valueConcept, valueNumber,
-      valueSource, units, ageAtEvent
+      itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
     ],
     reverseEnum: {
       itemDate: itemDate,
-      standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
-      valueConcept: valueConcept,
-      valueNumber: valueNumber,
-      valueSource: valueSource,
-      units: units,
+      standardName: standardName,
+      value: value,
       age: ageAtEvent,
+    }
+  }, {
+    name: 'Labs',
+    domain: DomainType.LAB,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      itemTime: itemTime,
+      standardName: standardName,
+      value: value,
+      age: ageAtEvent,
+      visitType: visitType
+    }
+  }, {
+    name: 'Vitals',
+    domain: DomainType.VITAL,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      itemTime: itemTime,
+      standardName: standardName,
+      value: value,
+      age: ageAtEvent,
+      visitType: visitType
+    }
+  }, {
+    name: 'Surveys',
+    domain: DomainType.SURVEY,
+    filterType: PageFilterType.ReviewFilter,
+    columns: [
+      itemDate, survey, question, answer
+    ],
+    reverseEnum: {
+      itemDate: itemDate,
+      survey: survey,
+      question: question,
+      answer: answer
     }
   }];
 
   constructor(
-    private state: ReviewStateService,
-    private route: ActivatedRoute,
     private reviewAPI: CohortReviewService,
   ) {}
 
-
-  ngOnChanges() {
-    if (this.clickedParticipantId && this.participantsId !== this.clickedParticipantId) {
-      this.chartLoadedSpinner = true;
-      if (this.summaryActive) {
-        this.getSubscribedData();
-      }
-    }
-  }
-
-  getSubscribedData() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.subscription = this.route.data.map(({participant}) => participant)
-      .subscribe(participants => {
-        this.participantsId = this.clickedParticipantId || participants.participantId;
-      });
-    this.getDomainsParticipantsData();
-  }
-
   ngOnInit() {
-    this.getSubscribedData();
-  }
-
-
-  getDomainsParticipantsData() {
-    const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const limit = 10;
-
-    this.domainList.map(domainName => {
-      this.chartData[domainName] = {
-        conditionTitle: '',
-        loading: true,
-        items: []
-      };
-      const getParticipantsDomainData = this.reviewAPI.getParticipantChartData(ns, wsid, cid, cdrid,
-        this.participantsId , domainName, limit)
-        .subscribe(data => {
-          const participantsData = data;
-          this.chartData[domainName].items = participantsData.items;
-          this.chartData[domainName].conditionTitle = typeToTitle(domainName);
-          this.chartData[domainName].loading = false;
-        });
-      this.subscription.add(getParticipantsDomainData);
-    });
+    this.subscription = Observable
+      .combineLatest(urlParamsStore, currentWorkspaceStore)
+      .map(([{ns, wsid, cid, pid}, {cdrVersionId}]) => ({ns, wsid, cid, pid, cdrVersionId}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid, cid, pid, cdrVersionId}) => {
+        this.participantId = pid;
+        return Observable.forkJoin(
+          ...this.domainList.map(domainName => {
+            this.chartData[domainName] = {
+              loading: true,
+              conditionTitle: '',
+              items: []
+            };
+            return this.reviewAPI
+              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10)
+              .do(({items}) => {
+                this.chartData[domainName] = {
+                  loading: false,
+                  conditionTitle: typeToTitle(domainName),
+                  items
+                };
+              });
+          })
+        );
+      })
+      .subscribe();
   }
 
   ngOnDestroy() {

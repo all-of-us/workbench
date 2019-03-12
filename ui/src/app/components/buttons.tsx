@@ -89,6 +89,14 @@ const buttonVariants = {
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
     hover: {backgroundColor: colors.purple[1], color: '#fff', borderColor: colors.purple[1]}
+  },
+  link: {
+    style: {
+      color: colors.blue[0]
+    },
+    disabledStyle: {
+      color: colors.gray[2]
+    }
   }
 };
 
@@ -134,20 +142,81 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
   </TooltipTrigger>;
 };
 
-const cardButtonStyle = {
+const cardButtonBase = {
   style: {
-    ...cardStyles.card,
-    alignItems: 'flex-start', alignContent: 'left',
-    marginTop: '1.9rem', marginRight: '106px',
+    alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
     justifyContent: 'center', padding: '0 1rem', color: colors.blue[0],
-    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   },
   disabledStyle: {color: '#c3c3c3', backgroundColor: '#f1f2f2', cursor: 'not-allowed'}
+
 };
 
-export const CardButton = ({disabled = false, style = {}, children, ...props}) => {
+const cardButtonStyle = {
+  large: {
+    style: {
+      ...cardStyles.workspaceCard, ...cardButtonBase.style,
+      boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+      fontSize: 20, lineHeight: '28px',
+    },
+    disabledStyle: {...cardButtonBase.disabledStyle}
+  },
+
+  small: {
+    style : {
+      ...cardStyles.resourceCard, ...cardButtonBase.style,
+      fontSize: 18, lineHeight: '22px',
+      minWidth: '200px', maxWidth: '200px', minHeight: '105px', maxHeight: '105px',
+      marginTop: '1rem', marginRight: '1rem',
+    },
+    disabledStyle: {...cardButtonBase.disabledStyle}
+  }
+};
+
+export const CardButton = ({type = 'large', disabled = false, style = {}, children, ...props}) => {
   return <Clickable
     disabled={disabled} {...props}
-    {...fp.merge(computeStyle(cardButtonStyle, {disabled}), {style})}
+    {...fp.merge(computeStyle(cardButtonStyle[type], {disabled}), {style})}
+  >{children}</Clickable>;
+};
+
+const tabButtonStyle = {
+  style: {
+    margin: '0 1rem',
+    textAlign: 'center',
+    color: '#2691D0',
+    fontSize: '16px',
+    lineHeight: '28px',
+  },
+  hover: {},
+  disabledStyle: {}
+};
+
+const activeTabButtonStyle = {
+  style: {
+    borderBottom: '4px solid #216FB4',
+    fontWeight: 600
+  }
+};
+
+export const TabButton = ({disabled = false, style = {}, active = false, children, ...props}) => {
+  const tabButtonStyleMerged = {
+    style: {...tabButtonStyle.style, ...(active ? activeTabButtonStyle.style : {})},
+    hover: tabButtonStyle.hover,
+    disabledStyle: tabButtonStyle.disabledStyle,
+  };
+  return <Clickable
+    disabled={disabled} {...props}
+    {...fp.merge(computeStyle(tabButtonStyleMerged, {disabled}), {style})}
+  >{children}</Clickable>;
+};
+
+export const Link = ({disabled = false, style = {}, children, ...props}) => {
+  const linkStyle = {
+    style: {color: '#2691D0'},
+    hover: {textDecoration: 'underline'}
+  };
+  return <Clickable
+      disabled={disabled} {...props}
+      {...fp.merge(computeStyle(linkStyle, {disabled}), {style})}
   >{children}</Clickable>;
 };

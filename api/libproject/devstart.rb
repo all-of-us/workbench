@@ -26,7 +26,7 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 ENVIRONMENTS = {
-  TEST_PROJECT => {
+  "all-of-us-workbench-test" => {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
@@ -150,8 +150,8 @@ def dev_up()
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
-  init_new_cdr_db %W{--cdr-db-name cdr}
-  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -194,8 +194,8 @@ def run_local_migrations()
     common.run_inline %W{./run-migrations.sh main}
   end
   Dir.chdir('db-cdr/generate-cdr') do
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --version-flag cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public --version-flag public}
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
@@ -456,6 +456,22 @@ Common.register_command({
   :fn => ->(*args) { run_bigquery_tests("bigquerytest", *args) }
 })
 
+def run_rainforest_tests(cmd_name, *args)
+  ensure_docker cmd_name, args
+  common = Common.new
+  # The bucket is hardcoded to staging, because that is currently the only
+  # environment we can run tests in. There is, however, an identical key in
+  # each of the other environments.
+  token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
+  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
+end
+
+Common.register_command({
+  :invocation => "rainforesttest",
+  :description => "Runs rainforest tests.",
+  :fn => ->(*args) { run_rainforest_tests("rainforesttest", *args) }
+})
+
 def run_gradle(cmd_name, args)
   ensure_docker cmd_name, args
   begin
@@ -622,10 +638,10 @@ def run_local_all_migrations()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  init_new_cdr_db %W{--cdr-db-name cdr}
-  init_new_cdr_db %W{--cdr-db-name public}
-  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({
@@ -636,8 +652,8 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({
@@ -647,8 +663,8 @@ Common.register_command({
 })
 
 def run_local_public_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name public}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({
@@ -1006,6 +1022,44 @@ Common.register_command({
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
 })
 
+def backfill_gsuite_user_data(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  # This command reads from the AoU database and reads/writes to the associated GSuite API.
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle --info backfillGSuiteUserData
+       -PappArgs=[#{op.opts.dry_run}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "backfill-gsuite-user-data",
+  :description => "Backfills the Institution and contact email address fields in GSuite.\n",
+  :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
@@ -1134,6 +1188,46 @@ Common.register_command({
   :invocation => "list-clusters",
   :description => "List all clusters in this environment",
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
+})
+
+def create_local_es_index(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  # TODO(RW-2213): Generalize this subsampling approach for all local development work.
+  op.opts.inverse_prob = 1000
+  op.add_option(
+      "--participant-inclusion-inverse-prob [DENOMINATOR]",
+      ->(opts, v) { opts.inverse_prob = v},
+      "The inverse probabilty to index a participant, used to index a " +
+      "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
+      "target dataset. Defaults to 1K (~1K participants on the 1M participant synthetic CDR).")
+  op.parse.validate
+  unless Workbench.in_docker?
+    exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
+  end
+
+  common = Common.new
+  # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
+  # to work against the synthetic CDR into a local ES (using test Workbench).
+  create_flags = ([
+    ['--query-project-id', 'all-of-us-ehr-dev'],
+    ['--es-base-url', 'http://elastic:9200'],
+    # Matches cdr_versions_local.json
+    ['--cdr-version', 'cdr'],
+    ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
+    ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
+    ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+  ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+    '--delete-indices'
+    # Gradle args need to be single-quote wrapped.
+  ]).map { |f| "'#{f}'" }
+  common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
+end
+
+Common.register_command({
+  :invocation => "create-local-es-index",
+  :description => "Create Elasticsearch index",
+  :fn => ->(*args) { create_local_es_index("create-local-es-index", *args) }
 })
 
 def update_cdr_version_options(cmd_name, args)

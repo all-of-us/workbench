@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.util.HashMap;
 
-import org.pmiops.workbench.cdm.DomainTableEnum;
+import org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,23 +47,15 @@ public class ParticipantCounter {
 
   private static final String DOMAIN_CHART_INFO_SQL_TEMPLATE =
     "select standard_name as name, standard_concept_id as conceptId, count(distinct person_id) as count\n" +
-      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "from `${projectId}.${dataSetId}." + QueryBuilderConstants.REVIEW_TABLE + "` " + QueryBuilderConstants.REVIEW_TABLE + "\n" +
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_GROUP_BY =
     "group by gender, race, ageRange\n" +
       "order by gender, race, ageRange\n";
 
-  private static final String LAB_SQL_TEMPLATE =
-    "and ${tableId} in (\n" +
-      "  select concept_id\n" +
-      "  from `${projectId}.${dataSetId}.criteria`\n" +
-      "  where type = 'MEAS'\n" +
-      "    and subtype = 'LAB'\n" +
-      "    and is_selectable = 1\n" +
-      ")\n";
-
   private static final String DOMAIN_CHART_INFO_SQL_GROUP_BY =
+    "and domain = '${domain}'\n" +
     "and standard_concept_id != 0 \n" +
       "group by name, conceptId\n" +
       "order by count desc, name asc\n" +
@@ -103,18 +95,11 @@ public class ParticipantCounter {
     public QueryJobConfiguration buildDomainChartInfoCounterQuery(ParticipantCriteria participantCriteria,
                                                                   DomainType domainType,
                                                                   int chartLimit) {
-      String domain = domainType.equals(DomainType.LAB) ? "Measurement" : domainType.name();
-      String table = DomainTableEnum.getDenormalizedTableName(domain);
-      String limit = Integer.toString(chartLimit);
-      String sqlTemplate = DOMAIN_CHART_INFO_SQL_TEMPLATE
-        .replace("${table}", table);
-      String endSqlTemplate = DomainType.LAB.equals(domainType) ?
-        LAB_SQL_TEMPLATE + DOMAIN_CHART_INFO_SQL_GROUP_BY :
-        DOMAIN_CHART_INFO_SQL_GROUP_BY;
-      endSqlTemplate = endSqlTemplate
-        .replace("${limit}", limit)
-        .replace("${tableId}", STANDARD_CONCEPT_ID);
-      return buildQuery(participantCriteria, sqlTemplate, endSqlTemplate, table);
+      String endSqlTemplate = DOMAIN_CHART_INFO_SQL_GROUP_BY
+        .replace("${limit}", Integer.toString(chartLimit))
+        .replace("${tableId}", STANDARD_CONCEPT_ID)
+        .replace("${domain}", domainType.name());
+      return buildQuery(participantCriteria, DOMAIN_CHART_INFO_SQL_TEMPLATE, endSqlTemplate, QueryBuilderConstants.REVIEW_TABLE);
     }
 
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,

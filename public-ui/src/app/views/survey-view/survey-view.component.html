@@ -74,7 +74,12 @@
     </div>
     <div class="row">
       <div class="col-md-12 col-xs-12">
-        <p card-text>Click on each response to view branding logic and age and gender distributions</p>
+        <p class="card-text">Click on each response to view branding logic and age and gender distributions</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 col-xs-12">
+        <p class="card-text info-text">Note: The survey questions appear in the order in which people actually took the survey.</p>
       </div>
     </div>
     <div class="survey-results" *ngIf="resultsComplete">
@@ -90,12 +95,16 @@
             </div>
           </div>
           <div class="col-xs-12">
-            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Answers
+            <a class="toggle-link" (click)="toggleAnswer(q.conceptId)" *ngIf="q.subQuestions === null; else subQuestionLink"> See Answers
               <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+            <ng-template #subQuestionLink>
+              <a class="toggle-link" (click)="toggleAnswer(q.conceptId)"> See Sub Questions
+                <clr-icon *ngIf="!showAnswer[q.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[q.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+            </ng-template>
           </div>
         </div>
         <div class="row col-xs-12 col-header-row" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-6 info-text">
+          <div class="col-md-5 info-text">
             Text
           </div>
           <div class="col-md-2 info-text">
@@ -117,55 +126,92 @@
           <div class="col-md-2 info-text">
             Participant Count
           </div>
-          <div class="col-md-1 info-text flex-xs-middle">
+          <div class="col-md-2 info-text flex-xs-middle">
             % answered
           </div>
           <div class="col-md-1 info-text">
           </div>
         </div>
-        <div class="row expandable-grid-row" *ngFor="let a of q.countAnalysis.results" [hidden]="!showAnswer[q.conceptId]">
-          <div class="col-md-6 flex-xs-middle" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
-            <label class="answer-text">
-              <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
-            </label>
-          </div>
-          <ng-template #binnedSurveyQuestionDisplay>
-            <div class="col-md-6 flex-xs-middle">
-              <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
+        <ng-container *ngIf="q.subQuestions === null; else subQuestionDisplay">
+          <div class="row expandable-grid-row" *ngFor="let a of q.countAnalysis.results" [hidden]="!showAnswer[q.conceptId]">
+            <div class="col-md-6 flex-xs-middle" *ngIf="!binnedSurveyQuestions.includes(a.stratum2); else binnedSurveyQuestionDisplay">
+              <label class="answer-text">
                 <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
               </label>
-              <ng-template #rangeLabel>
-                <label class="answer-text">
-                  <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value"></app-highlight-search>
+            </div>
+            <ng-template #binnedSurveyQuestionDisplay>
+              <div class="col-md-6 flex-xs-middle">
+                <label class="answer-text" *ngIf="a.stratum4.toLowerCase().trim() === 'did not answer' || a.stratum4.toLowerCase().includes('skip'); else rangeLabel">
+                  <app-highlight-search [text]="a.stratum4" [searchTerm]="searchText.value"></app-highlight-search>
                 </label>
-              </ng-template>
-            </div>
-          </ng-template>
-          <div class="col-md-2 flex-xs-middle">
-            <label class="concept-code">{{a.stratum3}}</label>
-          </div>
-          <div class="answer-text col-md-2 flex-xs-middle">
-            <label class="participant-count answer-text">{{a.countValue | number}}  </label>
-          </div>
-          <div class="col-md-1 percent-bar flex-xs-middle">
-            <span>{{a.countPercent.toFixed(2)}}%</span>
-          </div>
-          <div class="col-md-1 flex-xs-middle">
-            <button class="icon-btn" (click)="showAnswerGraphs(a)">
-              <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
-            </button>
-          </div>
-          <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'" #chartElement>
-            <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g,q)" class="btn btn-link">{{g}}</button>
-            <div class="row">
-              <div class="col-md-4"></div>
-              <div class="col-md-4">
-                <app-chart [analysis]="q.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'" [domainType]="'surveys'"></app-chart>
+                <ng-template #rangeLabel>
+                  <label class="answer-text">
+                    <app-highlight-search [text]="a.stratum4 + '-' + (convertToNum(a.stratum4)+10)" [searchTerm]="searchText.value"></app-highlight-search>
+                  </label>
+                </ng-template>
               </div>
-              <div class="col-md-4"></div>
+            </ng-template>
+            <div class="col-md-2 flex-xs-middle">
+              <label class="concept-code">{{a.stratum3}}</label>
+            </div>
+            <div class="answer-text col-md-2 flex-xs-middle">
+              <label class="participant-count answer-text">{{a.countValue | number}}  </label>
+            </div>
+            <div class="col-md-1 percent-bar flex-xs-middle">
+              <span>{{a.countPercent.toFixed(2)}}%</span>
+            </div>
+            <div class="col-md-1 flex-xs-middle">
+              <button class="icon-btn" (click)="showAnswerGraphs(a)">
+                <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
+              </button>
+            </div>
+            <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'" #chartElement>
+              <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g,q)" class="btn btn-link">{{g}}</button>
+              <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                  <app-chart [analysis]="q.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'" [domainType]="'surveys'"></app-chart>
+                </div>
+                <div class="col-md-4"></div>
+              </div>
             </div>
           </div>
-        </div>
+        </ng-container>
+        <ng-template #subQuestionDisplay>
+          <div class="row expandable-grid-row sub-question" *ngFor="let sq of q.subQuestions" [ngClass]="{'expanded-row': sq.expanded}" [hidden]="!showAnswer[q.conceptId]">
+            <div class="col-md-5 flex-xs-middle"><app-highlight-search [text]="sq.conceptName" [searchTerm]="searchText.value"></app-highlight-search>
+            </div>
+            <div class="col-md-2 flex-xs-middle">{{sq.conceptId}}</div>
+            <div class="col-md-2 flex-xs-middle">{{sq.countValue}}</div>
+            <div class="col-md-2 flex-xs-middle">{{countPercentage(sq.countValue).toFixed(2)}}</div>
+            <div class="col-md-1 flex-xs-middle">
+              <a class="toggle-link" (click)="sq.expanded = !sq.expanded"> See Answers
+                <clr-icon *ngIf="!showAnswer[sq.conceptId]" shape="caret" dir="right"></clr-icon> <clr-icon *ngIf="showAnswer[sq.conceptId]" shape="caret" dir="down"></clr-icon> </a>
+            </div>
+            <div class="row expandable-grid-row sub-question-results flex-xs-middle" *ngFor="let a of sq.countAnalysis.results" [hidden]="!sq.expanded">
+              <div class="col-md-5 flex-xs-middle"><app-highlight-search [text]="removeDescribingWords(a.stratum4)" [searchTerm]="searchText.value"></app-highlight-search>
+              </div>
+              <div class="col-md-2 flex-xs-middle">{{a.stratum3}}</div>
+              <div class="col-md-2 flex-xs-middle">{{a.countValue | number}}</div>
+              <div class="col-md-2 flex-xs-middle">{{countPercentage(a.countValue).toFixed(2)}}%</div>
+              <div class="col-md-1 flex-xs-middle">
+                <button class="icon-btn" (click)="showAnswerGraphs(a, sq)">
+                  <clr-icon shape="bar-chart" style="height: 1rem; width: 1rem;color: #2691D0;"></clr-icon>
+                </button>
+              </div>
+              <div class="col-xs-12 row-expansion flex-xs-middle" *ngIf="a.expanded && a.stratum4.toLowerCase() != 'did not answer'" #chartElement>
+                <button *ngFor="let g of ['Biological Sex', 'Gender Identity', 'Age at Occurrence']" [ngClass]="{active:selectedGraph === g}" (click)="selectGraph(g,sq)" class="btn btn-link">{{g}}</button>
+                <div class="row">
+                  <div class="col-md-4"></div>
+                  <div class="col-md-4">
+                    <app-chart [analysis]="sq.selectedAnalysis" [selectedResult]="a" [backgroundColor]="'#ECF1F4'" [domainType]="'surveys'"></app-chart>
+                  </div>
+                  <div class="col-md-4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
 
       </div>
     </div>
@@ -182,6 +228,5 @@
     </div>
   </div>
   -->
-  <div class="info-text"> Note: The survey questions appear in the order in which people actually took the survey.</div>
 
 </div>

@@ -2,6 +2,7 @@
 # MOodle API information can be found at :
 # https://docs.moodle.org/dev/Web_service_API_functions
 
+
 swagger: '2.0'
 
 info:
@@ -9,7 +10,7 @@ info:
   description: |
     Service for Moodle Interactions.
   version: "0.1"
-
+#The host will get updated as per the environment it will be aoudev.nnlm.gov for dev and test
 host: "aou.nnlm.gov"
 schemes:
   - "https"

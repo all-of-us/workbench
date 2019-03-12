@@ -289,63 +289,91 @@ definitions:
       - id
       - parentId
       - type
-      - code
       - name
       - group
       - selectable
       - hasAttribute
     properties:
       id:
-        description: id of the criteria
+        description: >
+          Primary identifier which is unique within a CDR version. Value may
+          not be stable across different CDR versions.
         type: integer
         format: int64
       parentId:
-        description: parent id of the criteria
+        description: >
+          The parent id of the criteria. 0 if this is the root node of a
+          criteria tree.
         type: integer
         format: int64
       type:
-        description: type of criteria
-        type: string
+        description: The tree type of this criteria, see TreeType.
+        $ref: "#/definitions/TreeType"
       subtype:
-        description: subtype of this criteria
-        type: string
+        description: The tree subtype of this criteria, see TreeSubType.
+        $ref: "#/definitions/TreeSubType"
       code:
         description: >
-          code that identifies this criteria, ex: icd9, icd10 or cpt all
-          have codes that map to the concept_code column in the concept
-          table.
+          Code that identifies this criteria. In some vocabularies such as ICD9
+          and ICD10, this code captures the tree hierarchy, e.g. '001.002.003'.
+          Multiple criteria may exist for the same code within a CDR version if
+          a given concept has multiple entries at different locations in the
+          criteria tree (this is common in SNOMED).
+
+          Criteria codes should generally be stable across CDR versions.
         type: string
       name:
         description: description of criteria
         type: string
       count:
-        description: est. count in the cdr
+        description: >
+          Estimated number of participants in a particular CDR version which
+          have a least one event matching this criteria.
         type: integer
         format: int64
       group:
         description: specifies if child or parent
         type: boolean
       selectable:
-        description: specifies if user can search with
+        description: >
+          Whether or not a client can specify this criteria in a search request.
+          Selecting a group implies selecting all criteria contained within that
+          group.
         type: boolean
       conceptId:
         description: >
-          concept ids are ids associated with a specific vocabulary item,
-          in the concept table and allow you to search for that code in
-          its domain table.
+          The OMOP concept id associated with this criteria. May be null if this
+          criteria does not match an OMOP concept, e.g. for intermediate nodes
+          (groups) in the criteria tree. Concept ids are ids associated with a
+          specific vocabulary item in the concept table and allow you to search
+          for that code in its domain table. This may be a source or standard
+          concept ID, depending on the tree for the criteria.
+
+          Similar to a code, multiple criteria may reference the same concept
+          ID due to multiple occurrences of a concept in the criteria tree. In
+          other cases a criteria may share the concept ID of its parent, e.g. in
+          the PPI tree a question and child answer share a concept id.
+
+          Concept IDs should generally be stable across CDR versions.
         type: integer
         format: int64
       domainId:
         description: >
-          clue to determine which tables to search, but these only exist
-          for leaves in the tree. Parents don't have domain ids and concept
-          id will be used in the case that a parent is selectable.
+          # TODO: Remove this field.
+          Deprecated. Clue to determine which OMOP tables to search, but these
+          only exist for leaves in the tree. Parents don't have domain ids and
+          concept id will be used in the case that a parent is selectable.
         type: string
       hasAttributes:
-        description: specifies if extra attributes are needed
+        description: >
+          Whether this criteria has associated attributes which can be filtered
+          by value during a search, for example a blood pressure measurement
+          critieria might have an associated measurement value attribute.
         type: boolean
       path:
-        description: full path from parent to this node with ids
+        description: >
+          A "." delimited path of all parent criteria IDs. Does not include the
+          id for this criteria; root criteria nodes have a null path.
         type: string
 
   CriteriaAttributeListResponse:
@@ -362,7 +390,6 @@ definitions:
     type: object
     required:
       - id
-      - conceptId
       - valueAsConceptId
       - conceptName
       - type
@@ -370,10 +397,6 @@ definitions:
     properties:
       id:
         description: id of the criteria
-        type: integer
-        format: int64
-      conceptId:
-        description: conceptId of the concept
         type: integer
         format: int64
       valueAsConceptId:
@@ -431,7 +454,7 @@ definitions:
 
   SearchGroup:
     description: >
-      A SearchGroup is a container for groups of criteria which are `AND`ed together.
+      A SearchGroup is a container for groups of criteria which are `OR`ed together.
     type: object
     required:
       - temporal
@@ -446,10 +469,10 @@ definitions:
         default: false
       mention:
         description: first, last or any mention(used in temporal realtionships)
-        type: string
+        $ref: "#/definitions/TemporalMention"
       time:
         description: time frame between temporal items
-        type: string
+        $ref: "#/definitions/TemporalTime"
       timeValue:
         description: time value between temporal items
         type: integer
@@ -489,7 +512,31 @@ definitions:
         items:
           $ref: "#/definitions/SearchParameter"
       modifiers:
-        description: criteria by operation or predicate
+        description: >
+          Predicates to apply to the search parameters. Aggregate modifiers
+          (i.e. NUM_OF_OCCURRENCES) are applied independently to each
+          SearchParameter and furthermore, are applied independently to any
+          group elements within those SearchParameters.
+
+          Consider the following example query scenario.
+
+          Example criteria tree:
+          - parent
+            - child1
+            - child2
+
+          Curated dataset contains 1 participant with 1 event each of concepts
+          child1 and child2. Search request is made on "parent", with a modifier of
+          {type: NUM_OF_OCCURRENCES, operands: [2]}.
+
+          This does not match - the participant would need to have at least 2
+          events of type child1 and/or of child2 and/or of parent (in the event
+          that "parent" corresponds to a real concept in the data).
+
+          Additionally, aggregate modifiers are applied secondarily to other
+          modifiers. For example, combining the AGE_AT_EVENT with
+          NUM_OF_OCCURRENCES - first we filter down all events by the age
+          predicate, then we count occurrences.
         type: "array"
         items:
           $ref: "#/definitions/Modifier"
@@ -522,7 +569,7 @@ definitions:
         description: The name of the generating Criterion
         type: string
       value:
-        description: The Value of the Criteria within its Category Tree
+        description: The Criteria code (or name if querying for Deceased)
         type: string
       type:
         description: The type of the generating Criterion
@@ -534,11 +581,56 @@ definitions:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
       conceptId:
-        description: The concept id that maps to concept table.
+        description: The concept id that maps to concept table, if any.
         type: integer
         format: int64
       attributes:
-        description: Any applicable arguments that complete the sense of the parameter
+        description: >
+            Attributes are extra inputs provided by users through the UX. Currently used by Demographics(Age),
+            Measurements(Body Height, Weight.. etc) and Physical Measurements(Blood Pressure, Body Weight.. etc).
+            Measurements and Physical Measurements have overlap in many areas such as body weight, but the
+            difference is standard(measurements) and source(physical measurements).
+            
+             Example demo age search parameter:
+             {
+               "type": "DEMO",
+               "searchParameters": [
+                 {
+                   "type": "DEMO", 
+                   "subtype": "AGE",
+                   "group": false,
+                   "attributes": [{"name": "Age", "operator": "BETWEEN", "operands": [23, 31]}]
+                 }
+               ],
+               "modifiers": []
+             } 
+             
+             Example physical measurement blood pressure(Hypotensive (Systolic <= 90 / Diastolic <= 60))
+             {
+               "type": "PM",
+               "searchParameters": [
+                 {
+                   "type": "PM",
+                   "subtype": "BP",
+                   "group": false,
+                   "attributes": [
+                     {
+                       "conceptId": 903118,
+                       "name": "Systolic",
+                       "operands": ["90"],
+                       "operator":"LESS_THAN_OR_EQUAL_TO"
+                     },
+                     {
+                       "conceptId": 903115,
+                       "name": "Diastolic",
+                       "operands": ["60"],
+                        "operator": "LESS_THAN_OR_EQUAL_TO"
+                      }
+                    ]
+                  }
+                ],
+                "modifiers": []
+              }
         type: "array"
         items:
           $ref: "#/definitions/Attribute"
@@ -558,8 +650,8 @@ definitions:
       - operands
     properties:
       name:
-        type: string
         description: the name of the attribute
+        $ref: "#/definitions/AttrName"
       operator:
         $ref: "#/definitions/Operator"
       operands:
@@ -631,6 +723,11 @@ definitions:
     type: string
     description: time refers to the amount of time in reference to temporal mentions
     enum: [DURING_SAME_ENCOUNTER_AS, X_DAYS_BEFORE, X_DAYS_AFTER, WITHIN_X_DAYS_OF]
+
+  AttrName:
+    type: string
+    description: Name that descibes the type of attribute
+    enum: [ANY, NUM, CAT, AGE]
 
   DemoChartInfoListResponse:
     type: object

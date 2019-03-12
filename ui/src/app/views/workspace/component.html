@@ -111,9 +111,9 @@
         </span>
       </span>
     </div>
-    <div *ngFor="let user of workspace.userRoles">
-      <div>{{user.role}}: {{user.email}}</div>
-    </div>
+      <div *ngFor="let user of workspace.userRoles">
+        <div>{{user.role}}: {{user.email}}</div>
+      </div>
     <h6>
       Workspace Information
       <app-tooltip [direction]="'top-left'">
@@ -172,7 +172,11 @@
     </a>
   </div>
 </div>
-<app-workspace-share [workspace]="workspace" [accessLevel]="accessLevel"></app-workspace-share>
+<app-workspace-share [workspace]="workspace"
+                     [accessLevel]="accessLevel"
+                     [onClose]="closeShare.bind(this)"
+                     [userEmail]="username"
+                     [sharing]="sharing"></app-workspace-share>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
@@ -180,7 +184,9 @@
     <button type="button" class="btn btn-primary" (click)="notebookError = false">Ok</button>
   </div>
 </clr-modal>
-<app-bug-report></app-bug-report>
+<app-bug-report *ngIf="bugReportOpen"
+                [bugReportDescription]="bugReportDescription"
+                [onClose]="closeBugReport"></app-bug-report>
 <app-new-notebook-modal *ngIf="creatingNotebook"
   [workspace]="workspace"
   [existingNotebooks]="notebookList"
