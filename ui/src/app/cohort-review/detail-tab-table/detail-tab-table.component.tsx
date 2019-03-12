@@ -146,27 +146,27 @@ const css = `
     color: black;
   }
 
-  body .p-tabview.p-tabview-top .p-tabview-nav 
-  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom 
-  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-left 
-  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-right 
+  body .p-tabview.p-tabview-top .p-tabview-nav
+  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom
+  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-left
+  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-right
   .p-tabview-nav li.p-highlight:hover a {
     border: none;
     background-color: transparent;
     color: black;
   }
-  body .p-tabview.p-tabview-top .p-tabview-nav 
-  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom 
-  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-left 
-  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-right 
+  body .p-tabview.p-tabview-top .p-tabview-nav
+  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom
+  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-left
+  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-right
   .p-tabview-nav li.p-highlight:focus a {
     border: none;
     background-color: transparent;
     color: black;
   }
-  body .p-tabview.p-tabview-top 
-  .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a, 
-  body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a, 
+  body .p-tabview.p-tabview-top
+  .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
+  body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
   body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
   body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a {
     background-color: transparent;
@@ -403,7 +403,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      let noMatch;
+      // let noMatch;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
           ? start + rows - (start + rows - data.length) : start + rows;
@@ -413,12 +413,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-      if(data !== null) {
-        noMatch =  data.filter(m => {
-          // console.log(m.standardName);
-          m.standardName === 'No matching concept'
-        })
-      }
+      // if (data !== null) {
+      //   noMatch =  data.filter(m => {
+      //     // console.log(m.standardName);
+      //     m.standardName === 'No matching concept'
+      //   })
+      // }
       console.log(this.state.expandedRows);
       const columns = this.props.columns.map((col) => {
 
