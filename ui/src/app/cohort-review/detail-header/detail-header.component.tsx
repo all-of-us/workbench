@@ -63,7 +63,7 @@ const styles = reactStyles({
   headerSection: {
     float: 'left',
     height: '100%',
-    marginRight: '1rem',
+    marginRight: '2%',
     border: '1px solid #cccccc',
     borderRadius: '5px',
     background: '#fafafa',
@@ -83,13 +83,14 @@ const styles = reactStyles({
     color: '#262262',
   },
   filterHeader: {
-    height: '35%',
-    marginBottom: '0.4rem',
+    height: '38%',
+    marginBottom: '0.3rem',
     borderBottom: '1px solid #216fb4',
   },
   filterTab: {
     height: '100%',
-    margin: '0 0.25rem',
+    margin: '0 4% 0 1%',
+    padding: '5px 7px 0',
     fontSize: '12px',
     color: '#2691d0',
     border: 0,
@@ -107,9 +108,9 @@ const styles = reactStyles({
   resetBtn: {
     float: 'right',
     lineHeight: '16px',
-    padding: '0 2px',
-    margin: '5px 5px 0 0',
-    fontSize: '11px',
+    padding: '0.5px 3.5px',
+    margin: '6px 5px 0 0',
+    fontSize: '10px',
     color: '#2691d0',
     border: '1px solid #2691d0',
     borderRadius: '3px',
@@ -119,18 +120,18 @@ const styles = reactStyles({
 const otherStyles = {
   navigation: {
     ...styles.headerSection,
-    width: '20%',
+    width: '22%',
     padding: '1.15rem 0.4rem'
   },
   filters: {
     ...styles.headerSection,
-    width: '40%',
+    width: '50%',
   },
   radios: {
     ...styles.headerSection,
     fontSize: '12px',
-    width: '20%',
-    padding: '0.5rem',
+    width: '24%',
+    padding: '0.5rem 0 0.5rem 0.5rem',
   },
   navBtnActive: {
     ...styles.navBtn,
@@ -146,7 +147,7 @@ const otherStyles = {
   },
   tabActive: {
     ...styles.filterTab,
-    borderBottom: '2px solid #216FB4',
+    borderBottom: '4px solid #216FB4',
     fontWeight: 600,
   },
   filterLabel: {
@@ -472,7 +473,7 @@ export const DetailHeader = withCurrentWorkspace()(
               </div>}
             </div>
           </div>
-          <div style={otherStyles.radios}>
+          <div style={{...otherStyles.radios, marginRight: 0}}>
             <div style={{marginBottom: '0.5rem'}}>
               <RadioButton
                 name='vocab'
