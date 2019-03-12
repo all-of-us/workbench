@@ -229,7 +229,7 @@ const FocusCategories = [
   }
 ];
 
-class WorkspaceUnderservedPopulation extends
+export class WorkspaceUnderservedPopulation extends
     React.Component<{value: Array<UnderservedPopulationEnum>, onChange: Function},
     {show: boolean, value: Array<UnderservedPopulationEnum>}> {
   constructor(props: any) {
