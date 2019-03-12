@@ -186,7 +186,7 @@
         </div>
         <ng-template #noConceptSynonyms><div class="col-md flex-xs-middle"></div></ng-template>
         <div class="col-md-1 flex-items-xs-right card-view">
-          {{r.countValue | number }}
+          {{checkCount(r.countValue)}}
         </div>
         <div class="col-md-1 flex-xs-middle">
           {{r.vocabularyId}} {{r.conceptCode}}

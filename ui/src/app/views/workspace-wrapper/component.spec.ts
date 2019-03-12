@@ -8,6 +8,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
@@ -15,13 +16,14 @@ import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
-import {BugReportService, UserService, WorkspaceAccessLevel, WorkspacesService, } from 'generated';
+import {BugReportService, UserService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
 import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStorageServiceStub} from 'testing/stubs/workspace-storage-service-stub';
 
 import {updateAndTick} from 'testing/test-helpers';
 
@@ -71,6 +73,7 @@ describe('WorkspaceWrapperComponent', () => {
           })
         },
         {provide: WorkspacesService, useValue: new WorkspacesServiceStub()},
+        {provide: WorkspaceStorageService, useValue: new WorkspaceStorageServiceStub()},
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(FakeAppComponent);

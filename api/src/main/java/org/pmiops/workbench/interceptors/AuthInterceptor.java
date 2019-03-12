@@ -209,7 +209,10 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // Fetch the user with authorities, since they aren't loaded during normal
       user = userDao.findUserWithAuthorities(user.getUserId());
       Collection<Authority> granted = user.getAuthoritiesEnum();
-      if (granted.containsAll(Arrays.asList(req.value()))) {
+
+      // DEVELOPER subsumes all other authorities.
+      if (granted.contains(Authority.DEVELOPER) ||
+          granted.containsAll(Arrays.asList(req.value()))) {
         return true;
       } else {
         log.log(

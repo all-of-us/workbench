@@ -150,8 +150,8 @@ def dev_up()
   common.run_inline %W{docker-compose up -d db}
   common.status "Running database migrations..."
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
-  init_new_cdr_db %W{--cdr-db-name cdr}
-  init_new_cdr_db %W{--cdr-db-name public}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
 
   common.status "Updating CDR versions..."
   common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
@@ -194,8 +194,8 @@ def run_local_migrations()
     common.run_inline %W{./run-migrations.sh main}
   end
   Dir.chdir('db-cdr/generate-cdr') do
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr}
-    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --version-flag cdr}
+    common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name public --version-flag public}
   end
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
   common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
@@ -463,7 +463,7 @@ def run_rainforest_tests(cmd_name, *args)
   # environment we can run tests in. There is, however, an identical key in
   # each of the other environments.
   token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
-  common.run_inline %W{rainforest run all --token #{token}}
+  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
 end
 
 Common.register_command({
@@ -638,10 +638,10 @@ def run_local_all_migrations()
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
-  init_new_cdr_db %W{--cdr-db-name cdr}
-  init_new_cdr_db %W{--cdr-db-name public}
-  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({
@@ -652,8 +652,8 @@ Common.register_command({
 
 
 def run_local_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name cdr --version-flag cdr --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({
@@ -663,8 +663,8 @@ Common.register_command({
 })
 
 def run_local_public_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name public}
-  init_new_cdr_db %W{--cdr-db-name public --run-list data --context local}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
+  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
 end
 
 Common.register_command({

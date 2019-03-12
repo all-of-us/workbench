@@ -116,10 +116,11 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.ALLEVENTS,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      visitType, standardCode, standardVocabulary, standardName, value,
+      itemDate, visitType, standardCode, standardVocabulary, standardName, value,
       domain, ageAtEvent
     ],
     reverseEnum: {
+      itemDate: itemDate,
       visitType: visitType,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
@@ -135,9 +136,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.CONDITION,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
+      itemDate: itemDate,
       standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,
@@ -149,9 +151,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.PROCEDURE,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      standardCode, standardVocabulary, standardName, ageAtEvent, visitType
+      itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
     ],
     reverseEnum: {
+      itemDate: itemDate,
       standardName: standardName,
       standardCode: standardCode,
       standardVocabulary: standardVocabulary,

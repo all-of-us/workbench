@@ -86,7 +86,7 @@ public interface FireCloudService {
 
   NihStatus getNihStatus();
 
-  void postNihCallback(JWTWrapper wrapper);
+  NihStatus postNihCallback(JWTWrapper wrapper);
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
 

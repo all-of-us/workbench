@@ -354,11 +354,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void postNihCallback(JWTWrapper wrapper) {
+  public NihStatus postNihCallback(JWTWrapper wrapper) {
     NihApi nihApi = nihApiProvider.get();
-    retryHandler.run((context) -> {
-      nihApi.nihCallback(wrapper);
-      return null;
+    return retryHandler.run((context) -> {
+      return nihApi.nihCallback(wrapper);
     });
   }
 

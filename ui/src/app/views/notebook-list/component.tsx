@@ -9,8 +9,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NewNotebookModal} from 'app/views/new-notebook-modal/component';
 import {ResourceCard} from 'app/views/resource-card/component';
@@ -21,11 +21,6 @@ const styles = {
   heading: {
     color: '#2F2E7E',
     fontSize: 20, fontWeight: 600, lineHeight: '24px'
-  },
-  addCard: {
-    width: 200, height: 105,
-    marginTop: '1rem', marginRight: '1rem',
-    fontSize: 18, fontWeight: 500, lineHeight: '22px',
   }
 };
 
@@ -77,7 +72,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         <TooltipTrigger content={!canWrite && 'Write permission required to create notebooks'}>
           <CardButton
             disabled={!canWrite}
-            style={styles.addCard}
+            type='small'
             onClick={() => this.setState({creating: true})}
           >
             Create a<br/>New Notebook

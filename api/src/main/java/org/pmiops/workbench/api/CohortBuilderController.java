@@ -4,11 +4,14 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
@@ -42,8 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
-
-  private final static Long DEFAULT_LIMIT = 100L;
+  private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
+  private static final Long DEFAULT_LIMIT = 100L;
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -67,8 +70,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         return new org.pmiops.workbench.model.Criteria()
           .id(criteria.getId())
           .parentId(criteria.getParentId())
-          .type(criteria.getType())
-          .subtype(criteria.getSubtype())
+          .type(TreeType.fromValue(criteria.getType()))
+          .subtype(TreeSubType.fromValue(criteria.getSubtype()))
           .code(criteria.getCode())
           .name(criteria.getName())
           .count(StringUtils.isEmpty(criteria.getCount()) ? null : new Long(criteria.getCount()))
@@ -92,7 +95,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       public org.pmiops.workbench.model.CriteriaAttribute apply(CriteriaAttribute criteria) {
         return new org.pmiops.workbench.model.CriteriaAttribute()
           .id(criteria.getId())
-          .conceptId(criteria.getConceptId())
           .valueAsConceptId(criteria.getValueAsConceptId())
           .conceptName(criteria.getConceptName())
           .type(criteria.getType())
@@ -176,8 +178,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
-      //for now just log cluster name and status if elastic is enabled
-      elasticSearchService.elasticCount();
+      try {
+        return ResponseEntity.ok(elasticSearchService.count(request).value());
+      } catch (IOException e) {
+        log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
+      }
     }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(
       participantCounter.buildParticipantCounterQuery(new ParticipantCriteria(request))
