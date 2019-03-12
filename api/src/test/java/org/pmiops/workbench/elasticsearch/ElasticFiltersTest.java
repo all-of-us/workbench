@@ -64,6 +64,8 @@ public class ElasticFiltersTest {
 
   private SearchParameter leafParam2;
   private Attribute numEqualAttr;
+  private SearchParameter ageParam;
+  private Attribute ageAttr;
 
   @Before
   public void setUp() {
@@ -162,6 +164,16 @@ public class ElasticFiltersTest {
       .name(AttrName.NUM)
       .operator(Operator.EQUAL)
       .operands(Arrays.asList("1"));
+
+    ageAttr = new Attribute()
+      .name(AttrName.AGE)
+      .operator(Operator.EQUAL)
+      .operands(Arrays.asList("38"));
+    ageParam = new SearchParameter()
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.AGE.toString())
+      .group(false)
+      .attributes(Arrays.asList(ageAttr));
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
@@ -368,5 +380,17 @@ public class ElasticFiltersTest {
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(heightEqualParam.getConceptId().toString())),
       QueryBuilders.rangeQuery("events.value_as_number").gt(numEqualAttr.getOperands().get(0)).lt(numEqualAttr.getOperands().get(0))));
+  }
+
+  @Test
+  public void testAgeQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(ageParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
   }
 }
