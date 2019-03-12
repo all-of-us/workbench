@@ -4,16 +4,12 @@ import {InfoIcon} from 'app/components/icons';
 import {Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
-import {
-  WorkspaceUnderservedPopulation
-} from 'app/views/workspace-edit-underserved-population/component';
-import {WorkspaceAccessLevel} from 'generated';
-import {CdrVersion, DataAccessLevel} from 'generated/fetch';
+import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserved-population/component';
+import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -232,13 +228,13 @@ interface WorkspaceEditProps {
   navigateBack: Function;
   mode: WorkspaceEditMode;
   routeConfigData: any;
-  workspace: WorkspaceData;
+  workspace: Workspace;
 }
 
 interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
   disableButton: Boolean;
-  workspace: WorkspaceData;
+  workspace: Workspace;
   workspaceCreationConflictError: Boolean;
   workspaceCreationError: Boolean;
 }
@@ -256,7 +252,6 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           name: '',
           description: '',
           dataAccessLevel: DataAccessLevel.Registered,
-          accessLevel: WorkspaceAccessLevel.OWNER,
           cdrVersionId: '',
           researchPurpose: {
             diseaseFocusedResearch: false,
@@ -269,10 +264,10 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             reviewRequested: false,
             containsUnderservedPopulation: false,
             underservedPopulationDetails: []
-          },
-          workspaceCreationConflictError: false,
-          workspaceCreationError: false
-        }
+          }
+        },
+        workspaceCreationConflictError: false,
+        workspaceCreationError: false
       };
     }
 
@@ -367,6 +362,14 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       return !fieldValue || fieldValue === '';
     }
 
+    updateUnderserverPopulation(populationDetails) {
+      this.setState(
+          fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], populationDetails));
+      this.setState(
+          fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'], (populationDetails.length > 0))
+      )
+    }
+
     render() {
       return <React.Fragment>
         <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
@@ -376,10 +379,12 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                        value = {this.state.workspace.name}
                        onChange={v =>    this.setState(fp.set(['workspace', 'name'], v))}/>
             <div style={styles.select}>
-               <Select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px'}}
+                <Select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px'}}
                         value={this.state.workspace.cdrVersionId}
                         options={this.state.cdrVersionItems}
-                       isDisabled={this.props.routeConfigData.mode === WorkspaceEditMode.Edit}>
+                        onChange={v =>
+                            this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
+                        isDisabled={this.props.routeConfigData.mode === WorkspaceEditMode.Edit}>
                 </Select>
             </div>
             <TooltipTrigger content={toolTipText.cdrSelect}>
@@ -412,7 +417,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                 style={{width: 'calc(50% - 2rem)', border: '1px solid #9a9a9', borderRadius: '5px'}}
                 placeholder='Name of Disease' onChange={v =>
                 this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
-                       disabled={true}/>
+                       disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
 
           </WorkspaceCateogry>
           <div style={{display: 'inline-block'}}>
@@ -447,18 +452,20 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           </div>
           <WorkspaceUnderservedPopulation
               value={this.state.workspace.researchPurpose.underservedPopulationDetails}
-              onChange={v => this.setState(
-                fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], v))}>
+              onChange={v => this.updateUnderserverPopulation(v)}>
           </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
                               tooltip={toolTipText.reviewRequest}>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
-                   type='checkbox'/>
+                   type='checkbox'
+                   onChange={v =>
+                this.setState(fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.target.checked))}
+                   checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
-              <a onClick= {() => this.openStigmatization()}>stigmatization</a>
+              <a onClick= {() => this.openStigmatization()}> stigmatization </a>
             of research participants. I would like the All of Us Resource Access Board (RAB) to
               review my Research Purpose.
               (This will not prevent you from creating a workspace and proceeding.)

@@ -2,7 +2,7 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {reactStyles} from 'app/utils';
-import {UnderservedPopulationEnum} from 'generated/model/underservedPopulationEnum';
+import {UnderservedPopulationEnum} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
