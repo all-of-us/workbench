@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
-import {Select, TextInput} from 'app/components/inputs';
+import {DatePicker, Select, TextInput} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -409,30 +409,38 @@ export const DetailHeader = withCurrentWorkspace()(
                   Date Range:
                 </div>
                 <div style={otherStyles.filterInput}>
-                  <Calendar
-                    style={{width: '100%'}}
-                    dateFormat='yy-mm-dd'
+                  {/*<Calendar*/}
+                    {/*style={{width: '100%'}}*/}
+                    {/*dateFormat='yy-mm-dd'*/}
+                    {/*value={date.min}*/}
+                    {/*onChange={(e) => this.setFilter(e.value, 'date', 'min')}*/}
+                    {/*monthNavigator={true}*/}
+                    {/*yearNavigator={true}*/}
+                    {/*yearRange='1941:2018'*/}
+                    {/*showIcon={true}*/}
+                  {/*/>*/}
+                  <DatePicker
                     value={date.min}
-                    onChange={(e) => this.setFilter(e.value, 'date', 'min')}
-                    monthNavigator={true}
-                    yearNavigator={true}
-                    yearRange='1941:2018'
-                    showIcon={true}
+                    onChange={v => this.setFilter(v, 'date', 'min')}
                   />
                 </div>
                 <div style={otherStyles.filterText}>
                   and
                 </div>
                 <div style={otherStyles.filterInput}>
-                  <Calendar
-                    style={{width: '100%'}}
-                    dateFormat='yy-mm-dd'
+                  {/*<Calendar*/}
+                    {/*style={{width: '100%'}}*/}
+                    {/*dateFormat='yy-mm-dd'*/}
+                    {/*value={date.max}*/}
+                    {/*onChange={(e) => this.setFilter(e.value, 'date', 'max')}*/}
+                    {/*monthNavigator={true}*/}
+                    {/*yearNavigator={true}*/}
+                    {/*yearRange='1940:2018'*/}
+                    {/*showIcon={true}*/}
+                  {/*/>*/}
+                  <DatePicker
                     value={date.max}
-                    onChange={(e) => this.setFilter(e.value, 'date', 'max')}
-                    monthNavigator={true}
-                    yearNavigator={true}
-                    yearRange='1940:2018'
-                    showIcon={true}
+                    onChange={v => this.setFilter(v, 'date', 'max')}
                   />
                 </div>
               </div>}
