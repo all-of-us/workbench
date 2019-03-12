@@ -461,7 +461,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
                    type='checkbox'
                    onChange={v =>
-                this.setState(fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.target.checked))}
+                   this.setState(fp.set(['workspace', 'researchPurpose', 'reviewRequested' ],
+                   v.target.checked))}
                    checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
