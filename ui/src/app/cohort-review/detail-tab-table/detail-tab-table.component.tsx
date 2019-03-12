@@ -1,18 +1,17 @@
 import {Component, Input} from '@angular/core';
+import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
-import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import {DomainType, PageFilterRequest, PageFilterType, SortOrder, TreeType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
-
-
 
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
@@ -175,6 +174,16 @@ const styles = reactStyles({
   }
 });
 const rows = 25;
+const domains = [
+  DomainType.CONDITION,
+  DomainType.PROCEDURE,
+  DomainType.DRUG,
+  DomainType.OBSERVATION,
+  DomainType.PHYSICALMEASURE,
+  DomainType.LAB,
+  DomainType.VITAL,
+  DomainType.SURVEY,
+];
 
 export interface DetailTabTableProps {
   tabname: string;
@@ -310,7 +319,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {checkedItems, data} = this.state;
       if (event.target.checked) {
         if (event.target.name === 'SelectAll') {
-          checkedItems[colName] = namesArray ;
+          checkedItems[colName] = namesArray.map(opt => opt.name);
         } else {
           checkedItems[colName].push(event.target.name);
           if (namesArray.length - 1 === checkedItems[colName].length) {
@@ -385,42 +394,52 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    addAllOption(arr) {
-      arr.push('SelectAll');
-    }
-
-    getColumnValue(colName) {
+    getColumnValue(colName: string) {
       const {data, checkedItems} = this.state;
-      let names = [];
-      if (data) {
-        names = [...fp.uniq(data.map(item => {
-          if (colName === 'standardVocabulary') {
-            return item.standardVocabulary;
-          } else if (colName === 'domain') {
-            return item.domain;
-          }
-        }))];
+      const {domain} = this.props;
+      if (!data) {
+        return {};
       }
-      this.addAllOption(names);
+      const counts = {total: 0};
+      data.forEach(item => {
+        counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+        counts.total++;
+      });
+      let options: Array<any>;
+      switch (colName) {
+        case 'standardVocabulary':
+          /* TODO need to check for Source also after adding the standard/source radio buttons */
+          const vocabs = vocabOptions.getValue().Standard;
+          options = vocabs[domain] ? vocabs[domain].map(option => {
+            return {name: option, count: counts[option] || 0};
+          }) : [];
+          break;
+        case 'domain':
+          options = domains.map(option => {
+            return {name: option, count: counts[option] || 0};
+          });
+      }
+      options.push({name: 'SelectAll', count: counts.total});
       if (checkedItems[colName].find(i => i === 'SelectAll')) {
-        checkedItems[colName] = names;
+        checkedItems[colName] = options.map(opt => opt.name);
       }
       let fl: any;
 
-      return ( <span>  {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
+      return <span>
+        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {names.map((i, index) => (
-            <div key={index} style={{borderTop: i === 'SelectAll' ? '1px solid #ccc' : 'none',
-              padding: i === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
-              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={i}
-                     checked={checkedItems[colName].includes(i)}
-                     onChange={($event) => this.updateData($event, colName, names)}/>
-              <label style={{paddingLeft: '0.4rem'}}> {i} </label>
+          {options.map((opt, i) => (
+            <div key={i} style={{borderTop: opt.name === 'SelectAll' ? '1px solid #ccc' : 'none',
+              padding: opt.name === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+                     checked={checkedItems[colName].includes(opt.name)}
+                     onChange={($event) => this.updateData($event, colName, options)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
             </div>
           ))}
         </OverlayPanel>
-      </span>);
+      </span>;
     }
 
     render() {

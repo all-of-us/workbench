@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 
-import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, filterStateStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewService, CohortsService, PageFilterType, ReviewStatus, SortOrder} from 'generated';
 
@@ -39,6 +39,20 @@ export class PageLayout implements OnInit, OnDestroy {
       currentCohortStore.next(cohort);
       this.cohortLoaded = true;
     });
+    if (!vocabOptions.getValue()) {
+      this.reviewAPI.getVocabularies(ns, wsid, cid, cdrid)
+        .toPromise()
+        .then(response => {
+          const filters = {Source: {}, Standard: {}};
+          response.items.forEach(item => {
+            filters[item.type][item.domain] = [
+              ...(filters[item.type][item.domain] || []),
+              item.vocabulary
+            ];
+          });
+          vocabOptions.next(filters);
+        });
+    }
   }
 
   ngOnDestroy() {
