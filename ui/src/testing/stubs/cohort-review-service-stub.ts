@@ -1,4 +1,4 @@
-import {CohortReview, ParticipantDataListResponse} from 'generated';
+import {CohortReview, ParticipantDataListResponse, VocabularyListResponse} from 'generated';
 import {Observable} from 'rxjs/Observable';
 
 export const cohortReviewStub = {
@@ -40,5 +40,8 @@ export class CohortReviewServiceStub {
   }
   getParticipantCohortAnnotations() {
     return Observable.of({items: []});
+  }
+  getVocabularies(): Observable<VocabularyListResponse> {
+    return Observable.of(<VocabularyListResponse>{items: []});
   }
 }
