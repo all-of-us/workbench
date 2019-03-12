@@ -109,7 +109,6 @@
     "react-paginating": "^1.0.3-react16.0",
     "react-select": "^2.3.0",
     "react-switch": "^4.1.0",
-    "react-toggle-switch": "^3.0.4",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
     "rxjs": "^5.5.6",
