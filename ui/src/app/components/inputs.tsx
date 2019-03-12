@@ -167,7 +167,7 @@ export class DatePicker extends React.Component<
         />}
       >
         <Clickable style={{display: 'flex', alignItems: 'center', flex: 1}}>
-          <div style={{flex: 1}}>{value && value.toLocaleDateString()}</div>
+          <div style={{flex: 1}}>{value && value.toISOString().slice(0, 10)}</div>
           <ClrIcon style={{flex: 'none'}} shape='calendar' />
         </Clickable>
       </PopupTrigger>
