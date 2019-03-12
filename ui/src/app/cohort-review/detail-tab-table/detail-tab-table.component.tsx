@@ -295,7 +295,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (this.props.domain !== DomainType[DomainType.SURVEY]
         && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
         && visits) {
-        data = data.filter(item => visits.includes(item.visitType));
+        data = data.filter(item => visits === item.visitType);
       }
       const empty = [];
       for (const col in checkedItems) {
