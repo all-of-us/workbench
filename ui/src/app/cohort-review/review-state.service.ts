@@ -38,5 +38,6 @@ const initialFilterState = {
 };
 
 export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
+export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore =
   new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));

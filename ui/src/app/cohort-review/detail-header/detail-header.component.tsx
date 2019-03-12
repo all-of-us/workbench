@@ -1,7 +1,8 @@
 import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore, filterStateStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
+import {Select, TextInput} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -14,19 +15,30 @@ import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
 import * as moment from 'moment';
-import {TextInput} from '../../components/inputs';
 const css = `
   body .p-calendar.p-calendar-w-btn > .p-inputtext,
   body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
     width: 80%;
+    height: 1.5rem;
+    border-color: rgb(197, 197, 197);
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
-    border-right: 1px solid #212121;
+    border-right: 1px solid rgb(197, 197, 197);
+  }
+  body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:focus,
+  .p-calendar > .p-calendar-button:enabled:focus {
+    box-shadow: none;
   }
   .p-calendar > .p-calendar-button,
   .p-calendar > .p-calendar-button:enabled:hover {
     color: #216FB4;
     background: transparent;
+    border: 0;
+  }
+  .p-button-icon-only .pi-calendar.p-button-icon-left {
+    font-size: 1.5em;
+  }
+  .p-button-icon-only .pi-calendar.p-button-icon-left:active {
     border: 0;
   }
 `;
@@ -69,24 +81,28 @@ const styles = reactStyles({
   participantText: {
     fontSize: '14px',
     color: '#262262',
-    padding: '0 1rem'
   },
   filterHeader: {
-    height: '33%',
-    marginBottom: '0.5rem',
+    height: '35%',
+    marginBottom: '0.4rem',
     borderBottom: '1px solid #216fb4',
   },
   filterTab: {
+    height: '100%',
     margin: '0 0.25rem',
     fontSize: '12px',
     color: '#2691d0',
     border: 0,
+    borderBottom: 0,
     background: 'transparent',
     cursor: 'pointer',
   },
   filterBody: {
     paddingLeft: '0.5rem',
     fontSize: '12px',
+  },
+  filterDiv: {
+    float: 'left',
   },
   resetBtn: {
     float: 'right',
@@ -104,7 +120,7 @@ const otherStyles = {
   navigation: {
     ...styles.headerSection,
     width: '20%',
-    padding: '1.15rem 0.4rem',
+    padding: '1.15rem 0.4rem'
   },
   filters: {
     ...styles.headerSection,
@@ -112,6 +128,7 @@ const otherStyles = {
   },
   radios: {
     ...styles.headerSection,
+    fontSize: '12px',
     width: '20%',
     padding: '0.5rem',
   },
@@ -131,6 +148,24 @@ const otherStyles = {
     ...styles.filterTab,
     borderBottom: '2px solid #216FB4',
     fontWeight: 600,
+  },
+  filterLabel: {
+    ...styles.filterDiv,
+    width: '25%',
+    marginTop: '4px'
+  },
+  filterInput: {
+    ...styles.filterDiv,
+    width: '30%',
+  },
+  filterSelect: {
+    ...styles.filterDiv,
+    width: '50%',
+  },
+  filterText: {
+    ...styles.filterDiv,
+    width: '10%',
+    margin: '4px 0 0 0.5rem'
   }
 };
 export interface DetailHeaderProps {
@@ -320,18 +355,24 @@ export const DetailHeader = withCurrentWorkspace()(
         <h4 style={styles.title}>{cohort.name}</h4>
         <div style={styles.description}>{cohort.description}</div>
         <div style={{height: '3.5rem'}}>
-          <div style={otherStyles.navigation}>
+          <div style={{...otherStyles.navigation, textAlign: 'center'}}>
             <button
-              style={isFirstParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive}
+              style={{
+                ...(isFirstParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),
+                float: 'left',
+              }}
               type='button'
               title='Go To the Prior Participant'
               disabled={isFirstParticipant}
               onClick={() => this.previous()}>
               <i style={styles.icon} className='pi pi-angle-left' />
             </button>
-            <span style={styles.participantText}>Participant { participant.id }</span>
+            <span style={styles.participantText}>Participant {participant.id}</span>
             <button
-              style={isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive}
+              style={{
+                ...(isLastParticipant ? otherStyles.navBtnDisabled : otherStyles.navBtnActive),
+                float: 'right',
+              }}
               type='button'
               title='Go To the Next Participant'
               disabled={isLastParticipant}
@@ -364,10 +405,10 @@ export const DetailHeader = withCurrentWorkspace()(
             </div>
             <div style={styles.filterBody}>
               {filterTab === 'date' && <div>
-                <div style={{float: 'left', width: '25%'}}>
-                  Select Date Range:
+                <div style={otherStyles.filterLabel}>
+                  Date Range:
                 </div>
-                <div style={{float: 'left', width: '30%'}}>
+                <div style={otherStyles.filterInput}>
                   <Calendar
                     style={{width: '100%'}}
                     dateFormat='yy-mm-dd'
@@ -379,10 +420,10 @@ export const DetailHeader = withCurrentWorkspace()(
                     showIcon={true}
                   />
                 </div>
-                <div style={{float: 'left', width: '10%', marginLeft: '0.5rem'}}>
+                <div style={otherStyles.filterText}>
                   and
                 </div>
-                <div style={{float: 'left', width: '30%'}}>
+                <div style={otherStyles.filterInput}>
                   <Calendar
                     style={{width: '100%'}}
                     dateFormat='yy-mm-dd'
@@ -396,20 +437,20 @@ export const DetailHeader = withCurrentWorkspace()(
                 </div>
               </div>}
               {filterTab === 'age' && <div>
-                <div style={{float: 'left', width: '25%'}}>
-                  Age Range
+                <div style={otherStyles.filterLabel}>
+                  Age Range:
                 </div>
-                <div style={{float: 'left', width: '30%'}}>
+                <div style={otherStyles.filterInput}>
                   <TextInput
                     type='number'
                     value={age.min}
                     onChange={(e) => this.setFilter(e, 'age', 'min')}
                   />
                 </div>
-                <div style={{float: 'left', width: '10%', marginLeft: '0.5rem'}}>
+                <div style={otherStyles.filterText}>
                   and
                 </div>
-                <div style={{float: 'left', width: '30%'}}>
+                <div style={otherStyles.filterInput}>
                   <TextInput
                     type='number'
                     value={age.max}
@@ -417,11 +458,22 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {filterTab === 'visits' && <div>Visits</div>}
+              {filterTab === 'visits' && <div>
+                <div style={otherStyles.filterLabel}>
+                  Visits:
+                </div>
+                <div style={otherStyles.filterSelect}>
+                  <Select
+                    options={visitsFilterOptions.getValue()}
+                    value={visits}
+                    onChange={(e) => this.setFilter(e, 'visits')}
+                  />
+                </div>
+              </div>}
             </div>
           </div>
           <div style={otherStyles.radios}>
-            <div>
+            <div style={{marginBottom: '0.5rem'}}>
               <RadioButton
                 name='vocab'
                 value='source'
