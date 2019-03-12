@@ -11,6 +11,7 @@ import javax.inject.Provider;
 import javax.servlet.ServletContext;
 
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -22,6 +23,7 @@ import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -38,7 +40,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 @EnableWebMvc
 @Configuration
-@Import(CacheSpringConfiguration.class)
+@ComponentScan(basePackages={"org.pmiops.workbench.interceptors", "org.pmiops.workbench.google"})
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
@@ -55,11 +57,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired
   private SecurityHeadersInterceptor securityHeadersInterceptor;
-
-  @Bean
-  HttpTransport httpTransport() {
-    return UrlFetchTransport.getDefaultInstance();
-  }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -104,11 +101,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Bean
-  public CloudStorageService cloudStorageService(Provider<WorkbenchConfig> workbenchConfig) {
-    return new CloudStorageServiceImpl(workbenchConfig);
   }
 
   /**

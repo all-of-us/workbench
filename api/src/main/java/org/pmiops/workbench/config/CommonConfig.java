@@ -28,6 +28,4 @@ public class CommonConfig {
   @Bean
   GoogleCredential.Builder googleCredentialBuilder() { return new GoogleCredential.Builder(); }
 
-  @Bean
-  ServiceAccounts serviceAccounts() { return new ServiceAccounts(); }
 }

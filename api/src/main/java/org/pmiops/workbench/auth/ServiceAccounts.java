@@ -4,17 +4,28 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import java.io.IOException;
-import java.util.List;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.List;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
+/**
+ * Handles functionality related to loading service account credentials and generated derived /
+ * impersonated credentials.
+ */
+@Component
 public class ServiceAccounts {
 
+  private final HttpTransport httpTransport;
+
   @Autowired
-  static HttpTransport httpTransport;
+  public ServiceAccounts(HttpTransport httpTransport) {
+    this.httpTransport = httpTransport;
+  }
 
   public GoogleCredential.Builder getCredentialBuilder() {
     return new GoogleCredential.Builder();
