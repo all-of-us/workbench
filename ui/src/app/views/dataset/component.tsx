@@ -220,8 +220,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                   onClick={() => navigate(['workspaces', namespace, id,  'cohorts', 'build'])}/>
               </div>
               <div style={{height: '10rem', overflowY: 'auto'}}>
-                {this.state.cohortList.length > 0 && !loadingResources &&
-                  this.state.cohortList.map(cohort =>
+                {!loadingResources && this.state.cohortList.map(cohort =>
                   <ResourceListItem key={cohort.id} resource={cohort} rType={ResourceType.COHORT}
                                     data-test-id='cohort-list-item'
                                     openConfirmDelete={
@@ -258,8 +257,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                            onClick={() => this.setState({creatingConceptSet: true})}/>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
-                  {this.state.conceptSetList.length > 0 && !loadingResources &&
-                    this.state.conceptSetList.map(conceptSet =>
+                  {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                       <ResourceListItem key={conceptSet.id} resource={conceptSet}
                                         data-test-id='concept-set-list-item'
                                         rType={ResourceType.CONCEPT_SET}
