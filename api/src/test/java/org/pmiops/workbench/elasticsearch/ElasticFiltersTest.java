@@ -39,6 +39,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 
+import java.util.Arrays;
+
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -66,6 +68,7 @@ public class ElasticFiltersTest {
 
   private static Criteria basicsCriteria() {
     return new Criteria()
+        .domainId("Observation")
         .type(TreeType.PPI.toString())
         .subtype(TreeSubType.BASICS.toString())
         .attribute(Boolean.FALSE);
@@ -409,6 +412,18 @@ public class ElasticFiltersTest {
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQueryOccurrences(
         13, QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
+  }
+
+  @Test
+  public void testAgeQuery() {
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(ageParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
   }
 
   @Test
