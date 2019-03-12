@@ -2,18 +2,19 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {InfoIcon} from 'app/components/icons';
 import {Select, TextArea, TextInput} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {WorkspaceData} from 'app/resolvers/workspace';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
+import WorkspaceUnderservedPopulation
+  from 'app/views/workspace-edit-underserved-population/component';
 import {WorkspaceAccessLevel} from 'generated';
+import {CdrVersion, DataAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {CdrVersion, DataAccessLevel} from '../../../generated/fetch';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from '../../components/modals';
-import {WorkspaceData} from '../../resolvers/workspace';
-import WorkspaceUnderservedPopulation from '../workspace-edit-underserved-population/component';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
@@ -282,7 +283,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
 
     async setCdrVersions() {
       const cdrVersions = await cdrVersionsApi().getCdrVersions();
-      //Convert cdrVersion to select input format of lable and value
+      // Convert cdrVersion to select input format of lable and value
       const versions = [];
       cdrVersions.items.map((version , i) => {
         versions.push({label: version.name, value: version.cdrVersionId});
@@ -310,7 +311,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create: return 'Create a new Workspace';
         case WorkspaceEditMode.Edit: return 'Edit workspace \"' + this.props.workspace.name + '\"';
-        case WorkspaceEditMode.Clone: return 'Clone workspace \"' + this.props.workspace.name + '\"';
+        case WorkspaceEditMode.Clone: return 'Clone workspace \"' +
+                                             this.props.workspace.name + '\"';
       }
     }
 
@@ -397,12 +399,14 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           <TextArea value={this.state.workspace.description}
                     onChange={v => this.setState(fp.set(['workspace', 'description'], v))}/>
         </WorkspaceEditSection>
-        <WorkspaceEditSection header='Please select all data use categories that apply for your current study'
-            text='These are for informational purposes only and do not affect or configure your new workspace.'>
-          <WorkspaceCateogry style={{width: '100%'}} item={ResearchPurposeItems.diseaseFocusedResearch}
-                             value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
-                             onChange={
-                               v => this.updateWorkspaceCategory('diseaseFocusedResearch', v)}>
+        <WorkspaceEditSection
+            header='Please select all data use categories that apply for your current study'
+            text='These are for informational purposes only and do not affect or configure your
+            new workspace.'>
+          <WorkspaceCateogry style={{width: '100%'}}
+              item={ResearchPurposeItems.diseaseFocusedResearch}
+              value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
+              onChange={v => this.updateWorkspaceCategory('diseaseFocusedResearch', v)}>
             <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
                 style={{width: 'calc(50% - 2rem)', border: '1px solid #9a9a9', borderRadius: '5px'}}
                 placeholder='Name of Disease' onChange={v =>
@@ -413,48 +417,44 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
               <WorkspaceCateogry item={ResearchPurposeItems.methodsDevelopment}
-                                 value={this.state.workspace.researchPurpose.methodsDevelopment}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('methodsDevelopment', v)}/>
+                  value={this.state.workspace.researchPurpose.methodsDevelopment}
+                  onChange={v => this.updateWorkspaceCategory('methodsDevelopment', v)}/>
               <WorkspaceCateogry item={ResearchPurposeItems.aggregateAnalysis}
-                                 value={!!this.state.workspace.researchPurpose.aggregateAnalysis}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('aggregateAnalysis', v)}/>
+                  value={!!this.state.workspace.researchPurpose.aggregateAnalysis}
+                  onChange={v => this.updateWorkspaceCategory('aggregateAnalysis', v)}/>
             </div>
           </div>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
               <WorkspaceCateogry item={ResearchPurposeItems.controlSet}
-                                 value={this.state.workspace.researchPurpose.controlSet}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('controlSet', v)}/>
+                  value={this.state.workspace.researchPurpose.controlSet}
+                  onChange={v => this.updateWorkspaceCategory('controlSet', v)}/>
               <WorkspaceCateogry item={ResearchPurposeItems.ancestry}
-                                 value={this.state.workspace.researchPurpose.ancestry}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('ancestry', v)}/>
+                  value={this.state.workspace.researchPurpose.ancestry}
+                  onChange={v => this.updateWorkspaceCategory('ancestry', v)}/>
             </div>
           </div>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
               <WorkspaceCateogry item={ResearchPurposeItems.population}
-                                 value={this.state.workspace.researchPurpose.population}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('population', v)}/>
+                  value={this.state.workspace.researchPurpose.population}
+                  onChange={v => this.updateWorkspaceCategory('population', v)}/>
               <WorkspaceCateogry item={ResearchPurposeItems.commercialPurpose}
-                                 value={this.state.workspace.researchPurpose.commercialPurpose}
-                                 onChange={
-                                   v => this.updateWorkspaceCategory('commercialPurpose', v)}/>
+                  value={this.state.workspace.researchPurpose.commercialPurpose}
+                  onChange={v => this.updateWorkspaceCategory('commercialPurpose', v)}/>
             </div>
           </div>
-          <WorkspaceUnderservedPopulation value={this.state.workspace.researchPurpose.underservedPopulationDetails}
-                                  onChange={v =>
-                                    this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], v))
-                                  }>
+          <WorkspaceUnderservedPopulation
+              value={this.state.workspace.researchPurpose.underservedPopulationDetails}
+              onChange={v => this.setState(
+                fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], v))}>
           </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
-        <WorkspaceEditSection header='Request a review of your research purpose' tooltip={toolTipText.reviewRequest}>
+        <WorkspaceEditSection header='Request a review of your research purpose'
+                              tooltip={toolTipText.reviewRequest}>
           <div style={{display: 'flex', flexDirection: 'row'}}>
-            <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}} type='checkbox'/>
+            <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
+                   type='checkbox'/>
             <label style={styles.text}>
               I am concerned about potential
               <a onClick= {() => this.openStigmatization()}>stigmatization</a>
@@ -488,12 +488,14 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         <Modal>
           <ModalTitle>Error:</ModalTitle>
           <ModalBody>Could not {this.props.routeConfigData.mode}
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'create' : 'update'} workspace.
+            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'create' : 'update'}
+            workspace.
           </ModalBody>
           <ModalFooter>
             <Button
                 type='secondary'>
-              Cancel {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
+              Cancel
+              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
                 </Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>
@@ -501,11 +503,13 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         }
         {this.state.workspaceCreationConflictError &&
         <Modal>
-          <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Error: ' : 'Conflicting update:'}</ModalTitle>
-          <ModalBody>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'You already have a workspace named ' +
+          <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              'Error: ' : 'Conflicting update:'}</ModalTitle>
+          <ModalBody>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              'You already have a workspace named ' +
               'Please choose another name' :
-              'Another client has modified this workspace since the beginning of this editing session. ' +
-              'Please reload to avoid overwriting those changes.'}
+              'Another client has modified this workspace since the beginning of this editing ' +
+              'session. Please reload to avoid overwriting those changes.'}
           </ModalBody>
           <ModalFooter>
             <Button type='secondary'>Cancel Creation</Button>
@@ -526,4 +530,3 @@ export class WorkspaceEditComponent extends ReactWrapperBase {
     super(WorkspaceEdit, []);
   }
 }
-

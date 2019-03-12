@@ -244,15 +244,13 @@ class WorkspaceUnderservedPopulation extends
   }
 
   focusCategoryChange(subCategory, value) {
-    let categories = this.state.value;
     if (!value ) {
-      const index = categories.findIndex(item => item === subCategory.id);
-      categories.splice(index , 1);
+      const index = this.state.value.findIndex(item => item === subCategory.id);
+      this.state.value.splice(index , 1);
     } else if (value) {
-      categories.push(subCategory);
+      this.state.value.push(subCategory);
     }
     this.props.onChange(this.state.value);
-    this.setState({value : categories});
   }
 
 
@@ -273,11 +271,11 @@ class WorkspaceUnderservedPopulation extends
         <div style={styles.header}>
           Focus on an underserved population
           <TooltipTrigger content='A primary mission of the All of Us Research Program is to include
-          populations that are medically underserved and/or historically underrepresented in biomedical
-          research or who, because of systematic social disadvantage, experience disparities in health.
-          As a way to understand how much research is being conducted on these populations, All of Us
-           requests that you mark all options for underserved populations that will be included in your
-           research.'>
+          populations that are medically underserved and/or historically underrepresented in
+          biomedical research or who, because of systematic social disadvantage, experience
+          disparities in health. As a way to understand how much research is being conducted on
+          these populations, All of Us requests that you mark all options for underserved
+          populations that will be included in your research.'>
             <InfoIcon style={styles.infoIcon}/>
           </TooltipTrigger>
         </div>

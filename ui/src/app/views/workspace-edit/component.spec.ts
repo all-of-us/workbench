@@ -1,14 +1,9 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {By} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
-import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
-import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
 import {currentWorkspaceStore, NavStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
@@ -17,19 +12,11 @@ import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
-import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-service-stub';
-import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, simulateInput, updateAndTick} from 'testing/test-helpers';
 
 import {ToolTipComponent} from 'app/views/tooltip/component';
 import {
-  DataAccessLevel,
-  UnderservedPopulationEnum,
-  WorkspaceAccessLevel,
-  WorkspacesService
+  WorkspaceAccessLevel
 } from 'generated';
 
 
