@@ -1,11 +1,11 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {IconComponent} from 'app/icons/icon/component';
 import colors from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
-import {IconComponent} from "app/icons/icon/component";
 
 export const styles = {
   base: {
@@ -156,14 +156,14 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
   </TooltipTrigger>;
 };
 
-export const IconButton = ({icon, tooltip = '', disabled = false, ...props}) => {
+export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
         data-test-id={icon}
         disabled={disabled}
         {...props}
     >
-      <IconComponent icon={icon} disabled={disabled} />
+      <IconComponent icon={icon} disabled={disabled} style={style}/>
     </Clickable>
   </TooltipTrigger>;
 };

@@ -3,16 +3,16 @@ import {Button, IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger} from 'app/components/popups';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {ReactWrapperBase, withUserProfile} from 'app/utils/index';
 import {Profile} from 'generated/fetch';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
+import * as React from 'react';
 
 
 export interface AccessModules {
-  complianceTraining: boolean,
-  betaAccess: boolean,
-  eraCommons: boolean,
+  complianceTraining: boolean;
+  betaAccess: boolean;
+  eraCommons: boolean;
 }
 
 export const AdminUserBypass = withUserProfile()
@@ -38,6 +38,16 @@ export const AdminUserBypass = withUserProfile()
     };
   }
 
+  componentDidMount() {
+
+  }
+
+  componentWillUnmount() {
+
+    console.log('unmounting');
+    this.cancel();
+  }
+
   save() {
     const {editedModules} = this.state;
     this.setState({modules: editedModules});
@@ -49,7 +59,7 @@ export const AdminUserBypass = withUserProfile()
   }
 
   hasEdited(): boolean {
-    return this.state.editedModules != this.state.modules;
+    return this.state.editedModules !== this.state.modules;
   }
 
   render() {
@@ -59,24 +69,22 @@ export const AdminUserBypass = withUserProfile()
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
           <Toggle name='Beta Access'
                   enabled={editedModules.betaAccess}
-                  onToggle={() => {this.setState(
-                      ({editedModules}) => ({editedModules:
-                          fp.set('betaAccess', !editedModules.betaAccess, editedModules)}))} } />
+                  onToggle={() => {this.setState({editedModules:
+                          fp.set('betaAccess', !editedModules.betaAccess, editedModules)}); } } />
           <Toggle name='Compliance Training'
                   enabled={editedModules.complianceTraining}
-                  onToggle={() => {this.setState(
-                      ({editedModules}) => ({editedModules:
-                          fp.set('complianceTraining', !editedModules.complianceTraining, editedModules)}))} }/>
+                  onToggle={() => {this.setState({editedModules:
+                      fp.set('complianceTraining',
+                        !editedModules.complianceTraining, editedModules)}); } }/>
           <Toggle name='eRA Commons Linking'
                   enabled={editedModules.eraCommons}
-                  onToggle={() => {this.setState(
-                      ({editedModules}) => ({editedModules:
-                          fp.set('eraCommons', !editedModules.eraCommons, editedModules)}))} } />
+                  onToggle={() => {this.setState({editedModules:
+                      fp.set('eraCommons', !editedModules.eraCommons, editedModules)}); } } />
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
 
-              <IconButton icon='times'
-                          onClick={() => this.cancel()}
-                          disabled={!this.hasEdited()}/>
+            <IconButton icon='times'
+                        onClick={() => this.cancel()}
+                        disabled={!this.hasEdited()}/>
             <IconButton icon='check'
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>

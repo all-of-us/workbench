@@ -1,6 +1,4 @@
-import {Component, Input} from '@angular/core';
 
-import {ReactWrapperBase} from 'app/utils';
 
 import * as React from 'react';
 
@@ -8,11 +6,14 @@ import * as React from 'react';
 const iconData = {
   times: {
     title: 'Cancel',
-    path: <path class="clr-i-outline clr-i-outline-path-1" d="M19.41,18l8.29-8.29a1,1,0,0,0-1.41-1.41L18,16.59,9.71,8.29A1,1,0,0,0,8.29,9.71L16.59,18,8.29,26.29a1,1,0,1,0,1.41,1.41L18,19.41l8.29,8.29a1,1,0,0,0,1.41-1.41Z"/>
+    path: <path d='M19.41,18l8.29-8.29a1,1,0,0,0-1.41-1.41L18,16.59,9.71,8.29A1,
+      1,0,0,0,8.29,9.71L16.59,18,8.29,26.29a1,1,0,1,0,1.41,1.41L18,19.41l8.29,
+      8.29a1,1,0,0,0,1.41-1.41Z'/>
   },
   check: {
     title: 'Save',
-    path: <path class="clr-i-outline clr-i-outline-path-1" d="M13.72,27.69,3.29,17.27a1,1,0,0,1,1.41-1.41l9,9L31.29,7.29a1,1,0,0,1,1.41,1.41Z"/>
+    path: <path d='M13.72,27.69,3.29,17.27a1,1,0,0,1,1.41-1.41l9,
+    9L31.29,7.29a1,1,0,0,1,1.41,1.41Z'/>
   }
 };
 

@@ -46,6 +46,8 @@ export class AdminUserComponent implements OnInit {
         });
   }
 
+  // TODO: do we still need this endpoint?
+  // is approving someone the same as bypassing them?
   setIdVerificationStatus(profile: Profile, newStatus: IdVerificationStatus): void {
     if (profile.idVerificationStatus !== newStatus) {
       this.contentLoaded = false;
