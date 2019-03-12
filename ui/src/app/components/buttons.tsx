@@ -5,6 +5,7 @@ import colors from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
+import {IconComponent} from "app/icons/icon/component";
 
 export const styles = {
   base: {
@@ -151,6 +152,18 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
     >
       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
+    </Clickable>
+  </TooltipTrigger>;
+};
+
+export const IconButton = ({icon, tooltip = '', disabled = false, ...props}) => {
+  return <TooltipTrigger side='left' content={tooltip}>
+    <Clickable
+        data-test-id={icon}
+        disabled={disabled}
+        {...props}
+    >
+      <IconComponent icon={icon} disabled={disabled} />
     </Clickable>
   </TooltipTrigger>;
 };
