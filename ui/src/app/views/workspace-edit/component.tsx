@@ -13,7 +13,7 @@ import * as React from 'react';
 import {CdrVersion, DataAccessLevel} from '../../../generated/fetch';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from '../../components/modals';
 import {WorkspaceData} from '../../resolvers/workspace';
-import WorkspaceCategoryFocus from '../workspace-edit-category-focus/component';
+import WorkspaceUnderservedPopulation from '../workspace-edit-underserved-population/component';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
@@ -446,11 +446,11 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                                    v => this.updateWorkspaceCategory('commercialPurpose', v)}/>
             </div>
           </div>
-          <WorkspaceCategoryFocus value={this.state.workspace.researchPurpose.underservedPopulationDetails}
+          <WorkspaceUnderservedPopulation value={this.state.workspace.researchPurpose.underservedPopulationDetails}
                                   onChange={v =>
                                     this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'], v))
                                   }>
-          </WorkspaceCategoryFocus>
+          </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose' tooltip={toolTipText.reviewRequest}>
           <div style={{display: 'flex', flexDirection: 'row'}}>
