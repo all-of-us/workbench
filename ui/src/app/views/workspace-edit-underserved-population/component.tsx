@@ -308,7 +308,7 @@ class WorkspaceUnderservedPopulation extends
                   })
                 }
               </div>
-            </div>
+            </div>;
           })}
          </div>
       </div>
