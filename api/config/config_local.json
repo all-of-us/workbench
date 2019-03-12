@@ -50,5 +50,11 @@
   "moodle": {
     "host": "aoudev.nnlm.gov",
     "enableMoodleBackend": true
+  },
+  "access": {
+    "enableComplianceTraining": false,
+    "enableEraCommons": false,
+    "enableDataUseAgreement": false,
+    "enableIdVerification": false
   }
 }

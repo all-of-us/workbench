@@ -21,7 +21,7 @@ import {navigate} from 'app/utils/navigation';
 import * as React from 'react';
 
 import {FadeBox} from 'app/components/containers';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
 
 const styles = reactStyles({
@@ -50,10 +50,6 @@ const styles = reactStyles({
     marginLeft: '0.2rem',
     height: '16px',
     width: '16px'
-  },
-  addCard: {
-    minWidth: 200, minHeight: 105, maxHeight: 105,
-    marginTop: '1rem', marginRight: '1rem',
   }
 });
 
@@ -116,7 +112,7 @@ export const CohortList = withCurrentWorkspace()(
         <div style={styles.pageArea}>
           <TooltipTrigger content={!writePermission &&
               `Write permission required to create cohorts`} side='top'>
-            <CardButton style={styles.addCard}
+            <CardButton type='small'
                         onClick={() => this.navigateToCohortBuilder()}
                         disabled={!writePermission}>
               Create a <br/>New Cohort

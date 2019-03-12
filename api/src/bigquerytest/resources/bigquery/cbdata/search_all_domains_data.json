@@ -237,7 +237,7 @@
     "entry_date":"2009-12-03",
     "concept_id":1586218,
     "domain":"Measurement",
-    "value_as_number":1.0,
+    "value_as_number":47.0,
     "value_as_concept_id":4262985,
     "is_standard":0
   },
@@ -255,7 +255,7 @@
     "entry_date":"2009-12-03",
     "concept_id":1586218,
     "domain":"Measurement",
-    "value_as_number":1.0,
+    "value_as_number":51.0,
     "value_as_concept_id":4297303,
     "is_standard":0
   },

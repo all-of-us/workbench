@@ -1,4 +1,4 @@
-<app-top-box>
+<app-top-box *ngIf="conceptSet">
   <div class="concept-set-header">
     <clr-dropdown class="action-menu-dropdown">
       <!-- TODO: Once clone is added to the menu, never disable the dropdown. -->
@@ -97,3 +97,4 @@
             [clrLoading]="removeSubmitting" [disabled]="removeSubmitting">Remove Concepts</button>
   </div>
 </clr-modal>
+<div *ngIf="!conceptSet" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

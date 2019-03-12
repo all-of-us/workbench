@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -12,16 +11,13 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Map;
-
 import javax.inject.Provider;
-
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +28,6 @@ import org.mockito.Mock;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -44,9 +39,12 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
+import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -60,6 +58,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -76,6 +75,7 @@ public class ClusterControllerTest {
   private static final String WORKSPACE_NS = "proj";
   private static final String WORKSPACE_ID = "wsid";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
+  private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -99,6 +99,8 @@ public class ClusterControllerTest {
       WorkbenchConfig config = new WorkbenchConfig();
       config.server = new WorkbenchConfig.ServerConfig();
       config.server.apiBaseUrl = API_BASE_URL;
+      config.access = new WorkbenchConfig.AccessConfig();
+      config.access.enableComplianceTraining = true;
       return config;
     }
     @Bean
@@ -125,8 +127,6 @@ public class ClusterControllerTest {
   @Autowired
   UserDao userDao;
   @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
   WorkspaceService workspaceService;
   @Mock
   Provider<User> userProvider;
@@ -148,6 +148,8 @@ public class ClusterControllerTest {
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableComplianceTraining = true;
     User user = new User();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
@@ -155,6 +157,8 @@ public class ClusterControllerTest {
     user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.READY);
     when(userProvider.get()).thenReturn(user);
     clusterController.setUserProvider(userProvider);
+
+    createUser(OTHER_USER_EMAIL);
 
     UserService userService = new UserService(
         userProvider, userDao, adminActionHistoryDao, CLOCK, new FakeLongRandom(123),
@@ -234,7 +238,7 @@ public class ClusterControllerTest {
   @Test
   public void testListClustersLazyCreate() throws Exception {
     when(notebookService.getCluster(WORKSPACE_NS, "all-of-us")).thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us"), any()))
+    when(notebookService.createCluster(eq(WORKSPACE_NS), eq("all-of-us")))
         .thenReturn(testFcCluster);
 
     assertThat(clusterController.listClusters().getBody().getDefaultCluster())
@@ -245,6 +249,47 @@ public class ClusterControllerTest {
   public void testDeleteCluster() throws Exception {
     clusterController.deleteCluster(WORKSPACE_NS, "cluster");
     verify(notebookService).deleteCluster(WORKSPACE_NS, "cluster");
+  }
+
+  @Test
+  public void testSetClusterConfig() {
+    ResponseEntity<EmptyResponse> response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(new ClusterConfig()
+                .machineType("n1-standard-4")
+                .masterDiskSize(100)));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-4");
+    assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
+  }
+
+  @Test
+  public void testUpdateClusterConfigClear() {
+    ResponseEntity<EmptyResponse> response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(new ClusterConfig()
+                .machineType("n1-standard-4")
+                .masterDiskSize(100)));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    response = this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest()
+            .userEmail(OTHER_USER_EMAIL)
+            .clusterConfig(null));
+    assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+
+    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    assertThat(updatedUser.getClusterConfigDefault()).isNull();
+  }
+
+  @Test(expected=NotFoundException.class)
+  public void testUpdateClusterConfigUserNotFound() {
+    this.clusterController.updateClusterConfig(
+        new UpdateClusterConfigRequest().userEmail("not-found@researchallofus.org"));
   }
 
   @Test
@@ -325,4 +370,13 @@ public class ClusterControllerTest {
     // Config files only.
     assertThat(mapCaptor.getValue().size()).isEqualTo(2);
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
-  }}
+  }
+
+    private void createUser(String email) {
+      User user = new User();
+      user.setGivenName("first");
+      user.setFamilyName("last");
+      user.setEmail(email);
+      userDao.save(user);
+    }
+}

@@ -38,6 +38,8 @@
   overflow-x: hidden;
   flex: 1;
   padding-top:0.35rem;
+  padding-bottom: 0.35rem;
+  color: #4A4A4A;
 }
 
 .sidebar-content.sidebar-open {
@@ -45,6 +47,7 @@
   width: 385px;
   border-left: 1rem solid #728FA3;
   padding-left: 0.5rem;
+  padding-right: 1rem;
 }
 
 .sidebar-handle.sidebar-open {

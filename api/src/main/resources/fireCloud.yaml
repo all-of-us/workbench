@@ -250,6 +250,8 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+            $ref: '#/definitions/NihStatus'
         400:
           description: Invalid or malformed JWT
         401:

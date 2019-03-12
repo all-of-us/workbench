@@ -96,7 +96,7 @@ describe('HomepageComponent', () => {
     const newProfile = {
       ...profile,
       pageVisits: [{page: 'homepage'}],
-      linkedNihUsername: 'test'
+      eraCommonsLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -107,7 +107,7 @@ describe('HomepageComponent', () => {
     profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
       ...profile,
-      linkedNihUsername: 'test',
+      eraCommonsLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -117,7 +117,6 @@ describe('HomepageComponent', () => {
 
   it('should show access tasks dashboard if the user has no nih username', async () => {
     profileApi.profile.trainingCompletionTime = 1;
-
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
@@ -126,7 +125,7 @@ describe('HomepageComponent', () => {
   it('should show access tasks dashboard if the user has not completed training', async () => {
     const newProfile = {
       ...profile,
-      linkedNihUsername: 'test'
+      eraCommonsLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -145,7 +144,7 @@ describe('HomepageComponent', () => {
     profileApi.profile.trainingCompletionTime = 1;
     const newProfile = {
         ...profile,
-      linkedNihUsername: 'test',
+      eraCommonsLinkedNihUsername: 'test',
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();

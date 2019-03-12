@@ -1,30 +1,44 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
-import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.categoricalAndNotIn;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.nameBlank;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsEmpty;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotNumbers;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotOne;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.nameNotNumber;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.attributesEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.ppiTypeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.valueNotNumber;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CATEGORICAL_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NAME;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.NOT_VALID_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ONE_OPERAND_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERANDS_NUMERIC_MESSAGE;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.OPERATOR;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.operatorText;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETER;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.PARAMETERS;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.TYPE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.VALUE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.from;
 
 /**
@@ -51,10 +65,10 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     "in (${conceptId}) ";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
-    "and value_as_number = ${value}\n";
+    "and value_as_number ${operator} ${value}\n";
 
   private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
-    "and value_as_concept_id = ${value}\n";
+    "and value_as_concept_id ${operator} (${value})\n";
 
   /**
    * {@inheritDoc}
@@ -64,9 +78,9 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
                            SearchGroupItem searchGroupItem,
                            TemporalMention temporalMention) {
     from(parametersEmpty()).test(searchGroupItem.getSearchParameters()).throwException(EMPTY_MESSAGE, PARAMETERS);
-    List<String> queryParts = new ArrayList<String>();
+    List<String> queryParts = new ArrayList<>();
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
-      validateSearchParameter(parameter);
+      from(typeBlank().or(ppiTypeInvalid())).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, parameter.getType());
       StringBuilder sqlTemplate = new StringBuilder(PPI_SQL_TEMPLATE);
       if (parameter.getConceptId() == null && parameter.getGroup()) {
         String subtype = addQueryParameterValue(queryParams,
@@ -74,18 +88,25 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
         sqlTemplate.append(SURVEY_IN_CLAUSE
           .replace("${subtype}", "@" + subtype));
       } else {
+        from(conceptIdNull()).test(parameter).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, parameter.getConceptId());
         String namedParameterConceptId = addQueryParameterValue(queryParams,
           QueryParameterValue.int64(parameter.getConceptId()));
         sqlTemplate.append(QUESTION_ANSWER_IN_CLAUSE
           .replace("${conceptId}", "@" + namedParameterConceptId));
         if (!parameter.getGroup()) {
-          boolean isValueAsNum = StringUtils.isBlank(parameter.getValue());
-          String value = isValueAsNum ? parameter.getName() : parameter.getValue();
+          from(attributesEmpty()).test(parameter).throwException(EMPTY_MESSAGE, ATTRIBUTES);
+          Attribute attr = parameter.getAttributes().get(0);
+          validateAttribute(attr);
+          boolean isValueAsNum = attr.getName().equals("NUM");
           String namedParameter = addQueryParameterValue(queryParams,
-            QueryParameterValue.int64(new Long(value)));
+            QueryParameterValue.int64(new Long(attr.getOperands().get(0))));
           sqlTemplate.append(isValueAsNum ?
-            VALUE_AS_NUMBER_SQL_TEMPLATE.replace("${value}","@" + namedParameter) :
-            VALUE_AS_CONCEPT_ID_SQL_TEMPLATE.replace("${value}","@" + namedParameter));
+            VALUE_AS_NUMBER_SQL_TEMPLATE
+              .replace("${operator}", OperatorUtils.getSqlOperator(attr.getOperator()))
+              .replace("${value}","@" + namedParameter) :
+            VALUE_AS_CONCEPT_ID_SQL_TEMPLATE
+              .replace("${operator}", OperatorUtils.getSqlOperator(attr.getOperator()))
+              .replace("${value}","@" + namedParameter));
         }
       }
       queryParts.add(sqlTemplate.toString());
@@ -93,15 +114,15 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
     return String.join(UNION_ALL, queryParts);
   }
 
-  private void validateSearchParameter(SearchParameter param) {
-    from(typeBlank().or(ppiTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
-    if (!param.getGroup()) {
-      if (StringUtils.isBlank(param.getValue())) {
-        from(nameNotNumber()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, NAME, param.getName());
-      } else {
-        from(valueNotNumber()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, VALUE, param.getValue());
-      }
-    }
+  private void validateAttribute(Attribute attr) {
+      String name = attr.getName() == null ? null : attr.getName().name();
+      String oper = operatorText.get(attr.getOperator());
+      from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
+      from(operandsNotOne()).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, Operator.EQUAL);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
   }
 
   /**

@@ -24,10 +24,6 @@ import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
 import {WorkspaceComponent} from './views/workspace/component';
 
-import {CohortResolver} from './resolvers/cohort';
-import {ConceptSetResolver} from './resolvers/concept-set';
-import {WorkspaceResolver} from './resolvers/workspace';
-
 import {DataPageComponent} from 'app/views/data-page/component';
 import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
@@ -86,9 +82,6 @@ const routes: Routes = [
             path: ':ns/:wsid',
             component: WorkspaceWrapperComponent,
             runGuardsAndResolvers: 'always',
-            resolve: {
-              workspace: WorkspaceResolver,
-            },
             children: [
               {
                 path: '',
@@ -155,9 +148,6 @@ const routes: Routes = [
                     data: {
                       title: 'Cohort',
                     },
-                    resolve: {
-                      cohort: CohortResolver,
-                    }
                   }
                 ]
               },
@@ -201,9 +191,6 @@ const routes: Routes = [
                     title: 'Concept Set',
                     breadcrumb: BreadcrumbType.ConceptSet
                   },
-                  resolve: {
-                    conceptSet: ConceptSetResolver,
-                  }
                 }]
               }]
           }]
@@ -238,11 +225,9 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    ConceptSetResolver,
     AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
-    WorkspaceResolver,
   ]
 })
 export class AppRoutingModule {

@@ -12,7 +12,7 @@ import {
   Link,
   MenuItem
 } from 'app/components/buttons';
-import {Card} from 'app/components/card';
+import {WorkspaceCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -44,8 +44,7 @@ const styles = reactStyles({
     display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'
   },
   addCard: {
-    display: 'flex', fontSize: '20px', lineHeight: '28px', marginTop: '0',
-    fontWeight: 600, color: '#216FB4'
+    margin: '0 1rem 1rem 0', fontWeight: 600, color: 'rgb(33, 111, 180)'
   },
   workspaceName: {
     color: '#216FB4', marginBottom: '0.5rem', fontWeight: 600,
@@ -157,7 +156,7 @@ export class WorkspaceCard extends React.Component<
     const permissionBoxColors = {'OWNER': '#4996A2', 'READER': '#8F8E8F', 'WRITER': '#92B572'};
 
     return <React.Fragment>
-      <Card>
+      <WorkspaceCardBase>
         <div style={styles.workspaceCard} data-test-id='workspace-card'>
           <div style={{display: 'flex', flexDirection: 'column'}}>
             <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
@@ -192,7 +191,7 @@ export class WorkspaceCard extends React.Component<
                  data-test-id='workspace-access-level'>{wp.accessLevel}</div>
           </div>
         </div>
-      </Card>
+      </WorkspaceCardBase>
       {workspaceDeletionError && <Modal>
         <ModalTitle>Error: Could not delete workspace '{wp.workspace.name}'</ModalTitle>
         <ModalBody style={{display: 'flex', flexDirection: 'row'}}>
