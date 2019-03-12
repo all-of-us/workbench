@@ -4,7 +4,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
-import {currentWorkspaceStore, NavStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {BugReportComponent} from 'app/views/bug-report/component';
 import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from 'app/views/workspace-edit/component';
@@ -21,18 +21,7 @@ import {
 
 
 describe('WorkspaceEditComponent', () => {
-  let testComponent: WorkspaceEditComponent;
-  let fixture: ComponentFixture<WorkspaceEditComponent>;
-  let workspacesService: WorkspacesServiceStub;
-
-  function setupComponent(mode: WorkspaceEditMode) {
-    routeConfigDataStore.next({mode});
-    fixture = TestBed.createComponent(WorkspaceEditComponent);
-    testComponent = fixture.componentInstance;
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
+   let workspacesService: WorkspacesServiceStub;
 
   beforeEach(fakeAsync(() => {
     urlParamsStore.next({

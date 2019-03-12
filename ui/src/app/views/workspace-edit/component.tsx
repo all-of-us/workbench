@@ -9,8 +9,7 @@ import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients'
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
-import WorkspaceUnderservedPopulation
-  from 'app/views/workspace-edit-underserved-population/component';
+import WorkspaceUnderservedPopulation from '../workspace-edit-underserved-population/component';
 import {WorkspaceAccessLevel} from 'generated';
 import {CdrVersion, DataAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
