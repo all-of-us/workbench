@@ -1,3 +1,4 @@
+import {getChartObj} from 'app/cohort-search/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
@@ -5,78 +6,49 @@ import * as React from 'react';
 
 export class ReviewDomainChartsComponent extends React.Component<
   {orgData: any, unitName: any}, {}> {
+  chart: any;
   constructor(props) {
     super(props);
-    // this.state = {
-    //   data: this.props.orgData,
-    // };
   }
-  componentDidMount() {
-    // console.log(this.props.orgData)
-  }
-
 
   getOptions() {
-    // const {chartData: {conditionTitle, items}} = this.props;
-    // const names = ['', ...fp.uniq(items.map(item => item.standardName))];
-    // const nameIndexes = fp.mapValues(n => +n, fp.invert(names));
     const values = this.props.orgData.map(val => {
       return  val.values;
     });
     const date = this.props.orgData.map(val => {
-      // return moment(val.date, 'YYYY-MM-DD').unix()
       return val.date;
     });
-     // console.log(date);
+
     return {
       chart: {
         type: 'spline',
         zoomType: 'xy',
+        backgroundColor: 'transparent',
       },
-      // credits: {
-      //   enabled: false
-      // },
+      credits: {
+        enabled: false
+      },
       title: {
-        text: this.props.unitName
+        text: 'Units : ' + this.props.unitName
       },
-
-      // xAxis: {
-      //         title: {
-      //           enabled: true,
-      //           text: 'Entry Date',
-      //         },
-      //         labels: {
-      //           formatter: function() {
-      //             return moment.unix(this.value).format('YYYY');
-      //           },
-      //         },
-      //         startOnTick: true,
-      //         endOnTick: true,
-      //         tickInterval: 40 * 3600 * 1000,
-      //       },
       yAxis: {
-        lineWidth: 2
-        // title: {
-        //   text: 'Number of Employees'
-        // }
-      },
-      legend: {
-        layout: 'vertical',
-        align: 'right',
-        verticalAlign: 'middle'
+        lineWidth: 2,
+        lineColor: '#979797',
+        // tickWidth: 0,
       },
       plotOptions: {
         series: {
           label: {
             connectorAllowed: false
           },
-          // pointStart: 2010
         }
       },
       tooltip: {
+        headerFormat: '',
         pointFormatter() {
           return `
-            <b>Value: </b>${this.y}<br/>`;
+            <b>Value: </b>${this.y}<br/>
+             <b>Date: </b>${this.category}<br/>`;
         },
         style: {
           color: '#565656',
@@ -85,48 +57,25 @@ export class ReviewDomainChartsComponent extends React.Component<
         shared: true
       },
       xAxis: {
-        // title: {
-        //   text: 'Number of Months'
-        // },
         categories: date,
-        // labels: {
-        //   formatter: function() {
-        //     return moment.unix(this.value).format('YYYY');
-        //   },
-        // },
-        // tickInterval: 12 * 3600 * 1000,
+        lineWidth: 2,
+        lineColor: '#979797',
       },
       series: [{
-        name: 'Vitals',
         data: values,
         turboThreshold: 5000,
         showInLegend: false,
       }],
-      responsive: {
-        rules: [{
-          condition: {
-            maxWidth: 500
-          },
-          chartOptions: {
-            legend: {
-              layout: 'horizontal',
-              align: 'center',
-              verticalAlign: 'bottom'
-            }
-          }
-        }]
-      }
     };
   }
-
 
   render() {
     return (
       <div>
-        {/*hello*/}
         <HighchartsReact
           highcharts={highCharts}
           options={this.getOptions()}
+          callback={getChartObj}
         />
       </div>
     );

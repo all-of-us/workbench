@@ -14,6 +14,7 @@ import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
 
+
 const css = `
   body .p-datatable .p-sortable-column:not(.p-highlight):hover,
   body .p-datatable .p-sortable-column.p-highlight {
@@ -116,10 +117,11 @@ const css = `
   }
   .graphExpander .pi-chevron-right {
     display: none;
+    border-bottom: 2px solid white;
   }
-   .graphExpander body .p-datatable .p-datatable-tbody > tr > td  {
-    border: none!important;
-  }
+ // body .graphExpander.p-datatable .p-datatable-tbody > tr:not(last-of-type)  {
+ //        border-bottom: 2px solid white!important;
+ //  }
   body .p-tabview.p-tabview-top,
   body .p-tabview.p-tabview-bottom,
   body .p-tabview.p-tabview-left, body
@@ -140,8 +142,9 @@ const css = `
 	body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
 	body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
     background-color: none!important;
-    border-bottom: 3px solid #007ad9!important;
-    color: black;
+    border-bottom: 4px solid #007ad9!important;
+    color: #2691D0;
+    font-size: 14px;
   }
   body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
   body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
@@ -149,7 +152,8 @@ const css = `
   body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
     background-color: transparent!important;
     border: none;
-    color: black;
+    color: #2691D0;
+    font-size: 14px;
   }
 
   body .p-tabview.p-tabview-top .p-tabview-nav
@@ -159,7 +163,8 @@ const css = `
   .p-tabview-nav li.p-highlight:hover a {
     border: none;
     background-color: transparent;
-    color: black;
+    color: #2691D0;
+    font-size: 14px;
   }
   body .p-tabview.p-tabview-top .p-tabview-nav
   li.p-highlight:hover a, body .p-tabview.p-tabview-bottom
@@ -168,7 +173,8 @@ const css = `
   .p-tabview-nav li.p-highlight:focus a {
     border: none;
     background-color: transparent;
-    color: black;
+    color: #2691D0;
+    font-size: 14px;
   }
   body .p-tabview.p-tabview-top
   .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
@@ -176,12 +182,33 @@ const css = `
   body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
   body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a {
     background-color: transparent;
-    border-bottom: 3px solid #007ad9!important;
+    border-bottom: 4px solid #007ad9!important;
     border-top: none;
     border-right: none;
     border-left: none;
-    color: black;
+    color: #2691D0;
+    font-size: 14px;
   }
+  body .p-tabview .p-tabview-panels {
+    border: none;
+    background-color: transparent;
+  }
+  body .p-tabview.p-tabview-top .p-tabview-nav {
+    margin-left: 3rem;
+    border-bottom: 1px solid #007ad9;
+  }
+  body .p-datatable .p-datatable-tbody > tr > td {
+    background-color: #ECF1F4;
+    border: none;
+  }
+ .graphExpander {
+    border-bottom: none;
+  }
+body .p-datatable .p-sortable-column:focus {
+    outline: 0;
+    outline-offset: 0;
+    box-shadow: none;
+}
 
   `;
 
@@ -385,35 +412,33 @@ export const DetailTabTable = withCurrentWorkspace()(
         return acc;
       }, {});
     }
-
     rowExpansionTemplate = (rowData: any) => {
       const {data} = this.state;
       const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
       const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
       const unitKey = Object.keys(unitsObj);
-      return rowData.standardName === 'No matching concept' ? <div>NO Data to show</div>  : <TabView>
+      return <TabView>
         {unitKey.map((k, i) => {
+          const name = k === 'null' ? 'No Unit' : k;
           { this.valueArray = unitsObj[k].map(v => {
             return {
               values: parseInt(v.value, 10),
               date: v.itemDate,
-              standardConceptId: v.standardConceptId
             };
           }); }
-          return <TabPanel header={k} key={i}>
-            <ReviewDomainChartsComponent orgData={this.valueArray} unitName={k}/>
+          return <TabPanel header={name} key={i}>
+            <ReviewDomainChartsComponent orgData={this.valueArray} unitName={name}/>
           </TabPanel>;
         })}
       </TabView>;
     }
     hideGraphIcon = (rowData: any) => {
-      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept'
-          return {'graphExpander' : noConcept};
+      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
+      return {'graphExpander' : noConcept};
     }
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-       let noMatch;
       if (data !== null) {
         const lastRowOfPage = (start + rows) > data.length
           ? start + rows - (start + rows - data.length) : start + rows;
@@ -423,7 +448,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (data && data.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-        const columns = this.props.columns.map((col) => {
+      const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
@@ -437,13 +462,15 @@ export const DetailTabTable = withCurrentWorkspace()(
             {col.displayName}
           </span>
           {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {(desc && !isExpanderNeeded)  && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(desc && !isExpanderNeeded) &&
+          <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
 
         return <Column
           expander={isExpanderNeeded}
           style={styles.tableBody}
-          bodyStyle={isExpanderNeeded ? styles.graphColumnBody && styles.columnBody : styles.columnBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody
+            && styles.columnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
