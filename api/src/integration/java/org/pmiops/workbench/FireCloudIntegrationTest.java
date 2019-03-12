@@ -62,6 +62,9 @@ public class FireCloudIntegrationTest {
   @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   private GoogleCredential serviceAccountCredential;
 
+  @Autowired
+  private ServiceAccounts serviceAccounts;
+
   private WorkbenchEnvironment workbenchEnvironment;
 
   // N.B. this will load the default service account credentials for whatever AoU environment

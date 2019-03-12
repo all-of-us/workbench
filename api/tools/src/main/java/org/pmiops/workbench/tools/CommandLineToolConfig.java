@@ -26,6 +26,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 
 import java.io.IOException;
 
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
+
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
  * command-line tool versus a WebMVC request handler.
