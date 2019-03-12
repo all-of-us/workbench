@@ -6,6 +6,7 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
@@ -25,10 +27,24 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
+
 @Configuration
 @Import({RetryConfig.class, CommonConfig.class})
-// Scan the google module which contains the CloudStorageService bean.
+// Scan the google package, which we need for the CloudStorage bean.
 @ComponentScan("org.pmiops.workbench.google")
+// Scan the ServiceAccounts class, but exclude other classes in auth (since they
+// bring in JPA-related beans, which include a whole bunch of other deps that are
+// more complicated than we need for now).
+//
+// TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
+// dependency-ridden classes (e.g. ProfileService) out instead.
+@ComponentScan(
+   basePackageClasses = ServiceAccounts.class,
+   useDefaultFilters = false,
+   includeFilters = {
+     @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
+   })
 public class IntegrationTestConfig {
 
   /**

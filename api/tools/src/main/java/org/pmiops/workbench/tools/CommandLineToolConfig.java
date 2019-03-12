@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -25,6 +26,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 
 import java.io.IOException;
 
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
+
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
  * command-line tool versus a WebMVC request handler.
@@ -39,6 +42,18 @@ import java.io.IOException;
 @ComponentScan("org.pmiops.workbench.google")
 // Scan the FireCloud module, for FireCloudService bean.
 @ComponentScan("org.pmiops.workbench.firecloud")
+// Scan the ServiceAccounts class, but exclude other classes in auth (since they
+// bring in JPA-related beans, which include a whole bunch of other deps that are
+// more complicated than we need for now).
+//
+// TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
+// dependency-ridden classes (e.g. ProfileService) out instead.
+@ComponentScan(
+   basePackageClasses = ServiceAccounts.class,
+   useDefaultFilters = false,
+   includeFilters = {
+     @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
+   })
 public class CommandLineToolConfig {
 
   /**

@@ -65,6 +65,9 @@ public class FireCloudIntegrationTest {
   @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   private GoogleCredential serviceAccountCredential;
 
+  @Autowired
+  private ServiceAccounts serviceAccounts;
+
   private WorkbenchEnvironment workbenchEnvironment;
 
   @Autowired
@@ -107,7 +110,7 @@ public class FireCloudIntegrationTest {
         Providers.of(workspacesApi),
         Providers.of(new StatusApi(apiClient)),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
-        new ServiceAccounts(),
+        serviceAccounts,
         Providers.of(fireCloudAdminCredential)
     );
   }
