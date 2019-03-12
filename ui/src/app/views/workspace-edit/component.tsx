@@ -462,7 +462,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                    type='checkbox'
                    onChange={v =>
                    this.setState(fp.set(['workspace', 'researchPurpose', 'reviewRequested' ],
-                   v.target.checked))}
+                     v.target.checked))}
                    checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
