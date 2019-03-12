@@ -14,7 +14,6 @@ import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-import * as moment from 'moment';
 const css = `
   body .p-calendar.p-calendar-w-btn > .p-inputtext,
   body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
