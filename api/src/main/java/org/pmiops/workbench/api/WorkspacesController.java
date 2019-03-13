@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
@@ -66,6 +67,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
@@ -80,6 +82,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Autowired
   WorkspacesController(
       WorkspaceService workspaceService,
+      WorkspaceDao workspaceDao,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
@@ -91,6 +94,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
@@ -514,46 +518,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     User user = userProvider.get();
-    // This code is to migrate firecloud uuid to current workspaces
-    // once we are confident this has been done we can rework/remove
-    // much of this logic
+
+    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+        fireCloudService.getWorkspaces();
+    List<String> fcUuids = fcWorkspaces.stream()
+        .map(workspace -> workspace.getWorkspace().getWorkspaceId()).collect(Collectors.toList());
+
+    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
+        workspaceDao.findAllByFirecloudUuidIn(fcUuids);
+
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
-    if (user != null) {
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-          fireCloudService.getWorkspaces();
-      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
-        org.pmiops.workbench.db.model.Workspace dbWorkspace;
-        dbWorkspace = userRole.getWorkspace();
-        List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> filteredFcWorkspaces =
-            fcWorkspaces
-                .stream()
-                .filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId()))
-                .collect(Collectors.toList());
-        if (!filteredFcWorkspaces.isEmpty()) {
-          fcWorkspace = filteredFcWorkspaces.get(0);
-        }
-        if (fcWorkspace == null) {
-          log.warning(String.format(
-              "workspace '%s' workbench ACLs are out of sync with Firecloud, " +
-              "omitting this workspace for current user", dbWorkspace.getFirecloudName()));
-        } else {
-          if (dbWorkspace.getFirecloudUuid() == null) {
-            // populate UUID
-            dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspace().getWorkspaceId());
-            workspaceService.getDao().save(dbWorkspace);
-          }
-          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-          if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
-          } else {
-            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
-          }
-          responseList.add(currentWorkspace);
-        }
+
+    for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = fcWorkspaces
+          .stream()
+          .filter(w -> w.getWorkspace().getWorkspaceId().equals(dbWorkspace.getFirecloudUuid()))
+          .collect(Collectors.toList())
+          .get(0);
+      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+      } else {
+        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
       }
+      responseList.add(currentWorkspace);
     }
+
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(responseList);
     return ResponseEntity.ok(response);
