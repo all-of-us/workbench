@@ -4,9 +4,10 @@ import {InfoIcon} from 'app/components/icons';
 import {Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {reactStyles} from 'app/utils';
+import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserved-population/component';
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
@@ -237,6 +238,8 @@ interface WorkspaceEditState {
   workspace: Workspace;
   workspaceCreationConflictError: Boolean;
   workspaceCreationError: Boolean;
+  cloneUserRole: boolean;
+  loading: boolean;
 }
 
 export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
@@ -267,7 +270,9 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           }
         },
         workspaceCreationConflictError: false,
-        workspaceCreationError: false
+        workspaceCreationError: false,
+        cloneUserRole: false,
+        loading: false
       };
     }
 
@@ -279,7 +284,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
 
     async setCdrVersions() {
       const cdrVersions = await cdrVersionsApi().getCdrVersions();
-      // Convert cdrVersion to select input format of lable and value
+      // Convert cdrVersion to select input format of label and value
       const versions = [];
       cdrVersions.items.map((version , i) => {
         versions.push({label: version.name, value: version.cdrVersionId});
@@ -290,13 +295,14 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     updateWorkspace() {
       if (this.props.routeConfigData.mode === WorkspaceEditMode.Create) {
         const profile =  userProfileStore.getValue().profile;
-        const workspace = this.state.workspace;
-        workspace.namespace = profile.freeTierBillingProjectName;
         this.setState(fp.set(['workspace', 'namespace'], profile.freeTierBillingProjectName));
-      } else if (this.props.routeConfigData.mode === WorkspaceEditMode.Edit ||
-          this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
-        this.setState({workspace : this.props.workspace});
+        return;
       }
+      this.setState({workspace : this.props.workspace});
+      if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
+          this.setState(
+            fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
+        }
     }
 
     openStigmatization() {
@@ -305,10 +311,13 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
 
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
-        case WorkspaceEditMode.Create: return 'Create a new Workspace';
-        case WorkspaceEditMode.Edit: return 'Edit workspace \"' + this.props.workspace.name + '\"';
-        case WorkspaceEditMode.Clone: return 'Clone workspace \"' +
-                                             this.props.workspace.name + '\"';
+        case WorkspaceEditMode.Create:
+          return 'Create a new Workspace';
+        case WorkspaceEditMode.Edit:
+          return 'Edit workspace \"' + this.props.workspace.name + '\"';
+        case WorkspaceEditMode.Clone:
+          return 'Clone workspace \"' +
+              this.props.workspace.name + '\"';
       }
     }
 
@@ -321,27 +330,44 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
     disableButton() {
-      return !this.state.workspace.description || (this.state.workspace.description === '') ||
-          !this.state.workspace.name || (this.state.workspace.name === '');
+      return !this.state.workspace.description || this.state.workspace.description === '' ||
+          !this.state.workspace.name || this.state.workspace.name === '';
     }
 
     updateWorkspaceCategory(category, value) {
       this.setState(fp.set(['workspace', 'researchPurpose', category], value));
     }
 
+
+    updateUnderserverPopulation(populationDetails) {
+      this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'],
+        populationDetails));
+      this.setState(fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'],
+        (populationDetails.length > 0)));
+    }
+
     async saveWorkspace() {
       try {
+        this.setState({loading: true});
+        let workspace = this.state.workspace;
         if (this.props.routeConfigData.mode === WorkspaceEditMode.Create) {
-          const workspace =
+          workspace =
               await workspacesApi().createWorkspace(this.state.workspace);
-          navigate(['workspaces', workspace.namespace, workspace.id]);
-        } else {
-          await workspacesApi()
+        } else if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
+           await workspacesApi().cloneWorkspace(
+            this.state.workspace.namespace, this.state.workspace.id,
+            {
+              includeUserRoles: this.state.cloneUserRole,
+              workspace: this.state.workspace
+            });
+         } else {
+           await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
-          navigate(['workspaces', this.state.workspace.namespace, this.state.workspace.id]);
-        }
+         }
+        navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
+        this.setState({loading: false});
         if (error.status === 409) {
           this.setState({workspaceCreationConflictError: true});
         } else {
@@ -362,11 +388,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       return !fieldValue || fieldValue === '';
     }
 
-    updateUnderserverPopulation(populationDetails) {
-      this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'],
-        populationDetails));
-      this.setState(fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'],
-        (populationDetails.length > 0)));
+    isMode(mode) {
+      return this.props.routeConfigData.mode === mode;
     }
 
     render() {
@@ -383,7 +406,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                         options={this.state.cdrVersionItems}
                         onChange={v =>
                             this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
-                        isDisabled={this.props.routeConfigData.mode === WorkspaceEditMode.Edit}>
+                        isDisabled={this.isMode(WorkspaceEditMode.Edit)}>
                 </Select>
             </div>
             <TooltipTrigger content={toolTipText.cdrSelect}>
@@ -391,6 +414,16 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             </TooltipTrigger>
           </div>
         </WorkspaceEditSection>
+        {this.isMode(WorkspaceEditMode.Clone) &&
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+          <input type='checkbox'
+                 style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
+          onChange={v => this.setState({cloneUserRole: v.target.checked})}>
+              </input>
+          <WorkspaceEditSection header='Copy Original workspace Collaborators'
+            text='Share cloned workspace with same collaborators'/>
+        </div>
+        }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}
             text='To fulfill program requirements, All of Us requests the following information'/>
@@ -475,7 +508,9 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </WorkspaceEditSection>
         <div>
           <div style={{display: 'flex', flexDirection: 'row'}}>
-            <Button type='secondary' style={{marginRight: '1rem'}}>Cancel</Button>
+            <Button type='secondary' style={{marginRight: '1rem'}}>
+              Cancel
+            </Button>
             {this.disableButton() &&
             <TooltipTrigger content={[<ul>Missing Required Fields:
               { this.isEmpty('name') && <li> Name </li> }
@@ -487,7 +522,9 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             </TooltipTrigger>
             } {
               !this.disableButton() &&
-              <Button type='primary' onClick={() => this.saveWorkspace()}>
+              <Button type='primary' onClick={() => this.saveWorkspace()}
+                      disabled={this.state.loading}>
+                {this.state.loading && <SpinnerOverlay/>}
                 {this.renderButtonText()}
               </Button>
           }
@@ -496,13 +533,13 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         {this.state.workspaceCreationError &&
         <Modal>
           <ModalTitle>Error:</ModalTitle>
-          <ModalBody>Could not {this.props.routeConfigData.mode}
+          <ModalBody>Could not
             {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'create' : 'update'}
             workspace.
           </ModalBody>
           <ModalFooter>
             <Button
-                type='secondary'>
+                type='secondary' style={{marginRight: '2rem'}}>
               Cancel
               {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
                 </Button>
@@ -514,14 +551,15 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         <Modal>
           <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
               'Error: ' : 'Conflicting update:'}</ModalTitle>
-          <ModalBody>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
-              'You already have a workspace named ' +
-              'Please choose another name' :
+          <ModalBody>
+            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              'You already have a workspace named ' + this.state.workspace.name +
+              ' Please choose another name' :
               'Another client has modified this workspace since the beginning of this editing ' +
               'session. Please reload to avoid overwriting those changes.'}
           </ModalBody>
           <ModalFooter>
-            <Button type='secondary'>Cancel Creation</Button>
+            <Button type='secondary' style={{marginRight: '2rem'}}>Cancel Creation</Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>
         </Modal>
