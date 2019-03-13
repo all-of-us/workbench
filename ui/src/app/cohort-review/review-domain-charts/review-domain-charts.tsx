@@ -5,7 +5,7 @@ import * as React from 'react';
 
 
 export class ReviewDomainChartsComponent extends React.Component<
-  {unitData: any, unitName: any}> {
+  {unitData: any}> {
   chart: any;
   constructor(props) {
     super(props);
@@ -30,11 +30,7 @@ export class ReviewDomainChartsComponent extends React.Component<
         enabled: false
       },
       title: {
-        text: 'Units : ' + this.props.unitName,
-        style: {
-          color: '#2691D0',
-          fontSize: '14px'
-        }
+        text: ''
       },
       yAxis: {
         lineWidth: 2,
