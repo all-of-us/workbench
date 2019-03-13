@@ -168,12 +168,7 @@ public class ElasticFiltersTest {
     ageAttr = new Attribute()
       .name(AttrName.AGE)
       .operator(Operator.EQUAL)
-      .operands(Arrays.asList("38"));
-    ageParam = new SearchParameter()
-      .type(TreeType.DEMO.toString())
-      .subtype(TreeSubType.AGE.toString())
-      .group(false)
-      .attributes(Arrays.asList(ageAttr));
+      .operands(Arrays.asList("1"));
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
@@ -383,14 +378,38 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testAgeQuery() {
+  public void testAnyHeightQuery() {
+    SearchParameter anyHeightParam = new SearchParameter()
+      .conceptId(903133L)
+      .type(TreeType.PM.toString())
+      .subtype(TreeSubType.HEIGHT.toString())
+      .group(false);
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
-            .addSearchParametersItem(ageParam))));
+            .addSearchParametersItem(anyHeightParam))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
+      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(anyHeightParam.getConceptId().toString()))));
+  }
+
+  @Test
+  public void testHeightEqualQuery() {
+    SearchParameter heightEqualParam = new SearchParameter()
+      .conceptId(903133L)
+      .type(TreeType.PM.toString())
+      .subtype(TreeSubType.HEIGHT.toString())
+      .group(false)
+      .attributes(Arrays.asList(numEqualAttr));
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(heightEqualParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(heightEqualParam.getConceptId().toString())),
+      QueryBuilders.rangeQuery("events.value_as_number").gt(numEqualAttr.getOperands().get(0)).lt(numEqualAttr.getOperands().get(0))));
   }
 }
