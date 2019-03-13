@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TreeSubType;
@@ -11,8 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 public class ParameterPredicates {
 
@@ -154,17 +151,17 @@ public class ParameterPredicates {
     return sp -> sp.getAttributes().size() != 2;
   }
 
+  public static Predicate<SearchParameter> notNumAttr() {
+    return sp -> sp.getAttributes()
+      .stream()
+      .filter(a -> AttrName.NUM.equals(a.getName()))
+      .collect(Collectors.toList()).size() == 0;
+  }
+
   public static Predicate<SearchParameter> notSystolicAndDiastolic() {
     return sp -> sp.getAttributes()
       .stream()
       .filter(a -> SYSTOLIC != a.getConceptId() && DIASTOLIC != a.getConceptId())
       .collect(Collectors.toList()).size() != 0;
-  }
-
-  public static Predicate<SearchParameter> notAnyAttr() {
-    return sp -> sp.getAttributes()
-      .stream()
-      .filter(a -> AttrName.ANY.equals(a.getName()))
-      .collect(Collectors.toList()).size() == 0;
   }
 }
