@@ -18,4 +18,10 @@
     <description>Periodic Sync users training status</description>
     <schedule>every 24 hours</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/bulkSyncEraCommonsStatus</url>
+    <target>api</target>
+    <description>Daily sync of eRA Commons linkage status (via FireCloud API)</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
 </cronentries>

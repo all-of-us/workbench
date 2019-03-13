@@ -84,6 +84,11 @@ public interface FireCloudService {
 
   boolean isUserMemberOfGroup(String groupName);
 
+  /**
+   * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.
+   *
+   * Returns null if the FireCloud user is not found or if the user has no NIH linkage.
+   */
   NihStatus getNihStatus();
 
   NihStatus postNihCallback(JWTWrapper wrapper);

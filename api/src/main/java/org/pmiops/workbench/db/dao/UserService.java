@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Provider;
 
+import com.google.api.client.http.HttpStatusCodes;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.AdminActionHistory;
@@ -19,7 +21,9 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -273,32 +277,6 @@ public class UserService {
     }, user);
   }
 
-  public User setEraCommonsStatus(NihStatus nihStatus) {
-    return updateUserWithRetries((user) -> {
-      if (nihStatus != null) {
-        Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
-        // NihStatus should never come back from firecloud with an empty linked username.
-        // If that is the case, there is an error with FC, because we should get a 404
-        // in that case. Leaving the null checking in for code safety reasons
-        if ((nihStatus.getLinkedNihUsername() != null &&
-            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
-            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-          eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
-        } else if (nihStatus.getLinkedNihUsername() == null) {
-          eraCommonsCompletionTime = null;
-        }
-        user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
-        user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
-        user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
-      } else {
-        user.setEraCommonsLinkedNihUsername(null);
-        user.setEraCommonsLinkExpireTime(null);
-        user.setEraCommonsCompletionTime(null);
-      }
-      return user;
-    });
-  }
-
   public User setClusterRetryCount(int clusterRetryCount) {
     return updateUserWithRetries((user) -> {
       user.setClusterCreateRetries(clusterRetryCount);
@@ -387,17 +365,17 @@ public class UserService {
   }
 
   /**
-   * This methods updates user's training status from Moodle.
+   * This methods updates the current user's training status from Moodle.
    * 1. Check if user have moodle_id,
    *    a. if not retrieve it from MOODLE API and save it in the Database
    * 2. Using the MOODLE_ID get user's Badge update the database with
    *    a. training completion time as current time
    *    b. training expiration date with as returned from MOODLE.
    * 3. If there are no badges for a user set training completion time and expiration date as null
-   * @param user
    * @return
    */
-  public void syncUserTraining(User user) throws ApiException, NotFoundException {
+  public void syncUserTraining() throws ApiException, NotFoundException {
+    User user = userProvider.get();
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = user.getMoodleId();
@@ -435,5 +413,64 @@ public class UserService {
       }
       throw ex;
     }
+  }
+
+  /**
+   * Given an NihStatus, updates the given user's eraCommons-related fields.
+   */
+  private void setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+
+    updateUserWithRetries(user -> {
+      if (nihStatus != null) {
+        Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+        // NihStatus should never come back from firecloud with an empty linked username.
+        // If that is the case, there is an error with FC, because we should get a 404
+        // in that case. Leaving the null checking in for code safety reasons
+        if ((nihStatus.getLinkedNihUsername() != null &&
+            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+          eraCommonsCompletionTime = now;
+        } else if (nihStatus.getLinkedNihUsername() == null) {
+          eraCommonsCompletionTime = null;
+        }
+        user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+        user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+        user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+      } else {
+        user.setEraCommonsLinkedNihUsername(null);
+        user.setEraCommonsLinkExpireTime(null);
+        user.setEraCommonsCompletionTime(null);
+      }
+      return user;
+    }, targetUser);
+  }
+
+  /**
+   * Syncs the eraCommons access module status for the current user.
+   */
+  public void syncEraCommonsStatus() {
+    User user = userProvider.get();
+    NihStatus nihStatus = fireCloudService.getNihStatus();
+    setEraCommonsStatus(user, nihStatus);
+  }
+
+  /**
+   * Syncs the eraCommons access module status for an arbitrary user. This uses impersonated
+   * credentials and should only be called in the context of a cron job.
+   */
+  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException {
+    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
+    NihApi api = new NihApi(apiClient);
+    try {
+      NihStatus nihStatus = api.nihStatus();
+    } catch (ApiException e) {
+      if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        log.info(String.format("NIH Status not found for user %s", user.getEmail()));
+        return;
+      }
+    }
+
+
   }
 }

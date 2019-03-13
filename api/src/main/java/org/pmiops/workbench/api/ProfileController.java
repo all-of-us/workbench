@@ -72,6 +72,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Contains implementations for all Workbench API methods tagged with "profile".
+ *
+ * The majority of handlers here are lightweight wrappers which delegate to UserService, where many
+ * user-focused database and/or API calls are implemented.
+ */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
@@ -503,8 +509,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
     User user = userProvider.get();
-    NihStatus nihStatus = fireCloudService.getNihStatus();
-    user = userService.setEraCommonsStatus(nihStatus);
+    userService.syncEraCommonsStatus(user);
     return getProfileResponse(user);
   }
 

@@ -392,8 +392,9 @@ paths:
     post:
       tags:
         - profile
-      summary: Sync era commons status
-      description: Retrieves era commons id from firecloud
+      summary: Sync eRA Commons status
+      description: Retrieves and stores the current user's NIH / eRA Commons
+                   linkage status, fetched via the FireCloud API.
       operationId: syncEraCommonsStatus
       responses:
         200:
