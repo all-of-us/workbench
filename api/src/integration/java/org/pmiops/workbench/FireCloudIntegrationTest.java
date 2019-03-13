@@ -66,16 +66,12 @@ public class FireCloudIntegrationTest {
   @Autowired
   private ServiceAccounts serviceAccounts;
 
-  private WorkbenchEnvironment workbenchEnvironment;
-
   @Autowired
   @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
   private GoogleCredential fireCloudAdminCredential;
 
   @Before
   public void setUp() throws IOException {
-    workbenchEnvironment = new WorkbenchEnvironment(true, "aou-integration-test");
-
     // Get a refreshed access token for the FireCloud service account credentials.
     serviceAccountCredential = serviceAccountCredential.createScoped(
         FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);

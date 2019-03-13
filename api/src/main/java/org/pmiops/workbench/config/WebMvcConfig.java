@@ -1,21 +1,11 @@
 package org.pmiops.workbench.config;
 
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.services.oauth2.model.Userinfoplus;
-
-import java.io.IOException;
-import java.io.InputStream;
-import javax.inject.Provider;
-import javax.servlet.ServletContext;
-
 import org.pmiops.workbench.auth.Constants;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
@@ -25,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
@@ -37,6 +26,10 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
+import java.io.InputStream;
 
 @EnableWebMvc
 @Configuration
