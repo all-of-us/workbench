@@ -347,18 +347,6 @@ public class ElasticFiltersTest {
   }
 
   @Test
-  public void testAgeQuery() {
-    ElasticFilterResponse<QueryBuilder> resp =
-      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
-        .addIncludesItem(new SearchGroup()
-          .addItemsItem(new SearchGroupItem()
-            .addSearchParametersItem(ageParam))));
-    assertThat(resp.isApproximate()).isFalse();
-    assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
-  }
-
-  @Test
   public void testAnyHeightQuery() {
     SearchParameter anyHeightParam = new SearchParameter()
       .conceptId(903133L)
