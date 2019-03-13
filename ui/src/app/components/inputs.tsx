@@ -136,7 +136,7 @@ export const Select = ({value, options, onChange, ...props}) => {
 };
 
 export class DatePicker extends React.Component<
-  {value: Date, onChange: Function}
+  {value: Date, onChange: Function, maxDate?: Date}
 > {
   popup: React.RefObject<any>;
   constructor(props) {
