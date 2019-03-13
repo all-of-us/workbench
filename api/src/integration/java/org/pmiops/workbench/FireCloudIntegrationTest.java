@@ -1,7 +1,6 @@
 package org.pmiops.workbench;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import org.junit.Before;
@@ -24,7 +23,6 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.Me;
-import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -94,11 +92,10 @@ public class FireCloudIntegrationTest {
    * the same integration test run.
    **/
   private FireCloudService createService(WorkbenchConfig config) {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(config.firecloud.baseUrl);
-
+    ApiClient apiClient = new ApiClient()
+        .setBasePath(config.firecloud.baseUrl)
+        .setDebugging(config.firecloud.debugEndpoints);
     apiClient.setAccessToken(serviceAccountCredential.getAccessToken());
-    apiClient.setDebugging(config.firecloud.debugEndpoints);
 
     return new FireCloudServiceImpl(
         Providers.of(config),
@@ -167,7 +164,7 @@ public class FireCloudIntegrationTest {
     NihApi nihApi = new NihApi(apiClient);
     int responseCode = 0;
     try {
-      NihStatus nihStatus = nihApi.nihStatus();
+      nihApi.nihStatus();
     } catch (ApiException e) {
       responseCode = e.getCode();
     }

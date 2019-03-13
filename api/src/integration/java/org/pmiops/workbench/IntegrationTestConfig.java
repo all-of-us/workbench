@@ -47,17 +47,6 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
    })
 public class IntegrationTestConfig {
 
-  /**
-   * Loads the GSuite admin service account key from GCS.
-   *
-   * This needs to be annotated with @Lazy so only classes that use it (e.g. BackfillGSuiteUserData
-   * which requires a WorkbenchConfig instance) will trigger the file load attempt.
-   *
-   * Any command-line tool which loads this bean needs to be called from a project.rb command
-   * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
-   *
-   * @return
-   */
   @Lazy
   @Bean(name= Constants.GSUITE_ADMIN_CREDS)
   GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {

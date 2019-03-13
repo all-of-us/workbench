@@ -14,7 +14,7 @@ import java.util.List;
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
 /**
- * Handles functionality related to loading service account credentials and generated derived /
+ * Handles functionality related to loading service account credentials and generating derived /
  * impersonated credentials.
  */
 @Component
@@ -68,7 +68,7 @@ public class ServiceAccounts {
       GoogleCredential serviceAccountCredential,
       String userEmail,
       List<String> scopes) throws IOException {
-    // Build derived csredentials for impersonating the target user.
+    // Build derived credentials for impersonating the target user.
     GoogleCredential impersonatedUserCredential = getCredentialBuilder()
         .setJsonFactory(getDefaultJsonFactory())
         .setTransport(httpTransport)

@@ -45,14 +45,12 @@ public class FetchFireCloudUserProfile {
                 + Arrays.asList(args));
       }
 
-      String username = args[0];
-      User user = userDao.findUserByEmail(
-          username + "@" + workbenchConfig.googleDirectoryService.gSuiteDomain);
+      String userEmail = args[0];
+      User user = userDao.findUserByEmail(userEmail);
       if (user == null) {
         throw new RuntimeException(
-            String.format("Error fetching AoU user with username %s", username));
+            String.format("Error fetching AoU user with email %s", userEmail));
       }
-      String userEmail = user.getEmail();
       log.info("Fetching data for " + userEmail);
 
       ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(userEmail);

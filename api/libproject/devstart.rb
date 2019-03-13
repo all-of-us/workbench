@@ -1068,10 +1068,10 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--username=[username]",
+      "--user=[user]",
       String,
-      ->(opts, v) { opts.username = v},
-      "The AoU username to fetch FireCloud data for (e.g. 'gjordan'")
+      ->(opts, v) { opts.user = v},
+      "The AoU user to fetch FireCloud data for (e.g. 'gjordan@fake-research-aou.org'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
@@ -1082,7 +1082,7 @@ def fetch_firecloud_user_profile(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common.run_inline %W{
         gradle --info fetchFireCloudUserProfile
-       -PappArgs=["#{op.opts.username}"]}
+       -PappArgs=["#{op.opts.user}"]}
   end
 end
 
