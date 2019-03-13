@@ -94,6 +94,9 @@ public class ProfileService {
     if (user.getEraCommonsCompletionTime() != null) {
       profile.setEraCommonsCompletionTime(user.getEraCommonsCompletionTime().getTime());
     }
+    if (user.getEraCommonsBypassTime() != null) {
+      profile.setEraCommonsBypassTime(user.getEraCommonsBypassTime().getTime());
+    }
     if (user.getDemographicSurveyCompletionTime() != null) {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
           .getTime());
