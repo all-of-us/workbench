@@ -507,7 +507,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
                               tooltip={toolTipText.reviewRequest}>
-          <div style={{display: 'flex', flexDirection: 'row', paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
+          <div style={{display: 'flex', flexDirection: 'row',
+            paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
                    type='checkbox'
                    onChange={v =>
