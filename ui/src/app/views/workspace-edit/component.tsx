@@ -109,7 +109,8 @@ const styles = reactStyles({
     fontSize: '13px',
     fontStyle: 'italic',
     fontWeight: 400,
-    color: '#4A4A4A'
+    color: '#4A4A4A',
+    marginLeft: '0.2rem'
   },
 
   text: {
@@ -177,7 +178,7 @@ const styles = reactStyles({
 export const WorkspaceEditSection = (props) => {
   return <div key={props.header}>
     <div style={{display: 'flex', flexDirection: 'row', marginTop: (props.largeHeader ? 48 : 24)}}>
-      <div style={{...styles.header, marginRight: '0.2rem',
+      <div style={{...styles.header,
         fontSize: (props.largeHeader ? 20 : 16)}}>
         {props.header}
       </div>
@@ -506,7 +507,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
                               tooltip={toolTipText.reviewRequest}>
-          <div style={{display: 'flex', flexDirection: 'row', paddingBottom: '14.4px'}}>
+          <div style={{display: 'flex', flexDirection: 'row', paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
                    type='checkbox'
                    onChange={v =>
