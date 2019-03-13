@@ -24,6 +24,7 @@ export class ReviewDomainChartsComponent extends React.Component<
         type: 'spline',
         zoomType: 'xy',
         backgroundColor: 'transparent',
+        height: 300,
       },
       credits: {
         enabled: false
@@ -34,7 +35,6 @@ export class ReviewDomainChartsComponent extends React.Component<
       yAxis: {
         lineWidth: 2,
         lineColor: '#979797',
-        // tickWidth: 0,
       },
       plotOptions: {
         series: {
