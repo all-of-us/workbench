@@ -27,7 +27,6 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotTwo;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notNumAttr;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notSystolicAndDiastolic;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notTwoAttributes;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
