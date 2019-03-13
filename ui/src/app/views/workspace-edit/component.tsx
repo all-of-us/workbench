@@ -525,7 +525,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           </div>
         </WorkspaceEditSection>
         <div>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem',
+            marginBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}>
               Cancel
             </Button>
