@@ -29,7 +29,10 @@ def get_live_gae_version(project, validate_version=true)
     common.error "Failed to get live GAE version for project '#{project}'"
     exit 1
   end
-  services = Set["api", "default", "public-api", "public-ui"]
+
+  # TODO(RW-1974): Remove public-* services.
+  wb_services = Set["api", "default"]
+  services = wb_services + Set["public-api", "public-ui"]
   actives = JSON.parse(versions).select{|v| v["traffic_split"] == 1.0}
   active_services = actives.map{|v| v["service"]}.to_set
   if actives.empty?
@@ -41,7 +44,8 @@ def get_live_gae_version(project, validate_version=true)
     return nil
   end
 
-  versions = actives.map{|v| v["id"]}.to_set
+  # TODO(RW-1974): Revert this filtering once public services are gone.
+  versions = actives.select{|v| wb_services.include?(v["service"])}.map{|v| v["id"]}.to_set
   if versions.length != 1
     common.warning "Found varying IDs across GAE services in project '#{project}': " +
                    "[#{versions.to_a.join(', ')}]"
@@ -274,6 +278,7 @@ def deploy(cmd_name, args)
       --key-file #{op.opts.key_file}
       --version #{op.opts.app_version}
       #{op.opts.promote ? "--promote" : "--no-promote"}
+      --skip-public-api
   } + (op.opts.dry_run ? %W{--dry-run} : [])
 
   maybe_log_jira.call "'#{op.opts.project}': Beginning deploy of api and " +
@@ -292,17 +297,6 @@ def deploy(cmd_name, args)
       --quiet
   } + (op.opts.dry_run ? %W{--dry-run} : [])
   maybe_log_jira.call "'#{op.opts.project}': completed UI service deployment"
-
-  common.run_inline %W{
-    ../public-ui/project.rb deploy-ui
-      --project #{op.opts.project}
-      --account #{op.opts.account}
-      --key-file #{op.opts.key_file}
-      --version #{op.opts.app_version}
-      #{op.opts.promote ? "--promote" : "--no-promote"}
-      --quiet
-  } + (op.opts.dry_run ? %W{--dry-run} : [])
-  maybe_log_jira.call "'#{op.opts.project}': completed Public-UI service deployment"
 
   if create_ticket
     jira_client.create_ticket(op.opts.project, from_version,
