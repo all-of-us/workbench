@@ -1715,9 +1715,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsHeartRateAny() throws Exception {
-    List<Attribute> attributes = Arrays.asList(new Attribute().name(AttrName.ANY));
     SearchParameter searchParameter = createPMSearchCriteria(TreeType.PM.name(), TreeSubType.HR_DETAIL.toString(), "1586218");
-    searchParameter.attributes(attributes);
     SearchRequest searchRequest = createSearchRequests(TreeType.PM.name(), Arrays.asList(searchParameter), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }

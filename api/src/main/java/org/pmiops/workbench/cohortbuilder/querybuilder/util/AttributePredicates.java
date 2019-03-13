@@ -46,6 +46,14 @@ public class AttributePredicates {
     return a -> a.getName() == null;
   }
 
+  public static Predicate<Attribute> anyAttr() {
+    return a -> AttrName.ANY.equals(a.getName());
+  }
+
+  public static Predicate<Attribute> conceptIdIsNull() {
+    return a -> a.getConceptId() == null;
+  }
+
   public static Predicate<Attribute> operandsNotNumbers() {
     return a -> !a
       .getOperands()
