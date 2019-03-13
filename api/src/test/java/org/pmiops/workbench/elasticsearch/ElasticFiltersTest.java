@@ -75,6 +75,9 @@ public class ElasticFiltersTest {
   }
 
   private SearchParameter leafParam2;
+  private Attribute numEqualAttr;
+  private SearchParameter ageParam;
+  private Attribute ageAttr;
 
   @Before
   public void setUp() {
@@ -211,6 +214,15 @@ public class ElasticFiltersTest {
         .type(TreeType.ICD9.toString())
         .subtype(TreeSubType.CM.toString())
         .group(false);
+    numEqualAttr = new Attribute()
+      .name(AttrName.NUM)
+      .operator(Operator.EQUAL)
+      .operands(Arrays.asList("1"));
+
+    ageAttr = new Attribute()
+      .name(AttrName.AGE)
+      .operator(Operator.EQUAL)
+      .operands(Arrays.asList("1"));
   }
 
   private static final QueryBuilder singleNestedQuery(QueryBuilder... inners) {
