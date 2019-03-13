@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
+import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -14,201 +15,6 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
-
-const css = `
-  body .p-datatable .p-sortable-column:not(.p-highlight):hover,
-  body .p-datatable .p-sortable-column.p-highlight {
-    color: #333333;
-    background-color: #f4f4f4;
-  }
-  body .p-datatable .p-datatable-thead > tr > th {
-    padding: 10px 5px 10px 10px;
-    vertical-align: middle;
-    background: #f4f4f4;
-    border: 0;
-    border-bottom: 1px solid #c8c8c8;
-    border-left: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-datatable-thead > tr > th:first-of-type {
-    border-left: 0;
-  }
-  body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
-    border-bottom: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-column-title {
-    display: flex;
-  }
-  .pi.pi-sort,
-  .pi.pi-sort-up,
-  .pi.pi-sort-down {
-    display: none;
-  }
-  .p-datatable .p-datatable-scrollable-wrapper {
-    border: 1px solid #c8c8c8;
-  }
-  .p-datatable .p-paginator.p-paginator-bottom {
-    border: 0;
-    margin-top: 20px;
-    background: none;
-    font-size: 12px;
-    text-align: right;
-  }
-  body .p-paginator .p-paginator-pages {
-    display: inline;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next,
-  body .p-paginator .p-paginator-pages .p-paginator-page {
-    border: 1px solid #cccccc;
-    border-radius: 3px;
-    background: #fafafa;
-    color: #2691D0;
-    height: auto;
-    width: auto;
-    min-width: 0;
-    padding: 7px;
-    margin: 0 2px;
-    line-height: 0.5rem;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next {
-    height: 28px;
-    width: 24px;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page:focus {
-    box-shadow: 0;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-    background: #fafafa;
-    color: rgba(0, 0, 0, .5);
-  }
-  body .p-overlaypanel .p-overlaypanel-close {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel {
-    top: 19px!important;
-    left: 0px!important;
-    width:9.5rem;
-  }
-  body .p-overlaypanel .p-overlaypanel-close:hover {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel .p-overlaypanel-content {
-    padding: 0.6rem 0.6rem;
-    font-size: 13px;
-  }
-  .pi-chevron-right:before {
-    content: "\\E96D";
-    color: rgb(0, 134, 193);
-    font-size: 0.8rem;
-    line-height: 0rem;
-  }
- .pi-chevron-down:before {
-    content: "\\E96D";
-    color: rgb(0, 134, 193);
-    font-size: 0.8rem;
-    line-height: 0rem;
-  }
-  .graphExpander .pi-chevron-right {
-    display: none;
-    border-bottom: 2px solid white;
-  }
-
-  body .p-tabview.p-tabview-top,
-  body .p-tabview.p-tabview-bottom,
-  body .p-tabview.p-tabview-left, body
-  .p-tabview.p-tabview-right {
-    margin: 0rem 11rem;
-    background-color: transparent;
-  }
-
-  body .p-tabview.p-tabview-top .p-tabview-nav li a,
-  body .p-tabview.p-tabview-bottom .p-tabview-nav li a,
-  body .p-tabview.p-tabview-left .p-tabview-nav li a,
-  body .p-tabview.p-tabview-right .p-tabview-nav li a {
-    border: none;
-    background-color: transparent;
-  }
-	body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
-	body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
-	body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
-	body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
-    background-color: none!important;
-    border-bottom: 4px solid #007ad9!important;
-    color: #2691D0;
-    font-size: 14px;
-  }
-  body .p-tabview.p-tabview-top .p-tabview-nav li.p-highlight a,
-  body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-highlight a,
-  body .p-tabview.p-tabview-left .p-tabview-nav li.p-highlight a,
-  body .p-tabview.p-tabview-right .p-tabview-nav li.p-highlight a {
-    background-color: transparent!important;
-    border: none;
-    color: #2691D0;
-    font-size: 14px;
-  }
-
-  body .p-tabview.p-tabview-top .p-tabview-nav
-  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom
-  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-left
-  .p-tabview-nav li.p-highlight:hover a, body .p-tabview.p-tabview-right
-  .p-tabview-nav li.p-highlight:hover a {
-    border: none;
-    background-color: transparent;
-    color: #2691D0;
-    font-size: 14px;
-  }
-  body .p-tabview.p-tabview-top .p-tabview-nav
-  li.p-highlight:hover a, body .p-tabview.p-tabview-bottom
-  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-left
-  .p-tabview-nav li.p-highlight:focus a, body .p-tabview.p-tabview-right
-  .p-tabview-nav li.p-highlight:focus a {
-    border: none;
-    background-color: transparent;
-    color: #2691D0;
-    font-size: 14px;
-  }
-  body .p-tabview.p-tabview-top
-  .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-  body .p-tabview.p-tabview-bottom .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-  body .p-tabview.p-tabview-left .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a,
-  body .p-tabview.p-tabview-right .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover a {
-    background-color: transparent;
-    border-bottom: 4px solid #007ad9!important;
-    border-top: none;
-    border-right: none;
-    border-left: none;
-    color: #2691D0;
-    font-size: 14px;
-  }
-  body .p-tabview .p-tabview-panels {
-    border: none;
-    background-color: transparent;
-  }
-  body .p-tabview.p-tabview-top .p-tabview-nav {
-    margin-left: 3rem;
-    border-bottom: 1px solid #007ad9;
-  }
-  body .p-datatable .p-datatable-tbody > tr > td {
-    background: #ECF1F4;
-    border: none;
-  }
-  body .p-datatable .p-sortable-column:focus {
-    outline: 0;
-    outline-offset: 0;
-    box-shadow: none;
-  }
-  .changeColor {
-    background-color: red;
-    border-bottom: none!important;
-  }
-  `;
 
 const styles = reactStyles({
   container: {
@@ -274,7 +80,7 @@ const styles = reactStyles({
     color: '#2691D0',
     fontSize: '14px',
     fontWeight: 'bold',
-    width: '11rem',
+    width: '20rem',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -414,7 +220,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       let valueArray;
       return <React.Fragment>
         <div style={styles.headerStyle}>{rowData.standardName}</div>
-      <TabView>
+      <TabView className='unitTab'>
         {unitKey.map((k, i) => {
           const name = k === 'null' ? 'No Unit' : k;
           { valueArray = unitsObj[k].map(v => {
@@ -424,7 +230,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             };
           }); }
           return <TabPanel header={name} key={i}>
-            <ReviewDomainChartsComponent orgData={valueArray} unitName={name}/>
+            <ReviewDomainChartsComponent unitData={valueArray} unitName={name}/>
           </TabPanel>;
         })}
       </TabView>;
