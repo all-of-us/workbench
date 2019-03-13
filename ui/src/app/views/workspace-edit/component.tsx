@@ -277,9 +277,22 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
     componentWillMount() {
-      this.setCdrVersions();
       this.updateWorkspace();
+      this.setCdrVersions();
+    }
 
+
+    updateWorkspace() {
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        const profile =  userProfileStore.getValue().profile;
+        this.setState(fp.set(['workspace', 'namespace'], profile.freeTierBillingProjectName));
+        return;
+      }
+      this.setState({workspace : this.props.workspace});
+      if (this.isMode(WorkspaceEditMode.Clone)) {
+        this.setState(
+          fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
+      }
     }
 
     async setCdrVersions() {
@@ -290,20 +303,11 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         versions.push({label: version.name, value: version.cdrVersionId});
       });
       this.setState({cdrVersionItems: versions});
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        this.setState(fp.set(['workspace', 'cdrVersionId'], versions[0].value));
+      }
     }
 
-    updateWorkspace() {
-      if (this.props.routeConfigData.mode === WorkspaceEditMode.Create) {
-        const profile =  userProfileStore.getValue().profile;
-        this.setState(fp.set(['workspace', 'namespace'], profile.freeTierBillingProjectName));
-        return;
-      }
-      this.setState({workspace : this.props.workspace});
-      if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
-        this.setState(
-          fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
-      }
-    }
 
     openStigmatization() {
       window.open('/definitions/stigmatization', '_blank');
@@ -330,8 +334,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
     disableButton() {
-      return !this.state.workspace.description || this.state.workspace.description === '' ||
-          !this.state.workspace.name || this.state.workspace.name === '';
+      return this.isEmpty('name') || this.isEmpty('description');
     }
 
     updateWorkspaceCategory(category, value) {
@@ -350,10 +353,10 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       try {
         this.setState({loading: true});
         let workspace = this.state.workspace;
-        if (this.props.routeConfigData.mode === WorkspaceEditMode.Create) {
+        if (this.isMode(WorkspaceEditMode.Create)) {
           workspace =
               await workspacesApi().createWorkspace(this.state.workspace);
-        } else if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
+        } else if (this.isMode(WorkspaceEditMode.Clone)) {
           await workspacesApi().cloneWorkspace(
             this.state.workspace.namespace, this.state.workspace.id,
             {
@@ -394,13 +397,17 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
 
     render() {
       return <React.Fragment>
+        <div style={{width: '60%'}}>
         <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
                        value = {this.state.workspace.name}
                        onChange={v =>    this.setState(fp.set(['workspace', 'name'], v))}/>
-            <div style={styles.select}>
+            <TooltipTrigger
+                content='To use a different dataset version, clone or create a new workspace.'
+                disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
+              <div style={styles.select}>
                 <Select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px'}}
                         value={this.state.workspace.cdrVersionId}
                         options={this.state.cdrVersionItems}
@@ -408,7 +415,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                             this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
                         isDisabled={this.isMode(WorkspaceEditMode.Edit)}>
                 </Select>
-            </div>
+              </div>
+            </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
               <InfoIcon style={{...styles.infoIcon, marginTop: '0.5rem'}}/>
             </TooltipTrigger>
@@ -426,7 +434,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}
-            text='To fulfill program requirements, All of Us requests the following information'/>
+            text='To fulfill program requirements, All of Us requests the following information
+            for each workspace.'/>
         <WorkspaceEditSection header='Describe your research purpose'
             tooltip={toolTipText.researchPurpose}
             text={['Please include the ', <strong key='question'>research question</strong>,
@@ -446,12 +455,19 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
               item={ResearchPurposeItems.diseaseFocusedResearch}
               value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
               onChange={v => this.updateWorkspaceCategory('diseaseFocusedResearch', v)}>
-            <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
-                style={{width: 'calc(50% - 2rem)', border: '1px solid #9a9a9', borderRadius: '5px'}}
-                placeholder='Name of Disease' onChange={v =>
-                this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
-                       disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
-
+            <TooltipTrigger
+                content='You must select disease focused research to enter a disease of focus'
+                disabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}>
+              <TextInput value={this.state.workspace.researchPurpose.diseaseOfFocus}
+                         style={{
+                           width: 'calc(50% - 2rem)',
+                           border: '1px solid #9a9a9',
+                           borderRadius: '5px'
+                         }}
+                         placeholder='Name of Disease' onChange={v =>
+                  this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
+                         disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
+            </TooltipTrigger>
           </WorkspaceCateogry>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
@@ -490,7 +506,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
                               tooltip={toolTipText.reviewRequest}>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <div style={{display: 'flex', flexDirection: 'row', paddingBottom: '14.4px'}}>
             <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
                    type='checkbox'
                    onChange={v =>
@@ -511,23 +527,16 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             <Button type='secondary' style={{marginRight: '1rem'}}>
               Cancel
             </Button>
-            {this.disableButton() &&
             <TooltipTrigger content={[<ul>Missing Required Fields:
               { this.isEmpty('name') && <li> Name </li> }
               { this.isEmpty('description') && <li> Description </li> }
-            </ul>]}>
-              <Button type='primary' onClick={() => this.saveWorkspace()} disabled>
-                {this.renderButtonText()}
-              </Button>
-            </TooltipTrigger>
-            } {
-              !this.disableButton() &&
+            </ul>]} disabled={!this.disableButton()}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
-                      disabled={this.state.loading}>
+                      disabled={this.disableButton() || this.state.loading}>
                 {this.state.loading && <SpinnerOverlay/>}
                 {this.renderButtonText()}
               </Button>
-          }
+            </TooltipTrigger>
           </div>
         </div>
         {this.state.workspaceCreationError &&
@@ -564,6 +573,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           </ModalFooter>
         </Modal>
         }
+        </div>
       </React.Fragment> ;
     }
   }));
