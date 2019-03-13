@@ -11,8 +11,8 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
-
 
 
 const css = `
@@ -119,14 +119,12 @@ const css = `
     display: none;
     border-bottom: 2px solid white;
   }
- // body .graphExpander.p-datatable .p-datatable-tbody > tr:not(last-of-type)  {
- //        border-bottom: 2px solid white!important;
- //  }
+
   body .p-tabview.p-tabview-top,
   body .p-tabview.p-tabview-bottom,
   body .p-tabview.p-tabview-left, body
   .p-tabview.p-tabview-right {
-    margin: 1rem 11rem;
+    margin: 0rem 11rem;
     background-color: transparent;
   }
 
@@ -198,18 +196,18 @@ const css = `
     border-bottom: 1px solid #007ad9;
   }
   body .p-datatable .p-datatable-tbody > tr > td {
-    background-color: #ECF1F4;
+    background: #ECF1F4;
     border: none;
   }
- .graphExpander {
-    border-bottom: none;
-  }
-body .p-datatable .p-sortable-column:focus {
+  body .p-datatable .p-sortable-column:focus {
     outline: 0;
     outline-offset: 0;
     box-shadow: none;
-}
-
+  }
+  .changeColor {
+    background-color: red;
+    border-bottom: none!important;
+  }
   `;
 
 const styles = reactStyles({
@@ -240,13 +238,13 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
   },
   graphColumnBody: {
-    // background: '#ffffff',
-    // padding: '5px',
-    // verticalAlign: 'top',
-    // textAlign: 'left',
-    // borderLeft: 0,
-    // borderRight: 0,
-    // lineHeight: '0.6rem',
+    background: '#ffffff',
+    padding: '5px',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    lineHeight: '0.6rem',
     width: '2rem',
   },
 
@@ -272,8 +270,17 @@ const styles = reactStyles({
     borderLeft: 'none',
     width: '2rem',
   },
-  testHeader: {
-
+  headerStyle: {
+    color: '#2691D0',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    width: '11rem',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    margin: 'auto',
+    paddingTop: '0.5rem',
+    textAlign: 'center',
   }
 });
 const rows = 25;
@@ -294,12 +301,10 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  openClickedTab: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    valueArray: any;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -309,7 +314,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortField: null,
         sortOrder: 1,
         expandedRows: [],
-        openClickedTab: {}
       };
     }
 
@@ -402,40 +406,35 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
-    groupByData = (objectArray: any, property: any) => {
-      return objectArray.reduce((acc, obj) => {
-        const key = obj[property];
-        if (!acc[key]) {
-          acc[key] = [];
-        }
-        acc[key].push(obj);
-        return acc;
-      }, {});
-    }
     rowExpansionTemplate = (rowData: any) => {
       const {data} = this.state;
-      const conceptIdBasedData = this.groupByData(data, 'standardConceptId');
-      const unitsObj = this.groupByData(conceptIdBasedData[rowData.standardConceptId], 'unit');
+      const conceptIdBasedData = fp.groupBy('standardConceptId', data);
+      const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
       const unitKey = Object.keys(unitsObj);
-      return <TabView>
+      let valueArray;
+      return <div>
+        <div style={styles.headerStyle}>{rowData.standardName}</div>
+      <TabView>
         {unitKey.map((k, i) => {
           const name = k === 'null' ? 'No Unit' : k;
-          { this.valueArray = unitsObj[k].map(v => {
+          { valueArray = unitsObj[k].map(v => {
             return {
               values: parseInt(v.value, 10),
               date: v.itemDate,
             };
           }); }
           return <TabPanel header={name} key={i}>
-            <ReviewDomainChartsComponent orgData={this.valueArray} unitName={name}/>
+            <ReviewDomainChartsComponent orgData={valueArray} unitName={name}/>
           </TabPanel>;
         })}
       </TabView>;
+      </div>
     }
     hideGraphIcon = (rowData: any) => {
       const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
       return {'graphExpander' : noConcept};
     }
+
     render() {
       const {data, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
@@ -469,8 +468,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         return <Column
           expander={isExpanderNeeded}
           style={styles.tableBody}
-          bodyStyle={isExpanderNeeded ? styles.graphColumnBody
-            && styles.columnBody : styles.columnBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
