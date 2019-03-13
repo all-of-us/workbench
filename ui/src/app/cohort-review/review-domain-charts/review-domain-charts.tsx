@@ -5,17 +5,17 @@ import * as React from 'react';
 
 
 export class ReviewDomainChartsComponent extends React.Component<
-  {orgData: any, unitName: any}, {}> {
+  {unitData: any, unitName: any}> {
   chart: any;
   constructor(props) {
     super(props);
   }
 
   getOptions() {
-    const values = this.props.orgData.map(val => {
+    const values = this.props.unitData.map(val => {
       return  val.values;
     });
-    const date = this.props.orgData.map(val => {
+    const date = this.props.unitData.map(val => {
       return val.date;
     });
 
@@ -30,7 +30,11 @@ export class ReviewDomainChartsComponent extends React.Component<
         enabled: false
       },
       title: {
-        text: 'Units : ' + this.props.unitName
+        text: 'Units : ' + this.props.unitName,
+        style: {
+          color: '#2691D0',
+          fontSize: '14px'
+        }
       },
       yAxis: {
         lineWidth: 2,
