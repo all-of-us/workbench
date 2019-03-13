@@ -278,18 +278,18 @@ export const DetailTabTable = withCurrentWorkspace()(
     filterData() {
       const {checkedItems} = this.state;
       let {data, start} = this.state;
-      const {filterState: {global: {age, date, visits}}} = this.props;
-      if (date.min || date.max) {
-        const min = date.min ? date.min.getTime() : 0;
-        const max = date.max ? date.max.getTime() : 9999999999999;
+      const {filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}} = this.props;
+      if (dateMin || dateMax) {
+        const min = dateMin ? dateMin.getTime() : 0;
+        const max = dateMax ? dateMax.getTime() : 9999999999999;
         data = data.filter(item => {
           const itemDate = Date.parse(item.itemDate);
           return itemDate > min && itemDate < max;
         });
       }
-      if (this.props.domain !== DomainType[DomainType.SURVEY] && (age.min || age.max)) {
-        const min = age.min || 0;
-        const max = age.max || 120;
+      if (this.props.domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
+        const min = ageMin || 0;
+        const max = ageMax || 120;
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY]

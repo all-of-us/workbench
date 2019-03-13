@@ -6,14 +6,10 @@ import {
 
 const initialFilterState = {
   global: {
-    date: {
-      min: null,
-      max: null
-    },
-    age: {
-      min: '',
-      max: ''
-    },
+    dateMin: null,
+    dateMax: null,
+    ageMin: '',
+    ageMax: '',
     visits: null
   },
   tabs: {

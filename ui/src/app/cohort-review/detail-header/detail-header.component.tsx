@@ -2,18 +2,27 @@ import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
-import {DatePicker, Select, TextInput} from 'app/components/inputs';
+import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
-import {CohortReview, PageFilterRequest, PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {
+  CohortReview,
+  PageFilterRequest,
+  PageFilterType,
+  ParticipantCohortStatus,
+  SortOrder
+} from 'generated/fetch';
+import * as moment from 'moment';
 import {Calendar} from 'primereact/calendar';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
+import {validate} from 'validate.js';
+
 const css = `
   body .p-calendar.p-calendar-w-btn > .p-inputtext,
   body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
@@ -198,6 +207,7 @@ export const DetailHeader = withCurrentWorkspace()(
 
     componentDidMount() {
       this.update();
+      console.log(moment.utc());
     }
 
     componentDidUpdate(prevProps: any) {
@@ -301,24 +311,10 @@ export const DetailHeader = withCurrentWorkspace()(
       this.setState({filterState: filterState});
     }
 
-    setFilter = (value: any, type: string, field?: string) => {
+    setFilter = (value: any, type: string) => {
       const {filterState} = this.state;
-      switch (type) {
-        case 'age':
-          filterState.global[type][field] = value;
-          filterStateStore.next(filterState);
-          break;
-        case 'date':
-          filterState.global[type][field] = value;
-          if (typeof value === 'object') {
-            filterStateStore.next(filterState);
-          }
-          break;
-        case 'visits':
-          filterState.global[type] = value;
-          filterStateStore.next(filterState);
-          break;
-      }
+      filterState.global[type] = value;
+      filterStateStore.next(filterState);
       this.setState({filterState: filterState});
     }
 
@@ -336,12 +332,29 @@ export const DetailHeader = withCurrentWorkspace()(
     render() {
       const {participant} = this.props;
       const {
-        filterState: {global: {age, date, visits}},
+        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}},
         filterState,
         filterTab,
         isFirstParticipant,
         isLastParticipant
       } = this.state;
+      const errors = validate({ageMin, ageMax}, {
+        ageMin: {
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0,
+            message: 'must be a positive whole number'
+          }
+        },
+        ageMax: {
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0,
+            lessThanOrEqualTo: 120,
+            message: 'must be a positive whole number'
+          }
+        }
+      });
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <style>{css}</style>
@@ -420,8 +433,9 @@ export const DetailHeader = withCurrentWorkspace()(
                     {/*showIcon={true}*/}
                   {/*/>*/}
                   <DatePicker
-                    value={date.min}
-                    onChange={v => this.setFilter(v, 'date', 'min')}
+                    value={dateMin}
+                    onChange={v => this.setFilter(v, 'dateMin')}
+                    maxDate={new Date()}
                   />
                 </div>
                 <div style={otherStyles.filterText}>
@@ -439,8 +453,9 @@ export const DetailHeader = withCurrentWorkspace()(
                     {/*showIcon={true}*/}
                   {/*/>*/}
                   <DatePicker
-                    value={date.max}
-                    onChange={v => this.setFilter(v, 'date', 'max')}
+                    value={dateMax}
+                    onChange={v => this.setFilter(v, 'dateMax')}
+                    maxDate={new Date()}
                   />
                 </div>
               </div>}
@@ -451,8 +466,10 @@ export const DetailHeader = withCurrentWorkspace()(
                 <div style={otherStyles.filterInput}>
                   <TextInput
                     type='number'
-                    value={age.min}
-                    onChange={(e) => this.setFilter(e, 'age', 'min')}
+                    min='0'
+                    max='120'
+                    value={ageMin}
+                    onChange={(e) => this.setFilter(e, 'ageMin')}
                   />
                 </div>
                 <div style={otherStyles.filterText}>
@@ -461,8 +478,10 @@ export const DetailHeader = withCurrentWorkspace()(
                 <div style={otherStyles.filterInput}>
                   <TextInput
                     type='number'
-                    value={age.max}
-                    onChange={(e) => this.setFilter(e, 'age', 'max')}
+                    min='0'
+                    max='120'
+                    value={ageMax}
+                    onChange={(e) => this.setFilter(e, 'ageMax')}
                   />
                 </div>
               </div>}
@@ -478,6 +497,9 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
+              {/*<ValidationError>*/}
+                {/*{summarizeErrors(errors && (errors.ageMin || errors.ageMax))}*/}
+              {/*</ValidationError>*/}
             </div>
           </div>
           <div style={{...otherStyles.radios, marginRight: 0}}>
