@@ -839,6 +839,14 @@ definitions:
       ageAtEvent:
         type: integer
         description: The age at event for the participant
+      standardConceptId:
+        type: integer
+        format: int64
+        description: The standard concept id
+      sourceConceptId:
+        type: integer
+        format: int64
+        description: The source concept id
       domainType:
         $ref: "#/definitions/DomainType"
 
