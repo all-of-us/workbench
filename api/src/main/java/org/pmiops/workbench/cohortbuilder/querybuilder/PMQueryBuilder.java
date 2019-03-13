@@ -27,6 +27,7 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotTwo;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notNumAttr;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notSystolicAndDiastolic;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.notTwoAttributes;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
@@ -92,14 +93,14 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
       List<String> tempQueryParts = new ArrayList<String>();
-      boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       if (parameter.getAttributes().isEmpty()) {
         String tempSql = BASE_SQL_TEMPLATE;
         String namedParameterConceptId = addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
         tempQueryParts.add(tempSql.replace("${conceptId}", "@" + namedParameterConceptId));
       }
+      boolean isBP = parameter.getSubtype().equals(TreeSubType.BP.name());
       for (Attribute attribute : parameter.getAttributes()) {
-        validateAttribute(attribute);
+        validateAttribute(attribute, isBP);
         if (AttrName.ANY.equals(attribute.getName())) {
           String tempSql = BP_INNER_SQL_TEMPLATE;
           String namedParameterConceptId = addQueryParameterValue(queryParams, QueryParameterValue.int64(attribute.getConceptId()));
@@ -159,16 +160,18 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
     }
   }
 
-  private void validateAttribute(Attribute attr) {
+  private void validateAttribute(Attribute attr, boolean isBP) {
     String name = attr.getName() == null ? null : attr.getName().name();
     String oper = operatorText.get(attr.getOperator());
     from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
-    from(anyAttr().and(conceptIdIsNull())).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
-    from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
-    from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-    from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
-    from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
-    from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
-    from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
+    if (!isBP) {
+      from(anyAttr()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+      from(operatorNull().and(conceptIdIsNull())).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+      from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
+      from(notBetweenOperator().and(operandsNotOne())).test(attr).throwException(ONE_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
+    }
   }
 }

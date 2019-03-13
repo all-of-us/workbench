@@ -6,7 +6,7 @@ import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
 import {ResourceType} from 'app/utils/resourceActionsReact';
 import {environment} from 'environments/environment';
-import {ConceptSet} from 'generated/fetch';
+import {Cohort, ConceptSet} from 'generated/fetch';
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
@@ -69,19 +69,25 @@ export const ResourceCardMenu: React.FunctionComponent<{
 };
 
 export const ResourceListItem: React.FunctionComponent <
-  {conceptSet: ConceptSet, openConfirmDelete: Function, edit: Function, onSelect: Function}
-    > = ({conceptSet, openConfirmDelete, edit, onSelect}) => {
+  {resource: ConceptSet | Cohort, openConfirmDelete: Function, edit: Function,
+    rType: ResourceType, onSelect: Function, onClone?: Function, onReview?: Function}
+    > = ({resource, openConfirmDelete, edit, rType, onSelect, onClone = () => {},
+                                          onReview = () => {}}) => {
       return<div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
         height: '1.5rem', display: 'flex'}}>
       <div style={{width: '.75rem', paddingTop: 5, paddingLeft: 10}}>
         <ResourceCardMenu disabled={false}
-                          resourceType={ResourceType.CONCEPT_SET}
+                          resourceType={rType}
                           onDeleteResource={openConfirmDelete}
-                          onEditConceptSet={edit}/>
+                          onEditConceptSet={edit}
+                          onEditCohort={edit}
+                          onCloneResource={onClone}
+                          onReviewCohort={onReview}/>
+
       </div>
-      <input type='checkbox' value={conceptSet.name} onClick={() => onSelect}
+      <input type='checkbox' value={resource.name} onClick={() => onSelect}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
                marginRight: 10, backgroundColor: '#7CC79B'}}/>
-      <div style={{lineHeight: '1.5rem'}}>{conceptSet.name}</div>
+      <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>
     </div>;
     };
