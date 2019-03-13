@@ -62,14 +62,12 @@ public class FireCloudServiceImplTest {
   @Mock
   private GoogleCredential impersonatedCredential;
 
-  private WorkbenchConfig workbenchConfig;
-
   @Rule
   public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   @Before
   public void setUp() {
-    workbenchConfig = new WorkbenchConfig();
+    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
     workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.baseUrl = "https://api.firecloud.org";
     workbenchConfig.firecloud.debugEndpoints = true;
