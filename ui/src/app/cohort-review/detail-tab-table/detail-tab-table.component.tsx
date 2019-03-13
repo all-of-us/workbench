@@ -6,12 +6,12 @@ import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 
@@ -412,7 +412,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
       const unitKey = Object.keys(unitsObj);
       let valueArray;
-      return <div>
+      return <React.Fragment>
         <div style={styles.headerStyle}>{rowData.standardName}</div>
       <TabView>
         {unitKey.map((k, i) => {
@@ -428,7 +428,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </TabPanel>;
         })}
       </TabView>;
-      </div>
+      </React.Fragment>;
     }
     hideGraphIcon = (rowData: any) => {
       const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
