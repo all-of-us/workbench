@@ -1,5 +1,9 @@
 import {AnnotationType} from 'generated';
-import {Observable} from 'rxjs/Observable';
+import {
+  CohortAnnotationDefinition,
+  CohortAnnotationDefinitionApi, CohortAnnotationDefinitionListResponse,
+  EmptyResponse
+} from 'generated/fetch';
 
 export const cohortAnnotationDefinitionStub = {
   cohortAnnotationDefinitionId: 1,
@@ -8,8 +12,24 @@ export const cohortAnnotationDefinitionStub = {
   annotationType: AnnotationType.BOOLEAN
 };
 
-export class CohortAnnotationDefinitionServiceStub {
-  getCohortAnnotationDefinitions() {
-    return Observable.of({items: []});
+export class CohortAnnotationDefinitionServiceStub extends CohortAnnotationDefinitionApi {
+  createCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
+    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
+  }
+
+  deleteCohortAnnotationDefinition(): Promise<EmptyResponse> {
+    return new Promise<EmptyResponse>(resolve => resolve());
+  }
+
+  getCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
+    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
+  }
+
+  getCohortAnnotationDefinitions(): Promise<CohortAnnotationDefinitionListResponse> {
+    return new Promise<CohortAnnotationDefinitionListResponse>(resolve => resolve());
+  }
+
+  updateCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
+    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
   }
 }
