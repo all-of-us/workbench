@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.anyAttr;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.betweenOperator;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.categoricalAndNotIn;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.nameBlank;
@@ -23,14 +24,11 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePred
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotNumbers;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operandsNotTwo;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.AttributePredicates.operatorNull;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.attributesEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.conceptIdNull;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.measTypeInvalid;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.parametersEmpty;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.typeBlank;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTE;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.ATTRIBUTES;
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.BOTH;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CATEGORICAL_MESSAGE;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.CONCEPT_ID;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.EMPTY_MESSAGE;
@@ -78,22 +76,21 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
     for (SearchParameter parameter : searchGroupItem.getSearchParameters()) {
       validateSearchParameter(parameter);
+      if (parameter.getAttributes().isEmpty()) {
+        conceptIds.add(parameter.getConceptId());
+        if (!queryParts.contains("(" + CONCEPT_ID_IN_TEMPLATE + ")\n")) {
+          queryParts.add("(" + CONCEPT_ID_IN_TEMPLATE + ")\n");
+        }
+      }
       for (Attribute attribute : parameter.getAttributes()) {
         validateAttribute(attribute);
-        if (AttrName.ANY.equals(attribute.getName())) {
-          conceptIds.add(parameter.getConceptId());
-          if (!queryParts.contains("(" + CONCEPT_ID_IN_TEMPLATE + ")\n")) {
-            queryParts.add("(" + CONCEPT_ID_IN_TEMPLATE + ")\n");
-          }
-        } else {
-          String namedParameter = addQueryParameterValue(queryParams,
-            QueryParameterValue.int64(parameter.getConceptId()));
-          String queryPartSql = CONCEPT_ID_EQUAL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
-          if (AttrName.NUM.equals(attribute.getName())) {
-            queryParts.add(processNumericalSql(queryParams,"(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
-          } else if (AttrName.CAT.equals(attribute.getName())) {
-            queryParts.add(processCategoricalSql(queryParams,"(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
-          }
+        String namedParameter = addQueryParameterValue(queryParams,
+          QueryParameterValue.int64(parameter.getConceptId()));
+        String queryPartSql = CONCEPT_ID_EQUAL_TEMPLATE.replace("${conceptId}", "@" + namedParameter);
+        if (AttrName.NUM.equals(attribute.getName())) {
+          queryParts.add(processNumericalSql(queryParams, "(" + queryPartSql + VALUE_AS_NUMBER + ")\n", attribute));
+        } else if (AttrName.CAT.equals(attribute.getName())) {
+          queryParts.add(processCategoricalSql(queryParams, "(" + queryPartSql + VALUE_AS_CONCEPT_ID + ")\n", attribute));
         }
       }
     }
@@ -114,22 +111,20 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
   }
 
   private void validateSearchParameter(SearchParameter param) {
-    from(attributesEmpty()).test(param).throwException(EMPTY_MESSAGE, ATTRIBUTES);
     from(typeBlank().or(measTypeInvalid())).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, TYPE, param.getType());
     from(conceptIdNull()).test(param).throwException(NOT_VALID_MESSAGE, PARAMETER, CONCEPT_ID, param.getConceptId());
   }
 
   private void validateAttribute(Attribute attr) {
-    if (!AttrName.ANY.equals(attr.getName())) {
-      String name = attr.getName() == null ? null : attr.getName().name();
-      String oper = operatorText.get(attr.getOperator());
-      from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
-      from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
-      from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
-      from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
-      from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
-      from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
-    }
+    String name = attr.getName() == null ? null : attr.getName().name();
+    String oper = operatorText.get(attr.getOperator());
+    from(nameBlank()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+    from(anyAttr()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, NAME, name);
+    from(operatorNull()).test(attr).throwException(NOT_VALID_MESSAGE, ATTRIBUTE, OPERATOR, oper);
+    from(operandsEmpty()).test(attr).throwException(EMPTY_MESSAGE, OPERANDS);
+    from(categoricalAndNotIn()).test(attr).throwException(CATEGORICAL_MESSAGE);
+    from(betweenOperator().and(operandsNotTwo())).test(attr).throwException(TWO_OPERAND_MESSAGE, ATTRIBUTE, name, oper);
+    from(operandsNotNumbers()).test(attr).throwException(OPERANDS_NUMERIC_MESSAGE, ATTRIBUTE, name);
   }
 
   private String processNumericalSql(Map<String, QueryParameterValue> queryParams,
