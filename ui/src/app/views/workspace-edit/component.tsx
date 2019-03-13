@@ -300,9 +300,9 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       }
       this.setState({workspace : this.props.workspace});
       if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
-          this.setState(
-            fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
-        }
+        this.setState(
+          fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
+      }
     }
 
     openStigmatization() {
@@ -354,17 +354,17 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           workspace =
               await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.props.routeConfigData.mode === WorkspaceEditMode.Clone) {
-           await workspacesApi().cloneWorkspace(
+          await workspacesApi().cloneWorkspace(
             this.state.workspace.namespace, this.state.workspace.id,
             {
               includeUserRoles: this.state.cloneUserRole,
               workspace: this.state.workspace
             });
-         } else {
-           await workspacesApi()
+        } else {
+          await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
-         }
+        }
         navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
         this.setState({loading: false});
