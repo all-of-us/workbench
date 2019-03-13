@@ -510,3 +510,13 @@ task elasticSearchIndexer(type: JavaExec) {
     args Eval.me(appArgs)
   }
 }
+
+// See api/project.rb fetch-firecloud-user-profiles
+task fetchFireCloudUserProfile(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.FetchFireCloudUserProfile"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}

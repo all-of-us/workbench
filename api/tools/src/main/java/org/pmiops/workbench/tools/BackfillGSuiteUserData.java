@@ -1,6 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.google.DirectoryService;
@@ -10,13 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * See api/project.rb backfill-gsuite-fields for usage.
@@ -30,22 +26,6 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
  * to the directory API, we should augment this script & run a backfill for recovery emails.
  */
 @SpringBootApplication
-// Most of the "config" module contains Spring beans that we don't want. But the RetryConfig
-// is required for the DirectoryService class, so we specifically include only that one.
-//
-// TODO(gjuggler): find a better way to manage component scans like this... either cenralize
-// in CommandLineToolConfig or fix the /config/ module (with @Lazy annotations?) so it can be
-// loaded altogether.
-@ComponentScan(
-  basePackageClasses = RetryConfig.class,
-  useDefaultFilters = false,
-  includeFilters = {
-    @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = RetryConfig.class),
-  })
-// Scan the module containing the DirectoryService so it can be auto-wired into this tool.
-@ComponentScan(
-  basePackageClasses = DirectoryService.class
-)
 // Load the DBA and DB model classes required for UserDao.
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
