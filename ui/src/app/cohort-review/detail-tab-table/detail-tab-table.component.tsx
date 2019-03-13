@@ -230,10 +230,10 @@ export const DetailTabTable = withCurrentWorkspace()(
             };
           }); }
           return <TabPanel header={name} key={i}>
-            <ReviewDomainChartsComponent unitData={valueArray} unitName={name}/>
+            <ReviewDomainChartsComponent unitData={valueArray} />
           </TabPanel>;
         })}
-      </TabView>;
+      </TabView>
       </React.Fragment>;
     }
     hideGraphIcon = (rowData: any) => {
