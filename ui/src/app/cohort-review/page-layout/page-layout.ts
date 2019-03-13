@@ -1,9 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService, CohortsService, PageFilterType, SortOrder} from 'generated';
-import {ReviewStatus} from 'generated/fetch';
+import {CohortsService} from 'generated';
+import {PageFilterType, ReviewStatus, SortOrder} from 'generated/fetch';
 
 @Component({
   templateUrl: './page-layout.html',
@@ -13,19 +14,18 @@ export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
   constructor(
-    private reviewAPI: CohortReviewService,
     private cohortsAPI: CohortsService
   ) {}
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    this.reviewAPI.getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
       pageFilterType: PageFilterType.ParticipantCohortStatuses,
-    }).subscribe(review => {
+    }).then(review => {
       cohortReviewStore.next(review);
       if (review.reviewStatus === ReviewStatus.NONE) {
         this.reviewPresent = false;

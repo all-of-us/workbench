@@ -3,7 +3,9 @@ import {
   CriteriaAttributeListResponse,
   CriteriaListResponse,
   DemoChartInfoListResponse,
-  ParticipantDemographics
+  ParticipantDemographics,
+  TreeSubType,
+  TreeType
 } from 'generated/fetch';
 
 export const cohortStub = {
@@ -15,8 +17,8 @@ export const cohortStub = {
 const criteriaStub = {
   id: 1,
   parentId: 0,
-  type: 'ICD9',
-  subtype: '',
+  type: TreeType.ICD9,
+  subtype: TreeSubType.CM,
   code: '123',
   name: 'Test',
   count: 1,

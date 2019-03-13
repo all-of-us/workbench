@@ -2,8 +2,8 @@ import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 

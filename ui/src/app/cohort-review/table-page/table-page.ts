@@ -7,13 +7,11 @@ import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/c
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
 import {
-  CohortBuilderService,
   CohortReview,
-  ConceptIdName,
   Filter,
   Operator,
   PageFilterType,
@@ -65,9 +63,7 @@ export class TablePage implements OnInit, OnDestroy {
   tab = 'participants';
   reportInit = false;
 
-  constructor(
-    private builderAPI: CohortBuilderService,
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     this.loading = false;
@@ -79,7 +75,7 @@ export class TablePage implements OnInit, OnDestroy {
     });
 
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    this.builderAPI.getParticipantDemographics(cdrid).subscribe(data => {
+    cohortBuilderApi().getParticipantDemographics(cdrid).then(data => {
       const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
       this.races = extract(data.raceList);
       this.genders = extract(data.genderList);
