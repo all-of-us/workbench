@@ -1275,7 +1275,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       .type(TreeType.DEMO.name())
       .subtype(TreeSubType.AGE.name())
       .group(false);
-    demo.attributes(Arrays.asList(new Attribute().operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
+    demo.attributes(Arrays.asList(new Attribute().name(AttrName.AGE).operator(Operator.EQUAL).operands(Arrays.asList(age.toString()))));
     SearchRequest searchRequests = createSearchRequests(TreeType.DEMO.name(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
