@@ -23,8 +23,11 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AttrName;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
+import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -163,6 +166,9 @@ public final class ElasticFilters {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         BoolQueryBuilder b = QueryBuilders.boolQuery()
             .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
+        for (Attribute attr : param.getAttributes()) {
+          b.filter(attributeToQuery(attr));
+        }
         for (QueryBuilder f : modFilters) {
           b.filter(f);
         }
@@ -180,6 +186,48 @@ public final class ElasticFilters {
     }
 
     return filter;
+  }
+
+  private static QueryBuilder attributeToQuery(Attribute attr) {
+    RangeQueryBuilder rq;
+    Object left, right = null;
+    if (AttrName.NUM.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("events.value_as_number");
+      left = Float.parseFloat(attr.getOperands().get(0));
+      if (attr.getOperands().size() > 1) {
+        right = Float.parseFloat(attr.getOperands().get(1));
+      }
+    } else if (AttrName.CAT.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("events.value_as_concept_id");
+      left = attr.getOperands().get(0);
+      if (attr.getOperands().size() > 1) {
+        right = attr.getOperands().get(1);
+      }
+    } else {
+      throw new RuntimeException("attribute name is not a attr name type: " + attr.getName());
+    }
+    switch (attr.getOperator()) {
+      case LESS_THAN:
+      case GREATER_THAN:
+      case LESS_THAN_OR_EQUAL_TO:
+        rq.lte(left);
+        break;
+      case GREATER_THAN_OR_EQUAL_TO:
+        rq.gte(left);
+        break;
+      case BETWEEN:
+        rq.gte(left).lte(right);
+        break;
+      case LIKE:
+      case IN:
+      case EQUAL:
+        rq.gte(left).lte(left);
+        break;
+      case NOT_EQUAL:
+      default:
+        throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+    }
+    return rq;
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {
