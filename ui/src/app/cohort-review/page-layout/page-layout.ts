@@ -51,7 +51,7 @@ export class PageLayout implements OnInit, OnDestroy {
         });
     }
     if (!visitsFilterOptions.getValue()) {
-      this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
+      this.builderApi.getCriteriaBy(cdrId, TreeType[TreeType.VISIT], null, 0)
         .toPromise()
         .then(response => {
           visitsFilterOptions.next([
