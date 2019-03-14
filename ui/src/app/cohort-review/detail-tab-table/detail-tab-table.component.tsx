@@ -254,8 +254,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       let {data, start} = this.state;
       const {filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}} = this.props;
       if (dateMin || dateMax) {
-        const min = dateMin ? dateMin.getTime() : 0;
-        const max = dateMax ? dateMax.getTime() : 9999999999999;
+        const min = dateMin ? Date.parse(dateMin) : 0;
+        const max = dateMax ? Date.parse(dateMax) : 9999999999999;
         data = data.filter(item => {
           const itemDate = Date.parse(item.itemDate);
           return itemDate > min && itemDate < max;

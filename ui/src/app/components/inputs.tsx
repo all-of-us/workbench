@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
@@ -136,7 +137,7 @@ export const Select = ({value, options, onChange, ...props}) => {
 };
 
 export class DatePicker extends React.Component<
-  {value: Date, onChange: Function, maxDate?: Date}
+  {value: Date, onChange: Function, onBlur?: Function, maxDate?: Date}
 > {
   popup: React.RefObject<any>;
   constructor(props) {
@@ -145,21 +146,34 @@ export class DatePicker extends React.Component<
   }
 
   render() {
-    const {value, onChange, ...props} = this.props;
+    const {value, onChange, onBlur, ...props} = this.props;
+    let date, text;
+    if (value !== null && typeof value === 'object') {
+      date = value;
+      text = value.toISOString().slice(0, 10);
+    } else {
+      date = moment(value, 'YYYY-MM-DD', true).isValid()
+        ? new Date(new Date(value).toUTCString().substr(0, 25)) : null;
+      text = value || '';
+    }
     return <div
       style={{
         display: 'flex',
         width: '100%', height: '1.5rem',
-        borderColor: '#c5c5c5', borderWidth: 1, borderStyle: 'solid', borderRadius: 3,
-        padding: '0 0.5rem',
-        color: '#565656', backgroundColor: '#fff',
+        border: 0,
+        padding: '0',
+        color: '#565656', background: 'transparent',
       }}
     >
+      <TextInput
+        value={text}
+        onChange={onChange}
+        onBlur={onBlur}/>
       <PopupTrigger
         ref={this.popup}
         content={<Calendar
           {...props}
-          value={value}
+          value={date}
           onChange={v => {
             this.popup.current.close();
             onChange(v);
@@ -167,14 +181,9 @@ export class DatePicker extends React.Component<
         />}
       >
         <Clickable style={{display: 'flex', alignItems: 'center', flex: 1}}>
-          <div style={{flex: 1}}>{value && value.toISOString().slice(0, 10)}</div>
-          <ClrIcon style={{flex: 'none'}} shape='calendar' />
+          <ClrIcon style={{flex: 'none', marginLeft: '4px', color: '#0086C1'}} shape='calendar' />
         </Clickable>
       </PopupTrigger>
-      <Clickable
-        style={{display: 'flex', alignItems: 'center', flex: 'none', marginLeft: '0.5rem'}}
-        onClick={() => onChange(null)}
-      ><ClrIcon shape='times' /></Clickable>
     </div>;
   }
 }
