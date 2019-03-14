@@ -7,15 +7,13 @@ import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-revi
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CriteriaListResponse} from 'generated';
-import {CohortReviewApi, CohortsApi} from 'generated/fetch';
+import {CohortBuilderService} from 'generated';
+import {CohortReviewApi, CohortsApi, CriteriaListResponse} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspace-storage-service-stub';
 import {PageLayout} from './page-layout';
-
-
 class BuilderApiStub {
   getCriteriaBy(): Observable<CriteriaListResponse> {
     return Observable.of({items: []});
