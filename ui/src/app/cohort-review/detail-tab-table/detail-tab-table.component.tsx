@@ -126,8 +126,6 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  filterState: any;
-
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -141,7 +139,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        filterState: props.filterState,
         expandedRows: [],
       };
     }
@@ -241,8 +238,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      const {filterState, data} = this.state;
-      const {domain} = this.props;
+      // const {data} = this.state;
+      const {domain, filterState} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
       if (event.target.checked) {
         if (event.target.name === 'Select All') {
@@ -265,21 +262,21 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       filterState.tabs[domain][colName] = checkedItems;
-      this.setState({filterState: filterState});
+      // this.setState({filterState: filterState});
       this.props.getFilteredData(filterState);
-      if (data) {
-        this.filterData();
-      }
+      // if (data) {
+      //   this.filterData();
+      // }
       this.getErrorMessage(event.target.name);
     }
 
     filterData() {
-      const {filterState} = this.state;
-      const {domain} = this.props;
+      let {data, start} = this.state;
+      const {
+        domain, filterState, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}
+      } = this.props;
       const checkedItems = filterState.tabs[domain];
       const vocab = filterState.vocab;
-      let {data, start} = this.state;
-      const {filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}} = this.props;
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
@@ -323,8 +320,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getErrorMessage = (name?) => {
-      const {data, filterState, filteredData} = this.state;
-      const {domain} = this.props;
+      const {data, filteredData} = this.state;
+      const {domain, filterState} = this.props;
       const checkedItems = filterState.tabs[domain];
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
@@ -342,8 +339,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getColumnValue(colName: string) {
-      const {data, filterState} = this.state;
-      const {domain} = this.props;
+      const {data} = this.state;
+      const {domain, filterState} = this.props;
       const checkedItems = filterState.tabs[domain];
       if (!data) {
         return {};

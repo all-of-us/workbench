@@ -31,28 +31,28 @@ const domain = {
 const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
-  displayName: 'Vocabulary',
+  displayName: 'Standard Vocabulary',
 };
 const standardName = {
   name: 'standardName',
-  displayName: 'Name',
+  displayName: 'Standard Name',
 };
 const standardCode = {
   name: 'standardCode',
-  displayName: 'Code',
+  displayName: 'Standard Code',
 };
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
-  displayName: 'Vocabulary',
+  displayName: 'Source Vocabulary',
 };
 const sourceName = {
   name: 'sourceName',
-  displayName: 'Name',
+  displayName: 'Source Name',
 };
 const sourceCode = {
   name: 'sourceCode',
-  displayName: 'Code',
+  displayName: 'Source Code',
 };
 const value = {
   name: 'value',
@@ -159,7 +159,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
       ],
       source: [
-        itemDate, sourceName, ageAtEvent, numMentions, firstMention, lastMention, visitType
+        itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
       ],
     }
   }, {
@@ -195,7 +195,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
       source: [
-        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
     }
   }, {
@@ -207,7 +207,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
       source: [
-        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
     }
   }, {
