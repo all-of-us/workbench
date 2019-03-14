@@ -15,7 +15,6 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
-import * as moment from 'moment';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
