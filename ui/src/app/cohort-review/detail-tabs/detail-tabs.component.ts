@@ -1,14 +1,16 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 
+import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
-} from 'generated';
+} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
@@ -94,6 +96,29 @@ const answer = {
   name: 'answer',
   displayName: 'Answer',
 };
+const graph = {
+  name: 'graph',
+  displayName: ' '
+};
+
+const initialfilterState = {
+  ALL_EVENTS: {
+    standardVocabulary: ['Select All'],
+    domain: ['Select All'],
+  },
+  PROCEDURE: {
+    standardVocabulary: ['Select All'],
+  },
+  CONDITION: {
+    standardVocabulary: ['Select All'],
+  },
+  OBSERVATION: {
+    standardVocabulary: ['Select All'],
+  },
+  PHYSICAL_MEASURE: {
+    standardVocabulary: ['Select All'],
+  },
+};
 
 @Component({
   selector: 'app-detail-tabs',
@@ -109,8 +134,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
-  chartLoadedSpinner = false;
   summaryActive = false;
+  filterState: any;
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
@@ -128,7 +153,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       value: value,
       domain: domain,
       age: ageAtEvent,
-    }
+    },
   };
 
   readonly tabs = [{
@@ -145,7 +170,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
       visitType: visitType,
-    }
+    },
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
@@ -213,9 +238,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
@@ -228,9 +254,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType,
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
@@ -253,9 +280,9 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }];
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-  ) {}
+  constructor() {
+    this.filteredData = this.filteredData.bind(this);
+  }
 
   ngOnInit() {
     this.subscription = Observable
@@ -271,8 +298,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
               conditionTitle: '',
               items: []
             };
-            return this.reviewAPI
-              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10)
+            return from(cohortReviewApi()
+              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10))
               .do(({items}) => {
                 this.chartData[domainName] = {
                   loading: false,
@@ -284,6 +311,16 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         );
       })
       .subscribe();
+
+    this.subscription.add(filterStateStore.subscribe(filterState => {
+      this.filterState = filterState === null
+        ? JSON.parse(JSON.stringify(initialfilterState)) : filterState;
+    }));
+  }
+
+  filteredData(_domain: string, checkedItems: any) {
+    this.filterState[_domain] = checkedItems;
+    filterStateStore.next(this.filterState);
   }
 
   ngOnDestroy() {

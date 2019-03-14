@@ -463,7 +463,7 @@ def run_rainforest_tests(cmd_name, *args)
   # environment we can run tests in. There is, however, an identical key in
   # each of the other environments.
   token = `gsutil cat gs://all-of-us-rw-staging-credentials/rainforest-key.txt`
-  common.run_inline %W{rainforest run all --token #{token}}
+  common.run_inline %W{rainforest run --run-group 4450 --token #{token}}
 end
 
 Common.register_command({
@@ -1058,6 +1058,38 @@ Common.register_command({
   :invocation => "backfill-gsuite-user-data",
   :description => "Backfills the Institution and contact email address fields in GSuite.\n",
   :fn => ->(*args) {backfill_gsuite_user_data("backfill-gsuite-user-data", *args)}
+})
+
+def fetch_firecloud_user_profile(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--user=[user]",
+      String,
+      ->(opts, v) { opts.user = v},
+      "The AoU user to fetch FireCloud data for (e.g. 'gjordan@fake-research-aou.org'")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle --info fetchFireCloudUserProfile
+       -PappArgs=["#{op.opts.user}"]}
+  end
+end
+
+Common.register_command({
+  :invocation => "fetch-firecloud-user-profile",
+  :description => "Fetches and logs FireCloud profile data for an AoU user.\n",
+  :fn => ->(*args) {fetch_firecloud_user_profile("fetch-firecloud-user-profile", *args)}
 })
 
 def authority_options(cmd_name, args)
@@ -1798,11 +1830,18 @@ def setup_project_data(gcc, cdr_db_name, public_db_name)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
   with_cloud_proxy_and_db(gcc) do
-    common.status "Copying service account key to GCS..."
+    common.status "Copying GSuite service account key to GCS..."
     gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
     common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
         --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
     common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
+
+    common.status "Copying FireCloud service account key to GCS..."
+    firecloud_admin_creds_file = Tempfile.new("firecloud-admin-sa.json").path
+    common.run_inline %W{gcloud iam service-accounts keys create #{firecloud_admin_creds_file}
+        --iam-account=firecloud-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
+    common.run_inline %W{gsutil cp #{firecloud_admin_creds_file} gs://#{gcc.project}-credentials/firecloud-admin-sa.json}
+
 
     common.status "Setting up databases and users..."
     create_workbench_db

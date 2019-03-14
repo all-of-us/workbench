@@ -2,7 +2,7 @@ import {select} from '@angular-redux/store';
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {Operator, TreeSubType, TreeType} from 'generated';
+import {AttrName, Operator, TreeSubType, TreeType} from 'generated';
 import {fromJS, Map} from 'immutable';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -87,7 +87,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       if (this.isMeasurement) {
         this.node.get('attributes').forEach(attr => {
           switch (attr.type) {
-            case 'NUM':
+            case AttrName.NUM:
               const NUM = <FormGroup>this.form.controls.NUM;
               if (!this.attrs.NUM.length) {
                 NUM.addControl('num0', new FormGroup({
@@ -97,9 +97,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                 }));
                 this.dropdowns.labels[0] = 'Numeric Values';
                 this.attrs.NUM.push({
-                  name: 'NUM',
+                  name: AttrName.NUM,
                   operator: null,
-                  operands: [null],
+                  operands: [],
                   conceptId: attr.conceptId,
                   [attr.conceptName]: attr.estCount
                 });
@@ -107,7 +107,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
                 this.attrs.NUM[0][attr.conceptName] = attr.estCount;
               }
               break;
-            case 'CAT':
+            case AttrName.CAT:
               if (parseInt(attr.estCount, 10) > 0) {
                 attr['checked'] = false;
                 this.attrs.CAT.push(attr);
@@ -115,15 +115,15 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           }
         });
       } else {
-        this.options.unshift({value: 'ANY', name: 'Any', display: 'Any', code: 'Any'});
+        this.options.unshift({value: AttrName.ANY, name: 'Any', display: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
         if (this.attrs.NUM) {
           const NUM = <FormGroup>this.form.controls.NUM;
           this.selectedCode = 'Any';
           this.attrs.NUM.forEach((attr, i) => {
-            attr.operator = 'ANY';
-            this.dropdowns.selected[i] = 'ANY';
-            this.dropdowns.oldVals[i] = 'ANY';
+            attr.operator = AttrName.ANY;
+            this.dropdowns.selected[i] = AttrName.ANY;
+            this.dropdowns.oldVals[i] = AttrName.ANY;
             NUM.addControl('num' + i, new FormGroup({
               operator: new FormControl(),
               valueA: new FormControl(),
@@ -162,10 +162,10 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       if (!this.dropdowns.codes.includes('')) {
         this.selectedCode = (this.dropdowns.codes.join(''));
       }
-      if (option.value === 'ANY') {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = 'ANY';
+      if (option.value === AttrName.ANY) {
+        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = AttrName.ANY;
         this.dropdowns.selected[other] = 'Any';
-      } else if (this.dropdowns.oldVals[index] === 'ANY') {
+      } else if (this.dropdowns.oldVals[index] === AttrName.ANY) {
         this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
         this.dropdowns.selected[other] = option.name;
       }
@@ -177,7 +177,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       this.selectedCode = option.code;
     }
     this.setValidation(option.name);
-    this.preview = option.value === 'ANY'
+    this.preview = option.value === AttrName.ANY
       ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
@@ -265,41 +265,29 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     return stripHtml(this.node.get('name'));
   }
 
-  getParamWithAttributes() {
-    let name = this.node.get('name', '') + ' (';
-    let attrs = [];
+  get paramWithAttributes() {
+    let name;
+    const attrs = [];
     if (this.attrs.EXISTS) {
-      name += 'Any)';
-      attrs.push({
-        name: 'ANY',
-        operator: null,
-        operands: [null],
-        conceptId: this.node.get('conceptId')
-      });
+      name = this.node.get('name', '') + ' (Any)';
     } else {
+      name = this.paramName;
       this.attrs.NUM.forEach((attr, i) => {
         const paramAttr = {
-          name: attr.name,
+          name: AttrName.NUM,
           operator: attr.operator,
           operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
           conceptId: attr.conceptId
         };
-        if (this.form.value.NUM['num' + i].operator === 'ANY') {
-          paramAttr.name = 'ANY';
-          if (i === 0) {
-            name += 'Any';
-          }
-        } else {
-          if (i > 0) {
-            name += ' / ';
-          }
-          if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
-            name += attr.name + ' ';
-          }
-          name += this.options.find(option => option.value === attr.operator).display
-            + attr.operands.join('-');
+        if (this.form.value.NUM['num' + i].operator === AttrName.ANY
+          && this.node.get('subtype') === TreeSubType.BP) {
+          paramAttr.name = AttrName.ANY;
+          paramAttr.operands = [];
+          delete(paramAttr.operator);
+          attrs.push(paramAttr);
+        } else if (this.form.value.NUM['num' + i].operator !== AttrName.ANY) {
+          attrs.push(paramAttr);
         }
-        attrs.push(paramAttr);
       });
 
       const catOperands = this.attrs.CAT.reduce((checked, current) => {
@@ -309,15 +297,9 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
         return checked;
       }, []);
       if (catOperands.length) {
-        attrs.push({name: 'CAT', operator: Operator.IN, operands: catOperands});
+        attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
       }
-      if (this.attrs.NUM.length && catOperands.length) {
-        attrs = attrs.map(attr => {
-          attr.name = 'BOTH';
-          return attr;
-        });
-      }
-      name += (this.isPM && attrs[0].name !== 'ANY'
+      name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
         ? this.units[this.node.get('subtype')]
         : '') + ')';
     }
@@ -327,13 +309,34 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       .set('attributes', fromJS(attrs));
   }
 
+  get paramName() {
+    let name = this.node.get('name', '') + ' (';
+    this.attrs.NUM.forEach((attr, i) => {
+      if (this.form.value.NUM['num' + i].operator === AttrName.ANY) {
+        if (i === 0) {
+          name += 'Any';
+        }
+      } else {
+        if (i > 0) {
+          name += ' / ';
+        }
+        if (this.node.get('subtype') === TreeSubType[TreeSubType.BP]) {
+          name += attr.name + ' ';
+        }
+        name += this.options.find(option => option.value === attr.operator).display
+          + attr.operands.join('-');
+      }
+    });
+    return name;
+  }
+
   requestPreview() {
-    const param = this.getParamWithAttributes();
+    const param = this.paramWithAttributes;
     this.actions.requestAttributePreview(param);
   }
 
   addAttrs() {
-    const param = this.getParamWithAttributes();
+    const param = this.paramWithAttributes;
     this.actions.addParameter(param);
     this.actions.hideAttributesPage();
   }
@@ -344,7 +347,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
 
   showInput(index: number) {
     return this.attrs.NUM[index].operator
-      && this.form.value.NUM['num' + index].operator !== 'ANY';
+      && this.form.value.NUM['num' + index].operator !== AttrName.ANY;
   }
 
   isBetween(index: number) {
@@ -366,7 +369,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   get showCalc() {
     let notAny = true;
     if (this.isPM) {
-      notAny = this.attrs.NUM[0].operator !== 'ANY';
+      notAny = this.attrs.NUM[0].operator !== AttrName.ANY;
     }
     return !this.attrs.EXISTS && notAny;
   }
@@ -374,7 +377,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   get showAdd() {
     let any = false;
     if (this.isPM) {
-      any = this.attrs.NUM[0].operator === 'ANY';
+      any = this.attrs.NUM[0].operator === AttrName.ANY;
     }
     return (this.preview.get('count') && !this.preview.get('requesting')) || any;
   }

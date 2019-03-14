@@ -1,105 +1,21 @@
 import {Component, Input} from '@angular/core';
+import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
+import {vocabOptions} from 'app/cohort-review/review-state.service';
+import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {WorkspaceData} from 'app/resolvers/workspace';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
-const css = `
-  body .p-datatable .p-sortable-column:not(.p-highlight):hover,
-  body .p-datatable .p-sortable-column.p-highlight {
-    color: #333333;
-    background-color: #f4f4f4;
-  }
-  body .p-datatable .p-datatable-thead > tr > th {
-    padding: 10px 5px 10px 10px;
-    vertical-align: middle;
-    background: #f4f4f4;
-    border: 0;
-    border-bottom: 1px solid #c8c8c8;
-    border-left: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-datatable-thead > tr > th:first-of-type {
-    border-left: 0;
-  }
-  body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
-    border-bottom: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-column-title {
-    display: flex;
-  }
-  .pi.pi-sort,
-  .pi.pi-sort-up,
-  .pi.pi-sort-down {
-    display: none;
-  }
-  .p-datatable .p-datatable-scrollable-wrapper {
-    border: 1px solid #c8c8c8;
-  }
-  .p-datatable .p-paginator.p-paginator-bottom {
-    border: 0;
-    margin-top: 20px;
-    background: none;
-    font-size: 12px;
-    text-align: right;
-  }
-  body .p-paginator .p-paginator-pages {
-    display: inline;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next,
-  body .p-paginator .p-paginator-pages .p-paginator-page {
-    border: 1px solid #cccccc;
-    border-radius: 3px;
-    background: #fafafa;
-    color: #2691D0;
-    height: auto;
-    width: auto;
-    min-width: 0;
-    padding: 7px;
-    margin: 0 2px;
-    line-height: 0.5rem;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next {
-    height: 28px;
-    width: 24px;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page:focus {
-    box-shadow: 0;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-    background: #fafafa;
-    color: rgba(0, 0, 0, .5);
-  }
-  body .p-overlaypanel .p-overlaypanel-close {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel {
-    top: 19px!important;
-    left: 0px!important;
-    width:9.5rem;
-  }
-  body .p-overlaypanel .p-overlaypanel-close:hover {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel .p-overlaypanel-content {
-    padding: 0.6rem 0.6rem;
-    font-size: 13px;
-  }
-  `;
 
 const styles = reactStyles({
   container: {
@@ -125,8 +41,20 @@ const styles = reactStyles({
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
-    lineHeight: '0.6rem'
+    borderBottom: 'none',
+    lineHeight: '0.6rem',
   },
+  graphColumnBody: {
+    background: '#ffffff',
+    padding: '5px',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    lineHeight: '0.6rem',
+    width: '2rem',
+  },
+
   filterIcon: {
     color: '#0086C1',
     fontSize: '0.5rem',
@@ -145,24 +73,60 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
+  filterBorder: {
+    paddingTop: '0.5rem',
+    borderTop: '1px solid #ccc',
+  },
+  graphStyle: {
+    borderLeft: 'none',
+    width: '2rem',
+  },
+  headerStyle: {
+    color: '#2691D0',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    width: '20rem',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    margin: 'auto',
+    paddingTop: '0.5rem',
+    textAlign: 'center',
+  }
 });
 const rows = 25;
+const domains = [
+  DomainType.CONDITION,
+  DomainType.PROCEDURE,
+  DomainType.DRUG,
+  DomainType.OBSERVATION,
+  DomainType.PHYSICALMEASURE,
+  DomainType.LAB,
+  DomainType.VITAL,
+  DomainType.SURVEY,
+];
 
 export interface DetailTabTableProps {
-  tabname: string;
+  tabName: string;
   columns: Array<any>;
   domain: string;
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
+  filteredTab: any;
+  getFilteredData: Function;
 }
 
 export interface DetailTabTableState {
   data: Array<any>;
+  filteredData: Array<any>;
   loading: boolean;
   start: number;
   sortField: string;
   sortOrder: number;
+  expandedRows: Array<any>;
+  checkedItems: any;
+
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -171,10 +135,13 @@ export const DetailTabTable = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
+        filteredData: null,
         loading: true,
         start: 0,
         sortField: null,
-        sortOrder: 1
+        sortOrder: 1,
+        checkedItems: props.filteredTab,
+        expandedRows: [],
       };
     }
 
@@ -186,6 +153,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
+          filteredData: null,
           loading: true,
         });
         this.getParticipantData();
@@ -224,6 +192,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
+          this.filterData();
         });
       } catch (error) {
         console.log(error);
@@ -256,73 +225,241 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-            <OverlayPanel ref={(el) => {vl = el; }} showCloseIcon={true} dismissable={true}>
-              {(rowData.refRange &&  column.field === 'value') &&
-                <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
-              {(rowData.unit && column.field === 'value') &&
-                <div>Units: {rowData.unit}</div>}
-              {nameField &&
-                <div>Route: {rowData.route}</div>}
-            </OverlayPanel>
+        <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+                      showCloseIcon={true} dismissable={true}>
+          {(rowData.refRange &&  column.field === 'value') &&
+          <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+          {(rowData.unit && column.field === 'value') &&
+          <div>Units: {rowData.unit}</div>}
+          {nameField &&
+          <div>Route: {rowData.route}</div>}
+        </OverlayPanel>
       </div>;
     }
 
+    updateData = (event, colName, namesArray) => {
+      const {checkedItems, data} = this.state;
+      if (event.target.checked) {
+        if (event.target.name === 'Select All') {
+          checkedItems[colName] = namesArray.map(opt => opt.name);
+        } else {
+          checkedItems[colName].push(event.target.name);
+          if (namesArray.length - 1 === checkedItems[colName].length) {
+            // we have to add selectall when everything is selected
+            checkedItems[colName].push('Select All');
+          }
+        }
+      } else {
+        if (event.target.name === 'Select All') {
+          checkedItems[colName] = [];
+          this.setState({filteredData: checkedItems});
+        } else {
+          if (checkedItems[colName].find(s => s === 'Select All')) {
+            checkedItems[colName]
+              .splice(checkedItems[colName]
+                .indexOf('Select All'), 1);
+          }
+          checkedItems[colName]
+            .splice(checkedItems[colName]
+              .indexOf(event.target.name), 1);
+        }
+      }
+      this.setState({checkedItems: checkedItems});
+      this.props.getFilteredData(colName, checkedItems);
+      if (data) {
+        this.filterData();
+      }
+      this.getErrorMessage(event.target.name);
+    }
+
+    filterData() {
+      const {checkedItems} = this.state;
+      let {data, start} = this.state;
+      const empty = [];
+      for (const col in checkedItems) {
+        if (checkedItems[col].length) {
+          data = data.filter(row => checkedItems[col].includes(row[col]));
+          empty.push(false);
+        } else {
+          empty.push(true);
+        }
+      }
+      if (!empty.includes(false)) {
+        if (checkedItems === undefined) {
+          // as some tab does not have filtered items but have data
+          this.setState({filteredData: data, start: start});
+        } else {
+          this.setState({filteredData: []});
+        }
+      } else {
+        if (data.length < start + rows) {
+          start = Math.floor(data.length / rows) * rows;
+        }
+        this.setState({filteredData: data, start: start});
+      }
+    }
+
+    getErrorMessage = (name?) => {
+      const {data, checkedItems, filteredData} = this.state;
+      if (data && data.length === 0) {
+        return  'No ' + this.props.tabName + ' Data';
+      } else {
+        if (filteredData && filteredData.length === 0) {
+          for (const col in checkedItems) {
+            if (checkedItems[col].find( i => i !== name) || filteredData !== null) {
+              // filtered data null  or if item selected from different participants not
+              // exist in next/previous participants need to show this below message
+              return 'There is data, but it is all currently hidden. Please check your filters';
+            }
+          }
+        }
+      }
+    }
+
+    getColumnValue(colName: string) {
+      const {data, checkedItems} = this.state;
+      const {domain} = this.props;
+      if (!data) {
+        return {};
+      }
+      const counts = {total: 0};
+      data.forEach(item => {
+        counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+        counts.total++;
+      });
+      let options: Array<any>;
+      switch (colName) {
+        case 'standardVocabulary':
+          /* TODO need to check for Source also after adding the standard/source radio buttons */
+          const vocabs = vocabOptions.getValue().Standard;
+          options = vocabs[domain] ? vocabs[domain].map(option => {
+            return {name: option, count: counts[option] || 0};
+          }) : [];
+          break;
+        case 'domain':
+          options = domains.map(option => {
+            return {name: option, count: counts[option] || 0};
+          });
+      }
+      options.push({name: 'Select All', count: counts.total});
+      if (checkedItems[colName].find(i => i === 'Select All')) {
+        checkedItems[colName] = options.map(opt => opt.name);
+      }
+      let fl: any;
+
+      return <span>
+        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          {options.map((opt, i) => (
+            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+                     checked={checkedItems[colName].includes(opt.name)}
+                     onChange={($event) => this.updateData($event, colName, options)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+            </div>
+          ))}
+        </OverlayPanel>
+      </span>;
+    }
+
+    rowExpansionTemplate = (rowData: any) => {
+      const {data} = this.state;
+      const conceptIdBasedData = fp.groupBy('standardConceptId', data);
+      const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
+      const unitKey = Object.keys(unitsObj);
+      let valueArray;
+      return <React.Fragment>
+        <div style={styles.headerStyle}>{rowData.standardName}</div>
+      <TabView className='unitTab'>
+        {unitKey.map((k, i) => {
+          const name = k === 'null' ? 'No Unit' : k;
+          { valueArray = unitsObj[k].map(v => {
+            return {
+              values: parseInt(v.value, 10),
+              date: v.itemDate,
+            };
+          }); }
+          return <TabPanel header={name} key={i}>
+            <ReviewDomainChartsComponent unitData={valueArray} />
+          </TabPanel>;
+        })}
+      </TabView>
+      </React.Fragment>;
+    }
+    hideGraphIcon = (rowData: any) => {
+      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
+      return {'graphExpander' : noConcept};
+    }
+
     render() {
-      const {data, loading, start, sortField, sortOrder} = this.state;
+      const {filteredData, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      if (data !== null) {
-        const lastRowOfPage = (start + rows) > data.length
-          ? start + rows - (start + rows - data.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${data.length} records `;
+      if (filteredData !== null) {
+        const lastRowOfPage = (start + rows) > filteredData.length
+          ? start + rows - (start + rows - filteredData.length) : start + rows;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (data && data.length > rows) {
+      if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
+        const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
+        const isExpanderNeeded = col.name === 'graph'  &&
+          (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
+        const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {(desc && !isExpanderNeeded) &&
+          <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
 
         return <Column
+          expander={isExpanderNeeded}
           style={styles.tableBody}
-          bodyStyle={styles.columnBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
+          headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
-          body={colName && this.overlayTemplate}/>;
+          filter={filterColName && true}
+          filterElement= {filterColName && this.getColumnValue(col.name)}
+          body={overlayTemplate}/>;
       });
 
       return <div style={styles.container}>
         <style>{css}</style>
-        {data && <DataTable
+        {filteredData && <DataTable  expandedRows={this.state.expandedRows}
+          onRowToggle={(e) => this.setState({expandedRows: e.data})}
+          rowExpansionTemplate={this.rowExpansionTemplate}
+          rowClassName = {this.hideGraphIcon}
           style={styles.table}
-          value={data}
+          value={filteredData}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          paginatorTemplate={filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
-          totalRecords={data.length}
+          totalRecords={filteredData.length}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
+          emptyMessage={this.getErrorMessage()}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
@@ -336,19 +473,24 @@ export const DetailTabTable = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class DetailTabTableComponent extends ReactWrapperBase {
-  @Input('tabname') tabname: DetailTabTableProps['tabname'];
+  @Input('tabName') tabName: DetailTabTableProps['tabName'];
   @Input('columns') columns: DetailTabTableProps['columns'];
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
+  @Input('filteredTab') filteredTab: DetailTabTableProps['filteredTab'];
+  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
 
   constructor() {
     super(DetailTabTable, [
-      'tabname',
+      'tabName',
       'columns',
       'domain',
       'filterType',
       'participantId',
+      'filteredTab',
+      'getFilteredData',
     ]);
   }
 }
+

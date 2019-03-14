@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -75,12 +76,18 @@ public class UserService {
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  private User updateWithRetries(Function<User, User> modifyUser) {
+  private User updateUserWithRetries(Function<User, User> modifyUser) {
     User user = userProvider.get();
-    return updateWithRetries(modifyUser, user);
+    return updateUserWithRetries(modifyUser, user);
   }
 
-  private User updateWithRetries(Function<User, User> userModifier, User user) {
+  /**
+   * Updates a user record with a modifier function.
+   *
+   * Ensures that the data access level for the user reflects the state of other fields on the
+   * user; handles conflicts with concurrent updates by retrying.
+   */
+    public User updateUserWithRetries(Function<User, User> userModifier, User user) {
     int numAttempts = 0;
     while (true) {
       user = userModifier.apply(user);
@@ -100,11 +107,27 @@ public class UserService {
   }
 
   private void updateDataAccessLevel(User user) {
-    boolean shouldBeRegistered = Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false)
-        && user.getDemographicSurveyCompletionTime() != null
-        && user.getTrainingCompletionTime() != null
-        && user.getTermsOfServiceCompletionTime() != null
+    boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
+      user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
+    // TODO: Add in when we add this module
+    // boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
+    // user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
+    boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
+      !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
+    boolean complianceTrainingCompliant = user.getComplianceTrainingCompletionTime() != null ||
+      user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
+    boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
+      user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
+    // TODO: can be removed once we totally move off old validation
+      Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
+    // TODO: can take out other checks once we're entirely moved over to the 'module' columns
+    boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null
         && !user.getDisabled()
+    // TODO: Add when we add this module
+    //  && dataUseAgreementCompliant
+        && complianceTrainingCompliant
+        && eraCommonsCompliant
+        && idVerificationCompliant
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
@@ -179,7 +202,7 @@ public class UserService {
 
   public User submitTermsOfService() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setTermsOfServiceCompletionTime(timestamp);
@@ -190,7 +213,7 @@ public class UserService {
 
   public User submitEthicsTraining() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setTrainingCompletionTime(timestamp);
@@ -201,7 +224,7 @@ public class UserService {
 
   public User submitDemographicSurvey() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
@@ -210,8 +233,37 @@ public class UserService {
     });
   }
 
+  public User setEraCommonsStatus(NihStatus nihStatus) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        if (nihStatus != null) {
+          Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+          // NihStatus should never come back from firecloud with an empty linked username.
+          // If that is the case, there is an error with FC, because we should get a 404
+          // in that case. Leaving the null checking in for code safety reasons
+          if ((nihStatus.getLinkedNihUsername() != null &&
+              !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+              nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+            eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+          } else if (nihStatus.getLinkedNihUsername() == null) {
+            eraCommonsCompletionTime = null;
+          }
+          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+          user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+          user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+        } else {
+          user.setEraCommonsLinkedNihUsername(null);
+          user.setEraCommonsLinkExpireTime(null);
+          user.setEraCommonsCompletionTime(null);
+        }
+        return user;
+      }
+    });
+  }
+
   public User setClusterRetryCount(int clusterRetryCount) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setClusterCreateRetries(clusterRetryCount);
@@ -221,7 +273,7 @@ public class UserService {
   }
 
   public User setBillingRetryCount(int billingRetryCount) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setBillingProjectRetries(billingRetryCount);
@@ -231,7 +283,7 @@ public class UserService {
   }
 
   public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setFreeTierBillingProjectName(name);
@@ -243,7 +295,7 @@ public class UserService {
 
   public User setDisabledStatus(Long userId, boolean disabled) {
     User user = userDao.findUserByUserId(userId);
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setDisabled(disabled);
@@ -262,7 +314,7 @@ public class UserService {
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
     User user = userDao.findUserByUserId(userId);
-    return updateWithRetries(new Function<User, User>() {
+    return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setIdVerificationIsValid(blockscoreVerificationIsValid);

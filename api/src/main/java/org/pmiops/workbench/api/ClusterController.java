@@ -1,6 +1,7 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Timestamp;
@@ -15,16 +16,20 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.User.ClusterConfig;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
@@ -32,6 +37,7 @@ import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ClusterController implements ClusterApiDelegate {
-
 
   // Writing this file to a directory on a Leonardo cluster will result in
   // delocalization of saved files back to a given GCS location. See
@@ -62,9 +67,7 @@ public class ClusterController implements ClusterApiDelegate {
   private static final Logger log = Logger.getLogger(ClusterController.class.getName());
 
   private static final Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster> TO_ALL_OF_US_CLUSTER =
-    new Function<org.pmiops.workbench.notebooks.model.Cluster, Cluster>() {
-      @Override
-      public Cluster apply(org.pmiops.workbench.notebooks.model.Cluster firecloudCluster) {
+      (firecloudCluster) -> {
         Cluster allOfUsCluster = new Cluster();
         allOfUsCluster.setClusterName(firecloudCluster.getClusterName());
         allOfUsCluster.setClusterNamespace(firecloudCluster.getGoogleProject());
@@ -80,8 +83,7 @@ public class ClusterController implements ClusterApiDelegate {
         allOfUsCluster.setStatus(status);
         allOfUsCluster.setCreatedDate(firecloudCluster.getCreatedDate());
         return allOfUsCluster;
-      }
-    };
+      };
 
   private final NotebooksService notebooksService;
   private Provider<User> userProvider;
@@ -90,6 +92,7 @@ public class ClusterController implements ClusterApiDelegate {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private UserService userService;
   private UserRecentResourceService userRecentResourceService;
+  private final UserDao userDao;
   private Clock clock;
 
   @Autowired
@@ -100,6 +103,7 @@ public class ClusterController implements ClusterApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
       UserRecentResourceService userRecentResourceService,
+      UserDao userDao,
       Clock clock) {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
@@ -108,6 +112,7 @@ public class ClusterController implements ClusterApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
+    this.userDao = userDao;
     this.clock = clock;
   }
 
@@ -129,13 +134,12 @@ public class ClusterController implements ClusterApiDelegate {
           "User billing project is not yet initialized, cannot list/create clusters");
     }
     String project = user.getFreeTierBillingProjectName();
-
     org.pmiops.workbench.notebooks.model.Cluster fcCluster;
     try {
       fcCluster = this.notebooksService.getCluster(project, NotebooksService.DEFAULT_CLUSTER_NAME);
     } catch (NotFoundException e) {
       fcCluster = this.notebooksService.createCluster(
-          project, NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+          project, NotebooksService.DEFAULT_CLUSTER_NAME);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);
@@ -236,6 +240,33 @@ public class ClusterController implements ClusterApiDelegate {
     // Jupyter REST API.
     resp.setClusterLocalDirectory(apiDir);
     return ResponseEntity.ok(resp);
+  }
+
+  @Override
+  @AuthorityRequired({Authority.DEVELOPER})
+  public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
+    User user = userDao.findUserByEmail(body.getUserEmail());
+    if (user == null) {
+      throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
+    }
+    String oldOverride = user.getClusterConfigDefaultRaw();
+
+    final ClusterConfig override =
+        body.getClusterConfig() != null ? new ClusterConfig() : null;
+    if (override != null) {
+      override.masterDiskSize = body.getClusterConfig().getMasterDiskSize();
+      override.machineType = body.getClusterConfig().getMachineType();
+    }
+    userService.updateUserWithRetries((u) -> {
+      u.setClusterConfigDefault(override);
+      return u;
+    }, user);
+    userService.logAdminUserAction(
+        user.getUserId(),
+        "cluster config override",
+        oldOverride,
+        new Gson().toJson(override));
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   private String jsonToDataUri(JSONObject json) {

@@ -14,8 +14,6 @@ import {NgxPopperModule} from 'ngx-popper';
 import {CohortCommonModule} from 'app/cohort-common/module';
 // This is to get cohortsaerchstore acces, might need to change
 import {AddAnnotationDefinitionModalComponent, EditAnnotationDefinitionsModalComponent} from './annotation-definition-modals/annotation-definition-modals.component';
-import {AnnotationItemComponent} from './annotation-item/annotation-item.component';
-import {AnnotationListComponent} from './annotation-list/annotation-list.component';
 import {ClearButtonFilterComponent} from './clearbutton-filter/clearbutton-filter.component';
 import {ClearButtonInMemoryFilterComponent} from './clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from './create-review-page/create-review-page';
@@ -28,7 +26,6 @@ import {IndividualParticipantsChartsComponent} from './individual-participants-c
 import {MultiSelectFilterComponent} from './multiselect-filter/multiselect-filter.component';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
-import {ParticipantStatusComponent} from './participant-status/participant-status.component';
 import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
 import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
@@ -68,8 +65,6 @@ import {TablePage} from './table-page/table-page';
     TablePage,
 
     /* Annotations */
-    AnnotationItemComponent,
-    AnnotationListComponent,
     AddAnnotationDefinitionModalComponent,
     EditAnnotationDefinitionsModalComponent,
 
@@ -80,7 +75,6 @@ import {TablePage} from './table-page/table-page';
     ClearButtonInMemoryFilterComponent,
     IndividualParticipantsChartsComponent,
     /* Participant Detail */
-    ParticipantStatusComponent,
     SidebarContentComponent,
     DetailHeaderComponent,
     DetailTabsComponent,

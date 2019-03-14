@@ -51,6 +51,7 @@ import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.IdVerificationListResponse;
 import org.pmiops.workbench.model.IdVerificationReviewRequest;
 import org.pmiops.workbench.model.IdVerificationStatus;
@@ -358,7 +359,7 @@ public class ProfileController implements ProfileApiDelegate {
 
     try {
       this.notebooksService.createCluster(
-          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME, user.getEmail());
+          user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME);
       log.log(Level.INFO, String.format("created cluster %s/%s",
           user.getFreeTierBillingProjectName(), NotebooksService.DEFAULT_CLUSTER_NAME));
     } catch (ConflictException e) {
@@ -373,11 +374,6 @@ public class ProfileController implements ProfileApiDelegate {
   private ResponseEntity<Profile> getProfileResponse(User user) {
     Profile profile = profileService.getProfile(user);
     // Note: The following requires that the current request is authenticated.
-    NihStatus nihStatus = fireCloudService.getNihStatus();
-    if (nihStatus != null) {
-      profile.setLinkedNihUsername(nihStatus.getLinkedNihUsername());
-      profile.setLinkExpireTime(nihStatus.getLinkExpireTime());
-    }
     return ResponseEntity.ok(profile);
   }
 
@@ -493,7 +489,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
     User user = userProvider.get();
-    Profile profile = profileService.getProfile(user);
     try {
       userService.syncUserTraining(user);
     } catch(NotFoundException ex) {
@@ -501,7 +496,15 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return ResponseEntity.ok(profile);
+    return getProfileResponse(user);
+  }
+
+  @Override
+  public ResponseEntity<Profile> syncEraCommonsStatus() {
+    User user = userProvider.get();
+    NihStatus nihStatus = fireCloudService.getNihStatus();
+    user = userService.setEraCommonsStatus(nihStatus);
+    return getProfileResponse(user);
   }
 
   @Override
@@ -668,6 +671,45 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, Boolean bypassed) {
+    User user = userDao.findUserByUserId(userId);
+    Timestamp valueToSet;
+    if (bypassed == null || bypassed) {
+      valueToSet = new Timestamp(clock.instant().toEpochMilli());
+    } else {
+      valueToSet = null;
+    }
+    switch (moduleName) {
+      case "dataUseAgreement":
+        user.setDataUseAgreementBypassTime(valueToSet);
+        break;
+      case "complianceTraining":
+        user.setComplianceTrainingBypassTime(valueToSet);
+        break;
+      case "betaAccess":
+        user.setBetaAccessBypassTime(valueToSet);
+        break;
+      case "emailVerification":
+        user.setEmailVerificationBypassTime(valueToSet);
+        break;
+      case "eraCommons":
+        user.setEraCommonsBypassTime(valueToSet);
+        break;
+      case "idVerification":
+        user.setIdVerificationBypassTime(valueToSet);
+        break;
+      case "twoFactorAuth":
+        user.setTwoFactorAuthBypassTime(valueToSet);
+        break;
+      default:
+        throw new BadRequestException("There is no access module named: " + moduleName);
+    }
+    saveUserWithConflictHandling(user);
+    return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  @Override
+  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
     IdVerificationStatus status = review.getNewStatus();
     User user = userDao.findUserByUserId(userId);
@@ -701,11 +743,12 @@ public class ProfileController implements ProfileApiDelegate {
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
-      fireCloudService.postNihCallback(wrapper);
+      NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
       User user = initializeUserIfNeeded();
+      user = userService.setEraCommonsStatus(nihStatus);
       return getProfileResponse(user);
-    } catch (Exception e) {
-      throw new ServerErrorException("Unable to update NIH token", e);
+    } catch (WorkbenchException e) {
+      throw e;
     }
   }
 

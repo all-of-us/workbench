@@ -18,7 +18,7 @@ export class ProfileStubVariables {
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
     pageVisits: [{page: 'test'}],
-    linkedNihUsername: null,
+    eraCommonsLinkedNihUsername: null,
     currentPosition: 'some',
     organization: 'here',
     areaOfResearch: 'things',
@@ -65,6 +65,10 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public syncTrainingStatus() {
+    return Promise.resolve(this.profile);
+  }
+
+  public syncEraCommonsStatus() {
     return Promise.resolve(this.profile);
   }
 }

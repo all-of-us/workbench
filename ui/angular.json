@@ -27,6 +27,7 @@
               "node_modules/primereact/resources/primereact.min.css",
               "node_modules/primeicons/primeicons.css",
               "node_modules/primereact/resources/themes/nova-light/theme.css",
+              "node_modules/react-calendar/dist/Calendar.css",
               "src/styles.css"
             ],
             "scripts": [

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
+import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
@@ -85,6 +86,8 @@ public interface FireCloudService {
 
   NihStatus getNihStatus();
 
-  void postNihCallback(JWTWrapper wrapper);
+  NihStatus postNihCallback(JWTWrapper wrapper);
+
+  ApiClient getApiClientWithImpersonation(String email) throws IOException;
 
 }

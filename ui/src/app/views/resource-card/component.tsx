@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
-import {Card} from 'app/components/card';
+import {ResourceCardBase} from 'app/components/card';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {ResourceCardMenu} from 'app/components/resources';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
@@ -46,8 +46,6 @@ const styles = reactStyles({
   card: {
     marginTop: '1rem',
     justifyContent: 'space-between',
-    width: '200px',
-    height: '223px',
     marginRight: '1rem',
     padding: '0.75rem 0.75rem 0rem 0.75rem',
     boxShadow: '0 0 0 0'
@@ -104,6 +102,7 @@ const resourceTypeStyles = reactStyles({
 export interface ResourceCardProps {
   resourceCard: RecentResource;
   onUpdate: Function;
+  marginTop: string;
 }
 
 export interface ResourceCardState {
@@ -114,6 +113,9 @@ export interface ResourceCardState {
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
+  public static defaultProps = {
+    marginTop: '1rem'
+  };
 
   constructor(props: ResourceCardProps) {
     super(props);
@@ -352,6 +354,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   render() {
+    const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
       <Modal>
@@ -361,7 +364,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
         </ModalFooter>
       </Modal>}
-      <Card style={styles.card}
+      <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
             data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -390,7 +393,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                data-test-id='card-type'>
             {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
         </div>
-      </Card>
+      </ResourceCardBase>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
         <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
                    onEdit={v => this.receiveEdit(v)}
@@ -420,8 +423,9 @@ export class ResourceCardComponent extends ReactWrapperBase {
   resourceType: ResourceType;
   @Input('resourceCard') resourceCard: ResourceCardProps['resourceCard'];
   @Input('onUpdate') onUpdate: ResourceCardProps['onUpdate'];
+  @Input('marginTop') marginTop: ResourceCardProps['marginTop'];
 
   constructor() {
-    super(ResourceCard, ['resourceCard', 'onUpdate']);
+    super(ResourceCard, ['resourceCard', 'onUpdate', 'marginTop']);
   }
 }

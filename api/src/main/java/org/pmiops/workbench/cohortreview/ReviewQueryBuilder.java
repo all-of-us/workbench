@@ -28,9 +28,11 @@ public class ReviewQueryBuilder {
       "standard_name as standardName,\n" +
       "standard_code as standardCode,\n" +
       "standard_vocabulary as standardVocabulary,\n" +
+      "standard_concept_id as standardConceptId,\n" +
       "source_name as sourceName,\n" +
       "source_code as sourceCode,\n" +
       "source_vocabulary as sourceVocabulary,\n" +
+      "source_concept_id as sourceConceptId,\n" +
       "age_at_event as ageAtEvent,\n" +
       "visit_type as visitType,\n" +
       "route as route,\n" +
@@ -85,6 +87,22 @@ public class ReviewQueryBuilder {
       "and domain = @" + NAMED_DOMAIN_PARAM + "\n" +
       "and rnk <= @" + NAMED_LIMIT_PARAM + "\n" +
       "order by rank, standardName, startDate\n";
+
+  private static final String VOCAB_DATA_TEMPLATE =
+    "SELECT distinct 'Standard' as type, 'ALL_EVENTS' as domain, standard_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Standard' as type, domain, standard_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Source' as type, 'ALL_EVENTS' as domain, source_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "where domain in ('CONDITION', 'PROCEDURE')\n" +
+    "UNION ALL\n" +
+    "SELECT distinct 'Source' as type, domain, source_vocabulary as vocabulary\n" +
+    "FROM `${projectId}.${dataSetId}.person_all_events`\n" +
+    "where domain in ('CONDITION', 'PROCEDURE')\n" +
+    "order by type, domain, vocabulary";
 
   public QueryJobConfiguration buildQuery(Long participantId,
                                           DomainType domain,
@@ -145,6 +163,13 @@ public class ReviewQueryBuilder {
     return QueryJobConfiguration
       .newBuilder(finalSql)
       .setNamedParameters(params)
+      .setUseLegacySql(false)
+      .build();
+  }
+
+  public QueryJobConfiguration buildVocabularyDataQuery() {
+    return QueryJobConfiguration
+      .newBuilder(VOCAB_DATA_TEMPLATE)
       .setUseLegacySql(false)
       .build();
   }

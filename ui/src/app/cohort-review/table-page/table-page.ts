@@ -1,27 +1,26 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
 import {ClrDatagridStateInterface} from '@clr/angular';
+import * as fp from 'lodash/fp';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
-import {ParticipantCohortStatusColumns} from 'generated';
 import {
   CohortReview,
-  CohortReviewService,
-  ConceptIdName,
   Filter,
   Operator,
   PageFilterType,
+  ParticipantCohortStatusColumns,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatuses as Request,
-  ParticipantDemographics,
   SortOrder,
-} from 'generated';
+} from 'generated/fetch';
+import {from} from 'rxjs/observable/from';
 
 function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {
   return (filter instanceof MultiSelectFilterComponent);
@@ -55,7 +54,6 @@ export class TablePage implements OnInit, OnDestroy {
   review: CohortReview;
   loading: boolean;
   subscription: Subscription;
-  concepts: ParticipantDemographics;
   genders: string[] = [];
   races: string[] = [];
   ethnicities: string[] = [];
@@ -65,10 +63,7 @@ export class TablePage implements OnInit, OnDestroy {
   tab = 'participants';
   reportInit = false;
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-    private route: ActivatedRoute,
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     this.loading = false;
@@ -79,11 +74,13 @@ export class TablePage implements OnInit, OnDestroy {
       this.totalParticipantCount = review.matchedParticipantCount;
     });
 
-    const {concepts} = this.route.snapshot.data;
-    this.concepts = concepts;
-    this.races = this.extractDemographics(concepts.raceList);
-    this.genders = this.extractDemographics(concepts.genderList);
-    this.ethnicities = this.extractDemographics(concepts.ethnicityList);
+    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    cohortBuilderApi().getParticipantDemographics(cdrid).then(data => {
+      const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
+      this.races = extract(data.raceList);
+      this.genders = extract(data.genderList);
+      this.ethnicities = extract(data.ethnicityList);
+    });
   }
 
 
@@ -143,8 +140,8 @@ export class TablePage implements OnInit, OnDestroy {
     console.log('Participant page request parameters:');
     console.dir(query);
 
-    return this.reviewAPI
-      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query)
+    return from(cohortReviewApi()
+      .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query))
       .do(_ => this.loading = false)
       .subscribe(review => {
         cohortReviewStore.next(review);
@@ -153,12 +150,6 @@ export class TablePage implements OnInit, OnDestroy {
 
   isSelected(column: string) {
     return this.isFiltered.indexOf(column) > -1;
-  }
-
-  private extractDemographics(arr: ConceptIdName[]): string[] {
-    const names = arr.map(item => item.conceptName);
-    const vals = new Set<string>(names);
-    return Array.from(vals);
   }
 
   ngOnDestroy() {

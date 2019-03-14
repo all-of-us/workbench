@@ -2,13 +2,12 @@ package org.pmiops.workbench.exceptions;
 
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import org.pmiops.workbench.firecloud.ApiException;
+import org.springframework.http.HttpStatus;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import javax.servlet.http.HttpServletResponse;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.pmiops.workbench.model.ErrorCode;
-import org.pmiops.workbench.model.ErrorResponse;
-import org.springframework.http.HttpStatus;
 
 /**
  * Utility methods related to exceptions.

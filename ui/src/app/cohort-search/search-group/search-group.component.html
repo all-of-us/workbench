@@ -54,17 +54,16 @@
   <div class="card-block">
     <ng-template #groupDropDown>
     <clr-dropdown>
-      <button type="button" class="btn selection-button" clrDropdownTrigger>
+      <button [id]="role + index + '-button'" type="button" class="btn selection-button" (click)="setMenuPosition()" clrDropdownTrigger>
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
-      <clr-dropdown-menu clrPosition="bottom-left">
+      <clr-dropdown-menu clrPosition="{{position}}">
         <h4 class="dropdown-header">Program Data</h4>
         <button
           *ngFor="let criteria of programTypes"
           [id]="criteria.type"
           class="dropdown-item"
           type="button"
-          [disabled]="criteria.disabled"
           (click)="launchWizard(criteria)"
           clrDropdownItem>{{criteria.name}}</button>
         <div class="dropdown-divider"></div>
@@ -75,7 +74,6 @@
             [id]="criteria.type"
             class="dropdown-item"
             type="button"
-            [disabled]="criteria.disabled"
             (click)="launchWizard(criteria)"
             clrDropdownItem>{{criteria.name}}</button>
           <ng-container *ngIf="criteria.children">
@@ -83,7 +81,6 @@
               [id]="criteria.type + '-' + index"
               class="dropdown-item"
               type="button"
-              [disabled]="criteria.disabled"
               clrDropdownTrigger>{{criteria.name}}</button>
             <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
               <clr-dropdown-menu [id]="'demo-menu-' + index">
@@ -92,7 +89,6 @@
                   [id]="child.subtype"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="child.disabled"
                   (click)="launchWizard(child)"
                   clrDropdownItem>{{child.name}}</button>
               </clr-dropdown-menu>
@@ -112,7 +108,6 @@
                   id="criteria.type domain"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="criteria.disabled"
                   (click)="launchWizard(criteria)"
                   clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
@@ -171,10 +166,9 @@
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
         <ng-container *ngFor="let criteria of domainTypes">
           <button *ngIf="criteria.name !== 'Demographics'"
-                  id="criteria.type"
+                  [id]="criteria.type"
                   class="dropdown-item"
                   type="button"
-                  [disabled]="criteria.disabled"
                   (click)="launchWizard(criteria, 1)"
                   clrDropdownItem>{{criteria.name}}</button>
         </ng-container>
@@ -185,14 +179,16 @@
   <ng-container>
     <div class="container card-footer" *ngIf=" this.group.get('count') !== -1 || !groupDiasbleFlag">
       <div class="row" [ngClass]="{'toggle-no-cursor' : !typeFlag}">
-        <div class="toggle-switch col-sm-1" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
-          <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
-                 [checked]="temporalFlag" (click)="getTemporal($event)">
-          <label class="" [for]="'toggle'+ index">
-            <span class="solid-preview-label"></span>
-          </label>
+        <div class="col-sm-6 temporal-container">
+          <div class="toggle-switch" [ngClass]="{'toggle-switch-disable' : !typeFlag}">
+            <input class=" ng-valid ng-dirty ng-touched" [id]="'toggle'+ index" type="checkbox"
+                   [checked]="temporalFlag" (click)="getTemporal($event)">
+            <label [for]="'toggle'+ index">
+              <span class="solid-preview-label"></span>
+            </label>
+          </div>
+          <div style="padding-left: 2rem">Temporal</div>
         </div>
-        <div class="col-sm-5">Temporal</div>
         <div class="col-sm-6 text-right">
           Group Count:
           <span *ngIf="isRequesting"

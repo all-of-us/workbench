@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import * as fp from 'lodash/fp';
 
-import {WorkspaceData} from 'app/resolvers/workspace';
-
-import {currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import {currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 
 import {
@@ -39,7 +39,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workspacesService: WorkspacesService
+    private workspacesService: WorkspacesService,
+    private workspaceStorageService: WorkspaceStorageService
   ) {
     this.share = this.share.bind(this);
     this.closeShare = this.closeShare.bind(this);
@@ -50,15 +51,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const handleData = (data) => {
-      const workspace = <WorkspaceData> data.workspace;
-      currentWorkspaceStore.next(workspace);
-      this.workspace = workspace;
-      this.accessLevel = workspace.accessLevel;
-    };
-    handleData(this.route.snapshot.data);
-    this.subscriptions.push(this.route.data.subscribe(handleData));
-
     this.tabPath = this.getTabPath();
 
     this.subscriptions.push(
@@ -69,6 +61,16 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
     }));
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
+      .distinctUntilChanged(fp.isEqual)
+      .switchMap(({ns, wsid}) => this.workspaceStorageService.getWorkspace(ns, wsid))
+      .subscribe(workspace => {
+        this.workspace = workspace;
+        this.accessLevel = workspace.accessLevel;
+        currentWorkspaceStore.next(workspace);
+      })
+    );
   }
 
   ngOnDestroy() {
