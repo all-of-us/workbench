@@ -34,7 +34,7 @@ describe('ConceptAddModal', () => {
     registerApiClient(ConceptSetsApi, conceptSetsApi);
   });
 
-  it('gets concept set list filtered by domain selected', async () => {
+  it('finds the correct number of concepts in the selected domain', async () => {
     const wrapper = component();
     currentWorkspaceStore.next({
       ...WorkspacesServiceStub.stubWorkspace(),
@@ -63,7 +63,7 @@ describe('ConceptAddModal', () => {
 
   });
 
-  it('disables option to add to existing if concept set does not exist', async () => {
+  it('disables option to add to existing if concept set does not exist & defaults to create', async () => {
     props.selectedDomain = DomainCountStubVariables.STUB_DOMAIN_COUNTS[2];
     const wrapper = component();
     currentWorkspaceStore.next({
@@ -75,18 +75,6 @@ describe('ConceptAddModal', () => {
     expect(wrapper.find('[data-test-id="create-new-set"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-id="toggle-existing-set"]')
         .first().prop('disabled')).toBe(true);
-
-  });
-
-  it('defaults to create new set if set in domain does not exist', async () => {
-    props.selectedDomain = DomainCountStubVariables.STUB_DOMAIN_COUNTS[2];
-    const wrapper = component();
-    currentWorkspaceStore.next({
-      ...WorkspacesServiceStub.stubWorkspace(),
-      accessLevel: WorkspaceAccessLevel.OWNER,
-    });
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="create-new-set"]').exists()).toBeTruthy();
 
   });
 
