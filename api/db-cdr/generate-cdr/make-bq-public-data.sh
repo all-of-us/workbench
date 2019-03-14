@@ -67,7 +67,6 @@ else
     exit 1
 fi
 
-
 # Round counts for public dataset (The counts are rounded up using ceil. For example 4 to 20, 21 to 40, 43 to 60)
 # 1. Set any count > 0 and < BIN_SIZE  to BIN_SIZE,
 # 2. Round any above BIN_SIZE to multiple of BIN_SIZE
@@ -168,10 +167,6 @@ set participant_count =
         cast(CEIL(participant_count / ${BIN_SIZE}) * ${BIN_SIZE} as int64)
     end
 where participant_count > 0"
-
-#Drop person_gender_identity table
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"drop table \`$PUBLIC_PROJECT.$PUBLIC_DATASET.person_gender_identity\` "
 
 #Drop unit_map table
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
