@@ -446,7 +446,7 @@ Requires that Elastic is running (via run-api or dev-up).
 Show the top 5 standard condition concept IDs:
 
 ```
-curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
+curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
 ```
 
 The above IDs can be cross-referenced against the Criteria table in SQL or
@@ -455,7 +455,7 @@ BigQuery to determine cohort builder search targets.
 Dump all participants matching a condition source concept ID (disclaimer: large):
 
 ```
-curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
+curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
 ```
 
 ###

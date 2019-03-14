@@ -23,7 +23,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 public class ElasticDocument {
   /** The Elasticsearch primitive index types we utilize. */
   private enum ElasticType {
-    KEYWORD, INTEGER, DATE, NESTED, TEXT;
+    KEYWORD, INTEGER, FLOAT, DATE, NESTED, TEXT;
 
     String lower() {
       return this.name().toLowerCase();
@@ -52,7 +52,7 @@ public class ElasticDocument {
           .put("start_date", esType(ElasticType.DATE))
           .put("age_at_start", esType(ElasticType.INTEGER))
           .put("visit_concept_id", esType(ElasticType.KEYWORD))
-          .put("value_as_number", esType(ElasticType.INTEGER))
+          .put("value_as_number", esType(ElasticType.FLOAT))
           .put("value_as_concept_id", esType(ElasticType.KEYWORD))
           .build());
 
