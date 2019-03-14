@@ -3,13 +3,15 @@ import * as fp from 'lodash/fp';
 
 import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
-} from 'generated';
+} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 /* The most common column types */
@@ -95,6 +97,10 @@ const answer = {
   name: 'answer',
   displayName: 'Answer',
 };
+const graph = {
+  name: 'graph',
+  displayName: ' '
+};
 
 const initialfilterState = {
   ALL_EVENTS: {
@@ -122,6 +128,7 @@ const initialfilterState = {
 })
 export class DetailTabsComponent implements OnInit, OnDestroy {
   subscription: Subscription;
+  data;
   participantId: any;
   chartData = {};
   domainList = [DomainType[DomainType.CONDITION],
@@ -233,9 +240,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.LAB,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
@@ -248,9 +256,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     domain: DomainType.VITAL,
     filterType: PageFilterType.ReviewFilter,
     columns: [
-      itemDate, itemTime, standardName, value, ageAtEvent, visitType
+      itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType,
     ],
     reverseEnum: {
+      graph: graph,
       itemDate: itemDate,
       itemTime: itemTime,
       standardName: standardName,
@@ -293,8 +302,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
               conditionTitle: '',
               items: []
             };
-            return this.reviewAPI
-              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10)
+            return from(cohortReviewApi()
+              .getParticipantChartData(ns, wsid, cid, cdrVersionId, pid, domainName, 10))
               .do(({items}) => {
                 this.chartData[domainName] = {
                   loading: false,

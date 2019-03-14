@@ -150,6 +150,18 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public GoogleCredential getFireCloudAdminCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "firecloud-admin-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
+  public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
+    String json = readToString(getCredentialsBucketName(), "app-engine-default-sa.json");
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+  }
+
+  @Override
   public void deleteBlob(BlobId blobId) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     storage.delete(blobId);

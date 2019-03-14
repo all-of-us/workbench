@@ -217,6 +217,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents2 = new AllEvents()
       .domain("Condition")
@@ -238,6 +240,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents3 = new AllEvents()
       .domain("Observation")
@@ -259,6 +263,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents4 = new AllEvents()
       .domain("Observation")
@@ -280,6 +286,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents5 = new AllEvents()
       .domain("Procedure")
@@ -301,6 +309,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents6 = new AllEvents()
       .domain("Procedure")
@@ -322,6 +332,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents7 = new AllEvents()
       .domain("Condition")
@@ -343,6 +355,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedAllEvents8 = new AllEvents()
       .domain("Drug")
@@ -364,6 +378,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.ALL_EVENTS);
     expectedCondition1 = new Condition()
       .visitType("visit")
@@ -375,6 +391,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.CONDITION);
     expectedCondition2 = new Condition()
       .visitType("visit")
@@ -386,6 +404,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.CONDITION);
     expectedCondition3 = new Condition()
       .visitType("visit")
@@ -397,6 +417,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.CONDITION);
     expectedPhysicalMeasure1 = new PhysicalMeasurement()
       .value("1.0")
@@ -406,6 +428,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-07-22 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.PHYSICAL_MEASURE);
     expectedPhysicalMeasure2 = new PhysicalMeasurement()
       .value("1.0")
@@ -415,6 +439,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2008-08-01 05:00:00 UTC")
       .standardName("SNOMED")
       .ageAtEvent(28)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.PHYSICAL_MEASURE);
     expectedLab1 = new Lab()
       .value("1.0")
@@ -423,6 +449,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .visitType("visitType")
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .ageAtEvent(29)
       .domainType(DomainType.LAB);
     expectedLab2 = new Lab()
@@ -433,6 +461,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.LAB);
     expectedVital1 = new Vital()
       .value("1.0")
@@ -442,6 +472,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.VITAL);
     expectedVital2 = new Vital()
       .value("1.0")
@@ -451,6 +483,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.VITAL);
     expectedProcedure1 = new Procedure()
       .visitType("visit")
@@ -462,6 +496,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.PROCEDURE);
     expectedProcedure2 = new Procedure()
       .visitType("visit")
@@ -473,6 +509,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2009-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(29)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.PROCEDURE);
     expectedObservation1 = new Observation()
       .visitType("visit")
@@ -484,6 +522,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-03 05:00:00 UTC")
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.OBSERVATION);
     expectedObservation2 = new Observation()
       .visitType("visit")
@@ -495,6 +535,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .sourceVocabulary("ICD10CM")
       .sourceName("name")
       .itemDate("2009-12-04 05:00:00 UTC")
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.OBSERVATION);
     expectedDrug1 = new Drug()
       .visitType("visit")
@@ -507,6 +549,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2001-12-03 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.DRUG);
     expectedDrug2 = new Drug()
       .visitType("visit")
@@ -519,6 +563,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .itemDate("2001-12-04 05:00:00 UTC")
       .standardName("name")
       .ageAtEvent(21)
+      .standardConceptId(1L)
+      .sourceConceptId(1L)
       .domainType(DomainType.DRUG);
 
     cdrVersion = new CdrVersion();

@@ -1,6 +1,5 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -9,7 +8,6 @@ import org.pmiops.workbench.model.Operator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 public class AttributePredicates {
 
@@ -44,6 +42,14 @@ public class AttributePredicates {
 
   public static Predicate<Attribute> nameBlank() {
     return a -> a.getName() == null;
+  }
+
+  public static Predicate<Attribute> anyAttr() {
+    return a -> AttrName.ANY.equals(a.getName());
+  }
+
+  public static Predicate<Attribute> conceptIdIsNull() {
+    return a -> a.getConceptId() == null;
   }
 
   public static Predicate<Attribute> operandsNotNumbers() {

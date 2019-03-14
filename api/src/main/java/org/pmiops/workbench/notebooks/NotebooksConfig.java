@@ -41,12 +41,13 @@ public class NotebooksConfig {
   @Bean(name=NOTEBOOKS_SERVICE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient workbenchServiceAccountClient(
-      WorkbenchEnvironment workbenchEnvironment, WorkbenchConfig workbenchConfig) {
+      WorkbenchEnvironment workbenchEnvironment, WorkbenchConfig workbenchConfig,
+      ServiceAccounts serviceAccounts) {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(workbenchConfig.firecloud.leoBaseUrl);
     try {
       apiClient.setAccessToken(
-          ServiceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
+          serviceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
       apiClient.setDebugging(workbenchConfig.firecloud.debugEndpoints);
     } catch (IOException e) {
       throw new ServerErrorException(e);

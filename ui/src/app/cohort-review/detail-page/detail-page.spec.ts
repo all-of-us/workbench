@@ -15,11 +15,14 @@ import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individua
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {SidebarContentComponent} from 'app/cohort-review/sidebar-content/sidebar-content.component';
 import {CohortSearchActions} from 'app/cohort-search/redux';
-import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortAnnotationDefinitionService, CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentCohortStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {WorkspaceAccessLevel} from 'generated';
+import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import {NgxPopperModule} from 'ngx-popper';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
+import {cohortStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortSearchActionStub} from 'testing/stubs/cohort-search-action-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
@@ -32,6 +35,8 @@ describe('DetailPage', () => {
   let fixture: ComponentFixture<DetailPage>;
 
   beforeEach(async(() => {
+    registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [
         ClearButtonInMemoryFilterComponent,
@@ -56,11 +61,6 @@ describe('DetailPage', () => {
           provide: HighchartsStatic,
           useValue: highCharts
         },
-        {
-          provide: CohortAnnotationDefinitionService,
-          useValue: new CohortAnnotationDefinitionServiceStub()
-        },
-        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
         {provide: CohortSearchActions, useValue: new CohortSearchActionStub()},
       ],
     })
@@ -69,6 +69,7 @@ describe('DetailPage', () => {
       ...WorkspacesServiceStub.stubWorkspace(),
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
+    currentCohortStore.next(cohortStub);
     cohortReviewStore.next(cohortReviewStub);
   }));
 
