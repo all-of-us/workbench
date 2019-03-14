@@ -4,7 +4,7 @@ import {
   CohortReview,
 } from 'generated/fetch';
 
-const initialFilterState = {
+export const initialFilterState = {
   global: {
     dateMin: null,
     dateMax: null,

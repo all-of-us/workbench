@@ -19,33 +19,7 @@ import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-const css = `
-  body .p-calendar.p-calendar-w-btn > .p-inputtext,
-  body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
-    width: 80%;
-    height: 1.5rem;
-    border-color: rgb(197, 197, 197);
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-right: 1px solid rgb(197, 197, 197);
-  }
-  body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:focus,
-  .p-calendar > .p-calendar-button:enabled:focus {
-    box-shadow: none;
-  }
-  .p-calendar > .p-calendar-button,
-  .p-calendar > .p-calendar-button:enabled:hover {
-    color: #216FB4;
-    background: transparent;
-    border: 0;
-  }
-  .p-button-icon-only .pi-calendar.p-button-icon-left {
-    font-size: 1.5em;
-  }
-  .p-button-icon-only .pi-calendar.p-button-icon-left:active {
-    border: 0;
-  }
-`;
+
 const styles = reactStyles({
   backBtn: {
     padding: 0,
@@ -119,6 +93,7 @@ const styles = reactStyles({
     border: '1px solid #2691d0',
     borderRadius: '3px',
     background: 'transparent',
+    cursor: 'pointer',
   },
 });
 const otherStyles = {
@@ -316,8 +291,10 @@ export const DetailHeader = withCurrentWorkspace()(
     clearFilters = () => {
       const {filterState} = this.state;
       filterState.global = {
-        date: {min: null, max: null},
-        age: {min: null, max: null},
+        dateMin: null,
+        dateMax: null,
+        ageMin: '',
+        ageMax: '',
         visits: null
       };
       filterStateStore.next(filterState);
@@ -335,7 +312,6 @@ export const DetailHeader = withCurrentWorkspace()(
       } = this.state;
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
-        <style>{css}</style>
         <button
           style={styles.backBtn}
           type='button'
