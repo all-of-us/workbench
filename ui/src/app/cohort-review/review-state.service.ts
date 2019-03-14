@@ -14,20 +14,25 @@ const initialFilterState = {
   },
   tabs: {
     ALL_EVENTS: {
-      standardVocabulary: [],
-      domain: [],
+      standardVocabulary: ['Select All'],
+      sourceVocabulary: ['Select All'],
+      domain: ['Select All'],
     },
     PROCEDURE: {
-      standardVocabulary: [],
+      standardVocabulary: ['Select All'],
+      sourceVocabulary: ['Select All'],
     },
     CONDITION: {
-      standardVocabulary: [],
+      standardVocabulary: ['Select All'],
+      sourceVocabulary: ['Select All'],
     },
     OBSERVATION: {
-      standardVocabulary: [],
+      standardVocabulary: ['Select All'],
+      sourceVocabulary: ['Select All'],
     },
     PHYSICAL_MEASURE: {
-      standardVocabulary: [],
+      standardVocabulary: ['Select All'],
+      sourceVocabulary: ['Select All'],
     },
   },
   vocab: 'standard',

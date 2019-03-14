@@ -204,7 +204,6 @@ export const DetailHeader = withCurrentWorkspace()(
 
     componentDidMount() {
       this.update();
-      console.log(moment.utc());
     }
 
     componentDidUpdate(prevProps: any) {
