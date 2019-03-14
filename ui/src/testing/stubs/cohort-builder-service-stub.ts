@@ -1,5 +1,6 @@
 import {
-  CohortBuilderApi, Criteria,
+  CohortBuilderApi,
+  Criteria,
   CriteriaAttributeListResponse,
   CriteriaListResponse,
   DemoChartInfoListResponse,
