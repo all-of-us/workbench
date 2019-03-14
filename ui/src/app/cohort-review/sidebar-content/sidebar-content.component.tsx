@@ -142,7 +142,7 @@ const AnnotationItem = fp.flow(
       case AnnotationType.DATE:
         return <DatePicker
           value={value}
-          onChange={v =>{
+          onChange={v => {
             if (moment(v, 'YYYY-MM-DD', true).isValid()) {
               this.setState({editValue: undefined});
               this.save(v);

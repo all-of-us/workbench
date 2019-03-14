@@ -20,8 +20,6 @@ import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
-import {validate} from 'validate.js';
-
 const css = `
   body .p-calendar.p-calendar-w-btn > .p-inputtext,
   body .p-calendar.p-calendar-w-btn > .p-inputtext:enabled:hover:not(.p-error) {
@@ -337,23 +335,6 @@ export const DetailHeader = withCurrentWorkspace()(
         isFirstParticipant,
         isLastParticipant
       } = this.state;
-      const errors = validate({ageMin, ageMax}, {
-        ageMin: {
-          numericality: {
-            onlyInteger: true,
-            greaterThanOrEqualTo: 0,
-            message: 'must be a positive whole number'
-          }
-        },
-        ageMax: {
-          numericality: {
-            onlyInteger: true,
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 120,
-            message: 'must be a positive whole number'
-          }
-        }
-      });
       const cohort = currentCohortStore.getValue();
       return <div className='detail-header'>
         <style>{css}</style>
