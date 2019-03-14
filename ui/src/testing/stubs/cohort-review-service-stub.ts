@@ -11,7 +11,8 @@ import {
   ParticipantCohortStatus,
   ParticipantDataListResponse,
   ReviewStatus,
-  SortOrder
+  SortOrder,
+  VocabularyListResponse
 } from 'generated/fetch';
 
 export const cohortReviewStub = {
@@ -119,5 +120,8 @@ export class CohortReviewServiceStub extends CohortReviewApi {
     return new Promise<CohortReview>(resolve => {
       resolve(cohortReviewStub);
     });
+  }
+  getVocabularies(): Promise<VocabularyListResponse> {
+    return new Promise<VocabularyListResponse>(resolve => resolve({items: []}));
   }
 }

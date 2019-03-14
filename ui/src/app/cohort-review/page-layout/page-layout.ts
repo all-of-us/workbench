@@ -1,6 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-
-import {cohortReviewStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, filterStateStore, visitsFilterOptions, vocabOptions} from 'app/cohort-review/review-state.service';
 import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeType} from 'generated';
@@ -17,8 +16,8 @@ export class PageLayout implements OnInit, OnDestroy {
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
+    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrId, {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
@@ -38,6 +37,19 @@ export class PageLayout implements OnInit, OnDestroy {
       currentCohortStore.next(cohort);
       this.cohortLoaded = true;
     });
+    if (!vocabOptions.getValue()) {
+      cohortReviewApi().getVocabularies(ns, wsid, cid, cdrId)
+        .then(response => {
+          const filters = {Source: {}, Standard: {}};
+          response.items.forEach(item => {
+            filters[item.type][item.domain] = [
+              ...(filters[item.type][item.domain] || []),
+              item.vocabulary
+            ];
+          });
+          vocabOptions.next(filters);
+        });
+    }
     if (!visitsFilterOptions.getValue()) {
       this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
         .toPromise()
@@ -54,6 +66,7 @@ export class PageLayout implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     currentCohortStore.next(undefined);
+    filterStateStore.next(null);
   }
 
   reviewCreated() {
