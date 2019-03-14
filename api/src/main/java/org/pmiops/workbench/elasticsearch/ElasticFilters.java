@@ -204,7 +204,7 @@ public final class ElasticFilters {
         right = attr.getOperands().get(1);
       }
     } else {
-      throw new RuntimeException("attribute name is not a attr name type: " + attr.getName());
+      throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
     }
     switch (attr.getOperator()) {
       case LESS_THAN:
