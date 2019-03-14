@@ -126,7 +126,7 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  checkedItems: any;
+  filterState: any;
 
 }
 
@@ -141,7 +141,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        checkedItems: props.filteredTab,
+        filterState: props.filterState,
         expandedRows: [],
       };
     }
@@ -241,34 +241,32 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      const {checkedItems, data} = this.state;
+      const {filterState, data} = this.state;
+      const {domain} = this.props;
+      let checkedItems = filterState.tabs[domain][colName];
       if (event.target.checked) {
         if (event.target.name === 'Select All') {
-          checkedItems[colName] = namesArray.map(opt => opt.name);
+          checkedItems = namesArray.map(opt => opt.name);
         } else {
-          checkedItems[colName].push(event.target.name);
-          if (namesArray.length - 1 === checkedItems[colName].length) {
+          checkedItems.push(event.target.name);
+          if (namesArray.length - 1 === checkedItems.length) {
             // we have to add selectall when everything is selected
-            checkedItems[colName].push('Select All');
+            checkedItems.push('Select All');
           }
         }
       } else {
         if (event.target.name === 'Select All') {
-          checkedItems[colName] = [];
-          this.setState({filteredData: checkedItems});
+          checkedItems = [];
         } else {
-          if (checkedItems[colName].find(s => s === 'Select All')) {
-            checkedItems[colName]
-              .splice(checkedItems[colName]
-                .indexOf('Select All'), 1);
+          if (checkedItems.find(s => s === 'Select All')) {
+            checkedItems.splice(checkedItems.indexOf('Select All'), 1);
           }
-          checkedItems[colName]
-            .splice(checkedItems[colName]
-              .indexOf(event.target.name), 1);
+          checkedItems.splice(checkedItems.indexOf(event.target.name), 1);
         }
       }
-      this.setState({checkedItems: checkedItems});
-      this.props.getFilteredData(colName, checkedItems);
+      filterState.tabs[domain][colName] = checkedItems;
+      this.setState({filterState: filterState});
+      this.props.getFilteredData(filterState);
       if (data) {
         this.filterData();
       }
@@ -276,7 +274,10 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     filterData() {
-      const {checkedItems} = this.state;
+      const {filterState} = this.state;
+      const {domain} = this.props;
+      const checkedItems = filterState.tabs[domain];
+      const vocab = filterState.vocab;
       let {data, start} = this.state;
       const {filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}} = this.props;
       if (dateMin || dateMax) {
@@ -299,7 +300,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       const empty = [];
       for (const col in checkedItems) {
-        if (checkedItems[col].length) {
+        if ((col === 'domain' || col === `${vocab}Vocabulary`) && checkedItems[col].length) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
           empty.push(false);
         } else {
@@ -322,7 +323,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getErrorMessage = (name?) => {
-      const {data, checkedItems, filteredData} = this.state;
+      const {data, filterState, filteredData} = this.state;
+      const {domain} = this.props;
+      const checkedItems = filterState.tabs[domain];
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
       } else {
@@ -339,8 +342,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getColumnValue(colName: string) {
-      const {data, checkedItems} = this.state;
+      const {data, filterState} = this.state;
       const {domain} = this.props;
+      const checkedItems = filterState.tabs[domain];
       if (!data) {
         return {};
       }
@@ -350,18 +354,17 @@ export const DetailTabTable = withCurrentWorkspace()(
         counts.total++;
       });
       let options: Array<any>;
-      switch (colName) {
-        case 'standardVocabulary':
-          /* TODO need to check for Source also after adding the standard/source radio buttons */
-          const vocabs = vocabOptions.getValue().Standard;
-          options = vocabs[domain] ? vocabs[domain].map(option => {
-            return {name: option, count: counts[option] || 0};
-          }) : [];
-          break;
-        case 'domain':
-          options = domains.map(option => {
-            return {name: option, count: counts[option] || 0};
-          });
+      if (colName === 'domain') {
+        options = domains.map(option => {
+          return {name: option, count: counts[option] || 0};
+        });
+      } else {
+        const vocabs = colName === 'standardVocabulary'
+          ? vocabOptions.getValue().Standard
+          : vocabOptions.getValue().Source;
+        options = vocabs[domain] ? vocabs[domain].map(option => {
+          return {name: option, count: counts[option] || 0};
+        }) : [];
       }
       options.push({name: 'Select All', count: counts.total});
       if (checkedItems[colName].find(i => i === 'Select All')) {
@@ -431,7 +434,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
+        const filterColName = col.name === 'domain'
+          || col.name === 'sourceVocabulary'
+          || col.name === 'standardVocabulary';
         const isExpanderNeeded = col.name === 'graph'  &&
           (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
