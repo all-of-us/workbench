@@ -9,9 +9,11 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -30,7 +32,6 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
@@ -67,7 +68,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Pattern.compile(NOTEBOOKS_WORKSPACE_DIRECTORY + "/[^/]+(\\.(?i)(ipynb))$");
 
   private final WorkspaceService workspaceService;
-  private final WorkspaceDao workspaceDao;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
   private final ConceptSetDao conceptSetDao;
@@ -82,7 +82,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Autowired
   WorkspacesController(
       WorkspaceService workspaceService,
-      WorkspaceDao workspaceDao,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
@@ -94,7 +93,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       UserRecentResourceService userRecentResourceService) {
     this.workspaceService = workspaceService;
-    this.workspaceDao = workspaceDao;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
@@ -521,28 +519,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
         fireCloudService.getWorkspaces();
-    List<String> fcUuids = fcWorkspaces.stream()
-        .map(workspace -> workspace.getWorkspace().getWorkspaceId()).collect(Collectors.toList());
-
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
+        new HashMap<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>();
+    fcWorkspaces
+        .stream()
+        .forEach(fcWorkspace -> {fcUuidWorkspaceMap.put(fcWorkspace.getWorkspace().getWorkspaceId(), fcWorkspace);});
     List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
-        workspaceDao.findAllByFirecloudUuidIn(fcUuids);
+        workspaceService.getDao().findAllByFirecloudUuidIn(fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
 
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
 
     for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
-      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = fcWorkspaces
-          .stream()
-          .filter(w -> w.getWorkspace().getWorkspaceId().equals(dbWorkspace.getFirecloudUuid()))
-          .collect(Collectors.toList())
-          .get(0);
-      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
-      } else {
-        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
+          fcUuidWorkspaceMap.get(dbWorkspace.getFirecloudUuid());
+      if (fcWorkspace != null) {
+        WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+        currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+        if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+          currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+        } else {
+          currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+        }
+        responseList.add(currentWorkspace);
       }
-      responseList.add(currentWorkspace);
     }
 
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
