@@ -5,7 +5,6 @@ import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewService} from 'generated';
 import {
   DomainType,
   PageFilterType,
@@ -104,20 +103,20 @@ const graph = {
 
 const initialfilterState = {
   ALL_EVENTS: {
-    standardVocabulary: ['SelectAll'],
-    domain: ['SelectAll'],
+    standardVocabulary: ['Select All'],
+    domain: ['Select All'],
   },
   PROCEDURE: {
-    standardVocabulary: ['SelectAll'],
+    standardVocabulary: ['Select All'],
   },
   CONDITION: {
-    standardVocabulary: ['SelectAll'],
+    standardVocabulary: ['Select All'],
   },
   OBSERVATION: {
-    standardVocabulary: ['SelectAll'],
+    standardVocabulary: ['Select All'],
   },
   PHYSICAL_MEASURE: {
-    standardVocabulary: ['SelectAll'],
+    standardVocabulary: ['Select All'],
   },
 };
 
@@ -135,7 +134,6 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
-  chartLoadedSpinner = false;
   summaryActive = false;
   filterState: any;
   readonly allEvents = {
@@ -282,9 +280,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }];
 
-  constructor(
-    private reviewAPI: CohortReviewService,
-  ) {
+  constructor() {
     this.filteredData = this.filteredData.bind(this);
   }
 

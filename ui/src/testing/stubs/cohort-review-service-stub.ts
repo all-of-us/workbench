@@ -14,7 +14,7 @@ import {
   SortOrder,
   VocabularyListResponse
 } from 'generated/fetch';
-import {Observable} from 'rxjs/Observable';
+
 export const cohortReviewStub = {
   cohortReviewId: 1,
   cohortId: 1,
@@ -121,7 +121,7 @@ export class CohortReviewServiceStub extends CohortReviewApi {
       resolve(cohortReviewStub);
     });
   }
-  getVocabularies(): Observable<VocabularyListResponse> {
-    return Observable.of(<VocabularyListResponse>{items: []});
+  getVocabularies(): Promise<VocabularyListResponse> {
+    return new Promise<VocabularyListResponse>(resolve => resolve({items: []}));
   }
 }

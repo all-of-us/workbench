@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
-import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
+import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -107,7 +107,7 @@ const domains = [
 ];
 
 export interface DetailTabTableProps {
-  tabname: string;
+  tabName: string;
   columns: Array<any>;
   domain: string;
   filterType: PageFilterType;
@@ -240,24 +240,24 @@ export const DetailTabTable = withCurrentWorkspace()(
     updateData = (event, colName, namesArray) => {
       const {checkedItems, data} = this.state;
       if (event.target.checked) {
-        if (event.target.name === 'SelectAll') {
+        if (event.target.name === 'Select All') {
           checkedItems[colName] = namesArray.map(opt => opt.name);
         } else {
           checkedItems[colName].push(event.target.name);
           if (namesArray.length - 1 === checkedItems[colName].length) {
             // we have to add selectall when everything is selected
-            checkedItems[colName].push('SelectAll');
+            checkedItems[colName].push('Select All');
           }
         }
       } else {
-        if (event.target.name === 'SelectAll') {
+        if (event.target.name === 'Select All') {
           checkedItems[colName] = [];
           this.setState({filteredData: checkedItems});
         } else {
-          if (checkedItems[colName].find(s => s === 'SelectAll')) {
+          if (checkedItems[colName].find(s => s === 'Select All')) {
             checkedItems[colName]
               .splice(checkedItems[colName]
-                .indexOf('SelectAll'), 1);
+                .indexOf('Select All'), 1);
           }
           checkedItems[colName]
             .splice(checkedItems[colName]
@@ -302,7 +302,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     getErrorMessage = (name?) => {
       const {data, checkedItems, filteredData} = this.state;
       if (data && data.length === 0) {
-        return  'No ' + this.props.tabname + ' Data';
+        return  'No ' + this.props.tabName + ' Data';
       } else {
         if (filteredData && filteredData.length === 0) {
           for (const col in checkedItems) {
@@ -341,8 +341,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             return {name: option, count: counts[option] || 0};
           });
       }
-      options.push({name: 'SelectAll', count: counts.total});
-      if (checkedItems[colName].find(i => i === 'SelectAll')) {
+      options.push({name: 'Select All', count: counts.total});
+      if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
       let fl: any;
@@ -352,8 +352,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {options.map((opt, i) => (
-            <div key={i} style={{borderTop: opt.name === 'SelectAll' ? '1px solid #ccc' : 'none',
-              padding: opt.name === 'SelectAll' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={checkedItems[colName].includes(opt.name)}
                      onChange={($event) => this.updateData($event, colName, options)}/>
@@ -411,7 +411,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         const colName = col.name === 'value' || col.name === 'standardName';
         const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
         const isExpanderNeeded = col.name === 'graph'  &&
-          (this.props.tabname === 'Vitals' || this.props.tabname === 'Labs');
+          (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
@@ -473,7 +473,7 @@ export const DetailTabTable = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class DetailTabTableComponent extends ReactWrapperBase {
-  @Input('tabname') tabname: DetailTabTableProps['tabname'];
+  @Input('tabName') tabName: DetailTabTableProps['tabName'];
   @Input('columns') columns: DetailTabTableProps['columns'];
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
@@ -483,7 +483,7 @@ export class DetailTabTableComponent extends ReactWrapperBase {
 
   constructor() {
     super(DetailTabTable, [
-      'tabname',
+      'tabName',
       'columns',
       'domain',
       'filterType',

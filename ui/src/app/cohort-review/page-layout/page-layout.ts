@@ -1,5 +1,4 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-
 import {cohortReviewStore, filterStateStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
@@ -14,14 +13,13 @@ export class PageLayout implements OnInit, OnDestroy {
   reviewPresent: boolean;
   cohortLoaded = false;
   constructor(
-    private reviewAPI: CohortReviewService,
     private cohortsAPI: CohortsService
   ) {}
 
   ngOnInit() {
     const {ns, wsid, cid} = urlParamsStore.getValue();
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, {
+    const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrId, {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
@@ -42,8 +40,7 @@ export class PageLayout implements OnInit, OnDestroy {
       this.cohortLoaded = true;
     });
     if (!vocabOptions.getValue()) {
-      this.reviewAPI.getVocabularies(ns, wsid, cid, cdrid)
-        .toPromise()
+      cohortReviewApi().getVocabularies(ns, wsid, cid, cdrId)
         .then(response => {
           const filters = {Source: {}, Standard: {}};
           response.items.forEach(item => {
