@@ -207,8 +207,6 @@ public final class ElasticFilters {
       throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
     }
     switch (attr.getOperator()) {
-      case LESS_THAN:
-      case GREATER_THAN:
       case LESS_THAN_OR_EQUAL_TO:
         rq.lte(left);
         break;
@@ -218,11 +216,13 @@ public final class ElasticFilters {
       case BETWEEN:
         rq.gte(left).lte(right);
         break;
-      case LIKE:
-      case IN:
       case EQUAL:
         rq.gte(left).lte(left);
         break;
+      case LESS_THAN:
+      case GREATER_THAN:
+      case LIKE:
+      case IN:
       case NOT_EQUAL:
       default:
         throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
