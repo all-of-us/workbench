@@ -166,8 +166,7 @@
         </div>
       </div>
     </div>
-    <a href="https://console.cloud.google.com/storage/browser/{{workspace.googleBucketName}}?authuser={{username}}"
-        target="_blank" rel="noopener noreferrer">
+    <a rel="noopener noreferrer" (click)="googleBucketModal = true">
       Google Bucket
     </a>
   </div>
@@ -177,6 +176,19 @@
                      [onClose]="closeShare.bind(this)"
                      [userEmail]="username"
                      [sharing]="sharing"></app-workspace-share>
+<clr-modal [(clrModalOpen)]="googleBucketModal">
+  <h3 class="modal-title">Note</h3>
+  <div class="modal-body">It is All of Us data use policy that researchers should not make copies of or download
+    individual-level data (including taking screenshots or other means of viewing individual-level data) outside of
+    the All of Us research environment without approval from All of Us Resource Access Board (RAB).<br>
+    Notebooks should rarely be downloaded directly from Google Cloud Console, as output cells in Notebooks may
+    contain sensitive individual level data.
+  </div>
+  <div class="modal-footer">`
+    <button type="button" class="btn btn-secondary" (click)="googleBucketModal = false">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="openGoogleBucket()">Continue</button>
+  </div>
+</clr-modal>
 <clr-modal [(clrModalOpen)]="notebookError">
   <h3 class="modal-title">Error:</h3>
   <div class="modal-body">Could not fetch notebooks from workspace. Please <a (click)="submitNotebooksLoadBugReport()">submit a bug report.</a></div>
