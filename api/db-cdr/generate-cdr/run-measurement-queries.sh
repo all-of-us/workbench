@@ -296,7 +296,6 @@ where m.value_as_number is not null and m.measurement_source_concept_id > 0
 and m.measurement_source_concept_id not in (select distinct measurement_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`)
 and (extract(year from m.measurement_date) - p.year_of_birth) >= 18 and (extract(year from m.measurement_date) - p.year_of_birth) < 30
 and m.unit_concept_id = 0 and m.unit_source_value is null
-
 ),
 overallstats as
 (select subject_id as stratum1_id, unit as stratum2_id, age_decile as stratum3_id, cast(avg(1.0 * count_value) as float64) as avg_value,
@@ -995,7 +994,6 @@ m1.measurement_source_concept_id not in (select distinct measurement_concept_id 
 group by stratum_1,stratum_3,stratum_4,stratum_5"
 
 # Generating biological sex counts for measurement concepts for each unit
-## Eg: If heart rate 3027018 has 20000 participants, this query calculates the individual biological sex participant counts for each unit beats/min,second ,no units ,etc per measurement.
 echo "Inserting unit specific biological sex counts for each measurement concept"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`${WORKBENCH_PROJECT}.${WORKBENCH_DATASET}.achilles_results\`
