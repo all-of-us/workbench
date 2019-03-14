@@ -2,10 +2,10 @@ import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
-import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
+import {DatePicker, Select, TextInput} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -16,7 +16,6 @@ import {
   SortOrder
 } from 'generated/fetch';
 import * as moment from 'moment';
-import {Calendar} from 'primereact/calendar';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
@@ -422,16 +421,6 @@ export const DetailHeader = withCurrentWorkspace()(
                   Date Range:
                 </div>
                 <div style={otherStyles.filterInput}>
-                  {/*<Calendar*/}
-                    {/*style={{width: '100%'}}*/}
-                    {/*dateFormat='yy-mm-dd'*/}
-                    {/*value={date.min}*/}
-                    {/*onChange={(e) => this.setFilter(e.value, 'date', 'min')}*/}
-                    {/*monthNavigator={true}*/}
-                    {/*yearNavigator={true}*/}
-                    {/*yearRange='1941:2018'*/}
-                    {/*showIcon={true}*/}
-                  {/*/>*/}
                   <DatePicker
                     value={dateMin}
                     onChange={v => this.setFilter(v, 'dateMin')}
@@ -442,16 +431,6 @@ export const DetailHeader = withCurrentWorkspace()(
                   and
                 </div>
                 <div style={otherStyles.filterInput}>
-                  {/*<Calendar*/}
-                    {/*style={{width: '100%'}}*/}
-                    {/*dateFormat='yy-mm-dd'*/}
-                    {/*value={date.max}*/}
-                    {/*onChange={(e) => this.setFilter(e.value, 'date', 'max')}*/}
-                    {/*monthNavigator={true}*/}
-                    {/*yearNavigator={true}*/}
-                    {/*yearRange='1940:2018'*/}
-                    {/*showIcon={true}*/}
-                  {/*/>*/}
                   <DatePicker
                     value={dateMax}
                     onChange={v => this.setFilter(v, 'dateMax')}
@@ -497,9 +476,6 @@ export const DetailHeader = withCurrentWorkspace()(
                   />
                 </div>
               </div>}
-              {/*<ValidationError>*/}
-                {/*{summarizeErrors(errors && (errors.ageMin || errors.ageMax))}*/}
-              {/*</ValidationError>*/}
             </div>
           </div>
           <div style={{...otherStyles.radios, marginRight: 0}}>
