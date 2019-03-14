@@ -5,6 +5,7 @@ import {ClarityModule} from '@clr/angular';
 import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
+import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceAccessLevel} from 'generated';
@@ -38,6 +39,7 @@ describe('DetailTabsComponent', () => {
       cdrVersionId: '1',
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
+    filterStateStore.next({vocab: 'standard'});
   }));
 
   beforeEach(() => {
