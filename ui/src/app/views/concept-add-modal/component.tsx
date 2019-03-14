@@ -169,7 +169,7 @@ export const ConceptAddModal = withCurrentWorkspace()
                             checked={addingToExistingSet}
                             disabled={conceptSets.length === 0}
                             data-test-id='toggle-existing-set'
-                            onChange={() => {this.setState({addingToExistingSet: true});}}/>
+                            onChange={() => {this.setState({addingToExistingSet: true}); }}/>
                 <label style={styles.label}>Choose existing set</label>
               </div>
             </TooltipTrigger>
@@ -178,7 +178,7 @@ export const ConceptAddModal = withCurrentWorkspace()
                          checked={!addingToExistingSet}
                          style={{marginLeft: '0.7rem'}}
                          data-test-id='toggle-new-set'
-                         onChange={() => {this.setState({addingToExistingSet: false});}}/>
+                         onChange={() => {this.setState({addingToExistingSet: false}); }}/>
               <label style={styles.label}>Create new set</label>
             </div>
           </div>
