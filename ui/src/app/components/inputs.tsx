@@ -181,7 +181,10 @@ export class DatePicker extends React.Component<
         />}
       >
         <Clickable style={{display: 'flex', alignItems: 'center', flex: 1}}>
-          <ClrIcon style={{flex: 'none', marginLeft: '4px', color: '#216FB4'}} shape='calendar' size={20} />
+          <ClrIcon
+            style={{flex: 'none', marginLeft: '4px', color: '#216FB4'}}
+            shape='calendar'
+            size={20} />
         </Clickable>
       </PopupTrigger>
     </div>;
