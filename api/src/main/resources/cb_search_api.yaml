@@ -681,9 +681,6 @@ definitions:
       name:
         description: name/type of modifier
         $ref: "#/definitions/ModifierType"
-      encounterType:
-        type: string
-        description: If encounter then this prop will hold the type
       operator:
         description: Machine name of the operator
         $ref: "#/definitions/Operator"
