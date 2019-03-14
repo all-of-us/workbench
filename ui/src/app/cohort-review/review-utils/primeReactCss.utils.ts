@@ -18,9 +18,6 @@ export const css = `
   body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
     border-bottom: 1px solid #c8c8c8;
   }
-  // body .p-datatable .p-column-title {
-  //   display: flex;
-  // }
   .pi.pi-sort,
   .pi.pi-sort-up,
   .pi.pi-sort-down {
