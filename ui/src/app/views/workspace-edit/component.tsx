@@ -204,7 +204,7 @@ export const WorkspaceEditSection = (props) => {
   </div>;
 };
 
-export const WorkspaceCateogry = (props) => {
+export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
     <input style={{height: '.66667rem', marginRight: '.31667rem'}} type='checkbox'
            checked={!!props.value}
@@ -226,14 +226,14 @@ export const WorkspaceCateogry = (props) => {
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
 
-interface WorkspaceEditProps {
+export interface WorkspaceEditProps {
   navigateBack: Function;
   mode: WorkspaceEditMode;
   routeConfigData: any;
   workspace: Workspace;
 }
 
-interface WorkspaceEditState {
+export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
   disableButton: Boolean;
   workspace: Workspace;
@@ -452,7 +452,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             header='Please select all data use categories that apply for your current study'
             text='These are for informational purposes only and do not affect or configure your
             new workspace.'>
-          <WorkspaceCateogry style={{width: '100%'}}
+          <WorkspaceCategory style={{width: '100%'}}
               item={ResearchPurposeItems.diseaseFocusedResearch}
               value={this.state.workspace.researchPurpose.diseaseFocusedResearch}
               onChange={v => this.updateWorkspaceCategory('diseaseFocusedResearch', v)}>
@@ -469,33 +469,33 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                   this.setState(fp.set(['workspace', 'researchPurpose', 'diseaseOfFocus'], v))}
                          disabled={!this.state.workspace.researchPurpose.diseaseFocusedResearch}/>
             </TooltipTrigger>
-          </WorkspaceCateogry>
+          </WorkspaceCategory>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
-              <WorkspaceCateogry item={ResearchPurposeItems.methodsDevelopment}
+              <WorkspaceCategory item={ResearchPurposeItems.methodsDevelopment}
                   value={this.state.workspace.researchPurpose.methodsDevelopment}
                   onChange={v => this.updateWorkspaceCategory('methodsDevelopment', v)}/>
-              <WorkspaceCateogry item={ResearchPurposeItems.aggregateAnalysis}
+              <WorkspaceCategory item={ResearchPurposeItems.aggregateAnalysis}
                   value={!!this.state.workspace.researchPurpose.aggregateAnalysis}
                   onChange={v => this.updateWorkspaceCategory('aggregateAnalysis', v)}/>
             </div>
           </div>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
-              <WorkspaceCateogry item={ResearchPurposeItems.controlSet}
+              <WorkspaceCategory item={ResearchPurposeItems.controlSet}
                   value={this.state.workspace.researchPurpose.controlSet}
                   onChange={v => this.updateWorkspaceCategory('controlSet', v)}/>
-              <WorkspaceCateogry item={ResearchPurposeItems.ancestry}
+              <WorkspaceCategory item={ResearchPurposeItems.ancestry}
                   value={this.state.workspace.researchPurpose.ancestry}
                   onChange={v => this.updateWorkspaceCategory('ancestry', v)}/>
             </div>
           </div>
           <div style={{display: 'inline-block'}}>
             <div style={{display: 'flex'}}>
-              <WorkspaceCateogry item={ResearchPurposeItems.population}
+              <WorkspaceCategory item={ResearchPurposeItems.population}
                   value={this.state.workspace.researchPurpose.population}
                   onChange={v => this.updateWorkspaceCategory('population', v)}/>
-              <WorkspaceCateogry item={ResearchPurposeItems.commercialPurpose}
+              <WorkspaceCategory item={ResearchPurposeItems.commercialPurpose}
                   value={this.state.workspace.researchPurpose.commercialPurpose}
                   onChange={v => this.updateWorkspaceCategory('commercialPurpose', v)}/>
             </div>
