@@ -18,9 +18,6 @@ export const css = `
   body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
     border-bottom: 1px solid #c8c8c8;
   }
-  body .p-datatable .p-column-title {
-    display: flex;
-  }
   .pi.pi-sort,
   .pi.pi-sort-up,
   .pi.pi-sort-down {
@@ -65,24 +62,24 @@ export const css = `
     background: #fafafa;
     color: rgba(0, 0, 0, .5);
   }
-  body .p-overlaypanel .p-overlaypanel-close {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-close {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
     color: #0086C1;
   }
-  body .p-overlaypanel {
+  body .labOverlay.p-overlaypanel {
     top: 19px!important;
     left: 0px!important;
     width:9.5rem;
   }
-  body .p-overlaypanel .p-overlaypanel-close:hover {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-close:hover {
     top: 0.231em;
     right: 0.231em;
     background-color: white;
     color: #0086C1;
   }
-  body .p-overlaypanel .p-overlaypanel-content {
+  body .labOverlay.p-overlaypanel .p-overlaypanel-content {
     padding: 0.6rem 0.6rem;
     font-size: 13px;
   }
@@ -203,5 +200,26 @@ export const css = `
     outline: 0;
     outline-offset: 0;
     box-shadow: none;
+  }
+     body .filterOverlay.p-overlaypanel .p-overlaypanel-close {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+  }
+  body .filterOverlay.p-overlaypanel {
+    top: 1.6rem!important;
+    left: auto!important;
+    width:9.5rem;
+  }
+  body .filterOverlay.p-overlaypanel .p-overlaypanel-close:hover {
+    top: 0.231em;
+    right: 0.231em;
+    background-color: white;
+    color: #0086C1;
+  }
+  body .filterOverlay.p-overlaypanel .p-overlaypanel-content {
+    padding: 0.7em 0em;
+    font-size: 13px;
   }
   `;

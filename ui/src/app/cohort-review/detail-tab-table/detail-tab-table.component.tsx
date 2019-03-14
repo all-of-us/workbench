@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
+import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
@@ -72,6 +73,10 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
+  filterBorder: {
+    paddingTop: '0.5rem',
+    borderTop: '1px solid #ccc',
+  },
   graphStyle: {
     borderLeft: 'none',
     width: '2rem',
@@ -90,23 +95,38 @@ const styles = reactStyles({
   }
 });
 const rows = 25;
+const domains = [
+  DomainType.CONDITION,
+  DomainType.PROCEDURE,
+  DomainType.DRUG,
+  DomainType.OBSERVATION,
+  DomainType.PHYSICALMEASURE,
+  DomainType.LAB,
+  DomainType.VITAL,
+  DomainType.SURVEY,
+];
 
 export interface DetailTabTableProps {
-  tabname: string;
+  tabName: string;
   columns: Array<any>;
   domain: string;
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
+  filteredTab: any;
+  getFilteredData: Function;
 }
 
 export interface DetailTabTableState {
   data: Array<any>;
+  filteredData: Array<any>;
   loading: boolean;
   start: number;
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
+  checkedItems: any;
+
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -115,10 +135,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
+        filteredData: null,
         loading: true,
         start: 0,
         sortField: null,
         sortOrder: 1,
+        checkedItems: props.filteredTab,
         expandedRows: [],
       };
     }
@@ -131,6 +153,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (prevProps.participantId !== this.props.participantId) {
         this.setState({
           data: null,
+          filteredData: null,
           loading: true,
         });
         this.getParticipantData();
@@ -169,6 +192,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             data: response.items,
             loading: false,
           });
+          this.filterData();
         });
       } catch (error) {
         console.log(error);
@@ -201,15 +225,143 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-            <OverlayPanel ref={(el) => {vl = el; }} showCloseIcon={true} dismissable={true}>
-              {(rowData.refRange &&  column.field === 'value') &&
-                <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
-              {(rowData.unit && column.field === 'value') &&
-                <div>Units: {rowData.unit}</div>}
-              {nameField &&
-                <div>Route: {rowData.route}</div>}
-            </OverlayPanel>
+        <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+                      showCloseIcon={true} dismissable={true}>
+          {(rowData.refRange &&  column.field === 'value') &&
+          <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
+          {(rowData.unit && column.field === 'value') &&
+          <div>Units: {rowData.unit}</div>}
+          {nameField &&
+          <div>Route: {rowData.route}</div>}
+        </OverlayPanel>
       </div>;
+    }
+
+    updateData = (event, colName, namesArray) => {
+      const {checkedItems, data} = this.state;
+      if (event.target.checked) {
+        if (event.target.name === 'Select All') {
+          checkedItems[colName] = namesArray.map(opt => opt.name);
+        } else {
+          checkedItems[colName].push(event.target.name);
+          if (namesArray.length - 1 === checkedItems[colName].length) {
+            // we have to add selectall when everything is selected
+            checkedItems[colName].push('Select All');
+          }
+        }
+      } else {
+        if (event.target.name === 'Select All') {
+          checkedItems[colName] = [];
+          this.setState({filteredData: checkedItems});
+        } else {
+          if (checkedItems[colName].find(s => s === 'Select All')) {
+            checkedItems[colName]
+              .splice(checkedItems[colName]
+                .indexOf('Select All'), 1);
+          }
+          checkedItems[colName]
+            .splice(checkedItems[colName]
+              .indexOf(event.target.name), 1);
+        }
+      }
+      this.setState({checkedItems: checkedItems});
+      this.props.getFilteredData(colName, checkedItems);
+      if (data) {
+        this.filterData();
+      }
+      this.getErrorMessage(event.target.name);
+    }
+
+    filterData() {
+      const {checkedItems} = this.state;
+      let {data, start} = this.state;
+      const empty = [];
+      for (const col in checkedItems) {
+        if (checkedItems[col].length) {
+          data = data.filter(row => checkedItems[col].includes(row[col]));
+          empty.push(false);
+        } else {
+          empty.push(true);
+        }
+      }
+      if (!empty.includes(false)) {
+        if (checkedItems === undefined) {
+          // as some tab does not have filtered items but have data
+          this.setState({filteredData: data, start: start});
+        } else {
+          this.setState({filteredData: []});
+        }
+      } else {
+        if (data.length < start + rows) {
+          start = Math.floor(data.length / rows) * rows;
+        }
+        this.setState({filteredData: data, start: start});
+      }
+    }
+
+    getErrorMessage = (name?) => {
+      const {data, checkedItems, filteredData} = this.state;
+      if (data && data.length === 0) {
+        return  'No ' + this.props.tabName + ' Data';
+      } else {
+        if (filteredData && filteredData.length === 0) {
+          for (const col in checkedItems) {
+            if (checkedItems[col].find( i => i !== name) || filteredData !== null) {
+              // filtered data null  or if item selected from different participants not
+              // exist in next/previous participants need to show this below message
+              return 'There is data, but it is all currently hidden. Please check your filters';
+            }
+          }
+        }
+      }
+    }
+
+    getColumnValue(colName: string) {
+      const {data, checkedItems} = this.state;
+      const {domain} = this.props;
+      if (!data) {
+        return {};
+      }
+      const counts = {total: 0};
+      data.forEach(item => {
+        counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+        counts.total++;
+      });
+      let options: Array<any>;
+      switch (colName) {
+        case 'standardVocabulary':
+          /* TODO need to check for Source also after adding the standard/source radio buttons */
+          const vocabs = vocabOptions.getValue().Standard;
+          options = vocabs[domain] ? vocabs[domain].map(option => {
+            return {name: option, count: counts[option] || 0};
+          }) : [];
+          break;
+        case 'domain':
+          options = domains.map(option => {
+            return {name: option, count: counts[option] || 0};
+          });
+      }
+      options.push({name: 'Select All', count: counts.total});
+      if (checkedItems[colName].find(i => i === 'Select All')) {
+        checkedItems[colName] = options.map(opt => opt.name);
+      }
+      let fl: any;
+
+      return <span>
+        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          {options.map((opt, i) => (
+            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+                     checked={checkedItems[colName].includes(opt.name)}
+                     onChange={($event) => this.updateData($event, colName, options)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+            </div>
+          ))}
+        </OverlayPanel>
+      </span>;
     }
 
     rowExpansionTemplate = (rowData: any) => {
@@ -242,23 +394,24 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, start, sortField, sortOrder} = this.state;
+      const {filteredData, loading, start, sortField, sortOrder} = this.state;
       let pageReportTemplate;
-      if (data !== null) {
-        const lastRowOfPage = (start + rows) > data.length
-          ? start + rows - (start + rows - data.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${data.length} records `;
+      if (filteredData !== null) {
+        const lastRowOfPage = (start + rows) > filteredData.length
+          ? start + rows - (start + rows - filteredData.length) : start + rows;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (data && data.length > rows) {
+      if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
+        const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
         const isExpanderNeeded = col.name === 'graph'  &&
-          (this.props.tabname === 'Vitals' || this.props.tabname === 'Labs');
+          (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
@@ -280,30 +433,33 @@ export const DetailTabTable = withCurrentWorkspace()(
           header={header}
           headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
+          filter={filterColName && true}
+          filterElement= {filterColName && this.getColumnValue(col.name)}
           body={overlayTemplate}/>;
       });
-      return <div style={styles.container} >
+
+      return <div style={styles.container}>
         <style>{css}</style>
-        {data && <DataTable  expandedRows={this.state.expandedRows}
+        {filteredData && <DataTable  expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
           style={styles.table}
-          value={data}
+          value={filteredData}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
           paginator
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          paginatorTemplate={filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rows}
-          totalRecords={data.length}
+          totalRecords={filteredData.length}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={data !== null ? 'No ' + this.props.tabname + ' Data' : ''}>
+          emptyMessage={this.getErrorMessage()}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
@@ -317,19 +473,24 @@ export const DetailTabTable = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class DetailTabTableComponent extends ReactWrapperBase {
-  @Input('tabname') tabname: DetailTabTableProps['tabname'];
+  @Input('tabName') tabName: DetailTabTableProps['tabName'];
   @Input('columns') columns: DetailTabTableProps['columns'];
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
+  @Input('filteredTab') filteredTab: DetailTabTableProps['filteredTab'];
+  @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
 
   constructor() {
     super(DetailTabTable, [
-      'tabname',
+      'tabName',
       'columns',
       'domain',
       'filterType',
       'participantId',
+      'filteredTab',
+      'getFilteredData',
     ]);
   }
 }
+

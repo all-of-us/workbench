@@ -33,7 +33,9 @@
     <clr-tab-content id="detail-{{ allEvents.name | lowercase }}-content" *clrIfActive>
       <div>
         <app-detail-tab-table
-          [tabname]="allEvents.name"
+          [getFilteredData]=filteredData
+          [filteredTab]="filterState[allEvents.domain]"
+          [tabName]="allEvents.name"
           [columns]="allEvents.columns"
           [filterType]="allEvents.filterType"
           [domain]="allEvents.domain"
@@ -66,7 +68,9 @@
     </button>
     <clr-tab-content id="detail-{{ tab.name | lowercase }}-content" *clrIfActive>
       <app-detail-tab-table
-        [tabname]="tab.name"
+        [getFilteredData]=filteredData
+        [filteredTab]="filterState[tab.domain]"
+        [tabName]="tab.name"
         [columns]="tab.columns"
         [filterType]="tab.filterType"
         [domain]="tab.domain"

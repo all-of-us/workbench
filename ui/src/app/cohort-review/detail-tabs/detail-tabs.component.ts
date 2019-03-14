@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import * as fp from 'lodash/fp';
 
+import {filterStateStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
@@ -100,6 +101,25 @@ const graph = {
   displayName: ' '
 };
 
+const initialfilterState = {
+  ALL_EVENTS: {
+    standardVocabulary: ['Select All'],
+    domain: ['Select All'],
+  },
+  PROCEDURE: {
+    standardVocabulary: ['Select All'],
+  },
+  CONDITION: {
+    standardVocabulary: ['Select All'],
+  },
+  OBSERVATION: {
+    standardVocabulary: ['Select All'],
+  },
+  PHYSICAL_MEASURE: {
+    standardVocabulary: ['Select All'],
+  },
+};
+
 @Component({
   selector: 'app-detail-tabs',
   templateUrl: './detail-tabs.component.html',
@@ -114,8 +134,8 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     DomainType[DomainType.PROCEDURE],
     DomainType[DomainType.DRUG]];
   conditionTitle: string;
-  chartLoadedSpinner = false;
   summaryActive = false;
+  filterState: any;
   readonly allEvents = {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
@@ -133,7 +153,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       value: value,
       domain: domain,
       age: ageAtEvent,
-    }
+    },
   };
 
   readonly tabs = [{
@@ -150,7 +170,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
       standardVocabulary: standardVocabulary,
       age: ageAtEvent,
       visitType: visitType,
-    }
+    },
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
@@ -260,7 +280,9 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }];
 
-  constructor() {}
+  constructor() {
+    this.filteredData = this.filteredData.bind(this);
+  }
 
   ngOnInit() {
     this.subscription = Observable
@@ -289,6 +311,16 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
         );
       })
       .subscribe();
+
+    this.subscription.add(filterStateStore.subscribe(filterState => {
+      this.filterState = filterState === null
+        ? JSON.parse(JSON.stringify(initialfilterState)) : filterState;
+    }));
+  }
+
+  filteredData(_domain: string, checkedItems: any) {
+    this.filterState[_domain] = checkedItems;
+    filterStateStore.next(this.filterState);
   }
 
   ngOnDestroy() {
