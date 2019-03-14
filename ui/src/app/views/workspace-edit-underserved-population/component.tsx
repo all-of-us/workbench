@@ -29,7 +29,8 @@ const styles = reactStyles({
     display: 'inline-block',
     minHeight: '1rem',
     cursor: 'pointer',
-    lineHeight: '1rem'
+    lineHeight: '1rem',
+    width: '60%'
   },
   title: {
     paddingTop: '1rem',
