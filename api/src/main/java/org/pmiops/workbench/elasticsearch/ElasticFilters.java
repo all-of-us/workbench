@@ -160,12 +160,12 @@ public final class ElasticFilters {
         }
       }
 
-      // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
       // TODO(calbach): Handle non-code values, e.g. question answers here.
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         BoolQueryBuilder b = QueryBuilders.boolQuery()
             .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
+        // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
         for (Attribute attr : param.getAttributes()) {
           b.filter(attributeToQuery(attr));
         }
