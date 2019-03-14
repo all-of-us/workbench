@@ -90,6 +90,10 @@ const answer = {
   name: 'answer',
   displayName: 'Answer',
 };
+const graph = {
+  name: 'graph',
+  displayName: ' '
+};
 
 @Component({
   selector: 'app-detail-tabs',
@@ -188,10 +192,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
-        itemDate, itemTime, standardName, value, ageAtEvent, visitType
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
       source: [
-        itemDate, itemTime, sourceName, value, ageAtEvent, visitType
+        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
       ],
     }
   }, {
@@ -200,10 +204,10 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
-        itemDate, itemTime, standardName, value, ageAtEvent, visitType
+        itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
       ],
       source: [
-        itemDate, itemTime, sourceName, value, ageAtEvent, visitType
+        itemDate, itemTime, sourceName, graph, value, ageAtEvent, visitType
       ],
     }
   }, {

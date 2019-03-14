@@ -17,7 +17,9 @@
 /api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
 /api/src/generated
 /api/tools/build/*
+/api/bin
 /common-api/.swagger-codegen/*
+/common-api/bin
 /common-api/src/generated
 /ui/package-lock.json
 /ui/coverage

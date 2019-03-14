@@ -16,6 +16,7 @@ import com.google.common.collect.Lists;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -68,7 +69,8 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final GoogleRetryHandler retryHandler;
 
   @Autowired
-  public DirectoryServiceImpl(Provider<GoogleCredential> googleCredentialProvider,
+  public DirectoryServiceImpl(
+      @Qualifier("gsuiteAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport, GoogleRetryHandler retryHandler) {
     this.googleCredentialProvider = googleCredentialProvider;

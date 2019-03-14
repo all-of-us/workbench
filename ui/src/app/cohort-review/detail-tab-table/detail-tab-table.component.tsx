@@ -1,105 +1,20 @@
 import {Component, Input} from '@angular/core';
+import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
+import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
-const css = `
-  body .p-datatable .p-sortable-column:not(.p-highlight):hover,
-  body .p-datatable .p-sortable-column.p-highlight {
-    color: #333333;
-    background-color: #f4f4f4;
-  }
-  body .p-datatable .p-datatable-thead > tr > th {
-    padding: 10px 5px 10px 10px;
-    vertical-align: middle;
-    background: #f4f4f4;
-    border: 0;
-    border-bottom: 1px solid #c8c8c8;
-    border-left: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-datatable-thead > tr > th:first-of-type {
-    border-left: 0;
-  }
-  body .p-datatable .p-datatable-tbody > tr:not(last-of-type) {
-    border-bottom: 1px solid #c8c8c8;
-  }
-  body .p-datatable .p-column-title {
-    display: flex;
-  }
-  .pi.pi-sort,
-  .pi.pi-sort-up,
-  .pi.pi-sort-down {
-    display: none;
-  }
-  .p-datatable .p-datatable-scrollable-wrapper {
-    border: 1px solid #c8c8c8;
-  }
-  .p-datatable .p-paginator.p-paginator-bottom {
-    border: 0;
-    margin-top: 20px;
-    background: none;
-    font-size: 12px;
-    text-align: right;
-  }
-  body .p-paginator .p-paginator-pages {
-    display: inline;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next,
-  body .p-paginator .p-paginator-pages .p-paginator-page {
-    border: 1px solid #cccccc;
-    border-radius: 3px;
-    background: #fafafa;
-    color: #2691D0;
-    height: auto;
-    width: auto;
-    min-width: 0;
-    padding: 7px;
-    margin: 0 2px;
-    line-height: 0.5rem;
-  }
-  body .p-paginator .p-paginator-prev,
-  body .p-paginator .p-paginator-next {
-    height: 28px;
-    width: 24px;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page:focus {
-    box-shadow: 0;
-  }
-  body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
-    background: #fafafa;
-    color: rgba(0, 0, 0, .5);
-  }
-  body .p-overlaypanel .p-overlaypanel-close {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel {
-    top: 19px!important;
-    left: 0px!important;
-    width:9.5rem;
-  }
-  body .p-overlaypanel .p-overlaypanel-close:hover {
-    top: 0.231em;
-    right: 0.231em;
-    background-color: white;
-    color: #0086C1;
-  }
-  body .p-overlaypanel .p-overlaypanel-content {
-    padding: 0.6rem 0.6rem;
-    font-size: 13px;
-  }
-  `;
 
 const styles = reactStyles({
   container: {
@@ -125,8 +40,20 @@ const styles = reactStyles({
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
-    lineHeight: '0.6rem'
+    borderBottom: 'none',
+    lineHeight: '0.6rem',
   },
+  graphColumnBody: {
+    background: '#ffffff',
+    padding: '5px',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    borderLeft: 0,
+    borderRight: 0,
+    lineHeight: '0.6rem',
+    width: '2rem',
+  },
+
   filterIcon: {
     color: '#0086C1',
     fontSize: '0.5rem',
@@ -145,6 +72,22 @@ const styles = reactStyles({
     color: '#0086C1',
     cursor: 'pointer',
   },
+  graphStyle: {
+    borderLeft: 'none',
+    width: '2rem',
+  },
+  headerStyle: {
+    color: '#2691D0',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    width: '20rem',
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    margin: 'auto',
+    paddingTop: '0.5rem',
+    textAlign: 'center',
+  }
 });
 const rows = 25;
 
@@ -167,6 +110,7 @@ export interface DetailTabTableState {
   start: number;
   sortField: string;
   sortOrder: number;
+  expandedRows: Array<any>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -179,7 +123,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         loading: true,
         start: 0,
         sortField: null,
-        sortOrder: 1
+        sortOrder: 1,
+        expandedRows: [],
       };
     }
 
@@ -276,6 +221,35 @@ export const DetailTabTable = withCurrentWorkspace()(
       </div>;
     }
 
+    rowExpansionTemplate = (rowData: any) => {
+      const {data} = this.state;
+      const conceptIdBasedData = fp.groupBy('standardConceptId', data);
+      const unitsObj = fp.groupBy( 'unit', conceptIdBasedData[rowData.standardConceptId]);
+      const unitKey = Object.keys(unitsObj);
+      let valueArray;
+      return <React.Fragment>
+        <div style={styles.headerStyle}>{rowData.standardName}</div>
+      <TabView className='unitTab'>
+        {unitKey.map((k, i) => {
+          const name = k === 'null' ? 'No Unit' : k;
+          { valueArray = unitsObj[k].map(v => {
+            return {
+              values: parseInt(v.value, 10),
+              date: v.itemDate,
+            };
+          }); }
+          return <TabPanel header={name} key={i}>
+            <ReviewDomainChartsComponent unitData={valueArray} />
+          </TabPanel>;
+        })}
+      </TabView>
+      </React.Fragment>;
+    }
+    hideGraphIcon = (rowData: any) => {
+      const noConcept = rowData.standardName && rowData.standardName === 'No matching concept';
+      return {'graphExpander' : noConcept};
+    }
+
     filterData() {
       let {data, start} = this.state;
       const {filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}} = this.props;
@@ -315,34 +289,42 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (filteredData && filteredData.length > rows) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-
       const columns = this.props.columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
+        const isExpanderNeeded = col.name === 'graph'  &&
+          (this.props.tabname === 'Vitals' || this.props.tabname === 'Labs');
+        const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
           <span
             onClick={() => this.columnSort(col.name)}
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
-          {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
+          {(desc && !isExpanderNeeded) &&
+          <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
 
         return <Column
+          expander={isExpanderNeeded}
           style={styles.tableBody}
-          bodyStyle={styles.columnBody}
+          bodyStyle={isExpanderNeeded ? styles.graphColumnBody : styles.columnBody}
           key={col.name}
           field={col.name}
           header={header}
+          headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
-          body={colName && this.overlayTemplate}/>;
+          body={overlayTemplate}/>;
       });
-
-      return <div style={styles.container}>
+      return <div style={styles.container} >
         <style>{css}</style>
         {filteredData && <DataTable
+          expandedRows={this.state.expandedRows}
+          onRowToggle={(e) => this.setState({expandedRows: e.data})}
+          rowExpansionTemplate={this.rowExpansionTemplate}
+          rowClassName = {this.hideGraphIcon}
           style={styles.table}
           value={filteredData}
           sortField={sortField}

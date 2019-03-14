@@ -778,6 +778,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.DRUG);
     } else if (domain.equals(DomainType.CONDITION)) {
       return new Condition()
@@ -790,6 +792,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.CONDITION);
     } else if (domain.equals(DomainType.PROCEDURE)) {
       return new Procedure()
@@ -802,6 +806,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.PROCEDURE);
     } else if (domain.equals(DomainType.OBSERVATION)) {
       return new Observation()
@@ -814,6 +820,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .visitType(bigQueryService.getString(row, rm.get("visitType")))
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.OBSERVATION);
     } else if (domain.equals(DomainType.LAB)) {
       return new Lab()
@@ -824,6 +832,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.LAB);
     } else if (domain.equals(DomainType.VITAL)) {
       return new Vital()
@@ -834,6 +844,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.VITAL);
     } else if(domain.equals(DomainType.PHYSICAL_MEASURE)) {
       return new PhysicalMeasurement()
@@ -844,6 +856,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.PHYSICAL_MEASURE);
     } else if (domain.equals(DomainType.SURVEY)) {
       return new Survey()
@@ -873,6 +887,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
         .standardName(bigQueryService.getString(row, rm.get("standardName")))
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
+        .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
+        .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.ALL_EVENTS);
     }
   }
