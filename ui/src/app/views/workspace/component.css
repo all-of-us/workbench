@@ -187,3 +187,20 @@ app-workspace-nav-bar {
 .padding-wrapper {
   padding-left: 1rem;
 }
+
+.btn-alink {
+background-color: #262262;
+border: none;
+padding: 0rem 0.77rem;
+border-radius: 0.3rem;
+cursor: pointer;
+cursor: hand;
+text-transform: uppercase;
+color: #fff;
+letter-spacing: 0.02rem;
+}
+
+.btn.btn-alink:hover {
+  background-color: #4356A7;
+  color: #fff;
+}

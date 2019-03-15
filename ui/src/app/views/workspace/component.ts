@@ -60,6 +60,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   bugReportOpen: boolean;
   bugReportDescription = '';
+  googleBucketModal = false;
 
   constructor(
     private cohortsService: CohortsService,
@@ -176,6 +177,12 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return this.accessLevel === WorkspaceAccessLevel.OWNER;
   }
 
+  openGoogleBucket() {
+    this.googleBucketModal = false;
+    const googleBucketUrl = 'https://console.cloud.google.com/storage/browser/' +
+        this.workspace.googleBucketName + '?authuser=' + this.username;
+    window.open(googleBucketUrl, '_blank');
+  }
   share(): void {
     this.sharing = true;
   }
