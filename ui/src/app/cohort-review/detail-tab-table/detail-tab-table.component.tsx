@@ -282,7 +282,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
         data = data.filter(item => {
           const itemDate = Date.parse(item.itemDate);
-          return itemDate > min && itemDate < max;
+          return itemDate >= min && itemDate <= max;
         });
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
