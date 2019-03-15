@@ -166,7 +166,7 @@
         </div>
       </div>
     </div>
-    <a rel="noopener noreferrer" (click)="googleBucketModal = true">
+    <a (click)="googleBucketModal = true">
       Google Bucket
     </a>
   </div>
@@ -186,7 +186,9 @@
   </div>
   <div class="modal-footer">`
     <button type="button" class="btn btn-secondary" (click)="googleBucketModal = false">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="openGoogleBucket()">Continue</button>
+      <a  class="btn btn-alink" (click)="openGoogleBucket()">
+        Continue
+      </a>
   </div>
 </clr-modal>
 <clr-modal [(clrModalOpen)]="notebookError">
