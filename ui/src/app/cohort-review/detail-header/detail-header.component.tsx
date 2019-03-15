@@ -2,10 +2,10 @@ import {Component, Input} from '@angular/core';
 
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/cohort-review/review-state.service';
-import {DatePicker, Select, TextInput} from 'app/components/inputs';
+import {DatePicker, Select, TextInput, ValidationError} from 'app/components/inputs';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
@@ -15,10 +15,23 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
+import * as moment from 'moment';
 import {RadioButton} from 'primereact/radiobutton';
 import * as React from 'react';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
+import {validate, validators} from 'validate.js';
+validators.dateFormat = (value: string) => {
+  return moment(value, 'YYYY-MM-DD', true).isValid()
+    ? null : 'must be in format \'YYYY-MM-DD\'';
+};
+
+const css = `
+  .error-messages > div {
+    margin: 0 0 0 25% !important;
+    line-height: 1;
+  }
+`;
 
 const styles = reactStyles({
   backBtn: {
@@ -82,6 +95,7 @@ const styles = reactStyles({
   },
   filterDiv: {
     float: 'left',
+    marginRight: '0.5rem'
   },
   resetBtn: {
     float: 'right',
@@ -95,6 +109,10 @@ const styles = reactStyles({
     background: 'transparent',
     cursor: 'pointer',
   },
+  validation: {
+    margin: '0 0 0 25%',
+    lineHeight: 1,
+  }
 });
 const otherStyles = {
   navigation: {
@@ -104,7 +122,6 @@ const otherStyles = {
   },
   filters: {
     ...styles.headerSection,
-    width: '50%',
   },
   radios: {
     ...styles.headerSection,
@@ -131,21 +148,17 @@ const otherStyles = {
   },
   filterLabel: {
     ...styles.filterDiv,
-    width: '25%',
     marginTop: '4px'
   },
   filterInput: {
     ...styles.filterDiv,
-    width: '30%',
   },
   filterSelect: {
     ...styles.filterDiv,
-    width: '50%',
   },
   filterText: {
     ...styles.filterDiv,
-    width: '10%',
-    margin: '4px 0 0 0.5rem'
+    marginTop: '4px ',
   }
 };
 export interface DetailHeaderProps {
@@ -311,7 +324,32 @@ export const DetailHeader = withCurrentWorkspace()(
         isLastParticipant
       } = this.state;
       const cohort = currentCohortStore.getValue();
+      const errors = validate({ageMin, ageMax, dateMin, dateMax}, {
+        ageMin: {
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0,
+            lessThanOrEqualTo: 120,
+            message: 'must be a whole number 0 - 120'
+          }
+        },
+        ageMax: {
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0,
+            lessThanOrEqualTo: 120,
+            message: 'must be a whole number 0 - 120'
+          }
+        },
+        dateMin: {
+          dateFormat: {}
+        },
+        dateMax: {
+          dateFormat: {}
+        }
+      });
       return <div className='detail-header'>
+        <style>{css}</style>
         <button
           style={styles.backBtn}
           type='button'
@@ -321,6 +359,14 @@ export const DetailHeader = withCurrentWorkspace()(
         </button>
         <h4 style={styles.title}>{cohort.name}</h4>
         <div style={styles.description}>{cohort.description}</div>
+        {errors && <div className='error-messages'>
+          <ValidationError>
+            {summarizeErrors(errors && (
+              (filterTab === 'age' && ((ageMin && errors.ageMin) || (ageMax && errors.ageMax))) ||
+              (filterTab === 'date' && ((dateMin && errors.dateMin) || (dateMax && errors.dateMax)))
+            ))}
+          </ValidationError>
+        </div>}
         <div style={{height: '3.5rem'}}>
           <div style={{...otherStyles.navigation, textAlign: 'center'}}>
             <button
@@ -428,6 +474,13 @@ export const DetailHeader = withCurrentWorkspace()(
                     options={visitsFilterOptions.getValue()}
                     value={visits}
                     onChange={(e) => this.setFilter(e, 'visits')}
+                    theme={(theme) => ({
+                      ...theme,
+                      colors: {
+                        ...theme.colors,
+                        primary: '#216FB4',
+                      },
+                    })}
                   />
                 </div>
               </div>}

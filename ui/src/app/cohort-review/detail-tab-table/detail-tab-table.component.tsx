@@ -297,7 +297,9 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       const empty = [];
       for (const col in checkedItems) {
-        if ((col === 'domain' || col === `${vocab}Vocabulary`) && checkedItems[col].length) {
+        if ((col === 'domain' || col === `${vocab}Vocabulary`)
+          && checkedItems[col].length
+          && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
           empty.push(false);
         } else {
@@ -305,7 +307,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       if (!empty.includes(false)) {
-        if (checkedItems === undefined) {
+        if (checkedItems === undefined ||
+          (vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
           // as some tab does not have filtered items but have data
           this.setState({filteredData: data, start: start});
         } else {
@@ -370,7 +373,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       let fl: any;
 
       return <span>
-        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {options.map((opt, i) => (
