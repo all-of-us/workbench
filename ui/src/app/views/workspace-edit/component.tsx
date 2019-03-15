@@ -227,8 +227,6 @@ export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 
 
 export interface WorkspaceEditProps {
-  navigateBack: Function;
-  mode: WorkspaceEditMode;
   routeConfigData: any;
   workspace: Workspace;
 }
