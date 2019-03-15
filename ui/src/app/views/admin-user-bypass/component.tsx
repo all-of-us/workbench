@@ -58,7 +58,8 @@ export class AdminUserBypass extends React.Component<
     const {profile} = this.props;
     Object.keys(editedModules).forEach(async m => {
       if (editedModules[m] !== modules[m]) {
-        await profileApi().bypassAccessRequirement(profile.userId, m.toString(), editedModules[m]);
+        await profileApi()
+          .bypassAccessRequirement(profile.userId, m.toString(), {isBypassed: editedModules[m]});
       }
     });
 

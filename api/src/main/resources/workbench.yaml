@@ -761,7 +761,7 @@ paths:
         - in: body
           name: bypassed
           schema:
-            type: boolean
+            $ref: '#/definitions/AccessBypassRequest'
           description: >
             Whether the requirement should be bypassed or not. Defaults to
             true, so an empty body  will cause the requirement to be bypassed.
@@ -1755,6 +1755,14 @@ definitions:
     properties:
       newStatus:
         $ref: "#/definitions/IdVerificationStatus"
+
+  AccessBypassRequest:
+    type: object
+    required:
+      - isBypassed
+    properties:
+      isBypassed:
+        type: boolean
 
   CohortListResponse:
     type: object

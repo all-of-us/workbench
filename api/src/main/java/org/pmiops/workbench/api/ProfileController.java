@@ -45,6 +45,7 @@ import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -671,10 +672,11 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, Boolean bypassed) {
+  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
     User user = userDao.findUserByUserId(userId);
     Timestamp valueToSet;
-    if (bypassed == null || bypassed) {
+    Boolean bypassed = request.getIsBypassed();
+    if (bypassed) {
       valueToSet = new Timestamp(clock.instant().toEpochMilli());
     } else {
       valueToSet = null;
