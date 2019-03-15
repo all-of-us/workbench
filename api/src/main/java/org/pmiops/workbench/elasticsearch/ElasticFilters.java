@@ -23,6 +23,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -418,6 +419,7 @@ public final class ElasticFilters {
 
       List<Criteria> parents = Lists.newArrayList();
       List<Criteria> leaves = Lists.newArrayList();
+      Criteria allDrugs = criteriaDao.findOne(5L);
       criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
           treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
           .forEach(c -> {
