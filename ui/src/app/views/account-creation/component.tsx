@@ -203,7 +203,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        onChange={v => this.updateProfile('contactEmail', v)}/>
           {this.state.invalidEmail &&
           <Error id='invalidEmailError'>
-            Email Id is invalid
+            Contact Email Id is invalid
           </Error>}
         </FormSection>
         <FormSection>
