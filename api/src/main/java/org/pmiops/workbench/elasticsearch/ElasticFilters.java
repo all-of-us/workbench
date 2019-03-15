@@ -165,7 +165,7 @@ public final class ElasticFilters {
         }
       }
 
-      // TODO(calbach): Handle non-code values, e.g. question answers here.
+      // TODO(freemabd): Handle Blood Pressure and Deceased
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         if (isNonNestedSchema(param)) {
@@ -173,7 +173,6 @@ public final class ElasticFilters {
         }
         BoolQueryBuilder b = QueryBuilders.boolQuery()
             .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
-        // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
         for (Attribute attr : param.getAttributes()) {
           b.filter(attributeToQuery(attr));
         }
@@ -182,6 +181,7 @@ public final class ElasticFilters {
         }
 
         if (isNonNestedSchema(param)) {
+          // setup non nested filter with proper demographic field
           sgiFilter.should(b);
         } else {
           // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
@@ -233,6 +233,7 @@ public final class ElasticFilters {
       }
       return rq;
     } else if (AttrName.CAT.equals(attr.getName())) {
+      //Currently the UI only uses the In operator for CAT
       return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
     } else {
       throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
