@@ -38,7 +38,7 @@ export class PageLayout implements OnInit, OnDestroy {
       this.cohortLoaded = true;
     });
     if (!vocabOptions.getValue()) {
-      cohortReviewApi().getVocabularies(ns, wsid, cid, cdrId)
+      cohortReviewApi().getVocabularies(ns, wsid, cid, cdrid)
         .then(response => {
           const filters = {Source: {}, Standard: {}};
           response.items.forEach(item => {
@@ -51,7 +51,7 @@ export class PageLayout implements OnInit, OnDestroy {
         });
     }
     if (!visitsFilterOptions.getValue()) {
-      this.builderApi.getCriteriaBy(cdrId, TreeType[TreeType.VISIT], null, 0)
+      this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
         .toPromise()
         .then(response => {
           visitsFilterOptions.next([
