@@ -317,7 +317,7 @@ public class ElasticFiltersTest {
     Attribute attr = new Attribute()
       .name(AttrName.NUM)
       .operator(Operator.EQUAL)
-      .addOperandsItem("45880929");
+      .addOperandsItem("1");
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
         .addIncludesItem(new SearchGroup()
@@ -330,7 +330,8 @@ public class ElasticFiltersTest {
               .addAttributesItem(attr)))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
+      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
+      QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
   }
 
   @Test
@@ -486,8 +487,7 @@ public class ElasticFiltersTest {
       .conceptId(Long.parseLong(conceptId))
       .type(TreeType.DEMO.toString())
       .subtype(TreeSubType.GEN.toString())
-      .group(false)
-      .conceptId(Long.parseLong(conceptId));
+      .group(false);
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
         .addIncludesItem(new SearchGroup()
@@ -505,8 +505,7 @@ public class ElasticFiltersTest {
       .conceptId(Long.parseLong(conceptId))
       .type(TreeType.DEMO.toString())
       .subtype(TreeSubType.RACE.toString())
-      .group(false)
-      .conceptId(Long.parseLong(conceptId));
+      .group(false);
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
         .addIncludesItem(new SearchGroup()
@@ -549,7 +548,6 @@ public class ElasticFiltersTest {
       .type(TreeType.PM.toString())
       .subtype(TreeSubType.PREG.toString())
       .group(false)
-      .conceptId(Long.parseLong(conceptId))
       .attributes(Arrays.asList(attr));
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
@@ -573,10 +571,9 @@ public class ElasticFiltersTest {
       .operands(Arrays.asList(operand1, operand2));
     SearchParameter ethParam = new SearchParameter()
       .conceptId(Long.parseLong(conceptId))
-      .type(TreeType.PM.toString())
-      .subtype(TreeSubType.PREG.toString())
+      .type(TreeType.MEAS.toString())
+      .subtype(TreeSubType.LAB.toString())
       .group(false)
-      .conceptId(Long.parseLong(conceptId))
       .attributes(Arrays.asList(attr));
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
@@ -585,7 +582,24 @@ public class ElasticFiltersTest {
             .addSearchParametersItem(ethParam))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
+      QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId)),
       QueryBuilders.termsQuery("events.value_as_concept_id", ImmutableList.of(operand1, operand2))));
+  }
+
+  @Test
+  public void testVisitQuery() {
+    String conceptId = "9202";
+    SearchParameter ethParam = new SearchParameter()
+      .conceptId(Long.parseLong(conceptId))
+      .type(TreeType.VISIT.toString())
+      .group(false);
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(ethParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(singleNestedQuery(
+      QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
   }
 }
