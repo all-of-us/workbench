@@ -8,7 +8,7 @@ import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
-import {WorkspaceData} from 'app/resolvers/workspace';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils/index';
 import {
