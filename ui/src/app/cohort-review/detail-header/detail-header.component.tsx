@@ -152,9 +152,12 @@ const otherStyles = {
   },
   filterInput: {
     ...styles.filterDiv,
+    minWidth: '5rem',
   },
   filterSelect: {
     ...styles.filterDiv,
+    marginLeft: '1rem',
+    minWidth: '13rem'
   },
   filterText: {
     ...styles.filterDiv,
