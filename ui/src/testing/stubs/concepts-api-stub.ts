@@ -1,4 +1,4 @@
-import {Concept, Domain, DomainInfo, DomainInfoResponse} from 'generated/fetch';
+import {Concept, Domain, DomainCount, DomainInfo, DomainInfoResponse} from 'generated/fetch';
 import {ConceptsApi} from 'generated/fetch/api';
 
 export class ConceptStubVariables {
@@ -79,6 +79,24 @@ export class DomainStubVariables {
       standardConceptCount: 50,
       allConceptCount: 65,
       participantCount: 200
+    }
+  ];
+}
+
+export class DomainCountStubVariables {
+  static STUB_DOMAIN_COUNTS: DomainCount[] = [
+    {
+      domain: Domain.CONDITION,
+      name: 'Condition',
+      conceptCount: 2
+    }, {
+      domain: Domain.MEASUREMENT,
+      name: 'Measurement',
+      conceptCount: 1
+    }, {
+      domain: Domain.DRUG,
+      name: 'Drug',
+      conceptCount: 2
     }
   ];
 }
