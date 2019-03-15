@@ -8,6 +8,7 @@ import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
 import {NotebookComponent} from 'app/icons/notebook/component';
+import {ReminderComponent} from 'app/icons/reminder/component';
 import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
@@ -88,6 +89,7 @@ describe('NotebookRedirectComponent', () => {
       declarations: [
         NotebookComponent,
         NotebookRedirectComponent,
+        ReminderComponent,
         TopBoxComponent
       ],
       imports: [
