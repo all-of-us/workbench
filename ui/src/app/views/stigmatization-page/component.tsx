@@ -44,6 +44,7 @@ const ListText = [
     'differences in skin color, ethnicity, country of origin, ancestry, sex, gender, sexual ' +
     'orientation, socioeconomic status, educational attainment, disability status, and body ' +
     'type—are considerably more prone to stigma than others. Salience of labels in such domains ' +
+    'are dependent on a process during which gross oversimplification of an attribute or ' +
     'characteristic creates artificial categories, upon which contextually-specific social ' +
     'selection occurs.'
   }, {
@@ -111,13 +112,13 @@ export class StigmatizatonPage extends React.Component<{}, {}> {
              <span style={{...styles.text, 'fontWeight': 600, 'color': '#262262'}}>
                {header}
              </span>
-             <span style={styles.text}>
+             <span style={{...styles.text, marginLeft: '0.3rem'}}>
                {text}
              </span>
            </li>;
         })}
       </ol>
-      <div style={styles.text}>
+      <div style={{...styles.text, marginTop: '1rem'}}>
         When these components converge, they produce widespread attitudes and beliefs that
         lead people to reject, avoid, or fear those they perceive as being different,
         resulting in detrimental inequities and unfair treatment at either the individual
