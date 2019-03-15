@@ -170,14 +170,14 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
         } else if (this.node.get('type') === TreeType.PPI && !this.node.get('group')) {
           if (this.node.get('code') === '') {
             attributes.push({
-              name: AttrName.CAT,
-              operator: Operator.IN,
+              name: AttrName.NUM,
+              operator: Operator.EQUAL,
               operands: [this.node.get('name')]
             });
           } else {
             attributes.push({
-              name: AttrName.NUM,
-              operator: Operator.EQUAL,
+              name: AttrName.CAT,
+              operator: Operator.IN,
               operands: [this.node.get('code')]
             });
           }
