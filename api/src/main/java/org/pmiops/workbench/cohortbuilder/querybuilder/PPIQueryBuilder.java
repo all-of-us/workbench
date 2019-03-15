@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
+import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -97,7 +98,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
           from(attributesEmpty()).test(parameter).throwException(EMPTY_MESSAGE, ATTRIBUTES);
           Attribute attr = parameter.getAttributes().get(0);
           validateAttribute(attr);
-          boolean isValueAsNum = attr.getName().equals("NUM");
+          boolean isValueAsNum = attr.getName().equals(AttrName.NUM);
           String namedParameter = addQueryParameterValue(queryParams,
             QueryParameterValue.int64(new Long(attr.getOperands().get(0))));
           sqlTemplate.append(isValueAsNum ?
