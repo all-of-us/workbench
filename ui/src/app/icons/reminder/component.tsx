@@ -3,7 +3,7 @@ import {ReactWrapperBase} from 'app/utils/index';
 import * as React from 'react';
 
 
-// tslint:disable
+// tslint:disable:max-line-length
 // We disable the tslint because certain stroke attributes for the SVG cannot be broken
 // up into smaller line length
 export class ReminderIconComponentReact extends React.Component<{style: object}> {
@@ -56,7 +56,7 @@ export class ReminderIconComponentReact extends React.Component<{style: object}>
     </svg>;
   }
 }
-// tslint:enable
+// tslint:enable:max-line-length
 
 @Component({
   selector: 'app-reminder-icon',
