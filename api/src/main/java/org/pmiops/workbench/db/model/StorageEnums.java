@@ -39,7 +39,7 @@ public final class StorageEnums {
   private static final BiMap<Authority, Short> CLIENT_TO_STORAGE_AUTHORITY =
       ImmutableBiMap.<Authority, Short>builder()
       .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
-      .put(Authority.MANAGE_GROUP, (short) 1)
+      .put(Authority.DEVELOPER, (short) 1)
       .put(Authority.REVIEW_ID_VERIFICATION, (short) 2)
       .build();
 
