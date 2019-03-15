@@ -39,10 +39,6 @@ export class AdminUserBypass extends React.Component<
   }
 
   componentDidMount() {
-    this.reloadModules();
-  }
-
-  reloadModules() {
     const {profile} = this.props;
     const currModules = {
       complianceTraining: !!profile.complianceTrainingBypassTime,
@@ -50,6 +46,11 @@ export class AdminUserBypass extends React.Component<
       eraCommons: !!profile.eraCommonsBypassTime
     };
     this.setState({modules: currModules, editedModules: currModules});
+  }
+
+  cancel() {
+    const {modules} = this.state;
+    this.setState({editedModules: modules});
   }
 
   save() {
@@ -72,7 +73,7 @@ export class AdminUserBypass extends React.Component<
     const {editedModules} = this.state;
     return <PopupTrigger
         side='bottom'
-        onClose={() => this.reloadModules()}
+        onClose={() => this.cancel()}
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
           <Toggle name='Beta Access'
                   enabled={editedModules.betaAccess}
@@ -90,7 +91,7 @@ export class AdminUserBypass extends React.Component<
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
 
             <IconButton icon='times'
-                        onClick={() => this.reloadModules()}
+                        onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
             <IconButton icon='check'
                         onClick={() => this.save()}
