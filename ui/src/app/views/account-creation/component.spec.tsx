@@ -111,3 +111,12 @@ it('should handle username validity if name is valid', () => {
   wrapper.find('input#username').simulate('change', {target: {value: 'username'}});
   expect(wrapper.exists('#usernameError')).toBeFalsy();
 });
+
+it('should handle invalid Email', () => {
+  const wrapper = component();
+  expect(wrapper.exists('#contactEmail')).toBeTruthy();
+  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
+  wrapper.find('input#contactEmail').simulate('change',
+      {target: {value: 'username@'}});
+  expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
+});
