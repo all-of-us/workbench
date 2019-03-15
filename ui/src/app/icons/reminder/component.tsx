@@ -2,7 +2,6 @@ import {Component, Input} from '@angular/core';
 import {ReactWrapperBase} from 'app/utils/index';
 import * as React from 'react';
 
-
 // tslint:disable:max-line-length
 // We disable the tslint because certain stroke attributes for the SVG cannot be broken
 // up into smaller line length
