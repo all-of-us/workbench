@@ -46,7 +46,7 @@ export const ConceptAddModal = withCurrentWorkspace()
   loading: boolean,
   nameTouched: boolean,
   newSetDescription: string,
-  newSetName: string,
+  name: string,
   saving: boolean,
   selectedSet: ConceptSet,
   selectedConceptsInDomain: Concept[]
@@ -61,7 +61,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       loading: true,
       nameTouched: false,
       newSetDescription: '',
-      newSetName: '',
+      name: '',
       saving: false,
       selectedSet: null,
       selectedConceptsInDomain: props.selectedConcepts
@@ -98,7 +98,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     const {workspace: {namespace, id}} = this.props;
     const {onSave, selectedDomain} = this.props;
     const {selectedSet, addingToExistingSet, newSetDescription,
-      newSetName, selectedConceptsInDomain} = this.state;
+      name, selectedConceptsInDomain} = this.state;
     this.setState({saving: true});
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
     if (addingToExistingSet) {
@@ -116,7 +116,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       }
     } else {
       const conceptSet: ConceptSet = {
-        name: newSetName,
+        name: name,
         description: newSetDescription,
         domain: selectedDomain.domain
       };
@@ -139,9 +139,9 @@ export const ConceptAddModal = withCurrentWorkspace()
   render() {
     const {selectedDomain, onClose} = this.props;
     const {conceptSets, loading, nameTouched, saving, addingToExistingSet,
-      newSetDescription, newSetName, errorSaving, selectedConceptsInDomain} = this.state;
-    const errors = validate({newSetName}, {
-      newSetName: {
+      newSetDescription, name, errorSaving, selectedConceptsInDomain} = this.state;
+    const errors = validate({name}, {
+      name: {
         presence: {allowEmpty: false},
         exclusion: {
           within: conceptSets.map((concept: ConceptSet) => concept.name),
@@ -169,7 +169,9 @@ export const ConceptAddModal = withCurrentWorkspace()
                             checked={addingToExistingSet}
                             disabled={conceptSets.length === 0}
                             data-test-id='toggle-existing-set'
-                            onChange={() => {this.setState({addingToExistingSet: true}); }}/>
+                            onChange={() => {this.setState({
+                              addingToExistingSet: true,
+                              nameTouched: false}); }}/>
                 <label style={styles.label}>Choose existing set</label>
               </div>
             </TooltipTrigger>
@@ -195,13 +197,13 @@ export const ConceptAddModal = withCurrentWorkspace()
             </ModalBody>
             ) :
           (<ModalBody data-test-id='create-new-set'>
-            <TextInput placeholder='Name' value={newSetName}
+            <TextInput placeholder='Name' value={name}
                        data-test-id='create-new-set-name'
                        onChange={(v) => {
-                         this.setState({newSetName: v, nameTouched: true});
+                         this.setState({name: v, nameTouched: true});
                        }}/>
             <ValidationError>
-              {summarizeErrors(nameTouched && errors && errors.newSetName)}
+              {summarizeErrors(nameTouched && errors && errors.name)}
             </ValidationError>
             <textarea style={{marginTop: '1rem'}} placeholder='Add a Description'
                       value={newSetDescription}
