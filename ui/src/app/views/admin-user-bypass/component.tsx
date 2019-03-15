@@ -1,9 +1,10 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Button, IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger} from 'app/components/popups';
-import {ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {profileApi} from 'app/services/swagger-fetch-clients';
+import {ReactWrapperBase} from 'app/utils/index';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -15,9 +16,8 @@ export interface AccessModules {
   eraCommons: boolean;
 }
 
-export const AdminUserBypass = withUserProfile()
-(class extends React.Component<
-    { profileState: { profile: Profile, reload: Function } },
+export class AdminUserBypass extends React.Component<
+    { profile: Profile},
     { modules: AccessModules, editedModules: AccessModules,
       loading: boolean} > {
 
@@ -39,23 +39,29 @@ export const AdminUserBypass = withUserProfile()
   }
 
   componentDidMount() {
-
+    this.reloadModules();
   }
 
-  componentWillUnmount() {
-
-    console.log('unmounting');
-    this.cancel();
+  reloadModules() {
+    const {profile} = this.props;
+    const currModules = {
+      complianceTraining: !!profile.complianceTrainingBypassTime,
+      betaAccess: !!profile.betaAccessBypassTime,
+      eraCommons: !!profile.eraCommonsBypassTime
+    };
+    this.setState({modules: currModules, editedModules: currModules});
   }
 
   save() {
-    const {editedModules} = this.state;
-    this.setState({modules: editedModules});
-  }
+    const {modules, editedModules} = this.state;
+    const {profile} = this.props;
+    Object.keys(editedModules).forEach(async m => {
+      if (editedModules[m] !== modules[m]) {
+        await profileApi().bypassAccessRequirement(profile.userId, m.toString(), editedModules[m]);
+      }
+    });
 
-  cancel() {
-    const {modules} = this.state;
-    this.setState({editedModules: modules});
+    this.setState({modules: editedModules});
   }
 
   hasEdited(): boolean {
@@ -66,6 +72,7 @@ export const AdminUserBypass = withUserProfile()
     const {editedModules} = this.state;
     return <PopupTrigger
         side='bottom'
+        onClose={() => this.reloadModules()}
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
           <Toggle name='Beta Access'
                   enabled={editedModules.betaAccess}
@@ -83,7 +90,7 @@ export const AdminUserBypass = withUserProfile()
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
 
             <IconButton icon='times'
-                        onClick={() => this.cancel()}
+                        onClick={() => this.reloadModules()}
                         disabled={!this.hasEdited()}/>
             <IconButton icon='check'
                         onClick={() => this.save()}
@@ -98,7 +105,7 @@ export const AdminUserBypass = withUserProfile()
     </PopupTrigger>;
   }
 
-});
+}
 
 
 @Component({
@@ -106,8 +113,9 @@ export const AdminUserBypass = withUserProfile()
   template: '<div #root></div>',
 })
 export class AdminUserBypassComponent extends ReactWrapperBase {
+  @Input('profile') profile: Profile;
 
   constructor() {
-    super(AdminUserBypass, []);
+    super(AdminUserBypass, ['profile']);
   }
 }
