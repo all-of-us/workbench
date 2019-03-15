@@ -8,6 +8,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +22,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -27,7 +30,6 @@ import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
-import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
@@ -93,6 +95,9 @@ public final class ElasticFilters {
    */
   private static Set<TreeType> HIERARCHICAL_CODE_TREES =
       ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
+
+  private static ImmutableMap<String, String> nonNestedFields = ImmutableMap.of(TreeSubType.GEN.toString(), "gender_concept_id",
+    TreeSubType.RACE.toString(), "race_concept_id", TreeSubType.ETH.toString(), "ethnicity_concept_id");
 
   private final CriteriaDao criteriaDao;
 
@@ -163,6 +168,9 @@ public final class ElasticFilters {
       // TODO(calbach): Handle non-code values, e.g. question answers here.
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
+        if (isNonNestedSchema(param)) {
+          conceptField = nonNestedFields.get(param.getSubtype());
+        }
         BoolQueryBuilder b = QueryBuilders.boolQuery()
             .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
         // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
@@ -172,15 +180,20 @@ public final class ElasticFilters {
         for (QueryBuilder f : modFilters) {
           b.filter(f);
         }
-        // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
-        // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
-        sgiFilter.should(
+
+        if (isNonNestedSchema(param)) {
+          sgiFilter.should(b);
+        } else {
+          // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
+          // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
+          sgiFilter.should(
             QueryBuilders.functionScoreQuery(
-                QueryBuilders.nestedQuery(
-                    // We sum a constant score for each matching document, yielding the total number
-                    // of matching nested documents (events).
-                    "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
-                .setMinScore(occurredAtLeast));
+              QueryBuilders.nestedQuery(
+                // We sum a constant score for each matching document, yielding the total number
+                // of matching nested documents (events).
+                "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
+              .setMinScore(occurredAtLeast));
+        }
       }
       filter.filter(sgiFilter);
     }
@@ -189,45 +202,41 @@ public final class ElasticFilters {
   }
 
   private static QueryBuilder attributeToQuery(Attribute attr) {
-    RangeQueryBuilder rq;
-    Object left, right = null;
     if (AttrName.NUM.equals(attr.getName())) {
+      RangeQueryBuilder rq;
+      Object left, right = null;
       rq = QueryBuilders.rangeQuery("events.value_as_number");
       left = Float.parseFloat(attr.getOperands().get(0));
       if (attr.getOperands().size() > 1) {
         right = Float.parseFloat(attr.getOperands().get(1));
       }
-    } else if (AttrName.CAT.equals(attr.getName())) {
-      rq = QueryBuilders.rangeQuery("events.value_as_concept_id");
-      left = attr.getOperands().get(0);
-      if (attr.getOperands().size() > 1) {
-        right = attr.getOperands().get(1);
+      switch (attr.getOperator()) {
+        case LESS_THAN_OR_EQUAL_TO:
+          rq.lte(left);
+          break;
+        case GREATER_THAN_OR_EQUAL_TO:
+          rq.gte(left);
+          break;
+        case BETWEEN:
+          rq.gte(left).lte(right);
+          break;
+        case EQUAL:
+          rq.gte(left).lte(left);
+          break;
+        case LESS_THAN:
+        case GREATER_THAN:
+        case LIKE:
+        case IN:
+        case NOT_EQUAL:
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
       }
+      return rq;
+    } else if (AttrName.CAT.equals(attr.getName())) {
+      return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
     } else {
       throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
     }
-    switch (attr.getOperator()) {
-      case LESS_THAN_OR_EQUAL_TO:
-        rq.lte(left);
-        break;
-      case GREATER_THAN_OR_EQUAL_TO:
-        rq.gte(left);
-        break;
-      case BETWEEN:
-        rq.gte(left).lte(right);
-        break;
-      case EQUAL:
-        rq.gte(left).lte(left);
-        break;
-      case LESS_THAN:
-      case GREATER_THAN:
-      case LIKE:
-      case IN:
-      case NOT_EQUAL:
-      default:
-        throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
-    }
-    return rq;
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {
@@ -262,7 +271,7 @@ public final class ElasticFilters {
         rq.gte(left);
         break;
       case BETWEEN:
-        rq.gt(left).lt(right);
+        rq.gte(left).lte(right);
         break;
       case LIKE:
       case IN:
@@ -277,6 +286,11 @@ public final class ElasticFilters {
   private static boolean isStandardConcept(SearchParameter param) {
     TreeType paramType = TreeType.valueOf(param.getType());
     return STANDARD_TREES.contains(paramType);
+  }
+
+  private static boolean isNonNestedSchema(SearchParameter param) {
+    TreeType paramType = TreeType.valueOf(param.getType());
+    return TreeType.DEMO.equals(paramType);
   }
 
   private Set<String> toleafConceptIds(List<SearchParameter> params) {
@@ -383,6 +397,7 @@ public final class ElasticFilters {
 
       List<Criteria> parents = Lists.newArrayList();
       List<Criteria> leaves = Lists.newArrayList();
+      Criteria allDrugs = criteriaDao.findOne(5L);
       criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
           treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
           .forEach(c -> {
