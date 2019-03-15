@@ -4,6 +4,8 @@ import * as React from 'react';
 
 
 // tslint:disable
+// We disable the tslint because certain stroke attributes for the SVG cannot be broken
+// up into smaller line length
 export class ReminderIconComponentReact extends React.Component<{style: object}> {
   render() {
     return <svg id='Layer_1' xmlns='http://www.w3.org/2000/svg'
