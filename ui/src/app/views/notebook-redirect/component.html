@@ -35,6 +35,15 @@
       </div>
     </div>
   </div>
+  <div style="display: flex; width: 800px; margin-left: 3rem; padding-top: 1rem;">
+    <app-reminder-icon [style]="{height: '60px', width: '60px', marginTop: '0.1rem'}"></app-reminder-icon>
+    <div style="color: #383498; font-size: 14px; line-height: 22px;">
+      It is All of Us data use policy that researchers should not make copies of
+      or download individual-level data (including taking screenshots or other means
+      of viewing individual-level data) outside of the All of Us research environment
+      without approval from AoU Resource Access Board (RAB).
+    </div>
+  </div>
 </div>
 <div *ngIf="progress === Progress.Redirecting || progress === Progress.Loaded" [class.hidden]="progress === Progress.Redirecting" class="i-frame">
   <div id="separator" *ngIf="progress === Progress.Loaded"></div>
