@@ -467,7 +467,8 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{css}</style>
-        {filteredData && <DataTable  expandedRows={this.state.expandedRows}
+        {filteredData && <DataTable
+          expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
