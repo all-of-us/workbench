@@ -40,6 +40,7 @@ export interface AccountCreationState {
   usernameConflictError: boolean;
   creatingAccount: boolean;
   showAllFieldsRequiredError: boolean;
+  invalidEmail: boolean;
 }
 
 export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
@@ -63,14 +64,17 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       usernameCheckInProgress: false,
       usernameConflictError: false,
       creatingAccount: false,
-      showAllFieldsRequiredError: false
+      showAllFieldsRequiredError: false,
+      invalidEmail: false
     };
   }
 
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
+    const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
     this.setState({showAllFieldsRequiredError: false});
+    this.setState({invalidEmail: false});
     const requiredFields =
       [profile.givenName, profile.familyName, profile.username, profile.contactEmail,
         profile.currentPosition, profile.organization, profile.areaOfResearch];
@@ -78,6 +82,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       this.setState({showAllFieldsRequiredError: true});
       return;
     } else if (this.isUsernameValidationError()) {
+      return;
+    } else if (!emailValidRegex.test(profile.contactEmail)) {
+      this.setState({invalidEmail: true});
       return;
     }
     this.setState({creatingAccount: true});
@@ -146,6 +153,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   updateProfile(attribute: string, value: string) {
+    if (attribute === 'contactEmail') {
+      this.setState({invalidEmail: false});
+    }
     const newProfile = this.state.profile;
     newProfile[attribute] = value;
     this.setState(({profile}) => ({profile: fp.set(attribute, value, profile)}));
@@ -191,6 +201,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      value={contactEmail}
                        style={{width: '16rem'}}
                        onChange={v => this.updateProfile('contactEmail', v)}/>
+          {this.state.invalidEmail &&
+          <Error id='invalidEmailError'>
+            Email Id is invalid
+          </Error>}
         </FormSection>
         <FormSection>
           <TextInput id='currentPosition' name='currentPosition'
