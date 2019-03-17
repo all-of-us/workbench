@@ -23,7 +23,7 @@
       <column name="question_order_number" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="path" type="VARCHAR(500)">
+      <column name="path" type="VARCHAR(1000)">
         <constraints nullable="false"/>
       </column>
       <column name="sub" type="INTEGER">
