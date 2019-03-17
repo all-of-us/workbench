@@ -15,8 +15,10 @@
       <column name="id" type="NUMERIC"/>
       <column name="survey_concept_id" type="NUMERIC"/>
       <column name="question_concept_id" type="NUMERIC"/>
-      <column name="path" type="NUMERIC"/>
-      <column name="is_main" type="BOOLEAN"/>
+      <column name="survey_order_number" type="NUMERIC"/>
+      <column name="question_order_number" type="NUMERIC"/>
+      <column name="path" type="STRING"/>
+      <column name="sub" type="NUMERIC"/>
     </loadData>
 
   </changeSet>
