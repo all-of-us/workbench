@@ -418,7 +418,6 @@ public final class ElasticFilters {
 
       List<Criteria> parents = Lists.newArrayList();
       List<Criteria> leaves = Lists.newArrayList();
-      Criteria allDrugs = criteriaDao.findOne(5L);
       criteriaDao.findCriteriaLeavesAndParentsByTypeAndParentConceptIds(
           treeType.type.toString(), treeType.subType.toString(), parentConceptIds)
           .forEach(c -> {
