@@ -221,7 +221,7 @@ export const homepageStyles = reactStyles({
   footerText: {
     height: '176px', opacity: 0.87, color: '#83C3EC', fontSize: '16px',
     fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
-    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'scroll'
+    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
   },
   linksBlock: {
     display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
