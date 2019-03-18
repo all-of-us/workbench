@@ -96,7 +96,7 @@ public final class ElasticFilters {
   private static Set<TreeType> HIERARCHICAL_CODE_TREES =
       ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
-  private static Map<String, String> nonNestedFields = ImmutableMap.of(
+  private static Map<String, String> NON_NESTED_FIELDS = ImmutableMap.of(
     TreeSubType.GEN.toString(), "gender_concept_id",
     TreeSubType.RACE.toString(), "race_concept_id",
     TreeSubType.ETH.toString(), "ethnicity_concept_id");
@@ -171,7 +171,7 @@ public final class ElasticFilters {
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
         if (isNonNestedSchema(param)) {
-          conceptField = nonNestedFields.get(param.getSubtype());
+          conceptField = NON_NESTED_FIELDS.get(param.getSubtype());
         }
         Set<String> leafConceptIds = toleafConceptIds(ImmutableList.of(param));
         BoolQueryBuilder b = QueryBuilders.boolQuery();
