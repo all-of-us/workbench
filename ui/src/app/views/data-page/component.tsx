@@ -167,7 +167,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           </CardButton>
           <CardButton style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
                       onClick={() => {
-                        navigate(['workspaces', namespace, id,  'concepts'])
+                        navigate(['workspaces', namespace, id,  'concepts']);
                       }}>
             <div style={styles.cardHeader}>
               <h2 style={styles.cardHeaderText}>Concept Sets</h2>
