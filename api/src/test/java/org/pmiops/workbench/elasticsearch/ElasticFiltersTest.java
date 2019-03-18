@@ -371,7 +371,7 @@ public class ElasticFiltersTest {
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
-        QueryBuilders.rangeQuery("events.start_date").gt("12/25/1988").lt("12/27/1988")));
+        QueryBuilders.rangeQuery("events.start_date").gte("12/25/1988").lte("12/27/1988")));
   }
 
   @Test
