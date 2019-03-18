@@ -96,8 +96,10 @@ public final class ElasticFilters {
   private static Set<TreeType> HIERARCHICAL_CODE_TREES =
       ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
-  private static Map<String, String> nonNestedFields = ImmutableMap.of(TreeSubType.GEN.toString(), "gender_concept_id",
-    TreeSubType.RACE.toString(), "race_concept_id", TreeSubType.ETH.toString(), "ethnicity_concept_id");
+  private static Map<String, String> nonNestedFields = ImmutableMap.of(
+    TreeSubType.GEN.toString(), "gender_concept_id",
+    TreeSubType.RACE.toString(), "race_concept_id",
+    TreeSubType.ETH.toString(), "ethnicity_concept_id");
 
   private final CriteriaDao criteriaDao;
 
