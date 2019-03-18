@@ -165,8 +165,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
                       || subtype === TreeSubType[TreeSubType.DEC]);
         items.sort(sortByCountThenName);
         const nodes = fromJS(items).map(node => {
-          if (node.get('subtype') !== TreeSubType[TreeSubType.AGE]) {
-            const paramId =
+          if (subtype !== TreeSubType[TreeSubType.AGE]) {
+            const paramId = subtype === TreeSubType[TreeSubType.DEC] ? 'param-dec' :
                           `param${node.get('conceptId', node.get('code'))}`;
             node = node.set('parameterId', paramId);
           }
