@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
 import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 
@@ -67,20 +67,34 @@ export class TablePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loading = false;
+    const cid = currentCohortStore.getValue().id;
     this.cohortName = currentCohortStore.getValue().name;
     this.subscription = cohortReviewStore.subscribe(review => {
       this.review = review;
       this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
       this.totalParticipantCount = review.matchedParticipantCount;
     });
-
-    const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const {cdrVersionId, id, namespace} = currentWorkspaceStore.getValue();
+    const cdrid = +cdrVersionId;
     cohortBuilderApi().getParticipantDemographics(cdrid).then(data => {
       const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
       this.races = extract(data.raceList);
       this.genders = extract(data.genderList);
       this.ethnicities = extract(data.ethnicityList);
     });
+    if (!vocabOptions.getValue()) {
+      cohortReviewApi().getVocabularies(namespace, id, cid, cdrid)
+        .then(response => {
+          const filters = {Source: {}, Standard: {}};
+          response.items.forEach(item => {
+            filters[item.type][item.domain] = [
+              ...(filters[item.type][item.domain] || []),
+              item.vocabulary
+            ];
+          });
+          vocabOptions.next(filters);
+        });
+    }
   }
 
 
