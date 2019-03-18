@@ -9,7 +9,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.text.DecimalFormat;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +23,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -171,8 +171,11 @@ public final class ElasticFilters {
         if (isNonNestedSchema(param)) {
           conceptField = nonNestedFields.get(param.getSubtype());
         }
-        BoolQueryBuilder b = QueryBuilders.boolQuery()
-            .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
+        Set<String> leafConceptIds = toleafConceptIds(ImmutableList.of(param));
+        BoolQueryBuilder b = QueryBuilders.boolQuery();
+        if (!leafConceptIds.isEmpty()) {
+          b.filter(QueryBuilders.termsQuery(conceptField, leafConceptIds));
+        }
         for (Attribute attr : param.getAttributes()) {
           b.filter(attributeToQuery(attr));
         }
@@ -195,49 +198,64 @@ public final class ElasticFilters {
               .setMinScore(occurredAtLeast));
         }
       }
-      filter.filter(sgiFilter);
+      //SGI should "OR"
+      filter.should(sgiFilter);
     }
 
     return filter;
   }
 
   private static QueryBuilder attributeToQuery(Attribute attr) {
-    if (AttrName.NUM.equals(attr.getName())) {
-      RangeQueryBuilder rq;
-      Object left, right = null;
-      rq = QueryBuilders.rangeQuery("events.value_as_number");
-      left = Float.parseFloat(attr.getOperands().get(0));
-      if (attr.getOperands().size() > 1) {
-        right = Float.parseFloat(attr.getOperands().get(1));
-      }
-      switch (attr.getOperator()) {
-        case LESS_THAN_OR_EQUAL_TO:
-          rq.lte(left);
-          break;
-        case GREATER_THAN_OR_EQUAL_TO:
-          rq.gte(left);
-          break;
-        case BETWEEN:
-          rq.gte(left).lte(right);
-          break;
-        case EQUAL:
-          rq.gte(left).lte(left);
-          break;
-        case LESS_THAN:
-        case GREATER_THAN:
-        case LIKE:
-        case IN:
-        case NOT_EQUAL:
-        default:
-          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
-      }
-      return rq;
-    } else if (AttrName.CAT.equals(attr.getName())) {
-      //Currently the UI only uses the In operator for CAT
+    //Attributes with a name of CAT map to the value_as_concept_id column
+    if (AttrName.CAT.equals(attr.getName())) {
+      //Currently the UI only uses the In operator for CAT which fits the terms query
       return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
     } else {
-      throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
+      Object left = null, right = null;
+      RangeQueryBuilder rq;
+      if (AttrName.NUM.equals(attr.getName())) {
+        rq = QueryBuilders.rangeQuery("events.value_as_number");
+        left = Float.parseFloat(attr.getOperands().get(0));
+        if (attr.getOperands().size() > 1) {
+          right = Float.parseFloat(attr.getOperands().get(1));
+        }
+        switch (attr.getOperator()) {
+          case LESS_THAN_OR_EQUAL_TO:
+            rq.lte(left);
+            break;
+          case GREATER_THAN_OR_EQUAL_TO:
+            rq.gte(left);
+            break;
+          case BETWEEN:
+            rq.gte(left).lte(right);
+            break;
+          case EQUAL:
+            rq.gte(left).lte(left);
+            break;
+          default:
+            throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+        }
+        return rq;
+      } else if (AttrName.AGE.equals(attr.getName())) {
+        rq = QueryBuilders.rangeQuery("birth_datetime");
+        //use the low end of the age range to calculate the high end(right) of the date range
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
+        if (attr.getOperands().size() > 1) {
+          //use high end of the age range to calculate the low end(left) of the date range
+          left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).plusDays(1).toLocalDate();
+        }
+        switch (attr.getOperator()) {
+          case BETWEEN:
+            rq.gte(left).lte(right).format("yyyy-MM-dd");
+            break;
+          default:
+            throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+        }
+        return rq;
+      }
     }
+    throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {
@@ -304,7 +322,9 @@ public final class ElasticFilters {
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
       } else {
-        out.add(Long.toString(param.getConceptId()));
+        if (param.getConceptId() != null) {
+          out.add(Long.toString(param.getConceptId()));
+        }
       }
     }
     return out;
