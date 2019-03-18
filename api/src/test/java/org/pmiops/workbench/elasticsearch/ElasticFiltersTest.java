@@ -35,6 +35,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 
 @RunWith(SpringRunner.class)
@@ -217,7 +219,7 @@ public class ElasticFiltersTest {
     for (QueryBuilder in : inners) {
       b.filter(in);
     }
-    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().filter(
+    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().should(
         QueryBuilders.boolQuery().should(
             QueryBuilders.functionScoreQuery(
                 QueryBuilders.nestedQuery(
@@ -232,7 +234,7 @@ public class ElasticFiltersTest {
     for (QueryBuilder in : inners) {
       b.filter(in);
     }
-    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().filter(
+    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().should(
       QueryBuilders.boolQuery().should(b)
     ));
   }
@@ -601,5 +603,28 @@ public class ElasticFiltersTest {
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
+  }
+
+  @Test
+  public void testAgeQuery() {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    Object left = now.minusYears(34).minusYears(1).plusDays(1).toLocalDate();
+    Object right = now.minusYears(20).toLocalDate();
+    SearchParameter ethParam = new SearchParameter()
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.AGE.toString())
+      .group(false)
+      .addAttributesItem(new Attribute()
+      .name(AttrName.AGE)
+      .operator(Operator.BETWEEN)
+      .operands(Arrays.asList("20", "34")));
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(ethParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(nonNestedQuery(
+      QueryBuilders.rangeQuery("birth_datetime").gte(left).lte(right).format("yyyy-MM-dd")));
   }
 }
