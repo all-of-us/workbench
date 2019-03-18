@@ -2147,6 +2147,10 @@ definitions:
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
+      termsOfServiceBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user was bypassed for consenting to terms of service in milliseconds since the UNIX epoch.
       termsOfServiceCompletionTime:
         type: integer
         format: int64
@@ -2177,8 +2181,24 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user requests identity verification.
+      idVerificationCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completes identity verification.
+      idVerificationBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user is bypassed for completing identity verification
       twoFactorEnabled:
         type: boolean
+      twoFactorAuthCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed two factor authentication in milliseconds since the UNIX epoch.
+      twoFactorAuthBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user was bypassed for completing two factor authentication in milliseconds since the UNIX epoch.
       eraCommonsLinkedNihUsername:
         type: string
         description: The user's NIH username
@@ -2191,6 +2211,46 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when the user completed era commons linking.
+      eraCommonsBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user was bypassed for completing era commons linking.
+      complianceTrainingCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user completed compliance training.
+      complianceTrainingBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user was bypassed for completing compliance training
+      betaAccessBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user was bypassed for beta access
+      emailVerificationCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user completed email verification
+      emailVerificationBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user was bypassed for completing email verification
+      dataUseAgreementCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user completed the data use agreement.
+      dataUseAgreementBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when a user was bypassed for completing the data use agreement.
+      termsOfServiceCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp for when a user completed the terms of service.
+      termsOfServiceBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp for when a user was bypassed for completing the terms of service.
 
   InstitutionalAffiliation:
     type: object

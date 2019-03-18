@@ -88,11 +88,20 @@ public class ProfileService {
     if (user.getTrainingCompletionTime() != null) {
       profile.setTrainingCompletionTime(user.getTrainingCompletionTime().getTime());
     }
+    if (user.getComplianceTrainingCompletionTime() != null) {
+      profile.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime().getTime());
+    }
+    if (user.getComplianceTrainingBypassTime() != null) {
+      profile.setComplianceTrainingBypassTime(user.getComplianceTrainingBypassTime().getTime());
+    }
     if (user.getEraCommonsLinkExpireTime() != null) {
       profile.setEraCommonsLinkExpireTime(user.getEraCommonsLinkExpireTime().getTime());
     }
     if (user.getEraCommonsCompletionTime() != null) {
       profile.setEraCommonsCompletionTime(user.getEraCommonsCompletionTime().getTime());
+    }
+    if (user.getEraCommonsBypassTime() != null) {
+      profile.setEraCommonsBypassTime(user.getEraCommonsBypassTime().getTime());
     }
     if (user.getDemographicSurveyCompletionTime() != null) {
       profile.setDemographicSurveyCompletionTime(user.getDemographicSurveyCompletionTime()
@@ -104,8 +113,35 @@ public class ProfileService {
     if (user.getIdVerificationRequestTime() != null) {
       profile.setIdVerificationRequestTime(user.getIdVerificationRequestTime().getTime());
     }
+    if (user.getIdVerificationCompletionTime() != null) {
+      profile.setIdVerificationCompletionTime(user.getIdVerificationCompletionTime().getTime());
+    }
+    if (user.getIdVerificationBypassTime() != null) {
+      profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
+    }
     if (user.getDataAccessLevelEnum() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevelEnum());
+    }
+    if (user.getBetaAccessBypassTime() != null) {
+      profile.setBetaAccessBypassTime(user.getBetaAccessBypassTime().getTime());
+    }
+    if (user.getEmailVerificationCompletionTime() != null) {
+      profile.setEmailVerificationCompletionTime(user.getEmailVerificationCompletionTime().getTime());
+    }
+    if (user.getEmailVerificationBypassTime() != null) {
+      profile.setEmailVerificationBypassTime(user.getEmailVerificationBypassTime().getTime());
+    }
+    if (user.getDataUseAgreementCompletionTime() != null) {
+      profile.setDataUseAgreementCompletionTime(user.getDataUseAgreementCompletionTime().getTime());
+    }
+    if (user.getDataUseAgreementBypassTime() != null) {
+      profile.setDataUseAgreementBypassTime(user.getDataUseAgreementBypassTime().getTime());
+    }
+    if (user.getTwoFactorAuthCompletionTime() != null) {
+      profile.setTwoFactorAuthCompletionTime(user.getTwoFactorAuthCompletionTime().getTime());
+    }
+    if (user.getTwoFactorAuthBypassTime() != null) {
+      profile.setTwoFactorAuthBypassTime(user.getTwoFactorAuthBypassTime().getTime());
     }
     if (user.getAuthoritiesEnum() != null) {
       profile.setAuthorities(new ArrayList<>(user.getAuthoritiesEnum()));
