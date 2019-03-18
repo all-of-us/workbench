@@ -212,50 +212,49 @@ public final class ElasticFilters {
     if (AttrName.CAT.equals(attr.getName())) {
       //Currently the UI only uses the In operator for CAT which fits the terms query
       return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
-    } else {
-      Object left = null, right = null;
-      RangeQueryBuilder rq;
-      if (AttrName.NUM.equals(attr.getName())) {
-        rq = QueryBuilders.rangeQuery("events.value_as_number");
-        left = Float.parseFloat(attr.getOperands().get(0));
-        if (attr.getOperands().size() > 1) {
-          right = Float.parseFloat(attr.getOperands().get(1));
-        }
-        switch (attr.getOperator()) {
-          case LESS_THAN_OR_EQUAL_TO:
-            rq.lte(left);
-            break;
-          case GREATER_THAN_OR_EQUAL_TO:
-            rq.gte(left);
-            break;
-          case BETWEEN:
-            rq.gte(left).lte(right);
-            break;
-          case EQUAL:
-            rq.gte(left).lte(left);
-            break;
-          default:
-            throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
-        }
-        return rq;
-      } else if (AttrName.AGE.equals(attr.getName())) {
-        rq = QueryBuilders.rangeQuery("birth_datetime");
-        //use the low end of the age range to calculate the high end(right) of the date range
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
-        if (attr.getOperands().size() > 1) {
-          //use high end of the age range to calculate the low end(left) of the date range
-          left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).plusDays(1).toLocalDate();
-        }
-        switch (attr.getOperator()) {
-          case BETWEEN:
-            rq.gte(left).lte(right).format("yyyy-MM-dd");
-            break;
-          default:
-            throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
-        }
-        return rq;
+    }
+    Object left = null, right = null;
+    RangeQueryBuilder rq;
+    if (AttrName.NUM.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("events.value_as_number");
+      left = Float.parseFloat(attr.getOperands().get(0));
+      if (attr.getOperands().size() > 1) {
+        right = Float.parseFloat(attr.getOperands().get(1));
       }
+      switch (attr.getOperator()) {
+        case LESS_THAN_OR_EQUAL_TO:
+          rq.lte(left);
+          break;
+        case GREATER_THAN_OR_EQUAL_TO:
+          rq.gte(left);
+          break;
+        case BETWEEN:
+          rq.gte(left).lte(right);
+          break;
+        case EQUAL:
+          rq.gte(left).lte(left);
+          break;
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+      }
+      return rq;
+    } else if (AttrName.AGE.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("birth_datetime");
+      //use the low end of the age range to calculate the high end(right) of the date range
+      OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+      right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
+      if (attr.getOperands().size() > 1) {
+        //use high end of the age range to calculate the low end(left) of the date range
+        left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).plusDays(1).toLocalDate();
+      }
+      switch (attr.getOperator()) {
+        case BETWEEN:
+          rq.gte(left).lte(right).format("yyyy-MM-dd");
+          break;
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+      }
+      return rq;
     }
     throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
   }
