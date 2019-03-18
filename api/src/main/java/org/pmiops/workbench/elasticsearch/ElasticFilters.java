@@ -184,7 +184,7 @@ public final class ElasticFilters {
         }
 
         if (isNonNestedSchema(param)) {
-          // setup non nested filter with proper demographic field
+          // setup non nested filter with proper field
           sgiFilter.should(b);
         } else {
           // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
