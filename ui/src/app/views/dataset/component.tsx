@@ -245,7 +245,6 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                 {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
                   left: '10rem'}}/>}
               </div>
-
             </div>
           </div>
           <div style={{width: '58%'}}>
