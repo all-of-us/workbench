@@ -16,7 +16,6 @@ import * as React from 'react';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
-    name: 'diseaseFocusedResearch',
     shortDescription: 'Disease-focused research',
     longDescription: 'The primary purpose of the research is to learn more about a particular \
     disease or disorder (for example, type 2 diabetes), a trait (for example, blood pressure), \
@@ -233,10 +232,10 @@ export interface WorkspaceEditProps {
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
-  disableButton: Boolean;
+  disableButton: boolean;
   workspace: Workspace;
-  workspaceCreationConflictError: Boolean;
-  workspaceCreationError: Boolean;
+  workspaceCreationConflictError: boolean;
+  workspaceCreationError: boolean;
   cloneUserRole: boolean;
   loading: boolean;
 }
@@ -307,11 +306,6 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       }
     }
 
-
-    openStigmatization() {
-      window.open('/definitions/stigmatization', '_blank');
-    }
-
     renderHeader() {
       switch (this.props.routeConfigData.mode) {
         case WorkspaceEditMode.Create:
@@ -341,7 +335,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
 
-    updateUnderserverPopulation(populationDetails) {
+    updateUnderservedPopulation(populationDetails) {
       this.setState(fp.set(['workspace', 'researchPurpose', 'underservedPopulationDetails'],
         populationDetails));
       this.setState(fp.set(['workspace', 'researchPurpose', 'containsUnderservedPopulation'],
@@ -402,7 +396,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
                        value = {this.state.workspace.name}
-                       onChange={v =>    this.setState(fp.set(['workspace', 'name'], v))}/>
+                       onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
                 content='To use a different dataset version, clone or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
@@ -500,7 +494,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
           </div>
           <WorkspaceUnderservedPopulation
               value={this.state.workspace.researchPurpose.underservedPopulationDetails}
-              onChange={v => this.updateUnderserverPopulation(v)}>
+              onChange={v => this.updateUnderservedPopulation(v)}>
           </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose'
@@ -515,7 +509,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                    checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
-              <a onClick= {() => this.openStigmatization()}> stigmatization </a>
+              <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
             of research participants. I would like the All of Us Resource Access Board (RAB) to
               review my Research Purpose.
               (This will not prevent you from creating a workspace and proceeding.)
