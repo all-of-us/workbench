@@ -558,7 +558,6 @@ definitions:
       - parameterId
       - name
       - type
-      - subtype
       - group
       - attributes
     properties:
