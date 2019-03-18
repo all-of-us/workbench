@@ -17,16 +17,10 @@
       <column name="question_concept_id" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="survey_order_number" type="INTEGER">
+      <column name="path" type="INTEGER">
         <constraints nullable="false"/>
       </column>
-      <column name="question_order_number" type="INTEGER">
-        <constraints nullable="false"/>
-      </column>
-      <column name="path" type="VARCHAR(1000)">
-        <constraints nullable="false"/>
-      </column>
-      <column name="sub" type="INTEGER">
+      <column name="is_main" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
     </createTable>

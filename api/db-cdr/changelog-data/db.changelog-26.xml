@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="srushtigangireddy" id="changelog-26">
+    <dropColumn tableName="survey_question_map" columnName="is_main"/>
+    <addColumn tableName="survey_question_map">
+      <column name="survey_order_number" type="INTEGER"/>
+      <column name="question_order_number" type="INTEGER"/>
+      <column name="sub" type="INTEGER"/>
+    </addColumn>
+    <modifyDataType tableName="survey_question_map" columnName="path" newDataType="VARCHAR(1000)"/>
+  </changeSet>
+</databaseChangeLog>
