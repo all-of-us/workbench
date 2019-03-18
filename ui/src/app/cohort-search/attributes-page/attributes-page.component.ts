@@ -114,39 +114,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
               }
           }
         });
-        this.attrs.CAT = [
-          {
-            'id': 7,
-            'valueAsConceptId': 4124457,
-            'conceptName': 'Normal range',
-            'type': 'CAT',
-            'estCount': '382'
-          }, {
-            'id': 8,
-            'valueAsConceptId': 4080894,
-            'conceptName': 'Null',
-            'type': 'CAT',
-            'estCount': '21'
-          }, {
-            'id': 9,
-            'valueAsConceptId': 4069590,
-            'conceptName': 'Normal',
-            'type': 'CAT',
-            'estCount': '395'
-          }, {
-            'id': 10,
-            'valueAsConceptId': 4328749,
-            'conceptName': 'High',
-            'type': 'CAT',
-            'estCount': '929'
-          }, {
-            'id': 11,
-            'valueAsConceptId': 4267416,
-            'conceptName': 'Low',
-            'type': 'CAT',
-            'estCount': '15'
-          }
-        ];
       } else {
         this.options.unshift({value: AttrName.ANY, name: 'Any', display: 'Any', code: 'Any'});
         this.attrs.NUM = this.node.get('attributes');
