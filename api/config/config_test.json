@@ -55,6 +55,6 @@
     "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
-    "enableIdVerification": true
+    "enableBetaAccess": true
   }
 }

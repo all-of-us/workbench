@@ -7,7 +7,7 @@
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": false,
+    "enforceRegistered": true,
     "jupyterUserScriptUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/setup_notebook_cluster.sh",
     "jupyterPlaygroundExtensionUri": "gs:\/\/all-of-us-workbench-test-cluster-resources/playground-extension.js",
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
@@ -52,9 +52,9 @@
     "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
-    "enableEraCommons": false,
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
     "enableDataUseAgreement": false,
-    "enableIdVerification": false
+    "enableBetaAccess": true
   }
 }

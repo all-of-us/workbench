@@ -683,30 +683,29 @@ public class ProfileController implements ProfileApiDelegate {
     }
     switch (moduleName) {
       case "dataUseAgreement":
-        user.setDataUseAgreementBypassTime(valueToSet);
+        user = userService.setDataUseAgreementBypassTime(valueToSet);
         break;
       case "complianceTraining":
-        user.setComplianceTrainingBypassTime(valueToSet);
+        user = userService.setComplianceTrainingBypassTime(valueToSet);
         break;
       case "betaAccess":
-        user.setBetaAccessBypassTime(valueToSet);
+        user = userService.setBetaAccessBypassTime(valueToSet);
         break;
       case "emailVerification":
-        user.setEmailVerificationBypassTime(valueToSet);
+        user = userService.setEmailVerificationBypassTime(valueToSet);
         break;
       case "eraCommons":
-        user.setEraCommonsBypassTime(valueToSet);
+        user = userService.setEraCommonsBypassTime(valueToSet);
         break;
       case "idVerification":
-        user.setIdVerificationBypassTime(valueToSet);
+        user = userService.setIdVerificationBypassTime(valueToSet);
         break;
       case "twoFactorAuth":
-        user.setTwoFactorAuthBypassTime(valueToSet);
+        user = userService.setTwoFactorAuthBypassTime(valueToSet);
         break;
       default:
         throw new BadRequestException("There is no access module named: " + moduleName);
     }
-    saveUserWithConflictHandling(user);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

@@ -336,7 +336,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
         this.setFirstVisit();
       }
       try {
-        this.setState({eraCommonsLinked: !!profile.eraCommonsLinkedNihUsername});
+        this.setState({eraCommonsLinked: (!!profile.eraCommonsCompletionTime
+              || !!profile.eraCommonsBypassTime) });
       } catch (ex) {
         this.setState({eraCommonsLinked: false});
         console.error('error fetching era commons linking status');
@@ -344,7 +345,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
       try {
         const syncTrainingStatus = await profileApi().syncTrainingStatus();
-        this.setState({trainingCompleted: !!syncTrainingStatus.trainingCompletionTime});
+        this.setState({trainingCompleted: (!!syncTrainingStatus.complianceTrainingCompletionTime
+              || !!syncTrainingStatus.complianceTrainingBypassTime)});
       } catch (ex) {
         this.setState({trainingCompleted: false});
         console.error('error fetching moodle training status');
@@ -371,6 +373,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
     this.setState(
         {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
+
+    console.log(profile);
   }
 
   checkBillingProjectStatus() {

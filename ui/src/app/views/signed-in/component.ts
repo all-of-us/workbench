@@ -77,6 +77,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
+        console.log(config.enforceRegistered);
+        console.log(profile);
         this.hasDataAccess =
           !config.enforceRegistered || hasRegisteredAccess(profile.dataAccessLevel);
 

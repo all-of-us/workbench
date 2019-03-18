@@ -116,18 +116,24 @@ public class UserService {
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
     boolean complianceTrainingCompliant = user.getComplianceTrainingCompletionTime() != null ||
       user.getComplianceTrainingBypassTime() != null || !configProvider.get().access.enableComplianceTraining;
-    boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
-      user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
-    // TODO: can be removed once we totally move off old validation
-      Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
+    boolean betaAccessGranted = user.getBetaAccessBypassTime() != null ||
+            !configProvider.get().access.enableBetaAccess;
+
+    // TODO: Add in when we add idVerification module
+    // boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
+    //   user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
+    // // TODO: can be removed once we totally move off old validation
+    //   Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
+
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null
         && !user.getDisabled()
     // TODO: Add when we add this module
     //  && dataUseAgreementCompliant
+    //  && idVerificationCompliant
         && complianceTrainingCompliant
         && eraCommonsCompliant
-        && idVerificationCompliant
+        && betaAccessGranted
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
             isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
@@ -228,6 +234,76 @@ public class UserService {
       @Override
       public User apply(User user) {
         user.setDemographicSurveyCompletionTime(timestamp);
+        return user;
+      }
+    });
+  }
+
+  public User setDataUseAgreementBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setDataUseAgreementBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setComplianceTrainingBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setComplianceTrainingBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setBetaAccessBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setBetaAccessBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setEmailVerificationBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setEmailVerificationBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setEraCommonsBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setEraCommonsBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setIdVerificationBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setIdVerificationBypassTime(bypassTime);
+        return user;
+      }
+    });
+  }
+
+  public User setTwoFactorAuthBypassTime(Timestamp bypassTime) {
+    return updateUserWithRetries(new Function<User, User>() {
+      @Override
+      public User apply(User user) {
+        user.setTwoFactorAuthBypassTime(bypassTime);
         return user;
       }
     });
@@ -397,7 +473,9 @@ public class UserService {
         } else {
           user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
         }
+        // TODO: delete trainingCompletionTime in follow-up PR
         user.setTrainingCompletionTime(now);
+        user.setComplianceTrainingCompletionTime(now);
         userDao.save(user);
       }
     } catch (NumberFormatException e) {

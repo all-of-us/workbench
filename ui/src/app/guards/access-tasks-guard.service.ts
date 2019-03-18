@@ -25,8 +25,11 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
     }
     return this.serverConfigService.getConfig().flatMap((config) => {
       return this.profileStorageService.profile$.flatMap((profile) => {
-        if (profile.eraCommonsCompletionTime === null
-            && config.enforceRegistered && environment.enableComplianceLockout) {
+        if (((profile.eraCommonsCompletionTime === null
+              && profile.eraCommonsBypassTime === null) ||
+            (profile.complianceTrainingCompletionTime === null
+              && profile.complianceTrainingBypassTime === null))
+              && config.enforceRegistered && environment.enableComplianceLockout) {
           this.router.navigate(['/']);
           return Observable.from([false]);
         }
