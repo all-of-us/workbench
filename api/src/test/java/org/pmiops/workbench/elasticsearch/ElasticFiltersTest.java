@@ -416,14 +416,25 @@ public class ElasticFiltersTest {
 
   @Test
   public void testAgeQuery() {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    Object left = now.minusYears(34).minusYears(1).plusDays(1).toLocalDate();
+    Object right = now.minusYears(20).toLocalDate();
+    SearchParameter ethParam = new SearchParameter()
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.AGE.toString())
+      .group(false)
+      .addAttributesItem(new Attribute()
+        .name(AttrName.AGE)
+        .operator(Operator.BETWEEN)
+        .operands(Arrays.asList("20", "34")));
     ElasticFilterResponse<QueryBuilder> resp =
       ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
-            .addSearchParametersItem(ageParam))));
+            .addSearchParametersItem(ethParam))));
     assertThat(resp.isApproximate()).isFalse();
-    assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.rangeQuery("events.birth_datetime").from("1981-03-12").to("1981-03-12").format("yyyy-MM-dd")));
+    assertThat(resp.value()).isEqualTo(nonNestedQuery(
+      QueryBuilders.rangeQuery("birth_datetime").gte(left).lte(right).format("yyyy-MM-dd")));
   }
 
   @Test
@@ -616,7 +627,6 @@ public class ElasticFiltersTest {
             .addSearchParametersItem(visitParam))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
-      QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(heightEqualParam.getConceptId().toString())),
-      QueryBuilders.rangeQuery("events.value_as_number").gt(numEqualAttr.getOperands().get(0)).lt(numEqualAttr.getOperands().get(0))));
+      QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
   }
 }
