@@ -37,19 +37,6 @@ export class PageLayout implements OnInit, OnDestroy {
       currentCohortStore.next(cohort);
       this.cohortLoaded = true;
     });
-    if (!vocabOptions.getValue()) {
-      cohortReviewApi().getVocabularies(ns, wsid, cid, cdrid)
-        .then(response => {
-          const filters = {Source: {}, Standard: {}};
-          response.items.forEach(item => {
-            filters[item.type][item.domain] = [
-              ...(filters[item.type][item.domain] || []),
-              item.vocabulary
-            ];
-          });
-          vocabOptions.next(filters);
-        });
-    }
     if (!visitsFilterOptions.getValue()) {
       this.builderApi.getCriteriaBy(cdrid, TreeType[TreeType.VISIT], null, 0)
         .toPromise()
@@ -66,6 +53,7 @@ export class PageLayout implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     currentCohortStore.next(undefined);
+    vocabOptions.next(null);
     filterStateStore.next(JSON.parse(JSON.stringify(initialFilterState)));
   }
 
