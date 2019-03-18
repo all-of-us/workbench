@@ -801,61 +801,6 @@ public class ProfileControllerTest {
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
-  @Test
-  public void testSyncTraining() throws Exception {
-    List<BadgeDetails> badgeDetail = new ArrayList<>();
-    Timestamp time = new Timestamp(12543);
-    BadgeDetails badge = new BadgeDetails();
-    badge.setName("All of us badge");
-    badge.setDateexpire("12543");
-    badgeDetail.add(badge);
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
-
-    createUser();
-
-    profileController.syncTrainingStatus();
-    verify(complianceTrainingService).getMoodleId(PRIMARY_EMAIL);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isEqualTo(time);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNotNull();
-
-  }
-
-  @Test
-  public void testSyncTrainingWithNoBadge() throws Exception {
-    List<BadgeDetails> badgeDetail = new ArrayList<>();
-
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
-
-    createUser();
-
-    profileController.syncTrainingStatus();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTermsOfServiceCompletionTime()).isNull();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
-  }
-
-  public void testSyncTrainingMoodleIdNotFound() throws Exception {
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(null);
-
-    createUser();
-
-    Profile profile = profileController.syncTrainingStatus().getBody();
-    verify(complianceTrainingService, never()).getUserBadge(any());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
-  }
-
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSyncTrainingMoodleIdNotFoundWhileGetUserBadge() throws Exception {
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12))
-        .thenThrow(new org.pmiops.workbench.moodle.ApiException
-            (HttpStatus.NOT_FOUND.value(), "user not found"));
-
-    createUser();
-    profileController.syncTrainingStatus().getBody();
-  }
-
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))

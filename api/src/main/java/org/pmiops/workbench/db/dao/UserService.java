@@ -22,13 +22,13 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,7 +38,13 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 /**
- * User state manipulation; handles version conflicts.
+ * A higher-level service class containing user manipulation and business logic which can't be
+ * represented by automatic query generation in UserDao.
+ *
+ * A large portion of this class is dedicated to:
+ *
+ * (1) making it easy to consistently modify a subset of fields in a User entry, with retries
+ * (2) ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
 public class UserService {
@@ -72,6 +78,17 @@ public class UserService {
     this.fireCloudService = fireCloudService;
     this.configProvider = configProvider;
     this.complianceService = complianceService;
+  }
+
+  /**
+   * Provides unfettered access to the DAO instance that sits beneath this service class.
+   *
+   * This accessor is meant primarily for tests, or scenarios where a controller needs to bypass
+   * the retry and data-access-level management logic implemented here in UserService (though that
+   * should be rare), or when performing simple read actions from the database.
+   */
+  public UserDao getDao() {
+    return userDao;
   }
 
   /**
@@ -365,17 +382,27 @@ public class UserService {
   }
 
   /**
-   * This methods updates the current user's training status from Moodle.
+   *  Syncs the current user's training status from Moodle.
+   */
+  public void syncComplianceTrainingStatus() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
+    syncComplianceTrainingStatus(userProvider.get());
+  }
+
+  /**
+   * Updates the given user's training status from Moodle.
+   *
+   * We can fetch Moodle data for arbitrary users since we use an API key to access Moodle, rather
+   * than user-specific OAuth tokens.
+   *
+   * Overall flow:
    * 1. Check if user have moodle_id,
    *    a. if not retrieve it from MOODLE API and save it in the Database
    * 2. Using the MOODLE_ID get user's Badge update the database with
    *    a. training completion time as current time
    *    b. training expiration date with as returned from MOODLE.
    * 3. If there are no badges for a user set training completion time and expiration date as null
-   * @return
    */
-  public void syncUserTraining() throws ApiException, NotFoundException {
-    User user = userProvider.get();
+  public void syncComplianceTrainingStatus(User user) throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = user.getMoodleId();
@@ -399,13 +426,21 @@ public class UserService {
         }
         // TODO: delete trainingCompletionTime in follow-up PR
         user.setTrainingCompletionTime(now);
-        user.setComplianceTrainingCompletionTime(now);
-        userDao.save(user);
-      }
+
+        updateUserWithRetries(dbUser -> {
+          dbUser.setMoodleId(user.getMoodleId());
+          dbUser.setTrainingExpirationTime(user.getTrainingExpirationTime());
+          dbUser.setTrainingCompletionTime(user.getTrainingCompletionTime());
+          return dbUser;
+        }, user);
+      } else {
+        throw new NotFoundException(
+            String.format("Empty badge list returned for user %s", user.getEmail()));
+        }
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
-    } catch (ApiException ex) {
+    } catch (org.pmiops.workbench.moodle.ApiException ex) {
       if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
         log.severe(String.format("Error while retrieving Badge for user %s: %s ",
             user.getUserId(), ex.getMessage()));
@@ -416,7 +451,7 @@ public class UserService {
   }
 
   /**
-   * Given an NihStatus, updates the given user's eraCommons-related fields.
+   * Updates the given user's eraCommons-related fields with the NihStatus object returned from FC.
    */
   private void setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -456,21 +491,26 @@ public class UserService {
   }
 
   /**
-   * Syncs the eraCommons access module status for an arbitrary user. This uses impersonated
-   * credentials and should only be called in the context of a cron job.
+   * Syncs the eraCommons access module status for an arbitrary user.
+   *
+   * This uses impersonated credentials and should only be called in the context of a cron job or a
+   * request from a user with elevated privileges.
    */
-  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException {
+  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException, ApiException {
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
       NihStatus nihStatus = api.nihStatus();
-    } catch (ApiException e) {
+      setEraCommonsStatus(user, nihStatus);
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
+        // eRA Commons linkage.
         log.info(String.format("NIH Status not found for user %s", user.getEmail()));
         return;
+      } else {
+        throw new org.pmiops.workbench.firecloud.ApiException(e);
       }
     }
-
-
   }
 }

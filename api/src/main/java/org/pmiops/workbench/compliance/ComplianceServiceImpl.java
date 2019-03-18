@@ -45,6 +45,11 @@ public class ComplianceServiceImpl implements ComplianceService {
     return configProvider.get().moodle.enableMoodleBackend;
   }
 
+  /**
+   * Returns the Moodle ID corresponding to the given AoU user email address.
+   *
+   * Returns null if no Moodle user ID was found.
+   */
   @Override
   public Integer getMoodleId(String email) throws ApiException {
     if (!enableMoodleCalls()) {
@@ -57,6 +62,12 @@ public class ComplianceServiceImpl implements ComplianceService {
     return response.get(0).getId();
   }
 
+  /**
+   * Returns the Moodle user badge for the given Moodle user ID.
+   *
+   * Throws a NOT_FOUND API exception if the Moodle API call returns an error because the given Moodle
+   * user ID does not exist.
+   */
   @Override
   public List<BadgeDetails>  getUserBadge(int userMoodleId) throws ApiException {
     if (!enableMoodleCalls()) {

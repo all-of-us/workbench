@@ -21,6 +21,26 @@ public class WorkbenchConfig {
   public MoodleConfig moodle;
   public AccessConfig access;
 
+  /**
+   * Creates a config with non-null-but-empty member variables, for use in testing.
+   */
+  public static WorkbenchConfig createEmptyConfig() {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.auth = new AuthConfig();
+    config.cdr = new CdrConfig();
+    config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
+    config.googleDirectoryService = new GoogleDirectoryServiceConfig();
+    config.server = new ServerConfig();
+    config.admin = new AdminConfig();
+    config.jira = new JiraConfig();
+    config.mandrill = new MandrillConfig();
+    config.elasticsearch = new ElasticsearchConfig();
+    config.moodle = new MoodleConfig();
+    config.access = new AccessConfig();
+    return config;
+  }
+
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;

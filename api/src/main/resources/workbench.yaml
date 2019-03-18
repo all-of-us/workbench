@@ -873,6 +873,7 @@ paths:
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
   # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+  # and o.p.w.interceptors.CronInterceptor which implements the header check.
 
   /v1/cron/auditBigQuery:
     get:
@@ -911,15 +912,31 @@ paths:
     get:
       security: []
       tags:
-        - user
+        - offlineUser
         - cron
-      description: sync moodle badge/training status for all user
+      description: sync moodle badge/training status for all users.
       operationId: bulkSyncTrainingStatus
       responses:
         200:
           description: The user table is updated with training status.
         404:
           description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/bulkSyncEraCommonsStatus:
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: sync eRA Commons linkage status for all users.
+      operationId: bulkSyncEraCommonsStatus
+      responses:
+        200:
+          description: All users' eRA Commons statuses were updated.
         500:
           description: Internal Error
           schema:

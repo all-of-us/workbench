@@ -495,22 +495,20 @@ public class ProfileController implements ProfileApiDelegate {
    */
   @Override
   public ResponseEntity<Profile> syncTrainingStatus() {
-    User user = userProvider.get();
     try {
-      userService.syncUserTraining(user);
+      userService.syncComplianceTrainingStatus();
     } catch(NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return getProfileResponse(user);
+    return getProfileResponse(userProvider.get());
   }
 
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
-    User user = userProvider.get();
-    userService.syncEraCommonsStatus(user);
-    return getProfileResponse(user);
+    userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
   }
 
   @Override
@@ -748,10 +746,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
-      NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
-      User user = initializeUserIfNeeded();
-      user = userService.setEraCommonsStatus(nihStatus);
-      return getProfileResponse(user);
+      fireCloudService.postNihCallback(wrapper);
+      userService.syncEraCommonsStatus();
+      return getProfileResponse(userProvider.get());
     } catch (WorkbenchException e) {
       throw e;
     }
