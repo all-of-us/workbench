@@ -91,22 +91,22 @@ const FocusCategories = [
     categories: [
       {
         id: UnderservedPopulationEnum.RACEAMERICANINDIANORALASKANATIVE,
-        label: ' American Indian or Alaska Native '
+        label: 'American Indian or Alaska Native'
       },
       {id: UnderservedPopulationEnum.RACEHISPANICORLATINO, label: ' Hispanic or Latino'},
       {id: UnderservedPopulationEnum.RACEMORETHANONERACE, label: ' More than one race '},
       {id: UnderservedPopulationEnum.RACEASIAN, label: 'Asian'},
       {
         id: UnderservedPopulationEnum.RACEMIDDLEEASTERNORNORTHAFRICAN,
-        label: ' Middle Eastern or North African '
+        label: 'Middle Eastern or North African'
       },
       {
         id: UnderservedPopulationEnum.RACEBLACKAFRICANORAFRICANAMERICAN,
-        label: ' Black, African or African American '
+        label: 'Black, African or African American'
       },
       {
         id: UnderservedPopulationEnum.RACENATIVEHAWAIIANORPACIFICISLANDER,
-        label: ' Native Hawaiian or Pacific Islander '
+        label: 'Native Hawaiian or Pacific Islander'
       }
     ]
   },
@@ -115,7 +115,7 @@ const FocusCategories = [
     categories: [
       {id: UnderservedPopulationEnum.AGECHILDREN, label: 'Children (0-11)'},
       {id: UnderservedPopulationEnum.AGEADOLESCENTS, label: 'Adolescents (12-17)'},
-      {id: UnderservedPopulationEnum.AGEOLDERADULTS, label: ' Older Adults (65-74)'},
+      {id: UnderservedPopulationEnum.AGEOLDERADULTS, label: 'Older Adults (65-74)'},
       {id: UnderservedPopulationEnum.AGEELDERLY, label: 'Elderly (75+)'}
     ]
   },
@@ -245,7 +245,7 @@ export class WorkspaceUnderservedPopulation extends
   }
 
   focusCategoryChange(subCategory, value) {
-    if (!value ) {
+    if (!value) {
       const index = this.state.value.findIndex(item => item === subCategory.id);
       this.state.value.splice(index , 1);
     } else if (value) {
@@ -272,11 +272,11 @@ export class WorkspaceUnderservedPopulation extends
         <div style={styles.header}>
           Focus on an underserved population
           <TooltipTrigger content='A primary mission of the All of Us Research Program is to include
-          populations that are medically underserved and/or historically underrepresented in
-          biomedical research or who, because of systematic social disadvantage, experience
-          disparities in health. As a way to understand how much research is being conducted on
-          these populations, All of Us requests that you mark all options for underserved
-          populations that will be included in your research.'>
+            populations that are medically underserved and/or historically underrepresented in
+            biomedical research or who, because of systematic social disadvantage, experience
+            disparities in health. As a way to understand how much research is being conducted on
+            these populations, All of Us requests that you mark all options for underserved
+            populations that will be included in your research.'>
             <InfoIcon style={styles.infoIcon}/>
           </TooltipTrigger>
         </div>
@@ -285,14 +285,13 @@ export class WorkspaceUnderservedPopulation extends
           related to one or more underserved populations
         </label>
       </div>
-
     </div>
       {this.state.show && <div style={{paddingTop: '1rem'}}>
         <h5>Additional information for underserved population</h5>
         <label>Select all that apply. Only options for underserved populations are provided.
         </label>
         <div>
-          { FocusCategories.map (({title, categories} ) => {
+          {FocusCategories.map (({title, categories}) => {
             return <div key={title}>
               <h4 style={styles.title}>
                 {title}
