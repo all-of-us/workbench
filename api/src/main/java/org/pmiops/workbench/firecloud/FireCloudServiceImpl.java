@@ -321,7 +321,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   public boolean isUserMemberOfGroup(String email, String groupName) {
     return retryHandler.run((context) -> {
       ManagedGroupWithMembers group = groupsApiProvider.get().getGroup(groupName);
-      return group.getMembersEmails().contains(email);
+      return group.getMembersEmails().contains(email) || group.getAdminsEmails().contains(email);
     });
   }
 

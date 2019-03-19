@@ -72,7 +72,7 @@ public class OfflineUserControllerTest {
 
   @Test
   public void testBulkSyncTrainingStatus() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    offlineUserController.bulkSyncTrainingStatus();
+    offlineUserController.bulkSyncComplianceTrainingStatus();
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
   }
 
@@ -80,7 +80,7 @@ public class OfflineUserControllerTest {
   public void testBulkSyncTrainingStatusWithSingleUserError() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
         .when(userService).syncComplianceTrainingStatus(argThat(user -> user.getEmail() == "a@fake-research-aou.org"));
-    offlineUserController.bulkSyncTrainingStatus();
+    offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
   }
