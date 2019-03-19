@@ -19,7 +19,11 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
   Observable<boolean> {
+    // When all of our access flags are enabled, these routes are all necessary
+    // to include in activateable routes, otherwise we get stuck in an infinite
+    // loop that routes things back and forth forever.
     if (route.routeConfig.path === '' ||
+        route.routeConfig.path.startsWith('unregistered') ||
         route.routeConfig.path.startsWith('nih-callback')) {
       return Observable.from([true]);
     }
