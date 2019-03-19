@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {InfoIcon} from 'app/components/icons';
-import {Select, TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -10,9 +10,10 @@ import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserved-population/component';
-import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
+import {CdrVersion, DataAccessLevel, UnderservedPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {select} from 'react-select';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
@@ -66,33 +67,33 @@ export const ResearchPurposeItems = {
 };
 
 export const toolTipText = {
-  header: 'A Workspace is your place to store and analyze data for a specific project.Each ' +
-  'Workspace is a separate Google bucket that serves as a dedicated space for file storage. You ' +
-  'can share this Workspace with other users, allowing them to view or edit your work. Your ' +
-  'Workspace is where you will go to build concept sets and cohorts and launch Notebooks for ' +
-  'performing analyses on your cohorts.',
-  cdrSelect: 'The curated data repository (CDR) is where research data from the All of Us ' +
-  'Research Program is stored. The CDR is periodically updated as new data becomes available for ' +
-  'use. You can select which version of the CDR you wish to query in this Workspace.',
-  billingAccount: 'Throughout this period of testing and development, your use of the Workbench ' +
-  'is being funded by the National Institutes of Health. In the future researchers may be ' +
-  'required to enter billing account information to cover the cost of computing time in the cloud.',
-  researchPurpose: 'You  are required to describe your research purpose, or the reason why you ' +
-  'are conducting this study. This information, along with your name, will be posted on the ' +
-  'publicly available All of Us website (https://www.researchallofus.org/) to inform our ' +
-  'participants and other stakeholders about what kind of research their data is being used for.',
-  reviewRequest: 'If you are concerned that your research may be stigmatizing to a particular ' +
-  'group of research participants, you may request a review of your research purpose by the All ' +
-  'of Us Resource Access Board (RAB). The RAB will provide feedback regarding potential for ' +
-  'stigmatizing specific groups of participants and, if needed, guidance for modifying your ' +
-  'research purpose/scope. Even if you request a review, you will be able to create a Workspace ' +
-  'and proceed with your research.',
-  underservedPopulation: 'A primary mission of the All of Us Research Program is to include ' +
-  'populations that are medically underserved and/or historically underrepresented in biomedical ' +
-  'research or who, because of systematic social disadvantage, experience disparities in health. ' +
-  'As a way to understand how much research is being conducted on these populations, All of Us ' +
-  'requests that you mark all options for underserved populations that will be included in your ' +
-  'research.'
+  header: `A Workspace is your place to store and analyze data for a specific project.Each
+    Workspace is a separate Google bucket that serves as a dedicated space for file storage.
+    You can share this Workspace with other users, allowing them to view or edit your work. Your
+    Workspace is where you will go to build concept sets and cohorts and launch Notebooks for
+    performing analyses on your cohorts.`,
+  cdrSelect: `The curated data repository (CDR) is where research data from the All of Us Research
+    Program is stored. The CDR is periodically updated as new data becomes available for use. You
+    can select which version of the CDR you wish to query in this Workspace.`,
+  billingAccount: `Throughout this period of testing and development, your use of the Workbench is
+    being funded by the National Institutes of Health. In the future researchers may be required to
+    enter billing account information to cover the cost of computing time in the cloud.`,
+  researchPurpose: `You  are required to describe your research purpose, or the reason why you are
+    conducting this study. This information, along with your name, will be posted on the publicly
+    available All of Us website (https://www.researchallofus.org/) to inform our participants and
+    other stakeholders about what kind of research their data is being used for.`,
+  reviewRequest: `If you are concerned that your research may be stigmatizing to a particular group
+    of research participants, you may request a review of your research purpose by the All of Us
+    Resource Access Board (RAB). The RAB will provide feedback regarding potential for stigmatizing
+    specific groups of participants and, if needed, guidance for modifying your research
+    purpose/scope. Even if you request a review, you will be able to create a Workspace and proceed
+    with your research.`,
+  underservedPopulation: `A primary mission of the All of Us Research Program is to include
+    populations that are medically underserved and/or historically underrepresented in biomedical
+    research or who, because of systematic social disadvantage, experience disparities in health.
+    As a way to understand how much research is being conducted on these populations, All of Us
+    requests that you mark all options for underserved populations that will be included in your
+    research.`
 };
 
 
@@ -205,9 +206,8 @@ export const WorkspaceEditSection = (props) => {
 
 export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <input style={{height: '.66667rem', marginRight: '.31667rem'}} type='checkbox'
-           checked={!!props.value}
-           onChange={props.onChange ? (e => props.onChange(e.target.checked)) : undefined}/>
+    <CheckBox style={{height: '.66667rem', marginRight: '.31667rem'}} checked={!!props.value}
+      onChange={e => props.onChange(e)}/>
     <div style={{display: 'flex', flexDirection: 'column', marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
         {props.item.shortDescription}
@@ -232,7 +232,6 @@ export interface WorkspaceEditProps {
 
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
-  disableButton: boolean;
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
@@ -240,7 +239,7 @@ export interface WorkspaceEditState {
   loading: boolean;
 }
 
-export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
   class extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
 
     constructor(props: WorkspaceEditProps) {
@@ -248,7 +247,6 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       this.isEmpty.bind(this);
       this.state = {
         cdrVersionItems: [],
-        disableButton: true,
         workspace: {
           name: '',
           description: '',
@@ -274,7 +272,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
       };
     }
 
-    componentWillMount() {
+    componentDidMount() {
       this.updateWorkspace();
       this.setCdrVersions();
     }
@@ -294,15 +292,14 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
     }
 
     async setCdrVersions() {
-      const cdrVersions = await cdrVersionsApi().getCdrVersions();
-      // Convert cdrVersion to select input format of label and value
-      const versions = [];
-      cdrVersions.items.map((version , i) => {
-        versions.push({label: version.name, value: version.cdrVersionId});
-      });
-      this.setState({cdrVersionItems: versions});
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        this.setState(fp.set(['workspace', 'cdrVersionId'], versions[0].value));
+      try {
+        const cdrVersions = await cdrVersionsApi().getCdrVersions();
+        this.setState({cdrVersionItems: cdrVersions.items});
+        if (this.isMode(WorkspaceEditMode.Create)) {
+          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersions.defaultCdrVersionId));
+        }
+      } catch (exception) {
+        console.log(exception);
       }
     }
 
@@ -401,13 +398,17 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                 content='To use a different dataset version, clone or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
               <div style={styles.select}>
-                <Select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px'}}
-                        value={this.state.workspace.cdrVersionId}
-                        options={this.state.cdrVersionItems}
-                        onChange={v =>
-                            this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
-                        isDisabled={this.isMode(WorkspaceEditMode.Edit)}>
-                </Select>
+                <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
+                  height: '1.5rem', width: '12rem'}}
+                  value={this.state.workspace.cdrVersionId}
+                  onChange={v => this.setState(fp.set(['workspace', 'cdrVersionId'], v))}
+                  disabled={this.isMode(WorkspaceEditMode.Edit)}>
+                    {this.state.cdrVersionItems.map((version, i) => (
+                      <option key={version.cdrVersionId} value={version.cdrVersionId}>
+                        {version.name}
+                      </option>
+                    ))}
+                </select>
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
@@ -417,10 +418,9 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Clone) &&
         <div style={{display: 'flex', flexDirection: 'row'}}>
-          <input type='checkbox'
+          <CheckBox
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
-          onChange={v => this.setState({cloneUserRole: v.target.checked})}>
-              </input>
+          onChange={v => this.setState({cloneUserRole: v.target.checked})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
             text='Share cloned workspace with same collaborators'/>
         </div>
@@ -493,7 +493,8 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
             </div>
           </div>
           <WorkspaceUnderservedPopulation
-              value={this.state.workspace.researchPurpose.underservedPopulationDetails}
+              value={!this.state.workspace.researchPurpose.underservedPopulationDetails? [] :
+                  this.state.workspace.researchPurpose.underservedPopulationDetails}
               onChange={v => this.updateUnderservedPopulation(v)}>
           </WorkspaceUnderservedPopulation>
         </WorkspaceEditSection>
@@ -501,12 +502,10 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
                               tooltip={toolTipText.reviewRequest}>
           <div style={{display: 'flex', flexDirection: 'row',
             paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
-            <input style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
-                   type='checkbox'
-                   onChange={v =>
-                   this.setState(fp.set(['workspace', 'researchPurpose', 'reviewRequested' ],
-                     v.target.checked))}
-                   checked={this.state.workspace.researchPurpose.reviewRequested}/>
+            <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
+              onChange={v => this.setState(
+                  fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.value))}
+              checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
               <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
@@ -571,7 +570,7 @@ export const WorkspaceEdit = withRouteConfigData()(withCurrentWorkspace()(
         </div>
       </React.Fragment> ;
     }
-  }));
+  });
 
 @Component({
   template: '<div #root></div>'

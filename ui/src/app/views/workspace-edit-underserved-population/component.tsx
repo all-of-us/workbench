@@ -1,7 +1,8 @@
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
-import {reactStyles} from 'app/utils';
+import {reactStyles, toggleIncludes} from 'app/utils';
 import {UnderservedPopulationEnum} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -48,14 +49,14 @@ const styles = reactStyles({
     fontWeight: 400,
     lineHeight: '24px'
   },
-  checkBox: {
-    color: '#333333',
-    fontSize: 14,
-    fontWeight: 400,
-    lineHeight: '30px', paddingRight: '0.3rem'
+  row: {
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    width: '33.3%',
+    display: 'flex',
+    flexDirection: 'row',
+    height: '3rem'
   },
-  row: {paddingLeft: '12px', paddingRight: '12px',
-    width: '33.3%', display: 'flex', flexDirection: 'row', height: '3rem'},
   checkbox: {
     color: '#333333',
     fontSize: 14,
@@ -232,10 +233,10 @@ const FocusCategories = [
 
 export class WorkspaceUnderservedPopulation extends
     React.Component<{value: Array<UnderservedPopulationEnum>, onChange: Function},
-    {show: boolean, value: Array<UnderservedPopulationEnum>}> {
+    {show: boolean}> {
   constructor(props: any) {
     super(props);
-    this.state = {show: false, value: !props.value ? [] : props.value};
+    this.state = {show: false};
   }
 
   flipShow() {
@@ -244,14 +245,8 @@ export class WorkspaceUnderservedPopulation extends
     });
   }
 
-  focusCategoryChange(subCategory, value) {
-    if (!value) {
-      const index = this.state.value.findIndex(item => item === subCategory.id);
-      this.state.value.splice(index , 1);
-    } else if (value) {
-      this.state.value.push(subCategory);
-    }
-    this.props.onChange(this.state.value);
+  focusCategoryChange(subCategory) {
+    this.props.onChange(toggleIncludes(subCategory, this.props.value));
   }
 
 
@@ -299,10 +294,11 @@ export class WorkspaceUnderservedPopulation extends
               <div style={{display: 'flex', flexWrap: 'wrap'}}>
                 {
                   categories.map(({id, label}) => {
-                    const isIncluded = fp.includes(id, this.state.value);
-                    return <div style={styles.row}>
-                      <input type='checkbox' style={styles.checkBox} checked={isIncluded}
-                             onChange = {e => (this.focusCategoryChange(id, e.target.checked))}/>
+                    const isIncluded = fp.includes(id, this.props.value);
+                    return <div key={id} style={styles.row}>
+                      <CheckBox checked={isIncluded} style= {styles.checkbox}
+                        onChange =
+                          {e => this.props.onChange(toggleIncludes(id, this.props.value))}/>
                       <label style={styles.label}>{label}</label>
                     </div>;
                   })
