@@ -85,7 +85,7 @@ export class AdminUserBypass extends React.Component<
     const {editedModules, open} = this.state;
     return <PopupTrigger
         side='bottom'
-        onClose={() => {this.cancel(); this.setState({open: false});}}
+        onClose={() => {this.cancel(); this.setState({open: false}); }}
         onOpen={() => this.setState({open: true})}
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
