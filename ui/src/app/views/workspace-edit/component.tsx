@@ -10,7 +10,7 @@ import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserved-population/component';
-import {CdrVersion, DataAccessLevel, UnderservedPopulationEnum, Workspace} from 'generated/fetch';
+import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {select} from 'react-select';
@@ -493,7 +493,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
           </div>
           <WorkspaceUnderservedPopulation
-              value={!this.state.workspace.researchPurpose.underservedPopulationDetails? [] :
+              value={!this.state.workspace.researchPurpose.underservedPopulationDetails ? [] :
                   this.state.workspace.researchPurpose.underservedPopulationDetails}
               onChange={v => this.updateUnderservedPopulation(v)}>
           </WorkspaceUnderservedPopulation>
@@ -504,7 +504,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
             <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
               onChange={v => this.setState(
-                  fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.value))}
+                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v.value))}
               checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={styles.text}>
               I am concerned about potential
