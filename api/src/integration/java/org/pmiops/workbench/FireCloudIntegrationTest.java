@@ -55,7 +55,7 @@ public class FireCloudIntegrationTest {
   private ProfileApi profileApi;
   @Mock
   private NihApi nihApi;
-  
+
   // N.B. this will load the default service account credentials for whatever AoU environment
   // is set when running integration tests. This should be the test environment.
   @Autowired
@@ -133,7 +133,7 @@ public class FireCloudIntegrationTest {
   }
 
   /**
-   * Ensure swe can successfully use delegation of authority to make FireCloud API calls on behalf
+   * Ensures we can successfully use delegation of authority to make FireCloud API calls on behalf
    * of AoU users.
    * <p>
    * This test depends on there being an active account in FireCloud dev with the email address
