@@ -13,9 +13,9 @@
     <schedule>every 3 hours</schedule>
   </cron>
   <cron>
-    <url>/v1/cron/bulkSyncTrainingStatus</url>
+    <url>/v1/cron/bulkSyncComplianceTrainingStatus</url>
     <target>api</target>
-    <description>Periodic Sync users training status</description>
+    <description>Daily sync of compliance training status (via Moodle API)</description>
     <schedule>every 24 hours</schedule>
   </cron>
   <cron>

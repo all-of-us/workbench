@@ -493,8 +493,7 @@ public class ProfileController implements ProfileApiDelegate {
    * This methods updates logged in user's training status from Moodle.
    * @return Profile updated with training completion time
    */
-  @Override
-  public ResponseEntity<Profile> syncTrainingStatus() {
+  public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
       userService.syncComplianceTrainingStatus();
     } catch(NotFoundException ex) {

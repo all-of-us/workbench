@@ -368,14 +368,14 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/account/sync-training-status:
+  /v1/account/sync-compliance-training-status:
     post:
       tags:
         - profile
-      summary: Sync moodle badge/training status
+      summary: Sync compliance training status
       description: Retrieves moodleId(either from DB or call from Moodle API)
-                   and get Training status on the basis of that
-      operationId: syncTrainingStatus
+                   and gets Training status on the basis of that
+      operationId: syncComplianceTrainingStatus
       responses:
         200:
           description: The user's profile.
@@ -908,14 +908,14 @@ paths:
           schema:
             $ref: "#/definitions/CheckClustersResponse"
 
-  /v1/cron/bulkSyncTrainingStatus:
+  /v1/cron/bulkSyncComplianceTrainingStatus:
     get:
       security: []
       tags:
         - offlineUser
         - cron
       description: sync moodle badge/training status for all users.
-      operationId: bulkSyncTrainingStatus
+      operationId: bulkSyncComplianceTrainingStatus
       responses:
         200:
           description: The user table is updated with training status.

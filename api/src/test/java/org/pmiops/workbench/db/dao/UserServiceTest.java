@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 public class UserServiceTest {
 
-  private final String EMAIL_ADDRESS = "a@fake-research-aou.org";
+  private final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
   private Long incrementedUserId = 1L;
 

@@ -31,11 +31,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    * This API method is called by a cron job and is not part of our normal user-facing surface.
    */
   @Override
-  public ResponseEntity<Void> bulkSyncTrainingStatus() {
+  public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
     List<User> allUsers = userService.getAllUsers();
     allUsers.parallelStream().forEach(user -> {
       try {
         userService.syncComplianceTrainingStatus(user);
+        log.info(String.format("Updated compliance training status for user %s.", user.getEmail()));
       } catch (Exception e) {
         log.severe(String.format("Error syncing Moodle training status for user %s: %s",
             user.getEmail(), e.getMessage()));
@@ -55,6 +56,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     allUsers.parallelStream().forEach(user -> {
       try {
         userService.syncEraCommonsStatusUsingImpersonation(user);
+        log.info(String.format("Updated eRA Commons status for user %s.", user.getEmail()));
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         log.severe(String.format("Error syncing eRA Commons status for user %s: %s",
             user.getEmail(), e.getMessage()));
