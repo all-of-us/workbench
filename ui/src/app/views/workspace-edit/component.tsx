@@ -13,7 +13,6 @@ import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserv
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import select from 'react-select';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
