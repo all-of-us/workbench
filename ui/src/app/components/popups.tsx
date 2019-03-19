@@ -237,6 +237,7 @@ export const Popup = fp.flow(
 export class PopupTrigger extends React.Component {
   static readonly defaultProps = {
     closeOnClick: false,
+    onOpen: () => {},
     onClose: () => {}
   };
 
@@ -256,7 +257,7 @@ export class PopupTrigger extends React.Component {
   }
 
   render() {
-    const {children, content, onClose, closeOnClick, ...props} = this.props;
+    const {children, content, onOpen, onClose, closeOnClick, ...props} = this.props;
     const {open} = this.state;
     const child = React.Children.only(children);
     return <React.Fragment>
@@ -266,6 +267,9 @@ export class PopupTrigger extends React.Component {
         onClick: (...args: any[]) => {
           if (child.props.onClick) {
             child.props.onClick(...args);
+          }
+          if (!open) {
+            onOpen();
           }
           if (open) {
             onClose();

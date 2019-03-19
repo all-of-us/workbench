@@ -53,18 +53,16 @@ export class AdminUserComponent implements OnInit {
       if (a.disabled && b.disabled) {
         return this.timeCompare(a, b);
       }
-      else {
-        if (a.disabled) {
-          return 1;
-        }
-        if (!!a.betaAccessBypassTime === !!b.betaAccessBypassTime) {
-          return this.timeCompare(a, b);
-        }
-        if (!!b.betaAccessBypassTime) {
-          return -1;
-        }
+      if (a.disabled) {
         return 1;
       }
+      if (!!a.betaAccessBypassTime === !!b.betaAccessBypassTime) {
+        return this.timeCompare(a, b);
+      }
+      if (!!b.betaAccessBypassTime) {
+        return -1;
+      }
+      return 1;
     });
   }
 

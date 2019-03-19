@@ -373,8 +373,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
     this.setState(
         {quickTour: this.state.firstVisit && this.state.accessTasksRemaining === false});
-
-    console.log(profile);
   }
 
   checkBillingProjectStatus() {

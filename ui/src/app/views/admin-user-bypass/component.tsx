@@ -2,13 +2,24 @@ import {Component, Input} from '@angular/core';
 import {Button, IconButton} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
-import {PopupTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase} from 'app/utils/index';
+import {reactStyles, ReactWrapperBase} from 'app/utils/index';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+
+const styles = reactStyles({
+  infoIcon: {
+    color: '#2691D0',
+    cursor: 'pointer',
+    marginBottom: '0.5rem',
+    height: '16px',
+    width: '16px',
+    alignSelf: 'center'
+  }
+});
 
 export interface AccessModules {
   complianceTraining: boolean;
@@ -19,12 +30,12 @@ export interface AccessModules {
 export class AdminUserBypass extends React.Component<
     { profile: Profile},
     { modules: AccessModules, editedModules: AccessModules,
-      loading: boolean} > {
+      open: boolean} > {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
+      open: false,
       modules: {
         complianceTraining: true,
         betaAccess: true,
@@ -71,15 +82,22 @@ export class AdminUserBypass extends React.Component<
   }
 
   render() {
-    const {editedModules} = this.state;
+    const {editedModules, open} = this.state;
     return <PopupTrigger
         side='bottom'
-        onClose={() => this.cancel()}
+        onClose={() => {this.cancel(); this.setState({open: false});}}
+        onOpen={() => this.setState({open: true})}
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
-          <Toggle name='Beta Access'
-                  enabled={editedModules.betaAccess}
-                  onToggle={() => {this.setState({editedModules:
+          <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Toggle name='Beta Access'
+                    enabled={editedModules.betaAccess}
+                    onToggle={() => {this.setState({editedModules:
                           fp.set('betaAccess', !editedModules.betaAccess, editedModules)}); } } />
+            <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
+              <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
+            </TooltipTrigger>
+          </div>
+          <hr style={{width: '100%', marginBottom: '0.5rem'}}/>
           <Toggle name='Compliance Training'
                   enabled={editedModules.complianceTraining}
                   onToggle={() => {this.setState({editedModules:
@@ -90,7 +108,6 @@ export class AdminUserBypass extends React.Component<
                   onToggle={() => {this.setState({editedModules:
                       fp.set('eraCommons', !editedModules.eraCommons, editedModules)}); } } />
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-
             <IconButton icon='times'
                         onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
@@ -100,7 +117,7 @@ export class AdminUserBypass extends React.Component<
           </div>
         </div>}>
       <Button type='secondaryLight'>
-        <ClrIcon shape='caret right' size={19}
+        <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
                  style={{color: '#0077b7', marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
       </Button>
