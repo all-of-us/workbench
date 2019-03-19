@@ -1,24 +1,19 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {ClrDatagridStateInterface} from '@clr/angular';
+import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ClearButtonFilterComponent} from 'app/cohort-review/clearbutton-filter/clearbutton-filter.component';
-import {MultiSelectFilterComponent} from 'app/cohort-review/multiselect-filter/multiselect-filter.component';
 import {Participant} from 'app/cohort-review/participant.model';
 import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReview,
-  Filter,
-  Operator,
   PageFilterType,
-  ParticipantCohortStatusColumns,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatuses as Request,
   SortOrder,
@@ -26,40 +21,14 @@ import {
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {from} from 'rxjs/observable/from';
 
-function isMultiSelectFilter(filter): filter is MultiSelectFilterComponent {
-  return (filter instanceof MultiSelectFilterComponent);
-}
-
-function isClearButtonFilter(filter): filter is ClearButtonFilterComponent {
-  return (filter instanceof ClearButtonFilterComponent);
-}
 const fields = [
-  {
-    field: 'participantId',
-    name: 'Participant ID',
-  },
-  {
-    field: 'birthDate',
-    name: 'DOB',
-  },
-  {
-    field: 'gender',
-    name: 'Sex',
-  },
-  {
-    field: 'race',
-    name: 'Race',
-  },
-  {
-    field: 'ethnicity',
-    name: 'Ethnicity',
-  },
-  {
-    field: 'formattedStatusText',
-    name: 'Status',
-  }
+  {field: 'participantId', name: 'Participant ID'},
+  {field: 'birthDate', name: 'DOB'},
+  {field: 'gender', name: 'Sex'},
+  {field: 'race', name: 'Race'},
+  {field: 'ethnicity', name: 'Ethnicity'},
+  {field: 'formattedStatusText', name: 'Status'}
 ];
 const rows = 25;
 const styles = reactStyles({
@@ -81,13 +50,14 @@ const styles = reactStyles({
   },
   columnBody: {
     background: '#ffffff',
-    padding: '5px',
+    padding: '0.5rem 0.5rem 0.3rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,
     borderRight: 0,
     borderBottom: 'none',
     lineHeight: '0.6rem',
+    cursor: 'pointer',
   },
   graphColumnBody: {
     background: '#ffffff',
@@ -142,17 +112,16 @@ const styles = reactStyles({
 
 export interface ParticipantsTableState {
   data: Array<any>;
-  filteredData: Array<any>;
   loading: boolean;
-  start: number;
+  page: number;
   sortField: string;
   sortOrder: number;
+  total: number;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
-  class extends React.Component<{}, ParticipantsTableState> {
+  class extends React.Component<{workspace: WorkspaceData}, ParticipantsTableState> {
 
-    readonly ColumnEnum = Columns;
     readonly ReverseColumnEnum = {
       participantId: Columns.PARTICIPANTID,
       gender: Columns.GENDER,
@@ -170,44 +139,33 @@ export const ParticipantsTable = withCurrentWorkspace()(
     genders: string[] = [];
     races: string[] = [];
     ethnicities: string[] = [];
-    isFiltered = [];
     cohortName: string;
-    totalParticipantCount: number;
     tab = 'participants';
-    reportInit = false;
 
     constructor(props: any) {
       super(props);
       this.state = {
         data: null,
-        filteredData: null,
         loading: true,
-        start: 0,
-        sortField: null,
+        page: 0,
+        sortField: 'participantId',
         sortOrder: 1,
+        total: null
       };
     }
 
     componentDidMount() {
-      this.loading = false;
-      const cid = currentCohortStore.getValue().id;
-      this.cohortName = currentCohortStore.getValue().name;
-      this.subscription = cohortReviewStore.subscribe(review => {
-        this.review = review;
-        this.participants = review.participantCohortStatuses.map(Participant.fromStatus);
-        this.setState({data: this.participants, loading: false});
-        this.totalParticipantCount = review.matchedParticipantCount;
-      });
-      const {cdrVersionId, id, namespace} = currentWorkspaceStore.getValue();
-      const cdrid = +cdrVersionId;
-      cohortBuilderApi().getParticipantDemographics(cdrid).then(data => {
+      const {cdrVersionId, id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      this.getTableData();
+      cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
         const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
         this.races = extract(data.raceList);
         this.genders = extract(data.genderList);
         this.ethnicities = extract(data.ethnicityList);
       });
       if (!vocabOptions.getValue()) {
-        cohortReviewApi().getVocabularies(namespace, id, cid, cdrid)
+        cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
           .then(response => {
             const filters = {Source: {}, Standard: {}};
             response.items.forEach(item => {
@@ -221,109 +179,66 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }
     }
 
-    refresh(state: ClrDatagridStateInterface) {
-      setTimeout(() => this.loading = true, 0);
-      console.log('Datagrid state: ');
-      console.dir(state);
-
-      /* Populate the query with page / pagesize and then defaults */
+    getTableData(): void {
+      const {page, sortField, sortOrder} = this.state;
+      const {cdrVersionId, id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
       const query = {
-        page: Math.floor(state.page.from / state.page.size),
-        pageSize: state.page.size,
-        sortColumn: Columns.PARTICIPANTID,
-        sortOrder: SortOrder.Asc,
+        page: page,
+        pageSize: rows,
+        sortColumn: this.ReverseColumnEnum[sortField],
+        sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
         filters: {items: []},
         pageFilterType: PageFilterType.ParticipantCohortStatuses,
       } as Request;
-
-      if (state.sort) {
-        const sortby = (state.sort.by) as string;
-        query.sortColumn = this.ReverseColumnEnum[sortby];
-        query.sortOrder = state.sort.reverse
-          ? SortOrder.Desc
-          : SortOrder.Asc;
-      }
-
-      this.isFiltered = [];
-      if (state.filters) {
-        for (const filter of state.filters) {
-          if (isMultiSelectFilter(filter)) {
-            const property = filter.property;
-            this.isFiltered.push(property);
-
-            const operator = Operator.IN;
-            query.filters.items.push({
-              property,
-              values: filter.selection.value,
-              operator
-            } as Filter);
-          } else if (isClearButtonFilter(filter)) {
-            const property = filter.property;
-            this.isFiltered.push(property);
-            let operator = Operator.EQUAL;
-            if (filter.property === ParticipantCohortStatusColumns.PARTICIPANTID ||
-              filter.property === ParticipantCohortStatusColumns.BIRTHDATE) {
-              operator = Operator.LIKE;
-            }
-            query.filters.items.push({
-              property,
-              values: [filter.selection.value],
-              operator
-            } as Filter);
-          } else {
-            const {property, value} = filter as any;
-            const operator = Operator.EQUAL;
-            query.filters.items.push({property, values: [value], operator} as Filter);
-          }
-        }
-      }
-
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-
-      console.log('Participant page request parameters:');
-      console.dir(query);
-
-      return from(cohortReviewApi()
-        .getParticipantCohortStatuses(ns, wsid, cid, cdrid, query))
-        .do(_ => this.loading = false)
-        .subscribe(review => {
+      cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
+        .then(review => {
           cohortReviewStore.next(review);
+          this.setState({
+            data: review.participantCohortStatuses.map(Participant.fromStatus),
+            loading: false,
+            total: review.queryResultSize
+          });
         });
     }
 
-    isSelected(column: string) {
-      return this.isFiltered.indexOf(column) > -1;
+    onRowClick = (event: any) => {
+      const {id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      console.log(event);
+      navigate(
+        ['workspaces', namespace, id, 'cohorts', cid, 'review', 'participants', event.data.participantId]
+      );
     }
 
-    ngOnDestroy() {
-      this.subscription.unsubscribe();
-    }
-
-    setTab(tab: string) {
-      this.tab = tab;
-      if (tab === 'report' && !this.reportInit) {
-        this.reportInit = true;
-      }
-    }
-
-    onSort = (event: any) => {
-      this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
+    onPage = (event: any) => {
+      console.log(event);
+      this.setState({loading: true, page: event.page});
+      setTimeout(() => this.getTableData());
     }
 
     columnSort = (sortField: string) => {
       if (this.state.sortField === sortField) {
         const sortOrder = this.state.sortOrder === 1 ? -1 : 1;
-        this.setState({sortOrder});
+        this.setState({loading: true, sortOrder});
       } else {
-        this.setState({sortField, sortOrder: 1});
+        this.setState({loading: true, sortField, sortOrder: 1});
       }
+      setTimeout(() => this.getTableData());
     }
 
     render() {
-      const {data, loading, sortField, sortOrder, start} = this.state;
-      console.log(sortOrder);
-      console.log(sortField);
+      const {data, loading, page, sortField, sortOrder, total} = this.state;
+      const start = page * rows;
+      let pageReportTemplate;
+      if (data !== null) {
+        const lastRowOfPage = rows > data.length ? rows - data.length : start + rows;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${total} records `;
+      }
+      let paginatorTemplate = 'CurrentPageReport';
+      if (data && total > rows) {
+        paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
+      }
       const columns = fields.map(col => {
         const asc = sortField === col.field && sortOrder === 1;
         const desc = sortField === col.field && sortOrder === -1;
@@ -337,6 +252,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
         return <Column
+          style={styles.tableBody}
+          bodyStyle={styles.columnBody}
           key={col.field}
           field={col.field}
           header={header}
@@ -345,11 +262,19 @@ export const ParticipantsTable = withCurrentWorkspace()(
       return <div>
         <style>{css}</style>
         {data && <DataTable
+          style={styles.table}
           value={data}
+          first={start}
           sortField={sortField}
           sortOrder={sortOrder}
-          onSort={this.onSort}
-          first={start}
+          lazy
+          paginator
+          onPage={this.onPage}
+          paginatorTemplate={data.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+          rows={rows}
+          totalRecords={total}
+          onRowClick={this.onRowClick}
           scrollable
           scrollHeight='calc(100vh - 350px)'>
           {columns}
