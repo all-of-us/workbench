@@ -20,6 +20,7 @@ export class AccessTasksGuard implements CanActivate, CanActivateChild {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
   Observable<boolean> {
     if (route.routeConfig.path === '' ||
+        route.routeConfig.path.startsWith('unregistered') ||
         route.routeConfig.path.startsWith('nih-callback')) {
       return Observable.from([true]);
     }
