@@ -221,14 +221,14 @@ public class ElasticFiltersTest {
     for (QueryBuilder in : inners) {
       b.filter(in);
     }
-    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().should(
+    return QueryBuilders.boolQuery().filter(
         QueryBuilders.boolQuery().should(
             QueryBuilders.functionScoreQuery(
                 QueryBuilders.nestedQuery(
                     "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total)
             ).setMinScore(n)
         )
-    ));
+    );
   }
 
   private static final QueryBuilder nonNestedQuery(QueryBuilder... inners) {
@@ -237,7 +237,7 @@ public class ElasticFiltersTest {
       BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
       innerBuilder.should(b);
     }
-    return QueryBuilders.boolQuery().filter(QueryBuilders.boolQuery().should(innerBuilder));
+    return QueryBuilders.boolQuery().filter(innerBuilder);
   }
 
   @Test
