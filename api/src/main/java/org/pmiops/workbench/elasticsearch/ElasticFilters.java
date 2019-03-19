@@ -319,10 +319,8 @@ public final class ElasticFilters {
                 .stream()
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
-      } else {
-        if (param.getConceptId() != null) {
-          out.add(Long.toString(param.getConceptId()));
-        }
+      } else if (param.getConceptId() != null) {
+        out.add(Long.toString(param.getConceptId()));
       }
     }
     return out;
