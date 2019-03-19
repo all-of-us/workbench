@@ -245,11 +245,14 @@ public final class ElasticFilters {
       right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
       if (attr.getOperands().size() > 1) {
         //use high end of the age range to calculate the low end(left) of the date range
-        left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).plusDays(1).toLocalDate();
+        //Ex: 2019-03-19(current date) - 55year(age) - 1 year = 1963-03-19
+        //Need to use GT to make sure not to include 1963-03-19 which evaluates to 56 years old
+        //which is out the range of 55. 1963-03-20 evaluates to 55 years 11 months 30 days.
+        left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).toLocalDate();
       }
       switch (attr.getOperator()) {
         case BETWEEN:
-          rq.gte(left).lte(right).format("yyyy-MM-dd");
+          rq.gt(left).lte(right).format("yyyy-MM-dd");
           break;
         default:
           throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
