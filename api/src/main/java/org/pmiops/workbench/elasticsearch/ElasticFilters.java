@@ -138,10 +138,6 @@ public final class ElasticFilters {
     }
 
     for (SearchGroupItem sgi : sg.getItems()) {
-      // Note: Later we could investigate starting with an inexpensive presence filter; would need
-      // to map each concept ID into the right domain first though.
-      BoolQueryBuilder sgiFilter = QueryBuilders.boolQuery();
-
       // Modifiers apply to all criteria in this SearchGroupItem, but will be reapplied to each
       // subquery generated for each criteria ID.
       List<QueryBuilder> modFilters = Lists.newArrayList();
@@ -187,11 +183,11 @@ public final class ElasticFilters {
 
         if (isNonNestedSchema(param)) {
           // setup non nested filter with proper field
-          sgiFilter.should(b);
+          filter.should(b);
         } else {
           // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
           // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
-          sgiFilter.should(
+          filter.should(
             QueryBuilders.functionScoreQuery(
               QueryBuilders.nestedQuery(
                 // We sum a constant score for each matching document, yielding the total number
@@ -200,8 +196,6 @@ public final class ElasticFilters {
               .setMinScore(occurredAtLeast));
         }
       }
-      //SGI should "OR"
-      filter.should(sgiFilter);
     }
 
     return filter;
