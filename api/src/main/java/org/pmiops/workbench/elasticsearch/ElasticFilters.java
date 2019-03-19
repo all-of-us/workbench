@@ -8,6 +8,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +26,8 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.AttrName;
+import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Modifier;
 import org.pmiops.workbench.model.ModifierType;
 import org.pmiops.workbench.model.SearchGroup;
@@ -91,6 +96,11 @@ public final class ElasticFilters {
   private static Set<TreeType> HIERARCHICAL_CODE_TREES =
       ImmutableSet.of(TreeType.ICD9, TreeType.ICD10);
 
+  private static Map<String, String> NON_NESTED_FIELDS = ImmutableMap.of(
+    TreeSubType.GEN.toString(), "gender_concept_id",
+    TreeSubType.RACE.toString(), "race_concept_id",
+    TreeSubType.ETH.toString(), "ethnicity_concept_id");
+
   private final CriteriaDao criteriaDao;
 
   private boolean processed = false;
@@ -128,10 +138,6 @@ public final class ElasticFilters {
     }
 
     for (SearchGroupItem sgi : sg.getItems()) {
-      // Note: Later we could investigate starting with an inexpensive presence filter; would need
-      // to map each concept ID into the right domain first though.
-      BoolQueryBuilder sgiFilter = QueryBuilders.boolQuery();
-
       // Modifiers apply to all criteria in this SearchGroupItem, but will be reapplied to each
       // subquery generated for each criteria ID.
       List<QueryBuilder> modFilters = Lists.newArrayList();
@@ -157,29 +163,97 @@ public final class ElasticFilters {
         }
       }
 
-      // TODO(calbach): Handle Attribute modifiers here, e.g. value_as_number < 10.
-      // TODO(calbach): Handle non-code values, e.g. question answers here.
+      // TODO(freemabd): Handle Blood Pressure and Deceased
       for (SearchParameter param : sgi.getSearchParameters()) {
         String conceptField = "events." + (isStandardConcept(param) ? "concept_id" : "source_concept_id");
-        BoolQueryBuilder b = QueryBuilders.boolQuery()
-            .filter(QueryBuilders.termsQuery(conceptField, toleafConceptIds(ImmutableList.of(param))));
+        if (isNonNestedSchema(param)) {
+          conceptField = NON_NESTED_FIELDS.get(param.getSubtype());
+        }
+        Set<String> leafConceptIds = toleafConceptIds(ImmutableList.of(param));
+        BoolQueryBuilder b = QueryBuilders.boolQuery();
+        if (!leafConceptIds.isEmpty()) {
+          b.filter(QueryBuilders.termsQuery(conceptField, leafConceptIds));
+        }
+        for (Attribute attr : param.getAttributes()) {
+          b.filter(attributeToQuery(attr));
+        }
         for (QueryBuilder f : modFilters) {
           b.filter(f);
         }
-        // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
-        // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
-        sgiFilter.should(
+
+        if (isNonNestedSchema(param)) {
+          // setup non nested filter with proper field
+          filter.should(b);
+        } else {
+          // "should" gives us "OR" behavior so long as we're in a filter context, which we are. This
+          // translates to N occurrences of criteria 1 OR N occurrences of criteria 2, etc.
+          filter.should(
             QueryBuilders.functionScoreQuery(
-                QueryBuilders.nestedQuery(
-                    // We sum a constant score for each matching document, yielding the total number
-                    // of matching nested documents (events).
-                    "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
-                .setMinScore(occurredAtLeast));
+              QueryBuilders.nestedQuery(
+                // We sum a constant score for each matching document, yielding the total number
+                // of matching nested documents (events).
+                "events", QueryBuilders.constantScoreQuery(b), ScoreMode.Total))
+              .setMinScore(occurredAtLeast));
+        }
       }
-      filter.filter(sgiFilter);
     }
 
     return filter;
+  }
+
+  private static QueryBuilder attributeToQuery(Attribute attr) {
+    //Attributes with a name of CAT map to the value_as_concept_id column
+    if (AttrName.CAT.equals(attr.getName())) {
+      //Currently the UI only uses the In operator for CAT which fits the terms query
+      return QueryBuilders.termsQuery("events.value_as_concept_id", attr.getOperands());
+    }
+    Object left = null, right = null;
+    RangeQueryBuilder rq;
+    if (AttrName.NUM.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("events.value_as_number");
+      left = Float.parseFloat(attr.getOperands().get(0));
+      if (attr.getOperands().size() > 1) {
+        right = Float.parseFloat(attr.getOperands().get(1));
+      }
+      switch (attr.getOperator()) {
+        case LESS_THAN_OR_EQUAL_TO:
+          rq.lte(left);
+          break;
+        case GREATER_THAN_OR_EQUAL_TO:
+          rq.gte(left);
+          break;
+        case BETWEEN:
+          rq.gte(left).lte(right);
+          break;
+        case EQUAL:
+          rq.gte(left).lte(left);
+          break;
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+      }
+      return rq;
+    } else if (AttrName.AGE.equals(attr.getName())) {
+      rq = QueryBuilders.rangeQuery("birth_datetime");
+      //use the low end of the age range to calculate the high end(right) of the date range
+      OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+      right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
+      if (attr.getOperands().size() > 1) {
+        //use high end of the age range to calculate the low end(left) of the date range
+        //Ex: 2019-03-19(current date) - 55year(age) - 1 year = 1963-03-19
+        //Need to use GT to make sure not to include 1963-03-19 which evaluates to 56 years old
+        //which is out the range of 55. 1963-03-20 evaluates to 55 years 11 months 30 days.
+        left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).toLocalDate();
+      }
+      switch (attr.getOperator()) {
+        case BETWEEN:
+          rq.gt(left).lte(right).format("yyyy-MM-dd");
+          break;
+        default:
+          throw new BadRequestException("Bad operator for attribute: " + attr.getOperator());
+      }
+      return rq;
+    }
+    throw new BadRequestException("attribute name is not an attr name type: " + attr.getName());
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {
@@ -214,7 +288,7 @@ public final class ElasticFilters {
         rq.gte(left);
         break;
       case BETWEEN:
-        rq.gt(left).lt(right);
+        rq.gte(left).lte(right);
         break;
       case LIKE:
       case IN:
@@ -231,6 +305,11 @@ public final class ElasticFilters {
     return STANDARD_TREES.contains(paramType);
   }
 
+  private static boolean isNonNestedSchema(SearchParameter param) {
+    TreeType paramType = TreeType.valueOf(param.getType());
+    return TreeType.DEMO.equals(paramType);
+  }
+
   private Set<String> toleafConceptIds(List<SearchParameter> params) {
     Set<String> out = Sets.newHashSet();
     for (SearchParameter param : params) {
@@ -240,7 +319,9 @@ public final class ElasticFilters {
                 .stream()
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
-      } else {
+      } else if (param.getConceptId() != null) {
+        //not all SearchParameter have a concept id, so attributes/modifiers
+        //are used to find matches in those scenarios.
         out.add(Long.toString(param.getConceptId()));
       }
     }
