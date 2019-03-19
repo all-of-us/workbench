@@ -320,6 +320,8 @@ public final class ElasticFilters {
                 .map(id -> Long.toString(id))
                 .collect(Collectors.toSet()));
       } else if (param.getConceptId() != null) {
+        //not all SearchParameter have a concept id, so attributes/modifiers
+        //are used to find matches in those scenarios.
         out.add(Long.toString(param.getConceptId()));
       }
     }
