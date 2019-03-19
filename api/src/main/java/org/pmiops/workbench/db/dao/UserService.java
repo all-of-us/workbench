@@ -22,7 +22,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
@@ -496,7 +495,7 @@ public class UserService {
    * This uses impersonated credentials and should only be called in the context of a cron job or a
    * request from a user with elevated privileges.
    */
-  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException, ApiException {
+  public void syncEraCommonsStatusUsingImpersonation(User user) throws IOException, org.pmiops.workbench.firecloud.ApiException {
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {

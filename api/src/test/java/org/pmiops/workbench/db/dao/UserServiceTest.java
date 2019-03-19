@@ -5,48 +5,32 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.api.OfflineClusterController;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.NihStatus;
-import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
-import org.pmiops.workbench.notebooks.NotebooksConfig;
-import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Provider;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,8 +55,6 @@ public class UserServiceTest {
   @Mock
   private AdminActionHistoryDao adminActionHistoryDao;
   @Mock
-  private Provider<WorkbenchConfig> configProvider;
-  @Mock
   private FireCloudService fireCloudService;
   @Mock
   private ComplianceService complianceService;
@@ -82,7 +64,7 @@ public class UserServiceTest {
 
   @Before
   public void setUp() {
-    configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
+    Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
     testUser = insertUser(EMAIL_ADDRESS);
 
     userService = new UserService(Providers.of(testUser), userDao, adminActionHistoryDao, CLOCK,

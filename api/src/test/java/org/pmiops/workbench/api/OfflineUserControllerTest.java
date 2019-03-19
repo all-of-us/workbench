@@ -79,7 +79,7 @@ public class OfflineUserControllerTest {
   @Test
   public void testBulkSyncTrainingStatusWithSingleUserError() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
-        .when(userService).syncComplianceTrainingStatus(argThat(user -> user.getEmail() == "a@fake-research-aou.org"));
+        .when(userService).syncComplianceTrainingStatus(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
@@ -94,7 +94,7 @@ public class OfflineUserControllerTest {
   @Test
   public void testBulkSyncEraCommonsStatusWithSingleUserError() throws ApiException, NotFoundException, IOException, org.pmiops.workbench.firecloud.ApiException {
     doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
-        .when(userService).syncEraCommonsStatusUsingImpersonation(argThat(user -> user.getEmail() == "a@fake-research-aou.org"));
+        .when(userService).syncEraCommonsStatusUsingImpersonation(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncEraCommonsStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());
