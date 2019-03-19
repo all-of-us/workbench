@@ -609,7 +609,7 @@ public class ElasticFiltersTest {
   @Test
   public void testAgeQuery() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    Object left = now.minusYears(34).minusYears(1).plusDays(1).toLocalDate();
+    Object left = now.minusYears(34).minusYears(1).toLocalDate();
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ethParam = new SearchParameter()
       .type(TreeType.DEMO.toString())
@@ -626,13 +626,13 @@ public class ElasticFiltersTest {
             .addSearchParametersItem(ethParam))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
-      QueryBuilders.rangeQuery("birth_datetime").gte(left).lte(right).format("yyyy-MM-dd")));
+      QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd")));
   }
 
   @Test
   public void testAgeAndVisitQuery() {
     OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-    Object left = now.minusYears(34).minusYears(1).plusDays(1).toLocalDate();
+    Object left = now.minusYears(34).minusYears(1).toLocalDate();
     Object right = now.minusYears(20).toLocalDate();
     SearchParameter ageParam = new SearchParameter()
       .type(TreeType.DEMO.toString())
@@ -656,7 +656,7 @@ public class ElasticFiltersTest {
             .searchParameters(Arrays.asList(ageParam, ethParam)))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
-      QueryBuilders.rangeQuery("birth_datetime").gte(left).lte(right).format("yyyy-MM-dd"),
+      QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd"),
       QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
   }
 }
