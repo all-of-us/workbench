@@ -82,7 +82,7 @@ public interface FireCloudService {
 
   void removeUserFromGroup(String email, String groupName);
 
-  boolean isUserMemberOfGroup(String groupName);
+  boolean isUserMemberOfGroup(String email, String groupName);
 
   /**
    * Fetches the status of the currently-authenticated user's linkage to NIH's eRA Commons system.

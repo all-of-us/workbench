@@ -509,6 +509,39 @@ paths:
             - profile
 
   /api/groups/{groupName}:
+    get:
+      responses:
+        200:
+          description: Successfully loaded group
+          schema:
+            $ref: '#/definitions/ManagedGroupWithMembers'
+        403:
+          description: You must be an admin of this group in order to view members
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: Group not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      parameters:
+        - in: path
+          description: Group name
+          name: groupName
+          required: true
+          type: string
+      tags:
+        - Groups
+      summary: view the members in a group
+      operationId: getGroup
+      security:
+        - googleoauth:
+          - openid
+          - email
+          - profile
     post:
       responses:
         201:

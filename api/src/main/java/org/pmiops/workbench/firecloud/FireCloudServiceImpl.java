@@ -318,17 +318,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public boolean isUserMemberOfGroup(String groupName) {
+  public boolean isUserMemberOfGroup(String email, String groupName) {
     return retryHandler.run((context) -> {
-      // There is no endpoint in FireCloud for checking whether a user is a member of a particular
-      // group; so instead, fetch all the group memberships. (There won't be that many for our
-      // users anyway.)
-      for (ManagedGroupAccessResponse group : endUserGroupsApiProvider.get().getGroups()) {
-        if (groupName.equals(group.getGroupName()) && MEMBER_ROLE.equalsIgnoreCase(group.getRole())) {
-          return true;
-        }
-      }
-      return false;
+      ManagedGroupWithMembers group = groupsApiProvider.get().getGroup(groupName);
+      return group.getMembersEmails().contains(email);
     });
   }
 

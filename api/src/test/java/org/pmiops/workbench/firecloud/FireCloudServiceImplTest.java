@@ -23,6 +23,7 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
 import org.pmiops.workbench.firecloud.model.ManagedGroupAccessResponse;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.SystemStatus;
 import org.pmiops.workbench.test.Providers;
@@ -30,6 +31,7 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
@@ -38,6 +40,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 public class FireCloudServiceImplTest {
+
+  private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
   private FireCloudServiceImpl service;
 
@@ -118,29 +122,34 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testIsUserMemberOfGroup_none() throws Exception {
-    when(endUserGroupsApi.getGroups()).thenReturn(new ArrayList<ManagedGroupAccessResponse>());
-    assertThat(service.isUserMemberOfGroup("group")).isFalse();
+    when(groupsApi.getGroup("group")).thenReturn(new ManagedGroupWithMembers());
+    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
   public void testIsUserMemberOfGroup_noNameMatch() throws Exception {
-    when(endUserGroupsApi.getGroups()).thenReturn(
-        Lists.newArrayList(new ManagedGroupAccessResponse().groupName("blah").role("Member")));
-    assertThat(service.isUserMemberOfGroup("group")).isFalse();
+    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    group.setMembersEmails(Arrays.asList("asdf@fake-research-aou.org"));
+    when(groupsApi.getGroup("group")).thenReturn(group);
+    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
-  public void testIsUserMemberOfGroup_noRoleMatch() throws Exception {
-    when(endUserGroupsApi.getGroups()).thenReturn(
-        Lists.newArrayList(new ManagedGroupAccessResponse().groupName("group").role("notmember")));
-    assertThat(service.isUserMemberOfGroup("group")).isFalse();
+  public void testIsUserMemberOfGroup_matchInAdminList() throws Exception {
+    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    group.setAdminsEmails(Arrays.asList(EMAIL_ADDRESS));
+
+    when(groupsApi.getGroup("group")).thenReturn(group);
+    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test
-  public void testIsUserMemberOfGroup_match() throws Exception {
-    when(endUserGroupsApi.getGroups()).thenReturn(
-        Lists.newArrayList(new ManagedGroupAccessResponse().groupName("group").role("member")));
-    assertThat(service.isUserMemberOfGroup("group")).isTrue();
+  public void testIsUserMemberOfGroup_matchInMemberList() throws Exception {
+    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    group.setMembersEmails(Arrays.asList(EMAIL_ADDRESS));
+
+    when(groupsApi.getGroup("group")).thenReturn(group);
+    assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isTrue();
   }
 
   @Test

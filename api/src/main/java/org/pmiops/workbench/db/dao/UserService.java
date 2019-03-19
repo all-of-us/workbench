@@ -144,7 +144,7 @@ public class UserService {
         && betaAccessGranted
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
     boolean isInGroup = this.fireCloudService.
-            isUserMemberOfGroup(configProvider.get().firecloud.registeredDomainName);
+            isUserMemberOfGroup(user.getEmail(), configProvider.get().firecloud.registeredDomainName);
     if (shouldBeRegistered) {
       if (!isInGroup) {
         this.fireCloudService.addUserToGroup(user.getEmail(),
