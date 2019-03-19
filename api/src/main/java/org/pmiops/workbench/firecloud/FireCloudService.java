@@ -94,7 +94,4 @@ public interface FireCloudService {
   NihStatus postNihCallback(JWTWrapper wrapper);
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
-
-  ApiClient getApiClientWithImpersonation(String email) throws IOException;
-
 }

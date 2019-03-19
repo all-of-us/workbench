@@ -54,19 +54,8 @@ public class FireCloudIntegrationTest {
   @Mock
   private ProfileApi profileApi;
   @Mock
-  private GroupsApi endUserGroupsApi;
-
-  // N.B. this will load the default service account credentials for whatever AoU environment
-  // is set when running integration tests. This should be the test environment.
-  @Autowired
-  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  private GoogleCredential serviceAccountCredential;
-
-  @Autowired
-  private ServiceAccounts serviceAccounts;
-
-  private WorkbenchEnvironment workbenchEnvironment;
-
+  private NihApi nihApi;
+  
   // N.B. this will load the default service account credentials for whatever AoU environment
   // is set when running integration tests. This should be the test environment.
   @Autowired

@@ -2,7 +2,6 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
-import com.google.api.client.http.HttpTransport;
 import com.google.common.collect.ImmutableList;
 import org.json.JSONException;
 import org.json.JSONObject;
