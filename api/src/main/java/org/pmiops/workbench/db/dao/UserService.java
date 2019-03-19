@@ -122,15 +122,17 @@ public class UserService {
     // TODO: Add in when we add idVerification module
     // boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
     //   user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
+    // TODO: Add in when we add demographics survey
+    // boolean demographicSurveyComplete = user.getDemographicSurveyCompletionTime() != null;
     // // TODO: can be removed once we totally move off old validation
     //   Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
-    boolean shouldBeRegistered = user.getDemographicSurveyCompletionTime() != null
-        && !user.getDisabled()
+    boolean shouldBeRegistered = !user.getDisabled()
     // TODO: Add when we add this module
     //  && dataUseAgreementCompliant
     //  && idVerificationCompliant
+    //  && demographicSurveyComplete
         && complianceTrainingCompliant
         && eraCommonsCompliant
         && betaAccessGranted
