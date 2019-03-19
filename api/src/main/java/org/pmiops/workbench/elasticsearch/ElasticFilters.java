@@ -256,7 +256,7 @@ public final class ElasticFilters {
       }
       return rq;
     }
-    throw new RuntimeException("attribute name is not an attr name type: " + attr.getName());
+    throw new BadRequestException("attribute name is not an attr name type: " + attr.getName());
   }
 
   private static QueryBuilder dateModifierToQuery(Modifier mod) {
