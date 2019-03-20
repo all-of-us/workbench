@@ -323,3 +323,12 @@ export function displayDate(time: Number): string {
     {year: '2-digit', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', hour12: true});
 }
+
+// Given a value and an array, return a new array with the value appended.
+export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
+
+// Given a value and an array, return a new array that 'toggles' the presence of the value.
+// E.g. remove if it exists, append if it doesn't.
+export const toggleIncludes = fp.curry((value, arr) => {
+  return fp.includes(value, arr) ? fp.pull(value, arr) : append(value, arr);
+});

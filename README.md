@@ -342,7 +342,7 @@ Description of arguments these scripts take are as follows.
 
 `# Once for public cdr.`
 
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-private-cloudsql/public20180913`
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database public20180913 --bucket all-of-us-workbench-public-cloudsql/public20180913`
 ##### Result is
 1. Databases are live on cloudsql.
 
@@ -446,7 +446,7 @@ Requires that Elastic is running (via run-api or dev-up).
 Show the top 5 standard condition concept IDs:
 
 ```
-curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
+curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"size": 0, "aggs": {"aggs": {"terms": {"field": "condition_concept_ids", "size": 5 }}}}'
 ```
 
 The above IDs can be cross-referenced against the Criteria table in SQL or
@@ -455,7 +455,7 @@ BigQuery to determine cohort builder search targets.
 Dump all participants matching a condition source concept ID (disclaimer: large):
 
 ```
-curl -H "Content-Type: application/json" "localhost:9200/cdr/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
+curl -H "Content-Type: application/json" "localhost:9200/cdr_person/_doc/_search?pretty" -d '{"query": {"term": {"condition_source_concept_ids": "44833466"}}}' > dump.json
 ```
 
 ###
@@ -567,11 +567,13 @@ oauth2l reset
 ```
 
 ### Generating survey_question_map.csv
-survey_question_map.csv is used to identify the order of appearance of the questions in actual survey pdfs.
+survey_question_map.csv is used to identify the order of appearance of the questions and the path of each question in actual survey pdfs.
 1. Id column is incremental and specifies the order of the questions in each survey.(Used to display the questions in the same order in databrowser)
 2. survey_concept_id holds the concept id of the survey. (can be fetched from the survey_module))
 3. question_concept_id holds the concept id of each question. (can be fetched from the survey pdf)
-4. path specifies the origin id of each question. If the question is the sub-question, then the id of the main question would be the path.
-5. is_main is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question.
+4. survey_order_number specifies the order of specific survey. (In the order they appear to participant while taking the survey)
+5. question_order_number specifies the order of specific survey. (In the order questions appear to participant while taking the survey)
+4. path specifies the traversing path of question. This column is used to display the branching logic in the ui. This would have the value in the form main_question_concept_id.answer_concept_id.sub_question_concept_id. 
+5. sub is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question. (Used to filter out the main questions)
 * NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones. Also, the missing questions would not be displayed as they do not have the counts in there to display.
 

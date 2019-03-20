@@ -5,8 +5,11 @@ import {ClarityModule} from '@clr/angular';
 import {ChartModule} from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {IndividualParticipantsChartsComponent} from 'app/cohort-review/individual-participants-charts/individual-participants-charts';
+import {filterStateStore} from 'app/cohort-review/review-state.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CohortReviewService, WorkspaceAccessLevel} from 'generated';
+import {WorkspaceAccessLevel} from 'generated';
+import {CohortReviewApi} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
@@ -18,6 +21,7 @@ describe('DetailTabsComponent', () => {
   let fixture: ComponentFixture<DetailTabsComponent>;
 
   beforeEach(async(() => {
+    registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [DetailTabsComponent, IndividualParticipantsChartsComponent],
       imports: [ChartModule, ClarityModule, RouterTestingModule],
@@ -27,7 +31,6 @@ describe('DetailTabsComponent', () => {
           provide: HighchartsStatic,
           useValue: highCharts
         },
-        {provide: CohortReviewService, useValue: new CohortReviewServiceStub()},
       ]
     })
       .compileComponents();
@@ -36,6 +39,7 @@ describe('DetailTabsComponent', () => {
       cdrVersionId: '1',
       accessLevel: WorkspaceAccessLevel.OWNER,
     });
+    filterStateStore.next({vocab: 'standard'});
   }));
 
   beforeEach(() => {

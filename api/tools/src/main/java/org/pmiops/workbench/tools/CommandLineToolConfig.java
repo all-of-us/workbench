@@ -4,6 +4,10 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
+import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.Config;
@@ -11,10 +15,17 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
+import org.springframework.retry.backoff.Sleeper;
+import org.springframework.retry.backoff.ThreadWaitSleeper;
 
 import java.io.IOException;
+
+import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
 /**
  * Contains Spring beans for dependencies which are different for classes run in the context of a
@@ -25,8 +36,23 @@ import java.io.IOException;
  */
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-// Scan the google module, which contains the CloudStorageService bean.
+@Import({RetryConfig.class, CommonConfig.class})
+// Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
+// Scan the FireCloud module, for FireCloudService bean.
+@ComponentScan("org.pmiops.workbench.firecloud")
+// Scan the ServiceAccounts class, but exclude other classes in auth (since they
+// bring in JPA-related beans, which include a whole bunch of other deps that are
+// more complicated than we need for now).
+//
+// TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
+// dependency-ridden classes (e.g. ProfileService) out instead.
+@ComponentScan(
+   basePackageClasses = ServiceAccounts.class,
+   useDefaultFilters = false,
+   includeFilters = {
+     @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
+   })
 public class CommandLineToolConfig {
 
   /**
@@ -41,10 +67,20 @@ public class CommandLineToolConfig {
    * @return
    */
   @Lazy
-  @Bean
-  GoogleCredential googleCredential(CloudStorageService cloudStorageService) {
+  @Bean(name= Constants.GSUITE_ADMIN_CREDS)
+  GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Lazy
+  @Bean(name=Constants.FIRECLOUD_ADMIN_CREDS)
+  GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getFireCloudAdminCredentials();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -73,5 +109,20 @@ public class CommandLineToolConfig {
   @Bean
   HttpTransport httpTransport() {
     return new ApacheHttpTransport();
+  }
+
+  @Bean
+  public Sleeper sleeper() {
+    return new ThreadWaitSleeper();
+  }
+
+  @Bean
+  public BackOffPolicy backOffPolicy(Sleeper sleeper) {
+    // Defaults to 100ms initial interval, doubling each time, with some random multiplier.
+    ExponentialRandomBackOffPolicy policy = new ExponentialRandomBackOffPolicy();
+    // Set max interval of 20 seconds.
+    policy.setMaxInterval(20000);
+    policy.setSleeper(sleeper);
+    return policy;
   }
 }

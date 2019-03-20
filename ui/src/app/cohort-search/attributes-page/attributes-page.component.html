@@ -19,9 +19,9 @@
         <input type="radio" name="EXISTS" [value]="true" formControlName="EXISTS" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
         <label>Any value (lab exists)</label>
       </div>
-      <div *ngIf="!form.value.EXISTS && form.value.NUM !== {}" class="or-circle">OR</div>
+      <div *ngIf="!attrs.EXISTS && attrs.NUM.length" class="or-circle">OR</div>
     </div>
-    <ng-container *ngIf="!form.value.EXISTS" formGroupName="NUM">
+    <ng-container *ngIf="!attrs.EXISTS" formGroupName="NUM">
       <div *ngFor="let attr of attrs.NUM; let i = index">
         <div class="attr-name-color">{{dropdowns.labels[i]}}</div>
           <div class="container" [formGroupName]="'num'+i">

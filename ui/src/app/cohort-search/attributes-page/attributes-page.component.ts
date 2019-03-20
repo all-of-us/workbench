@@ -215,8 +215,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   inputChange(input: number, index: number, name: string) {
     if (input) {
       let value = input.toString();
-      if (value && value.length > 3) {
-        value = value.slice(0, 3);
+      if (value && value.length > 10) {
+        value = value.slice(0, 10);
         this.form.controls.NUM.get(['num' + index, name]).setValue(value, {emitEvent: false});
       }
     }
@@ -270,10 +270,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
     const attrs = [];
     if (this.attrs.EXISTS) {
       name = this.node.get('name', '') + ' (Any)';
-      attrs.push({
-        name: AttrName.ANY,
-        operands: []
-      });
     } else {
       name = this.paramName;
       this.attrs.NUM.forEach((attr, i) => {
@@ -283,12 +279,15 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
           operands: attr.operator === 'BETWEEN' ? attr.operands : [attr.operands[0]],
           conceptId: attr.conceptId
         };
-        if (this.form.value.NUM['num' + i].operator === AttrName.ANY) {
+        if (this.form.value.NUM['num' + i].operator === AttrName.ANY
+          && this.node.get('subtype') === TreeSubType.BP) {
           paramAttr.name = AttrName.ANY;
           paramAttr.operands = [];
           delete(paramAttr.operator);
+          attrs.push(paramAttr);
+        } else if (this.form.value.NUM['num' + i].operator !== AttrName.ANY) {
+          attrs.push(paramAttr);
         }
-        attrs.push(paramAttr);
       });
 
       const catOperands = this.attrs.CAT.reduce((checked, current) => {
@@ -300,7 +299,7 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
       if (catOperands.length) {
         attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
       }
-      name += (this.isPM && attrs[0].name !== AttrName.ANY
+      name += (this.isPM && attrs[0] && attrs[0].name !== AttrName.ANY
         ? this.units[this.node.get('subtype')]
         : '') + ')';
     }

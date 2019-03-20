@@ -1,8 +1,11 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortBuilderService, CohortReview, CohortReviewService, DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated';
+import {DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated/fetch';
+import {CohortReview} from 'generated/fetch';
 import {fromJS, List} from 'immutable';
+import {from} from 'rxjs/observable/from';
 import {Subscription} from 'rxjs/Subscription';
 
 
@@ -29,16 +32,13 @@ export class OverviewPage implements OnInit, OnDestroy {
   private subscription: Subscription;
   domainsData = {};
   totalCount: any;
-  constructor(
-    private chartAPI: CohortBuilderService,
-    private reviewAPI: CohortReviewService,
-  ) {}
+  constructor() {}
 
   ngOnInit() {
     const workspace = currentWorkspaceStore.getValue();
     const cohort = currentCohortStore.getValue();
     const request = <SearchRequest>(JSON.parse(cohort.criteria));
-    this.chartAPI.getDemoChartInfo(+workspace.cdrVersionId, request)
+    from(cohortBuilderApi().getDemoChartInfo(+workspace.cdrVersionId, request))
       .map(response => (<DemoChartInfoListResponse>response).items)
       .subscribe(data => {
         this.data = fromJS(data);
@@ -67,8 +67,8 @@ export class OverviewPage implements OnInit, OnDestroy {
         conditionTitle: '',
         loading: true
       };
-      this.subscription = this.reviewAPI.getCohortChartData(ns, wsid, cid, cdrid, domainName,
-        limit, null)
+      this.subscription = from(cohortReviewApi()
+        .getCohortChartData(ns, wsid, cid, cdrid, domainName, limit, null))
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;

@@ -1,12 +1,13 @@
 import {Component, Input} from '@angular/core';
-import {ParticipantChartData} from 'generated';
+import {getChartObj} from 'app/cohort-search/utils';
+import {ReactWrapperBase} from 'app/utils/index';
+import {ParticipantChartData} from 'generated/fetch';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
-import {ReactWrapperBase} from 'app/utils/index';
 
 export class IndividualParticipantsCharts extends React.Component<{
   chartData: {
@@ -118,23 +119,6 @@ export class IndividualParticipantsCharts extends React.Component<{
     };
   }
 
-  getChartObj(chartObj: any) {
-    this.chart = chartObj;
-    const chartRef = this.chart.container.parentElement;
-    if (this.chart && typeof ResizeObserver === 'function') {
-      // Unbind window.onresize handler so we don't do double redraws
-      if (this.chart.unbindReflow) {
-        this.chart.unbindReflow();
-      }
-      // create observer to redraw charts on div resize
-      const ro = new ResizeObserver(() => {
-        if (this.chart) {
-          this.chart.reflow();
-        }
-      });
-      ro.observe(chartRef);
-    }
-  }
 
   render() {
     const {chartData: {loading, items}} = this.props;
@@ -142,7 +126,7 @@ export class IndividualParticipantsCharts extends React.Component<{
       return <HighchartsReact
         highcharts={highCharts}
         options={this.getOptions()}
-        callback={this.getChartObj}
+        callback={getChartObj}
       />;
     }
     return null;

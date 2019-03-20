@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -514,46 +515,36 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     User user = userProvider.get();
-    // This code is to migrate firecloud uuid to current workspaces
-    // once we are confident this has been done we can rework/remove
-    // much of this logic
+
+    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+        fireCloudService.getWorkspaces();
+    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
+        fcWorkspaces.stream().collect(
+            Collectors.toMap(
+                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                fcWorkspace -> fcWorkspace));
+
+    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
+        workspaceService.getDao().findAllByFirecloudUuidIn(fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
+
     List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
-    if (user != null) {
-      List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-          fireCloudService.getWorkspaces();
-      for (WorkspaceUserRole userRole : user.getWorkspaceUserRoles()) {
-        org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace = null;
-        org.pmiops.workbench.db.model.Workspace dbWorkspace;
-        dbWorkspace = userRole.getWorkspace();
-        List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> filteredFcWorkspaces =
-            fcWorkspaces
-                .stream()
-                .filter(w -> w.getWorkspace().getName().equals(TO_CLIENT_WORKSPACE.apply(userRole.getWorkspace()).getId()))
-                .collect(Collectors.toList());
-        if (!filteredFcWorkspaces.isEmpty()) {
-          fcWorkspace = filteredFcWorkspaces.get(0);
-        }
-        if (fcWorkspace == null) {
-          log.warning(String.format(
-              "workspace '%s' workbench ACLs are out of sync with Firecloud, " +
-              "omitting this workspace for current user", dbWorkspace.getFirecloudName()));
-        } else {
-          if (dbWorkspace.getFirecloudUuid() == null) {
-            // populate UUID
-            dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspace().getWorkspaceId());
-            workspaceService.getDao().save(dbWorkspace);
-          }
-          WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-          currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
-          if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
-          } else {
-            currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
-          }
-          responseList.add(currentWorkspace);
-        }
+
+    for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
+      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
+          fcUuidWorkspaceMap.get(dbWorkspace.getFirecloudUuid());
+      if (!(fcUuidWorkspaceMap.containsKey(dbWorkspace.getFirecloudUuid()))) {
+        continue;
       }
+      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
+      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
+      } else {
+        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
+      }
+      responseList.add(currentWorkspace);
     }
+
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(responseList);
     return ResponseEntity.ok(response);

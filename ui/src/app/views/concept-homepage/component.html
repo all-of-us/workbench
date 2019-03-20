@@ -106,5 +106,8 @@
     </div>
   </app-top-box>
 </ng-template>
-<app-concept-add-modal [selectedDomain]="selectedDomain.domain" [selectedConcepts]="conceptsToAdd"
-                       (saveComplete)="afterConceptsSaved()"></app-concept-add-modal>
+<app-concept-add-modal *ngIf="conceptAddOpen"
+        [selectedDomain]="selectedDomain"
+        [selectedConcepts]="conceptsToAdd"
+        [onSave]="afterConceptsSaved"
+        [onClose]="closeAddModal"></app-concept-add-modal>

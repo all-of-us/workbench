@@ -206,3 +206,7 @@ ul {
   padding-top: 0rem;
 }
 
+.card-footer .temporal-container {
+  display: flex;
+}
+

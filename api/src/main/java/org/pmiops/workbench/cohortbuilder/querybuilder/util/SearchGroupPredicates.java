@@ -3,7 +3,6 @@ package org.pmiops.workbench.cohortbuilder.querybuilder.util;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
-import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 
 import java.util.Arrays;
