@@ -45,10 +45,11 @@ const styles = reactStyles({
   title: {
     marginTop: 0,
     fontSize: '20px',
+    fontWeight: 600,
     color: '#262262',
   },
   description: {
-    margin: '0.75rem 0',
+    margin: '0.5rem 0',
     color: '#000000',
   },
   headerSection: {
