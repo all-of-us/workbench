@@ -12,6 +12,7 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {
+  setupModals,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -39,6 +40,7 @@ describe('AdminUserComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(AdminUserComponent);
+      setupModals(fixture);
       tick();
     });
   }));

@@ -91,6 +91,7 @@ export class AdminUserBypass extends React.Component<
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
                     enabled={editedModules.betaAccess}
+                    data-test-id='beta-access-toggle'
                     onToggle={() => {this.setState({editedModules:
                           fp.set('betaAccess', !editedModules.betaAccess, editedModules)}); } } />
             <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
@@ -100,11 +101,13 @@ export class AdminUserBypass extends React.Component<
           <hr style={{width: '100%', marginBottom: '0.5rem'}}/>
           <Toggle name='Compliance Training'
                   enabled={editedModules.complianceTraining}
+                  data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({editedModules:
                       fp.set('complianceTraining',
                         !editedModules.complianceTraining, editedModules)}); } }/>
           <Toggle name='eRA Commons Linking'
                   enabled={editedModules.eraCommons}
+                  data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({editedModules:
                       fp.set('eraCommons', !editedModules.eraCommons, editedModules)}); } } />
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
@@ -112,11 +115,12 @@ export class AdminUserBypass extends React.Component<
                         onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
             <IconButton icon='check'
+                        data-test-id='toggle-save'
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>
           </div>
         </div>}>
-      <Button type='secondaryLight'>
+      <Button type='secondaryLight' data-test-id='bypass-popup'>
         <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
                  style={{color: '#0077b7', marginRight: '1px', cursor: 'pointer'}}/>
         Bypass

@@ -1,4 +1,5 @@
 import {
+  AccessBypassRequest,
   BillingProjectStatus,
   DataAccessLevel,
   InvitationVerificationRequest,
@@ -6,6 +7,8 @@ import {
   Profile,
   ProfileApi
 } from 'generated/fetch';
+
+import {EmptyResponse} from 'generated/fetch/api';
 
 export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
@@ -23,6 +26,11 @@ export class ProfileStubVariables {
     organization: 'here',
     areaOfResearch: 'things',
     trainingCompletionTime: null,
+    betaAccessBypassTime: null,
+    complianceTrainingCompletionTime: null,
+    complianceTrainingBypassTime: null,
+    eraCommonsCompletionTime: null,
+    eraCommonsBypassTime: null
   };
 }
 
@@ -70,5 +78,30 @@ export class ProfileApiStub extends ProfileApi {
 
   public syncEraCommonsStatus() {
     return Promise.resolve(this.profile);
+  }
+
+  public bypassAccessRequirement(
+      userId: number, moduleName: string,
+      bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
+    return new Promise<EmptyResponse>(resolve => {
+      let valueToSet;
+      if (bypassed.isBypassed) {
+        valueToSet = 1;
+      } else {
+        valueToSet = null;
+      }
+      switch(moduleName) {
+        case 'complianceTraining':
+          this.profile.complianceTrainingBypassTime = valueToSet;
+          break;
+        case 'betaAccess':
+          this.profile.betaAccessBypassTime = valueToSet;
+          break;
+        case 'eraCommons':
+          this.profile.eraCommonsBypassTime = valueToSet;
+          break;
+      }
+      resolve({});
+    })
   }
 }
