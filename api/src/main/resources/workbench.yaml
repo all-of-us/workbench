@@ -761,7 +761,7 @@ paths:
         - in: body
           name: bypassed
           schema:
-            type: boolean
+            $ref: '#/definitions/AccessBypassRequest'
           description: >
             Whether the requirement should be bypassed or not. Defaults to
             true, so an empty body  will cause the requirement to be bypassed.
@@ -1756,6 +1756,14 @@ definitions:
       newStatus:
         $ref: "#/definitions/IdVerificationStatus"
 
+  AccessBypassRequest:
+    type: object
+    required:
+      - isBypassed
+    properties:
+      isBypassed:
+        type: boolean
+
   CohortListResponse:
     type: object
     required:
@@ -2147,14 +2155,6 @@ definitions:
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
-      termsOfServiceBypassTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user was bypassed for consenting to terms of service in milliseconds since the UNIX epoch.
-      termsOfServiceCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user consented to terms of service in milliseconds since the UNIX epoch.
       trainingCompletionTime:
         type: integer
         format: int64

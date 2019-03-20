@@ -2,6 +2,7 @@ import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core
 
 import {DataAccessLevel, Domain} from 'generated';
 import {Domain as FetchDomain} from 'generated/fetch';
+import {DataAccessLevel as FetchDataAccessLevel} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -40,6 +41,14 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
   return [
     DataAccessLevel.Registered,
     DataAccessLevel.Protected
+  ].includes(access);
+}
+
+// TODO: consolidate this with above when UI is fully converted
+export function hasRegisteredAccessFetch(access: FetchDataAccessLevel): boolean {
+  return [
+    FetchDataAccessLevel.Registered,
+    FetchDataAccessLevel.Protected
   ].includes(access);
 }
 

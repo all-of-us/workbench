@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import Calendar from 'react-calendar/dist/entry.nostyle';
 import RSelect from 'react-select';
+import Switch from 'react-switch';
 
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -190,3 +191,14 @@ export class DatePicker extends React.Component<
     </div>;
   }
 }
+
+export const Toggle = ({name, enabled, onToggle, ...props}) => {
+
+  return <label style={{display: 'flex', flexDirection: 'row', paddingBottom: '.5rem'}}>
+    <Switch onChange={onToggle} checked={enabled} checkedIcon={false}
+            {...props}
+    />
+    <span style={{marginLeft: '.5rem'}}>{name}</span>
+  </label>;
+
+};

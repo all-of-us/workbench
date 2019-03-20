@@ -52,9 +52,9 @@
     "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
-    "enableEraCommons": false,
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
     "enableDataUseAgreement": false,
-    "enableIdVerification": false
+    "enableBetaAccess": true
   }
 }

@@ -2,21 +2,14 @@ import {Component, OnInit} from '@angular/core';
 
 import {
   AuthDomainService,
-  IdVerificationReviewRequest,
-  IdVerificationStatus,
   Profile,
   ProfileService,
 } from 'generated';
 
-const verificationSortMap = {
-  [IdVerificationStatus.UNVERIFIED]: 0,
-  [IdVerificationStatus.REJECTED]: 1,
-  [IdVerificationStatus.VERIFIED]: 2
-};
-
 /**
- * Review ID Verifications. Users with the REVIEW_ID_VERIFICATION permission use this
- * to manually set (approve/reject) the ID verification state of a user.
+ * Users with the REVIEW_ID_VERIFICATION permission use this
+ * to manually set (approve/reject) the beta access state of a user, as well as
+ * other access module bypasses.
  */
 @Component({
   templateUrl: './component.html',
@@ -25,7 +18,6 @@ const verificationSortMap = {
 export class AdminUserComponent implements OnInit {
   profiles: Profile[] = [];
   contentLoaded = false;
-  IdVerificationStatus = IdVerificationStatus;
 
   constructor(
     private authDomainService: AuthDomainService,
@@ -46,18 +38,6 @@ export class AdminUserComponent implements OnInit {
         });
   }
 
-  setIdVerificationStatus(profile: Profile, newStatus: IdVerificationStatus): void {
-    if (profile.idVerificationStatus !== newStatus) {
-      this.contentLoaded = false;
-      const request = <IdVerificationReviewRequest> {newStatus};
-      this.profileService.reviewIdVerification(profile.userId, request).subscribe(
-        profilesResp => {
-          this.profiles = this.sortProfileList(profilesResp.profileList);
-          this.contentLoaded = true;
-        });
-    }
-  }
-
   updateUserDisabledStatus(disable: boolean, profile: Profile): void {
     this.authDomainService.updateUserDisabledStatus(
         {email: profile.username, disabled: disable}).subscribe(() => {
@@ -65,15 +45,21 @@ export class AdminUserComponent implements OnInit {
         });
   }
 
-  // We want to sort first by verification status, then by
+  // We want to sort first by beta access status, then by
   // submission time (newest at the top), then alphanumerically.
   private sortProfileList(profileList: Array<Profile>): Array<Profile> {
     return profileList.sort((a, b) => {
-      if (a.idVerificationStatus === b.idVerificationStatus) {
+      // put disabled accounts at the bottom
+      if (a.disabled && b.disabled) {
         return this.timeCompare(a, b);
       }
-      if (verificationSortMap[a.idVerificationStatus]
-        < verificationSortMap[b.idVerificationStatus]) {
+      if (a.disabled) {
+        return 1;
+      }
+      if (!!a.betaAccessBypassTime === !!b.betaAccessBypassTime) {
+        return this.timeCompare(a, b);
+      }
+      if (!!b.betaAccessBypassTime) {
         return -1;
       }
       return 1;

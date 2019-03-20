@@ -1,6 +1,7 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {IconComponent} from 'app/icons/icon/component';
 import colors from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -50,6 +51,19 @@ const buttonVariants = {
       backgroundColor: colors.backgroundGrey, color: colors.gray[4]
     },
     hover: {backgroundColor: colors.purple[0], color: '#ffffff'}
+  },
+  secondaryLight: {
+    style: {
+      ...styles.base,
+      border: '1px solid', borderRadius: '0.2rem', borderColor: '#0077b7',
+      backgroundColor: 'transparent',
+      color: '#0077b7'
+    },
+    disabledStyle: {
+      borderColor: colors.gray[4],
+      backgroundColor: colors.backgroundGrey, color: colors.gray[4]
+    },
+    hover: {backgroundColor: colors.blue[4], color: '#000'}
   },
   darklingPrimary: {
     style: {
@@ -138,6 +152,18 @@ export const MenuItem = ({icon, tooltip = '', disabled = false, children, ...pro
     >
       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>
       {children}
+    </Clickable>
+  </TooltipTrigger>;
+};
+
+export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ...props}) => {
+  return <TooltipTrigger side='left' content={tooltip}>
+    <Clickable
+        data-test-id={icon}
+        disabled={disabled}
+        {...props}
+    >
+      <IconComponent icon={icon} disabled={disabled} style={style}/>
     </Clickable>
   </TooltipTrigger>;
 };
