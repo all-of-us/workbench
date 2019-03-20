@@ -136,7 +136,9 @@ export class WorkbenchAccessTasks extends
               <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
                 <div style={{flexDirection: 'column', width: '70%'}}>
                   <div style={styles.infoBoxHeader}>Beta Access</div>
-                  <div style={styles.infoBoxBody}>The status of your beta access.</div>
+                  <div style={styles.infoBoxBody}>Beta access should be granted within 24-48 hours
+                    from the time of account creation.  If you are not granted access within
+                    that time frame, please contact support@researchallofus.org.</div>
                 </div>
                 <AccountLinkingButton failed={false}
                                       completed={betaAccessGranted}
