@@ -1,6 +1,6 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import {Domain, DataAccessLevel} from 'generated';
+import {DataAccessLevel, Domain} from 'generated';
 import {Domain as FetchDomain} from 'generated/fetch';
 import {DataAccessLevel as FetchDataAccessLevel} from 'generated/fetch';
 import {fromJS} from 'immutable';
