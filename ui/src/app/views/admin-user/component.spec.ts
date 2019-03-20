@@ -17,6 +17,8 @@ import {
 } from 'testing/test-helpers';
 
 import {AdminUserComponent} from 'app/views/admin-user/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
+import {AdminUserBypassComponent} from 'app/views/admin-user-bypass/component';
 
 describe('AdminUserComponent', () => {
   let fixture: ComponentFixture<AdminUserComponent>;
@@ -26,7 +28,9 @@ describe('AdminUserComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AdminUserComponent
+        AdminUserComponent,
+        AdminUserBypassComponent,
+        ToolTipComponent
       ],
       providers: [
         { provide: AuthDomainService, useValue: {} },
