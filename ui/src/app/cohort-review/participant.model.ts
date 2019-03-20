@@ -14,6 +14,10 @@ export class Participant implements ParticipantCohortStatus {
     return Participant.formatStatusForText(this.status);
   }
 
+  get formattedGenderText() {
+    return this.gender.charAt(0).toUpperCase() + this.gender.slice(1).toLowerCase();
+  }
+
   birthDate: ParticipantCohortStatus['birthDate'];
 
   /* Demographic information */

@@ -9,7 +9,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortReview,
@@ -24,14 +24,32 @@ import * as React from 'react';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
-  {field: 'birthDate', name: 'DOB'},
-  {field: 'gender', name: 'Sex'},
+  {field: 'birthDate', name: 'Date of Birth'},
+  {field: 'formattedGenderText', name: 'Sex'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},
   {field: 'formattedStatusText', name: 'Status'}
 ];
 const rows = 25;
 const styles = reactStyles({
+  backBtn: {
+    padding: 0,
+    border: 0,
+    fontSize: '14px',
+    color: '#2691d0',
+    background: 'transparent',
+    cursor: 'pointer',
+  },
+  title: {
+    marginTop: 0,
+    fontSize: '20px',
+    fontWeight: 600,
+    color: '#262262',
+  },
+  description: {
+    margin: '0.5rem 0',
+    color: '#000000',
+  },
   container: {
     position: 'relative',
     minHeight: '15rem'
@@ -50,7 +68,7 @@ const styles = reactStyles({
   },
   columnBody: {
     background: '#ffffff',
-    padding: '0.5rem 0.5rem 0.3rem',
+    padding: '0.5rem 0.5rem 0.3rem 0.75rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,
@@ -69,15 +87,10 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     width: '2rem',
   },
-
-  filterIcon: {
-    color: '#0086C1',
-    fontSize: '0.5rem',
-    float: 'right'
-  },
   sortIcon: {
     color: '#2691D0',
-    fontSize: '0.4rem'
+    fontSize: '0.4rem',
+    float: 'right'
   },
   overlayHeader: {
     padding: '0.3rem',
@@ -109,6 +122,11 @@ const styles = reactStyles({
     textAlign: 'center',
   }
 });
+
+const idColumn = {
+  ...styles.columnBody,
+  color: '#2691D0'
+}
 
 export interface ParticipantsTableState {
   data: Array<any>;
@@ -202,19 +220,33 @@ export const ParticipantsTable = withCurrentWorkspace()(
         });
     }
 
+    backToCohort() {
+      const {id, namespace} = this.props.workspace;
+      navigate(['/workspaces', namespace, id, 'cohorts']);
+    }
+
     onRowClick = (event: any) => {
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       console.log(event);
-      navigate(
-        ['workspaces', namespace, id, 'cohorts', cid, 'review', 'participants', event.data.participantId]
-      );
+      navigate([
+        'workspaces',
+        namespace,
+        id,
+        'cohorts',
+        cid,
+        'review',
+        'participants',
+        event.data.participantId
+      ]);
     }
 
     onPage = (event: any) => {
-      console.log(event);
-      this.setState({loading: true, page: event.page});
-      setTimeout(() => this.getTableData());
+      const {page} = this.state;
+      if (event.page !== page) {
+        this.setState({loading: true, page: event.page});
+        setTimeout(() => this.getTableData());
+      }
     }
 
     columnSort = (sortField: string) => {
@@ -229,6 +261,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
 
     render() {
       const {data, loading, page, sortField, sortOrder, total} = this.state;
+      const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
       if (data !== null) {
@@ -240,6 +273,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
       const columns = fields.map(col => {
+        const bodyStyle = col.field === 'participantId' ? idColumn : styles.columnBody;
         const asc = sortField === col.field && sortOrder === 1;
         const desc = sortField === col.field && sortOrder === -1;
         const header = <React.Fragment>
@@ -253,7 +287,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         </React.Fragment>;
         return <Column
           style={styles.tableBody}
-          bodyStyle={styles.columnBody}
+          bodyStyle={bodyStyle}
           key={col.field}
           field={col.field}
           header={header}
@@ -261,6 +295,15 @@ export const ParticipantsTable = withCurrentWorkspace()(
       })
       return <div>
         <style>{css}</style>
+        <button
+          style={styles.backBtn}
+          type='button'
+          title='Go back to cohort'
+          onClick={() => this.backToCohort()}>
+          Back to cohort
+        </button>
+        <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
+        <div style={styles.description}>{cohort.description}</div>
         {data && <DataTable
           style={styles.table}
           value={data}
