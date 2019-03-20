@@ -86,7 +86,7 @@ export class AdminUserBypass extends React.Component<
     return <PopupTrigger
         side='bottom'
         onClose={() => {this.cancel(); this.setState({open: false}); }}
-        onOpen={() => this.setState({open: true})}
+        onOpen={() => {this.setState({open: true}); console.log(this.props.profile); }}
         content={<div style={{padding: '1rem', display: 'flex', flexDirection: 'column'}}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'

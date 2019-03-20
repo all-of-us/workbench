@@ -127,6 +127,8 @@ public class UserService {
     // // TODO: can be removed once we totally move off old validation
     //   Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
 
+    log.severe(String.valueOf(betaAccessGranted));
+
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = !user.getDisabled()
     // TODO: Add when we add this module

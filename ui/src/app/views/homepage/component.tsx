@@ -17,7 +17,7 @@ import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withStyle, withUserProfile} from 'app/utils';
+import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withStyle, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
 import {
@@ -90,6 +90,7 @@ const AccountLinkingButton: React.FunctionComponent<{
 };
 
 export interface WorkbenchAccessTasksProps {
+  betaAccessGranted: boolean;
   eraCommonsLinked: boolean;
   eraCommonsError: string;
   trainingCompleted: boolean;
@@ -118,7 +119,7 @@ export class WorkbenchAccessTasks extends
 
   render() {
     const {trainingWarningOpen} = this.state;
-    const {eraCommonsLinked, eraCommonsError, trainingCompleted} = this.props;
+    const {eraCommonsLinked, eraCommonsError, trainingCompleted, betaAccessGranted} = this.props;
     return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
         <div style={{display: 'flex', flexDirection: 'column', width: '50%', padding: '3% 0 0 3%'}}>
           <div style={styles.mainHeader}>Researcher Workbench</div>
@@ -132,6 +133,20 @@ export class WorkbenchAccessTasks extends
         </div>
         <div style={{flexDirection: 'column', width: '50%', padding: '1rem'}}>
           <div style={{...styles.infoBox, flexDirection: 'column'}}>
+              <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                <div style={{flexDirection: 'column', width: '70%'}}>
+                  <div style={styles.infoBoxHeader}>Beta Access</div>
+                  <div style={styles.infoBoxBody}>The status of your beta access.</div>
+                </div>
+                <AccountLinkingButton failed={false}
+                                      completed={betaAccessGranted}
+                                      defaultText='Pending'
+                                      completedText='Granted'
+                                      failedText='Denied'
+                                      onClick={() => {}}/>
+              </div>
+          </div>
+          <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
               <div style={{flexDirection: 'column', width: '70%'}}>
                 <div style={styles.infoBoxHeader}>Login to eRA Commons</div>
@@ -186,7 +201,7 @@ export const homepageStyles = reactStyles({
     flexDirection: 'column', justifyContent: 'space-between'
   },
   singleCard: {
-    height: '33.4%', width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
+    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
     display: 'flex', flexDirection: 'column', borderRadius: '5px',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
@@ -245,6 +260,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
   { profileState: { profile: Profile, reload: Function } },
   { accessTasksLoaded: boolean,
     accessTasksRemaining: boolean,
+    betaAccessGranted: boolean,
     billingProjectInitialized: boolean,
     eraCommonsError: string,
     eraCommonsLinked: boolean,
@@ -263,6 +279,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.state = {
       accessTasksLoaded: false,
       accessTasksRemaining: undefined,
+      betaAccessGranted: undefined,
       billingProjectInitialized: false,
       eraCommonsError: '',
       eraCommonsLinked: undefined,
@@ -273,10 +290,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
       videoOpen: false,
       videoLink: '',
     };
-  }
-
-  get accessTasksRemaining(): boolean {
-    return !(this.state.eraCommonsLinked && this.state.trainingCompleted);
   }
 
   componentDidMount() {
@@ -352,6 +365,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
         console.error('error fetching moodle training status');
       }
 
+      this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
+
       const {workbenchAccessTasks} = queryParamsStore.getValue();
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
@@ -360,7 +375,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
           const config = await configApi().getConfig();
           if (environment.enableComplianceLockout && config.enforceRegistered) {
             this.setState({
-              accessTasksRemaining: this.accessTasksRemaining,
+              accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
               accessTasksLoaded: true});
           } else {
             this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
@@ -392,7 +407,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
 
   render() {
-    const {billingProjectInitialized, videoOpen, accessTasksLoaded,
+    const {billingProjectInitialized, betaAccessGranted, videoOpen, accessTasksLoaded,
         accessTasksRemaining, eraCommonsLinked, eraCommonsError, firstVisitTraining,
         trainingCompleted, quickTour, videoLink} = this.state;
     const quickTourResources = [
@@ -438,7 +453,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 (<WorkbenchAccessTasks eraCommonsLinked={eraCommonsLinked}
                                        eraCommonsError={eraCommonsError}
                                        trainingCompleted={trainingCompleted}
-                                       firstVisitTraining={firstVisitTraining}/>
+                                       firstVisitTraining={firstVisitTraining}
+                                       betaAccessGranted={betaAccessGranted}/>
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={homepageStyles.contentWrapperLeft}>
