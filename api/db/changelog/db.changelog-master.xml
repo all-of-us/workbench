@@ -68,4 +68,5 @@
   <include file="changelog/db.changelog-58-update-access-modules.xml"/>
   <include file="changelog/db.changelog-59-cluster-config-default.xml"/>
   <include file="changelog/db.changelog-60-backfill-bypass.xml"/>
+  <include file="changelog/db.changelog-61.xml"/>
 </databaseChangeLog>

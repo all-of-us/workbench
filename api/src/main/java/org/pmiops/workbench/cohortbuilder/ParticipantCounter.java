@@ -29,8 +29,9 @@ public class ParticipantCounter {
       "where\n";
 
   private static final String ID_SQL_TEMPLATE =
-    "select rand() as x, person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+    "select rand() as x, ${table}.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n" +
       "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "left join `${projectId}.${dataSetId}.death` death on (${table}.person_id = death.person_id)\n" +
       "where\n";
 
   private static final String DEMO_CHART_INFO_SQL_TEMPLATE =

@@ -25,6 +25,7 @@ import * as React from 'react';
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
   {field: 'birthDate', name: 'Date of Birth'},
+  {field: 'formattedDeceasedText', name: 'Deceased'},
   {field: 'formattedGenderText', name: 'Sex'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},

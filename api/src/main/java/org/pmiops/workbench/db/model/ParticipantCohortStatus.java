@@ -26,6 +26,7 @@ public class ParticipantCohortStatus {
     private String race;
     private Long ethnicityConceptId;
     private String ethnicity;
+    private boolean deceased;
 
     @EmbeddedId
     @AttributeOverrides({
@@ -169,6 +170,20 @@ public class ParticipantCohortStatus {
 
     public ParticipantCohortStatus ethnicity(String ethnicity) {
         this.ethnicity = ethnicity;
+        return this;
+    }
+
+    @Column(name = "deceased")
+    public boolean getDeceased() {
+        return deceased;
+    }
+
+    public void setDeceased(boolean deceased) {
+        this.deceased = deceased;
+    }
+
+    public ParticipantCohortStatus deceased(boolean deceased) {
+        this.deceased = deceased;
         return this;
     }
 

@@ -12,6 +12,13 @@ export const initialFilterState = {
     ageMax: '',
     visits: null
   },
+  participants: {
+    participantId: null,
+    gender: ['Select All'],
+    race: ['Select All'],
+    ethnicity: ['Select All'],
+    status: ['Select All'],
+  },
   tabs: {
     ALL_EVENTS: {
       standardVocabulary: ['Select All'],
@@ -43,3 +50,4 @@ export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore =
   new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
+export const demoOptions = new BehaviorSubject<any>(null);

@@ -113,14 +113,16 @@ public class ParticipantCohortStatusDaoTest {
                 .birthDate(new Date(System.currentTimeMillis()))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
-                .raceConceptId(1L);
+                .raceConceptId(1L)
+                .deceased(false);
         ParticipantCohortStatus pcs2 = new ParticipantCohortStatus()
                 .participantKey(key2)
                 .statusEnum(CohortStatus.EXCLUDED)
                 .birthDate(new Date(System.currentTimeMillis()))
                 .ethnicityConceptId(1L)
                 .genderConceptId(1L)
-                .raceConceptId(1L);
+                .raceConceptId(1L)
+                .deceased(false);
 
         participantCohortStatusDao.saveParticipantCohortStatusesCustom(Arrays.asList(pcs1, pcs2));
 
