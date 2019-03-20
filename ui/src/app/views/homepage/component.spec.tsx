@@ -31,6 +31,7 @@ describe('WorkbenchAccessTasks', () => {
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
+      betaAccessGranted: true
     }
   });
 

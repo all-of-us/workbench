@@ -109,9 +109,6 @@ public class UserService {
   private void updateDataAccessLevel(User user) {
     boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
       user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
-    // TODO: Add in when we add this module
-    // boolean dataUseAgreementCompliant = user.getDataUseAgreementCompletionTime() != null ||
-    // user.getDataUseAgreementBypassTime() != null || !configProvider.get().access.enableDataUseAgreement;
     boolean eraCommonsCompliant = user.getEraCommonsBypassTime() != null ||
       !configProvider.get().access.enableEraCommons || user.getEraCommonsCompletionTime() != null;
     boolean complianceTrainingCompliant = user.getComplianceTrainingCompletionTime() != null ||
@@ -119,22 +116,8 @@ public class UserService {
     boolean betaAccessGranted = user.getBetaAccessBypassTime() != null ||
             !configProvider.get().access.enableBetaAccess;
 
-    // TODO: Add in when we add idVerification module
-    // boolean idVerificationCompliant = user.getIdVerificationCompletionTime() != null ||
-    //   user.getIdVerificationBypassTime() != null || !configProvider.get().access.enableIdVerification ||
-    // TODO: Add in when we add demographics survey
-    // boolean demographicSurveyComplete = user.getDemographicSurveyCompletionTime() != null;
-    // // TODO: can be removed once we totally move off old validation
-    //   Optional.ofNullable(user.getIdVerificationIsValid()).orElse(false);
-
-    log.severe(String.valueOf(betaAccessGranted));
-
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     boolean shouldBeRegistered = !user.getDisabled()
-    // TODO: Add when we add this module
-    //  && dataUseAgreementCompliant
-    //  && idVerificationCompliant
-    //  && demographicSurveyComplete
         && complianceTrainingCompliant
         && eraCommonsCompliant
         && betaAccessGranted
