@@ -18,7 +18,15 @@ export class Participant implements ParticipantCohortStatus {
     return this.gender.charAt(0).toUpperCase() + this.gender.slice(1).toLowerCase();
   }
 
+  get formattedDeceasedText() {
+    if (this.deceased === null) {
+      return;
+    }
+    return this.deceased ? 'Deceased' : 'Not Deceased';
+  }
+
   birthDate: ParticipantCohortStatus['birthDate'];
+  deceased: ParticipantCohortStatus['deceased'];
 
   /* Demographic information */
   gender: ParticipantCohortStatus['gender'];
@@ -28,13 +36,14 @@ export class Participant implements ParticipantCohortStatus {
   /* Constructor & static methods */
   constructor(obj?: ParticipantCohortStatus) {
     if (obj) {
-      const {participantId, status, gender, race, ethnicity, birthDate} = obj;
+      const {participantId, status, gender, race, ethnicity, birthDate, deceased} = obj;
       this.id = participantId;
       this.status = status;
       this.gender = gender;
       this.race = race;
       this.ethnicity = ethnicity;
       this.birthDate = birthDate;
+      this.deceased = deceased;
     }
   }
 

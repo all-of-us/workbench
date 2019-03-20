@@ -607,6 +607,8 @@ definitions:
         format: int64
       ethnicity:
         type: string
+      deceased:
+        type: boolean
 
   ModifyCohortStatusRequest:
     type: object

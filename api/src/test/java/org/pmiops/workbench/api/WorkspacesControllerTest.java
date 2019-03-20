@@ -351,6 +351,7 @@ public class WorkspacesControllerTest {
         .put("race_concept_id", 3)
         .put("ethnicity_concept_id", 4)
         .put("count", 5)
+        .put("deceased", 6)
         .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
