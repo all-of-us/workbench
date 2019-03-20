@@ -40,9 +40,7 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
               hasRegisteredAccess(profile.dataAccessLevel) :
               (!!profile.betaAccessBypassTime &&
                 profile.emailVerificationStatus === 'subscribed');
-
           if (hasAccess) {
-            console.log('has access');
             return Observable.from([true]);
           }
           this.router.navigate(['/']);

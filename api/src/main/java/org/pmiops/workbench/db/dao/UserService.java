@@ -243,74 +243,81 @@ public class UserService {
     });
   }
 
-  public User setDataUseAgreementBypassTime(Timestamp bypassTime) {
+  public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setDataUseAgreementBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setComplianceTrainingBypassTime(Timestamp bypassTime) {
+  public User setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setComplianceTrainingBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setBetaAccessBypassTime(Timestamp bypassTime) {
+  public User setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setBetaAccessBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setEmailVerificationBypassTime(Timestamp bypassTime) {
+  public User setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setEmailVerificationBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setEraCommonsBypassTime(Timestamp bypassTime) {
+  public User setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setEraCommonsBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setIdVerificationBypassTime(Timestamp bypassTime) {
+  public User setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setIdVerificationBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
-  public User setTwoFactorAuthBypassTime(Timestamp bypassTime) {
+  public User setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+    User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(new Function<User, User>() {
       @Override
       public User apply(User user) {
         user.setTwoFactorAuthBypassTime(bypassTime);
         return user;
       }
-    });
+    }, user);
   }
 
   public User setEraCommonsStatus(NihStatus nihStatus) {

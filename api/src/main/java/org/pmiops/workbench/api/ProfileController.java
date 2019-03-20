@@ -673,7 +673,6 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
-    User user = userDao.findUserByUserId(userId);
     Timestamp valueToSet;
     Boolean bypassed = request.getIsBypassed();
     if (bypassed) {
@@ -683,25 +682,25 @@ public class ProfileController implements ProfileApiDelegate {
     }
     switch (moduleName) {
       case "dataUseAgreement":
-        user = userService.setDataUseAgreementBypassTime(valueToSet);
+        userService.setDataUseAgreementBypassTime(userId, valueToSet);
         break;
       case "complianceTraining":
-        user = userService.setComplianceTrainingBypassTime(valueToSet);
+        userService.setComplianceTrainingBypassTime(userId, valueToSet);
         break;
       case "betaAccess":
-        user = userService.setBetaAccessBypassTime(valueToSet);
+        userService.setBetaAccessBypassTime(userId, valueToSet);
         break;
       case "emailVerification":
-        user = userService.setEmailVerificationBypassTime(valueToSet);
+        userService.setEmailVerificationBypassTime(userId, valueToSet);
         break;
       case "eraCommons":
-        user = userService.setEraCommonsBypassTime(valueToSet);
+        userService.setEraCommonsBypassTime(userId, valueToSet);
         break;
       case "idVerification":
-        user = userService.setIdVerificationBypassTime(valueToSet);
+        userService.setIdVerificationBypassTime(userId, valueToSet);
         break;
       case "twoFactorAuth":
-        user = userService.setTwoFactorAuthBypassTime(valueToSet);
+        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
         break;
       default:
         throw new BadRequestException("There is no access module named: " + moduleName);
