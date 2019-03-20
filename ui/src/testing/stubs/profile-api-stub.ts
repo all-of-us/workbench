@@ -81,8 +81,8 @@ export class ProfileApiStub extends ProfileApi {
   }
 
   public bypassAccessRequirement(
-      userId: number, moduleName: string,
-      bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
+    userId: number, moduleName: string,
+    bypassed?: AccessBypassRequest, options?: any): Promise<EmptyResponse> {
     return new Promise<EmptyResponse>(resolve => {
       let valueToSet;
       if (bypassed.isBypassed) {
@@ -90,7 +90,7 @@ export class ProfileApiStub extends ProfileApi {
       } else {
         valueToSet = null;
       }
-      switch(moduleName) {
+      switch (moduleName) {
         case 'complianceTraining':
           this.profile.complianceTrainingBypassTime = valueToSet;
           break;
@@ -102,6 +102,6 @@ export class ProfileApiStub extends ProfileApi {
           break;
       }
       resolve({});
-    })
+    });
   }
 }
