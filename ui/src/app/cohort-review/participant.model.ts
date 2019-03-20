@@ -15,6 +15,9 @@ export class Participant implements ParticipantCohortStatus {
   }
 
   get formattedGenderText() {
+    if (!this.gender) {
+      return;
+    }
     return this.gender.charAt(0).toUpperCase() + this.gender.slice(1).toLowerCase();
   }
 
