@@ -53,7 +53,6 @@ import {SignedInComponent} from './views/signed-in/component';
 import {SlidingFabComponent} from './views/sliding-fab/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
 import {TopBoxComponent} from './views/top-box/component';
-import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceNavBarComponent} from './views/workspace-nav-bar/component';
@@ -169,7 +168,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     StigmatizationPageComponent,
     ToolTipComponent,
     TopBoxComponent,
-    UnregisteredComponent,
     WorkspaceComponent,
     WorkspaceEditComponent,
     WorkspaceListComponent,
