@@ -740,11 +740,11 @@ public class ProfileControllerTest {
     createUser();
     IdVerificationStatus status = IdVerificationStatus.REJECTED;
     IdVerificationReviewRequest request = new IdVerificationReviewRequest().newStatus(status);
-    doNothing().when(mailService).sendIdVerificationCompleteEmail(any(), any(), any());
+    doNothing().when(mailService).sendBetaAccessCompleteEmail(any(), any());
 
     profileController.reviewIdVerification(
         user.getUserId(), request);
-    verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
+    verify(mailService, times(1)).sendBetaAccessCompleteEmail(any(), any());
   }
 
   @Test

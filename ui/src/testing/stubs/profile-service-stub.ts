@@ -8,8 +8,8 @@ import {
   PageVisit,
   Profile,
   ProfileService,
-  UsernameTakenResponse,
-  UserListResponse
+  UserListResponse,
+  UsernameTakenResponse
 } from 'generated';
 
 export class ProfileStubVariables {

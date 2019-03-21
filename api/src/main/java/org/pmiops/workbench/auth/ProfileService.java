@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -73,13 +72,6 @@ public class ProfileService {
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
-    if (user.getIdVerificationIsValid() == null) {
-      profile.setIdVerificationStatus(IdVerificationStatus.UNVERIFIED);
-    } else if (!user.getIdVerificationIsValid()) {
-      profile.setIdVerificationStatus(IdVerificationStatus.REJECTED);
-    } else {
-      profile.setIdVerificationStatus(IdVerificationStatus.VERIFIED);
-    }
 
     if (user.getTermsOfServiceCompletionTime() != null) {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());

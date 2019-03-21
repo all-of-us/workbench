@@ -450,10 +450,10 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> requestBetaAccess() {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     User user = userProvider.get();
-    if (user.getBetaAccessRequestTime() == null || !user.getBetaAccessRequestTime()) {
+    if (user.getBetaAccessRequestTime() == null) {
       log.log(Level.INFO, "Sending beta access request email.");
       try {
-        mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
+        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getEmail());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting beta access request", e);
       }
