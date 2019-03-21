@@ -17,7 +17,6 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
-import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
@@ -47,12 +46,6 @@ const routes: Routes = [
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
-      }, {
-        path: 'unregistered',
-        component: UnregisteredComponent,
-        data: {
-          title: 'Awaiting ID Verification'
-        }
       }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
