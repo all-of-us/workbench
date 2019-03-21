@@ -42,7 +42,8 @@ export class Participant implements ParticipantCohortStatus {
       const {participantId, status, gender, race, ethnicity, birthDate, deceased} = obj;
       this.id = participantId;
       this.status = status;
-      this.gender = gender;
+      this.gender = !!gender ? gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase()
+        : gender;
       this.race = race;
       this.ethnicity = ethnicity;
       this.birthDate = birthDate;
