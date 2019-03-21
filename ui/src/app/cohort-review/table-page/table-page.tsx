@@ -1,10 +1,13 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
-import {Subscription} from 'rxjs/Subscription';
 
-import {Participant} from 'app/cohort-review/participant.model';
-import {cohortReviewStore, vocabOptions} from 'app/cohort-review/review-state.service';
+import {
+  cohortReviewStore,
+  multiOptions,
+  vocabOptions
+} from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -12,24 +15,28 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
 
 import {
-  CohortReview,
+  CohortStatus,
+  Filter,
+  Operator,
   PageFilterType,
+  ParticipantCohortStatus,
   ParticipantCohortStatusColumns as Columns,
   ParticipantCohortStatuses as Request,
   SortOrder,
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
 const fields = [
   {field: 'participantId', name: 'Participant ID'},
   {field: 'birthDate', name: 'Date of Birth'},
-  {field: 'formattedDeceasedText', name: 'Deceased'},
-  {field: 'formattedGenderText', name: 'Sex'},
+  {field: 'deceased', name: 'Deceased'},
+  {field: 'gender', name: 'Sex'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},
-  {field: 'formattedStatusText', name: 'Status'}
+  {field: 'status', name: 'Status'},
 ];
 const rows = 25;
 const styles = reactStyles({
@@ -127,7 +134,16 @@ const styles = reactStyles({
 const idColumn = {
   ...styles.columnBody,
   color: '#2691D0'
-}
+};
+let multiFilters: any;
+const reverseColumnEnum = {
+  participantId: Columns.PARTICIPANTID,
+  gender: Columns.GENDER,
+  race: Columns.RACE,
+  ethnicity: Columns.ETHNICITY,
+  birthDate: Columns.BIRTHDATE,
+  status: Columns.STATUS
+};
 
 export interface ParticipantsTableState {
   data: Array<any>;
@@ -136,31 +152,11 @@ export interface ParticipantsTableState {
   sortField: string;
   sortOrder: number;
   total: number;
+  filters: any;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData}, ParticipantsTableState> {
-
-    readonly ReverseColumnEnum = {
-      participantId: Columns.PARTICIPANTID,
-      gender: Columns.GENDER,
-      race: Columns.RACE,
-      ethnicity: Columns.ETHNICITY,
-      birthDate: Columns.BIRTHDATE,
-      status: Columns.STATUS
-    };
-
-    participants: Participant[];
-
-    review: CohortReview;
-    loading: boolean;
-    subscription: Subscription;
-    genders: string[] = [];
-    races: string[] = [];
-    ethnicities: string[] = [];
-    cohortName: string;
-    tab = 'participants';
-
     constructor(props: any) {
       super(props);
       this.state = {
@@ -169,7 +165,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
         page: 0,
         sortField: 'participantId',
         sortOrder: 1,
-        total: null
+        total: null,
+        filters: {RACE: ['Select All'], GENDER: ['Select All'], ETHNICITY: ['Select All'], STATUS: ['Select All']}
       };
     }
 
@@ -177,48 +174,119 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       this.getTableData();
-      cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
-        const extract = arr => fp.uniq(arr.map(i => i.conceptName)) as string[];
-        this.races = extract(data.raceList);
-        this.genders = extract(data.genderList);
-        this.ethnicities = extract(data.ethnicityList);
-      });
+      if (!multiOptions.getValue()) {
+        cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+          const extract = (arr, _type?) => fp.uniq([
+            ...arr.map(i => {
+              return {
+                name: _type === Columns.GENDER
+                  ? this.formatGenderForText(i.conceptName) : i.conceptName,
+                value: i.conceptName
+              };
+            }),
+            {name: 'Select All', value: 'Select All'}
+          ]) as string[];
+          multiFilters = {
+            RACE: extract(data.raceList),
+            GENDER: extract(data.genderList, Columns.GENDER),
+            ETHNICITY: extract(data.ethnicityList),
+            STATUS: [
+              {name: 'Included', value: CohortStatus.INCLUDED},
+              {name: 'Excluded', value: CohortStatus.EXCLUDED},
+              {name: 'Needs Further Review', value: CohortStatus.NEEDSFURTHERREVIEW},
+              {name: 'Unreviewed', value: CohortStatus.NOTREVIEWED},
+              {name: 'Select All', value: 'Select All'}
+            ]
+          };
+          multiOptions.next(multiFilters);
+        });
+      } else {
+        multiFilters = multiOptions.getValue();
+      }
       if (!vocabOptions.getValue()) {
         cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
           .then(response => {
-            const filters = {Source: {}, Standard: {}};
+            const vocabFilters = {Source: {}, Standard: {}};
             response.items.forEach(item => {
-              filters[item.type][item.domain] = [
-                ...(filters[item.type][item.domain] || []),
+              vocabFilters[item.type][item.domain] = [
+                ...(vocabFilters[item.type][item.domain] || []),
                 item.vocabulary
               ];
             });
-            vocabOptions.next(filters);
+            vocabOptions.next(vocabFilters);
           });
       }
     }
 
     getTableData(): void {
-      const {page, sortField, sortOrder} = this.state;
+      const {filters, page, sortField, sortOrder} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
       const query = {
         page: page,
         pageSize: rows,
-        sortColumn: this.ReverseColumnEnum[sortField],
+        sortColumn: reverseColumnEnum[sortField],
         sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-        filters: {items: []},
+        filters: {items: this.mapFilters()},
         pageFilterType: PageFilterType.ParticipantCohortStatuses,
       } as Request;
       cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
         .then(review => {
           cohortReviewStore.next(review);
           this.setState({
-            data: review.participantCohortStatuses.map(Participant.fromStatus),
+            data: review.participantCohortStatuses.map(this.mapData),
             loading: false,
             total: review.queryResultSize
           });
         });
+    }
+
+    mapFilters = () => {
+      const {filters} = this.state;
+      return Object.keys(filters).reduce((acc, _type) => {
+        const values = filters[_type].filter(val => val !== 'Select All');
+        if (values.length) {
+          const filter = {
+            property: Columns[_type],
+            values: values,
+            operator: Operator.IN
+          } as Filter;
+          acc.push(filter);
+        }
+        return acc;
+      }, []);
+    }
+
+    mapData = (participant: ParticipantCohortStatus) => {
+      const {participantId, status, gender, race, ethnicity, birthDate, deceased} = participant;
+      return {
+        participantId,
+        status: this.formatStatusForText(status),
+        gender: !!gender ? gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase() : gender,
+        race,
+        ethnicity,
+        birthDate,
+        deceased: deceased ? 'Yes' : null
+      };
+    }
+
+    formatStatusForText(status: CohortStatus): string {
+      return {
+        [CohortStatus.EXCLUDED]: 'Excluded',
+        [CohortStatus.INCLUDED]: 'Included',
+        [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
+        [CohortStatus.NOTREVIEWED]: '',
+      }[status];
+    }
+
+    formatGenderForText(gender: string): string {
+      return {
+        AMBIGUOUS: 'Ambiguous',
+        FEMALE: 'Female',
+        MALE: 'Male',
+        OTHER: 'Other',
+        UNKNOWN: 'Unknown'
+      }[gender];
     }
 
     backToCohort() {
@@ -260,13 +328,85 @@ export const ParticipantsTable = withCurrentWorkspace()(
       setTimeout(() => this.getTableData());
     }
 
+    filterTemplate(column: string) {
+      const {data, filters} = this.state;
+      if (!data) {
+        return {};
+      }
+      const colType = reverseColumnEnum[column]
+      const options = multiFilters[colType];
+      // const counts = {total: 0};
+      // data.forEach(item => {
+      //   counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+      //   counts.total++;
+      // });
+      // let options: Array<any>;
+      // if (colName === 'domain') {
+      //   options = domains.map(option => {
+      //     return {name: option, count: counts[option] || 0};
+      //   });
+      // } else {
+      //   const vocabs = colName === 'standardVocabulary'
+      //     ? vocabOptions.getValue().Standard
+      //     : vocabOptions.getValue().Source;
+      //   options = vocabs[domain] ? vocabs[domain].map(option => {
+      //     return {name: option, count: counts[option] || 0};
+      //   }) : [];
+      // }
+      // options.push({name: 'Select All', count: counts.total});
+      // if (checkedItems[colName].find(i => i === 'Select All')) {
+      //   checkedItems[colName] = options.map(opt => opt.name);
+      // }
+      let fl: any;
+
+      return <span>
+        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          {column === 'participantId' && <TextInput />}
+          {column !== 'participantId' && options.map((opt, i) => (
+            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
+              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
+              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+                     checked={filters[colType].includes(opt.value)} value={opt.value}
+                     onChange={(e) => this.updateData(e, colType)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {opt.name} </label>
+            </div>
+          ))}
+        </OverlayPanel>
+      </span>;
+    }
+
+    updateData = (event, column) => {
+      const {filters} = this.state;
+      const {checked, value} = event.target;
+      if (checked) {
+        const options = multiFilters[column].map(opt => opt.value);
+        if (value === 'Select All') {
+          filters[column] = options;
+        } else {
+          filters[column].push(value);
+          if (options.length - 1 === filters[column].length) {
+            filters[column].push('Select All');
+          }
+        }
+      } else {
+        filters[column].splice(filters[column].indexOf(value), 1);
+        if (filters[column].includes('Select All')) {
+          filters[column].splice(filters[column].indexOf('Select All'), 1);
+        }
+      }
+      this.setState({loading: true, filters: filters});
+      setTimeout(() => this.getTableData());
+    }
+
     render() {
       const {data, loading, page, sortField, sortOrder, total} = this.state;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
       if (data !== null) {
-        const lastRowOfPage = rows > data.length ? rows - data.length : start + rows;
+        const lastRowOfPage = rows > data.length ? start + data.length : start + rows;
         pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${total} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
@@ -285,6 +425,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           </span>
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
+          {!['deceased', 'birthDate'].includes(col.field) && this.filterTemplate(col.field)}
         </React.Fragment>;
         return <Column
           style={styles.tableBody}
