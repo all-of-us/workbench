@@ -224,7 +224,7 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -234,16 +234,14 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    Profile profile = profileController.completeEthicsTraining().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    profile = profileController.submitDemographicsSurvey().getBody();
+    Profile profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     user = userProvider.get();
     user.setDataUseAgreementCompletionTime(timestamp);
@@ -255,7 +253,7 @@ public class ProfileControllerTest {
 
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
 
@@ -810,7 +808,7 @@ public class ProfileControllerTest {
 
     Profile profile = profileController.syncTrainingStatus().getBody();
     verify(complianceTrainingService, never()).getUserBadge(any());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
