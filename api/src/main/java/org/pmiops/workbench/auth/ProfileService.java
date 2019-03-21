@@ -101,6 +101,9 @@ public class ProfileService {
     if (user.getIdVerificationBypassTime() != null) {
       profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
     }
+    if (user.getIdVerificationCompletionTime() != null) {
+      profile.setIdVerificationCompletionTime(user.getIdVerificationCompletionTime().getTime());
+    }
     if (user.getDataAccessLevelEnum() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }

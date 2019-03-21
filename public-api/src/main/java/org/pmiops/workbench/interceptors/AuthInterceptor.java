@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.privateworkbench.PrivateWorkbenchService;
-import org.pmiops.workbench.privateworkbench.model.IdVerificationStatus;
 import org.pmiops.workbench.privateworkbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -79,7 +78,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     Profile profile = privateWorkbenchService.getMe();
     if (configProvider.get().firecloud.enforceRegistered &&
-        profile.getIdVerificationStatus() != IdVerificationStatus.VERIFIED) {
+        !!profile.getBetaAccessBypassTime()) {
       log.warning("Account has not been id verified");
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;

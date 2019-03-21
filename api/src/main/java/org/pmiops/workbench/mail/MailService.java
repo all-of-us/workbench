@@ -3,7 +3,6 @@ package org.pmiops.workbench.mail;
 import javax.mail.MessagingException;
 
 import com.google.api.services.admin.directory.model.User;
-import org.pmiops.workbench.model.IdVerificationStatus;
 
 public interface MailService {
 

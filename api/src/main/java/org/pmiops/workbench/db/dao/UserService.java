@@ -371,17 +371,6 @@ public class UserService {
     return userDao.findUsers();
   }
 
-  public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
-    User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setIdVerificationIsValid(blockscoreVerificationIsValid);
-        return user;
-      }
-    }, user);
-  }
-
   public void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(targetUserId,null, targetAction, oldValue,  newValue);
   }

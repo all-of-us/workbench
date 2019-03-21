@@ -55,9 +55,6 @@ import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.IdVerificationListResponse;
-import org.pmiops.workbench.model.IdVerificationReviewRequest;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -173,7 +170,7 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
+    doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
         complianceTrainingService);
@@ -225,7 +222,6 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
     assertThat(profile.getTrainingCompletionTime()).isNull();
@@ -236,7 +232,6 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitTermsOfService().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTrainingCompletionTime()).isNull();
@@ -248,9 +243,6 @@ public class ProfileControllerTest {
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     Profile profile = profileController.completeEthicsTraining().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
-    reviewStatus.setNewStatus(IdVerificationStatus.VERIFIED);
-    profileController.reviewIdVerification(profile.getUserId(), reviewStatus);
     profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     user = userProvider.get();
@@ -261,7 +253,6 @@ public class ProfileControllerTest {
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
     verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
 
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
@@ -733,18 +724,6 @@ public class ProfileControllerTest {
     //called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(directoryService, times(1)).resetUserPassword(anyString());
-  }
-
-  @Test
-  public void reviewIdVerification_sendsEmail() throws Exception {
-    createUser();
-    IdVerificationStatus status = IdVerificationStatus.REJECTED;
-    IdVerificationReviewRequest request = new IdVerificationReviewRequest().newStatus(status);
-    doNothing().when(mailService).sendBetaAccessCompleteEmail(any(), any());
-
-    profileController.reviewIdVerification(
-        user.getUserId(), request);
-    verify(mailService, times(1)).sendBetaAccessCompleteEmail(any(), any());
   }
 
   @Test

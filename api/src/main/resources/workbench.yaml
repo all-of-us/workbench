@@ -2210,11 +2210,6 @@ definitions:
       role:
         type: string
 
-  IdVerificationStatus:
-    type: string
-    description: possible values indicating whether the user's ID has been verified
-    enum: [UNVERIFIED, VERIFIED, REJECTED]
-
   StackTraceElement:
     description: ''
     required:
