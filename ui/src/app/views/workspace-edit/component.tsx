@@ -250,6 +250,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           name: '',
           description: '',
           dataAccessLevel: DataAccessLevel.Registered,
+          namespace: userProfileStore.getValue().profile.freeTierBillingProjectName,
           cdrVersionId: '',
           researchPurpose: {
             diseaseFocusedResearch: false,
@@ -272,22 +273,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     componentDidMount() {
-      this.updateWorkspace();
+      if (!this.isMode(WorkspaceEditMode.Create)) {
+        this.setState({workspace : this.props.workspace});
+        if (this.isMode(WorkspaceEditMode.Clone)) {
+          this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
+        }
+      }
       this.setCdrVersions();
-    }
-
-
-    updateWorkspace() {
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        const profile =  userProfileStore.getValue().profile;
-        this.setState(fp.set(['workspace', 'namespace'], profile.freeTierBillingProjectName));
-        return;
-      }
-      this.setState({workspace : this.props.workspace});
-      if (this.isMode(WorkspaceEditMode.Clone)) {
-        this.setState(
-          fp.set(['workspace', 'name'], ('Duplicate of ' + this.props.workspace.name)));
-      }
     }
 
     async setCdrVersions() {
@@ -419,7 +411,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <div style={{display: 'flex', flexDirection: 'row'}}>
           <CheckBox
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
-          onChange={v => this.setState({cloneUserRole: v.target.checked})}/>
+          onChange={v => this.setState({cloneUserRole: v.value})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
             text='Share cloned workspace with same collaborators'/>
         </div>
@@ -492,7 +484,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </div>
           </div>
           <WorkspaceUnderservedPopulation
-              value={!this.state.workspace.researchPurpose.underservedPopulationDetails ? [] :
+            selectedValues={
+              !this.state.workspace.researchPurpose.underservedPopulationDetails ? [] :
                   this.state.workspace.researchPurpose.underservedPopulationDetails}
               onChange={v => this.updateUnderservedPopulation(v)}>
           </WorkspaceUnderservedPopulation>

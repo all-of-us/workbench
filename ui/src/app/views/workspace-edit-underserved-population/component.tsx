@@ -232,7 +232,7 @@ const FocusCategories = [
 ];
 
 export class WorkspaceUnderservedPopulation extends
-    React.Component<{value: Array<UnderservedPopulationEnum>, onChange: Function},
+    React.Component<{selectedValues: Array<UnderservedPopulationEnum>, onChange: Function},
     {show: boolean}> {
   constructor(props: any) {
     super(props);
@@ -246,7 +246,7 @@ export class WorkspaceUnderservedPopulation extends
   }
 
   focusCategoryChange(subCategory) {
-    this.props.onChange(toggleIncludes(subCategory, this.props.value));
+    this.props.onChange(toggleIncludes(subCategory, this.props.selectedValues));
   }
 
 
@@ -294,11 +294,11 @@ export class WorkspaceUnderservedPopulation extends
               <div style={{display: 'flex', flexWrap: 'wrap'}}>
                 {
                   categories.map(({id, label}) => {
-                    const isIncluded = fp.includes(id, this.props.value);
+                    const isIncluded = fp.includes(id, this.props.selectedValues);
                     return <div key={id} style={styles.row}>
                       <CheckBox checked={isIncluded} style= {styles.checkbox}
-                        onChange =
-                          {e => this.props.onChange(toggleIncludes(id, this.props.value))}/>
+                        onChange ={
+                          e => this.props.onChange(toggleIncludes(id, this.props.selectedValues))}/>
                       <label style={styles.label}>{label}</label>
                     </div>;
                   })
