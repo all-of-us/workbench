@@ -51,8 +51,8 @@
           [class.active]="homeActive"
           routerLink="/"
           (click)="sidenavToggle = false">Home</button>
-      <button class="btn btn-primary nav-link"
-          (click)="openDataBrowser()">Browse Data</button>
+      <a class="btn btn-primary nav-link"
+          [href]="publicUiUrl" target="_blank">Browse Data</a>
       <button class="btn btn-primary nav-link"
           [class.active]="createWorkspaceActive"
           routerLink="/workspaces/build"
