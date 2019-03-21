@@ -30,7 +30,7 @@ export class AdminUserComponent implements OnInit {
 
   loadProfiles(): void {
     this.contentLoaded = false;
-    this.profileService.getIdVerificationsForReview()
+    this.profileService.getAllUsers()
       .subscribe(
         profilesResp => {
           this.profiles = this.sortProfileList(profilesResp.profileList);
@@ -67,14 +67,14 @@ export class AdminUserComponent implements OnInit {
   }
 
   private timeCompare(a: Profile, b: Profile): number {
-    if (a.idVerificationRequestTime === b.idVerificationRequestTime) {
+    if (a.betaAccessRequestTime === b.betaAccessRequestTime) {
       return this.nameCompare(a, b);
-    } else if (a.idVerificationRequestTime === null) {
+    } else if (a.betaAccessRequestTime === null) {
       return 1;
-    } else if (b.idVerificationRequestTime === null) {
+    } else if (b.betaAccessRequestTime === null) {
       return -1;
     }
-    return b.idVerificationRequestTime - a.idVerificationRequestTime;
+    return b.betaAccessRequestTime - a.betaAccessRequestTime;
   }
 
   private nameCompare(a: Profile, b: Profile): number {

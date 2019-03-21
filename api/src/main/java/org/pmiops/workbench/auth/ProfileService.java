@@ -70,7 +70,6 @@ public class ProfileService {
     profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
-    profile.setRequestedIdVerification(user.getRequestedIdVerification());
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
@@ -84,9 +83,6 @@ public class ProfileService {
 
     if (user.getTermsOfServiceCompletionTime() != null) {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
-    }
-    if (user.getTrainingCompletionTime() != null) {
-      profile.setTrainingCompletionTime(user.getTrainingCompletionTime().getTime());
     }
     if (user.getComplianceTrainingCompletionTime() != null) {
       profile.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime().getTime());
@@ -110,12 +106,6 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.getIdVerificationRequestTime() != null) {
-      profile.setIdVerificationRequestTime(user.getIdVerificationRequestTime().getTime());
-    }
-    if (user.getIdVerificationCompletionTime() != null) {
-      profile.setIdVerificationCompletionTime(user.getIdVerificationCompletionTime().getTime());
-    }
     if (user.getIdVerificationBypassTime() != null) {
       profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
     }
@@ -124,6 +114,9 @@ public class ProfileService {
     }
     if (user.getBetaAccessBypassTime() != null) {
       profile.setBetaAccessBypassTime(user.getBetaAccessBypassTime().getTime());
+    }
+    if (user.getBetaAccessRequestTime() != null) {
+      profile.setBetaAccessRequestTime(user.getBetaAccessRequestTime().getTime());
     }
     if (user.getEmailVerificationCompletionTime() != null) {
       profile.setEmailVerificationCompletionTime(user.getEmailVerificationCompletionTime().getTime());

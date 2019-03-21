@@ -243,17 +243,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSubmitEthicsTraining_success() throws Exception {
-    createUser();
-    Profile profile = profileController.completeEthicsTraining().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
-    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
-  }
-
-  @Test
   public void testSubmitEverything_success() throws Exception {
     createUser();
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());

@@ -204,17 +204,6 @@ public class UserService {
     });
   }
 
-  public User submitEthicsTraining() {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setTrainingCompletionTime(timestamp);
-        return user;
-      }
-    });
-  }
-
   public User submitDemographicSurvey() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries(new Function<User, User>() {
@@ -467,8 +456,6 @@ public class UserService {
         } else {
           user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
         }
-        // TODO: delete trainingCompletionTime in follow-up PR
-        user.setTrainingCompletionTime(now);
         user.setComplianceTrainingCompletionTime(now);
         userDao.save(user);
       }

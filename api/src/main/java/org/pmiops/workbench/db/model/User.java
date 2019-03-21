@@ -67,12 +67,9 @@ public class User {
   private Set<WorkspaceUserRole> workspaceUserRoles = new HashSet<>();
   private Boolean idVerificationIsValid;
   private Timestamp termsOfServiceCompletionTime;
-  private Timestamp trainingCompletionTime;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
-  private Boolean requestedIdVerification;
-  private Timestamp idVerificationRequestTime;
   private Set<PageVisit> pageVisits = new HashSet<>();
   private String clusterConfigDefault;
 
@@ -87,7 +84,7 @@ public class User {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
-  private Timestamp betaAccessCompletionTime;
+  private Timestamp betaAccessRequestTime;
   private Timestamp betaAccessBypassTime;
   private Timestamp dataUseAgreementCompletionTime;
   private Timestamp dataUseAgreementBypassTime;
@@ -338,15 +335,6 @@ public class User {
     this.termsOfServiceCompletionTime = termsOfServiceCompletionTime;
   }
 
-  @Column(name = "training_completion_time")
-  public Timestamp getTrainingCompletionTime() {
-    return trainingCompletionTime;
-  }
-
-  public void setTrainingCompletionTime(Timestamp trainingCompletionTime) {
-    this.trainingCompletionTime = trainingCompletionTime;
-  }
-
   @Column(name = "demographic_survey_completion_time")
   public Timestamp getDemographicSurveyCompletionTime() {
     return demographicSurveyCompletionTime;
@@ -420,15 +408,6 @@ public class User {
     this.areaOfResearch = areaOfResearch;
   }
 
-  @Column(name = "requested_id_verification")
-  public Boolean getRequestedIdVerification() {
-    return requestedIdVerification;
-  }
-
-  public void setRequestedIdVerification(Boolean requestedIdVerification) {
-    this.requestedIdVerification = requestedIdVerification;
-  }
-
   @Column(name = "two_factor_enabled")
   public Boolean getTwoFactorEnabled() {
     return twoFactorEnabled;
@@ -456,13 +435,13 @@ public class User {
     this.billingProjectRetries = billingProjectRetries;
   }
 
-  @Column(name = "id_verification_request_time")
-  public Timestamp getIdVerificationRequestTime() {
-    return idVerificationRequestTime;
+  @Column(name = "beta_access_request_time")
+  public Timestamp getBetaAccessRequestTime() {
+    return betaAccessRequestTime;
   }
 
-  public void setIdVerificationRequestTime(Timestamp idVerificationRequestTime) {
-    this.idVerificationRequestTime = idVerificationRequestTime;
+  public void setBetaAccessRequestTime(Timestamp betaAccessRequestTime) {
+    this.betaAccessRequestTime = betaAccessRequestTime;
   }
 
   @Column(name = "moodle_id")
@@ -526,13 +505,6 @@ public class User {
 
   public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
     this.complianceTrainingBypassTime = complianceTrainingBypassTime;
-  }
-
-  @Column(name = "beta_access_completion_time")
-  public Timestamp getBetaAccessCompletionTime() {return betaAccessCompletionTime; }
-
-  public void setBetaAccessCompletionTime(Timestamp betaAccessCompletionTime) {
-    this.betaAccessCompletionTime = betaAccessCompletionTime;
   }
 
   @Column(name = "beta_access_bypass_time")
