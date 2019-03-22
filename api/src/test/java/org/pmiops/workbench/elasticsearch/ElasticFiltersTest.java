@@ -238,6 +238,15 @@ public class ElasticFiltersTest {
     return QueryBuilders.boolQuery().filter(innerBuilder);
   }
 
+  private static final QueryBuilder nonNestedMustNotQuery(QueryBuilder... inners) {
+    BoolQueryBuilder innerBuilder = QueryBuilders.boolQuery();
+    for (QueryBuilder in : inners) {
+      BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
+      innerBuilder.should(b);
+    }
+    return QueryBuilders.boolQuery().filter(innerBuilder).mustNot(innerBuilder);
+  }
+
   @Test
   public void testLeafQuery() {
     ElasticFilterResponse<QueryBuilder> resp =
@@ -496,6 +505,45 @@ public class ElasticFiltersTest {
             .addSearchParametersItem(genderParam))));
     assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
+      QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
+  }
+
+  @Test
+  public void testGenderExcludeQuery() {
+    String conceptId = "8507";
+    SearchParameter genderParam = new SearchParameter()
+      .conceptId(Long.parseLong(conceptId))
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.GEN.toString())
+      .group(false);
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addExcludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(genderParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(nonNestedQuery(
+      QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
+  }
+
+  @Test
+  public void testGenderIncludeAndExcludeQuery() {
+    String conceptId = "8507";
+    SearchParameter genderParam = new SearchParameter()
+      .conceptId(Long.parseLong(conceptId))
+      .type(TreeType.DEMO.toString())
+      .subtype(TreeSubType.GEN.toString())
+      .group(false);
+    ElasticFilterResponse<QueryBuilder> resp =
+      ElasticFilters.fromCohortSearch(criteriaDao, new SearchRequest()
+        .addIncludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(genderParam)))
+        .addExcludesItem(new SearchGroup()
+          .addItemsItem(new SearchGroupItem()
+            .addSearchParametersItem(genderParam))));
+    assertThat(resp.isApproximate()).isFalse();
+    assertThat(resp.value()).isEqualTo(nonNestedMustNotQuery(
       QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
   }
 
