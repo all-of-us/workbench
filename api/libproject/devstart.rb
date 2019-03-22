@@ -709,6 +709,18 @@ Generates big query denormalized search. Used by cohort builder. Must be run onc
   :fn => ->(*args) { make_bq_denormalized_search(*args) }
 })
 
+def make_bq_denormalized_dataset(*args)
+  common = Common.new
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-dataset.sh} + args
+end
+
+Common.register_command({
+                            :invocation => "make-bq-denormalized-dataset",
+                            :description => "make-bq-denormalized-dataset --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query denormalized dataset tables. Used by Data Set Builder. Must be run once when a new cdr is released",
+                            :fn => ->(*args) { make_bq_denormalized_dataset(*args) }
+                        })
+
 def generate_criteria_table(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table.sh} + args
