@@ -52,6 +52,8 @@ public class AggregationUtils {
           .terms(RACE + ageRange)
           .field("race_concept_name")
           .order(BucketOrder.key(true))
+          //This eliminates the race buckets with 0 counts. Without this param elastic
+          //returns all race buckets regardless of count.
           .minDocCount(1)));
   }
 
