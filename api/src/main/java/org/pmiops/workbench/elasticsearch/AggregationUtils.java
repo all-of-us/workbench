@@ -7,7 +7,7 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.range.ParsedDateRange;
 import org.elasticsearch.search.aggregations.bucket.range.Range;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.json.JSONObject;
+import org.pmiops.workbench.model.DemoChartInfo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -55,8 +55,8 @@ public class AggregationUtils {
           .minDocCount(1)));
   }
 
-  public static List<String> unwrapDemoChartBuckets(SearchResponse searchResponse, String... ageRanges) {
-    List<String> demoInformation = new ArrayList<>();
+  public static List<DemoChartInfo> unwrapDemoChartBuckets(SearchResponse searchResponse, String... ageRanges) {
+    List<DemoChartInfo> demoInformation = new ArrayList<>();
     for (String ageRange : ageRanges) {
       ParsedDateRange parsedDate = searchResponse.getAggregations().get(DATE + ageRange);
       for (Range.Bucket dateBucket : parsedDate.getBuckets()) {
@@ -65,11 +65,11 @@ public class AggregationUtils {
           Terms race = genderBucket.getAggregations().get(RACE + ageRange);
           for (Terms.Bucket raceBucket : race.getBuckets()) {
             demoInformation.add(
-              new JSONObject()
-                .put("gender", genderBucket.getKeyAsString().substring(0, 1))
-                .put("race", raceBucket.getKeyAsString())
-                .put("ageRange", RANGE_GT_65.equals(ageRange) ? "> " + ageRange : ageRange)
-                .put("count", raceBucket.getDocCount()).toString());
+              new DemoChartInfo()
+                .gender(genderBucket.getKeyAsString().substring(0, 1))
+                .race(raceBucket.getKeyAsString())
+                .ageRange(RANGE_GT_65.equals(ageRange) ? "> " + ageRange : ageRange)
+                .count(raceBucket.getDocCount()));
           }
         }
       }
