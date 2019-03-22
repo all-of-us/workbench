@@ -9,8 +9,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -120,7 +118,11 @@ public final class ElasticFilters {
       filter.filter(searchGroupToFilter(sg));
     }
     for (SearchGroup sg : req.getExcludes()) {
-      filter.mustNot(searchGroupToFilter(sg));
+      if (req.getIncludes().isEmpty()) {
+        filter.filter(searchGroupToFilter(sg));
+      } else {
+        filter.mustNot(searchGroupToFilter(sg));
+      }
     }
     processed = true;
     return filter;
@@ -235,14 +237,14 @@ public final class ElasticFilters {
     } else if (AttrName.AGE.equals(attr.getName())) {
       rq = QueryBuilders.rangeQuery("birth_datetime");
       //use the low end of the age range to calculate the high end(right) of the date range
-      OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-      right = now.minusYears(Long.parseLong(attr.getOperands().get(0))).toLocalDate();
+      right = ElasticUtils.todayMinusYears(Integer.parseInt(attr.getOperands().get(0)));
       if (attr.getOperands().size() > 1) {
         //use high end of the age range to calculate the low end(left) of the date range
+        //need to add 1 year to adjust to the beginning of the date range
         //Ex: 2019-03-19(current date) - 55year(age) - 1 year = 1963-03-19
         //Need to use GT to make sure not to include 1963-03-19 which evaluates to 56 years old
         //which is out the range of 55. 1963-03-20 evaluates to 55 years 11 months 30 days.
-        left = now.minusYears(Long.parseLong(attr.getOperands().get(1))).minusYears(1).toLocalDate();
+        left = ElasticUtils.todayMinusYears(Integer.parseInt(attr.getOperands().get(1)) + 1);
       }
       switch (attr.getOperator()) {
         case BETWEEN:
