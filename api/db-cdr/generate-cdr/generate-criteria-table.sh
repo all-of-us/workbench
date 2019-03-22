@@ -1785,53 +1785,53 @@ where cr.concept_id_1 in (select concept_id from \`$BQ_PROJECT.$BQ_DATASET.crite
 and c1.concept_class_id = 'Ingredient'"
 
 
-################################################
-# DROPPED PREP TABLES AND VIEWS
-################################################
-echo "DROP - criteria_seed"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\`"
-
-echo "DROP - criteria_ancestor_count"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\`"
-
-echo "DROP - criteria_terms_nc"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_terms_nc\`"
-
-echo "DROP - atc_rel_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`"
-
-echo "DROP - loinc_rel_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`"
-
-echo "DROP - snomed_rel_cm_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`"
-
-echo "DROP - snomed_rel_pcs_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`"
-
-echo "DROP - snomed_rel_meas_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`"
-
-echo "DROP - v_loinc_rel"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\`"
-
-echo "DROP - v_snomed_rel_cm"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\`"
-
-echo "DROP - v_snomed_rel_pcs"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs\`"
-
-echo "DROP - v_snomed_rel_meas"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_meas\`"
+#################################################
+## DROPPED PREP TABLES AND VIEWS
+#################################################
+#echo "DROP - criteria_seed"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_seed\`"
+#
+#echo "DROP - criteria_ancestor_count"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\`"
+#
+#echo "DROP - criteria_terms_nc"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.criteria_terms_nc\`"
+#
+#echo "DROP - atc_rel_in_data"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.atc_rel_in_data\`"
+#
+#echo "DROP - loinc_rel_in_data"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.loinc_rel_in_data\`"
+#
+#echo "DROP - snomed_rel_cm_in_data"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`"
+#
+#echo "DROP - snomed_rel_pcs_in_data"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP TABLE IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`"
+#
+#echo "DROP - snomed_rel_meas_in_data"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_meas_in_data\`"
+#
+#echo "DROP - v_loinc_rel"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_loinc_rel\`"
+#
+#echo "DROP - v_snomed_rel_cm"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_cm\`"
+#
+#echo "DROP - v_snomed_rel_pcs"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_pcs\`"
+#
+#echo "DROP - v_snomed_rel_meas"
+#bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+#"DROP VIEW IF EXISTS \`$BQ_PROJECT.$BQ_DATASET.v_snomed_rel_meas\`"

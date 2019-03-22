@@ -322,6 +322,8 @@ Description of arguments these scripts take are as follows.
 1. The BigQuery dataset has new denormalized tables(search and review) for cohort builder to work.
 #### Generate cdr count data for use by workbench in BigQuery from a deidentified cdr release
 `./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version 20181107 --bucket all-of-us-workbench-private-cloudsql`
+#### Generate denormalized data set builder tables in the BigQuery cdr only one time when it is released or as needed
+`./project.rb make-bq-denormalized-dataset --bq-project all-of-us-ehr-dev --bq-dataset test_merge_dec26 `
 ##### Result is
 1. Cdr BigQuery dataset:  all-of-us-workbench-test:cdr20181107
 2. CSV dumps of tables in bucket all-of-us-workbench-private-cloudsql: cdr20181107/*.csv.gz 

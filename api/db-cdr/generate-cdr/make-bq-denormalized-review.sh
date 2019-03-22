@@ -84,7 +84,7 @@ join
     c1.concept_id,
     b2.id as s_id,
     c1.id as q_id
-FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor\` a1
+FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_ancestor_count\` a1
 left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` b2 on a1.ancestor_id = b2.id
 left join \`$BQ_PROJECT.$BQ_DATASET.criteria\` c1 on a1.descendant_id = c1.id
 where ancestor_id in
