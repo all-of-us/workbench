@@ -37,6 +37,8 @@ public class AggregationUtils {
       start = ElasticUtils.todayMinusYears(Integer.parseInt(ages[1]) + 1);
     }
 
+    //Added order to gender and race buckets. Therefore the UI code can expect consistent results
+    //between BQ(sql ordered by gender, race, age) and elastic
     return AggregationBuilders
       .dateRange(DATE + ageRange)
       .field("birth_datetime")
