@@ -195,182 +195,137 @@ public class UserService {
 
   public User submitTermsOfService() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setTermsOfServiceCompletionTime(timestamp);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setTermsOfServiceCompletionTime(timestamp);
+      return user;
     });
   }
 
   public User submitEthicsTraining() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setTrainingCompletionTime(timestamp);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setTrainingCompletionTime(timestamp);
+      return user;
     });
   }
 
   public User submitDemographicSurvey() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setDemographicSurveyCompletionTime(timestamp);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setDemographicSurveyCompletionTime(timestamp);
+      return user;
     });
   }
 
   public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setDataUseAgreementBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setDataUseAgreementBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setComplianceTrainingBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setComplianceTrainingBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setBetaAccessBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setBetaAccessBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setEmailVerificationBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setEmailVerificationBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setEraCommonsBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setEraCommonsBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setIdVerificationBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setIdVerificationBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setTwoFactorAuthBypassTime(bypassTime);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setTwoFactorAuthBypassTime(bypassTime);
+      return u;
     }, user);
   }
 
   public User setEraCommonsStatus(NihStatus nihStatus) {
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        if (nihStatus != null) {
-          Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
-          // NihStatus should never come back from firecloud with an empty linked username.
-          // If that is the case, there is an error with FC, because we should get a 404
-          // in that case. Leaving the null checking in for code safety reasons
-          if ((nihStatus.getLinkedNihUsername() != null &&
-              !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
-              nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
-            eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
-          } else if (nihStatus.getLinkedNihUsername() == null) {
-            eraCommonsCompletionTime = null;
-          }
-          user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
-          user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
-          user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
-        } else {
-          user.setEraCommonsLinkedNihUsername(null);
-          user.setEraCommonsLinkExpireTime(null);
-          user.setEraCommonsCompletionTime(null);
+    return updateUserWithRetries((user) -> {
+      if (nihStatus != null) {
+        Timestamp eraCommonsCompletionTime = user.getEraCommonsCompletionTime();
+        // NihStatus should never come back from firecloud with an empty linked username.
+        // If that is the case, there is an error with FC, because we should get a 404
+        // in that case. Leaving the null checking in for code safety reasons
+        if ((nihStatus.getLinkedNihUsername() != null &&
+            !nihStatus.getLinkedNihUsername().equals(user.getEraCommonsLinkedNihUsername())) ||
+            nihStatus.getLinkExpireTime() != user.getEraCommonsLinkExpireTime().getTime()) {
+          eraCommonsCompletionTime = new Timestamp(clock.instant().toEpochMilli());
+        } else if (nihStatus.getLinkedNihUsername() == null) {
+          eraCommonsCompletionTime = null;
         }
-        return user;
+        user.setEraCommonsLinkedNihUsername(nihStatus.getLinkedNihUsername());
+        user.setEraCommonsLinkExpireTime(new Timestamp(nihStatus.getLinkExpireTime()));
+        user.setEraCommonsCompletionTime(eraCommonsCompletionTime);
+      } else {
+        user.setEraCommonsLinkedNihUsername(null);
+        user.setEraCommonsLinkExpireTime(null);
+        user.setEraCommonsCompletionTime(null);
       }
+      return user;
     });
   }
 
   public User setClusterRetryCount(int clusterRetryCount) {
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setClusterCreateRetries(clusterRetryCount);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setClusterCreateRetries(clusterRetryCount);
+      return user;
     });
   }
 
   public User setBillingRetryCount(int billingRetryCount) {
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setBillingProjectRetries(billingRetryCount);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setBillingProjectRetries(billingRetryCount);
+      return user;
     });
   }
 
   public User setBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setFreeTierBillingProjectName(name);
-        user.setFreeTierBillingProjectStatusEnum(status);
-        return user;
-      }
+    return updateUserWithRetries((user) -> {
+      user.setFreeTierBillingProjectName(name);
+      user.setFreeTierBillingProjectStatusEnum(status);
+      return user;
     });
   }
 
   public User setDisabledStatus(Long userId, boolean disabled) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setDisabled(disabled);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setDisabled(disabled);
+      return u;
     }, user);
   }
 
@@ -384,12 +339,9 @@ public class UserService {
 
   public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
     User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(new Function<User, User>() {
-      @Override
-      public User apply(User user) {
-        user.setIdVerificationIsValid(blockscoreVerificationIsValid);
-        return user;
-      }
+    return updateUserWithRetries((u) -> {
+      u.setIdVerificationIsValid(blockscoreVerificationIsValid);
+      return u;
     }, user);
   }
 
