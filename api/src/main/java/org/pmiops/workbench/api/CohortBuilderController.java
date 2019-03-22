@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+
+import com.google.gson.Gson;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -200,7 +202,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+      try {
+        return ResponseEntity.ok(response.items(
+          elasticSearchService
+            .demoChartInfo(request)
+            .value()
+            .stream()
+            .map(d -> new Gson().fromJson(d, DemoChartInfo.class))
+            .collect(Collectors.toList())
+        ));
+      } catch (IOException e) {
+        log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
+      }
+    }
     QueryJobConfiguration qjc = bigQueryService.filterBigQueryConfig(participantCounter.buildDemoChartInfoCounterQuery(
       new ParticipantCriteria(request)));
     TableResult result = bigQueryService.executeQuery(qjc);

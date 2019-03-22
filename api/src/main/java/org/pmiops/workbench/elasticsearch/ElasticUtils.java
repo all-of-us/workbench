@@ -2,6 +2,9 @@ package org.pmiops.workbench.elasticsearch;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Iterator;
 import java.util.logging.Logger;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -83,6 +86,11 @@ public final class ElasticUtils {
       log.info(String.format("Inserted %.2f%% of documents (%d/%d) (%d failed)",
           ((float) 100 * (inserted)) / numDocs, inserted, numDocs, fails));
     }
+  }
+
+  public static LocalDate todayMinusYears(int years) {
+    OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+    return now.minusYears(years).toLocalDate();
   }
 
 }
