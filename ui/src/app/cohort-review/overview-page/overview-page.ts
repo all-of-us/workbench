@@ -68,7 +68,7 @@ export class OverviewPage implements OnInit, OnDestroy {
         loading: true
       };
       this.subscription = from(cohortReviewApi()
-        .getCohortChartData(ns, wsid, cid, cdrid, domainName, limit, null))
+        .getCohortChartData(ns, wsid, cid, cdrid, domainName, limit))
         .subscribe(data => {
           const chartData = data;
           this.totalCount = chartData.count;
