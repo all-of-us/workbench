@@ -157,6 +157,7 @@ export interface ParticipantsTableState {
 
 export const ParticipantsTable = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData}, ParticipantsTableState> {
+    filterInput: Function;
     constructor(props: any) {
       super(props);
       this.state = {
@@ -167,6 +168,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortOrder: 1,
         total: null,
         filters: {
+          PARTICIPANTID: '',
           RACE: ['Select All'],
           GENDER: ['Select All'],
           ETHNICITY: ['Select All'],
@@ -179,6 +181,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           ]
         }
       };
+      this.filterInput = fp.debounce(300, () => this.getTableData());
     }
 
     componentDidMount() {
@@ -274,16 +277,26 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const {filters} = this.state;
       const filterArr =  Object.keys(filters).reduce((acc, _type) => {
         const values = filters[_type];
-        if (!values.length) {
-          return null;
-        }
-        if (!values.includes('Select All')) {
-          const filter = {
-            property: Columns[_type],
-            values: values,
-            operator: Operator.IN
-          } as Filter;
-          acc.push(filter);
+        if (_type === Columns[Columns.PARTICIPANTID]) {
+          if (values) {
+            const filter = {
+              property: Columns[_type],
+              values: [values],
+              operator: Operator.LIKE
+            } as Filter;
+            acc.push(filter);
+          }
+        } else {
+          if (!values.length) {
+            acc.push(null);
+          } else if (!values.includes('Select All')) {
+            const filter = {
+              property: Columns[_type],
+              values: values,
+              operator: Operator.IN
+            } as Filter;
+            acc.push(filter);
+          }
         }
         return acc;
       }, []);
@@ -366,43 +379,22 @@ export const ParticipantsTable = withCurrentWorkspace()(
       if (!data) {
         return {};
       }
-      const colType = reverseColumnEnum[column]
+      const colType = reverseColumnEnum[column];
       const options = multiFilters[colType];
-      // const counts = {total: 0};
-      // data.forEach(item => {
-      //   counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
-      //   counts.total++;
-      // });
-      // let options: Array<any>;
-      // if (colName === 'domain') {
-      //   options = domains.map(option => {
-      //     return {name: option, count: counts[option] || 0};
-      //   });
-      // } else {
-      //   const vocabs = colName === 'standardVocabulary'
-      //     ? vocabOptions.getValue().Standard
-      //     : vocabOptions.getValue().Source;
-      //   options = vocabs[domain] ? vocabs[domain].map(option => {
-      //     return {name: option, count: counts[option] || 0};
-      //   }) : [];
-      // }
-      // options.push({name: 'Select All', count: counts.total});
-      // if (checkedItems[colName].find(i => i === 'Select All')) {
-      //   checkedItems[colName] = options.map(opt => opt.name);
-      // }
       let fl: any;
 
       return <span>
         {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {column === 'participantId' && <TextInput />}
+          {column === 'participantId' &&
+            <TextInput value={filters.PARTICIPANTID} onChange={this.onInputChange} />}
           {column !== 'participantId' && options.map((opt, i) => (
             <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
               <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
                      checked={filters[colType].includes(opt.value)} value={opt.value}
-                     onChange={(e) => this.updateData(e, colType)}/>
+                     onChange={(e) => this.onCheckboxChange(e, colType)}/>
               <label style={{paddingLeft: '0.4rem'}}> {opt.name} </label>
             </div>
           ))}
@@ -410,7 +402,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       </span>;
     }
 
-    updateData = (event, column) => {
+    onCheckboxChange = (event, column) => {
       const {filters} = this.state;
       const {checked, value} = event.target;
       if (checked) {
@@ -424,13 +416,24 @@ export const ParticipantsTable = withCurrentWorkspace()(
           }
         }
       } else {
-        filters[column].splice(filters[column].indexOf(value), 1);
-        if (filters[column].includes('Select All')) {
-          filters[column].splice(filters[column].indexOf('Select All'), 1);
+        if (value === 'Select All') {
+          filters[column] = [];
+        } else {
+          filters[column].splice(filters[column].indexOf(value), 1);
+          if (filters[column].includes('Select All')) {
+            filters[column].splice(filters[column].indexOf('Select All'), 1);
+          }
         }
       }
       this.setState({loading: true, filters});
       setTimeout(() => this.getTableData());
+    }
+
+    onInputChange = (value: any) => {
+      const {filters} = this.state;
+      filters.PARTICIPANTID = value;
+      this.setState({loading: true, filters});
+      this.filterInput(value);
     }
 
     render() {
@@ -467,7 +470,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           field={col.field}
           header={header}
           sortable/>;
-      })
+      });
       return <div>
         <style>{css}</style>
         <button
