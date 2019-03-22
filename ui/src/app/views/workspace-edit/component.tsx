@@ -10,10 +10,10 @@ import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients'
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
-import {WorkspaceUnderservedPopulation} from 'app/views/workspace-edit-underserved-population/component';
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import WorkspaceUnderservedPopulation from './workspace-edit-underserverd';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {

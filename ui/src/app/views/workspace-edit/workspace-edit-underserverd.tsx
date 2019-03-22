@@ -2,8 +2,8 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
-import {reactStyles, toggleIncludes} from 'app/utils';
-import {UnderservedPopulationEnum} from 'generated/fetch';
+import {reactStyles, toggleIncludes} from 'app/utils/index';
+import {UnderservedPopulationEnum} from 'generated/fetch/index';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
