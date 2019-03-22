@@ -2,7 +2,7 @@ SELECT
   p.person_id _id,
   DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH) birth_datetime,
   p.gender_concept_id,
-  gc.concept_name gender_concept_name,
+  case when gc.concept_name is null then 'Unknown' else gc.concept_name end as gender_concept_name,
   p.race_concept_id,
   case when rc.concept_name is null then 'Unknown' else rc.concept_name end as race_concept_name,
   p.ethnicity_concept_id,
