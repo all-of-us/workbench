@@ -18,6 +18,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticFilters.ElasticFilterResponse;
+import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class ElasticSearchService {
   /**
    * Get the demographic data info for the given search criteria.
    */
-  public ElasticFilterResponse<List<String>> demoChartInfo(SearchRequest req) throws IOException {
+  public ElasticFilterResponse<List<DemoChartInfo>> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
       ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
     ElasticFilterResponse<QueryBuilder> filter = ElasticFilters.fromCohortSearch(criteriaDao, req);

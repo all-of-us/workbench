@@ -204,14 +204,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
       try {
-        return ResponseEntity.ok(response.items(
-          elasticSearchService
-            .demoChartInfo(request)
-            .value()
-            .stream()
-            .map(d -> new Gson().fromJson(d, DemoChartInfo.class))
-            .collect(Collectors.toList())
-        ));
+        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request).value()));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
