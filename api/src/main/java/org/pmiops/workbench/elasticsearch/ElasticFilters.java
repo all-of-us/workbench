@@ -118,6 +118,7 @@ public final class ElasticFilters {
       filter.filter(searchGroupToFilter(sg));
     }
     for (SearchGroup sg : req.getExcludes()) {
+      //Only case to use mustNot is when both includes and excludes exist together
       if (req.getIncludes().isEmpty()) {
         filter.filter(searchGroupToFilter(sg));
       } else {
