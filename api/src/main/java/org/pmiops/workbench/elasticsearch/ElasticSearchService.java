@@ -81,7 +81,7 @@ public class ElasticSearchService {
    * works but need to add Synchronized annotation to make this method thread safe.
    */
   @Synchronized
-  protected RestHighLevelClient client() {
+  private RestHighLevelClient client() {
     if (client == null) {
       String[] vars = configProvider.get().elasticsearch.host.split(":");
       String host = vars[0];
