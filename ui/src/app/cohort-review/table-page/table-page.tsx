@@ -166,18 +166,30 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortField: 'participantId',
         sortOrder: 1,
         total: null,
-        filters: {RACE: ['Select All'], GENDER: ['Select All'], ETHNICITY: ['Select All'], STATUS: ['Select All']}
+        filters: {
+          RACE: ['Select All'],
+          GENDER: ['Select All'],
+          ETHNICITY: ['Select All'],
+          STATUS: [
+            CohortStatus.INCLUDED,
+            CohortStatus.EXCLUDED,
+            CohortStatus.NEEDSFURTHERREVIEW,
+            CohortStatus.NOTREVIEWED,
+            'Select All'
+          ]
+        }
       };
     }
 
     componentDidMount() {
+      const {filters} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      this.getTableData();
       if (!multiOptions.getValue()) {
         cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
           const extract = (arr, _type?) => fp.uniq([
             ...arr.map(i => {
+              filters[_type].push(i.conceptName);
               return {
                 name: _type === Columns.GENDER
                   ? this.formatGenderForText(i.conceptName) : i.conceptName,
@@ -187,9 +199,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
             {name: 'Select All', value: 'Select All'}
           ]) as string[];
           multiFilters = {
-            RACE: extract(data.raceList),
+            RACE: extract(data.raceList, Columns.RACE),
             GENDER: extract(data.genderList, Columns.GENDER),
-            ETHNICITY: extract(data.ethnicityList),
+            ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
             STATUS: [
               {name: 'Included', value: CohortStatus.INCLUDED},
               {name: 'Excluded', value: CohortStatus.EXCLUDED},
@@ -199,9 +211,18 @@ export const ParticipantsTable = withCurrentWorkspace()(
             ]
           };
           multiOptions.next(multiFilters);
+          this.setState({filters});
+          setTimeout(() => this.getTableData());
         });
       } else {
         multiFilters = multiOptions.getValue();
+        for (const _type in multiFilters) {
+          if (multiFilters.hasOwnProperty(_type)) {
+            filters[_type] = [...filters[_type], ...multiFilters[_type].map(opt => opt.value)];
+          }
+        }
+        this.setState({filters});
+        setTimeout(() => this.getTableData());
       }
       if (!vocabOptions.getValue()) {
         cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
@@ -219,33 +240,44 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     getTableData(): void {
-      const {filters, page, sortField, sortOrder} = this.state;
+      const {page, sortField, sortOrder} = this.state;
       const {cdrVersionId, id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      const query = {
-        page: page,
-        pageSize: rows,
-        sortColumn: reverseColumnEnum[sortField],
-        sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-        filters: {items: this.mapFilters()},
-        pageFilterType: PageFilterType.ParticipantCohortStatuses,
-      } as Request;
-      cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
-        .then(review => {
-          cohortReviewStore.next(review);
-          this.setState({
-            data: review.participantCohortStatuses.map(this.mapData),
-            loading: false,
-            total: review.queryResultSize
-          });
+      const filters = this.mapFilters();
+      if (filters === null) {
+        this.setState({
+          data: [],
+          loading: false,
         });
+      } else {
+        const query = {
+          page: page,
+          pageSize: rows,
+          sortColumn: reverseColumnEnum[sortField],
+          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+          filters: {items: filters},
+          pageFilterType: PageFilterType.ParticipantCohortStatuses,
+        } as Request;
+        cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
+          .then(review => {
+            cohortReviewStore.next(review);
+            this.setState({
+              data: review.participantCohortStatuses.map(this.mapData),
+              loading: false,
+              total: review.queryResultSize
+            });
+          });
+      }
     }
 
     mapFilters = () => {
       const {filters} = this.state;
-      return Object.keys(filters).reduce((acc, _type) => {
-        const values = filters[_type].filter(val => val !== 'Select All');
-        if (values.length) {
+      const filterArr =  Object.keys(filters).reduce((acc, _type) => {
+        const values = filters[_type];
+        if (!values.length) {
+          return null;
+        }
+        if (!values.includes('Select All')) {
           const filter = {
             property: Columns[_type],
             values: values,
@@ -255,6 +287,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         }
         return acc;
       }, []);
+      return filterArr.includes(null) ? null : filterArr;
     }
 
     mapData = (participant: ParticipantCohortStatus) => {
@@ -396,7 +429,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           filters[column].splice(filters[column].indexOf('Select All'), 1);
         }
       }
-      this.setState({loading: true, filters: filters});
+      this.setState({loading: true, filters});
       setTimeout(() => this.getTableData());
     }
 
