@@ -236,7 +236,9 @@ export const Popup = fp.flow(
 
 export class PopupTrigger extends React.Component {
   static readonly defaultProps = {
-    closeOnClick: false
+    closeOnClick: false,
+    onOpen: () => {},
+    onClose: () => {}
   };
 
   props: any;
@@ -251,10 +253,11 @@ export class PopupTrigger extends React.Component {
 
   close() {
     this.setState({open: false});
+    this.props.onClose();
   }
 
   render() {
-    const {children, content, closeOnClick, ...props} = this.props;
+    const {children, content, onOpen, onClose, closeOnClick, ...props} = this.props;
     const {open} = this.state;
     const child = React.Children.only(children);
     return <React.Fragment>
@@ -265,12 +268,18 @@ export class PopupTrigger extends React.Component {
           if (child.props.onClick) {
             child.props.onClick(...args);
           }
+          if (!open) {
+            onOpen();
+          }
+          if (open) {
+            onClose();
+          }
           this.setState({open: !open});
         }
       })}
       {open && <Popup
           target={this.id}
-          handleClickOutside={() => this.setState({open: false})}
+          handleClickOutside={() => this.close()}
           outsideClickIgnoreClass={this.id}
           onClick={closeOnClick ? () => this.close() : undefined}
           {...props}

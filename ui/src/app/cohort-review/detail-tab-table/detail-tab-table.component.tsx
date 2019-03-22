@@ -113,8 +113,9 @@ export interface DetailTabTableProps {
   filterType: PageFilterType;
   participantId: number;
   workspace: WorkspaceData;
-  filteredTab: any;
+  filterState: any;
   getFilteredData: Function;
+  updateState: number;
 }
 
 export interface DetailTabTableState {
@@ -125,8 +126,6 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  checkedItems: any;
-
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -140,7 +139,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         start: 0,
         sortField: null,
         sortOrder: 1,
-        checkedItems: props.filteredTab,
         expandedRows: [],
       };
     }
@@ -157,6 +155,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           loading: true,
         });
         this.getParticipantData();
+      } else if (prevProps.updateState !== this.props.updateState) {
+        this.filterData();
       }
     }
 
@@ -238,46 +238,68 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      const {checkedItems, data} = this.state;
+      // const {data} = this.state;
+      const {domain, filterState} = this.props;
+      let checkedItems = filterState.tabs[domain][colName];
       if (event.target.checked) {
         if (event.target.name === 'Select All') {
-          checkedItems[colName] = namesArray.map(opt => opt.name);
+          checkedItems = namesArray.map(opt => opt.name);
         } else {
-          checkedItems[colName].push(event.target.name);
-          if (namesArray.length - 1 === checkedItems[colName].length) {
+          checkedItems.push(event.target.name);
+          if (namesArray.length - 1 === checkedItems.length) {
             // we have to add selectall when everything is selected
-            checkedItems[colName].push('Select All');
+            checkedItems.push('Select All');
           }
         }
       } else {
         if (event.target.name === 'Select All') {
-          checkedItems[colName] = [];
-          this.setState({filteredData: checkedItems});
+          checkedItems = [];
         } else {
-          if (checkedItems[colName].find(s => s === 'Select All')) {
-            checkedItems[colName]
-              .splice(checkedItems[colName]
-                .indexOf('Select All'), 1);
+          if (checkedItems.find(s => s === 'Select All')) {
+            checkedItems.splice(checkedItems.indexOf('Select All'), 1);
           }
-          checkedItems[colName]
-            .splice(checkedItems[colName]
-              .indexOf(event.target.name), 1);
+          checkedItems.splice(checkedItems.indexOf(event.target.name), 1);
         }
       }
-      this.setState({checkedItems: checkedItems});
-      this.props.getFilteredData(colName, checkedItems);
-      if (data) {
-        this.filterData();
-      }
+      filterState.tabs[domain][colName] = checkedItems;
+      // this.setState({filterState: filterState});
+      this.props.getFilteredData(filterState);
+      // if (data) {
+      //   this.filterData();
+      // }
       this.getErrorMessage(event.target.name);
     }
 
     filterData() {
-      const {checkedItems} = this.state;
       let {data, start} = this.state;
+      const {
+        domain, filterState, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}
+      } = this.props;
+      const checkedItems = filterState.tabs[domain];
+      const vocab = filterState.vocab;
+      if (dateMin || dateMax) {
+        const min = dateMin ? Date.parse(dateMin) : 0;
+        const max = dateMax ? Date.parse(dateMax) : 9999999999999;
+        data = data.filter(item => {
+          const itemDate = Date.parse(item.itemDate);
+          return itemDate >= min && itemDate <= max;
+        });
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
+        const min = ageMin || 0;
+        const max = ageMax || 120;
+        data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
+      }
+      if (this.props.domain !== DomainType[DomainType.SURVEY]
+        && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
+        && visits) {
+        data = data.filter(item => visits === item.visitType);
+      }
       const empty = [];
       for (const col in checkedItems) {
-        if (checkedItems[col].length) {
+        if ((col === 'domain' || col === `${vocab}Vocabulary`)
+          && checkedItems[col].length
+          && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
           empty.push(false);
         } else {
@@ -285,7 +307,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       if (!empty.includes(false)) {
-        if (checkedItems === undefined) {
+        if (checkedItems === undefined ||
+          (vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
           // as some tab does not have filtered items but have data
           this.setState({filteredData: data, start: start});
         } else {
@@ -300,7 +323,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getErrorMessage = (name?) => {
-      const {data, checkedItems, filteredData} = this.state;
+      const {data, filteredData} = this.state;
+      const {domain, filterState} = this.props;
+      const checkedItems = filterState.tabs[domain];
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
       } else {
@@ -317,8 +342,9 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     getColumnValue(colName: string) {
-      const {data, checkedItems} = this.state;
-      const {domain} = this.props;
+      const {data} = this.state;
+      const {domain, filterState} = this.props;
+      const checkedItems = filterState.tabs[domain];
       if (!data) {
         return {};
       }
@@ -328,18 +354,17 @@ export const DetailTabTable = withCurrentWorkspace()(
         counts.total++;
       });
       let options: Array<any>;
-      switch (colName) {
-        case 'standardVocabulary':
-          /* TODO need to check for Source also after adding the standard/source radio buttons */
-          const vocabs = vocabOptions.getValue().Standard;
-          options = vocabs[domain] ? vocabs[domain].map(option => {
-            return {name: option, count: counts[option] || 0};
-          }) : [];
-          break;
-        case 'domain':
-          options = domains.map(option => {
-            return {name: option, count: counts[option] || 0};
-          });
+      if (colName === 'domain') {
+        options = domains.map(option => {
+          return {name: option, count: counts[option] || 0};
+        });
+      } else {
+        const vocabs = colName === 'standardVocabulary'
+          ? vocabOptions.getValue().Standard
+          : vocabOptions.getValue().Source;
+        options = vocabs[domain] ? vocabs[domain].map(option => {
+          return {name: option, count: counts[option] || 0};
+        }) : [];
       }
       options.push({name: 'Select All', count: counts.total});
       if (checkedItems[colName].find(i => i === 'Select All')) {
@@ -348,7 +373,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       let fl: any;
 
       return <span>
-        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {options.map((opt, i) => (
@@ -409,7 +434,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const filterColName = col.name === 'standardVocabulary' || col.name === 'domain';
+        const filterColName = col.name === 'domain'
+          || col.name === 'sourceVocabulary'
+          || col.name === 'standardVocabulary';
         const isExpanderNeeded = col.name === 'graph'  &&
           (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
@@ -440,7 +467,8 @@ export const DetailTabTable = withCurrentWorkspace()(
 
       return <div style={styles.container}>
         <style>{css}</style>
-        {filteredData && <DataTable  expandedRows={this.state.expandedRows}
+        {filteredData && <DataTable
+          expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
@@ -478,8 +506,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
   @Input('domain') domain: DetailTabTableProps['domain'];
   @Input('filterType') filterType: DetailTabTableProps['filterType'];
   @Input('participantId') participantId: DetailTabTableProps['participantId'];
-  @Input('filteredTab') filteredTab: DetailTabTableProps['filteredTab'];
+  @Input('filterState') filterState: DetailTabTableProps['filterState'];
   @Input('getFilteredData') getFilteredData: DetailTabTableProps['getFilteredData'];
+  @Input('updateState') updateState: DetailTabTableProps['updateState'];
 
   constructor() {
     super(DetailTabTable, [
@@ -488,9 +517,9 @@ export class DetailTabTableComponent extends ReactWrapperBase {
       'domain',
       'filterType',
       'participantId',
-      'filteredTab',
+      'filterState',
       'getFilteredData',
+      'updateState',
     ]);
   }
 }
-

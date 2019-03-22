@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
-import {AccessTasksGuard} from './guards/access-tasks-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -18,7 +17,6 @@ import {ProfilePageComponent} from './views/profile-page/component';
 import {SettingsComponent} from './views/settings/component';
 import {SignedInComponent} from './views/signed-in/component';
 import {StigmatizationPageComponent} from './views/stigmatization-page/component';
-import {UnregisteredComponent} from './views/unregistered/component';
 import {WorkspaceEditComponent, WorkspaceEditMode} from './views/workspace-edit/component';
 import {WorkspaceListComponent} from './views/workspace-list/component';
 import {WorkspaceWrapperComponent} from './views/workspace-wrapper/component';
@@ -41,19 +39,13 @@ const routes: Routes = [
     path: '',
     component: SignedInComponent,
     canActivate: [SignInGuard],
-    canActivateChild: [SignInGuard, RegistrationGuard, AccessTasksGuard],
+    canActivateChild: [SignInGuard, RegistrationGuard],
     runGuardsAndResolvers: 'always',
     children: [
       {
         path: '',
         component: HomepageComponent,
         data: {title: 'Homepage'},
-      }, {
-        path: 'unregistered',
-        component: UnregisteredComponent,
-        data: {
-          title: 'Awaiting ID Verification'
-        }
       }, {
         path: 'definitions/stigmatization',
         component: StigmatizationPageComponent,
@@ -225,7 +217,6 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
-    AccessTasksGuard,
     RegistrationGuard,
     SignInGuard,
   ]

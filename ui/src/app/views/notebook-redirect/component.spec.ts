@@ -8,6 +8,7 @@ import {AsyncSubject} from 'rxjs/AsyncSubject';
 import {Observable} from 'rxjs/Observable';
 
 import {NotebookComponent} from 'app/icons/notebook/component';
+import {ReminderComponent} from 'app/icons/reminder/component';
 import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebookRedirectComponent} from 'app/views/notebook-redirect/component';
@@ -18,7 +19,7 @@ import {JupyterServiceStub} from 'testing/stubs/jupyter-service-stub';
 import {LeoClusterServiceStub} from 'testing/stubs/leo-cluster-service-stub';
 import {NotebooksServiceStub} from 'testing/stubs/notebooks-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {simulateClick, updateAndTick} from 'testing/test-helpers';
+import {setupModals, simulateClick, updateAndTick} from 'testing/test-helpers';
 
 import {
   ClusterLocalizeRequest,
@@ -73,7 +74,6 @@ class BlockingClusterStub extends ClusterServiceStub {
   }
 }
 
-
 describe('NotebookRedirectComponent', () => {
   let fixture: ComponentFixture<NotebookRedirectComponent>;
   let blockingClusterStub: BlockingClusterStub;
@@ -88,6 +88,7 @@ describe('NotebookRedirectComponent', () => {
       declarations: [
         NotebookComponent,
         NotebookRedirectComponent,
+        ReminderComponent,
         TopBoxComponent
       ],
       imports: [
@@ -102,6 +103,7 @@ describe('NotebookRedirectComponent', () => {
         { provide: JupyterService, useValue: new JupyterServiceStub() },
       ]}).compileComponents().then(() => {
         fixture = TestBed.createComponent(NotebookRedirectComponent);
+        setupModals(fixture);
         spyOn(window.history, 'replaceState').and.stub();
         blockingClusterStub.release();
         blockingNotebooksStub.release();
@@ -337,6 +339,7 @@ describe('NotebookRedirectComponent', () => {
       declarations: [
         NotebookComponent,
         NotebookRedirectComponent,
+        ReminderComponent,
         TopBoxComponent
       ],
       imports: [
@@ -351,6 +354,7 @@ describe('NotebookRedirectComponent', () => {
         { provide: JupyterService, useValue: new JupyterServiceStub() },
       ]}).compileComponents().then(() => {
         fixture = TestBed.createComponent(NotebookRedirectComponent);
+        setupModals(fixture);
         spyOn(window.history, 'replaceState').and.stub();
         blockingClusterStub.release();
         blockingNotebooksStub.release();

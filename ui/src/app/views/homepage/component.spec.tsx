@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConfigApi, ProfileApi} from 'generated/fetch';
+import {ConfigApi, DataAccessLevel, ProfileApi} from 'generated/fetch';
 import {Profile} from 'generated';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
@@ -31,6 +31,7 @@ describe('WorkbenchAccessTasks', () => {
       eraCommonsError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
+      betaAccessGranted: true
     }
   });
 
@@ -77,7 +78,6 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload});
-    profileApi.profile.trainingCompletionTime = null;
   });
 
   it('should render the homepage', () => {
@@ -96,7 +96,6 @@ describe('HomepageComponent', () => {
     const newProfile = {
       ...profile,
       pageVisits: [{page: 'homepage'}],
-      eraCommonsLinkedNihUsername: 'test'
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
@@ -104,51 +103,33 @@ describe('HomepageComponent', () => {
   });
 
   it('should display quick tour if first visit', async () => {
-    profileApi.profile.trainingCompletionTime = 1;
-    const newProfile = {
-      ...profile,
-      eraCommonsLinkedNihUsername: 'test'
-    };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
   });
 
-  it('should show access tasks dashboard if the user has no nih username', async () => {
-    profileApi.profile.trainingCompletionTime = 1;
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
-  });
-
-  it('should show access tasks dashboard if the user has not completed training', async () => {
+  it('should show access tasks dashboard if the user is not registered', async () => {
     const newProfile = {
       ...profile,
-      eraCommonsLinkedNihUsername: 'test'
+      dataAccessLevel: DataAccessLevel.Unregistered
     };
     userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="complete-training"]')
         .first().text()).toEqual('Complete Training');
+    expect(wrapper.find('[data-test-id="login"]').first().text()).toEqual('Login');
   });
 
   it('should not display the quick tour if access tasks dashboard is open', async () => {
+    const newProfile = {
+      ...profile,
+      dataAccessLevel: DataAccessLevel.Unregistered
+    };
+    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
 
-  it('should not show access tasks dashboard if user has completed all access tasks', async () => {
-    profileApi.profile.trainingCompletionTime = 1;
-    const newProfile = {
-        ...profile,
-      eraCommonsLinkedNihUsername: 'test',
-    };
-    userProfileStore.next({profile: newProfile as unknown as Profile, reload});
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="login"]').exists()).toBeFalsy();
-  });
 });

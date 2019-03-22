@@ -161,10 +161,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
     return this.locationService.path() === '/workspaces/build';
   }
 
-  openDataBrowser(): void {
-    window.open(this.publicUiUrl, '_blank');
-  }
-
   openZendeskWidget(): void {
     // Note: we're string-protecting our access of the 'zE' property, since
     // this property is dynamically loaded by the Zendesk web widget snippet,

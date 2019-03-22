@@ -242,9 +242,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                                     }/>
                   )
                 }
+                {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
+                  left: '10rem'}}/>}
               </div>
-              {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
-                left: '10rem'}}/>}
             </div>
           </div>
           <div style={{width: '58%'}}>
@@ -254,7 +254,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                 <div style={styles.selectBoxHeader}>
                   Concept Sets
                   <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
-                           onClick={() => this.setState({creatingConceptSet: true})}/>
+                           onClick={() => navigate(['workspaces', namespace, id,  'concepts'])}/>
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   {!loadingResources && this.state.conceptSetList.map(conceptSet =>

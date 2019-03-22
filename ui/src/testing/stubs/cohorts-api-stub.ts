@@ -1,6 +1,7 @@
 import {convertToResources, ResourceType} from 'app/utils/resourceActionsReact';
 import {
   Cohort,
+  CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
   RecentResource,
@@ -133,5 +134,13 @@ export class CohortsApiStub extends CohortsApi {
         resolve({items: cohortsInWorkspace});
       }
     });
+  }
+
+  getCohort(): Promise<Cohort> {
+    return new Promise<Cohort>(resolve => resolve(this.cohorts[0]));
+  }
+
+  getCohortAnnotations(): Promise<CohortAnnotationsResponse> {
+    return new Promise<CohortAnnotationsResponse>(resolve => resolve({results: []}));
   }
 }

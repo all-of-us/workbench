@@ -1,5 +1,5 @@
-import {AnnotationType} from 'generated';
 import {
+  AnnotationType,
   CohortAnnotationDefinition,
   CohortAnnotationDefinitionApi, CohortAnnotationDefinitionListResponse,
   EmptyResponse
@@ -14,7 +14,8 @@ export const cohortAnnotationDefinitionStub = {
 
 export class CohortAnnotationDefinitionServiceStub extends CohortAnnotationDefinitionApi {
   createCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
-    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
+    return new Promise<CohortAnnotationDefinition>(resolve =>
+      resolve(cohortAnnotationDefinitionStub));
   }
 
   deleteCohortAnnotationDefinition(): Promise<EmptyResponse> {
@@ -22,14 +23,16 @@ export class CohortAnnotationDefinitionServiceStub extends CohortAnnotationDefin
   }
 
   getCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
-    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
+    return new Promise<CohortAnnotationDefinition>(resolve =>
+      resolve(cohortAnnotationDefinitionStub));
   }
 
   getCohortAnnotationDefinitions(): Promise<CohortAnnotationDefinitionListResponse> {
-    return new Promise<CohortAnnotationDefinitionListResponse>(resolve => resolve());
+    return new Promise<CohortAnnotationDefinitionListResponse>(resolve => resolve({items: []}));
   }
 
   updateCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
-    return new Promise<CohortAnnotationDefinition>(resolve => resolve());
+    return new Promise<CohortAnnotationDefinition>(resolve =>
+      resolve(cohortAnnotationDefinitionStub));
   }
 }

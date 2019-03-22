@@ -35,14 +35,14 @@ public class ExceptionAdvice {
       relevantError = e.getCause();
     }
 
-    errorResponse.setMessage(relevantError.getMessage());
-    errorResponse.setErrorClassName(relevantError.getClass().getName());
-
     // if exception class has an HTTP status associated with it, grab it
     if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
       statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
     }
     if (relevantError instanceof WorkbenchException) {
+      // Only include Exception details on Workbench errors.
+      errorResponse.setMessage(relevantError.getMessage());
+      errorResponse.setErrorClassName(relevantError.getClass().getName());
       WorkbenchException workbenchException = (WorkbenchException) relevantError;
       if (workbenchException.getErrorResponse() != null && workbenchException.getErrorResponse().getErrorCode() != null) {
         errorResponse.setErrorCode(workbenchException.getErrorResponse().getErrorCode());

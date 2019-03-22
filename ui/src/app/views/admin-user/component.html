@@ -1,30 +1,33 @@
 <h2>User Admin Table</h2>
   <clr-datagrid *ngIf="contentLoaded; else contentLoading">
-    <clr-dg-column [style.width.%]="7" [clrDgField]="'idVerificationStatus'">ID Verification Status</clr-dg-column>
     <clr-dg-column [style.width.%]="5" [clrDgField]="'disabled'">Disabled</clr-dg-column>
     <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'familyName'">Name</clr-dg-column>
     <clr-dg-column [style.width.%]="20" [clrDgSortBy]="'username'">User Name</clr-dg-column>
-    <clr-dg-column [style.width.%]="20" [clrDgSortBy]="'contactEmail'">Contact Email</clr-dg-column>
-    <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'idVerificationRequestTime'">Time Requested</clr-dg-column>
-    <clr-dg-column [style.width.%]="15">Action</clr-dg-column>
+    <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'contactEmail'">Contact Email</clr-dg-column>
+    <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'idVerificationRequestTime'">Beta Access Time Requested</clr-dg-column>
+    <clr-dg-column [style.width.%]="15">User Lockout
+      <app-tooltip [direction]="'bottom-left'">
+       <div class="tooltip-label">Disable or re-enable a user's access to the Workbench.  This should be used in the case of rejecting a user's request for beta access</div>
+      </app-tooltip>
+    </clr-dg-column>
+    <clr-dg-column [style.width.%]="11">Bypass
+      <app-tooltip [direction]="'bottom-left'">
+        <div class="tooltip-label">Bypass a user from completing certain access modules to gain access to the Workbench.</div>
+      </app-tooltip>
+    </clr-dg-column>
     <clr-dg-placeholder>No rejected or unverified profiles found.</clr-dg-placeholder>
     <clr-dg-row *clrDgItems="let profile of profiles" class="table-row workspace-table-row">
-      <clr-dg-cell>{{profile.idVerificationStatus | lowercase}}</clr-dg-cell>
       <clr-dg-cell>{{profile.disabled}}</clr-dg-cell>
       <clr-dg-cell>{{profile.familyName}}, {{profile.givenName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.username}}</clr-dg-cell>
       <clr-dg-cell>{{profile.contactEmail}}</clr-dg-cell>
       <clr-dg-cell>{{profile.idVerificationRequestTime | date: 'medium'}}</clr-dg-cell>
       <clr-dg-cell>
-        <div *ngIf="profile.idVerificationStatus !== IdVerificationStatus.VERIFIED">
-          <button class="btn"
-                  (click)="setIdVerificationStatus(profile,'VERIFIED')">Approve</button>
-          <button class="btn" (click)="setIdVerificationStatus(profile,'REJECTED')">Reject</button>
-        </div>
-        <div *ngIf="profile.idVerificationStatus === IdVerificationStatus.VERIFIED">
-          <button *ngIf="!profile.disabled" class="btn" (click)="updateUserDisabledStatus(true, profile)">Disable</button>
-          <button *ngIf="profile.disabled" class="btn" (click)="updateUserDisabledStatus(false, profile)">Enable</button>
-        </div>
+          <button *ngIf="!profile.disabled" style="margin-top: 0" class="btn" (click)="updateUserDisabledStatus(true, profile)">Disable</button>
+          <button *ngIf="profile.disabled" style="margin-top: 0" class="btn" (click)="updateUserDisabledStatus(false, profile)">Enable</button>
+      </clr-dg-cell>
+      <clr-dg-cell>
+        <app-admin-user-bypass [profile]="profile"></app-admin-user-bypass>
       </clr-dg-cell>
     </clr-dg-row>
   </clr-datagrid>

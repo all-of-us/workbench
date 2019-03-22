@@ -45,6 +45,7 @@ import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
+import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
@@ -671,40 +672,39 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, Boolean bypassed) {
-    User user = userDao.findUserByUserId(userId);
+  public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
     Timestamp valueToSet;
-    if (bypassed == null || bypassed) {
+    Boolean bypassed = request.getIsBypassed();
+    if (bypassed) {
       valueToSet = new Timestamp(clock.instant().toEpochMilli());
     } else {
       valueToSet = null;
     }
     switch (moduleName) {
       case "dataUseAgreement":
-        user.setDataUseAgreementBypassTime(valueToSet);
+        userService.setDataUseAgreementBypassTime(userId, valueToSet);
         break;
       case "complianceTraining":
-        user.setComplianceTrainingBypassTime(valueToSet);
+        userService.setComplianceTrainingBypassTime(userId, valueToSet);
         break;
       case "betaAccess":
-        user.setBetaAccessBypassTime(valueToSet);
+        userService.setBetaAccessBypassTime(userId, valueToSet);
         break;
       case "emailVerification":
-        user.setEmailVerificationBypassTime(valueToSet);
+        userService.setEmailVerificationBypassTime(userId, valueToSet);
         break;
       case "eraCommons":
-        user.setEraCommonsBypassTime(valueToSet);
+        userService.setEraCommonsBypassTime(userId, valueToSet);
         break;
       case "idVerification":
-        user.setIdVerificationBypassTime(valueToSet);
+        userService.setIdVerificationBypassTime(userId, valueToSet);
         break;
       case "twoFactorAuth":
-        user.setTwoFactorAuthBypassTime(valueToSet);
+        userService.setTwoFactorAuthBypassTime(userId, valueToSet);
         break;
       default:
         throw new BadRequestException("There is no access module named: " + moduleName);
     }
-    saveUserWithConflictHandling(user);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

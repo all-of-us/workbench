@@ -215,8 +215,8 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   inputChange(input: number, index: number, name: string) {
     if (input) {
       let value = input.toString();
-      if (value && value.length > 3) {
-        value = value.slice(0, 3);
+      if (value && value.length > 10) {
+        value = value.slice(0, 10);
         this.form.controls.NUM.get(['num' + index, name]).setValue(value, {emitEvent: false});
       }
     }

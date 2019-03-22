@@ -12,10 +12,13 @@ import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub'
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {
+  setupModals,
   updateAndTick
 } from 'testing/test-helpers';
 
+import {AdminUserBypassComponent} from 'app/views/admin-user-bypass/component';
 import {AdminUserComponent} from 'app/views/admin-user/component';
+import {ToolTipComponent} from 'app/views/tooltip/component';
 
 describe('AdminUserComponent', () => {
   let fixture: ComponentFixture<AdminUserComponent>;
@@ -25,7 +28,9 @@ describe('AdminUserComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        AdminUserComponent
+        AdminUserComponent,
+        AdminUserBypassComponent,
+        ToolTipComponent
       ],
       providers: [
         { provide: AuthDomainService, useValue: {} },
@@ -39,6 +44,7 @@ describe('AdminUserComponent', () => {
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(AdminUserComponent);
+      setupModals(fixture);
       tick();
     });
   }));

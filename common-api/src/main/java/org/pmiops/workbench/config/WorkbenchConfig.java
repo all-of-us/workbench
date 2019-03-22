@@ -95,6 +95,6 @@ public class WorkbenchConfig {
     public boolean enableComplianceTraining;
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
-    public boolean enableIdVerification;
+    public boolean enableBetaAccess;
   }
 }
