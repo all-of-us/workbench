@@ -23,7 +23,8 @@ public class AggregationUtils {
   public static final String RACE = "r_";
 
   /**
-   * Comment
+   * Build aggregations for demographic charting based on date range, gender and race. The bucket aggregations
+   * compute and return the number of documents that "fell into" each bucket.
    */
   public static AggregationBuilder buildDemoChartAggregation(String ageRange) {
     String[] ages = ageRange.split("-");
