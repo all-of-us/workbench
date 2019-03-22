@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {InfoIcon} from 'app/components/icons';
@@ -227,6 +228,7 @@ export enum WorkspaceEditMode { Create = 1, Edit = 2, Clone = 3 }
 export interface WorkspaceEditProps {
   routeConfigData: any;
   workspace: Workspace;
+  cancel: Function;
 }
 
 export interface WorkspaceEditState {
@@ -510,7 +512,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <div>
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem',
             marginBottom: '1rem'}}>
-            <Button type='secondary' style={{marginRight: '1rem'}}>
+            <Button type='secondary' style={{marginRight: '1rem'}}
+                    onClick = {() => this.props.cancel()}>
               Cancel
             </Button>
             <TooltipTrigger content={[<ul>Missing Required Fields:
@@ -533,7 +536,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             workspace.
           </ModalBody>
           <ModalFooter>
-            <Button
+            <Button onClick = {() => this.props.cancel()}
                 type='secondary' style={{marginRight: '2rem'}}>
               Cancel
               {this.props.routeConfigData.mode === WorkspaceEditMode.Create ? 'Creation' : 'Update'}
@@ -554,7 +557,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               'session. Please reload to avoid overwriting those changes.'}
           </ModalBody>
           <ModalFooter>
-            <Button type='secondary' style={{marginRight: '2rem'}}>Cancel Creation</Button>
+            <Button type='secondary' onClick = {() => this.props.cancel()}
+                    style={{marginRight: '2rem'}}>Cancel Creation</Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>
         </Modal>
@@ -569,7 +573,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 })
 export class WorkspaceEditComponent extends ReactWrapperBase {
 
-  constructor() {
-    super(WorkspaceEdit, []);
+  constructor(private _location: Location) {
+    super(WorkspaceEdit, ['cancel']);
+    this.cancel = this.cancel.bind(this);
+  }
+
+  cancel(): void {
+    this._location.back();
   }
 }
