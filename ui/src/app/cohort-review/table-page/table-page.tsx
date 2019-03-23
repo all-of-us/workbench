@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 
 import {
   cohortReviewStore,
+  filterStateStore,
   multiOptions,
   vocabOptions
 } from 'app/cohort-review/review-state.service';
@@ -96,8 +97,12 @@ const styles = reactStyles({
     width: '2rem',
   },
   sortIcon: {
+    marginTop: '3px',
     color: '#2691D0',
     fontSize: '0.4rem',
+    float: 'right'
+  },
+  filterIcon: {
     float: 'right'
   },
   overlayHeader: {
@@ -167,19 +172,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortField: 'participantId',
         sortOrder: 1,
         total: null,
-        filters: {
-          PARTICIPANTID: '',
-          RACE: ['Select All'],
-          GENDER: ['Select All'],
-          ETHNICITY: ['Select All'],
-          STATUS: [
-            CohortStatus.INCLUDED,
-            CohortStatus.EXCLUDED,
-            CohortStatus.NEEDSFURTHERREVIEW,
-            CohortStatus.NOTREVIEWED,
-            'Select All'
-          ]
-        }
+        filters: filterStateStore.getValue().participants
       };
       this.filterInput = fp.debounce(300, () => this.getTableData());
     }
@@ -219,13 +212,17 @@ export const ParticipantsTable = withCurrentWorkspace()(
         });
       } else {
         multiFilters = multiOptions.getValue();
-        for (const _type in multiFilters) {
-          if (multiFilters.hasOwnProperty(_type)) {
-            filters[_type] = [...filters[_type], ...multiFilters[_type].map(opt => opt.value)];
-          }
+        const review = cohortReviewStore.getValue();
+        if (review) {
+          this.setState({
+            data: review.participantCohortStatuses.map(this.mapData),
+            loading: false,
+            page: review.page,
+            total: review.queryResultSize
+          });
+        } else {
+          this.getTableData();
         }
-        this.setState({filters});
-        setTimeout(() => this.getTableData());
       }
       if (!vocabOptions.getValue()) {
         cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
@@ -240,6 +237,13 @@ export const ParticipantsTable = withCurrentWorkspace()(
             vocabOptions.next(vocabFilters);
           });
       }
+    }
+
+    componentWillUnmount(): void {
+      const {filters} = this.state;
+      const filterState = filterStateStore.getValue();
+      filterState.participants = filters;
+      filterStateStore.next(filterState);
     }
 
     getTableData(): void {
@@ -343,7 +347,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
     onRowClick = (event: any) => {
       const {id, namespace} = this.props.workspace;
       const {cid} = urlParamsStore.getValue();
-      console.log(event);
       navigate([
         'workspaces',
         namespace,
@@ -384,11 +387,15 @@ export const ParticipantsTable = withCurrentWorkspace()(
       let fl: any;
 
       return <span>
-        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
+        {data &&
+          <i className='pi pi-filter' style={styles.filterIcon} onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' &&
-            <TextInput value={filters.PARTICIPANTID} onChange={this.onInputChange} />}
+            <TextInput
+              style={{width: '90%', marginLeft: '5%'}}
+              value={filters.PARTICIPANTID}
+              onChange={this.onInputChange} />}
           {column !== 'participantId' && options.map((opt, i) => (
             <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
@@ -459,9 +466,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.name}
           </span>
+          {!['deceased', 'birthDate'].includes(col.field) && this.filterTemplate(col.field)}
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
-          {!['deceased', 'birthDate'].includes(col.field) && this.filterTemplate(col.field)}
         </React.Fragment>;
         return <Column
           style={styles.tableBody}

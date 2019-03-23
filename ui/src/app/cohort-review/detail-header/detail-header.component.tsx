@@ -10,9 +10,12 @@ import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} fro
 
 import {
   CohortReview,
+  Filter,
+  Operator,
   PageFilterRequest,
   PageFilterType,
   ParticipantCohortStatus,
+  ParticipantCohortStatusColumns as Columns,
   SortOrder
 } from 'generated/fetch';
 import * as moment from 'moment';
@@ -222,7 +225,7 @@ export const DetailHeader = withCurrentWorkspace()(
         return;
       }
 
-      const totalPages = Math.floor(review.reviewSize / review.pageSize);
+      const totalPages = Math.ceil(review.queryResultSize / review.pageSize);
 
       this.setState({
         afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
@@ -281,6 +284,7 @@ export const DetailHeader = withCurrentWorkspace()(
         page: page,
         pageSize: size,
         sortOrder: SortOrder.Asc,
+        filters: {items: this.getRequestFilters()},
         pageFilterType: PageFilterType.ParticipantCohortStatuses
       } as PageFilterRequest;
       return from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
@@ -289,6 +293,31 @@ export const DetailHeader = withCurrentWorkspace()(
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
       navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
+    }
+
+    getRequestFilters = () => {
+      const filters = filterStateStore.getValue().participants;
+      return Object.keys(filters).reduce((acc, _type) => {
+        const values = filters[_type];
+        if (_type === Columns[Columns.PARTICIPANTID]) {
+          if (values) {
+            const filter = {
+              property: Columns[_type],
+              values: [values],
+              operator: Operator.LIKE
+            } as Filter;
+            acc.push(filter);
+          }
+        } else if (values.length && !values.includes('Select All')) {
+          const filter = {
+            property: Columns[_type],
+            values: values,
+            operator: Operator.IN
+          } as Filter;
+          acc.push(filter);
+        }
+        return acc;
+      }, []);
     }
 
     vocabChange = (event: any) => {
