@@ -1,7 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {
-  CohortReview,
+  CohortReview, CohortStatus,
 } from 'generated/fetch';
 
 export const initialFilterState = {
@@ -13,11 +13,18 @@ export const initialFilterState = {
     visits: null
   },
   participants: {
-    participantId: null,
-    gender: ['Select All'],
-    race: ['Select All'],
-    ethnicity: ['Select All'],
-    status: ['Select All'],
+    PARTICIPANTID: '',
+    DECEASED: ['Select All'],
+    GENDER: ['Select All'],
+    RACE: ['Select All'],
+    ETHNICITY: ['Select All'],
+    STATUS: [
+      CohortStatus.INCLUDED,
+      CohortStatus.EXCLUDED,
+      CohortStatus.NEEDSFURTHERREVIEW,
+      CohortStatus.NOTREVIEWED,
+      'Select All'
+    ]
   },
   tabs: {
     ALL_EVENTS: {
