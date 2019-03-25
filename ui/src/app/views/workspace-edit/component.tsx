@@ -7,6 +7,8 @@ import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceStorageService} from 'app/services/workspace-storage.service';
+import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {ReactWrapperBase, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
@@ -102,20 +104,20 @@ const styles = reactStyles({
   header: {
     fontWeight: 600,
     lineHeight: '24px',
-    color: '#262262'
+    color: colors.purple[0]
   },
 
   requiredText: {
     fontSize: '13px',
     fontStyle: 'italic',
     fontWeight: 400,
-    color: '#4A4A4A',
+    color: colors.gray[0],
     marginLeft: '0.2rem'
   },
 
   text: {
     fontSize: '13px',
-    color: '#4A4A4A',
+    color: colors.gray[0],
     fontWeight: 400,
     lineHeight: '24px'
   },
@@ -147,13 +149,13 @@ const styles = reactStyles({
     height: '10em',
     resize: 'none',
     padding: '0.1rem 0.2rem',
-    background: '#fff',
+    background: colors.white,
     border: '1px solid #ccc',
-    color: '#000',
+    color: colors.black[0],
     borderRadius: '.125rem'
   },
   shortDescription: {
-    color: '#262262',
+    color: colors.purple[0],
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '24px'
@@ -229,6 +231,7 @@ export interface WorkspaceEditProps {
   routeConfigData: any;
   workspace: Workspace;
   cancel: Function;
+  reloadWorkspace: Function;
 }
 
 export interface WorkspaceEditState {
@@ -245,7 +248,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     constructor(props: WorkspaceEditProps) {
       super(props);
-      this.isEmpty.bind(this);
       this.state = {
         cdrVersionItems: [],
         workspace: {
@@ -301,10 +303,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         case WorkspaceEditMode.Create:
           return 'Create a new Workspace';
         case WorkspaceEditMode.Edit:
-          return 'Edit workspace \"' + this.props.workspace.name + '\"';
+          return 'Edit workspace \"' + this.state.workspace.name + '\"';
         case WorkspaceEditMode.Clone:
-          return 'Clone workspace \"' +
-              this.props.workspace.name + '\"';
+          return 'Clone workspace \"' + this.state.workspace.name + '\"';
       }
     }
 
@@ -340,18 +341,23 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           workspace =
               await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Clone)) {
-          await workspacesApi().cloneWorkspace(
+          const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.state.workspace.namespace, this.state.workspace.id,
             {
               includeUserRoles: this.state.cloneUserRole,
               workspace: this.state.workspace
             });
+          workspace = cloneWorkspace.workspace;
         } else {
-          await workspacesApi()
+          workspace = await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
+          this.props
+              .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+              .then(() => {
+                navigate(['workspaces', workspace.namespace, workspace.id]);
+              });
         }
-        navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
         this.setState({loading: false});
         if (error.status === 409) {
@@ -573,12 +579,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 })
 export class WorkspaceEditComponent extends ReactWrapperBase {
 
-  constructor(private _location: Location) {
-    super(WorkspaceEdit, ['cancel']);
+  constructor(private _location: Location, private workspaceStorage: WorkspaceStorageService) {
+    super(WorkspaceEdit, ['cancel', 'reloadWorkspace']);
     this.cancel = this.cancel.bind(this);
+    this.reloadWorkspace = this.reloadWorkspace.bind(this);
   }
 
   cancel(): void {
     this._location.back();
   }
+
+  reloadWorkspace(namespace, id): void {
+    this.workspaceStorage.reloadWorkspace(namespace, id);
+  }
+
+
 }

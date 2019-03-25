@@ -2,6 +2,7 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
+import colors from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils/index';
 import {UnderservedPopulationEnum} from 'generated/fetch/index';
 import * as fp from 'lodash/fp';
@@ -38,14 +39,14 @@ const styles = reactStyles({
     paddingBottom: '0.5rem',
     borderBottom: '1px solid #4356a7',
     marginBottom: '0.6rem',
-    color: '#262262',
+    color: colors.purple[0],
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '19px'
   },
   text: {
     fontSize: '13px',
-    color: '#4A4A4A',
+    color: colors.gray[0],
     fontWeight: 400,
     lineHeight: '24px'
   },
@@ -58,10 +59,12 @@ const styles = reactStyles({
     height: '3rem'
   },
   checkbox: {
-    color: '#333333',
+    color: colors.black[1],
     fontSize: 14,
     fontWeight: 400,
-    lineHeight: '30px', paddingRight: '0.3rem'},
+    lineHeight: '30px',
+    paddingRight: '0.3rem'
+  },
   label: {
     position: 'relative',
     display: 'inline-block',
@@ -69,7 +72,7 @@ const styles = reactStyles({
     paddingLeft: '.31667rem',
     cursor: 'pointer',
     lineHeight: '1rem',
-    color: 'black',
+    color: colors.black[0],
     marginTop: '-0.3rem'
   },
   focusHeader: {

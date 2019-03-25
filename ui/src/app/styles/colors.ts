@@ -23,4 +23,9 @@ export default {
     '#dbdbdb',
     '#ededed'
   ],
+  white: '#fff',
+  black: [
+    '#000',
+    '#333333'
+  ]
 };
