@@ -135,6 +135,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .cohortId(cohortReview.getCohortId())
           .cdrVersionId(cohortReview.getCdrVersionId())
           .creationTime(cohortReview.getCreationTime().toString())
+          .cohortDefinition(cohortReview.getCohortDefinition())
           .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
           .reviewedCount(cohortReview.getReviewedCount())
           .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -263,7 +264,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview
       .reviewSize(participantCohortStatuses.size())
-      .reviewStatusEnum(ReviewStatus.CREATED);
+      .reviewStatusEnum(ReviewStatus.CREATED)
+      .cohortDefinition(getCohortDefinition(cohort));
 
     //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
