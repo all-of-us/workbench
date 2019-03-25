@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {CohortsService} from 'generated';
+import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -18,7 +18,7 @@ import {
   isRequstingTotal,
   totalCount,
 } from 'app/cohort-search/redux';
-import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 
 const pixel = (n: number) => `${n}px`;
 const ONE_REM = 24;  // value in pixels
@@ -42,10 +42,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   tempLength = {};
   private subscription;
 
-  constructor(
-    private actions: CohortSearchActions,
-    private api: CohortsService,
-  ) {}
+  constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -59,8 +56,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
        * it */
       const cohortId = params.cohortId;
       if (cohortId) {
-        this.api.getCohort(workspace.namespace, workspace.id, cohortId)
-          .subscribe(cohort => {
+        cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
+          .then(cohort => {
+            currentCohortStore.next(cohort);
             if (cohort.criteria) {
               this.actions.loadFromJSON(cohort.criteria);
               this.actions.runAllRequests();

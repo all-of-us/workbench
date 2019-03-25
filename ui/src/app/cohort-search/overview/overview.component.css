@@ -4,7 +4,7 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
- margin-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
   height: 2rem;
 }
 
@@ -153,7 +153,7 @@ input.alreadyTaken {
 }
 .overview-header .btn.btn-primary {
   line-height: 0.2rem !important;
-  padding: 1rem 0.77rem !important;
+  border-radius: 3px;
 }
 .card-header {
     border-bottom: none;
