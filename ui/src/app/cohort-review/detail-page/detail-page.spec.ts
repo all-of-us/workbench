@@ -6,7 +6,6 @@ import { ChartModule } from 'angular2-highcharts';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import {ValidatorErrorsComponent} from 'app/cohort-common/validator-errors/validator-errors.component';
 import {AddAnnotationDefinitionModalComponent, EditAnnotationDefinitionsModalComponent} from 'app/cohort-review/annotation-definition-modals/annotation-definition-modals.component';
-import {ClearButtonInMemoryFilterComponent} from 'app/cohort-review/clearbutton-in-memory-filter/clearbutton-in-memory-filter.component';
 import {CreateReviewPage} from 'app/cohort-review/create-review-page/create-review-page';
 import {DetailHeaderComponent} from 'app/cohort-review/detail-header/detail-header.component';
 import {DetailTabTableComponent} from 'app/cohort-review/detail-tab-table/detail-tab-table.component';
@@ -39,7 +38,6 @@ describe('DetailPage', () => {
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     TestBed.configureTestingModule({
       declarations: [
-        ClearButtonInMemoryFilterComponent,
         CreateReviewPage,
         DetailHeaderComponent,
         DetailPage,
