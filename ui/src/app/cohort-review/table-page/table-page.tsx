@@ -147,6 +147,7 @@ const reverseColumnEnum = {
   race: Columns.RACE,
   ethnicity: Columns.ETHNICITY,
   birthDate: Columns.BIRTHDATE,
+  deceased: Columns.DECEASED,
   status: Columns.STATUS
 };
 
@@ -198,6 +199,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
             RACE: extract(data.raceList, Columns.RACE),
             GENDER: extract(data.genderList, Columns.GENDER),
             ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
+            DECEASED: [
+              {name: 'Yes', value: 1},
+              {name: 'No', value: 0},
+              {name: 'Select All', value: 'Select All'}
+            ],
             STATUS: [
               {name: 'Included', value: CohortStatus.INCLUDED},
               {name: 'Excluded', value: CohortStatus.EXCLUDED},
@@ -466,7 +472,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.name}
           </span>
-          {!['deceased', 'birthDate'].includes(col.field) && this.filterTemplate(col.field)}
+          {col.field !== 'birthDate' && this.filterTemplate(col.field)}
           {asc && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {desc && <i className='pi pi-arrow-down' style={styles.sortIcon} />}
         </React.Fragment>;
