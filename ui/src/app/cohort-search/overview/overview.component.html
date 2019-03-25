@@ -25,14 +25,30 @@
       </span>
     </h2>
     <div>
-      <button
-        type="button"
-        class="btn btn-primary"
-        [style.margin-left]="'0'"
-        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
-        (click)="saveModal.open()">
-        Save Cohort
-      </button>
+      <clr-dropdown>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="(isRequesting$ | async) || saving || (total$ | async) === null || (total$ | async) === -1"
+          [clrLoading]="saving"
+          clrDropdownTrigger>
+          Save Cohort
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu>
+          <button
+            type="button"
+            class="dropdown-item"
+            [disabled]="saveDisabled"
+            (click)="saveCohort()"
+            clrDropdownItem>Save</button>
+          <button
+            type="button"
+            class="dropdown-item"
+            (click)="saveModal.open()"
+            clrDropdownItem>Save as</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
     </div>
   </div>
 <ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
