@@ -58,11 +58,11 @@ export class SlidingFabReact extends React.Component<{submitFunction: Function,
   render() {
     const {hovering} = this.state;
     const {expanded, disable, iconShape} = this.props;
-    return <div style={disable ? {...styles.slidingButton, ...styles.disable} :
-      styles.slidingButton}
-                onMouseEnter={() => this.setState({hovering: true})}
-                onMouseLeave={() => this.setState({hovering: false})}
-                onClick={() => disable ? {} : this.props.submitFunction()}>
+    return <div data-test-id='sliding-button'
+      style={disable ? {...styles.slidingButton, ...styles.disable} : styles.slidingButton}
+      onMouseEnter={() => this.setState({hovering: true})}
+      onMouseLeave={() => this.setState({hovering: false})}
+      onClick={() => disable ? {} : this.props.submitFunction()}>
       <div style={hovering ? {...styles.text, ...styles.hovering} : styles.text}>{expanded}</div>
       <ClrIcon shape={iconShape} style={{height: '1.5rem', width: '1.5rem',
         marginRight: '.145rem'}}/>
