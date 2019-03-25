@@ -133,6 +133,11 @@ const styles = reactStyles({
     margin: 'auto',
     paddingTop: '0.5rem',
     textAlign: 'center',
+  },
+  filterOverlay: {
+    left: '359.531px!important',
+    maxHeight: 'calc(100vh - 360px)',
+    overflow: 'auto'
   }
 });
 
@@ -277,13 +282,13 @@ export const ParticipantsTable = withCurrentWorkspace()(
               cohortReviewStore.next(review);
               this.setState({
                 data: review.participantCohortStatuses.map(this.mapData),
+                loading: false,
                 total: review.queryResultSize
               });
             });
         }
       } catch (error) {
         console.log(error);
-      } finally {
         this.setState({
           loading: false
         });
@@ -402,7 +407,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       return <span>
         {data &&
           <i className='pi pi-filter' style={styles.filterIcon} onClick={(e) => fl.toggle(e)}/>}
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+        <OverlayPanel style={styles.filterOverlay} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' &&
             <TextInput

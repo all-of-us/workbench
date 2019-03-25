@@ -1,9 +1,0 @@
-<div class="form-group">
-  <label for="{{ property }}">
-    Select {{ formattedLabel() }}(s)
-  </label>
-  <div class="input">
-    <input id="{{ property }}" (keyup)="refreshData()" [formControl]="selection"/>
-    <button (click)="reset()" class="btn btn-sm" [disabled]="isDisabled">Clear</button>
-  </div>
-</div>
