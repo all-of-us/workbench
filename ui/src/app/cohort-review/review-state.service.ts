@@ -14,10 +14,10 @@ export const initialFilterState = {
   },
   participants: {
     PARTICIPANTID: '',
-    DECEASED: ['Select All'],
     GENDER: ['Select All'],
     RACE: ['Select All'],
     ETHNICITY: ['Select All'],
+    DECEASED: ['1', '0', 'Select All'],
     STATUS: [
       CohortStatus.INCLUDED,
       CohortStatus.EXCLUDED,
