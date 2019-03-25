@@ -364,6 +364,7 @@ public class WorkspacesControllerTest {
     when(bigQueryService.getLong(null, 3)).thenReturn(0L);
     when(bigQueryService.getLong(null, 4)).thenReturn(0L);
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+    when(bigQueryService.getBoolean(null, 6)).thenReturn(false);
   }
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.

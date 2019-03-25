@@ -63,11 +63,11 @@ public class ParticipantCohortStatusDaoTest {
         CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
         jdbcTemplate.execute("insert into participant_cohort_status" +
-                "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id)" +
-                "values (1, 1, 1, 8507, sysdate(), 8515, 38003564)");
+                "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id, deceased)" +
+                "values (1, 1, 1, 8507, sysdate(), 8515, 38003564, 0)");
         jdbcTemplate.execute("insert into participant_cohort_status" +
-                "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id)" +
-                "values (1, 2, 0, 8507, sysdate(), 8515, 38003564)");
+                "(cohort_review_id, participant_id, status, gender_concept_id, birth_date, race_concept_id, ethnicity_concept_id, deceased)" +
+                "values (1, 2, 0, 8507, sysdate(), 8515, 38003564, 0)");
         jdbcTemplate.execute("insert into concept" +
                 "(concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code, count_value, prevalence)" +
                 "values (8507, 'MALE', 3, 'Gender', 1, 'c', 'c', 1, 1)");
