@@ -124,8 +124,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       renaming: false,
       confirmDeleting: false,
       invalidResourceError: !(props.resourceCard.notebook ||
-          props.resourceCard.cohort ||
-          props.resourceCard.conceptSet)
+        props.resourceCard.cohort ||
+        props.resourceCard.conceptSet)
     };
   }
 
@@ -171,12 +171,12 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
 
   get writePermission(): boolean {
     return this.props.resourceCard.permission === 'OWNER'
-        || this.props.resourceCard.permission === 'WRITER';
+      || this.props.resourceCard.permission === 'WRITER';
   }
 
   get notebookReadOnly(): boolean {
     return this.isNotebook
-        && this.props.resourceCard.permission === 'READER';
+      && this.props.resourceCard.permission === 'READER';
   }
 
   get displayName(): string {
@@ -204,7 +204,19 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
   }
 
   edit(): void {
-    this.setState({editing: true});
+    switch (this.resourceType) {
+      case ResourceType.COHORT: {
+        const url =
+          '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
+          this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
+        navigateByUrl(url + this.props.resourceCard.cohort.id);
+        this.props.onUpdate();
+        break;
+      }
+      default: {
+        this.setState({editing: true});
+      }
+    }
   }
 
   reviewCohort(): void {
@@ -243,14 +255,6 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           .then(() => {
             this.props.onUpdate();
           });
-        break;
-      }
-      case ResourceType.COHORT: {
-        const url =
-            '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
-            this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
-        navigateByUrl(url + this.props.resourceCard.cohort.id);
-        this.props.onUpdate();
         break;
       }
     }
@@ -346,9 +350,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           ['workspaces', this.props.resourceCard.workspaceNamespace,
             this.props.resourceCard.workspaceFirecloudName, 'notebooks',
             encodeURIComponent(this.props.resourceCard.notebook.name)], {
-              queryParams,
-              relativeTo: null,
-            });
+            queryParams,
+            relativeTo: null,
+          });
       }
     }
   }
@@ -365,7 +369,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         </ModalFooter>
       </Modal>}
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
-            data-test-id='card'>
+                        data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
             <ResourceCardMenu disabled={this.actionsDisabled}
@@ -395,22 +399,22 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         </div>
       </ResourceCardBase>
       {this.state.editing && (this.isCohort  || this.isConceptSet) &&
-        <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
-                   onEdit={v => this.receiveEdit(v)}
-                   onCancel={() => this.closeEditModal()}/>}
+      <EditModal resource={ResourceCard.castConceptSet(this.props.resourceCard)}
+                 onEdit={v => this.receiveEdit(v)}
+                 onCancel={() => this.closeEditModal()}/>}
       {this.state.renaming && this.isNotebook &&
-        <RenameModal notebookName={this.props.resourceCard.notebook.name}
-                     workspace={{
-                       namespace: this.props.resourceCard.workspaceNamespace,
-                       name: this.props.resourceCard.workspaceFirecloudName
-                     }}
-                     onRename={() => this.receiveNotebookRename()}
-                     onCancel={() => this.cancelRename()}/>}
+      <RenameModal notebookName={this.props.resourceCard.notebook.name}
+                   workspace={{
+                     namespace: this.props.resourceCard.workspaceNamespace,
+                     name: this.props.resourceCard.workspaceFirecloudName
+                   }}
+                   onRename={() => this.receiveNotebookRename()}
+                   onCancel={() => this.cancelRename()}/>}
       {this.state.confirmDeleting &&
-        <ConfirmDeleteModal resourceName={this.displayName}
-                            resourceType={this.resourceType}
-                            receiveDelete={() => this.receiveDelete()}
-                            closeFunction={() => this.closeConfirmDelete()}/>}
+      <ConfirmDeleteModal resourceName={this.displayName}
+                          resourceType={this.resourceType}
+                          receiveDelete={() => this.receiveDelete()}
+                          closeFunction={() => this.closeConfirmDelete()}/>}
     </React.Fragment>;
   }
 }
