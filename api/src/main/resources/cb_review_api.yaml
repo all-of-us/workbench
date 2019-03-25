@@ -535,7 +535,7 @@ definitions:
 
   ParticipantCohortStatusColumns:
     type: string
-    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY]
+    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY, DECEASED]
 
   ReviewColumns:
     type: string
