@@ -352,12 +352,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           workspace = await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
-          this.props
-              .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id)
-              .then(() => {
-                navigate(['workspaces', workspace.namespace, workspace.id]);
-              });
+          await this.props
+              .reloadWorkspace(this.state.workspace.namespace, this.state.workspace.id);
         }
+        navigate(['workspaces', workspace.namespace, workspace.id]);
       } catch (error) {
         this.setState({loading: false});
         if (error.status === 409) {
