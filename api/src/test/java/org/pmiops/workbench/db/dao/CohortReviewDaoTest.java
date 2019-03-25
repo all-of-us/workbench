@@ -98,7 +98,8 @@ public class CohortReviewDaoTest {
                 .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
                 .lastModifiedTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
                 .matchedParticipantCount(100)
-                .reviewedCount(10);
+                .reviewedCount(10)
+                .cohortDefinition("{'name':'test'}");
     }
 
 }

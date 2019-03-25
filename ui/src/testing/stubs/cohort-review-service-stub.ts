@@ -20,6 +20,7 @@ export const cohortReviewStub = {
   cohortId: 1,
   cdrVersionId: 1,
   creationTime: '',
+  cohortDefinition: '',
   matchedParticipantCount: 1,
   reviewSize: 1,
   reviewedCount: 1,
