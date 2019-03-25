@@ -202,7 +202,6 @@ describe('ConceptHomepageComponent', () => {
     let buttonText = fixture.componentInstance.addToSetText;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
-    console.log(findElementsReact(fixture, '[data-test-id="card-name"]'));
     const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
     const checkBox = dataRow[0].queryAll(By.css('.datagrid-select'))[0]
         .query(By.css('.checkbox')).children;
