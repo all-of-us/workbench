@@ -70,4 +70,5 @@
   <include file="changelog/db.changelog-60-backfill-bypass.xml"/>
   <include file="changelog/db.changelog-61-backfill-beta-bypass.xml"/>
   <include file="changelog/db.changelog-62.xml"/>
+  <include file="changelog/db.changelog-63.xml"/>
 </databaseChangeLog>
