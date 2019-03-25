@@ -359,9 +359,9 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
 
       try {
-        const syncComplianceTrainingStatus = await profileApi().syncComplianceTrainingStatus();
-        this.setState({trainingCompleted: !!syncComplianceTrainingStatus.complianceTrainingCompletionTime
-              || !!syncComplianceTrainingStatus.complianceTrainingBypassTime});
+        const result = await profileApi().syncComplianceTrainingStatus();
+        this.setState({trainingCompleted: !!result.complianceTrainingCompletionTime
+              || !!result.complianceTrainingBypassTime});
       } catch (ex) {
         this.setState({trainingCompleted: false});
         console.error('error fetching moodle training status');
