@@ -25,7 +25,6 @@ import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
-  findElementsReact,
   setupModals,
   simulateClick,
   simulateEvent,
