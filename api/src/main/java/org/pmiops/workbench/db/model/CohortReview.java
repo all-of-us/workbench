@@ -20,6 +20,7 @@ public class CohortReview {
     private long cohortId;
     private long cdrVersionId;
     private Timestamp creationTime;
+    private String cohortDefinition;
     private Timestamp lastModifiedTime;
     private long matchedParticipantCount;
     private long reviewSize;
@@ -67,6 +68,20 @@ public class CohortReview {
 
     public CohortReview cdrVersionId(long cdrVersionId) {
         this.cdrVersionId = cdrVersionId;
+        return this;
+    }
+
+    @Column(name = "cohort_definition")
+    public String getCohortDefinition() {
+        return cohortDefinition;
+    }
+
+    public void setCohortDefinition(String cohortDefinition) {
+        this.cohortDefinition = cohortDefinition;
+    }
+
+    public CohortReview cohortDefinition(String cohortDefinition) {
+        this.cohortDefinition = cohortDefinition;
         return this;
     }
 
