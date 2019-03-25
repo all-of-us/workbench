@@ -391,8 +391,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                               section={{marginTop: '24px'}} largeHeader required>
           <div style={{display: 'flex', flexDirection: 'row'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
-                       value = {this.state.workspace.name}
-                       onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
+              value = {this.state.workspace.name}
+              onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
                 content='To use a different dataset version, clone or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>

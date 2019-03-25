@@ -242,22 +242,15 @@ export class WorkspaceUnderservedPopulation extends
     this.state = {show: false};
   }
 
-  flipShow() {
-    this.setState({
-      show: !this.state.show
-    });
-  }
-
   focusCategoryChange(subCategory) {
     this.props.onChange(toggleIncludes(subCategory, this.props.selectedValues));
   }
-
 
   render() {
     return <div style={styles.section}>
       <div style={{display: 'flex', flexDirection: 'row'}}>
         <div>
-          <Clickable onClick={() => this.flipShow()}>
+          <Clickable onClick={() => this.setState({show: !this.state.show})}>
             {!this.state.show &&
             <ClrIcon shape='plus-circle' style={styles.icon}/>
             }
