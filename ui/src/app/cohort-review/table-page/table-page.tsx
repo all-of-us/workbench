@@ -200,8 +200,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
             GENDER: extract(data.genderList, Columns.GENDER),
             ETHNICITY: extract(data.ethnicityList, Columns.ETHNICITY),
             DECEASED: [
-              {name: 'Yes', value: 1},
-              {name: 'No', value: 0},
+              {name: 'Yes', value: '1'},
+              {name: 'No', value: '0'},
               {name: 'Select All', value: 'Select All'}
             ],
             STATUS: [
@@ -253,33 +253,40 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     getTableData(): void {
-      const {page, sortField, sortOrder} = this.state;
-      const {cdrVersionId, id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
-      const filters = this.mapFilters();
-      if (filters === null) {
-        this.setState({
-          data: [],
-          loading: false,
-        });
-      } else {
-        const query = {
-          page: page,
-          pageSize: rows,
-          sortColumn: reverseColumnEnum[sortField],
-          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-          filters: {items: filters},
-          pageFilterType: PageFilterType.ParticipantCohortStatuses,
-        } as Request;
-        cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
-          .then(review => {
-            cohortReviewStore.next(review);
-            this.setState({
-              data: review.participantCohortStatuses.map(this.mapData),
-              loading: false,
-              total: review.queryResultSize
-            });
+      try {
+        const {page, sortField, sortOrder} = this.state;
+        const {cdrVersionId, id, namespace} = this.props.workspace;
+        const {cid} = urlParamsStore.getValue();
+        const filters = this.mapFilters();
+        if (filters === null) {
+          this.setState({
+            data: [],
+            loading: false,
           });
+        } else {
+          const query = {
+            page: page,
+            pageSize: rows,
+            sortColumn: reverseColumnEnum[sortField],
+            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            filters: {items: filters},
+            pageFilterType: PageFilterType.ParticipantCohortStatuses,
+          } as Request;
+          cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
+            .then(review => {
+              cohortReviewStore.next(review);
+              this.setState({
+                data: review.participantCohortStatuses.map(this.mapData),
+                total: review.queryResultSize
+              });
+            });
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.setState({
+          loading: false
+        });
       }
     }
 
