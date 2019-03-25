@@ -992,7 +992,8 @@ public class CohortReviewControllerTest {
         .participantId(participantCohortStatus.getParticipantKey().getParticipantId())
         .raceConceptId(participantCohortStatus.getRaceConceptId())
         .race(participantCohortStatus.getRace())
-        .status(participantCohortStatus.getStatusEnum()));
+        .status(participantCohortStatus.getStatusEnum())
+        .deceased(participantCohortStatus.getDeceased()));
     }
     return new org.pmiops.workbench.model.CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
