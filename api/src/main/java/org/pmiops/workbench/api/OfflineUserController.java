@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,17 +33,24 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncComplianceTrainingStatus() {
-    List<User> allUsers = userService.getAllUsers();
-    allUsers.parallelStream().forEach(user -> {
+    int errorCount = 0;
+    for (User user : userService.getAllUsers()) {
       try {
         userService.syncComplianceTrainingStatus(user);
         log.info(String.format("Updated compliance training status for user %s.", user.getEmail()));
       } catch (Exception e) {
-        log.severe(String.format("Error syncing Moodle training status for user %s: %s",
+        errorCount++;
+        log.severe(String.format("Error syncing compliance training status for user %s: %s",
             user.getEmail(), e.getMessage()));
       }
-    });
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    if (errorCount > 0) {
+      throw new ServerErrorException(
+          String.format("%d errors encountered during complince training sync", errorCount));
+    } else {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
   }
 
   /**
@@ -52,20 +60,28 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkSyncEraCommonsStatus() {
-    List<User> allUsers = userService.getAllUsers();
-    allUsers.parallelStream().forEach(user -> {
+    int errorCount = 0;
+    for (User user : userService.getAllUsers()) {
       try {
         userService.syncEraCommonsStatusUsingImpersonation(user);
         log.info(String.format("Updated eRA Commons status for user %s.", user.getEmail()));
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        errorCount++;
         log.severe(String.format("Error syncing eRA Commons status for user %s: %s",
             user.getEmail(), e.getMessage()));
       } catch (IOException e) {
+        errorCount++;
         log.severe(String.format("Error fetching impersonated creds for user %s: %s",
             user.getEmail(), e.getMessage()));
       }
-    });
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    if (errorCount > 0) {
+      throw new ServerErrorException(
+          String.format("%d errors encountered during eRA Commons sync", errorCount));
+    } else {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
   }
 
 }

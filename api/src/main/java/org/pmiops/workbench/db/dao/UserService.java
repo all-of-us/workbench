@@ -80,18 +80,7 @@ public class UserService {
   }
 
   /**
-   * Provides unfettered access to the DAO instance that sits beneath this service class.
-   *
-   * This accessor is meant primarily for tests, or scenarios where a controller needs to bypass
-   * the retry and data-access-level management logic implemented here in UserService (though that
-   * should be rare), or when performing simple read actions from the database.
-   */
-  public UserDao getDao() {
-    return userDao;
-  }
-
-  /**
-   * Updates a user record with a modifier function.
+   * Updates the currently-authenticated user with a modifier function.
    *
    * Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
@@ -508,7 +497,7 @@ public class UserService {
         log.info(String.format("NIH Status not found for user %s", user.getEmail()));
         return;
       } else {
-        throw new org.pmiops.workbench.firecloud.ApiException(e);
+        throw e;
       }
     }
   }

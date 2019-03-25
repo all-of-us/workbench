@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -38,10 +39,8 @@ public class OfflineUserControllerTest {
   @Import({
       OfflineUserController.class
   })
-  static class Configuration {
-    @MockBean
-    private UserService userService;
-  }
+  @MockBean({UserService.class})
+  static class Configuration {}
 
   @Autowired
   private UserService userService;
@@ -76,7 +75,7 @@ public class OfflineUserControllerTest {
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
   }
 
-  @Test
+  @Test(expected=ServerErrorException.class)
   public void testBulkSyncTrainingStatusWithSingleUserError() throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
         .when(userService).syncComplianceTrainingStatus(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
@@ -91,7 +90,7 @@ public class OfflineUserControllerTest {
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());
   }
 
-  @Test
+  @Test(expected=ServerErrorException.class)
   public void testBulkSyncEraCommonsStatusWithSingleUserError() throws ApiException, NotFoundException, IOException, org.pmiops.workbench.firecloud.ApiException {
     doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
         .when(userService).syncEraCommonsStatusUsingImpersonation(argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));

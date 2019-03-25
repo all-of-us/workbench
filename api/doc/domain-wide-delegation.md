@@ -1,19 +1,19 @@
-# Domain-wide delegation in AoU RW
+# Domain-wide delegation
 
-The All of Us backend uses `domain-wide delegation of authority` in a few places to 
+The Research Workbench (RW) backend uses `domain-wide delegation of authority` in a few places to 
 carry out administrative and maintenance tasks.
 
 ## Background
 
-Domain-wide delegation allows the Aou backend to impersonate users when making calls to
-OAuth-authenticated APIs. This works because AoU is in full control of the GSuite account that provides
+Domain-wide delegation allows the RW backend to impersonate users when making calls to
+OAuth-authenticated APIs. This works because RW is in full control of the GSuite account that provides
 user identities for @researchallofus.org (and @fake-research-aou.org) accounts.
 
 For more info, see https://developers.google.com/identity/protocols/OAuth2ServiceAccount.
 
 ## GSuite / Directory API
 
-The AoU backend needs the ability to create new GSuite users in response to an API request. We also need
+The RW backend needs the ability to create new GSuite users in response to an API request. We also need
 to manipulate GSuite user data (e.g. update schema values, backfill contact email addresses, fetch
 two-factor auth status) in the context of cron jobs or command-line tools. 
 

@@ -58,6 +58,7 @@ public class UserServiceTest {
   private FireCloudService fireCloudService;
   @Mock
   private ComplianceService complianceService;
+
   private UserService userService;
 
   private User testUser;
@@ -69,11 +70,6 @@ public class UserServiceTest {
 
     userService = new UserService(Providers.of(testUser), userDao, adminActionHistoryDao, CLOCK,
         new Random(), fireCloudService, configProvider, complianceService);
-  }
-
-  @After
-  public void tearDown() {
-    userDao.deleteAll();
   }
 
   private User insertUser(String email) {
@@ -97,7 +93,7 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
-    User user = userService.getDao().findUserByEmail(EMAIL_ADDRESS);
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTrainingCompletionTime()).isEqualTo(
         new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getTrainingExpirationTime()).isEqualTo(
@@ -110,7 +106,7 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     verify(complianceService, never()).getUserBadge(anyInt());
-    User user = userService.getDao().findUserByEmail(EMAIL_ADDRESS);
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTrainingCompletionTime()).isNull();
   }
 
@@ -143,7 +139,7 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    User user = userService.getDao().findUserByEmail(EMAIL_ADDRESS);
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(
         new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(
@@ -156,14 +152,14 @@ public class UserServiceTest {
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
-    userService.getDao().save(testUser);
+    userDao.save(testUser);
 
     // API returns a null value.
     when(fireCloudService.getNihStatus()).thenReturn(null);
 
     userService.syncEraCommonsStatus();
 
-    User user = userService.getDao().findUserByEmail(EMAIL_ADDRESS);
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isNull();
   }
 
