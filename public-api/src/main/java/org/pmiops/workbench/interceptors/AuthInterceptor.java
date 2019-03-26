@@ -78,8 +78,8 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 
     Profile profile = privateWorkbenchService.getMe();
     if (configProvider.get().firecloud.enforceRegistered &&
-        profile.betaAccessBypassTime == null) {
-      log.warning("Account has not been id verified");
+        profile.getBetaAccessBypassTime() == null) {
+      log.warning("Account has not been granted beta access");
       response.sendError(HttpServletResponse.SC_FORBIDDEN);
       return false;
     }
