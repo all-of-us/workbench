@@ -25,7 +25,7 @@
       </span>
     </h2>
     <div>
-      <clr-dropdown>
+      <clr-dropdown *ngIf="cohort">
         <button
           type="button"
           class="btn btn-primary"
@@ -49,6 +49,12 @@
             clrDropdownItem>Save as</button>
         </clr-dropdown-menu>
       </clr-dropdown>
+      <button
+        *ngIf="!cohort"
+        type="button"
+        class="btn btn-primary"
+        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
+        (click)="saveModal.open()">Create Cohort</button>
     </div>
   </div>
 <ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
@@ -106,7 +112,7 @@
   <div class="modal-body">
     <form [formGroup]="cohortForm" (ngSubmit)="submit()">
       <label
-        for="name"
+        for="name-control"
         [class.show]="(name.dirty || name.touched) && cohortForm.invalid">
         <em>*A Cohort Name is Required</em>
       </label>
