@@ -8,6 +8,7 @@
   <changeSet author="brianfreeman" id="changelog-62">
     <addColumn tableName="cohort_review">
       <column name="cohort_definition" type="mediumblob"/>
+      <column name="cohort_name" type="varchar(80)"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

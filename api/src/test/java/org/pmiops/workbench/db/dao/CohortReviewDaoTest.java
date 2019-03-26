@@ -99,7 +99,8 @@ public class CohortReviewDaoTest {
                 .lastModifiedTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))
                 .matchedParticipantCount(100)
                 .reviewedCount(10)
-                .cohortDefinition("{'name':'test'}");
+                .cohortDefinition("{'name':'test'}")
+                .cohortName("test");
     }
 
 }
