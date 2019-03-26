@@ -37,7 +37,8 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
             "gender_concept_id as genderConceptId,\n" +
             "birth_date as birthDate,\n" +
             "race_concept_id as raceConceptId,\n" +
-            "ethnicity_concept_id as ethnicityConceptId\n" +
+            "ethnicity_concept_id as ethnicityConceptId,\n" +
+            "deceased as deceased\n" +
             "from participant_cohort_status pcs\n";
 
     public static final String SELECT_COUNT_SQL_TEMPLATE =
@@ -52,9 +53,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     private static final String INSERT_SQL_TEMPLATE = "insert into participant_cohort_status(" +
             "birth_date, ethnicity_concept_id, gender_concept_id, race_concept_id, " +
-            "status, cohort_review_id, participant_id) " +
+            "status, cohort_review_id, participant_id, deceased) " +
             "values";
-    private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d)";
+    private static final String NEXT_INSERT = " (%s, %d, %d, %d, %d, %d, %d, %s)";
     private static final int BATCH_SIZE = 50;
 
     @Autowired
@@ -88,7 +89,8 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
                         //this represents NOT_REVIEWED
                         3,
                         pcs.getParticipantKey().getCohortReviewId(),
-                        pcs.getParticipantKey().getParticipantId());
+                        pcs.getParticipantKey().getParticipantId(),
+                        pcs.getDeceased());
                 sqlStatement = sqlStatement.equals(INSERT_SQL_TEMPLATE)
                         ? sqlStatement + nextSql : sqlStatement + ", " + nextSql;
 

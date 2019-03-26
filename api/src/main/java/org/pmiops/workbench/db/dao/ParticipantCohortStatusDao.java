@@ -13,7 +13,7 @@ public interface ParticipantCohortStatusDao extends CrudRepository<ParticipantCo
   // Important: Keep in sync with all DB rows that should be copied.
   static final String ALL_COLUMNS_EXCEPT_REVIEW_ID =
       "participant_id, status, gender_concept_id, birth_date, " +
-      "race_concept_id, ethnicity_concept_id";
+      "race_concept_id, ethnicity_concept_id, deceased";
 
   // We use native SQL here as there may be a large number of rows within a
   // given cohort review; this avoids loading them into memory.
