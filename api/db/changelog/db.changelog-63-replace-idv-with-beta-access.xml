@@ -6,8 +6,8 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
     <changeSet author="jroberti" id="db.changelog-63-replace-idv-with-beta-access">
         <dropColumn tableName="user">
-            <column name="beta_access_completion_time"/>
-            <column name="requested_id_verification"/>
+            <column columnName="beta_access_completion_time"/>
+            <column columnName="requested_id_verification"/>
         </dropColumn>
         <renameColumn tableName="user" oldColumnName="id_verification_request_time" newColumnName="beta_access_request_time"/>
     </changeSet>
