@@ -118,6 +118,8 @@ public class ParticipantCounter {
           endSql, PERSON_TABLE);
     }
 
+  //TODO: implemented for use with the Data Set Builder. Please remove it this does not become the preferred solution
+  //https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
     return buildQuery(participantCriteria, ID_SQL_TEMPLATE.replace("${table}", SEARCH_PERSON_TABLE), "", SEARCH_PERSON_TABLE);
   }
