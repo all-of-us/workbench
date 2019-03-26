@@ -16,8 +16,7 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  useZendeskForSupport: true,
-  enableJupyterLab: true,
-  enableComplianceLockout: true,
-  enableDatasetBuilder: true,
+  useZendeskForSupport: false,
+  enableJupyterLab: false,
+  enableDatasetBuilder: false,
 };

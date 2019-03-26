@@ -375,10 +375,11 @@ export const Homepage = withUserProfile()(class extends React.Component<
       } else {
         try {
           const config = await configApi().getConfig();
-          if (environment.enableComplianceLockout && config.enforceRegistered) {
+          if (config.enforceRegistered) {
             this.setState({
               accessTasksRemaining: !hasRegisteredAccessFetch(profile.dataAccessLevel),
-              accessTasksLoaded: true});
+              accessTasksLoaded: true
+            });
           } else {
             this.setState({accessTasksRemaining: false, accessTasksLoaded: true});
           }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet author="gjordan" id="changelog-61-backfill-beta-bypass">
+        <!--
+          We need to backfill the beta "bypass" field (changelog 60 only backfilled the "completion" time).
+          The "bypass" time is what's read by the backend to determine a user's beta access state.
+        -->
+        <sql>
+            UPDATE user
+            SET beta_access_bypass_time = CASE WHEN id_verification_is_valid = true THEN (select NOW()) ELSE NULL END
+        </sql>
+    </changeSet>
+</databaseChangeLog>
