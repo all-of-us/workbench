@@ -363,10 +363,6 @@ public class UserService {
     }, user);
   }
 
-  public List<User> getNonVerifiedUsers() {
-    return userDao.findUserNotValidated();
-  }
-
   public List<User> getAllUsers() {
     return userDao.findUsers();
   }

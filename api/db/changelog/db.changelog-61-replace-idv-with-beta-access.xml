@@ -8,8 +8,7 @@
         <dropColumn tableName="user">
             <column name="beta_access_completion_time"/>
             <column name="requested_id_verification"/>
-            <column name="id_verification_request_time"/>
         </dropColumn>
-        <addColumn columnName="beta_access_request_time" tableName="user" type="datetime"/>
+        <renameColumn tableName="user" oldColumnName="id_verification_request_time" newColumnName="beta_access_request_time"/>
     </changeSet>
 </databaseChangeLog>
