@@ -34,6 +34,12 @@ const css = `
     margin: 0 0 0 25% !important;
     line-height: 1;
   }
+  .detail-page .global-filters {
+    width: 40%;
+  }
+  .detail-page.sidebar-open .global-filters {
+    width: 50%;
+  }
 `;
 
 const styles = reactStyles({
@@ -122,15 +128,18 @@ const otherStyles = {
   navigation: {
     ...styles.headerSection,
     width: '22%',
+    minWidth: '8.5rem',
     padding: '1.15rem 0.4rem'
   },
   filters: {
     ...styles.headerSection,
+    minWidth: '16rem'
   },
   radios: {
     ...styles.headerSection,
     fontSize: '12px',
     width: '24%',
+    minWidth: '8.5rem',
     padding: '0.5rem 0 0.5rem 0.5rem',
   },
   navBtnActive: {
@@ -156,12 +165,12 @@ const otherStyles = {
   },
   filterInput: {
     ...styles.filterDiv,
-    minWidth: '5rem',
+    width: '30%',
   },
   filterSelect: {
     ...styles.filterDiv,
     marginLeft: '1rem',
-    minWidth: '13rem'
+    width: '70%'
   },
   filterText: {
     ...styles.filterDiv,
@@ -299,22 +308,18 @@ export const DetailHeader = withCurrentWorkspace()(
       const filters = filterStateStore.getValue().participants;
       return Object.keys(filters).reduce((acc, _type) => {
         const values = filters[_type];
-        if (_type === Columns[Columns.PARTICIPANTID]) {
-          if (values) {
-            const filter = {
-              property: Columns[_type],
-              values: [values],
-              operator: Operator.LIKE
-            } as Filter;
-            acc.push(filter);
-          }
+        if (_type === Columns[Columns.PARTICIPANTID] && values) {
+          acc.push({
+            property: Columns[_type],
+            values: [values],
+            operator: Operator.LIKE
+          } as Filter);
         } else if (values.length && !values.includes('Select All')) {
-          const filter = {
+          acc.push({
             property: Columns[_type],
             values: values,
             operator: Operator.IN
-          } as Filter;
-          acc.push(filter);
+          } as Filter);
         }
         return acc;
       }, []);
@@ -426,7 +431,7 @@ export const DetailHeader = withCurrentWorkspace()(
               <i style={styles.icon} className='pi pi-angle-right' />
             </button>
           </div>
-          <div style={otherStyles.filters}>
+          <div style={otherStyles.filters} className={'global-filters'}>
             <div style={styles.filterHeader}>
               <button
                 style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}

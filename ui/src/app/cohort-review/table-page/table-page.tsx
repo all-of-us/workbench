@@ -301,23 +301,21 @@ export const ParticipantsTable = withCurrentWorkspace()(
         const values = filters[_type];
         if (_type === Columns[Columns.PARTICIPANTID]) {
           if (values) {
-            const filter = {
+            acc.push({
               property: Columns[_type],
               values: [values],
               operator: Operator.LIKE
-            } as Filter;
-            acc.push(filter);
+            } as Filter);
           }
         } else {
           if (!values.length) {
             acc.push(null);
           } else if (!values.includes('Select All')) {
-            const filter = {
+            acc.push({
               property: Columns[_type],
               values: values,
               operator: Operator.IN
-            } as Filter;
-            acc.push(filter);
+            } as Filter);
           }
         }
         return acc;
