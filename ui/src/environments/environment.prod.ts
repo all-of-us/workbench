@@ -21,6 +21,5 @@ export const environment: Environment = {
   // exit criteria and Jira ticket links.
   useZendeskForSupport: false,
   enableJupyterLab: false,
-  enableComplianceLockout: false,
   enableDatasetBuilder: false,
 };
