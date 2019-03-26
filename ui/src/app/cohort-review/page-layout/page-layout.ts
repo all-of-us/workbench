@@ -1,5 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {cohortReviewStore, filterStateStore, initialFilterState, visitsFilterOptions, vocabOptions} from 'app/cohort-review/review-state.service';
+import {
+  cohortReviewStore,
+  filterStateStore,
+  initialFilterState,
+  multiOptions,
+  visitsFilterOptions,
+  vocabOptions
+} from 'app/cohort-review/review-state.service';
 import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService, TreeType} from 'generated';
@@ -53,6 +60,7 @@ export class PageLayout implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     currentCohortStore.next(undefined);
+    multiOptions.next(null);
     vocabOptions.next(null);
     filterStateStore.next(JSON.parse(JSON.stringify(initialFilterState)));
   }

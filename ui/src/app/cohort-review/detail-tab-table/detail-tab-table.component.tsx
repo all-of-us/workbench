@@ -36,7 +36,7 @@ const styles = reactStyles({
   },
   columnBody: {
     background: '#ffffff',
-    padding: '5px',
+    padding: '0.5rem 0.5rem 0.3rem',
     verticalAlign: 'top',
     textAlign: 'left',
     borderLeft: 0,

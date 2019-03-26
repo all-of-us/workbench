@@ -61,6 +61,7 @@ export const css = `
   body .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
     background: #fafafa;
     color: rgba(0, 0, 0, .5);
+    cursor: default;
   }
   body .labOverlay.p-overlaypanel .p-overlaypanel-close {
     top: 0.231em;

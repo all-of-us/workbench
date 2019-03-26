@@ -261,7 +261,8 @@ public class CohortReviewControllerTest {
       .race(TestDemo.ASIAN.getName())
       .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
       .ethnicity(TestDemo.NOT_HISPANIC.getName())
-      .birthDate(new java.sql.Date(today.getTime()));
+      .birthDate(new java.sql.Date(today.getTime()))
+      .deceased(false);
     participantCohortStatus2 = new ParticipantCohortStatus()
       .statusEnum(CohortStatus.NOT_REVIEWED)
       .participantKey(key2)
@@ -271,7 +272,8 @@ public class CohortReviewControllerTest {
       .race(TestDemo.WHITE.getName())
       .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
       .ethnicity(TestDemo.NOT_HISPANIC.getName())
-      .birthDate(new java.sql.Date(today.getTime()));
+      .birthDate(new java.sql.Date(today.getTime()))
+      .deceased(false);
 
     participantCohortStatusDao.save(participantCohortStatus1);
     participantCohortStatusDao.save(participantCohortStatus2);
@@ -957,6 +959,7 @@ public class CohortReviewControllerTest {
       .put("race_concept_id", 3)
       .put("ethnicity_concept_id", 4)
       .put("count", 5)
+      .put("deceased", 6)
       .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -989,7 +992,8 @@ public class CohortReviewControllerTest {
         .participantId(participantCohortStatus.getParticipantKey().getParticipantId())
         .raceConceptId(participantCohortStatus.getRaceConceptId())
         .race(participantCohortStatus.getRace())
-        .status(participantCohortStatus.getStatusEnum()));
+        .status(participantCohortStatus.getStatusEnum())
+        .deceased(participantCohortStatus.getDeceased()));
     }
     return new org.pmiops.workbench.model.CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
