@@ -32,7 +32,7 @@
           [disabled]="(isRequesting$ | async) || saving || (total$ | async) === null || (total$ | async) === -1"
           [clrLoading]="saving"
           clrDropdownTrigger>
-          Save Cohort
+          <span style="margin-right: 5px">Save Cohort</span>
           <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu>
