@@ -92,6 +92,7 @@
     "ng2-nouislider": "^1.7.7",
     "ngx-popper": "^5.1.7",
     "nouislider": "10.0.0",
+    "outdated-browser-rework": "^2.8.0",
     "popper.js": "^1.13.0",
     "portable-fetch": "^3.0.0",
     "primeicons": "^1.0.0",
