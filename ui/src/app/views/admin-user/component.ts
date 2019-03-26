@@ -7,7 +7,7 @@ import {
 } from 'generated';
 
 /**
- * Users with the REVIEW_ID_VERIFICATION permission use this
+ * Users with the ACCESS_MODULE_ADMIN permission use this
  * to manually set (approve/reject) the beta access state of a user, as well as
  * other access module bypasses.
  */

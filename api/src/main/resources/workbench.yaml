@@ -759,7 +759,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
         403:
-          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             $ref: "#/definitions/ErrorResponse"
         400:
@@ -773,7 +773,7 @@ paths:
         - profile
       description: >
           Returns a list of profiles for users to be reviewed. Requires
-          REVIEW_ID_VERIFICATION authority.
+          ACCESS_CONTROL_ADMIN authority.
       operationId: getAllUsers
       responses:
         200:
@@ -781,7 +781,7 @@ paths:
           schema:
             $ref: "#/definitions/UserListResponse"
         403:
-          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -1394,7 +1394,7 @@ definitions:
   #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
   #      administrative endpoints, including group management and cluster
   #      management. Intended to be granted for devops needs, e.g. for oncall.
-  #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
+  #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
   Authority:
     type: string
@@ -1405,7 +1405,7 @@ definitions:
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         DEVELOPER,
-        REVIEW_ID_VERIFICATION
+        ACCESS_CONTROL_ADMIN
     ]
 
   PageVisit:

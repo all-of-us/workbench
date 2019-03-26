@@ -40,7 +40,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
     User user = userDao.findUserByEmail(request.getEmail());
     Boolean previousDisabled = user.getDisabled();

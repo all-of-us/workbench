@@ -649,7 +649,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<UserListResponse> getAllUsers() {
     UserListResponse response = new UserListResponse();
     List<Profile> responseList = new ArrayList<>();
@@ -661,7 +661,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
     Timestamp valueToSet;
     Boolean bypassed = request.getIsBypassed();
