@@ -350,9 +350,9 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           ['workspaces', this.props.resourceCard.workspaceNamespace,
             this.props.resourceCard.workspaceFirecloudName, 'notebooks',
             encodeURIComponent(this.props.resourceCard.notebook.name)], {
-            queryParams,
-            relativeTo: null,
-          });
+              queryParams,
+              relativeTo: null,
+            });
       }
     }
   }

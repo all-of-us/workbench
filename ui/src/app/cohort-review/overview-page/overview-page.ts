@@ -5,7 +5,6 @@ import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
 import {fromJS, List} from 'immutable';
-import {from} from 'rxjs/observable/from';
 
 
 @Component({
