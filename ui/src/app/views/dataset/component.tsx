@@ -18,6 +18,7 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {
   Cohort,
   ConceptSet,
+  Domain,
   DomainInfo,
   RecentResource,
   WorkspaceAccessLevel,
@@ -76,9 +77,11 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   async loadResources() {
     try {
       const {namespace, id} = this.props.workspace;
-      const [conceptSets, cohorts] = await Promise.all([
+      const [conceptSets, cohorts, values] = await Promise.all([
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-        cohortsApi().getCohortsInWorkspace(namespace, id)]);
+        cohortsApi().getCohortsInWorkspace(namespace, id),
+        conceptsApi().getValuesFromDomain(namespace, id, Domain.CONDITION.toString())]);
+      console.log(values);
       this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
         loadingResources: false});
     } catch (error) {
