@@ -71,4 +71,5 @@
   <include file="changelog/db.changelog-61-backfill-beta-bypass.xml"/>
   <include file="changelog/db.changelog-62-drop-training-completion-time-col.xml"/>
   <include file="changelog/db.changelog-63-replace-idv-with-beta-access.xml"/>
+  <include file="changelog/db.changelog-62.xml"/>
 </databaseChangeLog>

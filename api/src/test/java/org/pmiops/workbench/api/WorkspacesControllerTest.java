@@ -351,6 +351,7 @@ public class WorkspacesControllerTest {
         .put("race_concept_id", 3)
         .put("ethnicity_concept_id", 4)
         .put("count", 5)
+        .put("deceased", 6)
         .build();
 
     when(bigQueryService.filterBigQueryConfig(null)).thenReturn(null);
@@ -363,6 +364,7 @@ public class WorkspacesControllerTest {
     when(bigQueryService.getLong(null, 3)).thenReturn(0L);
     when(bigQueryService.getLong(null, 4)).thenReturn(0L);
     when(bigQueryService.getLong(null, 5)).thenReturn(0L);
+    when(bigQueryService.getBoolean(null, 6)).thenReturn(false);
   }
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.

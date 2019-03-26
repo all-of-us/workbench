@@ -1,9 +1,0 @@
-<div class="form-group">
-  <label for="{{ property }}">
-    Select {{ property | titlecase }}(s)
-  </label>
-  <div class="input">
-    <input id="{{ property }}" [formControl]="selection"/>
-    <button (click)="selection.reset()" class="btn btn-sm" [disabled]="isDisabled">Clear</button>
-  </div>
-</div>

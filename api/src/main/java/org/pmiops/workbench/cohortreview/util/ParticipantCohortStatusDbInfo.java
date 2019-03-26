@@ -21,7 +21,8 @@ public enum ParticipantCohortStatusDbInfo {
     GENDER(ParticipantCohortStatusColumns.GENDER.name(), "gender_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
     BIRTH_DATE(ParticipantCohortStatusColumns.BIRTHDATE.name(), "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
     RACE(ParticipantCohortStatusColumns.RACE.name(), "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
-    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY.name(), "ethnicity_concept_id", ParticipantCohortStatusDbInfo::buildLongSql);
+    ETHNICITY(ParticipantCohortStatusColumns.ETHNICITY.name(), "ethnicity_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
+    DECEASED(ParticipantCohortStatusColumns.DECEASED.name(), "deceased", ParticipantCohortStatusDbInfo::buildLongSql);
 
     private final String name;
     private final String dbName;
