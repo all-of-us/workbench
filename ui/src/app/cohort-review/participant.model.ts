@@ -14,20 +14,6 @@ export class Participant implements ParticipantCohortStatus {
     return Participant.formatStatusForText(this.status);
   }
 
-  get formattedGenderText() {
-    if (!this.gender) {
-      return;
-    }
-    return this.gender.charAt(0).toUpperCase() + this.gender.slice(1).toLowerCase();
-  }
-
-  get formattedDeceasedText() {
-    if (this.deceased === null) {
-      return;
-    }
-    return this.deceased ? 'Deceased' : 'Not Deceased';
-  }
-
   birthDate: ParticipantCohortStatus['birthDate'];
   deceased: ParticipantCohortStatus['deceased'];
 
@@ -42,8 +28,7 @@ export class Participant implements ParticipantCohortStatus {
       const {participantId, status, gender, race, ethnicity, birthDate, deceased} = obj;
       this.id = participantId;
       this.status = status;
-      this.gender = !!gender ? gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase()
-        : gender;
+      this.gender = gender;
       this.race = race;
       this.ethnicity = ethnicity;
       this.birthDate = birthDate;

@@ -635,7 +635,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     assertThat(cohortReview.getReviewSize()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().size()).isEqualTo(1);
     assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus()).isEqualTo(CohortStatus.NOT_REVIEWED);
-    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getStatus()).isEqualTo(CohortStatus.NOT_REVIEWED);
+    assertThat(cohortReview.getParticipantCohortStatuses().get(0).getDeceased()).isEqualTo(false);
   }
 
   @Test
