@@ -14,7 +14,7 @@
         <div class="row" [ngClass]="showTitle?'button-padding-zero' :'button-padding'">
           <div class="col-sm-8 col-xs-8 col-lg-8 col-xl-8">
             <div class="chart-container">
-              <div *ngIf="buttonsDisableFlag" class="loading-spinner spinner spinner-lg spin-in-overlay">
+              <div *ngIf="loading" class="loading-spinner spinner spinner-lg spin-in-overlay">
                 Loading...
               </div>
               <div *ngIf="data?.size" class="demography-title ">Demographics</div>

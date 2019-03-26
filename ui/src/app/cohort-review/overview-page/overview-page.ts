@@ -1,12 +1,11 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {currentCohortStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {DemoChartInfoListResponse, DomainType, SearchRequest} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
 import {fromJS, List} from 'immutable';
 import {from} from 'rxjs/observable/from';
-import {Subscription} from 'rxjs/Subscription';
 
 
 @Component({
@@ -15,7 +14,7 @@ import {Subscription} from 'rxjs/Subscription';
   styleUrls: ['./overview-page.css'],
 
 })
-export class OverviewPage implements OnInit, OnDestroy {
+export class OverviewPage implements OnInit {
   openChartContainer = false;
   demoGraph = false;
   @Output() dataItems = new EventEmitter<any>();
@@ -28,27 +27,23 @@ export class OverviewPage implements OnInit, OnDestroy {
   showTitle = false;
   review: CohortReview;
   totalParticipantCount: number;
-  buttonsDisableFlag = false;
-  private subscription: Subscription;
+  loading = false;
   domainsData = {};
   totalCount: any;
   constructor() {}
 
   ngOnInit() {
     const workspace = currentWorkspaceStore.getValue();
-    const cohort = currentCohortStore.getValue();
-    const request = <SearchRequest>(JSON.parse(cohort.criteria));
-    from(cohortBuilderApi().getDemoChartInfo(+workspace.cdrVersionId, request))
-      .map(response => (<DemoChartInfoListResponse>response).items)
-      .subscribe(data => {
-        this.data = fromJS(data);
-        this.dataItems.emit(this.data);
-        this.buttonsDisableFlag = false;
-      });
     this.review = cohortReviewStore.getValue();
+    const request = <SearchRequest>(JSON.parse(this.review.cohortDefinition));
+    this.loading = true;
+    cohortBuilderApi().getDemoChartInfo(+workspace.cdrVersionId, request)
+      .then(response => {
+        this.data = fromJS((<DemoChartInfoListResponse>response).items);
+        this.dataItems.emit(this.data);
+        this.loading = false;
+      });
     this.totalParticipantCount = this.review.matchedParticipantCount;
-
-
     this.openChartContainer = true;
     this.fetchChartsData();
   }
@@ -56,8 +51,6 @@ export class OverviewPage implements OnInit, OnDestroy {
 
   fetchChartsData() {
     this.demoGraph = false;
-
-    this.buttonsDisableFlag = true;
     this.showTitle = false;
     const limit = 10;
     const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
@@ -67,9 +60,8 @@ export class OverviewPage implements OnInit, OnDestroy {
         conditionTitle: '',
         loading: true
       };
-      this.subscription = from(cohortReviewApi()
-        .getCohortChartData(ns, wsid, cid, cdrid, domainName, limit))
-        .subscribe(data => {
+      cohortReviewApi().getCohortChartData(ns, wsid, cid, cdrid, domainName, limit)
+        .then(data => {
           const chartData = data;
           this.totalCount = chartData.count;
           this.domainsData[domainName] = chartData.items;
@@ -77,9 +69,4 @@ export class OverviewPage implements OnInit, OnDestroy {
         });
     });
   }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
 }
