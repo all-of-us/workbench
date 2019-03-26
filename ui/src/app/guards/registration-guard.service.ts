@@ -10,7 +10,6 @@ import {Observable} from 'rxjs/Observable';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {hasRegisteredAccess} from 'app/utils';
-import {environment} from 'environments/environment';
 
 
 @Injectable()
