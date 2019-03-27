@@ -97,7 +97,6 @@ public final class ElasticFilters {
 
   private boolean processed = false;
   private Map<SearchParameter, Set<Long>> childrenByCriteriaGroup;
-  private boolean isApproximate = false;
 
   private ElasticFilters(CriteriaDao criteriaDao) {
     this.criteriaDao = criteriaDao;
@@ -130,9 +129,6 @@ public final class ElasticFilters {
    */
   private QueryBuilder searchGroupToFilter(SearchGroup sg) {
     BoolQueryBuilder filter = QueryBuilders.boolQuery();
-    if (sg.getTemporal()) {
-      this.isApproximate = true;
-    }
 
     for (SearchGroupItem sgi : sg.getItems()) {
       // Modifiers apply to all criteria in this SearchGroupItem, but will be reapplied to each
