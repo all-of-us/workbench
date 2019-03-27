@@ -87,8 +87,7 @@ export const CohortActions = withCurrentWorkspace()(
     navigateToCohort = (): void => {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
-      const url = '/workspaces/' + id + '/' + namespace + '/cohorts/build?cohortId=' + cohort.id;
-      navigateByUrl(url);
+      navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cohort.id}`);
     }
 
     render() {
@@ -98,8 +97,10 @@ export const CohortActions = withCurrentWorkspace()(
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a style={{color: '#5DAEE1'}} onClick={this.navigateToCohort}>{cohort.name} </a>
-            has been saved and can now be used in analysis and concept sets.
+             <a style={{color: '#5DAEE1'}} onClick={this.navigateToCohort}>
+                {cohort.name}
+             </a>
+             has been saved and can now be used in analysis and concept sets.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
