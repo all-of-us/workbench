@@ -39,7 +39,8 @@ function checkBrowserSupport() {
       en: {
         outOfDate: 'Researcher Workbench may not function correctly in this browser.',
         update: {
-          web: `If you experience issues, please install Google Chrome version ${minChromeVersion} or greater.`,
+          web: `If you experience issues, please install Google Chrome \
+          version ${minChromeVersion} or greater.`,
           googlePlay: 'Please install Chrome from Google Play',
           appStore: 'Please install Chrome from the App Store'
         },
