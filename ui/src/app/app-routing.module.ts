@@ -27,6 +27,7 @@ import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 import {SignInComponent} from './views/sign-in/component';
+import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 
 declare let gtag: Function;
 
@@ -127,6 +128,14 @@ const routes: Routes = [
                     component: CohortListComponent,
                     data: {
                       title: 'View Cohorts',
+                      breadcrumb: BreadcrumbType.Workspace
+                    },
+                  },
+                  {
+                    path: 'actions',
+                    component: CohortActionsComponent,
+                    data: {
+                      title: 'Cohort Actions',
                       breadcrumb: BreadcrumbType.Workspace
                     },
                   },
