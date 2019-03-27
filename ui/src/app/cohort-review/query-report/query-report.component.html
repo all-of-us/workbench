@@ -9,7 +9,7 @@
                 Cohort Name
               </div>
               <div class="query-content">
-                {{cohort?.name}}
+                {{review.cohortName}}
               </div>
               <div class="query-title">
                 Created By
@@ -33,7 +33,7 @@
               </div>
             </div>
             <div class="col-sm-12 col-xs-12">
-              <app-query-cohort-definition class="page-break" [cohort]="cohort" [review]="review"></app-query-cohort-definition>
+              <app-query-cohort-definition class="page-break" [review]="review"></app-query-cohort-definition>
             </div>
           </div>
         </div>
@@ -46,7 +46,7 @@
     </div>
   </div>
   <!--CHarts HTML Start-->
-    <app-overview-charts class="page-break" (dataItems) = "getDemoChartData($event)" ></app-overview-charts>
+    <app-overview-charts class="page-break" (dataItems)="getDemoChartData($event)"></app-overview-charts>
   <!--CHarts HTML End-->
 </div>
 

@@ -15,11 +15,31 @@ import {
   VocabularyListResponse
 } from 'generated/fetch';
 
+const criteriaStub = {
+  includes: [{
+    items: [{
+      type: 'PM',
+      modifiers: [{
+        name: 'AGE_AT_EVENT',
+        operands: ['60', '30'],
+        operator: 'GREATER_THAN_OR_EQUAL_TO'
+      }],
+      searchParameters: [{
+        name: 'Hypotensive (Systolic <= 90 / Diastolic <= 60)',
+        type: 'PM'
+      }]
+    }]
+  }],
+  excludes: []
+};
+
 export const cohortReviewStub = {
   cohortReviewId: 1,
   cohortId: 1,
   cdrVersionId: 1,
   creationTime: '',
+  cohortDefinition: JSON.stringify(criteriaStub),
+  cohortName: '',
   matchedParticipantCount: 1,
   reviewSize: 1,
   reviewedCount: 1,

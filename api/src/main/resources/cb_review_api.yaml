@@ -454,6 +454,8 @@ definitions:
       - creationTime
       - matchedParticipantCount
       - reviewStatus
+      - cohortDefinition
+      - cohortName
     properties:
       cohortReviewId:
         type: integer
@@ -465,6 +467,10 @@ definitions:
         type: integer
         format: int64
       creationTime:
+        type: string
+      cohortDefinition:
+        type: string
+      cohortName:
         type: string
       matchedParticipantCount:
         type: integer
