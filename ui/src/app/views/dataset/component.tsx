@@ -20,6 +20,8 @@ import {
   ConceptSet,
   Domain,
   DomainInfo,
+  DomainValue,
+  DomainValuesResponse,
   RecentResource,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
@@ -41,12 +43,18 @@ export const styles = {
   }
 };
 
+interface ValueSet {
+  domain: Domain;
+  values: DomainValue[];
+};
+
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
-    rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[]
+    rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
+    valueSets: ValueSet[],
   }> {
 
   constructor(props) {
@@ -62,7 +70,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       resource: undefined,
       rType: undefined,
       selectedConceptSetIds: [],
-      selectedCohortIds: []
+      selectedCohortIds: [],
+      valueSets: []
     };
   }
 
@@ -77,11 +86,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   async loadResources() {
     try {
       const {namespace, id} = this.props.workspace;
-      const [conceptSets, cohorts, values] = await Promise.all([
+      const [conceptSets, cohorts] = await Promise.all([
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-        cohortsApi().getCohortsInWorkspace(namespace, id),
-        conceptsApi().getValuesFromDomain(namespace, id, Domain.CONDITION.toString())]);
-      console.log(values);
+        cohortsApi().getCohortsInWorkspace(namespace, id)]);
       this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
         loadingResources: false});
     } catch (error) {
@@ -172,13 +179,43 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/${cohort.id}/review`);
   }
 
+  getDomainsFromConceptIds(selectedConceptSetIds: number[]): Domain[] {
+    const {conceptSetList} = this.state;
+    return fp.uniq(conceptSetList.filter((conceptSet: ConceptSet) =>
+      selectedConceptSetIds.includes(conceptSet.id))
+      .map((conceptSet: ConceptSet) => conceptSet.domain));
+  }
+
+  async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
+    const {namespace, id} = this.props.workspace;
+    console.log(domains);
+    const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
+        ({domain: domain, values: valueSet.items}),
+      domains,
+      await Promise.all(domains.map((domain) =>
+        conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
+    return valueSets;
+  }
+
   select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
     if (rtype === ResourceType.CONCEPT_SET) {
+      const {valueSets} = this.state;
       const origSelected = this.state.selectedConceptSetIds;
+      let newSelectedConceptSets: number[];
       if (fp.includes(resource.id, origSelected)) {
-        this.setState({selectedConceptSetIds: fp.remove((c) => c === resource.id, origSelected)});
+        newSelectedConceptSets = fp.remove((c) => c === resource.id, origSelected) as number[];
       } else {
-        this.setState({selectedConceptSetIds: (origSelected).concat(resource.id)});
+        newSelectedConceptSets = (origSelected).concat(resource.id);
+      }
+      const newDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
+      if (fp.xor(valueSets.map(valueSet => valueSet.domain), newDomains).length > 0) {
+        this.getValuesList(newDomains)
+          .then(valueSets => this.setState((state) => ({
+            selectedConceptSetIds: newSelectedConceptSets,
+            valueSets: valueSets
+          })));
+      } else {
+        this.setState({selectedConceptSetIds: newSelectedConceptSets});
       }
     } else {
       const origSelected = this.state.selectedCohortIds;
