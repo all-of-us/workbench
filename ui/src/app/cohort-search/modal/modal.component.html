@@ -10,13 +10,15 @@
                 <button  *ngIf="!altTab"
                  type="button"
                  class="btn tab"
+                 [disabled]="!noSelection && conceptType === 'standard'"
                  [class.active]="mode === 'tree'"
                  (click)="setMode('tree')">
                   {{ title }}
                 </button>
-                <button  *ngIf="showSnomed"
+                <button  *ngIf="isCondOrProc"
                   type="button"
                   class="btn tab snomed-tab"
+                  [disabled]="!noSelection && conceptType === 'source'"
                   [class.active]="mode === 'snomed'"
                   (click)="setMode('snomed')">
                   Search SNOMED
@@ -63,7 +65,7 @@
                   [ngClass]="{'disable-tree':disableCursor}"
                   [class.show]="mode === 'tree' || mode === 'modifiers' || mode === 'attributes' || mode === 'snomed'">
                    <!-- SNOMED Search -->
-                  <div *ngIf="showSnomed" class="panel-left" [class.show]="mode === 'snomed'">
+                  <div *ngIf="isCondOrProc" class="panel-left" [class.show]="mode === 'snomed'">
                     <crit-tree [node]="snomedNode"></crit-tree>
                   </div>
                   <!-- Tree Page -->
@@ -103,7 +105,7 @@
               <h5 class="selection-title">Selected Criteria</h5>
               <div class="panel-right selected">
                 <ng-container *ngFor="let type of objectKeys(selections); let i = index">
-                  <span class="selection-header" *ngIf="showHeader">{{selectionHeader(type)}}</span>
+                  <span class="selection-header" *ngIf="isCondOrProc">{{selectionHeader(type)}}</span>
                   <crit-selection-info
                     *ngFor="let parameter of selections[type]; let p = index"
                     [indexes]="[i,p]"
