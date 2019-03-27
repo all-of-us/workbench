@@ -178,7 +178,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(elasticSearchService.count(request).value());
       } catch (IOException e) {
@@ -190,10 +190,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
     List<FieldValue> row = result.iterateAll().iterator().next();
     Long count = bigQueryService.getLong(row, rm.get("count"));
-
     return ResponseEntity.ok(count);
   }
 
@@ -201,7 +199,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request).value()));
       } catch (IOException e) {
@@ -309,6 +307,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     ParticipantDemographics participantDemographics =
       new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
     return ResponseEntity.ok(participantDemographics);
+  }
+
+  /**
+   * This method helps determine what request can only be approximated by elasticsearch
+   * and must fallback to the BQ implementation.
+   *
+   * @param request
+   * @return
+   */
+  private boolean isApproximate(SearchRequest request) {
+    return request.getIncludes().stream().anyMatch(sg -> sg.getTemporal())
+      || request.getExcludes().stream().anyMatch(sg -> sg.getTemporal());
   }
 
   private String modifyKeywordMatch(String value, String type) {
