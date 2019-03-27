@@ -97,16 +97,16 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.noSelection = selections.size === 0;
         selections.forEach(selection => {
           if (this.isCondOrProc) {
-            this.conceptType = this.ctype === TreeType[TreeType.SNOMED] ? 'standard' : 'source';
+            this.conceptType = selection.get('type') === TreeType[TreeType.SNOMED]
+              ? 'standard' : 'source';
           }
           this.addSelectionToGroup(selection);
         });
+        if (this.conceptType === 'standard') {
+          this.mode = 'snomed';
+        }
       })
     );
-    this.subscription.add(this.selection$
-      .map(sel => sel.size === 0)
-      .subscribe(sel => this.noSelection = sel)
-      );
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
