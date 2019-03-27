@@ -32,10 +32,10 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   private static final String DRUG_SQL_TEMPLATE =
-    "select person_id, entry_date, concept_id\n" +
+    "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where concept_id in (select descendant_id\n" +
-    "from `${projectId}.${dataSetId}.criteria_ancestor`\n" +
+      "from `${projectId}.${dataSetId}.criteria_ancestor`\n" +
       "where ancestor_id in ${innerSql})\n";
 
   private static final String CHILD_ONLY_TEMPLATE =
@@ -58,6 +58,8 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
 
   private static final String PARENT_ONLY_TEMPLATE =
     "(" + PARENT_CRITERIA + ")\n";
+
+  private static final String IS_STANDARD = " and is_standard = 1\n";
 
   /**
    * {@inheritDoc}
@@ -92,10 +94,10 @@ public class DrugQueryBuilder extends AbstractQueryBuilder {
       baseSql = baseSql.replace("${innerSql}", BOTH_TEMPLATE.replace("${parentConceptIds}", "@" + parentParameter)
         .replace("${childConceptIds}", "@" + childParameter));
     }
-    baseSql = baseSql + AGE_DATE_AND_ENCOUNTER_VAR;
+    baseSql = baseSql + AGE_DATE_AND_ENCOUNTER_VAR + IS_STANDARD;
     List<Modifier> modifiers = searchGroupItem.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    return buildTemporalSql(modifiedSql, conceptIdSql, queryParams, modifiers, mention);
+    return buildTemporalSql(modifiedSql, conceptIdSql + IS_STANDARD, queryParams, modifiers, mention);
   }
 
   private ListMultimap<String, Long> getMappedParameters(List<SearchParameter> searchParameters) {

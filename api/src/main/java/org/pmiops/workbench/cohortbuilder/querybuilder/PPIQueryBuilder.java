@@ -71,6 +71,9 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
   private static final String VALUE_AS_CONCEPT_ID_SQL_TEMPLATE =
     "and value_as_concept_id ${operator} (${value})\n";
 
+  private static final String IS_NOT_STANDARD =
+    "and is_standard = 0\n";
+
   /**
    * {@inheritDoc}
    */
@@ -110,7 +113,7 @@ public class PPIQueryBuilder extends AbstractQueryBuilder {
               .replace("${value}","@" + namedParameter));
         }
       }
-      queryParts.add(sqlTemplate.toString());
+      queryParts.add(sqlTemplate.toString() + IS_NOT_STANDARD);
     }
     return String.join(UNION_ALL, queryParts);
   }

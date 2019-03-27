@@ -11,7 +11,7 @@
   },
   {
     "person_id":1,
-    "entry_date":"2009-12-03",
+    "entry_date":"2009-12-01",
     "concept_id":1,
     "domain":"Condition",
     "age_at_event":38,
@@ -37,7 +37,7 @@
     "age_at_event":38,
     "visit_concept_id":12,
     "visit_occurrence_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -107,7 +107,7 @@
     "age_at_event":38,
     "visit_concept_id":1,
     "visit_occurrence_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -117,7 +117,7 @@
     "age_at_event":38,
     "visit_concept_id":12,
     "visit_occurrence_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -137,7 +137,7 @@
     "age_at_event":38,
     "visit_concept_id":1,
     "visit_occurrence_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -147,7 +147,7 @@
     "age_at_event":38,
     "visit_concept_id":12,
     "visit_occurrence_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -159,7 +159,7 @@
     "visit_occurrence_id":1,
     "value_as_number":1.0,
     "value_as_concept_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":99,
@@ -203,7 +203,7 @@
     "age_at_event":38,
     "visit_occurrence_id":1,
     "visit_concept_id":1,
-    "is_standard":0
+    "is_standard":1
   },
   {
     "person_id":1,
@@ -339,5 +339,65 @@
     "value_as_number":7,
     "value_as_concept_id":7,
     "is_standard":0
+  },
+  {
+    "person_id":1,
+    "entry_date":"2009-12-03",
+    "concept_id":3,
+    "domain":"Condition",
+    "age_at_event":38,
+    "visit_concept_id":12,
+    "visit_occurrence_id":1,
+    "is_standard":0
+  },
+  {
+    "person_id":1,
+    "entry_date":"2009-11-03",
+    "concept_id":11,
+    "domain":"Drug",
+    "age_at_event":38,
+    "visit_concept_id":1,
+    "visit_occurrence_id":1,
+    "is_standard":0
+  },
+  {
+    "person_id":1,
+    "entry_date":"2009-12-03",
+    "concept_id":10,
+    "domain":"Condition",
+    "age_at_event":38,
+    "visit_concept_id":1,
+    "visit_occurrence_id":1,
+    "is_standard":0
+  },
+  {
+    "person_id":2,
+    "entry_date":"2009-12-03",
+    "concept_id":10,
+    "domain":"Visit",
+    "age_at_event":38,
+    "visit_occurrence_id":1,
+    "visit_concept_id":1,
+    "is_standard":0
+  },
+  {
+    "person_id":1,
+    "entry_date":"2009-11-03",
+    "concept_id":4,
+    "domain":"Procedure",
+    "age_at_event":38,
+    "visit_concept_id":1,
+    "visit_occurrence_id":1,
+    "is_standard":0
+  },
+  {
+    "person_id":2,
+    "entry_date":"2009-12-03",
+    "concept_id":6,
+    "domain":"Condition",
+    "age_at_event":38,
+    "visit_concept_id":1,
+    "visit_occurrence_id":1,
+    "is_standard":1
   }
 ]
