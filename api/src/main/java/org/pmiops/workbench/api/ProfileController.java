@@ -72,6 +72,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Contains implementations for all Workbench API methods tagged with "profile".
+ *
+ * The majority of handlers here are lightweight wrappers which delegate to UserService, where many
+ * user-focused database and/or API calls are implemented.
+ */
 @RestController
 public class ProfileController implements ProfileApiDelegate {
   private static final Map<CreationStatusEnum, BillingProjectStatus> fcToWorkbenchBillingMap =
@@ -487,25 +493,21 @@ public class ProfileController implements ProfileApiDelegate {
    * This methods updates logged in user's training status from Moodle.
    * @return Profile updated with training completion time
    */
-  @Override
-  public ResponseEntity<Profile> syncTrainingStatus() {
-    User user = userProvider.get();
+  public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncUserTraining(user);
+      userService.syncComplianceTrainingStatus();
     } catch(NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
       throw new ServerErrorException(e);
     }
-    return getProfileResponse(user);
+    return getProfileResponse(userProvider.get());
   }
 
   @Override
   public ResponseEntity<Profile> syncEraCommonsStatus() {
-    User user = userProvider.get();
-    NihStatus nihStatus = fireCloudService.getNihStatus();
-    user = userService.setEraCommonsStatus(nihStatus);
-    return getProfileResponse(user);
+    userService.syncEraCommonsStatus();
+    return getProfileResponse(userProvider.get());
   }
 
   @Override
@@ -743,10 +745,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
     JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
     try {
-      NihStatus nihStatus = fireCloudService.postNihCallback(wrapper);
-      User user = initializeUserIfNeeded();
-      user = userService.setEraCommonsStatus(nihStatus);
-      return getProfileResponse(user);
+      fireCloudService.postNihCallback(wrapper);
+      userService.syncEraCommonsStatus();
+      return getProfileResponse(userProvider.get());
     } catch (WorkbenchException e) {
       throw e;
     }
