@@ -1058,7 +1058,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.EQUAL)
-      .operands(Arrays.asList("3"));
+      .operands(Arrays.asList("2"));
 
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));
