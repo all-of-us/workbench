@@ -27,6 +27,7 @@ import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
+import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
@@ -140,6 +141,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BreadcrumbComponent,
     BugReportComponent,
     CreateConceptSetModalComponent,
+    CohortActionsComponent,
     CohortListComponent,
     ConceptAddModalComponent,
     ConceptSetDetailsComponent,

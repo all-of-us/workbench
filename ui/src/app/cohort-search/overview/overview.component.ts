@@ -75,6 +75,7 @@ export class OverviewComponent implements OnInit {
     this.cohort.criteria = JSON.stringify(this.actions.mapAll());
     cohortsApi().updateCohort(ns, wsid, this.cohort.id, this.cohort).then(() => {
       this.saving = false;
+      navigate(['workspaces', ns, wsid, 'cohorts', 'actions']);
     }, (error) => {
       if (error.status === 400) {
         console.log(error);
@@ -89,7 +90,7 @@ export class OverviewComponent implements OnInit {
     const description = this.cohortForm.get('description').value;
     const cohort = <Cohort>{name, description, criteria: this.criteria, type: COHORT_TYPE};
     cohortsApi().createCohort(ns, wsid, cohort).then(() => {
-      navigate(['workspaces', ns, wsid, 'cohorts']);
+      navigate(['workspaces', ns, wsid, 'cohorts', 'actions']);
     }, (error) => {
       if (error.status === 400) {
         this.showConflictError = true;
