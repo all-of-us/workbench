@@ -73,9 +73,11 @@ export class OverviewComponent implements OnInit {
     this.saving = true;
     const {ns, wsid} = urlParamsStore.getValue();
     this.cohort.criteria = JSON.stringify(this.actions.mapAll());
-    cohortsApi().updateCohort(ns, wsid, this.cohort.id, this.cohort).then(() => {
+    const cid = this.cohort.id;
+    cohortsApi().updateCohort(ns, wsid, cid, this.cohort).then(() => {
       this.saving = false;
-      navigate(['workspaces', ns, wsid, 'cohorts', 'actions']);
+      const queryParams = {cid: this.cohort.id};
+      navigate(['workspaces', ns, wsid, 'cohorts', cid, 'actions']);
     }, (error) => {
       if (error.status === 400) {
         console.log(error);
@@ -89,8 +91,9 @@ export class OverviewComponent implements OnInit {
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const cohort = <Cohort>{name, description, criteria: this.criteria, type: COHORT_TYPE};
-    cohortsApi().createCohort(ns, wsid, cohort).then(() => {
-      navigate(['workspaces', ns, wsid, 'cohorts', 'actions']);
+    cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
+      const queryParams = {cid: c.id};
+      navigate(['workspaces', ns, wsid, 'cohorts', 'actions'], {queryParams});
     }, (error) => {
       if (error.status === 400) {
         this.showConflictError = true;

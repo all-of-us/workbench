@@ -132,11 +132,11 @@ const routes: Routes = [
                     },
                   },
                   {
-                    path: 'actions',
+                    path: ':cid/actions',
                     component: CohortActionsComponent,
                     data: {
                       title: 'Cohort Actions',
-                      breadcrumb: BreadcrumbType.Workspace
+                      breadcrumb: BreadcrumbType.Cohort
                     },
                   },
                   {
