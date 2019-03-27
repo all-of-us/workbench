@@ -21,9 +21,11 @@ platformBrowserDynamic().bootstrapModule(AppModule);
 checkBrowserSupport();
 
 function checkBrowserSupport() {
+  const minChromeVersion = 67
+
   outdatedBrowserRework({
     browserSupport: {
-      Chrome: 67, // Includes Chrome for mobile devices
+      Chrome: minChromeVersion, // Includes Chrome for mobile devices
       Edge: false,
       Safari: false,
       "Mobile Safari": false,
@@ -35,14 +37,14 @@ function checkBrowserSupport() {
     isUnknownBrowserOK: false,
     messages: {
       en: {
-        outOfDate: "Terra may not function correctly in this browser.",
+        outOfDate: "Researcher Workbench may not function correctly in this browser.",
         update: {
-          web: "If you experience issues, please try " + (!!window['chrome']? "updating" : "using") + " Google Chrome.",
+          web: "If you experience issues, please install Google Chrome version 67 or greater.",
           googlePlay: "Please install Chrome from Google Play",
-          appStore: "Please update iOS from the Settings App"
+          appStore: "Please install Chrome from the App Store"
         },
         url: "https://www.google.com/chrome/",
-        callToAction: (!!window['chrome'] ? "Update" : "Download") + " Chrome now",
+        callToAction: "Download Chrome now",
         close: "Close"
       }
     }
