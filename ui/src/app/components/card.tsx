@@ -23,8 +23,14 @@ export const styles = reactStyles({
     ...baseStyles.card,
     minWidth: '200px', maxWidth: '200px',
     minHeight: '223px', maxHeight: '223px'
+  },
+  cohortActionCard: {
+    ...baseStyles.card,
+    width: '30%',
+    height: '12rem'
   }
 });
 
 export const WorkspaceCardBase = withStyle(styles.workspaceCard)('div');
 export const ResourceCardBase = withStyle(styles.resourceCard)('div');
+export const CohortActionCardBase = withStyle(styles.cohortActionCard)('div');
