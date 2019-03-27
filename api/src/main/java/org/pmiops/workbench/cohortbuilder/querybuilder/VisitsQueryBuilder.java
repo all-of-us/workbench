@@ -32,12 +32,13 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class VisitsQueryBuilder extends AbstractQueryBuilder {
 
   private static final String VISIT_SELECT_CLAUSE_TEMPLATE =
-    "select person_id, entry_date, concept_id\n" +
+    "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "` a\n" +
       "where ";
   private static final String CONCEPT_ID_TEMPLATE =
     "concept_id in unnest(${visitConceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
+  private static final String IS_STANDARD = " and is_standard = 1\n";
 
   /**
    * {@inheritDoc}
@@ -58,10 +59,10 @@ public class VisitsQueryBuilder extends AbstractQueryBuilder {
       throw new BadRequestException(
         "Bad Request: please provide valid concept ids with search parameters ");
     }
-    String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE;
+    String baseSql = VISIT_SELECT_CLAUSE_TEMPLATE + CONCEPT_ID_TEMPLATE + IS_STANDARD;
     List<Modifier> modifiers = inputParameters.getModifiers();
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    String finalSql = buildTemporalSql(modifiedSql, CONCEPT_ID_TEMPLATE, queryParams, modifiers, mention);
+    String finalSql = buildTemporalSql(modifiedSql, CONCEPT_ID_TEMPLATE + IS_STANDARD, queryParams, modifiers, mention);
     String namedParameter = addQueryParameterValue(queryParams,
       QueryParameterValue.array(conceptIdList.stream().toArray(Long[]::new), Long.class));
     return finalSql.replace("${visitConceptIds}", "@" + namedParameter);

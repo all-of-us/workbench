@@ -2,16 +2,19 @@ package org.pmiops.workbench.cohortbuilder.querybuilder;
 
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.TemporalMention;
+import org.pmiops.workbench.model.TreeType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.ParameterPredicates.codeBlank;
@@ -40,8 +43,11 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 @Service
 public class CodesQueryBuilder extends AbstractQueryBuilder {
 
+  private static Set<String> SOURCE_TREES =
+    ImmutableSet.of(TreeType.ICD9.toString(), TreeType.ICD10.toString(), TreeType.CPT.toString());
+
   private static final String CODES_SQL_TEMPLATE =
-    "select person_id, entry_date, concept_id\n" +
+    "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
       "where ";
 
@@ -65,6 +71,9 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     "concept_id in unnest(${conceptIds})\n" +
       AGE_DATE_AND_ENCOUNTER_VAR;
 
+  private static final String IS_STANDARD = " and is_standard = 1\n";
+  private static final String IS_NOT_STANDARD = " and is_standard = 0\n";
+
   /**
    * {@inheritDoc}
    */
@@ -78,10 +87,12 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
     ListMultimap<MultiKey, SearchParameter> paramMap = getMappedParameters(parameters);
     List<String> queryParts = new ArrayList<String>();
     String conceptIdsNamedParameter = "";
+    boolean isStandard = false;
 
     for (MultiKey key : paramMap.keySet()) {
       final List<SearchParameter> paramList = paramMap.get(key);
       final SearchParameter parameter = paramList.get(0);
+      isStandard = !SOURCE_TREES.contains(parameter.getType());
       if (key.getType().equals(CHILD)) {
         List<Long> conceptIds = new ArrayList<>();
         conceptIds.addAll(
@@ -106,12 +117,13 @@ public class CodesQueryBuilder extends AbstractQueryBuilder {
       }
     }
 
+    String standardSql = (isStandard) ? IS_STANDARD : IS_NOT_STANDARD;
     String bodySql = queryParts.size() == 1 && !conceptIdsNamedParameter.isEmpty() ?
       CHILD_ONLY_TEMPLATE.replace("${conceptIds}", "@" + conceptIdsNamedParameter) :
       MULTIPLE_TEMPLATE.replace("${innerParentAndChildSql}", String.join(OR, queryParts));
-    String baseSql = CODES_SQL_TEMPLATE + bodySql;
+    String baseSql = CODES_SQL_TEMPLATE + bodySql + standardSql;
     String modifiedSql = buildModifierSql(baseSql, queryParams, searchGroupItem.getModifiers());
-    return buildTemporalSql(modifiedSql, bodySql, queryParams, searchGroupItem.getModifiers(), mention);
+    return buildTemporalSql(modifiedSql, bodySql + standardSql, queryParams, searchGroupItem.getModifiers(), mention);
   }
 
   private void validateSearchParameter(SearchParameter param) {
