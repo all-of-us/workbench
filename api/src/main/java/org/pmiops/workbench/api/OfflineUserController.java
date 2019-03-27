@@ -47,9 +47,8 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     if (errorCount > 0) {
       throw new ServerErrorException(
           String.format("%d errors encountered during complince training sync", errorCount));
-    } else {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   /**
@@ -78,9 +77,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     if (errorCount > 0) {
       throw new ServerErrorException(
           String.format("%d errors encountered during eRA Commons sync", errorCount));
-    } else {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
-
 }
