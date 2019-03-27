@@ -21,14 +21,14 @@ platformBrowserDynamic().bootstrapModule(AppModule);
 checkBrowserSupport();
 
 function checkBrowserSupport() {
-  const minChromeVersion = 67
+  const minChromeVersion = 67;
 
   outdatedBrowserRework({
     browserSupport: {
       Chrome: minChromeVersion, // Includes Chrome for mobile devices
       Edge: false,
       Safari: false,
-      "Mobile Safari": false,
+      'Mobile Safari': false,
       Opera: false,
       Firefox: false,
       Vivaldi: false,
@@ -37,15 +37,15 @@ function checkBrowserSupport() {
     isUnknownBrowserOK: false,
     messages: {
       en: {
-        outOfDate: "Researcher Workbench may not function correctly in this browser.",
+        outOfDate: 'Researcher Workbench may not function correctly in this browser.',
         update: {
-          web: "If you experience issues, please install Google Chrome version 67 or greater.",
-          googlePlay: "Please install Chrome from Google Play",
-          appStore: "Please install Chrome from the App Store"
+          web: 'If you experience issues, please install Google Chrome version 67 or greater.',
+          googlePlay: 'Please install Chrome from Google Play',
+          appStore: 'Please install Chrome from the App Store'
         },
-        url: "https://www.google.com/chrome/",
-        callToAction: "Download Chrome now",
-        close: "Close"
+        url: 'https://www.google.com/chrome/',
+        callToAction: 'Download Chrome now',
+        close: 'Close'
       }
     }
   });
