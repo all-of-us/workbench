@@ -254,7 +254,6 @@ public class ElasticFiltersTest {
             .addIncludesItem(new SearchGroup()
                 .addItemsItem(new SearchGroupItem()
                     .addSearchParametersItem(leafParam2))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
@@ -270,7 +269,6 @@ public class ElasticFiltersTest {
                         .type(TreeType.DRUG.toString())
                         .subtype(TreeSubType.ATC.toString())
                         .group(true)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("19069022"))));
   }
@@ -286,7 +284,6 @@ public class ElasticFiltersTest {
                         .type(TreeType.ICD9.toString())
                         .subtype(TreeSubType.CM.toString())
                         .group(true)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772", "774"))));
   }
@@ -301,7 +298,6 @@ public class ElasticFiltersTest {
                         .type(TreeType.PPI.toString())
                         .subtype(TreeSubType.BASICS.toString())
                         .group(true)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
   }
@@ -317,7 +313,6 @@ public class ElasticFiltersTest {
                         .subtype(TreeSubType.BASICS.toString())
                         .conceptId(777L)
                         .group(true)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777"))));
   }
@@ -338,7 +333,6 @@ public class ElasticFiltersTest {
               .conceptId(777L)
               .group(true)
               .addAttributesItem(attr)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("777")),
       QueryBuilders.rangeQuery("events.value_as_number").gte(1.0F).lte(1.0F)));
@@ -357,7 +351,6 @@ public class ElasticFiltersTest {
                             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
                             .addOperandsItem("18"))
                 )));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
         QueryBuilders.rangeQuery("events.age_at_start").gte(18)));
@@ -377,7 +370,6 @@ public class ElasticFiltersTest {
                             .addOperandsItem("12/25/1988")
                             .addOperandsItem("12/27/1988"))
                 )));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
         QueryBuilders.rangeQuery("events.start_date").gte("12/25/1988").lte("12/27/1988")));
@@ -396,7 +388,6 @@ public class ElasticFiltersTest {
                             .operator(Operator.IN)
                             .addOperandsItem("123"))
                 )));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
         QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772")),
         QueryBuilders.termsQuery("events.visit_concept_id", ImmutableList.of("123"))));
@@ -415,7 +406,6 @@ public class ElasticFiltersTest {
                             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
                             .addOperandsItem("13"))
                 )));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQueryOccurrences(
         13, QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("772"))));
   }
@@ -433,7 +423,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(heightAnyParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId))));
   }
@@ -458,7 +447,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(heightParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
       QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
@@ -484,7 +472,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(weightParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
       QueryBuilders.rangeQuery("events.value_as_number").gte(left).lte(right)));
@@ -503,7 +490,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(genderParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
   }
@@ -521,7 +507,6 @@ public class ElasticFiltersTest {
         .addExcludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(genderParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
   }
@@ -542,7 +527,6 @@ public class ElasticFiltersTest {
         .addExcludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(genderParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedMustNotQuery(
       QueryBuilders.termsQuery("gender_concept_id", ImmutableList.of(conceptId))));
   }
@@ -560,7 +544,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(raceParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.termsQuery("race_concept_id", ImmutableList.of(conceptId))));
   }
@@ -579,7 +562,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(ethParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
   }
@@ -603,7 +585,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(pregParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of(conceptId)),
       QueryBuilders.termsQuery("events.value_as_concept_id", ImmutableList.of(operand))));
@@ -629,7 +610,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(measParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId)),
       QueryBuilders.termsQuery("events.value_as_concept_id", ImmutableList.of(operand1, operand2))));
@@ -647,7 +627,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(visitParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(singleNestedQuery(
       QueryBuilders.termsQuery("events.concept_id", ImmutableList.of(conceptId))));
   }
@@ -670,7 +649,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .addSearchParametersItem(ethParam))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd")));
   }
@@ -700,7 +678,6 @@ public class ElasticFiltersTest {
         .addIncludesItem(new SearchGroup()
           .addItemsItem(new SearchGroupItem()
             .searchParameters(Arrays.asList(ageParam, ethParam)))));
-    assertThat(resp.isApproximate()).isFalse();
     assertThat(resp.value()).isEqualTo(nonNestedQuery(
       QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd"),
       QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));

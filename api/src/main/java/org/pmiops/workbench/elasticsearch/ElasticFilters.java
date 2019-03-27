@@ -51,19 +51,13 @@ public final class ElasticFilters {
   public static class ElasticFilterResponse<T> {
 
     private final T value;
-    private final boolean isApproximate;
 
-    public ElasticFilterResponse(T value, boolean isApproximate) {
+    public ElasticFilterResponse(T value) {
       this.value = value;
-      this.isApproximate = isApproximate;
     }
 
     public T value() {
       return this.value;
-    }
-
-    public boolean isApproximate() {
-      return this.isApproximate;
     }
   }
 
@@ -76,7 +70,7 @@ public final class ElasticFilters {
       CriteriaDao criteriaDao, SearchRequest req) {
     ElasticFilters f = new ElasticFilters(criteriaDao);
     QueryBuilder q = f.process(req);
-    return new ElasticFilterResponse<>(q, f.isApproximate);
+    return new ElasticFilterResponse<>(q);
   }
 
   /**

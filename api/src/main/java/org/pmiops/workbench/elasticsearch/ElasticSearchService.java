@@ -53,7 +53,7 @@ public class ElasticSearchService {
     log.info("Elastic filter: "  + filter.value().toString());
     long count = client().count(new CountRequest(personIndex)
         .source(SearchSourceBuilder.searchSource().query(filter.value())), RequestOptions.DEFAULT).getCount();
-    return new ElasticFilterResponse<>(count, filter.isApproximate());
+    return new ElasticFilterResponse<>(count);
   }
 
   /**
@@ -73,7 +73,7 @@ public class ElasticSearchService {
           .aggregation(buildDemoChartAggregation(RANGE_19_44))
           .aggregation(buildDemoChartAggregation(RANGE_45_64))
           .aggregation(buildDemoChartAggregation(RANGE_GT_65))), RequestOptions.DEFAULT);
-    return new ElasticFilterResponse<>(unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65), filter.isApproximate());
+    return new ElasticFilterResponse<>(unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65));
   }
 
   /**
