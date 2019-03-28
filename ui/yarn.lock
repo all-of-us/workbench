@@ -6206,6 +6206,13 @@ osenv@0, osenv@^0.1.4, osenv@^0.1.5:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
 
+outdated-browser-rework@^2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/outdated-browser-rework/-/outdated-browser-rework-2.8.0.tgz#fbd0c92700822630afc61498468551e0bbb3b6aa"
+  integrity sha512-xXbk+mm2kcPlHqMaFtryaUfGRRuGwJkmY1ISAhnPc88ETkZz78bcc4WmCV8+ZS4cs4IcuJdpjIeMB3N6MivGBQ==
+  dependencies:
+    ua-parser-js "^0.7.18"
+
 p-defer@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/p-defer/-/p-defer-1.0.0.tgz#9f6eb182f6c9aa8cd743004a7d4f96b196b0fb0c"
@@ -8369,6 +8376,11 @@ typedarray@^0.0.6:
 typescript@3.1.6, "typescript@>=3.1.1 <3.2":
   version "3.1.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.6.tgz#b6543a83cfc8c2befb3f4c8fba6896f5b0c9be68"
+
+ua-parser-js@^0.7.18:
+  version "0.7.19"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.19.tgz#94151be4c0a7fb1d001af7022fdaca4642659e4b"
+  integrity sha512-T3PVJ6uz8i0HzPxOF9SWzWAlfN/DavlpQqepn22xgve/5QecC+XMCAtmUNnY7C9StehaV6exjUCI801lOI7QlQ==
 
 uglify-es@^3.3.4:
   version "3.3.9"

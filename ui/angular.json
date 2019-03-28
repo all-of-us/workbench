@@ -28,6 +28,7 @@
               "node_modules/primeicons/primeicons.css",
               "node_modules/primereact/resources/themes/nova-light/theme.css",
               "node_modules/react-calendar/dist/Calendar.css",
+              "node_modules/outdated-browser-rework/dist/style.css",
               "src/styles.css"
             ],
             "scripts": [
