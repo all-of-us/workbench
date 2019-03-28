@@ -26,6 +26,7 @@ import {DataPageComponent} from 'app/views/data-page/component';
 import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
+import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 import {SignInComponent} from './views/sign-in/component';
 
 declare let gtag: Function;
@@ -128,6 +129,14 @@ const routes: Routes = [
                     data: {
                       title: 'View Cohorts',
                       breadcrumb: BreadcrumbType.Workspace
+                    },
+                  },
+                  {
+                    path: ':cid/actions',
+                    component: CohortActionsComponent,
+                    data: {
+                      title: 'Cohort Actions',
+                      breadcrumb: BreadcrumbType.Cohort
                     },
                   },
                   {
