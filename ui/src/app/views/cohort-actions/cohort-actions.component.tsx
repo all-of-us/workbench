@@ -48,7 +48,7 @@ const styles = reactStyles({
 const disabledButton = {
   ...styles.cardButton,
   cursor: 'not-allowed'
-}
+};
 
 const actionCards = [
   {
@@ -69,7 +69,7 @@ const actionCards = [
        selecting the desired concept sets and values for the cohorts.`,
     action: 'dataset'
   },
-]
+];
 
 export const CohortActions = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData}, {cohort: Cohort}> {

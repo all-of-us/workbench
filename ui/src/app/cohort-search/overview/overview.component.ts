@@ -76,7 +76,6 @@ export class OverviewComponent implements OnInit {
     const cid = this.cohort.id;
     cohortsApi().updateCohort(ns, wsid, cid, this.cohort).then(() => {
       this.saving = false;
-      const queryParams = {cid: this.cohort.id};
       navigate(['workspaces', ns, wsid, 'cohorts', cid, 'actions']);
     }, (error) => {
       if (error.status === 400) {
