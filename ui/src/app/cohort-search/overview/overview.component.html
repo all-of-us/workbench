@@ -33,6 +33,7 @@
         (click)="saveModal.open()">Create Cohort</button>
       <button
         class="btn btn-link"
+        (click)="navigateTo('notebook')"
         disabled
         [popper]="'Export to notebook'"
         [popperTrigger]="'hover'">
@@ -47,6 +48,7 @@
       </button>
       <button
         class="btn btn-link"
+        (click)="navigateTo('review')"
         [disabled]="(isRequesting$ | async) || !cohort"
         [popper]="'Review participant level data'"
         [popperTrigger]="'hover'">

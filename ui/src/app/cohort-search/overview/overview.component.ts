@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions, searchRequestError} from 'app/cohort-search/redux';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 
 import {Cohort} from 'generated/fetch';
 
@@ -95,6 +95,23 @@ export class OverviewComponent implements OnInit {
         this.showConflictError = true;
       }
     });
+  }
+
+  navigateTo(action: string) {
+    const {ns, wsid} = urlParamsStore.getValue();
+    let url = `/workspaces/${ns}/${wsid}/`;
+    switch (action) {
+      case 'cohort':
+        url += 'cohorts';
+        break;
+      case 'notebook':
+        url += 'notebooks';
+        break;
+      case 'review':
+        url += `cohorts/${this.cohort.id}/review`;
+        break;
+    }
+    navigateByUrl(url);
   }
 
   toggleChartMode() {
