@@ -41,6 +41,7 @@
       </button>
       <button
         class="btn btn-link"
+        (click)="deleteModal.open()"
         [disabled]="(isRequesting$ | async) || !cohort"
         [popper]="'Delete cohort'"
         [popperTrigger]="'hover'">
@@ -131,7 +132,6 @@
   <div class="modal-title">
     <h2>Save New Cohort</h2>
   </div>
-
   <div class="modal-body">
     <form [formGroup]="cohortForm" (ngSubmit)="submit()">
       <label
@@ -167,7 +167,6 @@
       </textarea>
     </form>
   </div>
-
   <div class="modal-footer">
     <button
       type="button"
@@ -175,13 +174,37 @@
       (click)="saveModal.close()">
       Cancel
     </button>
-
     <button
       type="button"
       class="btn btn-primary"
       (click)="submit()"
       [disabled]="!cohortForm.valid">
       Save Cohort
+    </button>
+  </div>
+</clr-modal>
+<clr-modal #deleteModal
+  [clrModalSize]="'md'"
+  (clrModalOpenChange)="modalChange($event)">
+  <div class="modal-title">
+    <h2>Confirm Delete</h2>
+  </div>
+  <div class="modal-body" style="margin: 0.25rem 0 1rem">
+    Are you sure you want to delete this Cohort and all associated review sets?
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-link"
+      (click)="deleteModal.close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="delete()"
+      [clrLoading]="deleting">
+      Delete Cohort
     </button>
   </div>
 </clr-modal>

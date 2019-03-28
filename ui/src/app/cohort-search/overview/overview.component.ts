@@ -36,6 +36,7 @@ export class OverviewComponent implements OnInit {
 
   error: boolean;
   saving = false;
+  deleting = false;
   stackChart = false;
   showGenderChart = true;
   showComboChart = true;
@@ -97,13 +98,21 @@ export class OverviewComponent implements OnInit {
     });
   }
 
+  delete() {
+    this.deleting = true;
+    const {ns, wsid} = urlParamsStore.getValue();
+    cohortsApi().deleteCohort(ns, wsid, this.cohort.id).then(() => {
+      navigate(['workspaces', ns, wsid, 'cohorts']);
+    }, (error) => {
+      console.log(error);
+      this.deleting = false;
+    });
+  }
+
   navigateTo(action: string) {
     const {ns, wsid} = urlParamsStore.getValue();
     let url = `/workspaces/${ns}/${wsid}/`;
     switch (action) {
-      case 'cohort':
-        url += 'cohorts';
-        break;
       case 'notebook':
         url += 'notebooks';
         break;
