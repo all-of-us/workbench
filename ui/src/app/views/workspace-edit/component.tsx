@@ -15,7 +15,7 @@ import {navigate, userProfileStore} from 'app/utils/navigation';
 import {CdrVersion, DataAccessLevel, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import WorkspaceUnderservedPopulation from './workspace-edit-underserverd';
+import WorkspaceUnderservedPopulation from './workspace-edit-underserved';
 
 export const ResearchPurposeItems = {
   diseaseFocusedResearch: {
