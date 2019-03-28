@@ -1,7 +1,6 @@
 import {DOCUMENT} from '@angular/common';
 import {Component, Inject, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
-import outdatedBrowserRework from 'outdated-browser-rework';
 import {
   ActivatedRoute,
   Event as RouterEvent,
@@ -10,10 +9,11 @@ import {
   Router,
 } from '@angular/router';
 
-
 import {cookiesEnabled} from 'app/utils';
 import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
+
+import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
