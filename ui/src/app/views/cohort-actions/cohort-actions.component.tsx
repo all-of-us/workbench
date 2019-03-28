@@ -46,16 +46,19 @@ const actionCards = [
     title: 'Create Review Sets',
     description: `The review set feature allows you to select a subset of your cohort to review
        participants row-level data and add notes and annotations.`,
+    action: 'review'
   },
   {
     title: 'Export to a Notebook',
     description: `Data can be exported to a cloud-based Jupyter notebook for analysis using R or
        Python programming language.`,
+    action: 'notebook'
   },
   {
     title: 'Create a Dataset',
     description: `Here, you can build build and preview a dataset for one or more cohorts by
        selecting the desired concept sets and values for the cohorts.`,
+    action: 'dataset'
   },
 ]
 
@@ -84,10 +87,25 @@ export const CohortActions = withCurrentWorkspace()(
       }
     }
 
-    navigateToCohort = (): void => {
+    navigateTo = (action: string): void => {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
-      navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cohort.id}`);
+      let url = `/workspaces/${namespace}/${id}/`;
+      switch (action) {
+        case 'cohort':
+          url += `cohorts/build?cohortId=${cohort.id}`;
+          break;
+        case 'review':
+          url += `cohorts/${cohort.id}/review`;
+          break;
+        case 'notebook':
+          url += 'notebooks';
+          break;
+        case 'dataset':
+          url += 'data/datasets';
+          break;
+      }
+      navigateByUrl(url);
     }
 
     render() {
@@ -97,7 +115,7 @@ export const CohortActions = withCurrentWorkspace()(
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a style={{color: '#5DAEE1'}} onClick={this.navigateToCohort}>
+             <a style={{color: '#5DAEE1'}} onClick={() => this.navigateTo('cohort')}>
                 {cohort.name}
              </a>
              has been saved and can now be used in analysis and concept sets.
@@ -113,7 +131,10 @@ export const CohortActions = withCurrentWorkspace()(
                   <div style={styles.cardDescription}>{card.description}</div>
                 </div>
                 <div>
-                  <Button type='primary' style={{margin: '1rem 0', height: '2rem'}}>
+                  <Button
+                    type='primary'
+                    style={{margin: '1rem 0', height: '2rem'}}
+                    onClick={() => this.navigateTo(card.action)}>
                     {card.title}
                   </Button>
                 </div>
