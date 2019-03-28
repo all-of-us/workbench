@@ -545,6 +545,7 @@
           "name": "visit_occurrence_id",
           "mode": "nullable",
           "description": "A foreign key to the visit in the VISIT_OCCURRENCE table during which the device was used."
+          "foreignKey": "visit_occurrence"
         },
         {
           "type": "string",
