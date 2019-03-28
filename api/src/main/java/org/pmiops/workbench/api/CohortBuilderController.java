@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.TableResult;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,8 +15,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
@@ -35,6 +38,8 @@ import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -316,9 +321,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    * @param request
    * @return
    */
-  private boolean isApproximate(SearchRequest request) {
+  protected boolean isApproximate(SearchRequest request) {
+    //currently elasticsearch doesn't implement Temporal/BP/DEC
     return request.getIncludes().stream().anyMatch(sg -> sg.getTemporal())
-      || request.getExcludes().stream().anyMatch(sg -> sg.getTemporal());
+      || request.getExcludes().stream().anyMatch(sg -> sg.getTemporal())
+      || request.getIncludes().stream()
+      .flatMap(sg -> sg.getItems().stream())
+      .flatMap(sgi -> sgi.getSearchParameters().stream())
+      .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()))
+      || request.getExcludes().stream()
+      .flatMap(sg -> sg.getItems().stream())
+      .flatMap(sgi -> sgi.getSearchParameters().stream())
+      .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()));
   }
 
   private String modifyKeywordMatch(String value, String type) {
