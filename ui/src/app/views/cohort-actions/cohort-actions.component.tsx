@@ -38,8 +38,17 @@ const styles = reactStyles({
   cardDescription: {
     marginTop: '0.5rem', textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
     WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
+  },
+  cardButton: {
+    margin: '1rem 0',
+    height: '2rem'
   }
 });
+
+const disabledButton = {
+  ...styles.cardButton,
+  cursor: 'not-allowed'
+}
 
 const actionCards = [
   {
@@ -115,7 +124,9 @@ export const CohortActions = withCurrentWorkspace()(
           <h3 style={styles.cohortsHeader}>Cohort Saved Successfully</h3>
           <div style={{marginTop: '0.25rem'}}>
             The cohort
-             <a style={{color: '#5DAEE1'}} onClick={() => this.navigateTo('cohort')}>
+             <a
+               style={{color: '#5DAEE1', margin: '0 4px'}}
+               onClick={() => this.navigateTo('cohort')}>
                 {cohort.name}
              </a>
              has been saved and can now be used in analysis and concept sets.
@@ -123,6 +134,7 @@ export const CohortActions = withCurrentWorkspace()(
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
+              const disabled = card.action === 'notebook';
               return <CohortActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
@@ -133,7 +145,8 @@ export const CohortActions = withCurrentWorkspace()(
                 <div>
                   <Button
                     type='primary'
-                    style={{margin: '1rem 0', height: '2rem'}}
+                    style={disabled ? disabledButton : styles.cardButton}
+                    disabled={disabled}
                     onClick={() => this.navigateTo(card.action)}>
                     {card.title}
                   </Button>
