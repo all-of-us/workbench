@@ -48,11 +48,15 @@ interface ValueSet {
   values: DomainValue[];
 }
 
+interface DomainValuePair {
+  domain: Domain;
+  value: string;
+}
+
 export const ValueListItem: React.FunctionComponent <
   {domainValue: DomainValue, onSelect: Function}> =
   ({domainValue, onSelect}) => {
-    return <div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
-      height: '1.5rem', display: 'flex'}}>
+    return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
       <input type='checkbox' value={domainValue.value} onClick={() => onSelect()}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
                marginRight: 10, backgroundColor: '#7CC79B'}}/>
@@ -66,8 +70,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], /* We use strings because we can guarantee that all
-    values are unique */ selectedValues: string[]
+    valueSets: ValueSet[], selectedValues: DomainValuePair[]
   }> {
 
   constructor(props) {
@@ -212,7 +215,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
 
   select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
     if (rtype === ResourceType.CONCEPT_SET) {
-      const {valueSets} = this.state;
+      const {valueSets, selectedValues} = this.state;
       const origSelected = this.state.selectedConceptSetIds;
       let newSelectedConceptSets: number[];
       if (fp.includes(resource.id, origSelected)) {
@@ -220,15 +223,26 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       } else {
         newSelectedConceptSets = (origSelected).concat(resource.id);
       }
-      const newDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
-      if (fp.xor(valueSets.map(valueSet => valueSet.domain), newDomains).length > 0) {
+      const currentDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
+      const origDomains = valueSets.map(valueSet => valueSet.domain);
+      const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
+      const removedDomains = fp.without(currentDomains, origDomains);
+      const updatedValueSets =
+        valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
+      const updatedSelectedValues =
+        selectedValues.filter(selectedValue =>
+          !fp.contains(selectedValue.domain, removedDomains));
+      if (newDomains.length > 0) {
         this.getValuesList(newDomains)
-          .then(valueSets => this.setState((state) => ({
+          .then(newValueSets => this.setState((state) => ({
             selectedConceptSetIds: newSelectedConceptSets,
-            valueSets: valueSets
+            valueSets: updatedValueSets.concat(newValueSets),
+            selectedValues: updatedSelectedValues
           })));
       } else {
-        this.setState({selectedConceptSetIds: newSelectedConceptSets});
+        this.setState({selectedConceptSetIds: newSelectedConceptSets,
+          valueSets: updatedValueSets,
+          selectedValues: updatedSelectedValues});
       }
     } else {
       const origSelected = this.state.selectedCohortIds;
@@ -240,12 +254,13 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
-  selectDomainValue(domainValue: DomainValue): void {
+  selectDomainValue(domain: Domain, domainValue: DomainValue): void {
     const origSelected = this.state.selectedValues;
-    if (fp.includes(domainValue.value, origSelected)) {
-      this.setState({selectedValues: fp.remove((dv) => dv === domainValue.value, origSelected)});
+    const selectObj = {domain: domain, value: domainValue.value};
+    if (fp.includes(selectObj, origSelected)) {
+      this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
     } else {
-      this.setState({selectedValues: (origSelected).concat(domainValue.value)});
+      this.setState({selectedValues: (origSelected).concat(selectObj)});
     }
   }
 
@@ -313,7 +328,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
           <div style={{width: '58%'}}>
             <h2>Select Concept Sets</h2>
             <div style={{display: 'flex', backgroundColor: 'white', border: '1px solid #E5E5E5'}}>
-              <div style={{flexGrow: 1, borderRight: '1px solid #E5E5E5'}}>
+              <div style={{width: '60%', borderRight: '1px solid #E5E5E5'}}>
                 <div style={styles.selectBoxHeader}>
                   Concept Sets
                   <ClrIcon shape='plus-circle' class='is-solid' style={styles.addIcon}
@@ -341,20 +356,23 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                     left: '10rem'}}/>}
                 </div>
               </div>
-              <div style={{flexGrow: 1}}>
+              <div style={{width: '40%'}}>
                 <div style={styles.selectBoxHeader}>
                   Values
                 </div>
-                {valueSets.map(valueSet =>
-                  <div>
-                    valueSet.domain.toString()
-                    {valueSet.values.map(domainValue =>
-                      <ValueListItem domainValue={domainValue} onSelect={
-                        () => this.selectDomainValue(domainValue)}/>
-                    )}
-                  </div>)
-                }
-                <div style={{height: '10rem', overflowY: 'auto'}}/>
+                <div style={{height: '10rem', overflowY: 'auto'}}>
+                  {valueSets.map(valueSet =>
+                    <div style={{marginLeft: '0.5rem'}}>
+                      <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
+                        {fp.capitalize(valueSet.domain.toString())}
+                      </div>
+                      {valueSet.values.map(domainValue =>
+                        <ValueListItem domainValue={domainValue} onSelect={
+                          () => this.selectDomainValue(valueSet.domain, domainValue)}/>
+                      )}
+                    </div>)
+                  }
+                </div>
               </div>
             </div>
           </div>
