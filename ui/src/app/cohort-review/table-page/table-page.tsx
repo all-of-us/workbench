@@ -13,7 +13,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortStatus,
@@ -357,7 +357,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
 
     backToCohort() {
       const {id, namespace} = this.props.workspace;
-      navigate(['/workspaces', namespace, id, 'cohorts']);
+      const {cid} = urlParamsStore.getValue();
+      navigateByUrl( `/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
     }
 
     onRowClick = (event: any) => {
