@@ -102,11 +102,11 @@ describe('ConceptAddModal', () => {
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="toggle-new-set"]').first().simulate('click');
 
-    // empty name cannot be saved
+    // empty name cannot be unchanged
     expect(wrapper.find('[data-test-id="save-concept-set"]')
         .first().prop('disabled')).toBe(true);
 
-    // existing name cannot be saved
+    // existing name cannot be unchanged
     wrapper.find('[data-test-id="create-new-set-name"]').find('input')
         .simulate('change', {target: {value: stubSetsInDomain[0]}});
     expect(wrapper.find('[data-test-id="save-concept-set"]')
