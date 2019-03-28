@@ -16,6 +16,10 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
@@ -348,6 +353,55 @@ public class CohortBuilderControllerTest {
 
     criteriaAttributeDao.delete(criteriaAttributeMin.getId());
     criteriaAttributeDao.delete(criteriaAttributeMax.getId());
+  }
+
+  @Test
+  public void isApproximate() throws Exception {
+    SearchParameter inSearchParameter = new SearchParameter();
+    SearchParameter exSearchParameter = new SearchParameter();
+    SearchGroupItem inSearchGroupItem = new SearchGroupItem()
+      .addSearchParametersItem(inSearchParameter);
+    SearchGroupItem exSearchGroupItem = new SearchGroupItem()
+      .addSearchParametersItem(exSearchParameter);
+    SearchGroup inSearchGroup = new SearchGroup()
+      .addItemsItem(inSearchGroupItem);
+    SearchGroup exSearchGroup = new SearchGroup()
+      .addItemsItem(exSearchGroupItem);
+    SearchRequest searchRequest = new SearchRequest()
+      .addIncludesItem(inSearchGroup)
+      .addExcludesItem(exSearchGroup);
+    //Temporal includes
+    inSearchGroup.temporal(true);
+    assertTrue(controller.isApproximate(searchRequest));
+    //BP includes
+    inSearchGroup.temporal(false);
+    inSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Deceased includes
+    inSearchParameter.subtype(TreeSubType.DEC.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Temporal and BP includes
+    inSearchGroup.temporal(true);
+    inSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //No temporal/BP/Decease
+    inSearchGroup.temporal(false);
+    inSearchParameter.subtype(TreeSubType.HR_DETAIL.toString());
+    assertFalse(controller.isApproximate(searchRequest));
+    //Temporal excludes
+    exSearchGroup.temporal(true);
+    assertTrue(controller.isApproximate(searchRequest));
+    //BP excludes
+    exSearchGroup.temporal(false);
+    exSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Deceased excludes
+    exSearchParameter.subtype(TreeSubType.DEC.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Temporal and BP excludes
+    exSearchGroup.temporal(true);
+    exSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
   }
 
   private Criteria createCriteria(String type, String subtype, long parentId, String code, String name, String domain, String conceptId, boolean group, boolean selectable) {

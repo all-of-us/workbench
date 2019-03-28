@@ -17,7 +17,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.elasticsearch.ElasticFilters.ElasticFilterResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,34 +45,34 @@ public class ElasticSearchService {
   /**
    * Get the total participant count matching the given search criteria.
    */
-  public ElasticFilterResponse<Long> count(SearchRequest req) throws IOException {
+  public Long count(SearchRequest req) throws IOException {
     String personIndex =
         ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
-    ElasticFilterResponse<QueryBuilder> filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
-    log.info("Elastic filter: "  + filter.value().toString());
+    QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
+    log.info("Elastic filter: "  + filter.toString());
     long count = client().count(new CountRequest(personIndex)
-        .source(SearchSourceBuilder.searchSource().query(filter.value())), RequestOptions.DEFAULT).getCount();
-    return new ElasticFilterResponse<>(count, filter.isApproximate());
+        .source(SearchSourceBuilder.searchSource().query(filter)), RequestOptions.DEFAULT).getCount();
+    return count;
   }
 
   /**
    * Get the demographic data info for the given search criteria.
    */
-  public ElasticFilterResponse<List<DemoChartInfo>> demoChartInfo(SearchRequest req) throws IOException {
+  public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
       ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
-    ElasticFilterResponse<QueryBuilder> filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
-    log.info("Elastic filter: "  + filter.value().toString());
+    QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
+    log.info("Elastic filter: "  + filter.toString());
     SearchResponse searchResponse =
       client().search(new org.elasticsearch.action.search.SearchRequest(personIndex).source(
         SearchSourceBuilder
           .searchSource()
           .size(0)//reduce the payload since were only interested in the aggregations
-          .query(filter.value())
+          .query(filter)
           .aggregation(buildDemoChartAggregation(RANGE_19_44))
           .aggregation(buildDemoChartAggregation(RANGE_45_64))
           .aggregation(buildDemoChartAggregation(RANGE_GT_65))), RequestOptions.DEFAULT);
-    return new ElasticFilterResponse<>(unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65), filter.isApproximate());
+    return unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65);
   }
 
   /**
