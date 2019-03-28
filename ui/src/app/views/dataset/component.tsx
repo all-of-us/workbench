@@ -46,7 +46,19 @@ export const styles = {
 interface ValueSet {
   domain: Domain;
   values: DomainValue[];
-};
+}
+
+export const ValueListItem: React.FunctionComponent <
+  {domainValue: DomainValue, onSelect: Function}> =
+  ({domainValue, onSelect}) => {
+    return <div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
+      height: '1.5rem', display: 'flex'}}>
+      <input type='checkbox' value={domainValue.value} onClick={() => onSelect()}
+             style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
+               marginRight: 10, backgroundColor: '#7CC79B'}}/>
+      <div style={{lineHeight: '1.5rem'}}>{domainValue.value}</div>
+    </div>;
+  };
 
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
@@ -54,7 +66,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[],
+    valueSets: ValueSet[], /* We use strings because we can guarantee that all
+    values are unique */ selectedValues: string[]
   }> {
 
   constructor(props) {
@@ -71,7 +84,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       rType: undefined,
       selectedConceptSetIds: [],
       selectedCohortIds: [],
-      valueSets: []
+      valueSets: [],
+      selectedValues: [],
     };
   }
 
@@ -188,7 +202,6 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
 
   async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
     const {namespace, id} = this.props.workspace;
-    console.log(domains);
     const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
         ({domain: domain, values: valueSet.items}),
       domains,
@@ -227,6 +240,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  selectDomainValue(domainValue: DomainValue): void {
+    const origSelected = this.state.selectedValues;
+    if (fp.includes(domainValue.value, origSelected)) {
+      this.setState({selectedValues: fp.remove((dv) => dv === domainValue.value, origSelected)});
+    } else {
+      this.setState({selectedValues: (origSelected).concat(domainValue.value)});
+    }
+  }
+
   getCurrentResource(): Cohort | ConceptSet {
     if (this.state.resource) {
       return fp.compact([this.state.resource.cohort, this.state.resource.conceptSet])[0];
@@ -241,7 +263,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       conceptSetList,
       loadingResources,
       resource,
-      rType
+      rType,
+      valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
     return <React.Fragment>
@@ -322,7 +345,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                 <div style={styles.selectBoxHeader}>
                   Values
                 </div>
-                {/*TODO: load values and display here*/}
+                {valueSets.map(valueSet =>
+                  <div>
+                    valueSet.domain.toString()
+                    {valueSet.values.map(domainValue =>
+                      <ValueListItem domainValue={domainValue} onSelect={
+                        () => this.selectDomainValue(domainValue)}/>
+                    )}
+                  </div>)
+                }
                 <div style={{height: '10rem', overflowY: 'auto'}}/>
               </div>
             </div>
