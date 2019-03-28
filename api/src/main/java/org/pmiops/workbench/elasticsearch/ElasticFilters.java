@@ -44,33 +44,11 @@ public final class ElasticFilters {
   private static final Logger log = Logger.getLogger(ElasticFilters.class.getName());
 
   /**
-   * ElasticFilterResponse wraps value and attaches some additional metadata regarding the
-   * translation of criteria to Elasticsearch query filter. Namely, a query may or may not be
-   * an approximation, depending on the contents of the request.
+   * Translates a Cohort Builder search request into an Elasticsearch filter.
    */
-  public static class ElasticFilterResponse<T> {
-
-    private final T value;
-
-    public ElasticFilterResponse(T value) {
-      this.value = value;
-    }
-
-    public T value() {
-      return this.value;
-    }
-  }
-
-  /**
-   * Translates a Cohort Builder search request into an Elasticsearch filter. If the request
-   * parameters are not supported, this is indicated in the response and a best effort approximation
-   * of the target filter is made.
-   */
-  public static ElasticFilterResponse<QueryBuilder> fromCohortSearch(
-      CriteriaDao criteriaDao, SearchRequest req) {
+  public static QueryBuilder fromCohortSearch(CriteriaDao criteriaDao, SearchRequest req) {
     ElasticFilters f = new ElasticFilters(criteriaDao);
-    QueryBuilder q = f.process(req);
-    return new ElasticFilterResponse<>(q);
+    return f.process(req);
   }
 
   /**

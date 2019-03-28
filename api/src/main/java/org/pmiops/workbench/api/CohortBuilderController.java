@@ -185,7 +185,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(elasticSearchService.count(request).value());
+        return ResponseEntity.ok(elasticSearchService.count(request));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
@@ -206,7 +206,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request).value()));
+        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
