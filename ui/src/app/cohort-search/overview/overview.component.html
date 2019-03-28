@@ -1,5 +1,58 @@
 <div>
   <div class="overview-header">
+    <div class="actions-container">
+      <clr-dropdown *ngIf="cohort" style="float: right">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="(isRequesting$ | async) || saving || (total$ | async) === null || (total$ | async) === -1"
+          [clrLoading]="saving"
+          clrDropdownTrigger>
+          <span style="margin-right: 5px">Save Cohort</span>
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu>
+          <button
+            type="button"
+            class="dropdown-item"
+            [disabled]="unchanged"
+            (click)="saveCohort()"
+            clrDropdownItem>Save</button>
+          <button
+            type="button"
+            class="dropdown-item"
+            (click)="saveModal.open()"
+            clrDropdownItem>Save as</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+      <button
+        *ngIf="!cohort"
+        type="button"
+        class="btn btn-primary"
+        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
+        (click)="saveModal.open()">Create Cohort</button>
+      <button
+        class="btn btn-link"
+        disabled
+        [popper]="'Export to notebook'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="export" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        [disabled]="(isRequesting$ | async) || !cohort"
+        [popper]="'Delete cohort'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="trash" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        [disabled]="(isRequesting$ | async) || !cohort"
+        [popper]="'Review participant level data'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="copy" class="is-solid disabled" size="30"></clr-icon>
+      </button>
+    </div>
     <h2 class="count-header" id="total-count">
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
@@ -24,38 +77,6 @@
           size="18"></clr-icon>
       </span>
     </h2>
-    <div>
-      <clr-dropdown *ngIf="cohort">
-        <button
-          type="button"
-          class="btn btn-primary"
-          [disabled]="(isRequesting$ | async) || saving || (total$ | async) === null || (total$ | async) === -1"
-          [clrLoading]="saving"
-          clrDropdownTrigger>
-          <span style="margin-right: 5px">Save Cohort</span>
-          <clr-icon shape="caret down"></clr-icon>
-        </button>
-        <clr-dropdown-menu>
-          <button
-            type="button"
-            class="dropdown-item"
-            [disabled]="saveDisabled"
-            (click)="saveCohort()"
-            clrDropdownItem>Save</button>
-          <button
-            type="button"
-            class="dropdown-item"
-            (click)="saveModal.open()"
-            clrDropdownItem>Save as</button>
-        </clr-dropdown-menu>
-      </clr-dropdown>
-      <button
-        *ngIf="!cohort"
-        type="button"
-        class="btn btn-primary"
-        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
-        (click)="saveModal.open()">Create Cohort</button>
-    </div>
   </div>
 <ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
   <ng-container *ngIf="chartData$ | async as chartData">

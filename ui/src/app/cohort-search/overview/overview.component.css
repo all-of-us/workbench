@@ -158,3 +158,19 @@ input.alreadyTaken {
 .card-header {
     border-bottom: none;
 }
+.actions-container {
+  width: 100%;
+  margin-bottom: 5rem;
+}
+.actions-container > .btn-link {
+  float: right;
+  margin: 0 1rem 0 0;
+  min-width: 0;
+  padding: 0;
+  color: #262262;
+  cursor: pointer;
+}
+.actions-container > .btn-link:disabled {
+  cursor: not-allowed;
+}
+

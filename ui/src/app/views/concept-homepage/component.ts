@@ -305,7 +305,7 @@ export class ConceptHomepageComponent implements OnInit {
 
   afterConceptsSaved() {
     this.setConceptsSaveText();
-    // Once concepts are saved clear the selection from concept homepage for active Domain
+    // Once concepts are unchanged clear the selection from concept homepage for active Domain
     this.conceptTable.selectedConcepts.length = 0;
     this.selectedConceptDomainMap[this.selectedDomain.domain] = 0;
     this.cloneCacheConcepts();

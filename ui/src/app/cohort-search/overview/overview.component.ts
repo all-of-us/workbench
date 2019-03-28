@@ -58,7 +58,7 @@ export class OverviewComponent implements OnInit {
     return JSON.stringify(this.actions.mapAll());
   }
 
-  get saveDisabled() {
+  get unchanged() {
     return this.criteria === this.cohort.criteria;
   }
 
