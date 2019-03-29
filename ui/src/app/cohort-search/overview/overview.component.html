@@ -41,7 +41,7 @@
       </button>
       <button
         class="btn btn-link"
-        (click)="deleteModal.open()"
+        (click)="deleting = true"
         [disabled]="(isRequesting$ | async) || !cohort"
         [popper]="'Delete cohort'"
         [popperTrigger]="'hover'">
@@ -177,28 +177,10 @@
     </button>
   </div>
 </clr-modal>
-<clr-modal #deleteModal
-  [clrModalSize]="'md'"
-  (clrModalOpenChange)="modalChange($event)">
-  <div class="modal-title">
-    <h2>Confirm Delete</h2>
-  </div>
-  <div class="modal-body" style="margin: 0.25rem 0 1rem">
-    Are you sure you want to delete this Cohort and all associated review sets?
-  </div>
-  <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-link"
-      (click)="deleteModal.close()">
-      Cancel
-    </button>
-    <button
-      type="button"
-      class="btn btn-primary"
-      (click)="delete()"
-      [clrLoading]="deleting">
-      Delete Cohort
-    </button>
-  </div>
-</clr-modal>
+<app-confirm-delete-modal
+  *ngIf="deleting"
+  [resourceName]="cohort.name"
+  [resourceType]="'cohort'"
+  [receiveDelete]="delete"
+  [closeFunction]="cancel">
+</app-confirm-delete-modal>
