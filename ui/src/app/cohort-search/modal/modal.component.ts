@@ -103,7 +103,7 @@ export class ModalComponent implements OnInit, OnDestroy {
           this.addSelectionToGroup(selection);
         });
         if (this.conceptType === 'standard') {
-          this.mode = 'snomed';
+          this.setMode('snomed');
         }
       })
     );
