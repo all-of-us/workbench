@@ -130,13 +130,13 @@ public class BigQueryService {
     public FieldList getTableFieldsFromDomain(Domain d) {
         CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
         String tableName;
-        if (d.equals(Domain.CONDITION)) {
+        if (Domain.CONDITION.equals(d)) {
             tableName = "ds_condition_occurrence";
-        } else if (d.equals(Domain.PROCEDURE)) {
+        } else if (Domain.PROCEDURE.equals(d)) {
             tableName = "ds_procedure_occurrence";
-        } else if (d.equals(Domain.DRUG)) {
+        } else if (Domain.DRUG.equals(d)) {
             tableName = "ds_drug_exposure";
-        } else if (d.equals(Domain.MEASUREMENT)) {
+        } else if (Domain.MEASUREMENT.equals(d)) {
             tableName = "ds_measurement";
         } else {
             throw new BadRequestException("Invalid domain, unable to fetch fields from table");

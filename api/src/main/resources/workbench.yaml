@@ -2035,10 +2035,13 @@ definitions:
 
   DomainValue:
     type: object
+    description: >
+      Domain values map to various column names in OMOP.
     required:
       - value
     properties:
       value:
+        description: The user facing display name for the value.
         type: string
 
   CreateAccountRequest:

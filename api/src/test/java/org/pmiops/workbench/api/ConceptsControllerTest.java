@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({LiquibaseAutoConfiguration.class})
+@Import({LiquibaseAutoConfiguration.class, BigQueryService.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -206,6 +206,7 @@ public class ConceptsControllerTest {
       WorkspaceServiceImpl.class
   })
   @MockBean({
+      BigQueryService.class,
       FireCloudService.class,
       CohortService.class,
       ConceptSetService.class,
