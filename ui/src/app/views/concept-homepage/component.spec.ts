@@ -24,7 +24,13 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
-import {setupModals, simulateClick, simulateEvent, simulateInput, updateAndTick} from 'testing/test-helpers';
+import {
+  setupModals,
+  simulateClick,
+  simulateEvent,
+  simulateInput,
+  updateAndTick
+} from 'testing/test-helpers';
 
 
 function isSelectedDomain(
@@ -192,9 +198,7 @@ describe('ConceptHomepageComponent', () => {
     simulateEvent(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
-    const button = fixture.debugElement.query(By.css('.sliding-button'))
-       .query(By.css('.text'));
-    let buttonText = button.nativeNode.innerHTML;
+    let buttonText = fixture.componentInstance.addToSetText;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
     const dataRow = fixture.debugElement.queryAll(By.css('.concept-row'));
@@ -202,7 +206,7 @@ describe('ConceptHomepageComponent', () => {
         .query(By.css('.checkbox')).children;
     simulateClick(fixture, checkBox[0]);
     updateAndTick(fixture);
-    buttonText = button.nativeNode.innerHTML;
+    buttonText = fixture.componentInstance.addToSetText;
 
     // After select add the number of selected concepts
     expect(buttonText).toBe('Add (1) to set');
