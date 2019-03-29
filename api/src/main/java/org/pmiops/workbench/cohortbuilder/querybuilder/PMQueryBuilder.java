@@ -65,14 +65,15 @@ public class PMQueryBuilder extends AbstractQueryBuilder {
 
   private static final String BP_INNER_SQL_TEMPLATE =
     "select person_id, entry_date from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
-    "   where concept_id = ${conceptId}\n";
+    "where concept_id = ${conceptId}\n";
 
   private static final String BP_SQL_TEMPLATE =
     "select person_id from( ${bpInnerSqlTemplate} )\n";
 
   private static final String BASE_SQL_TEMPLATE =
     "select person_id from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
-      "where concept_id = ${conceptId}\n";
+      "where concept_id = ${conceptId}\n" +
+      "and is_standard = 0\n";
 
   private static final String VALUE_AS_NUMBER_SQL_TEMPLATE =
     BASE_SQL_TEMPLATE + VALUE_AS_NUMBER;

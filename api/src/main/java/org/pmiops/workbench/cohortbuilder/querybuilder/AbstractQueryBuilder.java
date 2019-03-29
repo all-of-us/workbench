@@ -67,7 +67,7 @@ public abstract class AbstractQueryBuilder {
       "from (${innerTemporalSql}) a\n" +
       "where rn = 1\n";
   private static final String OCCURRENCES_SQL_TEMPLATE =
-    "group by criteria.person_id, criteria.entry_date, criteria.concept_id\n" +
+    "group by criteria.person_id, criteria.concept_id\n" +
       "having count(criteria.person_id) ";
   private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
   private static final String EVENT_DATE_SQL_TEMPLATE = "and entry_date ";

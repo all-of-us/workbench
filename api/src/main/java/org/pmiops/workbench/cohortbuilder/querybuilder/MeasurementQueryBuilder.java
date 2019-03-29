@@ -51,9 +51,9 @@ import static org.pmiops.workbench.cohortbuilder.querybuilder.util.Validation.fr
 public class MeasurementQueryBuilder extends AbstractQueryBuilder {
 
   private static final String MEASUREMENT_SQL_TEMPLATE =
-    "select person_id, entry_date, concept_id\n" +
+    "select distinct person_id, entry_date, concept_id\n" +
       "from `${projectId}.${dataSetId}." + TABLE_ID + "`\n" +
-      "where ";
+      "where\n";
   private static final String CONCEPT_ID_EQUAL_TEMPLATE =
     "concept_id = ${conceptId}";
   private static final String CONCEPT_ID_IN_TEMPLATE =
@@ -62,6 +62,8 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     " and value_as_number ${operator} ${value}";
   private static final String VALUE_AS_CONCEPT_ID =
     " and value_as_concept_id ${operator} unnest(${values})";
+  private static final String IS_STANDARD = " and is_standard = 1\n";
+
 
   /**
    * {@inheritDoc}
@@ -97,9 +99,9 @@ public class MeasurementQueryBuilder extends AbstractQueryBuilder {
     List<Modifier> modifiers = searchGroupItem.getModifiers();
     String idParameter = addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds.stream().toArray(Long[]::new), Long.class));
     String conceptIdSql = String.join(OR, queryParts).replace("${conceptIds}", "@" + idParameter) + AGE_DATE_AND_ENCOUNTER_VAR;
-    String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql;
+    String baseSql = MEASUREMENT_SQL_TEMPLATE + conceptIdSql + IS_STANDARD;
     String modifiedSql = buildModifierSql(baseSql, queryParams, modifiers);
-    return buildTemporalSql(modifiedSql, conceptIdSql, queryParams, modifiers, mention);
+    return buildTemporalSql(modifiedSql, conceptIdSql + IS_STANDARD, queryParams, modifiers, mention);
   }
 
   /**
