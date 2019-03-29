@@ -257,6 +257,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           });
         break;
       }
+      case ResourceType.COHORT: {
+        const url =
+          '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
+          this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
+        navigateByUrl(url + this.props.resourceCard.cohort.id);
+        this.props.onUpdate();
+        break;
+      }
     }
   }
 
