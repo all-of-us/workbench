@@ -99,7 +99,6 @@ export class OverviewComponent implements OnInit {
   }
 
   delete = () => {
-    this.deleting = true;
     const {ns, wsid} = urlParamsStore.getValue();
     cohortsApi().deleteCohort(ns, wsid, this.cohort.id).then(() => {
       navigate(['workspaces', ns, wsid, 'cohorts']);
