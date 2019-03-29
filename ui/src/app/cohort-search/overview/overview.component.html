@@ -72,7 +72,7 @@
           size="18"></clr-icon>
       </span>
       <span *ngIf="!(isRequesting$ | async) && ((temporal?.flag && temporal.tempLength && (total$ | async) === null) || (total$ | async) === -1)">
-        - -
+        --
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
@@ -99,10 +99,6 @@
         [class.is-info]="stackChart"
         (click)="toggleChartMode()">
       </clr-icon>
-      <!--<clr-icon shape="angle"-->
-        <!--[dir]="showComboChart ? 'up' : 'down'"-->
-        <!--(click)="toggleShowCombo()">-->
-      <!--</clr-icon>-->
     </div>
     <div *ngIf="showComboChart" class="card-block">
       <app-combo-chart *ngIf="chartData.size"

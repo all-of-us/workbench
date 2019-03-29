@@ -202,7 +202,7 @@
                 {{ group.get('count') | number }}
               </ng-container>
               <ng-container *ngSwitchCase="(group.get('count') === null || group.get('count') === -1) && !temporalFlag">
-                 - -
+                 --
                 <clr-tooltip>
                   <clr-icon clrTooltipTrigger shape="warning-standard" size="21"></clr-icon>
                   <clr-tooltip-content clrSize="lg" *clrIfOpen>
@@ -221,7 +221,7 @@
                 size="18"></clr-icon>
             </span>
                 <span *ngSwitchCase="(!isRequesting && temporalFlag && warningFlag)">
-            - -
+            --
               <clr-icon
                 [popper]="errorPopper"
                 [popperTrigger]="'hover'"
