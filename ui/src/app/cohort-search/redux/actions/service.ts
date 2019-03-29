@@ -388,13 +388,12 @@ export class CohortSearchActions {
   enableGroupItem(role: keyof SearchRequest, groupId: string, itemId: string) {
     const group = getGroup(groupId)(this.state);
     const temporal = group.get('temporal');
-
+    const item = getItem(itemId)(this.state);
     if (temporal) {
       const groupItems = group
         .get('items', List())
         .map(id => getItem(id)(this.state))
         .filterNot(it => it.get('status') === 'deleted');
-      const item = getItem(itemId)(this.state);
       const temporalGroupItems = !groupItems
           .filter(it => it.get('id') !== itemId && it.get('status') === 'active'
             && it.get('temporalGroup') !== item.get('temporalGroup'))
@@ -406,8 +405,10 @@ export class CohortSearchActions {
       }
     } else {
       this.enableEntity('items', itemId);
-      this.requestGroupCount(role, groupId);
-      this.requestTotalCount();
+      if (item.get('count') > 0) {
+        this.requestGroupCount(role, groupId);
+        this.requestTotalCount();
+      }
     }
 
 
