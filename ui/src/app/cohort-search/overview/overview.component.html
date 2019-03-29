@@ -29,6 +29,7 @@
         *ngIf="!cohort"
         type="button"
         class="btn btn-primary"
+        style="float: right"
         [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
         (click)="saveModal.open()">Create Cohort</button>
       <button
