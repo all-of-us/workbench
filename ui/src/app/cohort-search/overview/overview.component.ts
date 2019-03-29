@@ -98,15 +98,18 @@ export class OverviewComponent implements OnInit {
     });
   }
 
-  delete() {
+  delete = () => {
     this.deleting = true;
     const {ns, wsid} = urlParamsStore.getValue();
     cohortsApi().deleteCohort(ns, wsid, this.cohort.id).then(() => {
       navigate(['workspaces', ns, wsid, 'cohorts']);
     }, (error) => {
       console.log(error);
-      this.deleting = false;
     });
+  }
+
+  cancel = () => {
+    this.deleting = false;
   }
 
   navigateTo(action: string) {
