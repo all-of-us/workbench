@@ -196,7 +196,7 @@ public final class ElasticSearchIndexer {
       Job job = bq.create(Job.of(QueryJobConfiguration.newBuilder(personSQL)
           .setDestinationTable(scratchTableId)
           .build())
-      ).waitFor(RetryOption.totalTimeout(Duration.ofMinutes(20)));
+      ).waitFor(RetryOption.totalTimeout(Duration.ofHours(1)));
       if (job.getStatus().getError() != null) {
         throw new IOException("BigQuery job failed: " + job.getStatus().getError().getMessage());
       }
@@ -214,7 +214,7 @@ public final class ElasticSearchIndexer {
               scratchTableId, gcsExportPath));
       job = bq.create(Job.of(
           ExtractJobConfiguration.of(scratchTableId, gcsExportPath, "NEWLINE_DELIMITED_JSON")))
-          .waitFor(RetryOption.totalTimeout(Duration.ofMinutes(20)));
+          .waitFor(RetryOption.totalTimeout(Duration.ofHours(1)));
       if (job.getStatus().getError() != null) {
         throw new IOException("BigQuery job failed: " + job.getStatus().getError().getMessage());
       }
