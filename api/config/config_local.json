@@ -44,7 +44,7 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "baseUrl": "http://elastic:9200",
+    "baseUrl": "http:\/\/elastic:9200",
     "enableBasicAuth": false,
     "enableElasticsearchBackend": true
   },

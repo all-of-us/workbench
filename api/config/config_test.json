@@ -44,7 +44,7 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "baseUrl": "https://8324381959a0404ab0642330e7452035.us-central1.gcp.cloud.es.io:9243",
+    "baseUrl": "https:\/\/8324381959a0404ab0642330e7452035.us-central1.gcp.cloud.es.io:9243",
     "enableBasicAuth": true,
     "enableElasticsearchBackend": true
   },

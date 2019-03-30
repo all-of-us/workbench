@@ -24,6 +24,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -60,6 +61,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired
   private BigQueryService bigQueryService;
+
+  @Autowired
+  private CloudStorageService cloudStorageService;
 
   @Autowired
   private ParticipantCounter participantCounter;
@@ -109,7 +113,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    ElasticSearchService elasticSearchService = new ElasticSearchService(criteriaDao, configProvider);
+    ElasticSearchService elasticSearchService =
+        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
       participantCounter, criteriaDao, criteriaAttributeDao,
