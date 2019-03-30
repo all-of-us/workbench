@@ -228,7 +228,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -239,7 +239,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -250,7 +250,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
   @Test
@@ -275,7 +275,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
 
 

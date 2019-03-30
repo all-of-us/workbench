@@ -213,7 +213,7 @@ public class UserService {
   public User submitEthicsTraining() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries((user) -> {
-      user.setTrainingCompletionTime(timestamp);
+      user.setComplianceTrainingCompletionTime(timestamp);
       return user;
     });
   }
@@ -398,33 +398,41 @@ public class UserService {
         moodleId = complianceService.getMoodleId(user.getEmail());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
-          return;
-        }
-        user.setMoodleId(moodleId);
-      }
-      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
-      // The assumption here is that the User will always get 1 badge which will be AoU
-      if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetails badge = badgeResponse.get(0);
-        if (badge.getDateexpire() == null) {
-          //This can happen if date expire is set to never
-          user.setTrainingExpirationTime(null);
+          user.setComplianceTrainingCompletionTime(null);
+          user.setComplianceTrainingExpirationTime(null);
         } else {
-          user.setTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+          user.setMoodleId(moodleId);
         }
-        // TODO: delete trainingCompletionTime in follow-up PR
-        user.setTrainingCompletionTime(now);
+      }
 
-        updateUserWithRetries(dbUser -> {
-          dbUser.setMoodleId(user.getMoodleId());
-          dbUser.setTrainingExpirationTime(user.getTrainingExpirationTime());
-          dbUser.setTrainingCompletionTime(user.getTrainingCompletionTime());
-          return dbUser;
-        }, user);
-      } else {
-        throw new NotFoundException(
-            String.format("Empty badge list returned for user %s", user.getEmail()));
+      if (moodleId != null) {
+        List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+        // The assumption here is that the User will always get 1 badge which will be AoU
+        if (badgeResponse != null && badgeResponse.size() > 0) {
+          user.setComplianceTrainingCompletionTime(now);
+
+          BadgeDetails badge = badgeResponse.get(0);
+          if (badge.getDateexpire() == null) {
+            //This can happen if date expire is set to never
+            user.setComplianceTrainingExpirationTime(null);
+          } else {
+            user.setComplianceTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
+          }
+        } else {
+          // Moodle has returned zero badges for the given user -- we should clear the user's
+          // training completion & expiration time.
+          user.setComplianceTrainingCompletionTime(null);
+          user.setComplianceTrainingExpirationTime(null);
         }
+      }
+
+      updateUserWithRetries(dbUser -> {
+        dbUser.setMoodleId(user.getMoodleId());
+        dbUser.setComplianceTrainingExpirationTime(user.getComplianceTrainingExpirationTime());
+        dbUser.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime());
+        return dbUser;
+      }, user);
+
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
       throw e;
