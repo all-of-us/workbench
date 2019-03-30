@@ -418,7 +418,7 @@ https://docs.google.com/document/d/1N_TDTOi-moTH6wrXn1Ix4dwUlw4j8GT9OsL9yXYXYmY/
 ### Indexing
 
 ```
-./project.rb create-local-es-index
+./project.rb load-es-index
 ```
 
 ### Development

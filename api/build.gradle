@@ -501,7 +501,7 @@ task backfillGSuiteUserData(type: JavaExec) {
   }
 }
 
-// See api/project.rb create-local-es-index
+// See api/project.rb load-es-index
 task elasticSearchIndexer(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.elastic.ElasticSearchIndexer"
