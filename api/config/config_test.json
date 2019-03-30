@@ -44,8 +44,9 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "",
-    "enableElasticsearchBackend": false
+    "baseUrl": "https://8324381959a0404ab0642330e7452035.us-central1.gcp.cloud.es.io:9243",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": true
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",

@@ -43,7 +43,8 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "",
+    "baseUrl": "",
+    "enableBasicAuth": true,
     "enableElasticsearchBackend": false
   },
   "moodle": {

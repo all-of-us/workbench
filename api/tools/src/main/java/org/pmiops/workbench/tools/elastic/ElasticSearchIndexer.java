@@ -13,6 +13,8 @@ import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,14 +25,27 @@ import java.util.Iterator;
 import java.util.Spliterators;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequest;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequestBuilder;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.settings.Settings;
 import org.pmiops.workbench.elasticsearch.ElasticDocument;
 import org.pmiops.workbench.elasticsearch.ElasticUtils;
 import org.springframework.boot.CommandLineRunner;
@@ -65,6 +80,13 @@ public final class ElasticSearchIndexer {
   private static Option esBaseUrlOpt = Option.builder()
       .longOpt("es-base-url")
       .desc("Elasticsearch base API URL, for loading data into")
+      .required()
+      .hasArg()
+      .build();
+    private static Option esAuthProjectOpt = Option.builder()
+      .longOpt("es-auth-project")
+      .desc("If specified, basic authentication is used for the given GCP project configuration;"
+          + "required for Elastic Cloud access")
       .required()
       .hasArg()
       .build();
@@ -109,6 +131,7 @@ public final class ElasticSearchIndexer {
   private static Options createOptions = new Options()
       .addOption(queryProjectIdOpt)
       .addOption(esBaseUrlOpt)
+      .addOption(esAuthProjectOpt)
       .addOption(cdrVersionOpt)
       .addOption(cdrBigQueryDatasetOpt)
       .addOption(scratchBigQueryDatasetOpt)
@@ -140,6 +163,16 @@ public final class ElasticSearchIndexer {
       log.warning(
           "400 status on index creation, assuming conflict and ignoring: " + e.getMessage());
     }
+
+    // Temporarily disable index refreshes and replication to speed up the ingestion process, per
+    // https://www.elastic.co/guide/en/elasticsearch/reference/master/tune-for-indexing-speed.html
+    Settings originalSettings = client.indices().getSettings(
+        new GetSettingsRequest().indices(personIndex), ElasticUtils.REQ_OPTS).getIndexToSettings().get(personIndex);
+    client.indices().putSettings(new UpdateSettingsRequest(personIndex).settings(
+        Settings.builder()
+            .put("index.refresh_interval", -1)
+            .put("index.number_of_replicas", 0)),
+        ElasticUtils.REQ_OPTS);
 
     // Generate JSON documents from the CDR for Elasticsearch.
     // Note: Here, BigQuery uses default credentials for the given environment.
@@ -217,6 +250,14 @@ public final class ElasticSearchIndexer {
     log.info(String.format("Starting bulk ingest of Elasticsearch documents to '%s'",
         opts.getOptionValue(esBaseUrlOpt.getLongOpt())));
     ElasticUtils.ingestDocuments(client, personIndex, docs, totalSampleSize);
+
+    // Restore the original index settings.
+    client.indices().putSettings(
+        new UpdateSettingsRequest(personIndex).settings(Settings.builder()
+            .put("index.refresh_interval", originalSettings.get("index.refresh_interval", null))
+            .put("index.number_of_replicas", originalSettings.get("index.number_of_replicas", null))
+        ),
+        ElasticUtils.REQ_OPTS);
   }
 
   private String getPersonBigQuerySQL(String bqDataset, int inverseProb) throws IOException {
@@ -227,10 +268,26 @@ public final class ElasticSearchIndexer {
         .replaceAll("\\{PERSON_ID_MOD\\}", Integer.toString(inverseProb));
   }
 
-  private static RestHighLevelClient newClient(String esBaseUrl) throws MalformedURLException {
+  private static RestHighLevelClient newClient(String esBaseUrl, @Nullable String esAuthProject)
+      throws MalformedURLException {
     URL url = new URL(esBaseUrl);
-    return new RestHighLevelClient(RestClient.builder(
-        new HttpHost(url.getHost(), url.getPort(), url.getProtocol())));
+    RestClientBuilder b = RestClient.builder(
+        new HttpHost(url.getHost(), url.getPort(), url.getProtocol()));
+    if (!Strings.isNullOrEmpty(esAuthProject)) {
+      Storage gcs = StorageOptions.getDefaultInstance().getService();
+      JsonObject creds = new JsonParser().parse(
+          new String(gcs.get(esAuthProject + "-credentials", "elastic-cloud.json").getContent()))
+          .getAsJsonObject();
+
+      CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+      credentialsProvider.setCredentials(AuthScope.ANY,
+          new UsernamePasswordCredentials(
+              creds.get("username").getAsString(), creds.get("password").getAsString()));
+      b.setHttpClientConfigCallback((httpClientBuilder) ->
+          httpClientBuilder
+              .setDefaultCredentialsProvider(credentialsProvider));
+    }
+    return new RestHighLevelClient(b);
   }
 
   @Bean
@@ -245,7 +302,9 @@ public final class ElasticSearchIndexer {
         switch (cmd) {
           case "create":
             CommandLine opts = new DefaultParser().parse(createOptions, args);
-            client = newClient(opts.getOptionValue(esBaseUrlOpt.getLongOpt()));
+            client = newClient(
+                opts.getOptionValue(esBaseUrlOpt.getLongOpt()),
+                opts.getOptionValue(esAuthProjectOpt.getLongOpt()));
             createIndex(opts);
             return;
 

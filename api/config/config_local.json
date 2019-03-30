@@ -44,8 +44,9 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "elastic:9200",
-    "enableElasticsearchBackend": false
+    "baseUrl": "http://elastic:9200",
+    "enableBasicAuth": false,
+    "enableElasticsearchBackend": true
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
