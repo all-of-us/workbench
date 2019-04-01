@@ -40,6 +40,15 @@ export const styles = {
     marginLeft: 19,
     fill: '#2691D0',
     verticalAlign: '-6%'
+  },
+
+  valueListItemCheckboxStyling: {
+    height: 17,
+    width: 17,
+    marginLeft: 10,
+    marginTop: 10,
+    marginRight: 10,
+    backgroundColor: '#7CC79B'
   }
 };
 
@@ -58,8 +67,7 @@ export const ValueListItem: React.FunctionComponent <
   ({domainValue, onSelect, checked}) => {
     return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
-             style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
-               marginRight: 10, backgroundColor: '#7CC79B'}}
+             style={styles.valueListItemCheckboxStyling}
              checked={checked}/>
       <div style={{lineHeight: '1.5rem'}}>{domainValue.value}</div>
     </div>;

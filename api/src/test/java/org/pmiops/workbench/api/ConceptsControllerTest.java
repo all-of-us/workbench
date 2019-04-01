@@ -1,8 +1,12 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
@@ -32,6 +36,7 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
@@ -698,6 +703,22 @@ public class ConceptsControllerTest {
             .participantCount(PROCEDURE_DOMAIN.getParticipantCount())
             .allConceptCount(PROCEDURE_DOMAIN.getAllConceptCount())
             .standardConceptCount(PROCEDURE_DOMAIN.getStandardConceptCount())).inOrder();
+  }
+
+  @Test
+  public void testGetValuesFromDomain() {
+    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
+        .thenReturn(FieldList.of(
+            Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
+            Field.of("FIELD_TWO", LegacySQLTypeName.STRING)
+        ));
+    List<DomainValue> domainValues =
+        conceptsController.getValuesFromDomain("ns", "name", Domain.CONDITION.toString()).getBody().getItems();
+    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+
+    assertThat(domainValues).containsExactly(
+        new DomainValue().value("FIELD_ONE"),
+        new DomainValue().value("FIELD_TWO"));
   }
 
   static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
