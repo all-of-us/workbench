@@ -20,6 +20,7 @@ public class WorkbenchConfig {
   public ElasticsearchConfig elasticsearch; 
   public MoodleConfig moodle;
   public AccessConfig access;
+  public CohortBuilderConfig cohortbuilder;
 
   /**
    * Creates a config with non-null-but-empty member variables, for use in testing.
@@ -38,6 +39,7 @@ public class WorkbenchConfig {
     config.elasticsearch = new ElasticsearchConfig();
     config.moodle = new MoodleConfig();
     config.access = new AccessConfig();
+    config.cohortbuilder = new CohortBuilderConfig();
     return config;
   }
 
@@ -116,5 +118,9 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+  }
+
+  public static class CohortBuilderConfig {
+    public boolean enableListSearch;
   }
 }
