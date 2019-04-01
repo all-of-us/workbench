@@ -229,6 +229,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     this.setState({editing: false});
   }
 
+  renameCohort(): void {
+    this.setState({editing: true});
+  }
+
   renameNotebook(): void {
     this.setState({renaming: true});
   }
@@ -385,6 +389,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
                               onCloneResource={() => this.cloneResource()}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameNotebook={() => this.renameNotebook()}
+                              onRenameCohort={() => this.renameCohort()}
                               onEditCohort={() => this.edit()}
                               onEditConceptSet={() => this.edit()}
                               onReviewCohort={() => this.reviewCohort()}
