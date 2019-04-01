@@ -48,11 +48,11 @@
   },
   "moodle": {
     "host": "aou.nnlm.gov",
-    "enableMoodleBackend": false
+    "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
-    "enableEraCommons": false,
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
     "enableDataUseAgreement": false,
     "enableBetaAccess": true
   }
