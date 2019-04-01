@@ -58,7 +58,7 @@ public class ElasticSearchService {
    */
   public Long count(SearchRequest req) throws IOException {
     String personIndex =
-        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
+        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
     log.info("Elastic filter: "  + filter.toString());
     long count = client().count(new CountRequest(personIndex)
@@ -71,7 +71,7 @@ public class ElasticSearchService {
    */
   public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
-      ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
+        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
     log.info("Elastic filter: "  + filter.toString());
     SearchResponse searchResponse =
