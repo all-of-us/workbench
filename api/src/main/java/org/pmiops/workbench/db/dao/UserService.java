@@ -403,25 +403,23 @@ public class UserService {
         user.setMoodleId(moodleId);
       }
 
-      if (moodleId != null) {
-        List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
-        // The assumption here is that the User will always get 1 badge which will be AoU
-        if (badgeResponse != null && badgeResponse.size() > 0) {
-          user.setComplianceTrainingCompletionTime(now);
+      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
+      // The assumption here is that the User will always get 1 badge which will be AoU
+      if (badgeResponse != null && badgeResponse.size() > 0) {
+        user.setComplianceTrainingCompletionTime(now);
 
-          BadgeDetails badge = badgeResponse.get(0);
-          if (badge.getDateexpire() == null) {
-            //This can happen if date expire is set to never
-            user.setComplianceTrainingExpirationTime(null);
-          } else {
-            user.setComplianceTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
-          }
-        } else {
-          // Moodle has returned zero badges for the given user -- we should clear the user's
-          // training completion & expiration time.
-          user.setComplianceTrainingCompletionTime(null);
+        BadgeDetails badge = badgeResponse.get(0);
+        if (badge.getDateexpire() == null) {
+          //This can happen if date expire is set to never
           user.setComplianceTrainingExpirationTime(null);
+        } else {
+          user.setComplianceTrainingExpirationTime(new Timestamp(Long.parseLong(badge.getDateexpire())));
         }
+      } else {
+        // Moodle has returned zero badges for the given user -- we should clear the user's
+        // training completion & expiration time.
+        user.setComplianceTrainingCompletionTime(null);
+        user.setComplianceTrainingExpirationTime(null);
       }
 
       updateUserWithRetries(dbUser -> {
