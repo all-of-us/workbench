@@ -131,6 +131,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String subtype,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      log.info("List search is on: " + configProvider.get().cohortbuilder.enableListSearch);
+    }
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
