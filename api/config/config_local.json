@@ -56,5 +56,8 @@
     "enableEraCommons": true,
     "enableDataUseAgreement": false,
     "enableBetaAccess": true
+  },
+  "cohortbuilder": {
+    "enableListSearch": true
   }
 }
