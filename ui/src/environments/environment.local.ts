@@ -19,5 +19,5 @@ export const environment: Environment = {
   useZendeskForSupport: true,
   enableJupyterLab: true,
   enableDatasetBuilder: true,
-  enableCBListSearch: true,
+  enableCBListSearch: false,
 };
