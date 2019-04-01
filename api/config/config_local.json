@@ -46,7 +46,7 @@
   "elasticsearch": {
     "baseUrl": "http:\/\/elastic:9200",
     "enableBasicAuth": false,
-    "enableElasticsearchBackend": true
+    "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
