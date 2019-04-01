@@ -84,7 +84,6 @@ public final class ElasticSearchIndexer {
       .longOpt("es-auth-project")
       .desc("If specified, basic authentication is used for the given GCP project configuration;"
           + "required for Elastic Cloud access")
-      .required()
       .hasArg()
       .build();
   private static Option cdrVersionOpt = Option.builder()

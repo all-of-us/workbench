@@ -25,8 +25,12 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
+# TODO: Make environment/project flags consistent across commands, consider
+# using a environment keywords as dict keys here, e.g. :test, :staging, etc.
 ENVIRONMENTS = {
   "local" => {
+    :api_endpoint_host => "localhost:8081",
+    :cdr_sql_instance => "workbench",
     :config_json => "config_local.json",
     :cdr_versions_json => "cdr_versions_local.json"
   },
@@ -1249,11 +1253,12 @@ def load_es_index(cmd_name, *args)
     "'all-of-us-workbench-test'")
   op.add_validator ->(opts) { raise ArgumentError unless ENVIRONMENTS.has_key? opts.env }
 
-  op.opts.cdr_version = 'cdr'
   op.add_option(
     "--cdr-version [VERSION]",
     ->(opts, v) { opts.cdr_version = v},
-    "CDR version to specify, should match cdr_versions_*.json configurations. Defaults to 'cdr'")
+    "CDR version, e.g. 'synth_r_2019q1_2', used to name the index. Value " +
+    "should eventually match elasticIndexBaseName in the cdr_versions_*.json " +
+    "configurations. Defaults to 'cdr' for local runs")
 
   # TODO(RW-2213): Generalize this subsampling approach for all local development work.
   op.add_option(
@@ -1267,6 +1272,10 @@ def load_es_index(cmd_name, *args)
 
   if op.opts.inverse_prob.nil?
     op.opts.inverse_prob = op.opts.env == "local" ? 1000 : 1
+  end
+  if op.opts.cdr_version.nil?
+    raise ArgumentError unless op.opts.env == "local"
+    op.opts.cdr_version = 'cdr'
   end
 
   unless Workbench.in_docker?
@@ -1282,18 +1291,18 @@ def load_es_index(cmd_name, *args)
   create_flags = ([
     ['--query-project-id', 'all-of-us-ehr-dev'],
     ['--es-base-url', base_url],
-    ['--es-auth-project', auth_project],
     # Matches cdr_versions_local.json
     ['--cdr-version', op.opts.cdr_version],
     ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
     ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
     ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
-    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob] +
+    (auth_project.nil? ? [] : ['--es-auth-project', auth_project])
   ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
     '--delete-indices'
     # Gradle args need to be single-quote wrapped.
   ]).map { |f| "'#{f}'" }
-  ServiceAccountContext.new(TEST_PROJECT).run do
+  ServiceAccountContext.new((auth_project or TEST_PROJECT)).run do
     common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
   end
 end
