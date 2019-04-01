@@ -68,5 +68,5 @@ export interface Environment {
 
   // Whether users should be able to see the new UI for cohort builder search.
   // Exit Criteria: remove flag for Bedford release.
-  enableNewCohortSearch: boolean;
+  enableCBListSearch: boolean;
 }
