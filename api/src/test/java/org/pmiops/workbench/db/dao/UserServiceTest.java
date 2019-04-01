@@ -101,16 +101,11 @@ public class UserServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusNoMoodleId() throws Exception {
-    // Without a Moodle ID, we should clear the completion bit.
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    user.setComplianceTrainingCompletionTime(new Timestamp(12345));
-    userDao.save(user);
-
     when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
 
     verify(complianceService, never()).getUserBadge(anyInt());
-    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
