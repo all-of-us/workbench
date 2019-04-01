@@ -54,12 +54,13 @@ interface DomainValuePair {
 }
 
 export const ValueListItem: React.FunctionComponent <
-  {domainValue: DomainValue, onSelect: Function}> =
-  ({domainValue, onSelect}) => {
+  {domainValue: DomainValue, onSelect: Function, checked: boolean}> =
+  ({domainValue, onSelect, checked}) => {
     return <div style={{display: 'flex', color: 'black', height: '1.2rem'}}>
-      <input type='checkbox' value={domainValue.value} onClick={() => onSelect()}
+      <input type='checkbox' value={domainValue.value} onChange={() => onSelect()}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
-               marginRight: 10, backgroundColor: '#7CC79B'}}/>
+               marginRight: 10, backgroundColor: '#7CC79B'}}
+             checked={checked}/>
       <div style={{lineHeight: '1.5rem'}}>{domainValue.value}</div>
     </div>;
   };
@@ -271,6 +272,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       loadingResources,
       resource,
       rType,
+      selectedValues,
       valueSets
     } = this.state;
     const currentResource = this.getCurrentResource();
@@ -354,13 +356,15 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                 </div>
                 <div style={{height: '10rem', overflowY: 'auto'}}>
                   {valueSets.map(valueSet =>
-                    <div style={{marginLeft: '0.5rem'}}>
+                    <div key={valueSet.domain} style={{marginLeft: '0.5rem'}}>
                       <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
                       {valueSet.values.map(domainValue =>
-                        <ValueListItem domainValue={domainValue} onSelect={
-                          () => this.selectDomainValue(valueSet.domain, domainValue)}/>
+                        <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
+                          () => this.selectDomainValue(valueSet.domain, domainValue)}
+                          checked={fp.some({domain: valueSet.domain, value: domainValue.value},
+                            selectedValues)}/>
                       )}
                     </div>)
                   }
