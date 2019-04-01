@@ -9,7 +9,7 @@ import {ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
 import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {convertToResource, ResourceType} from 'app/utils/resourceActionsReact';
 import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
@@ -217,12 +217,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     if (rtype === ResourceType.CONCEPT_SET) {
       const {valueSets, selectedValues} = this.state;
       const origSelected = this.state.selectedConceptSetIds;
-      let newSelectedConceptSets: number[];
-      if (fp.includes(resource.id, origSelected)) {
-        newSelectedConceptSets = fp.remove((c) => c === resource.id, origSelected) as number[];
-      } else {
-        newSelectedConceptSets = (origSelected).concat(resource.id);
-      }
+      const newSelectedConceptSets =
+        toggleIncludes(resource.id, origSelected)as unknown as number[];
       const currentDomains = this.getDomainsFromConceptIds(newSelectedConceptSets);
       const origDomains = valueSets.map(valueSet => valueSet.domain);
       const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
@@ -234,30 +230,26 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
           !fp.contains(selectedValue.domain, removedDomains));
       if (newDomains.length > 0) {
         this.getValuesList(newDomains)
-          .then(newValueSets => this.setState((state) => ({
+          .then(newValueSets => this.setState({
             selectedConceptSetIds: newSelectedConceptSets,
             valueSets: updatedValueSets.concat(newValueSets),
             selectedValues: updatedSelectedValues
-          })));
+          }));
       } else {
         this.setState({selectedConceptSetIds: newSelectedConceptSets,
           valueSets: updatedValueSets,
           selectedValues: updatedSelectedValues});
       }
     } else {
-      const origSelected = this.state.selectedCohortIds;
-      if (fp.includes(resource.id, origSelected)) {
-        this.setState({selectedCohortIds: fp.remove((c) => c === resource.id, origSelected)});
-      } else {
-        this.setState({selectedCohortIds: (origSelected).concat(resource.id)});
-      }
+      this.setState({selectedCohortIds: toggleIncludes(resource.id,
+        this.state.selectedCohortIds) as unknown as number[]});
     }
   }
 
   selectDomainValue(domain: Domain, domainValue: DomainValue): void {
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
-    if (fp.includes(selectObj, origSelected)) {
+    if (fp.some(selectObj, origSelected)) {
       this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
     } else {
       this.setState({selectedValues: (origSelected).concat(selectObj)});
