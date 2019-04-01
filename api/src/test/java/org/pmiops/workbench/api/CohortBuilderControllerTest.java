@@ -4,7 +4,9 @@ package org.pmiops.workbench.api;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
@@ -12,6 +14,7 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -33,12 +36,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Provider;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -53,8 +58,22 @@ public class CohortBuilderControllerTest {
   private static final String SUBTYPE_ATC = "ATC";
   private static final String SUBTYPE_BRAND = "BRAND";
 
-  @Autowired
   private CohortBuilderController controller;
+
+  @Mock
+  private BigQueryService bigQueryService;
+
+  @Mock
+  private ParticipantCounter participantCounter;
+
+  @Mock
+  private CdrVersionDao cdrVersionDao;
+
+  @Mock
+  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
+
+  @Mock
+  private CdrVersionService cdrVersionService;
 
   @Autowired
   private CriteriaDao criteriaDao;
@@ -68,21 +87,23 @@ public class CohortBuilderControllerTest {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  @TestConfiguration
-  @Import({
-    CohortBuilderController.class
-  })
-  @MockBean({
-    CdrVersionService.class,
-    CdrVersionDao.class,
-    BigQueryService.class,
-    ParticipantCounter.class,
-    ElasticSearchService.class
-  })
-  static class Configuration {}
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
 
   @Before
   public void setUp() {
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
+
+    ElasticSearchService elasticSearchService = new ElasticSearchService(criteriaDao, configProvider);
+
+    controller = new CohortBuilderController(bigQueryService,
+      participantCounter, criteriaDao, criteriaAttributeDao,
+      cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
+      elasticSearchService, configProvider);
+
     jdbcTemplate.execute("delete from criteria");
   }
 
