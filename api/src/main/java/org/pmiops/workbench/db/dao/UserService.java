@@ -398,11 +398,9 @@ public class UserService {
         moodleId = complianceService.getMoodleId(user.getEmail());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
-          user.setComplianceTrainingCompletionTime(null);
-          user.setComplianceTrainingExpirationTime(null);
-        } else {
-          user.setMoodleId(moodleId);
+          return;
         }
+        user.setMoodleId(moodleId);
       }
 
       if (moodleId != null) {
