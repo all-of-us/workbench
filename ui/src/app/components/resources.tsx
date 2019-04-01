@@ -10,12 +10,14 @@ import {Cohort, ConceptSet} from 'generated/fetch';
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
-  onOpenJupyterLabNotebook?: any, onCloneResource?: Function, onDeleteResource?: Function,
-  onEditCohort?: Function, onReviewCohort?: Function, onEditConceptSet?: Function
+  onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
+  onDeleteResource?: Function, onEditCohort?: Function, onReviewCohort?: Function,
+  onEditConceptSet?: Function
 }> = ({
-        disabled, resourceType, onRenameNotebook = () => {}, onOpenJupyterLabNotebook = () => {},
-        onCloneResource = () => {}, onDeleteResource = () => {}, onEditCohort = () => {},
-        onReviewCohort = () => {}, onEditConceptSet = () => {}
+        disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
+        onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {},
+        onDeleteResource = () => {}, onEditCohort = () => {}, onReviewCohort = () => {},
+        onEditConceptSet = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -45,6 +47,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['cohort', () => {
           return <React.Fragment>
+            <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
