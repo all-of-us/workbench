@@ -4,8 +4,6 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.6rem;
-  height: 2rem;
 }
 
 #total-count {
@@ -158,3 +156,18 @@ input.alreadyTaken {
 .card-header {
     border-bottom: none;
 }
+.actions-container {
+  width: 100%;
+}
+.actions-container > .btn-link {
+  float: right;
+  margin: 0 1rem 0 0;
+  min-width: 0;
+  padding: 0;
+  color: #262262;
+  cursor: pointer;
+}
+.actions-container > .btn-link:disabled {
+  cursor: not-allowed;
+}
+

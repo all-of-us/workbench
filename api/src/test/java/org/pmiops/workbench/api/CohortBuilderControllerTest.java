@@ -87,25 +87,6 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getPPICriteriaParent() throws Exception {
-    Criteria ppiCriteriaParent = criteriaDao.save(
-      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
-        "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", true, false)
-    );
-    Criteria ppiCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), ppiCriteriaParent.getId(), "324836",
-        "child", DomainType.OBSERVATION.name(), "43529119", false, true)
-    );
-    assertEquals(
-      createResponseCriteria(ppiCriteriaParent),
-      controller
-        .getPPICriteriaParent(1L, TreeType.PPI.name(), ppiCriteriaChild.getConceptId())
-        .getBody()
-    );
-  }
-
-  @Test
   public void getCriteriaByTypeAndParentId() throws Exception {
     Criteria icd9CriteriaParent = criteriaDao.save(
       createCriteria(TreeType.ICD9.name(), SUBTYPE_NONE, 0L, "001", "name", DomainType.CONDITION.name(), null, true, true)

@@ -70,7 +70,8 @@ export const ResourceCardMenu: React.FunctionComponent<{
 
 export const ResourceListItem: React.FunctionComponent <
   {resource: ConceptSet | Cohort, openConfirmDelete: Function, edit: Function,
-    rType: ResourceType, onSelect: Function, onClone?: Function, onReview?: Function}
+    rType: ResourceType, onSelect: Function,
+    onClone?: Function, onReview?: Function}
     > = ({resource, openConfirmDelete, edit, rType, onSelect, onClone = () => {},
                                           onReview = () => {}}) => {
       return<div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
@@ -85,7 +86,7 @@ export const ResourceListItem: React.FunctionComponent <
                           onReviewCohort={onReview}/>
 
       </div>
-      <input type='checkbox' value={resource.name} onClick={() => onSelect}
+      <input type='checkbox' value={resource.name} onClick={() => onSelect()}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
                marginRight: 10, backgroundColor: '#7CC79B'}}/>
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>

@@ -431,44 +431,6 @@ else
     exit 1
 fi
 
-####################
-# measurement queries #
-####################
-# Run measurement achilles count queries to fill achilles_results
-if ./generate-cdr/run-measurement-queries.sh --bq-project $BQ_PROJECT --bq-dataset $BQ_DATASET --workbench-project $OUTPUT_PROJECT --workbench-dataset $OUTPUT_DATASET
-then
-    echo "Measurement achilles queries ran"
-else
-    echo "FAILED To run measurement achilles queries for CDR $CDR_VERSION"
-    exit 1
-fi
-
-##########################
-# Update rolled up counts for snomed conditions, procedures, measurements #
-##########################
-echo "Updating rolled up counts in achilles results from criteria (for snomed conditions, procedures and measurments)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-SET ar.count_value = cr1.est_count
-FROM
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
-WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
-and cr1.type='SNOMED' and cr1.subtype in ('MEAS','PCS','CM')
-and analysis_id=3000 and ar.stratum_3 in ('Condition','Measurement','Procedure')"
-
-##########################
-# Update rolled up counts for loinc measurements #
-##########################
-echo "Updating rolled up counts in achilles results from criteria (for loinc measurments)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"UPDATE \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-SET ar.count_value = cr1.est_count
-FROM
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr1
-WHERE cast(cr1.concept_id as string)=ar.stratum_1 and cr1.synonyms like ('%rank1%')
-and cr1.type='MEAS' and cr1.subtype='LAB'
-and analysis_id=3000 and ar.stratum_3='Measurement' "
-
 ###########################
 # concept with count cols #
 ###########################
@@ -617,62 +579,3 @@ join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
 on d2.domain_id = c.domain_id
 and (c.count_value > 0 or c.source_count_value > 0)
 group by d2.domain_id,c.vocabulary_id"
-
-###############################################################
-# Update the path of concepts in achilles_results to fetch tree
-###############################################################
-echo "Updating path of concept in achilles results to fetch tree later"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-set ar.stratum_5=(select path from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` where synonyms like ('%rank1%') and cast(concept_id as string)=ar.stratum_1
-and type='SNOMED' and subtype in ('MEAS','PCS','CM'))
-where ar.analysis_id=3000 and ar.stratum_3 in ('Condition','Measurement','Procedure')"
-
-###############################################################
-# Update the path of concepts in achilles_results to fetch tree
-###############################################################
-echo "Updating path of concept in achilles results to fetch tree later"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-set ar.stratum_5=(select path from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` where synonyms like ('%rank1%') and cast(concept_id as string)=ar.stratum_1
-and type='MEAS' and subtype='LAB')
-where ar.analysis_id=3000 and ar.stratum_3='Measurement'"
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-set ar.stratum_5=concepts
-from
-(select string_agg(cast(concept_id as string)) as concepts,parent from (
-select cr.*,ar2.stratum_1 as parent from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar2
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr on cast(cr.id as string) in UNNEST(split(ar2.stratum_5,'.')) where ar2.analysis_id=3000
-and ar2.stratum_3 in ('Condition','Measurement','Procedure') and cr.type='SNOMED' and cr.subtype in ('MEAS','PCS','CM') order by cr.id asc)
-group by parent) where parent=ar.stratum_1 and ar.analysis_id=3000 and ar.stratum_3 in ('Condition','Measurement','Procedure') "
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar
-set ar.stratum_5=concepts
-from
-(select string_agg(cast(concept_id as string)) as concepts,parent from (
-select cr.*,ar2.stratum_1 as parent from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` ar2
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\` cr on cast(cr.id as string) in UNNEST(split(ar2.stratum_5,'.')) where ar2.analysis_id=3000
-and ar2.stratum_3='Measurement' and cr.type='MEAS' and cr.subtype='LAB' order by cr.id asc)
-group by parent) where parent=ar.stratum_1 and ar.analysis_id=3000 and ar.stratum_3='Measurement' "
-
-echo "Updating path of concept in concept to fetch tree later"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
-set c.path=(select stratum_5 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` where stratum_1=CAST(c.concept_id as string) and analysis_id=3000
-and stratum_3='Condition')
-where c.domain_id='Condition' "
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
-set c.path=(select stratum_5 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` where stratum_1=CAST(c.concept_id as string) and analysis_id=3000
-and stratum_3='Procedure')
-where c.domain_id='Procedure' "
-
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
-set c.path=(select stratum_5 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.achilles_results\` where stratum_1=CAST(c.concept_id as string) and analysis_id=3000
-and stratum_3='Measurement')
-where c.domain_id='Measurement' "

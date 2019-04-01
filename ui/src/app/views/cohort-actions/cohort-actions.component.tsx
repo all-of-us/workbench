@@ -31,9 +31,8 @@ const styles = reactStyles({
   },
   cardName: {
     fontSize: '18px', fontWeight: 600, lineHeight: '22px', color: '#2F2E7E',
-    cursor: 'pointer', wordBreak: 'break-all', textOverflow: 'ellipsis',
-    overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical'
+    wordBreak: 'break-all', textOverflow: 'ellipsis', overflow: 'hidden',
+    display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical'
   },
   cardDescription: {
     marginTop: '0.5rem', textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',

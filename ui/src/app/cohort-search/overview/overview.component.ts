@@ -6,7 +6,7 @@ import {Observable} from 'rxjs/Observable';
 
 import {CohortSearchActions, searchRequestError} from 'app/cohort-search/redux';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
-import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 
 import {Cohort} from 'generated/fetch';
 
@@ -36,6 +36,7 @@ export class OverviewComponent implements OnInit {
 
   error: boolean;
   saving = false;
+  deleting = false;
   stackChart = false;
   showGenderChart = true;
   showComboChart = true;
@@ -58,7 +59,7 @@ export class OverviewComponent implements OnInit {
     return JSON.stringify(this.actions.mapAll());
   }
 
-  get saveDisabled() {
+  get unchanged() {
     return this.criteria === this.cohort.criteria;
   }
 
@@ -98,6 +99,33 @@ export class OverviewComponent implements OnInit {
         this.showConflictError = true;
       }
     });
+  }
+
+  delete = () => {
+    const {ns, wsid} = urlParamsStore.getValue();
+    cohortsApi().deleteCohort(ns, wsid, this.cohort.id).then(() => {
+      navigate(['workspaces', ns, wsid, 'cohorts']);
+    }, (error) => {
+      console.log(error);
+    });
+  }
+
+  cancel = () => {
+    this.deleting = false;
+  }
+
+  navigateTo(action: string) {
+    const {ns, wsid} = urlParamsStore.getValue();
+    let url = `/workspaces/${ns}/${wsid}/`;
+    switch (action) {
+      case 'notebook':
+        url += 'notebooks';
+        break;
+      case 'review':
+        url += `cohorts/${this.cohort.id}/review`;
+        break;
+    }
+    navigateByUrl(url);
   }
 
   toggleChartMode() {

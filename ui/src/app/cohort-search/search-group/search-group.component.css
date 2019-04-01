@@ -2,7 +2,7 @@
   border-radius: 0.2rem;
   border-color: rgba(215, 215, 215, 0.5);
   box-shadow: 0 0.125rem 0.125rem 0 #d7d7d7;
-  margin: 0.6rem 0;
+  margin: 0 0 0.6rem;
 }
 
 .card-block.search-item {

@@ -1358,6 +1358,26 @@ paths:
             schema:
               $ref: "#/definitions/DomainInfoResponse"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}:
+      get:
+        tags:
+          - concepts
+        description: >
+          Returns all column names/values for a given domain.
+        operationId: "getValuesFromDomain"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: path
+            name: domain
+            required: true
+            type: string
+        responses:
+          200:
+            description: the values/column names in the domain.
+            schema:
+              $ref: "#/definitions/DomainValuesResponse"
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -2021,6 +2041,26 @@ definitions:
         items:
           $ref: "#/definitions/DomainInfo"
 
+  DomainValuesResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainValue"
+
+  DomainValue:
+    type: object
+    description: >
+      Domain values map to various column names in OMOP.
+    required:
+      - value
+    properties:
+      value:
+        description: The user facing display name for the value.
+        type: string
 
   CreateAccountRequest:
     type: object
