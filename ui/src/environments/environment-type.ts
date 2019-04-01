@@ -67,6 +67,5 @@ export interface Environment {
   enableDatasetBuilder: boolean;
 
   // Whether users should be able to see the new UI for cohort builder search.
-  // Exit Criteria: remove flag for Bedford release.
   enableCBListSearch: boolean;
 }
