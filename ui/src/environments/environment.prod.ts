@@ -22,5 +22,5 @@ export const environment: Environment = {
   useZendeskForSupport: false,
   enableJupyterLab: false,
   enableDatasetBuilder: false,
-  enableNewCohortSearch: false,
+  enableCBListSearch: false,
 };
