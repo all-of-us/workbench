@@ -93,6 +93,12 @@ const styles = reactStyles({
     margin: 'auto',
     paddingTop: '0.5rem',
     textAlign: 'center',
+  },
+  codeSearch: {
+    width: '85%',
+    borderRadius: '4px',
+    backgroundColor: '#dae6ed',
+    marginLeft: '5px'
   }
 });
 const rows = 25;
@@ -239,7 +245,6 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      // const {data} = this.state;
       const {domain, filterState} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
       if (event.target.checked) {
@@ -263,11 +268,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
       }
       filterState.tabs[domain][colName] = checkedItems;
-      // this.setState({filterState: filterState});
       this.props.getFilteredData(filterState);
-      // if (data) {
-      //   this.filterData();
-      // }
       this.getErrorMessage(event.target.name);
     }
 
@@ -278,7 +279,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         filterState,
         filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, vocab}
       } = this.props;
-      const checkedItems = filterState.tabs[domain];
+      /* Global filters */
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
@@ -297,9 +298,11 @@ export const DetailTabTable = withCurrentWorkspace()(
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
+      /* Column filters */
+      const checkedItems = filterState.tabs[domain];
       const empty = [];
       for (const col in checkedItems) {
-        if ((col === 'domain' || col === `${vocab}Vocabulary`)
+        if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)
           && checkedItems[col].length
           && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
           data = data.filter(row => checkedItems[col].includes(row[col]));
@@ -378,21 +381,29 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
+      const checkboxes = options.map((opt, i) => {
+        return <React.Fragment key={i}>
+          {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
+                   checked={checkedItems[colName].includes(opt.name)}
+                   onChange={($event) => this.updateData($event, colName, options)}/>
+            <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+          </div>}
+        </React.Fragment>;
+      });
       let fl: any;
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {colName === `${vocab}Code` && <TextInput />}
-          {options.map((opt, i) => (
-            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
-              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
-              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
-                     checked={checkedItems[colName].includes(opt.name)}
-                     onChange={($event) => this.updateData($event, colName, options)}/>
-              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
-            </div>
-          ))}
+          {colName === `${vocab}Code` && <TextInput style={styles.codeSearch}/>}
+          <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>{checkboxes}</div>
+          <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
+            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
+                   checked={checkedItems[colName].includes('Select All')}
+                   onChange={($event) => this.updateData($event, colName, options)}/>
+            <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
+          </div>
         </OverlayPanel>
       </span>;
     }
