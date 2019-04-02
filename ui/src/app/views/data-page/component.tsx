@@ -33,7 +33,9 @@ const styles = {
     width: '33%',
     justifyContent: 'flex-start',
     maxWidth: 'none',
-    margin: '1.9rem 1rem 0 0'
+    margin: '1.9rem 1rem 0 0',
+    minHeight: '325px',
+    maxHeight: '325px'
   },
   resourceTypeButtonLast: {
     marginRight: '0rem'
@@ -65,10 +67,25 @@ enum Tabs {
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
-const placeholderText = `Littera gothica quam nunc
-  putamus parum claram anteposuerit litterarum formas humanitatis per. In
-  iis qui facit eorum claritatem Investigationes demonstraverunt lectores
-  legere me lius quod ii legunt.`;
+const descriptions = {
+  data: `The Data Tab is the gateway to all Workbench tools and 
+  All of Us Research data that will help you complete your research project. 
+  Here, you can build a  cohorts of participants, select concept sets of 
+  interest and build analysis-ready tables from the two called datasets.`,
+  datasets: `Datasets are analysis-ready tables that can be exported to 
+  analysis tools such as Notebooks. Users can build and preview a dataset 
+  for one or more cohorts by selecting the desired concept sets and values 
+  for the cohorts. `,
+  cohorts: `A “Cohort” is a group of participants that researchers are 
+  interested in. The cohort builder allows you to create and review cohorts 
+  and annotate participants in a researcher’s study group.`,
+  conceptSets: `Concepts describe information in a patient’s medical record, 
+  such as a condition, a  prescription they are taking or their vital signs. 
+  Subject areas such as conditions, drugs, measurements etc. are called “domains”. 
+  Users can search for and save collections of concepts from a particular domain 
+  as a “Concept set” and then  use concept sets and cohorts to create a dataset, 
+  which can be used for analysis.`
+}
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
@@ -141,7 +158,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     return <React.Fragment>
       <FadeBox style={{marginTop: '1rem'}}>
         <h2 style={{marginTop: 0}}>Data</h2>
-        <div style={{color: '#000000', fontSize: '14px'}}>{placeholderText}</div>
+        <div style={{color: '#000000', fontSize: '14px'}}>{descriptions.data}</div>
         <div style={styles.cardButtonArea}>
           <CardButton style={styles.resourceTypeButton} onClick={() => {
             navigate(['workspaces', namespace, id, 'data', 'datasets']);
@@ -151,7 +168,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              {placeholderText}
+              {descriptions.datasets}
             </div>
           </CardButton>
           <CardButton style={styles.resourceTypeButton} onClick={() => {
@@ -162,7 +179,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              {placeholderText}
+              {descriptions.cohorts}
             </div>
           </CardButton>
           <CardButton style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
@@ -174,7 +191,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
             </div>
             <div style={styles.cardText}>
-              {placeholderText}
+              {descriptions.conceptSets}
             </div>
           </CardButton>
         </div>
