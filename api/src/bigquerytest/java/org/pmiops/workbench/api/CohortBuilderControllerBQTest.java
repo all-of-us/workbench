@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class,
+@Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageService.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
