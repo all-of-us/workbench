@@ -85,7 +85,7 @@ const descriptions = {
   Users can search for and save collections of concepts from a particular domain
   as a “Concept set” and then  use concept sets and cohorts to create a dataset,
   which can be used for analysis.`
-}
+};
 
 export const DataPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
