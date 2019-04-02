@@ -1,14 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-  <changeSet author="srushtigangireddy" id="changelog-26">
-    <validCheckSum>ANY</validCheckSum>
-    <preConditions onFail="MARK_RAN">
-      <tableExists tableName="survey_question_map"/> </preConditions>
-     <dropTable tableName="survey_question_map"/>
+  <changeSet author="brianfreeman" id="changelog-26">
+
+    <createTable tableName="cb_criteria">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="parent_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="subtype" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_standard" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="code" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="name" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_group" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_selectable" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_attribute" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_hierarchy" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_ancestor_data" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="path" type="VARCHAR(500)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="synonyms" type="mediumblob">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_criteria_type_parent_id"
+      tableName="criteria"
+      unique="false">
+      <column name="type"/>
+      <column name="parent_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_criteria_concept_id"
+      tableName="criteria"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
+
+    <sql dbms="mysql">
+      ALTER TABLE criteria
+      ADD FULLTEXT INDEX criteria_synonyms
+      (synonyms);
+    </sql>
+
   </changeSet>
 </databaseChangeLog>
