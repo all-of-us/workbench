@@ -238,10 +238,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
       if (!vocabOptions.getValue()) {
         cohortReviewApi().getVocabularies(namespace, id, cid, +cdrVersionId)
           .then(response => {
-            const vocabFilters = {Source: {}, Standard: {}};
+            const vocabFilters = {source: {}, standard: {}};
             response.items.forEach(item => {
-              vocabFilters[item.type][item.domain] = [
-                ...(vocabFilters[item.type][item.domain] || []),
+              const type = item.type.toLowerCase();
+              vocabFilters[type][item.domain] = [
+                ...(vocabFilters[type][item.domain] || []),
                 item.vocabulary
               ];
             });
