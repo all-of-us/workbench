@@ -25,7 +25,7 @@
 
 .count-preview .disable-link {
   pointer-events: none;
-  opavity: 0.3;
+  opacity: 0.3;
 }
 
 .count-preview .add-button {
@@ -127,22 +127,6 @@ button.btn:focus {
   padding-left: 0.5rem;
 }
 
-.attr-refresh {
-  margin-left: 1rem;
-  color: #2691D0;
-  cursor: pointer;
-  font-size: 12PX;
-}
-
-.radio {
-  padding-left: 0.5rem;
-}
-
-input[type=radio] {
-  margin-left: 0.5rem;
-  z-index: 1000;
-}
-
 .or-circle {
   background-color: rgb(226, 226, 233);
   border-radius: 50%;
@@ -171,13 +155,6 @@ input[type=radio] {
 
 .range-padding {
   padding-top: 0.2rem;
-}
-
-.attr-disable {
-  cursor: not-allowed;
-  color: #9B9B9B;
-  margin-left: 1rem;
-  font-size: 12PX;
 }
 
 clr-icon[shape^=error-standard] {
