@@ -25,6 +25,7 @@ import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -48,7 +49,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageService.class,
+@Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageServiceImpl.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
