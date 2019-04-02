@@ -18,6 +18,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -64,6 +65,9 @@ public class CohortBuilderControllerTest {
   private BigQueryService bigQueryService;
 
   @Mock
+  private CloudStorageService cloudStorageService;
+
+  @Mock
   private ParticipantCounter participantCounter;
 
   @Mock
@@ -97,7 +101,8 @@ public class CohortBuilderControllerTest {
     testConfig.cohortbuilder.enableListSearch = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    ElasticSearchService elasticSearchService = new ElasticSearchService(criteriaDao, configProvider);
+    ElasticSearchService elasticSearchService =
+        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
       participantCounter, criteriaDao, criteriaAttributeDao,
