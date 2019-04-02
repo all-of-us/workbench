@@ -1288,7 +1288,7 @@ def load_es_index(cmd_name, *args)
   common = Common.new
   # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
   # to work against the synthetic CDR into a local ES (using test Workbench).
-  create_flags = ([
+  create_flags = (([
     ['--query-project-id', 'all-of-us-ehr-dev'],
     ['--es-base-url', base_url],
     # Matches cdr_versions_local.json
@@ -1296,9 +1296,10 @@ def load_es_index(cmd_name, *args)
     ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
     ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
     ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
-    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob] +
-    (auth_project.nil? ? [] : ['--es-auth-project', auth_project])
-  ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+    ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
+  ] + (auth_project.nil? ? [] : [
+    ['--es-auth-project', auth_project]
+  ])).map { |kv| "#{kv[0]}=#{kv[1]}" } + [
     '--delete-indices'
     # Gradle args need to be single-quote wrapped.
   ]).map { |f| "'#{f}'" }
