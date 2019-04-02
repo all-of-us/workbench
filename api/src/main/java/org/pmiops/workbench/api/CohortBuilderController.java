@@ -4,6 +4,8 @@ import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +37,8 @@ import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -304,17 +308,19 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    * @return
    */
   protected boolean isApproximate(SearchRequest request) {
+    List<SearchGroup> allGroups = ImmutableList.copyOf(
+        Iterables.concat(request.getIncludes(), request.getExcludes()));
+    List<SearchParameter> allParams = allGroups.stream()
+        .flatMap(sg -> sg.getItems().stream())
+        .flatMap(sgi -> sgi.getSearchParameters().stream())
+        .collect(Collectors.toList());
     //currently elasticsearch doesn't implement Temporal/BP/DEC
-    return request.getIncludes().stream().anyMatch(sg -> sg.getTemporal())
-      || request.getExcludes().stream().anyMatch(sg -> sg.getTemporal())
-      || request.getIncludes().stream()
-      .flatMap(sg -> sg.getItems().stream())
-      .flatMap(sgi -> sgi.getSearchParameters().stream())
-      .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()))
-      || request.getExcludes().stream()
-      .flatMap(sg -> sg.getItems().stream())
-      .flatMap(sgi -> sgi.getSearchParameters().stream())
-      .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()));
+    return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+      || allParams.stream()
+        .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()))
+      || allParams.stream()
+        // TODO(RW-2404): Support these queries.
+        .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
   }
 
   private String modifyKeywordMatch(String value, String type) {
