@@ -51,7 +51,11 @@ public final class ElasticUtils {
     }
     client.indices().create(
           new CreateIndexRequest(indexName).mapping(
-              INDEX_TYPE, ImmutableMap.of("properties", ElasticDocument.PERSON_SCHEMA)),
+              INDEX_TYPE, ImmutableMap.of(
+                  // Do not allow new fields to appear in the mapping, this would indicate a
+                  // programming error.
+                  "dynamic", "strict",
+                  "properties", ElasticDocument.PERSON_SCHEMA)),
           REQ_OPTS);
     log.info("created person index: " + indexName);
   }
