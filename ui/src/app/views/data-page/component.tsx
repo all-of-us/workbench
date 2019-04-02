@@ -68,22 +68,22 @@ enum Tabs {
 }
 
 const descriptions = {
-  data: `The Data Tab is the gateway to all Workbench tools and 
-  All of Us Research data that will help you complete your research project. 
-  Here, you can build a  cohorts of participants, select concept sets of 
+  data: `The Data Tab is the gateway to all Workbench tools and
+  All of Us Research data that will help you complete your research project.
+  Here, you can build a  cohorts of participants, select concept sets of
   interest and build analysis-ready tables from the two called datasets.`,
-  datasets: `Datasets are analysis-ready tables that can be exported to 
-  analysis tools such as Notebooks. Users can build and preview a dataset 
-  for one or more cohorts by selecting the desired concept sets and values 
+  datasets: `Datasets are analysis-ready tables that can be exported to
+  analysis tools such as Notebooks. Users can build and preview a dataset
+  for one or more cohorts by selecting the desired concept sets and values
   for the cohorts. `,
-  cohorts: `A “Cohort” is a group of participants that researchers are 
-  interested in. The cohort builder allows you to create and review cohorts 
+  cohorts: `A “Cohort” is a group of participants that researchers are
+  interested in. The cohort builder allows you to create and review cohorts
   and annotate participants in a researcher’s study group.`,
-  conceptSets: `Concepts describe information in a patient’s medical record, 
-  such as a condition, a  prescription they are taking or their vital signs. 
-  Subject areas such as conditions, drugs, measurements etc. are called “domains”. 
-  Users can search for and save collections of concepts from a particular domain 
-  as a “Concept set” and then  use concept sets and cohorts to create a dataset, 
+  conceptSets: `Concepts describe information in a patient’s medical record,
+  such as a condition, a  prescription they are taking or their vital signs.
+  Subject areas such as conditions, drugs, measurements etc. are called “domains”.
+  Users can search for and save collections of concepts from a particular domain
+  as a “Concept set” and then  use concept sets and cohorts to create a dataset,
   which can be used for analysis.`
 }
 
