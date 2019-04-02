@@ -15,6 +15,9 @@ export interface Environment {
   // Example value: 'Test' would cause the following full title:
   // "Homepage | [Test] All of Us Research Workbench"
   displayTag: string;
+  // Indicates if the displayTag should be shown in the web app. If it is true,
+  // a small label will be added under the "All of Us" logo in the header.
+  shouldShowDisplayTag: boolean;
   // The Google Analytics account ID for logging actions and page views.
   // Example value: 'UA-112406425-3'
   gaId: string;

@@ -26,6 +26,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
   showHelpDeskItem = environment.useZendeskForSupport;
   showHubForumItem = environment.useZendeskForSupport;
   headerImg = '/assets/images/all-of-us-logo.svg';
+  displayTag = environment.displayTag;
+  shouldShowDisplayTag = environment.shouldShowDisplayTag;
   givenName = '';
   familyName = '';
   // The email address of the AoU researcher's Google Account. Note that this

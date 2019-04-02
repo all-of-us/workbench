@@ -86,7 +86,7 @@ export class AppComponent implements OnInit {
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
     this.baseTitle = this.titleService.getTitle();
-    if (environment.displayTag) {
+    if (environment.shouldShowDisplayTag) {
       this.baseTitle = `[${environment.displayTag}] ${this.baseTitle}`;
       this.titleService.setTitle(this.baseTitle);
     }
