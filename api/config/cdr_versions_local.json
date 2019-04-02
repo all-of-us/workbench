@@ -10,6 +10,7 @@
     "releaseNumber": 1,
     "numParticipants": 946237,
     "cdrDbName": "cdr",
+    "elasticIndexBaseName": "cdr",
     "publicDbName": "public"
   }
 ]

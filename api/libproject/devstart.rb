@@ -25,7 +25,15 @@ SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com 
               clouderrorreporting.googleapis.com bigquery-json.googleapis.com}
 DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
+# TODO: Make environment/project flags consistent across commands, consider
+# using a environment keywords as dict keys here, e.g. :test, :staging, etc.
 ENVIRONMENTS = {
+  "local" => {
+    :api_endpoint_host => "localhost:8081",
+    :cdr_sql_instance => "workbench",
+    :config_json => "config_local.json",
+    :cdr_versions_json => "cdr_versions_local.json"
+  },
   "all-of-us-workbench-test" => {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
@@ -57,11 +65,11 @@ def run_inline_or_log(dry_run, args)
   Common.new.run_inline(cmd_prefix + args)
 end
 
-def get_config(project)
-  unless ENVIRONMENTS.fetch(project, {}).has_key?(:config_json)
-    raise ArgumentError.new("project #{project} lacks a valid env configuration")
+def get_config(env)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(:config_json)
+    raise ArgumentError.new("env '#{env}' lacks a valid configuration")
   end
-  return ENVIRONMENTS[project][:config_json]
+  return ENVIRONMENTS[env][:config_json]
 end
 
 def get_cdr_versions_file(project)
@@ -1234,44 +1242,76 @@ Common.register_command({
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
 })
 
-def create_local_es_index(cmd_name, *args)
+def load_es_index(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
+
+  op.opts.env = "local"
+  op.add_option(
+    "--environment [ENV]",
+    ->(opts, v) { opts.env = v},
+    "Environment to load into; 'local' or a GCP project name, e.g. " +
+    "'all-of-us-workbench-test'")
+  op.add_validator ->(opts) { raise ArgumentError unless ENVIRONMENTS.has_key? opts.env }
+
+  op.add_option(
+    "--cdr-version [VERSION]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version, e.g. 'synth_r_2019q1_2', used to name the index. Value " +
+    "should eventually match elasticIndexBaseName in the cdr_versions_*.json " +
+    "configurations. Defaults to 'cdr' for local runs")
+
   # TODO(RW-2213): Generalize this subsampling approach for all local development work.
-  op.opts.inverse_prob = 1000
   op.add_option(
       "--participant-inclusion-inverse-prob [DENOMINATOR]",
       ->(opts, v) { opts.inverse_prob = v},
       "The inverse probabilty to index a participant, used to index a " +
       "sample of participants. For example, 1000 would index ~1/1000 of participants in the " +
-      "target dataset. Defaults to 1K (~1K participants on the 1M participant synthetic CDR).")
+      "target dataset. Defaults to 1K for local loads (~1K participants on the " +
+      "1M participant synthetic CDR), defaults to 1 for any other GCP project.")
   op.parse.validate
+
+  if op.opts.inverse_prob.nil?
+    op.opts.inverse_prob = op.opts.env == "local" ? 1000 : 1
+  end
+  if op.opts.cdr_version.nil?
+    raise ArgumentError unless op.opts.env == "local"
+    op.opts.cdr_version = 'cdr'
+  end
+
   unless Workbench.in_docker?
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
   end
 
+  base_url = get_es_base_url(op.opts.env)
+  auth_project = op.opts.env == "local" ? nil : op.opts.env
+
   common = Common.new
   # TODO(calbach): Parameterize most of these flags. For now this is hardcoded
   # to work against the synthetic CDR into a local ES (using test Workbench).
-  create_flags = ([
+  create_flags = (([
     ['--query-project-id', 'all-of-us-ehr-dev'],
-    ['--es-base-url', 'http://elastic:9200'],
+    ['--es-base-url', base_url],
     # Matches cdr_versions_local.json
-    ['--cdr-version', 'cdr'],
+    ['--cdr-version', op.opts.cdr_version],
     ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
     ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
     ['--scratch-gcs-bucket', 'all-of-us-workbench-test-elastic-exports'],
     ['--participant-inclusion-inverse-prob', op.opts.inverse_prob]
-  ].map { |kv| "#{kv[0]}=#{kv[1]}" } + [
+  ] + (auth_project.nil? ? [] : [
+    ['--es-auth-project', auth_project]
+  ])).map { |kv| "#{kv[0]}=#{kv[1]}" } + [
     '--delete-indices'
     # Gradle args need to be single-quote wrapped.
   ]).map { |f| "'#{f}'" }
-  common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
+  ServiceAccountContext.new((auth_project or TEST_PROJECT)).run do
+    common.run_inline %W{gradle elasticSearchIndexer -PappArgs=['create',#{create_flags.join(',')}]}
+  end
 end
 
 Common.register_command({
-  :invocation => "create-local-es-index",
+  :invocation => "load-es-index",
   :description => "Create Elasticsearch index",
-  :fn => ->(*args) { create_local_es_index("create-local-es-index", *args) }
+  :fn => ->(*args) { load_es_index("load-es-index", *args) }
 })
 
 def update_cdr_version_options(cmd_name, args)
@@ -1607,6 +1647,11 @@ end
 def get_auth_domain(project)
   config_json = get_config(project)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]["registeredDomainName"]
+end
+
+def get_es_base_url(env)
+  config_json = get_config(env)
+  return JSON.parse(File.read("config/#{config_json}"))["elasticsearch"]["baseUrl"]
 end
 
 def load_config(project, dry_run = false)

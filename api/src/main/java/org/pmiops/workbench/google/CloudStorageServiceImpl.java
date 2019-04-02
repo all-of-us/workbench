@@ -144,6 +144,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public JSONObject getElasticCredentials() {
+    return new JSONObject(readToString(getCredentialsBucketName(), "elastic-cloud.json"));
+  }
+
+  @Override
   public GoogleCredential getGSuiteAdminCredentials() throws IOException {
     String json = readToString(getCredentialsBucketName(), "gsuite-admin-sa.json");
     return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));

@@ -44,7 +44,8 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "elastic:9200",
+    "baseUrl": "http:\/\/elastic:9200",
+    "enableBasicAuth": false,
     "enableElasticsearchBackend": false
   },
   "moodle": {

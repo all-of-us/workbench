@@ -102,7 +102,8 @@ public class WorkbenchConfig {
   }
 
   public static class ElasticsearchConfig {
-    public String host;
+    public String baseUrl;
+    public boolean enableBasicAuth;
     public boolean enableElasticsearchBackend;
   }
 

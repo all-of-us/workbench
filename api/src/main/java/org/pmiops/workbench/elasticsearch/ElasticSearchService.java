@@ -1,32 +1,40 @@
 package org.pmiops.workbench.elasticsearch;
 
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_19_44;
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_45_64;
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_GT_65;
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.buildDemoChartAggregation;
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.unwrapDemoChartBuckets;
+
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-
 import jnr.ffi.annotations.Synchronized;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.ElasticsearchConfig;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.buildDemoChartAggregation;
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.unwrapDemoChartBuckets;
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_19_44;
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_45_64;
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_GT_65;
 
 @Service
 public class ElasticSearchService {
@@ -34,11 +42,14 @@ public class ElasticSearchService {
   private static final Logger log = Logger.getLogger(ElasticSearchService.class.getName());
   private RestHighLevelClient client;
   private CriteriaDao criteriaDao;
+  private CloudStorageService cloudStorageService;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
-  public ElasticSearchService(CriteriaDao criteriaDao, Provider<WorkbenchConfig> configProvider) {
+  public ElasticSearchService(CriteriaDao criteriaDao, CloudStorageService cloudStorageService,
+      Provider<WorkbenchConfig> configProvider) {
     this.criteriaDao = criteriaDao;
+    this.cloudStorageService = cloudStorageService;
     this.configProvider = configProvider;
   }
 
@@ -47,7 +58,7 @@ public class ElasticSearchService {
    */
   public Long count(SearchRequest req) throws IOException {
     String personIndex =
-        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
+        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
     log.info("Elastic filter: "  + filter.toString());
     long count = client().count(new CountRequest(personIndex)
@@ -60,7 +71,7 @@ public class ElasticSearchService {
    */
   public List<DemoChartInfo> demoChartInfo(SearchRequest req) throws IOException {
     String personIndex =
-      ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getCdrDbName());
+        ElasticUtils.personIndexName(CdrVersionContext.getCdrVersion().getElasticIndexBaseName());
     QueryBuilder filter = ElasticFilters.fromCohortSearch(criteriaDao, req);
     log.info("Elastic filter: "  + filter.toString());
     SearchResponse searchResponse =
@@ -81,12 +92,23 @@ public class ElasticSearchService {
    * works but need to add Synchronized annotation to make this method thread safe.
    */
   @Synchronized
-  private RestHighLevelClient client() {
+  private RestHighLevelClient client() throws IOException {
+    ElasticsearchConfig esConfig = configProvider.get().elasticsearch;
     if (client == null) {
-      String[] vars = configProvider.get().elasticsearch.host.split(":");
-      String host = vars[0];
-      int port = Integer.parseInt(vars[1]);
-      client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
+      URL url = new URL(esConfig.baseUrl);
+      RestClientBuilder builder =
+          RestClient.builder(new HttpHost(url.getHost(), url.getPort(), url.getProtocol()));
+      if (esConfig.enableBasicAuth) {
+        JSONObject creds = cloudStorageService.getElasticCredentials();
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY,
+            new UsernamePasswordCredentials(
+                creds.getString("username"), creds.getString("password")));
+        builder.setHttpClientConfigCallback((httpClientBuilder) ->
+            httpClientBuilder
+                .setDefaultCredentialsProvider(credentialsProvider));
+      }
+      client = new RestHighLevelClient(builder);
     }
     return client;
   }

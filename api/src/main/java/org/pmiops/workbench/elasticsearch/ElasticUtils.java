@@ -62,6 +62,7 @@ public final class ElasticUtils {
    */
   public static void ingestDocuments(RestHighLevelClient client, String indexName,
       Iterator<ElasticDocument> docs, int numDocs) throws IOException {
+    // TODO(calbach): Parallelize this.
     int fails = 0;
     for (int i = 0; docs.hasNext(); i += BATCH_SIZE) {
       BulkRequest bulkReq = new BulkRequest();

@@ -25,6 +25,7 @@ public interface CloudStorageService {
   public void writeFile(String bucketName, String fileName, byte[] bytes);
   public void copyBlob(BlobId from, BlobId to);
   public JSONObject getJiraCredentials();
+  public JSONObject getElasticCredentials();
   public GoogleCredential getGSuiteAdminCredentials() throws IOException;
   public GoogleCredential getFireCloudAdminCredentials() throws IOException;
   public GoogleCredential getDefaultServiceAccountCredentials() throws IOException;

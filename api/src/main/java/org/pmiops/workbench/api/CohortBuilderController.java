@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.base.Strings;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -28,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -184,8 +186,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend &&
+        !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName()) && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(elasticSearchService.count(request));
       } catch (IOException e) {
@@ -204,9 +208,11 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend && !isApproximate(request)) {
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend &&
+        !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName()) && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));
       } catch (IOException e) {
