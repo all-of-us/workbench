@@ -133,10 +133,12 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
+  codeResults: Array<any>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    codeInput: Function;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -147,7 +149,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortField: null,
         sortOrder: 1,
         expandedRows: [],
+        codeResults: [],
       };
+      this.codeInput = fp.debounce(300, (e) => this.filterCodes(e));
     }
 
     componentDidMount() {
@@ -346,8 +350,29 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    filterTemplate(colName: string) {
+    filterCodes = (event: string) => {
       const {data} = this.state;
+      const {domain, filterState, filterState: {vocab}} = this.props;
+      const codeType = `${vocab}Code`;
+      const checkedItems = filterState.tabs[domain][codeType];
+      // TODO prevent duplicates and already selected options in results
+      const codeResults = data.reduce((acc, item) => {
+        if (item[codeType].includes(event)) {
+          acc.push(item[codeType]);
+        }
+        return acc;
+      }, []);
+      this.setState({codeResults});
+      console.log(event);
+    }
+
+    addCode = (event: any) => {
+      // TODO remove from results, select option in main list when checked
+      console.log(event.target.value);
+    }
+
+    filterTemplate(colName: string) {
+      const {codeResults, data} = this.state;
       const {domain, filterState, filterState: {vocab}} = this.props;
       const checkedItems = filterState.tabs[domain];
       if (!data) {
@@ -366,9 +391,12 @@ export const DetailTabTable = withCurrentWorkspace()(
           });
           break;
         case `${vocab}Code`:
-          options = Object.keys(counts).map(name => {
-            return {name, count: counts[name]};
-          });
+          options = Object.keys(counts).reduce((acc, name) => {
+            if (name !== 'total') {
+              acc.push({name, count: counts[name]});
+            }
+            return acc;
+          }, []);
           break;
         case `${vocab}Vocabulary`:
           const vocabs = vocabOptions.getValue()[vocab];
@@ -391,12 +419,25 @@ export const DetailTabTable = withCurrentWorkspace()(
           </div>}
         </React.Fragment>;
       });
+      const codes = codeResults.map((opt, i) => {
+        return <React.Fragment key={i}>
+          <div style={{padding: '0.3rem 0.4rem'}}>
+            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt}
+                   checked={false}
+                   onChange={($event) => this.addCode($event)}/>
+            <label style={{paddingLeft: '0.4rem'}}> {opt} </label>
+          </div>
+        </React.Fragment>;
+      });
       let fl: any;
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {colName === `${vocab}Code` && <TextInput style={styles.codeSearch}/>}
+          {colName === `${vocab}Code` && <TextInput
+            style={styles.codeSearch}
+            onChange={this.codeInput} />}
+          {codeResults.length && <div>{codes}</div>}
           <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>{checkboxes}</div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
