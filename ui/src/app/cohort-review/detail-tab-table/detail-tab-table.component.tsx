@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -273,10 +274,11 @@ export const DetailTabTable = withCurrentWorkspace()(
     filterData() {
       let {data, start} = this.state;
       const {
-        domain, filterState, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}
+        domain,
+        filterState,
+        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, vocab}
       } = this.props;
       const checkedItems = filterState.tabs[domain];
-      const vocab = filterState.vocab;
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
@@ -341,41 +343,47 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    getColumnValue(colName: string) {
+    filterTemplate(colName: string) {
       const {data} = this.state;
-      const {domain, filterState} = this.props;
+      const {domain, filterState, filterState: {vocab}} = this.props;
       const checkedItems = filterState.tabs[domain];
       if (!data) {
         return {};
       }
       const counts = {total: 0};
+      let options: Array<any>;
       data.forEach(item => {
         counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
         counts.total++;
       });
-      let options: Array<any>;
-      if (colName === 'domain') {
-        options = domains.map(option => {
-          return {name: option, count: counts[option] || 0};
-        });
-      } else {
-        const vocabs = colName === 'standardVocabulary'
-          ? vocabOptions.getValue().Standard
-          : vocabOptions.getValue().Source;
-        options = vocabs[domain] ? vocabs[domain].map(option => {
-          return {name: option, count: counts[option] || 0};
-        }) : [];
+      switch (colName) {
+        case 'domain':
+          options = domains.map(name => {
+            return {name, count: counts[name] || 0};
+          });
+          break;
+        case `${vocab}Code`:
+          options = Object.keys(counts).map(name => {
+            return {name, count: counts[name]};
+          });
+          break;
+        case `${vocab}Vocabulary`:
+          const vocabs = vocabOptions.getValue()[vocab];
+          options = vocabs[domain] ? vocabs[domain].map(name => {
+            return {name, count: counts[name] || 0};
+          }) : [];
+          break;
       }
       options.push({name: 'Select All', count: counts.total});
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
       let fl: any;
-
       return <span>
-        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
+        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          {colName === `${vocab}Code` && <TextInput />}
           {options.map((opt, i) => (
             <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
@@ -434,9 +442,13 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const filterColName = col.name === 'domain'
-          || col.name === 'sourceVocabulary'
-          || col.name === 'standardVocabulary';
+        const hasFilter = [
+          'domain',
+          'sourceVocabulary',
+          'standardVocabulary',
+          'sourceCode',
+          'standardCode'
+        ].includes(col.name);
         const isExpanderNeeded = col.name === 'graph'  &&
           (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
@@ -446,6 +458,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
+          {hasFilter && this.filterTemplate(col.name)}
           {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {(desc && !isExpanderNeeded) &&
           <i className='pi pi-arrow-down' style={styles.sortIcon} />}
@@ -460,8 +473,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           header={header}
           headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
-          filter={filterColName && true}
-          filterElement= {filterColName && this.getColumnValue(col.name)}
           body={overlayTemplate}/>;
       });
 
