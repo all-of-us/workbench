@@ -15,7 +15,14 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {
+  cdrVersionStore,
+  currentCohortStore,
+  currentWorkspaceStore,
+  navigate,
+  navigateByUrl,
+  urlParamsStore
+} from 'app/utils/navigation';
 
 import {
   CohortStatus,
