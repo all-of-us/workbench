@@ -38,7 +38,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
       selectedConcept: [],
       concepts: this.props.concepts,
       selectedVocabulary: [],
-      dt: {}
+      dt: {exportCSV: () => {}, filter: () => {}}
     };
   }
 
