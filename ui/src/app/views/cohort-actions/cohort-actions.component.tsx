@@ -6,6 +6,7 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {environment} from 'environments/environment';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
 
@@ -133,7 +134,8 @@ export const CohortActions = withCurrentWorkspace()(
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
-              const disabled = card.action === 'notebook';
+              const disabled = card.action === 'notebook' ||
+                (card.action === 'dataset' && !environment.enableDatasetBuilder);
               return <CohortActionCardBase key={i} style={styles.card}>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                   <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
