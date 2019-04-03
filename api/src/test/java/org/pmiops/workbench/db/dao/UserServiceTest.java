@@ -93,29 +93,34 @@ public class UserServiceTest {
 
     // The user should be updated in the database with a non-empty completion and expiration time.
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getTrainingCompletionTime()).isEqualTo(
+    assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(
         new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getTrainingExpirationTime()).isEqualTo(
+    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(
         new Timestamp(12345));
   }
 
-  @Test()
+  @Test
   public void testSyncComplianceTrainingStatusNoMoodleId() throws Exception {
     when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
 
     verify(complianceService, never()).getUserBadge(anyInt());
     User user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getTrainingCompletionTime()).isNull();
+    assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test
   public void testSyncComplianceTrainingStatusNullBadge() throws Exception {
-    // We consider it an error if we have a valid Moodle ID but the Moodle API returns a NOT_FOUND
-    // response.
+    // When Moodle returns an empty badge response, we should clear the completion bit.
+    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    user.setComplianceTrainingCompletionTime(new Timestamp(12345));
+    userDao.save(user);
+
     when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
     when(complianceService.getUserBadge(1)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
+    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test(expected = NotFoundException.class)

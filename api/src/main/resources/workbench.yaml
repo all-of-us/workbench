@@ -2254,10 +2254,6 @@ definitions:
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
-      trainingCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
       demographicSurveyCompletionTime:
         type: integer
         format: int64
