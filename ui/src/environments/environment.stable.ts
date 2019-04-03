@@ -14,7 +14,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-3',
   gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
-  trainingUrl: 'https://aou.nnlm.gov',
+  trainingUrl: 'https://aoudev.nnlm.gov',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   useZendeskForSupport: true,
   enableJupyterLab: false,
