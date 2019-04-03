@@ -13,7 +13,7 @@ export const environment: Environment = {
   debug: false,
   gaId: 'UA-112406425-2',
   gaUserAgentDimension: 'dimension1',
-  trainingUrl: 'https://aou.nnlm.gov',
+  trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   useZendeskForSupport: true,
