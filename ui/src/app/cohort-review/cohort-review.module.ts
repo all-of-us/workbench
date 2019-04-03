@@ -26,7 +26,6 @@ import {PageLayout} from './page-layout/page-layout';
 import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
 import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
-import {QueryReportComponent} from './query-report/query-report.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {TablePage} from './table-page/table-page';
@@ -57,7 +56,6 @@ import {TablePage} from './table-page/table-page';
     DetailPage,
     OverviewPage,
     PageLayout,
-    QueryReportComponent,
     TablePage,
 
     /* Annotations */
