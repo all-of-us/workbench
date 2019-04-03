@@ -78,7 +78,7 @@ export class ConceptHomepageComponent implements OnInit {
   // For some reason clr checkboxes trigger click events twice on click. This
   // is a workaround to not allow multiple filter events to get triggered.
   blockMultipleSearchFromFilter = true;
-  maxConceptFetch = 100;
+  maxConceptFetch = 1000;
   conceptsSavedText = '';
 
   conceptAddOpen = false;
