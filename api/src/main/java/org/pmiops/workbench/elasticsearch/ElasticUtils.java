@@ -104,7 +104,7 @@ public final class ElasticUtils {
             .source(doc.source));
       }
 
-      // Should block until there is room in the pool.
+      // Adds work to the pool, or runs this callback on the current thread if the queue is full.
       pool.submit(() -> {
         BulkResponse response;
         try {
@@ -127,7 +127,6 @@ public final class ElasticUtils {
         if (response.hasFailures()) {
           for (BulkItemResponse itemResp : response.getItems()) {
               if (itemResp.isFailed()) {
-                // TODO: Investigate retry handling or aggregate failures.
                 log.warning(itemResp.getFailureMessage());
                 numFails++;
               }
