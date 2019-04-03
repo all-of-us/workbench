@@ -164,7 +164,7 @@ const styles = reactStyles({
     position: 'relative',
     display: 'inline-block',
     minHeight: '1rem',
-    cursor: 'pointer',
+    cursor: 'text',
     lineHeight: '1rem',
     width: '95%'
   },
