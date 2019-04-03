@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -162,19 +163,26 @@ const routes: Routes = [
               },
               {
                 path: 'data',
-                component: DataPageComponent,
-                data: {
-                  title: 'Data Page',
-                  breadcrumb: BreadcrumbType.Workspace
-                }
-              },
-              {
-                path: 'data/datasets',
-                component: DataSetComponent,
-                data: {
-                  title: 'Dataset Page',
-                  breadcrumb: BreadcrumbType.Dataset
-                }
+                canActivate: [DataSetGuard],
+                canActivateChild: [DataSetGuard],
+                children: [
+                  {
+                    path: '',
+                    component: DataPageComponent,
+                    data: {
+                      title: 'Data Page',
+                      breadcrumb: BreadcrumbType.Workspace
+                    }
+                  },
+                  {
+                    path: 'datasets',
+                    component: DataSetComponent,
+                    data: {
+                      title: 'Dataset Page',
+                      breadcrumb: BreadcrumbType.Dataset
+                    }
+                  },
+                ]
               },
               {
                 path: 'concepts/sets',
@@ -226,6 +234,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    DataSetGuard,
     RegistrationGuard,
     SignInGuard,
   ]
