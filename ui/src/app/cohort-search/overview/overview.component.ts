@@ -87,14 +87,15 @@ export class OverviewComponent implements OnInit {
   }
 
   submit() {
+    this.saving = true;
     const {ns, wsid} = urlParamsStore.getValue();
     const name = this.cohortForm.get('name').value;
     const description = this.cohortForm.get('description').value;
     const cohort = <Cohort>{name, description, criteria: this.criteria, type: COHORT_TYPE};
     cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
-      const queryParams = {cid: c.id};
-      navigate(['workspaces', ns, wsid, 'cohorts', 'actions'], {queryParams});
+      navigate(['workspaces', ns, wsid, 'cohorts', c.id, 'actions']);
     }, (error) => {
+      this.saving = false;
       if (error.status === 400) {
         this.showConflictError = true;
       }
