@@ -29,7 +29,7 @@ LEFT JOIN (
     ARRAY_AGG(STRUCT( observation_concept_id AS concept_id,
         observation_source_concept_id AS source_concept_id,
         observation_date AS start_date,
-        DATE_DIFF(observation_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
+        DATE_DIFF(observation_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start,
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id)) observations
@@ -57,7 +57,7 @@ LEFT JOIN (
     ARRAY_AGG(STRUCT( condition_concept_id AS concept_id,
         condition_source_concept_id AS source_concept_id,
         condition_start_date AS start_date,
-        DATE_DIFF(condition_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
+        DATE_DIFF(condition_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start,
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id)) conditions
@@ -85,7 +85,7 @@ LEFT JOIN (
     ARRAY_AGG(STRUCT( drug_concept_id AS concept_id,
         drug_source_concept_id AS source_concept_id,
         drug_exposure_start_date AS start_date,
-        DATE_DIFF(drug_exposure_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
+        DATE_DIFF(drug_exposure_start_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start,
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id)) drugs
@@ -113,7 +113,7 @@ LEFT JOIN (
     ARRAY_AGG(STRUCT( procedure_concept_id AS concept_id,
         procedure_source_concept_id AS source_concept_id,
         procedure_date AS start_date,
-        DATE_DIFF(procedure_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
+        DATE_DIFF(procedure_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start,
         v.visit_concept_id,
         CAST(NULL as FLOAT64) as value_as_number,
         CAST(NULL as INT64) as value_as_concept_id)) procedures
@@ -141,7 +141,7 @@ LEFT JOIN (
     ARRAY_AGG(STRUCT( measurement_concept_id AS concept_id,
         measurement_source_concept_id AS source_concept_id,
         measurement_date AS start_date,
-        DATE_DIFF(measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start_date,
+        DATE_DIFF(measurement_date, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), YEAR) AS age_at_start,
         v.visit_concept_id,
         value_as_number,
         value_as_concept_id)) measurements
