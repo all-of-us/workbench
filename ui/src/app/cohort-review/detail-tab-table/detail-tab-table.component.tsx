@@ -355,10 +355,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({codeResults: []});
       } else {
         const {data} = this.state;
-        const {domain, filterState, filterState: {vocab}} = this.props;
+        const {filterState: {vocab}} = this.props;
         const codeType = `${vocab}Code`;
-        const checkedItems = filterState.tabs[domain][codeType];
-        // TODO prevent duplicates and already selected options in results
         const codeResults = data.reduce((acc, item) => {
           if (item[codeType].includes(input) && !acc.includes(input)) {
             acc.push(item[codeType]);
@@ -368,11 +366,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({codeResults});
         console.log(input);
       }
-    }
-
-    addCode = (event: any) => {
-      // TODO remove from results, select option in main list when checked
-      console.log(event.target.value);
     }
 
     filterTemplate(colName: string) {
@@ -414,26 +407,19 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
-      const checkboxes = options.map((opt, i) => {
-        return <React.Fragment key={i}>
-          {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
-            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
-                   checked={checkedItems[colName].includes(opt.name)}
-                   onChange={($event) => this.updateData($event, colName, options)}/>
-            <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
-          </div>}
-        </React.Fragment>;
-      });
-      const codes = codeResults.map((opt, i) => {
-        return <React.Fragment key={i}>
-          <div style={{padding: '0.3rem 0.4rem'}}>
-            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt}
-                   checked={false}
-                   onChange={($event) => this.addCode($event)}/>
-            <label style={{paddingLeft: '0.4rem'}}> {opt} </label>
-          </div>
-        </React.Fragment>;
-      });
+      const checkboxes = options.reduce((acc, opt, i) => {
+        if (codeResults.length === 0 || codeResults.includes(opt.name)) {
+          acc.push(<React.Fragment key={i}>
+            {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+              <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
+                     checked={checkedItems[colName].includes(opt.name)}
+                     onChange={($event) => this.updateData($event, colName, options)}/>
+              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+            </div>}
+          </React.Fragment>);
+        }
+        return acc;
+      }, []);
       let fl: any;
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
@@ -443,7 +429,6 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.codeSearch}
             onChange={this.codeInput} />}
           <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
-            {codeResults.length > 0  && <div style={{borderBottom: '1px solid #ccc'}}>{codes}</div>}
             {checkboxes}
             </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
