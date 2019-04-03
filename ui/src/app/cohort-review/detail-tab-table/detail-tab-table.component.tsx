@@ -350,20 +350,24 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    filterCodes = (event: string) => {
-      const {data} = this.state;
-      const {domain, filterState, filterState: {vocab}} = this.props;
-      const codeType = `${vocab}Code`;
-      const checkedItems = filterState.tabs[domain][codeType];
-      // TODO prevent duplicates and already selected options in results
-      const codeResults = data.reduce((acc, item) => {
-        if (item[codeType].includes(event)) {
-          acc.push(item[codeType]);
-        }
-        return acc;
-      }, []);
-      this.setState({codeResults});
-      console.log(event);
+    filterCodes = (input: string) => {
+      if (!input) {
+        this.setState({codeResults: []});
+      } else {
+        const {data} = this.state;
+        const {domain, filterState, filterState: {vocab}} = this.props;
+        const codeType = `${vocab}Code`;
+        const checkedItems = filterState.tabs[domain][codeType];
+        // TODO prevent duplicates and already selected options in results
+        const codeResults = data.reduce((acc, item) => {
+          if (item[codeType].includes(input) && !acc.includes(input)) {
+            acc.push(item[codeType]);
+          }
+          return acc;
+        }, []);
+        this.setState({codeResults});
+        console.log(input);
+      }
     }
 
     addCode = (event: any) => {
@@ -405,6 +409,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           }) : [];
           break;
       }
+      options.sort((a, b) => b.count - a.count);
       options.push({name: 'Select All', count: counts.total});
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
@@ -437,8 +442,10 @@ export const DetailTabTable = withCurrentWorkspace()(
           {colName === `${vocab}Code` && <TextInput
             style={styles.codeSearch}
             onChange={this.codeInput} />}
-          {codeResults.length && <div>{codes}</div>}
-          <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>{checkboxes}</div>
+          <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
+            {codeResults.length > 0  && <div style={{borderBottom: '1px solid #ccc'}}>{codes}</div>}
+            {checkboxes}
+            </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={checkedItems[colName].includes('Select All')}
