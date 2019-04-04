@@ -99,6 +99,13 @@ const styles = reactStyles({
     borderRadius: '4px',
     backgroundColor: '#dae6ed',
     marginLeft: '5px'
+  },
+  codeInput: {
+    width: 'auto',
+    padding: '0 0 0 5px',
+    border: 0,
+    backgroundColor: 'transparent',
+    outline: 'none',
   }
 });
 const rows = 25;
@@ -420,9 +427,10 @@ export const DetailTabTable = withCurrentWorkspace()(
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {colName === `${vocab}Code` && <TextInput
-            style={styles.codeSearch}
-            onChange={this.codeInput} />}
+          {colName === `${vocab}Code` && <div style={styles.codeSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <TextInput style={styles.codeInput} onChange={this.codeInput} placeholder={'Search'} />
+          </div>}
           <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
             {checkboxes}
           </div>
