@@ -168,10 +168,6 @@ set participant_count =
     end
 where participant_count > 0"
 
-#Drop unit_map table
-bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
-"drop table \`$PUBLIC_PROJECT.$PUBLIC_DATASET.unit_map\` "
-
 # Updating domain_id of few survey questions from measurement to observation to avoid confusion in display
 bq --quiet --project=$PUBLIC_PROJECT query --nouse_legacy_sql \
 "Update  \`$PUBLIC_PROJECT.$PUBLIC_DATASET.concept\`
