@@ -261,31 +261,32 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
+      const {checked, name} = event.target;
       const {domain, filterState} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
-      if (event.target.checked) {
-        if (event.target.name === 'Select All') {
+      if (checked) {
+        if (name === 'Select All') {
           checkedItems = namesArray.map(opt => opt.name);
         } else {
-          checkedItems.push(event.target.name);
+          checkedItems.push(name);
           if (namesArray.length - 1 === checkedItems.length) {
             // we have to add selectall when everything is selected
             checkedItems.push('Select All');
           }
         }
       } else {
-        if (event.target.name === 'Select All') {
+        if (name === 'Select All') {
           checkedItems = [];
         } else {
           if (checkedItems.find(s => s === 'Select All')) {
             checkedItems.splice(checkedItems.indexOf('Select All'), 1);
           }
-          checkedItems.splice(checkedItems.indexOf(event.target.name), 1);
+          checkedItems.splice(checkedItems.indexOf(name), 1);
         }
       }
       filterState.tabs[domain][colName] = checkedItems;
       this.props.getFilteredData(filterState);
-      this.getErrorMessage(event.target.name);
+      this.getErrorMessage(name);
     }
 
     filterData() {
@@ -392,6 +393,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           options = domains.map(name => {
             return {name, count: counts[name] || 0};
           });
+          options.sort((a, b) => b.count - a.count);
           break;
         case `${vocab}Code`:
           options = Object.keys(counts).reduce((acc, name) => {
@@ -400,15 +402,21 @@ export const DetailTabTable = withCurrentWorkspace()(
             }
             return acc;
           }, []);
+          options.sort((a, b) => b.count - a.count);
+          checkedItems[colName].forEach(name => {
+            if (!options.find(opt => opt.name === name)) {
+              options = [{name, count: 0}, ...options];
+            }
+          });
           break;
         case `${vocab}Vocabulary`:
           const vocabs = vocabOptions.getValue()[vocab];
           options = vocabs[domain] ? vocabs[domain].map(name => {
             return {name, count: counts[name] || 0};
           }) : [];
+          options.sort((a, b) => b.count - a.count);
           break;
       }
-      options.sort((a, b) => b.count - a.count);
       options.push({name: 'Select All', count: counts.total});
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
