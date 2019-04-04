@@ -403,11 +403,13 @@ export const DetailTabTable = withCurrentWorkspace()(
             return acc;
           }, []);
           options.sort((a, b) => b.count - a.count);
-          checkedItems[colName].forEach(name => {
-            if (!options.find(opt => opt.name === name)) {
-              options = [{name, count: 0}, ...options];
-            }
-          });
+          if (!checkedItems[colName].includes('Select All')) {
+            checkedItems[colName].forEach(name => {
+              if (!options.find(opt => opt.name === name)) {
+                options = [{name, count: 0}, ...options];
+              }
+            });
+          }
           break;
         case `${vocab}Vocabulary`:
           const vocabs = vocabOptions.getValue()[vocab];
@@ -418,7 +420,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           break;
       }
       options.push({name: 'Select All', count: counts.total});
-      if (checkedItems[colName].find(i => i === 'Select All')) {
+      if (checkedItems[colName].includes('Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
       const checkboxes = codeResults && codeResults.length === 0
