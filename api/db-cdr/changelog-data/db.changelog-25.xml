@@ -11,13 +11,5 @@
 
     <delete tableName="survey_question_map"/>
 
-    <loadData tableName="survey_question_map" file="csv/survey_question_map.csv" encoding="UTF-8" quotchar='"'>
-      <column name="id" type="NUMERIC"/>
-      <column name="survey_concept_id" type="NUMERIC"/>
-      <column name="question_concept_id" type="NUMERIC"/>
-      <column name="path" type="NUMERIC"/>
-      <column name="is_main" type="BOOLEAN"/>
-    </loadData>
-
   </changeSet>
 </databaseChangeLog>

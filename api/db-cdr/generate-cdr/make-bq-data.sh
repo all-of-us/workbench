@@ -79,7 +79,7 @@ cri_anc_table_check=\\bcriteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute criteria_relationship criteria_ancestor domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info unit_map survey_question_map)
+create_tables=(achilles_analysis achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria criteria_attribute criteria_relationship criteria_ancestor domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info unit_map)
 
 for t in "${create_tables[@]}"
 do
@@ -88,7 +88,7 @@ do
 done
 
 # Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(domain_info survey_module achilles_analysis unit_map survey_question_map)
+load_tables=(domain_info survey_module achilles_analysis unit_map)
 csv_path=generate-cdr/csv
 for t in "${load_tables[@]}"
 do
@@ -528,21 +528,6 @@ on cr.concept_id_2 = sm.concept_id
 where cr.relationship_id = 'Has Module'
 group by survey_concept_id,cr.concept_id_1)
 where c1.concept_id=question_id
-"
-
-# Set the question count on the survey_module row
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
-set sm.question_count=num_questions from
-(select count(distinct qc.concept_id) num_questions, r.stratum_1 as survey_concept_id from
-\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.achilles_results\` r
-  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_question_map\` sq
-    on r.stratum_1 = CAST(sq.survey_concept_id AS STRING)
-  join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` qc
-    on sq.question_concept_id = qc.concept_id
-where r.analysis_id = 3110 and qc.count_value > 0 and sq.sub=0
-  group by survey_concept_id)
-where CAST(sm.concept_id AS STRING) = survey_concept_id
 "
 
 ########################
