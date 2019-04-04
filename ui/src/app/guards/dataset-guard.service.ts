@@ -14,12 +14,16 @@ export class DataSetGuard implements CanActivate, CanActivateChild {
   constructor(private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    this.router.navigate(['workspaces', route.params.ns, route.params.wsid]);
+    if (!environment.enableDatasetBuilder) {
+      this.router.navigate(['workspaces', route.params.ns, route.params.wsid]);
+    }
     return environment.enableDatasetBuilder;
   }
 
   canActivateChild(route: ActivatedRouteSnapshot): boolean {
-    this.router.navigate(['workspaces', route.params.ns, route.params.wsid]);
+    if (!environment.enableDatasetBuilder) {
+      this.router.navigate(['workspaces', route.params.ns, route.params.wsid]);
+    }
     return environment.enableDatasetBuilder;
   }
 }
