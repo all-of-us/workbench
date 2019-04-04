@@ -76,7 +76,7 @@
       referencedTableName="concept_set"/>
 
     <addForeignKeyConstraint baseColumnNames="data_set_id"
-      baseTableName="data_set_concept_id"
+      baseTableName="data_set_concept_set_id"
       constraintName="fk_data_set_concept_data_set_id"
       onDelete="CASCADE"
       referencedColumnNames="data_set_id"
