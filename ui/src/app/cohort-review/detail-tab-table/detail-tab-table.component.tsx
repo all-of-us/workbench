@@ -106,7 +106,12 @@ const styles = reactStyles({
     border: 0,
     backgroundColor: 'transparent',
     outline: 'none',
-  }
+  },
+  noResults: {
+    paddingLeft: '0.5rem',
+    lineHeight: '1.25rem',
+    opacity: 0.5,
+  },
 });
 const rows = 25;
 const domains = [
@@ -156,7 +161,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortField: null,
         sortOrder: 1,
         expandedRows: [],
-        codeResults: [],
+        codeResults: null,
       };
       this.codeInput = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -354,7 +359,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     filterCodes = (input: string) => {
       if (!input) {
-        this.setState({codeResults: []});
+        this.setState({codeResults: null});
       } else {
         const {data} = this.state;
         const {filterState: {vocab}} = this.props;
@@ -366,7 +371,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           return acc;
         }, []);
         this.setState({codeResults});
-        console.log(input);
       }
     }
 
@@ -409,19 +413,21 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (checkedItems[colName].find(i => i === 'Select All')) {
         checkedItems[colName] = options.map(opt => opt.name);
       }
-      const checkboxes = options.reduce((acc, opt, i) => {
-        if (codeResults.length === 0 || codeResults.includes(opt.name)) {
-          acc.push(<React.Fragment key={i}>
-            {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
-              <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
-                     checked={checkedItems[colName].includes(opt.name)}
-                     onChange={($event) => this.updateData($event, colName, options)}/>
-              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
-            </div>}
-          </React.Fragment>);
-        }
-        return acc;
-      }, []);
+      const checkboxes = codeResults && codeResults.length === 0
+        ? <em style={styles.noResults}>No matching codes</em>
+        : options.reduce((acc, opt, i) => {
+          if (!codeResults || codeResults.includes(opt.name)) {
+            acc.push(<React.Fragment key={i}>
+              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+                <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
+                       checked={checkedItems[colName].includes(opt.name)}
+                       onChange={($event) => this.updateData($event, colName, options)}/>
+                <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+              </div>}
+            </React.Fragment>);
+          }
+          return acc;
+        }, []);
       let fl: any;
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
