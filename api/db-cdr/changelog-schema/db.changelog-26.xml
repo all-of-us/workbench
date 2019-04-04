@@ -32,7 +32,7 @@
       <column name="name" type="VARCHAR(4000)">
         <constraints nullable="true"/>
       </column>
-      <column name="value" type="BIGINT">
+      <column name="value" type="VARCHAR(80)">
         <constraints nullable="true"/>
       </column>
       <column name="is_group" type="BOOL">
@@ -59,31 +59,59 @@
       <column name="path" type="VARCHAR(500)">
         <constraints nullable="true"/>
       </column>
-      <column name="synonyms" type="mediumblob">
+      <column name="synonyms" type="clob">
         <constraints nullable="true"/>
       </column>
     </createTable>
 
     <createIndex
-      indexName="idx_criteria_type_parent_id"
-      tableName="criteria"
+      indexName="idx_cb_criteria_type_parent_id"
+      tableName="cb_criteria"
       unique="false">
       <column name="type"/>
       <column name="parent_id"/>
     </createIndex>
 
     <createIndex
-      indexName="idx_criteria_concept_id"
-      tableName="criteria"
+      indexName="idx_cb_criteria_concept_id"
+      tableName="cb_criteria"
       unique="false">
       <column name="concept_id"/>
     </createIndex>
 
     <sql dbms="mysql">
-      ALTER TABLE criteria
-      ADD FULLTEXT INDEX criteria_synonyms
+      ALTER TABLE cb_criteria
+      ADD FULLTEXT INDEX cb_criteria_synonyms
       (synonyms);
     </sql>
+
+    <createTable tableName="cb_criteria_attribute">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value_as_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_criteria_attribute_concept_id"
+      tableName="cb_criteria_attribute"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
 
   </changeSet>
 </databaseChangeLog>
