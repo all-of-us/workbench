@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 
+import {QueryReport} from 'app/cohort-review/query-report/query-report.component';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -8,19 +9,13 @@ import {
   vocabOptions
 } from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {Button} from 'app/components/buttons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {
-  cdrVersionStore,
-  currentCohortStore,
-  currentWorkspaceStore,
-  navigate,
-  navigateByUrl,
-  urlParamsStore
-} from 'app/utils/navigation';
+import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 
 import {
   CohortStatus,
@@ -171,6 +166,7 @@ export interface ParticipantsTableState {
   sortOrder: number;
   total: number;
   filters: any;
+  cohortDescription: boolean;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
@@ -185,7 +181,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortField: 'participantId',
         sortOrder: 1,
         total: null,
-        filters: filterStateStore.getValue().participants
+        filters: filterStateStore.getValue().participants,
+        cohortDescription: false,
       };
       this.filterInput = fp.debounce(300, () => this.getTableData());
     }
@@ -363,10 +360,15 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }[gender];
     }
 
-    backToCohort() {
-      const {id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
-      navigateByUrl( `/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+    goBack() {
+      const {cohortDescription} = this.state;
+      if (cohortDescription) {
+        this.setState({cohortDescription: false});
+      } else {
+        const {id, namespace} = this.props.workspace;
+        const {cid} = urlParamsStore.getValue();
+        navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+      }
     }
 
     onRowClick = (event: any) => {
@@ -469,7 +471,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, page, sortField, sortOrder, total} = this.state;
+      const {cohortDescription, data, loading, page, sortField, sortOrder, total} = this.state;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
@@ -508,13 +510,20 @@ export const ParticipantsTable = withCurrentWorkspace()(
         <button
           style={styles.backBtn}
           type='button'
-          title='Go back to cohort'
-          onClick={() => this.backToCohort()}>
+          onClick={() => this.goBack()}>
           Back to cohort
         </button>
         <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
-        <div style={styles.description}>{cohort.description}</div>
-        {data && <DataTable
+        <div style={styles.description}>
+          {cohort.description}
+          {!cohortDescription && <Button
+            style={{float: 'right', marginBottom: '0.5rem'}}
+            onClick={() => this.setState({cohortDescription: true})}>
+            Cohort Description
+          </Button>}
+        </div>
+        {cohortDescription && <QueryReport/>}
+        {!cohortDescription && data && <DataTable
           style={styles.table}
           value={data}
           first={start}
