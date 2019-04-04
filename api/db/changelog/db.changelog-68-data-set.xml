@@ -60,7 +60,7 @@
       <column name="data_set_id" type="bigint">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="domain_id" type="STRING">
+      <column name="domain_id" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
       <column name="values" type="clob">
