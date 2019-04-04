@@ -304,26 +304,21 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       /* Column filters */
       const checkedItems = filterState.tabs[domain];
-      const empty = [];
-      for (const col in checkedItems) {
-        if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)
-          && checkedItems[col].length
-          && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-          data = data.filter(row => checkedItems[col].includes(row[col]));
-          empty.push(false);
-        } else {
-          empty.push(true);
+      if (!checkedItems) {
+        if (data.length < start + rows) {
+          start = Math.floor(data.length / rows) * rows;
         }
-      }
-      if (!empty.includes(false)) {
-        if (checkedItems === undefined ||
-          (vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-          // as some tab does not have filtered items but have data
-          this.setState({filteredData: data, start: start});
-        } else {
-          this.setState({filteredData: []});
-        }
+        this.setState({filteredData: data, start: start});
       } else {
+        for (const col in checkedItems) {
+          if (!checkedItems[col].length) {
+            data = [];
+            break;
+          } else if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)
+            && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+            data = data.filter(row => checkedItems[col].includes(row[col]));
+          }
+        }
         if (data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
@@ -430,7 +425,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             onChange={this.codeInput} />}
           <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
             {checkboxes}
-            </div>
+          </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={checkedItems[colName].includes('Select All')}
