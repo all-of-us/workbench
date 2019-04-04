@@ -4,8 +4,8 @@ import com.google.cloud.storage.Blob;
 import com.google.common.collect.Lists;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.channels.Channels;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -61,6 +61,8 @@ public class CloudStorageShardedLineIterator implements Iterator<String> {
   }
 
   private BufferedReader openBlob(Blob b) {
-    return new BufferedReader(new InputStreamReader(Channels.newInputStream(b.reader())));
+    // Call to GCS are slow, so use a big 64MiB buffer to minimize total requests.
+    return new BufferedReader(
+        Channels.newReader(b.reader(), Charset.forName("UTF-8").newDecoder(), 64 << 20));
   }
 }

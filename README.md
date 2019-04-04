@@ -567,15 +567,3 @@ curl -X GET -H "$(oauth2l header --json build/exploded-api/WEB-INF/sa-key.json u
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
 ```
-
-### Generating survey_question_map.csv
-survey_question_map.csv is used to identify the order of appearance of the questions and the path of each question in actual survey pdfs.
-1. Id column is incremental and specifies the order of the questions in each survey.(Used to display the questions in the same order in databrowser)
-2. survey_concept_id holds the concept id of the survey. (can be fetched from the survey_module))
-3. question_concept_id holds the concept id of each question. (can be fetched from the survey pdf)
-4. survey_order_number specifies the order of specific survey. (In the order they appear to participant while taking the survey)
-5. question_order_number specifies the order of specific survey. (In the order questions appear to participant while taking the survey)
-4. path specifies the traversing path of question. This column is used to display the branching logic in the ui. This would have the value in the form main_question_concept_id.answer_concept_id.sub_question_concept_id. 
-5. sub is the boolean field which holds 1 in the case of main questions and 0 in case the question is the sub question. (Used to filter out the main questions)
-* NOTE: This file for now is generated manually and in case new questions come in any of the survey, specific row should be added to this file to avoid missing out count generation for the new ones. Also, the missing questions would not be displayed as they do not have the counts in there to display.
-

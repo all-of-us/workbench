@@ -2031,6 +2031,34 @@ definitions:
           type: integer
           format: int64
 
+  DataSet:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      conceptSetIds:
+        type: array
+        description: >
+          The ids of all concept sets in the data set
+        items:
+          type: integer
+          format: int64
+      cohortIds:
+        type: array
+        description: >
+          The ids of all cohorts in the data set
+        items:
+          type: integer
+          format: int64
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          $ref: "#/definitions/ValueSet"
+
   DomainInfoResponse:
     type: object
     required:
@@ -2040,6 +2068,19 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/DomainInfo"
+
+  ValueSet:
+    type: object
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      values:
+        $ref: "#/definitions/DomainValuesResponse"
 
   DomainValuesResponse:
     type: object
@@ -2213,10 +2254,6 @@ definitions:
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
-      trainingCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
       demographicSurveyCompletionTime:
         type: integer
         format: int64

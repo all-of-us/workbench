@@ -74,5 +74,6 @@
   <include file="changelog/db.changelog-64.xml"/>
   <include file="changelog/db.changelog-65.xml"/>
   <include file="changelog/db.changelog-66.xml"/>
-  <include file="changelog/db.changelog-67-data-set.xml"/>
+  <include file="changelog/db.changelog-67-compliance-training-expiration.xml"/>
+  <include file="changelog/db.changelog-68-data-set.xml"/>
 </databaseChangeLog>
