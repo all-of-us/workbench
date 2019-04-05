@@ -127,23 +127,61 @@ public class CohortsController implements CohortsApiDelegate {
       Cohort cohort) {
     // This also enforces registered auth domain.
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
+
+    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
+
+    if (cohortDao.findCohortByNameAndWorkspaceId(newCohort.getName(), workspace.getWorkspaceId()) != null) {
+      throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
+              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()));
+    }
 
     try {
       // TODO Make this a pre-check within a transaction?
-      dbCohort = cohortDao.save(dbCohort);
-      userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(), userProvider.get().getUserId(), dbCohort.getCohortId(), now);
+      newCohort = cohortDao.save(newCohort);
+      userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(),
+              userProvider.get().getUserId(),
+              newCohort.getCohortId(),
+              new Timestamp(clock.instant().toEpochMilli()));
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
-      throw new BadRequestException(String.format(
-          "Cohort \"/%s/%s/%d\" already exists.",
-          workspaceNamespace, workspaceId, dbCohort.getCohortId()));
+      throw new ServerErrorException(
+              String.format("Could not save Cohort (\"/%s/%s/%s\")", workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()),
+              e
+      );
     }
-    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+
+    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+  }
+
+  @Override
+  public ResponseEntity<Cohort> duplicateCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
+    workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+
+    org.pmiops.workbench.db.model.Cohort fromCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(fromCohort, userProvider.get());
+
+    if (cohortDao.findCohortByNameAndWorkspaceId(newCohort.getName(), workspace.getWorkspaceId()) != null) {
+      throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
+              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()));
+    }
+
+    try {
+      newCohort = cohortDao.save(newCohort);
+      userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(),
+              userProvider.get().getUserId(),
+              newCohort.getCohortId(),
+              new Timestamp(clock.instant().toEpochMilli()));
+    } catch (Exception e) {
+      throw new ServerErrorException(
+              String.format("Could not save Cohort (\"/%s/%s/%s\")", workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()),
+              e
+      );
+    }
+
+    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
   }
 
   @Override

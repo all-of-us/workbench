@@ -34,7 +34,7 @@ public class CohortFactoryImpl implements CohortFactory {
     public Cohort duplicateCohort(Cohort from, User creator) {
         return createCohort(
                 from.getDescription(),
-                from.getName(),
+                from.getName() + "_2",
                 from.getType(),
                 from.getCriteria(),
                 creator,

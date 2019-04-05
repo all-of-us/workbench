@@ -1100,6 +1100,24 @@ paths:
           schema:
             $ref: "#/definitions/Cohort"
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/duplicate:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+    post:
+      tags:
+        - cohorts
+      consumes:
+        - application/json
+      description: Creates a duplicate of the cohort specified by cohortId
+      operationId: "duplicateCohort"
+      responses:
+        200:
+          description: The cohort definition that was created.
+          schema:
+            $ref: "#/definitions/Cohort"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
