@@ -38,7 +38,7 @@ echo "Importing data files from $REMOTE_DATA_LOC"
 
 # Add tables names of files to import here
 # TODO:Remove criteria
-TABLES=(achilles_analysis achilles_results achilles_results_dist domain_info survey_module domain vocabulary criteria cb_criteria criteria_attribute cb_criteria_attribute criteria_relationship cb_criteria_relationship criteria_ancestor cb_criteria_ancestor concept concept_relationship concept_synonym domain_vocabulary_info)
+TABLES=(achilles_results achilles_results_dist domain_info survey_module domain vocabulary criteria cb_criteria criteria_attribute cb_criteria_attribute criteria_relationship cb_criteria_relationship criteria_ancestor cb_criteria_ancestor concept concept_relationship concept_synonym domain_vocabulary_info)
 
 # Make a dir for the csvs
 local_fpath=/tmp/$CDR_DB_NAME
