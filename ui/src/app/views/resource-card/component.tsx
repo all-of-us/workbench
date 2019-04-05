@@ -110,6 +110,9 @@ export interface ResourceCardState {
   editing: boolean;
   confirmDeleting: boolean;
   invalidResourceError: boolean;
+  showErrorModal: boolean;
+  errorModalTitle: string;
+  errorModalBody: string;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -125,7 +128,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       confirmDeleting: false,
       invalidResourceError: !(props.resourceCard.notebook ||
         props.resourceCard.cohort ||
-        props.resourceCard.conceptSet)
+        props.resourceCard.conceptSet),
+      showErrorModal: false,
+      errorModalTitle: 'Error Title',
+      errorModalBody: 'Error Body'
     };
   }
 
@@ -139,6 +145,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return {...resourceCard, conceptSet: myTempConceptSet};
     }
     return resourceCard;
+  }
+
+  showErrorModal(title: string, body: string) {
+    this.setState({
+      showErrorModal: true,
+      errorModalTitle: title,
+      errorModalBody: body
+    })
   }
 
   get resourceType(): ResourceType {
@@ -268,6 +282,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
           this.props.resourceCard.cohort.id
         ).then(() => {
           this.props.onUpdate();
+        }).catch(e => {
+          this.showErrorModal('Duplicating Cohort Error', 'Cohort with the same name already exists.');
         });
         break;
       }
@@ -380,6 +396,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         <ModalBody>Please Report a Bug.</ModalBody>
         <ModalFooter>
           <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
+        </ModalFooter>
+      </Modal>}
+      {this.state.showErrorModal &&
+      <Modal>
+        <ModalTitle>{this.state.errorModalTitle}</ModalTitle>
+        <ModalBody>{this.state.errorModalBody}</ModalBody>
+        <ModalFooter>
+          <Button onClick={() => this.setState({showErrorModal: false})}>OK</Button>
         </ModalFooter>
       </Modal>}
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
