@@ -20,25 +20,43 @@ public class CohortFactoryImpl implements CohortFactory {
 
     @Override
     public Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId) {
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-
-        Cohort dbCohort = new org.pmiops.workbench.db.model.Cohort();
-        dbCohort.setCriteria(apiCohort.getCriteria());
-        dbCohort.setDescription(apiCohort.getDescription());
-        dbCohort.setName(apiCohort.getName());
-        dbCohort.setType(apiCohort.getType());
-        dbCohort.setCreationTime(now);
-        dbCohort.setLastModifiedTime(now);
-        dbCohort.setVersion(1);
-        dbCohort.setCreator(creator);
-        dbCohort.setWorkspaceId(workspaceId);
-
-        return dbCohort;
+        return createCohort(
+                apiCohort.getDescription(),
+                apiCohort.getName(),
+                apiCohort.getType(),
+                apiCohort.getCriteria(),
+                creator,
+                workspaceId
+        );
     }
 
     @Override
-    public Cohort duplicateCohort(org.pmiops.workbench.model.Cohort apiCohort) {
-        return null;
+    public Cohort duplicateCohort(Cohort from, User creator) {
+        return createCohort(
+                from.getDescription(),
+                from.getName(),
+                from.getType(),
+                from.getCriteria(),
+                creator,
+                from.getWorkspaceId()
+        );
+    }
+
+    private Cohort createCohort(String desc, String name, String type, String criteria, User creator, long workspaceId) {
+        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+        Cohort cohort = new Cohort();
+
+        cohort.setDescription(desc);
+        cohort.setName(name);
+        cohort.setType(type);
+        cohort.setCriteria(criteria);
+        cohort.setCreationTime(now);
+        cohort.setLastModifiedTime(now);
+        cohort.setVersion(1);
+        cohort.setCreator(creator);
+        cohort.setWorkspaceId(workspaceId);
+
+        return cohort;
     }
 
 }
