@@ -324,12 +324,14 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({filteredData: data, start: start});
       } else {
         for (const col in checkedItems) {
-          if (!checkedItems[col].length) {
-            data = [];
-            break;
-          } else if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)
-            && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-            data = data.filter(row => checkedItems[col].includes(row[col]));
+          if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)) {
+            if (!checkedItems[col].length) {
+              data = [];
+              break;
+            } else if (!checkedItems[col].includes('Select All')
+              && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+              data = data.filter(row => checkedItems[col].includes(row[col]));
+            }
           }
         }
         if (data.length < start + rows) {
