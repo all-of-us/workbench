@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -78,22 +79,10 @@ public class CohortsController implements CohortsApiDelegate {
         }
       };
 
-  private static final Function<Cohort, org.pmiops.workbench.db.model.Cohort> FROM_CLIENT_COHORT =
-      new Function<Cohort, org.pmiops.workbench.db.model.Cohort>() {
-        @Override
-        public org.pmiops.workbench.db.model.Cohort apply(Cohort cohort) {
-          org.pmiops.workbench.db.model.Cohort result = new org.pmiops.workbench.db.model.Cohort();
-          result.setCriteria(cohort.getCriteria());
-          result.setDescription(cohort.getDescription());
-          result.setName(cohort.getName());
-          result.setType(cohort.getType());
-          return result;
-        }
-      };
-
   private final WorkspaceService workspaceService;
   private final CohortDao cohortDao;
   private final CdrVersionDao cdrVersionDao;
+  private final CohortFactory cohortFactory;
   private final CohortReviewDao cohortReviewDao;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
@@ -107,6 +96,7 @@ public class CohortsController implements CohortsApiDelegate {
       WorkspaceService workspaceService,
       CohortDao cohortDao,
       CdrVersionDao cdrVersionDao,
+      CohortFactory cohortFactory,
       CohortReviewDao cohortReviewDao,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
@@ -117,6 +107,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
+    this.cohortFactory = cohortFactory;
     this.cohortReviewDao = cohortReviewDao;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
@@ -139,13 +130,11 @@ public class CohortsController implements CohortsApiDelegate {
 
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    org.pmiops.workbench.db.model.Cohort dbCohort = FROM_CLIENT_COHORT.apply(cohort);
-    // TODO: Make this a service method to avoid duplication with WorkspacesController
+    org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.createCohort(cohort);
+    // TODO eric: Make this a service method to avoid duplication with WorkspacesController
     dbCohort.setCreator(userProvider.get());
     dbCohort.setWorkspaceId(workspace.getWorkspaceId());
-    dbCohort.setCreationTime(now);
-    dbCohort.setLastModifiedTime(now);
-    dbCohort.setVersion(1);
+
     try {
       // TODO Make this a pre-check within a transaction?
       dbCohort = cohortDao.save(dbCohort);

@@ -393,7 +393,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     List<JSONObject> demoCohorts = cloudStorageService.readAllDemoCohorts();
     for (JSONObject cohort: demoCohorts) {
-      // TODO: Make this a service method to avoid duplication with CohortsController
+      // TODO eric: Make this a service method to avoid duplication with CohortsController
       Cohort dbCohort = new Cohort();
       dbCohort.setName(cohort.getString("name"));
       dbCohort.setDescription(cohort.getString("description"));
@@ -404,6 +404,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbCohort.setCreationTime(now);
       dbCohort.setLastModifiedTime(now);
       dbCohort.setVersion(1);
+
       try {
         dbCohort = cohortDao.save(dbCohort);
       } catch (DataIntegrityViolationException e) {
