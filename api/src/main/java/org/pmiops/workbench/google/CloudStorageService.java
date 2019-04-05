@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.model.Cohort;
 
 /**
- * Encapsulate Googe APIs for interfacing with Google Cloud Storage.
+ * Encapsulate Google APIs for interfacing with Google Cloud Storage.
  */
 public interface CloudStorageService {
 

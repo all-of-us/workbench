@@ -106,6 +106,7 @@ sourceSets {
                   'org/pmiops/workbench/model/ErrorCode.java',
                   'org/pmiops/workbench/model/ErrorResponse.java',
                   'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
+                  'org/pmiops/workbench/model/Cohort.java',
                   'org/pmiops/workbench/model/CohortStatus.java',
                   'org/pmiops/workbench/model/CohortReview.java',
                   'org/pmiops/workbench/model/Domain.java',

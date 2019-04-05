@@ -1108,8 +1108,6 @@ paths:
     post:
       tags:
         - cohorts
-      consumes:
-        - application/json
       description: Creates a duplicate of the cohort specified by cohortId
       operationId: "duplicateCohort"
       responses:
