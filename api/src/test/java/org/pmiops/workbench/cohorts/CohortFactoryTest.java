@@ -33,7 +33,7 @@ public class CohortFactoryTest {
 
         long workspaceId = 1l;
 
-        org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
+        Cohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
 
         assertThat(dbCohort.getDescription()).isEqualTo("desc");
         assertThat(dbCohort.getName()).isEqualTo("name");
@@ -54,7 +54,7 @@ public class CohortFactoryTest {
         originalCohort.setCohortReviews(Collections.singleton(mock(CohortReview.class)));
 
         User user = mock(User.class);
-        org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.duplicateCohort(originalCohort, user);
+        Cohort dbCohort = cohortFactory.duplicateCohort(originalCohort, user);
 
         assertThat(dbCohort.getDescription()).isEqualTo("desc");
         assertThat(dbCohort.getName()).isEqualTo("name_2");

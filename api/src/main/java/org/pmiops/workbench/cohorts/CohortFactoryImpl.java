@@ -31,14 +31,14 @@ public class CohortFactoryImpl implements CohortFactory {
     }
 
     @Override
-    public Cohort duplicateCohort(Cohort from, User creator) {
+    public Cohort duplicateCohort(Cohort original, User creator) {
         return createCohort(
-                from.getDescription(),
-                from.getName() + "_2",
-                from.getType(),
-                from.getCriteria(),
+                original.getDescription(),
+                original.getName() + "_2",
+                original.getType(),
+                original.getCriteria(),
                 creator,
-                from.getWorkspaceId()
+                original.getWorkspaceId()
         );
     }
 

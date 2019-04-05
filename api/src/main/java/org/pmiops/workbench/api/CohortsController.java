@@ -160,8 +160,8 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    org.pmiops.workbench.db.model.Cohort fromCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(fromCohort, userProvider.get());
+    org.pmiops.workbench.db.model.Cohort originalCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(originalCohort, userProvider.get());
 
     if (cohortDao.findCohortByNameAndWorkspaceId(newCohort.getName(), workspace.getWorkspaceId()) != null) {
       throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
