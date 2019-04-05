@@ -33,7 +33,6 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
-import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -235,13 +234,14 @@ public class CohortsControllerTest {
         WorkspaceAccessLevel.OWNER);
     stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME_2, "bob@gmail.com",
         WorkspaceAccessLevel.OWNER);
-    JSONObject demoCohort = new JSONObject();
-    demoCohort.put("name", "demo");
-    demoCohort.put("description", "demo");
-    demoCohort.put("type", "demo");
-    demoCohort.put("criteria", createDemoCriteria());
-    List<JSONObject> demoCohorts = Collections.singletonList(demoCohort);
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
+
+    Cohort cohort = new Cohort();
+    cohort.setName("demo");
+    cohort.setDescription("demo");
+    cohort.setType("demo");
+    cohort.setCriteria(createDemoCriteria().toString());
+    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
+
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     workspace = workspacesController.createWorkspace(workspace).getBody();

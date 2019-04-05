@@ -23,6 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cohorts.CohortFactory;
+import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -153,6 +155,9 @@ public class ConceptSetsControllerTest {
   ConceptDao conceptDao;
 
   @Autowired
+  CohortFactory cohortFactory;
+
+  @Autowired
   CohortDao cohortDao;
 
   @Autowired
@@ -183,7 +188,7 @@ public class ConceptSetsControllerTest {
 
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortService.class,
+  @Import({WorkspaceServiceImpl.class, CohortService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
       ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class})
@@ -205,8 +210,8 @@ public class ConceptSetsControllerTest {
     conceptSetsController = new ConceptSetsController(workspaceService, conceptSetDao, conceptDao,
         conceptBigQueryService, userRecentResourceService, userProvider, CLOCK);
     WorkspacesController workspacesController =
-        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, conceptSetDao, userDao,
-                userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
+        new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, cohortFactory, conceptSetDao,
+                userDao, userProvider, fireCloudService, cloudStorageService, CLOCK, userService,
                 userRecentResourceService);
 
     User user = new User();

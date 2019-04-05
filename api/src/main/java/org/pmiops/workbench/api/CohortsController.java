@@ -130,10 +130,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.createCohort(cohort);
-    // TODO eric: Make this a service method to avoid duplication with WorkspacesController
-    dbCohort.setCreator(userProvider.get());
-    dbCohort.setWorkspaceId(workspace.getWorkspaceId());
+    org.pmiops.workbench.db.model.Cohort dbCohort = cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
 
     try {
       // TODO Make this a pre-check within a transaction?

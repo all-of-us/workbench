@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cohorts;
 
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class CohortFactoryImpl implements CohortFactory {
     }
 
     @Override
-    public Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort) {
+    public Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
         Cohort dbCohort = new org.pmiops.workbench.db.model.Cohort();
@@ -29,6 +30,8 @@ public class CohortFactoryImpl implements CohortFactory {
         dbCohort.setCreationTime(now);
         dbCohort.setLastModifiedTime(now);
         dbCohort.setVersion(1);
+        dbCohort.setCreator(creator);
+        dbCohort.setWorkspaceId(workspaceId);
 
         return dbCohort;
     }

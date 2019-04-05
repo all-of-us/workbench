@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.Cohort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -84,8 +85,16 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public List<JSONObject> readAllDemoCohorts() {
-    return readJSONObjects("cohort", "cohort");
+  public List<Cohort> readAllDemoCohorts() {
+    return readJSONObjects("cohort", "cohort").stream()
+            .map(jsonObject -> {
+              Cohort cohort = new Cohort();
+              cohort.setName(jsonObject.getString("name"));
+              cohort.setDescription(jsonObject.getString("description"));
+              cohort.setCriteria(jsonObject.get("criteria").toString());
+              cohort.setType(jsonObject.getString("type"));
+              return cohort;
+            }).collect(Collectors.toList());
   }
 
   @Override

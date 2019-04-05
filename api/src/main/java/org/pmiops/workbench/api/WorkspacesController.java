@@ -24,6 +24,7 @@ import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -69,6 +70,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
+  private final CohortFactory cohortFactory;
   private final ConceptSetDao conceptSetDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
@@ -83,6 +85,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
+      CohortFactory cohortFactory,
       ConceptSetDao conceptSetDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -94,6 +97,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
+    this.cohortFactory = cohortFactory;
     this.conceptSetDao = conceptSetDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -389,30 +393,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     permissions.setUser(user);
 
     dbWorkspace.addWorkspaceUserRole(permissions);
-
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    List<JSONObject> demoCohorts = cloudStorageService.readAllDemoCohorts();
-    for (JSONObject cohort: demoCohorts) {
-      // TODO eric: Make this a service method to avoid duplication with CohortsController
-      Cohort dbCohort = new Cohort();
-      dbCohort.setName(cohort.getString("name"));
-      dbCohort.setDescription(cohort.getString("description"));
-      dbCohort.setCriteria(cohort.get("criteria").toString());
-      dbCohort.setType(cohort.getString("type"));
-      dbCohort.setCreator(userProvider.get());
-      dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
-      dbCohort.setCreationTime(now);
-      dbCohort.setLastModifiedTime(now);
-      dbCohort.setVersion(1);
 
-      try {
-        dbCohort = cohortDao.save(dbCohort);
-      } catch (DataIntegrityViolationException e) {
-        throw new ServerErrorException(String.format(
-            "Cohort \"/%s/%s/%d\" already exists.",
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
-      }
-    }
+    org.pmiops.workbench.db.model.Workspace finalDbWorkspace = dbWorkspace;
+    cloudStorageService.readAllDemoCohorts().stream()
+            .map(apiCohort -> cohortFactory.createCohort(apiCohort, userProvider.get(), finalDbWorkspace.getWorkspaceId())
+            ).forEach(dbCohort -> {
+              try {
+                dbCohort = cohortDao.save(dbCohort);
+              } catch (DataIntegrityViolationException e) {
+                throw new ServerErrorException(String.format(
+                        "Cohort \"/%s/%s/%d\" already exists.",
+                        finalDbWorkspace.getWorkspaceNamespace(), finalDbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
+              }
+            });
 
     List<JSONObject> demoConceptSets = cloudStorageService.readAllDemoConceptSets();
     for (JSONObject conceptSet: demoConceptSets) {
