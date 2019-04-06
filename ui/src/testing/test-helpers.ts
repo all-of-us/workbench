@@ -58,6 +58,16 @@ export function simulateClickReact<C>(
   updateAndTick(fixture);
 }
 
+export function simulateMultipleElementClickReact<C>(
+  fixture: ComponentFixture<C>,
+  selector: string,
+  index: number
+) {
+  const el = findElementsReact(fixture, selector)[index];
+  ReactTestUtils.Simulate.click(el);
+  updateAndTick(fixture);
+}
+
 export function findElementsReact<C>(
   fixture: ComponentFixture<C>,
   selector: string

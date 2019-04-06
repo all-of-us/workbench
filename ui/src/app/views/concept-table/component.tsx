@@ -90,7 +90,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
         <img style={{width: '15%'}} src='/assets/icons/filter.svg'/>
       </Clickable>
     </PopupTrigger>;
-    return <div>
+    return <div data-test-id='conceptTable'>
       <DataTable ref={(el) => this.dt = el} value={this.props.concepts}
                  paginator={true} rows={100} scrollable={true} loading={this.props.loading}
                  selection={this.state.selectedConcept}
@@ -120,16 +120,15 @@ export class ConceptTableComponent extends ReactWrapperBase {
   @Input() searchTerm = '';
   @Input() placeholderValue = '';
 
+  selectedConcepts: Array<any> = [];
 
   constructor() {
     super(ConceptTable, ['concepts', 'loading', 'onSelectedChanged']);
     this.onSelectedChanged = this.onSelectedChanged.bind(this);
   }
 
-  selectedConcepts: Array<any> = [];
-
   onSelectedChanged(selectedConcepts: Concept[]) {
-    console.log(this.selectedConcepts);
+    this.selectedConcepts = selectedConcepts;
     this.getSelectedConcepts.emit(selectedConcepts);
   }
 }
