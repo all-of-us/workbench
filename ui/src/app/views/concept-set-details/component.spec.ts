@@ -24,7 +24,6 @@ import {
 } from 'generated';
 import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 
-import {mount} from 'enzyme';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';

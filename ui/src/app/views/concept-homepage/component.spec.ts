@@ -202,7 +202,6 @@ describe('ConceptHomepageComponent', () => {
     let buttonText = button.nativeNode.innerHTML;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
-    const dataRow = findElementsReact(fixture, 'tr');
     simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     buttonText = button.nativeNode.innerHTML;
