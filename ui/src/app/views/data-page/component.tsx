@@ -161,17 +161,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         <div style={{color: '#000000', fontSize: '14px'}}>{descriptions.data}</div>
         <div style={styles.cardButtonArea}>
           <CardButton style={styles.resourceTypeButton} onClick={() => {
-            navigate(['workspaces', namespace, id, 'data', 'datasets']);
-          }}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.cardHeaderText}>Datasets</h2>
-              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
-            </div>
-            <div style={styles.cardText}>
-              {descriptions.datasets}
-            </div>
-          </CardButton>
-          <CardButton style={styles.resourceTypeButton} onClick={() => {
             navigate(['workspaces', namespace, id,  'cohorts', 'build']);
           }}>
             <div style={styles.cardHeader}>
@@ -182,7 +171,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               {descriptions.cohorts}
             </div>
           </CardButton>
-          <CardButton style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
+          <CardButton style={styles.resourceTypeButton}
                       onClick={() => {
                         navigate(['workspaces', namespace, id,  'concepts']);
                       }}>
@@ -192,6 +181,19 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             </div>
             <div style={styles.cardText}>
               {descriptions.conceptSets}
+            </div>
+          </CardButton>
+          <CardButton
+            style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
+            onClick={() => {
+              navigate(['workspaces', namespace, id, 'data', 'datasets']);
+            }}>
+            <div style={styles.cardHeader}>
+              <h2 style={styles.cardHeaderText}>Datasets</h2>
+              <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
+            </div>
+            <div style={styles.cardText}>
+              {descriptions.datasets}
             </div>
           </CardButton>
         </div>
@@ -204,11 +206,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               activeTab: Tabs.SHOWALL
             });
           }}>Show All</TabButton>
-          <TabButton active={activeTab === Tabs.DATASETS} onClick={() => {
-            this.setState({
-              activeTab: Tabs.DATASETS
-            });
-          }}>Datasets</TabButton>
           <TabButton active={activeTab === Tabs.COHORTS} onClick={() => {
             this.setState({
               activeTab: Tabs.COHORTS
@@ -219,6 +216,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               activeTab: Tabs.CONCEPTSETS
             });
           }} data-test-id='view-only-concept-sets'>Concept Sets</TabButton>
+          <TabButton active={activeTab === Tabs.DATASETS} onClick={() => {
+            this.setState({
+              activeTab: Tabs.DATASETS
+            });
+          }}>Datasets</TabButton>
         </div>
         <div style={{
           borderBottom: '1px solid #525A65',
