@@ -233,7 +233,7 @@ describe('ConceptSetDetailsComponent', () => {
     simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 3);
-    simulateClick(fixture, de.query(By.css('.sliding-button')));
+    simulateClickReact(fixture, '[data-test-id="sliding-button"]');
     simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
     updateAndTick(fixture);
     const tableRows = findElementsReact(fixture, 'tr');

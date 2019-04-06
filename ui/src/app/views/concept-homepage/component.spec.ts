@@ -197,17 +197,16 @@ describe('ConceptHomepageComponent', () => {
     simulateEvent(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
-    const button = fixture.debugElement.query(By.css('.sliding-button'))
-       .query(By.css('.text'));
-    let buttonText = button.nativeNode.innerHTML;
+    const button = findElementsReact(fixture, '[data-test-id="sliding-button"]')[0];
+    let buttonText = button.innerText;
     // Default value to be Add to set
-    expect(buttonText).toBe('Add to set');
+    expect(buttonText).toBe('ADD TO SET');
     simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
-    buttonText = button.nativeNode.innerHTML;
+    buttonText = button.innerText;
 
     // After select add the number of selected concepts
-    expect(buttonText).toBe('Add (1) to set');
+    expect(buttonText).toBe('ADD (1) TO SET');
   }));
 
   // TODO [RW-2272]: Disabling this test until this component is converted
