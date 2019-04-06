@@ -43,13 +43,19 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
     const normalized = mode === 'normalized';
     const options = {
       chart: {
+        height: 250,
         type: 'bar'
+      },
+      credits: {
+        enabled: false
       },
       title: {
         text: ''
       },
       xAxis: {
-        categories: this.getCategories()
+        categories: this.getCategories(),
+        tickLength: 0,
+        tickPixelInterval: 50
       },
       yAxis: {
         labels: {
@@ -60,11 +66,16 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
           text: ''
         }
       },
-      colors: ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5', '#adcded'],
+      // colors: ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5', '#adcded'],
+      colors: ['#adcded', '#aae3f5', '#a27ea8', '#7aa3e5', '#a8385d'],
       legend: {
         enabled: false
       },
       plotOptions: {
+        bar: {
+          groupPadding: 0,
+          pointPadding: 0.1,
+        },
         series: {
           stacking: (normalized ? 'percent' : 'normal')
         }
@@ -91,8 +102,7 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
       .map((group, race) => ({name: race, data: group.map(item => item.get('count'))}))
       .sort((a, b) => a.name < b.name ? 1 : -1)
       .toJS();
-    console.log(series);
-    return Object.values(series);
+    return Object.keys(series).map(key => series[key]);
   }
 
   /**
