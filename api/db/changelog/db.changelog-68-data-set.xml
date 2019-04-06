@@ -24,6 +24,7 @@
       <column name="creation_time" type="datetime">
         <constraints nullable="false"/>
       </column>
+      <column name="invalid" type="boolean"/>
     </createTable>
     <addForeignKeyConstraint baseColumnNames="creator_id"
         baseTableName="data_set"
