@@ -57,13 +57,12 @@ export class ModalComponent implements OnInit, OnDestroy {
   title = '';
   mode: 'tree' | 'modifiers' | 'attributes' | 'snomed' = 'tree'; // default to criteria tree
   backMode: string;
-  demoItemsType: string;
-  demoParam: string;
   count = 0;
   originalNode: any;
   disableCursor = false;
   modifiersDisabled = false;
   preview = Map();
+  conceptType: string = null;
 
   constructor(private actions: CohortSearchActions) {}
 
@@ -97,14 +96,17 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.selections = {};
         this.noSelection = selections.size === 0;
         selections.forEach(selection => {
+          if (this.isCondOrProc) {
+            this.conceptType = selection.get('type') === TreeType[TreeType.SNOMED]
+              ? 'standard' : 'source';
+          }
           this.addSelectionToGroup(selection);
         });
+        if (this.conceptType === 'standard') {
+          this.setMode('snomed');
+        }
       })
     );
-    this.subscription.add(this.selection$
-      .map(sel => sel.size === 0)
-      .subscribe(sel => this.noSelection = sel)
-      );
     this.subscription.add(this.attributes$
       .subscribe(node => {
         this.attributesNode = node;
@@ -235,12 +237,7 @@ export class ModalComponent implements OnInit, OnDestroy {
       this.itemType !== TreeType[TreeType.PPI];
   }
 
-  get showHeader() {
-    return this.itemType === TreeType[TreeType.CONDITION]
-    || this.itemType === TreeType[TreeType.PROCEDURE];
-  }
-
-  get showSnomed() {
+  get isCondOrProc() {
     return this.itemType === TreeType[TreeType.CONDITION]
     || this.itemType === TreeType[TreeType.PROCEDURE];
   }

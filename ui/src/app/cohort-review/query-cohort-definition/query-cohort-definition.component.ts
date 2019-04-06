@@ -10,18 +10,15 @@ import {typeToTitle} from 'app/cohort-search/utils';
 export class QueryCohortDefinitionComponent implements OnInit {
   definition: Array<any>;
   values: Array<any>;
-  @Input() cohort: any;
   @Input() review: any;
   constructor() {}
 
   ngOnInit() {
-    if (this.cohort) {
-      this.mapDefinition();
-    }
+    this.mapDefinition();
   }
 
   mapDefinition() {
-    const definition = JSON.parse(this.cohort.criteria);
+    const definition = JSON.parse(this.review.cohortDefinition);
     this.definition = ['includes', 'excludes'].map(role => {
       if (definition[role].length) {
         const roleObj = {role, groups: []};

@@ -454,6 +454,8 @@ definitions:
       - creationTime
       - matchedParticipantCount
       - reviewStatus
+      - cohortDefinition
+      - cohortName
     properties:
       cohortReviewId:
         type: integer
@@ -465,6 +467,10 @@ definitions:
         type: integer
         format: int64
       creationTime:
+        type: string
+      cohortDefinition:
+        type: string
+      cohortName:
         type: string
       matchedParticipantCount:
         type: integer
@@ -535,7 +541,7 @@ definitions:
 
   ParticipantCohortStatusColumns:
     type: string
-    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY]
+    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY, DECEASED]
 
   ReviewColumns:
     type: string
@@ -607,6 +613,8 @@ definitions:
         format: int64
       ethnicity:
         type: string
+      deceased:
+        type: boolean
 
   ModifyCohortStatusRequest:
     type: object

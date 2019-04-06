@@ -27,6 +27,7 @@ public class CdrVersion {
   private int numParticipants;
   private String cdrDbName;
   private String publicDbName;
+  private String elasticIndexBaseName;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -130,10 +131,18 @@ public class CdrVersion {
 
   public void setPublicDbName(String publicDbName) { this.publicDbName = publicDbName; }
 
+  @Column(name = "elastic_index_base_name")
+  public String getElasticIndexBaseName() { return elasticIndexBaseName; }
+
+  public void setElasticIndexBaseName(String elasticIndexBaseName) {
+    this.elasticIndexBaseName = elasticIndexBaseName;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(cdrVersionId, isDefault, name, dataAccessLevel, releaseNumber,
-        bigqueryProject, bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName);
+        bigqueryProject, bigqueryDataset, creationTime, numParticipants, publicDbName, cdrDbName,
+        elasticIndexBaseName);
   }
 
   @Override
@@ -152,6 +161,7 @@ public class CdrVersion {
         .append(this.numParticipants, that.numParticipants)
         .append(this.publicDbName, that.publicDbName)
         .append(this.cdrDbName, that.cdrDbName)
+        .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
         .build();
   }
 }

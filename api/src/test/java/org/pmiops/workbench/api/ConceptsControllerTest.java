@@ -1,8 +1,12 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
@@ -32,6 +36,7 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
@@ -52,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({LiquibaseAutoConfiguration.class})
+@Import({LiquibaseAutoConfiguration.class, BigQueryService.class})
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -206,6 +211,7 @@ public class ConceptsControllerTest {
       WorkspaceServiceImpl.class
   })
   @MockBean({
+      BigQueryService.class,
       FireCloudService.class,
       CohortService.class,
       ConceptSetService.class,
@@ -214,7 +220,8 @@ public class ConceptsControllerTest {
   static class Configuration {
   }
 
-
+  @Autowired
+  private BigQueryService bigQueryService;
   @Autowired
   private ConceptDao conceptDao;
   @Autowired
@@ -241,7 +248,7 @@ public class ConceptsControllerTest {
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
-    conceptsController = new ConceptsController(conceptService, workspaceService,
+    conceptsController = new ConceptsController(bigQueryService, conceptService, workspaceService,
         domainInfoDao, domainVocabularyInfoDao, conceptDao);
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -696,6 +703,22 @@ public class ConceptsControllerTest {
             .participantCount(PROCEDURE_DOMAIN.getParticipantCount())
             .allConceptCount(PROCEDURE_DOMAIN.getAllConceptCount())
             .standardConceptCount(PROCEDURE_DOMAIN.getStandardConceptCount())).inOrder();
+  }
+
+  @Test
+  public void testGetValuesFromDomain() {
+    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
+        .thenReturn(FieldList.of(
+            Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
+            Field.of("FIELD_TWO", LegacySQLTypeName.STRING)
+        ));
+    List<DomainValue> domainValues =
+        conceptsController.getValuesFromDomain("ns", "name", Domain.CONDITION.toString()).getBody().getItems();
+    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+
+    assertThat(domainValues).containsExactly(
+        new DomainValue().value("FIELD_ONE"),
+        new DomainValue().value("FIELD_TWO"));
   }
 
   static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {

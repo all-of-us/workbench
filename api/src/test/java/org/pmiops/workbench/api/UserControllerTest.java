@@ -221,27 +221,6 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
-  @Test
-  public void testBulkTrainingSync() throws ApiException, NotFoundException {
-    when(complianceService.getMoodleId("judy@lis.org")).thenReturn(1);
-    when(complianceService.getMoodleId("will@lis.org")).thenReturn(2);
-    when(complianceService.getMoodleId("penny@lis.org")).thenReturn(null);
-    when(complianceService.getMoodleId("maureen@lis.org")).thenReturn(3);
-    when(complianceService.getMoodleId("john@lis.org")).thenReturn(null);
-    when(complianceService.getMoodleId("bob@lis.org")).thenReturn(null);
-    BadgeDetails badge = new BadgeDetails();
-    badge.setName("All of us");
-    badge.setDateexpire("1234");
-    badge.setDateissued("567");
-
-    when(complianceService.getUserBadge(2)).thenReturn(Arrays.asList(badge));
-    when(complianceService.getUserBadge(1)).thenReturn(null);
-    when(complianceService.getUserBadge(3)).thenReturn(null);
-    userController.bulkSyncTrainingStatus();
-    verify(complianceService, times(6)).getMoodleId(anyString());
-    verify(complianceService, times(3)).getUserBadge(anyInt());
-  }
-
   /*
    * Testing helpers
    */

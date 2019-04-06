@@ -368,14 +368,14 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/account/sync-training-status:
+  /v1/account/sync-compliance-training-status:
     post:
       tags:
         - profile
-      summary: Sync moodle badge/training status
+      summary: Sync compliance training status
       description: Retrieves moodleId(either from DB or call from Moodle API)
-                   and get Training status on the basis of that
-      operationId: syncTrainingStatus
+                   and gets Training status on the basis of that
+      operationId: syncComplianceTrainingStatus
       responses:
         200:
           description: The user's profile.
@@ -392,8 +392,9 @@ paths:
     post:
       tags:
         - profile
-      summary: Sync era commons status
-      description: Retrieves era commons id from firecloud
+      summary: Sync eRA Commons status
+      description: Retrieves and stores the current user's NIH / eRA Commons
+                   linkage status, fetched via the FireCloud API.
       operationId: syncEraCommonsStatus
       responses:
         200:
@@ -872,6 +873,7 @@ paths:
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
   # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+  # and o.p.w.interceptors.CronInterceptor which implements the header check.
 
   /v1/cron/auditBigQuery:
     get:
@@ -906,19 +908,35 @@ paths:
           schema:
             $ref: "#/definitions/CheckClustersResponse"
 
-  /v1/cron/bulkSyncTrainingStatus:
+  /v1/cron/bulkSyncComplianceTrainingStatus:
     get:
       security: []
       tags:
-        - user
+        - offlineUser
         - cron
-      description: sync moodle badge/training status for all user
-      operationId: bulkSyncTrainingStatus
+      description: sync moodle badge/training status for all users.
+      operationId: bulkSyncComplianceTrainingStatus
       responses:
         200:
           description: The user table is updated with training status.
         404:
           description: User not found while retrieving  badge.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/bulkSyncEraCommonsStatus:
+    get:
+      security: []
+      tags:
+        - offlineUser
+        - cron
+      description: sync eRA Commons linkage status for all users.
+      operationId: bulkSyncEraCommonsStatus
+      responses:
+        200:
+          description: All users' eRA Commons statuses were updated.
         500:
           description: Internal Error
           schema:
@@ -1339,6 +1357,26 @@ paths:
             description: information on the domains
             schema:
               $ref: "#/definitions/DomainInfoResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}:
+      get:
+        tags:
+          - concepts
+        description: >
+          Returns all column names/values for a given domain.
+        operationId: "getValuesFromDomain"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: path
+            name: domain
+            required: true
+            type: string
+        responses:
+          200:
+            description: the values/column names in the domain.
+            schema:
+              $ref: "#/definitions/DomainValuesResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -1993,6 +2031,34 @@ definitions:
           type: integer
           format: int64
 
+  DataSet:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      conceptSetIds:
+        type: array
+        description: >
+          The ids of all concept sets in the data set
+        items:
+          type: integer
+          format: int64
+      cohortIds:
+        type: array
+        description: >
+          The ids of all cohorts in the data set
+        items:
+          type: integer
+          format: int64
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          $ref: "#/definitions/ValueSet"
+
   DomainInfoResponse:
     type: object
     required:
@@ -2003,6 +2069,39 @@ definitions:
         items:
           $ref: "#/definitions/DomainInfo"
 
+  ValueSet:
+    type: object
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      values:
+        $ref: "#/definitions/DomainValuesResponse"
+
+  DomainValuesResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainValue"
+
+  DomainValue:
+    type: object
+    description: >
+      Domain values map to various column names in OMOP.
+    required:
+      - value
+    properties:
+      value:
+        description: The user facing display name for the value.
+        type: string
 
   CreateAccountRequest:
     type: object
@@ -2155,10 +2254,6 @@ definitions:
       idVerificationStatus:
         $ref: "#/definitions/IdVerificationStatus"
         description: Status of ID verification
-      trainingCompletionTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user completed ethics training in milliseconds since the UNIX epoch.
       demographicSurveyCompletionTime:
         type: integer
         format: int64

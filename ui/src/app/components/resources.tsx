@@ -10,12 +10,14 @@ import {Cohort, ConceptSet} from 'generated/fetch';
 
 export const ResourceCardMenu: React.FunctionComponent<{
   disabled: boolean, resourceType: ResourceType, onRenameNotebook?: Function,
-  onOpenJupyterLabNotebook?: any, onCloneResource?: Function, onDeleteResource?: Function,
-  onEditCohort?: Function, onReviewCohort?: Function, onEditConceptSet?: Function
+  onRenameCohort?: Function, onOpenJupyterLabNotebook?: any, onCloneResource?: Function,
+  onDeleteResource?: Function, onEditCohort?: Function, onReviewCohort?: Function,
+  onEditConceptSet?: Function
 }> = ({
-        disabled, resourceType, onRenameNotebook = () => {}, onOpenJupyterLabNotebook = () => {},
-        onCloneResource = () => {}, onDeleteResource = () => {}, onEditCohort = () => {},
-        onReviewCohort = () => {}, onEditConceptSet = () => {}
+        disabled, resourceType, onRenameNotebook = () => {}, onRenameCohort = () => {},
+        onOpenJupyterLabNotebook = () => {}, onCloneResource = () => {},
+        onDeleteResource = () => {}, onEditCohort = () => {}, onReviewCohort = () => {},
+        onEditConceptSet = () => {}
       }) => {
   return <PopupTrigger
     data-test-id='resource-card-menu'
@@ -45,6 +47,7 @@ export const ResourceCardMenu: React.FunctionComponent<{
         }],
         ['cohort', () => {
           return <React.Fragment>
+            <MenuItem icon='note' onClick={onRenameCohort}>Rename</MenuItem>
             <MenuItem icon='copy' onClick={onCloneResource}>Duplicate</MenuItem>
             <MenuItem icon='pencil' onClick={onEditCohort}>Edit</MenuItem>
             <MenuItem icon='grid-view' onClick={onReviewCohort}>Review</MenuItem>
@@ -70,7 +73,8 @@ export const ResourceCardMenu: React.FunctionComponent<{
 
 export const ResourceListItem: React.FunctionComponent <
   {resource: ConceptSet | Cohort, openConfirmDelete: Function, edit: Function,
-    rType: ResourceType, onSelect: Function, onClone?: Function, onReview?: Function}
+    rType: ResourceType, onSelect: Function,
+    onClone?: Function, onReview?: Function}
     > = ({resource, openConfirmDelete, edit, rType, onSelect, onClone = () => {},
                                           onReview = () => {}}) => {
       return<div style={{border: '0.5px solid #C3C3C3', margin: '.4rem',
@@ -85,7 +89,7 @@ export const ResourceListItem: React.FunctionComponent <
                           onReviewCohort={onReview}/>
 
       </div>
-      <input type='checkbox' value={resource.name} onClick={() => onSelect}
+      <input type='checkbox' value={resource.name} onClick={() => onSelect()}
              style={{height: 17, width: 17, marginLeft: 10, marginTop: 10,
                marginRight: 10, backgroundColor: '#7CC79B'}}/>
       <div style={{lineHeight: '1.5rem'}}>{resource.name}</div>

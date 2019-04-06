@@ -1,7 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {
-  CohortReview,
+  CohortReview, CohortStatus,
 } from 'generated/fetch';
 
 export const initialFilterState = {
@@ -11,6 +11,20 @@ export const initialFilterState = {
     ageMin: '',
     ageMax: '',
     visits: null
+  },
+  participants: {
+    PARTICIPANTID: '',
+    GENDER: ['Select All'],
+    RACE: ['Select All'],
+    ETHNICITY: ['Select All'],
+    DECEASED: ['1', '0', 'Select All'],
+    STATUS: [
+      CohortStatus.INCLUDED,
+      CohortStatus.EXCLUDED,
+      CohortStatus.NEEDSFURTHERREVIEW,
+      CohortStatus.NOTREVIEWED,
+      'Select All'
+    ]
   },
   tabs: {
     ALL_EVENTS: {
@@ -43,3 +57,4 @@ export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore =
   new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
+export const multiOptions = new BehaviorSubject<any>(null);

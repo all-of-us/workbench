@@ -138,18 +138,19 @@ public class ProfileControllerTest {
 
   @Before
   public void setUp() throws MessagingException {
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.firecloud = new FireCloudConfig();
+    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.billingProjectPrefix = BILLING_PROJECT_PREFIX;
     config.firecloud.billingRetryCount = 2;
     config.firecloud.registeredDomainName = "";
-    config.access = new AccessConfig();
     config.access.enableEraCommons = false;
     config.access.enableComplianceTraining = false;
-    config.admin = new WorkbenchConfig.AdminConfig();
     config.admin.adminIdVerification = "adminIdVerify@dummyMockEmail.com";
-    config.access = new WorkbenchConfig.AccessConfig();
+    // All access modules are enabled for these tests. So completing any one module should maintain
+    // UNREGISTERED status.
     config.access.enableComplianceTraining = true;
+    config.access.enableBetaAccess = true;
+    config.access.enableEraCommons = true;
+    config.access.enableDataUseAgreement = true;
 
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
@@ -228,7 +229,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -239,7 +240,7 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
+    assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
@@ -250,34 +251,8 @@ public class ProfileControllerTest {
     assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
+    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
   }
-
-  @Test
-  public void testSubmitEverything_success() throws Exception {
-    createUser();
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    Profile profile = profileController.completeEthicsTraining().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    IdVerificationReviewRequest reviewStatus = new IdVerificationReviewRequest();
-    reviewStatus.setNewStatus(IdVerificationStatus.VERIFIED);
-    profileController.reviewIdVerification(profile.getUserId(), reviewStatus);
-    profile = profileController.submitDemographicsSurvey().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    user = userProvider.get();
-    user.setDataUseAgreementCompletionTime(timestamp);
-    user.setEraCommonsCompletionTime(timestamp);
-    user.setComplianceTrainingCompletionTime(timestamp);
-    profile = profileController.submitTermsOfService().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
-    verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
-
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.VERIFIED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
-  }
-
 
   @Test(expected = ServerErrorException.class)
   public void testCreateAccount_directoryServiceFail() throws Exception {
@@ -799,61 +774,6 @@ public class ProfileControllerTest {
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername()).isEqualTo(linkedUsername);
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
     assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
-  }
-
-  @Test
-  public void testSyncTraining() throws Exception {
-    List<BadgeDetails> badgeDetail = new ArrayList<>();
-    Timestamp time = new Timestamp(12543);
-    BadgeDetails badge = new BadgeDetails();
-    badge.setName("All of us badge");
-    badge.setDateexpire("12543");
-    badgeDetail.add(badge);
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
-
-    createUser();
-
-    profileController.syncTrainingStatus();
-    verify(complianceTrainingService).getMoodleId(PRIMARY_EMAIL);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isEqualTo(time);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNotNull();
-
-  }
-
-  @Test
-  public void testSyncTrainingWithNoBadge() throws Exception {
-    List<BadgeDetails> badgeDetail = new ArrayList<>();
-
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12)).thenReturn(badgeDetail);
-
-    createUser();
-
-    profileController.syncTrainingStatus();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTermsOfServiceCompletionTime()).isNull();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getTrainingExpirationTime()).isNull();
-  }
-
-  public void testSyncTrainingMoodleIdNotFound() throws Exception {
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(null);
-
-    createUser();
-
-    Profile profile = profileController.syncTrainingStatus().getBody();
-    verify(complianceTrainingService, never()).getUserBadge(any());
-    assertThat(profile.getTrainingCompletionTime()).isNull();
-  }
-
-  @Test(expected = org.pmiops.workbench.exceptions.NotFoundException.class)
-  public void testSyncTrainingMoodleIdNotFoundWhileGetUserBadge() throws Exception {
-    when(complianceTrainingService.getMoodleId(PRIMARY_EMAIL)).thenReturn(12);
-    when(complianceTrainingService.getUserBadge(12))
-        .thenThrow(new org.pmiops.workbench.moodle.ApiException
-            (HttpStatus.NOT_FOUND.value(), "user not found"));
-
-    createUser();
-    profileController.syncTrainingStatus().getBody();
   }
 
   private Profile createUser() throws Exception {

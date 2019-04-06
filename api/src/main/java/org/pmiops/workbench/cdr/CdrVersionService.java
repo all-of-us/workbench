@@ -33,13 +33,15 @@ public class CdrVersionService {
           .put(DataAccessLevel.PROTECTED, REGISTERED_AND_PROTECTED)
           .build();
 
+  private Provider<User> userProvider;
   private Provider<WorkbenchConfig> configProvider;
   private FireCloudService fireCloudService;
   private CdrVersionDao cdrVersionDao;
 
   @Autowired
-  public CdrVersionService(Provider<WorkbenchConfig> configProvider,
+  public CdrVersionService(Provider<User> userProvider, Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService, CdrVersionDao cdrVersionDao) {
+    this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.fireCloudService = fireCloudService;
     this.cdrVersionDao = cdrVersionDao;
@@ -56,7 +58,7 @@ public class CdrVersionService {
     if (configProvider.get().firecloud.enforceRegistered) {
       // TODO: map data access level to authorization domain here (RW-943)
       String authorizationDomain = configProvider.get().firecloud.registeredDomainName;
-      if (!fireCloudService.isUserMemberOfGroup(authorizationDomain)) {
+      if (!fireCloudService.isUserMemberOfGroup(userProvider.get().getEmail(), authorizationDomain)) {
         throw new ForbiddenException("Requester is not a member of " + authorizationDomain +
             ", cannot access CDR");
       }

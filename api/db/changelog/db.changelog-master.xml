@@ -68,4 +68,11 @@
   <include file="changelog/db.changelog-58-update-access-modules.xml"/>
   <include file="changelog/db.changelog-59-cluster-config-default.xml"/>
   <include file="changelog/db.changelog-60-backfill-bypass.xml"/>
+  <include file="changelog/db.changelog-61-backfill-beta-bypass.xml"/>
+  <include file="changelog/db.changelog-62.xml"/>
+  <include file="changelog/db.changelog-63.xml"/>
+  <include file="changelog/db.changelog-64.xml"/>
+  <include file="changelog/db.changelog-65.xml"/>
+  <include file="changelog/db.changelog-66.xml"/>
+  <include file="changelog/db.changelog-67-compliance-training-expiration.xml"/>
 </databaseChangeLog>

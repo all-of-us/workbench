@@ -24,6 +24,8 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -47,7 +49,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.cohortbuilder.querybuilder.util.QueryBuilderConstants.*;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({QueryBuilderFactory.class, BigQueryService.class,
+@Import({QueryBuilderFactory.class, BigQueryService.class, CloudStorageServiceImpl.class,
   ParticipantCounter.class, CohortQueryBuilder.class,
   TestJpaConfig.class, CdrVersionService.class, TemporalQueryBuilder.class})
 @MockBean({FireCloudService.class})
@@ -60,6 +62,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired
   private BigQueryService bigQueryService;
+
+  @Autowired
+  private CloudStorageService cloudStorageService;
 
   @Autowired
   private ParticipantCounter participantCounter;
@@ -109,7 +114,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     testConfig.elasticsearch.enableElasticsearchBackend = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    ElasticSearchService elasticSearchService = new ElasticSearchService(criteriaDao, configProvider);
+    ElasticSearchService elasticSearchService =
+        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
       participantCounter, criteriaDao, criteriaAttributeDao,
@@ -1058,7 +1064,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     Modifier modifier2 = new Modifier()
       .name(ModifierType.NUM_OF_OCCURRENCES)
       .operator(Operator.EQUAL)
-      .operands(Arrays.asList("3"));
+      .operands(Arrays.asList("2"));
 
     SearchRequest searchRequest = createSearchRequests(TreeType.CONDITION.name(),
       Arrays.asList(icd9), Arrays.asList(modifier1, modifier2));

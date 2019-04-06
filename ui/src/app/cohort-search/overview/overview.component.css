@@ -4,8 +4,6 @@
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
- margin-bottom: 0.6rem;
-  height: 2rem;
 }
 
 #total-count {
@@ -153,8 +151,23 @@ input.alreadyTaken {
 }
 .overview-header .btn.btn-primary {
   line-height: 0.2rem !important;
-  padding: 1rem 0.77rem !important;
+  border-radius: 3px;
 }
 .card-header {
     border-bottom: none;
 }
+.actions-container {
+  width: 100%;
+}
+.actions-container > .btn-link {
+  float: right;
+  margin: 0 1rem 0 0;
+  min-width: 0;
+  padding: 0;
+  color: #262262;
+  cursor: pointer;
+}
+.actions-container > .btn-link:disabled {
+  cursor: not-allowed;
+}
+

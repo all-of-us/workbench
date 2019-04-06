@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -20,6 +21,8 @@ public class CohortReview {
     private long cohortId;
     private long cdrVersionId;
     private Timestamp creationTime;
+    private String cohortDefinition;
+    private String cohortName;
     private Timestamp lastModifiedTime;
     private long matchedParticipantCount;
     private long reviewSize;
@@ -67,6 +70,35 @@ public class CohortReview {
 
     public CohortReview cdrVersionId(long cdrVersionId) {
         this.cdrVersionId = cdrVersionId;
+        return this;
+    }
+
+    @Column(name = "cohort_name")
+    public String getCohortName() {
+        return cohortName;
+    }
+
+    public void setCohortName(String cohortName) {
+        this.cohortName = cohortName;
+    }
+
+    public CohortReview cohortName(String cohortName) {
+        this.cohortName = cohortName;
+        return this;
+    }
+
+    @Lob
+    @Column(name = "cohort_definition")
+    public String getCohortDefinition() {
+        return cohortDefinition;
+    }
+
+    public void setCohortDefinition(String cohortDefinition) {
+        this.cohortDefinition = cohortDefinition;
+    }
+
+    public CohortReview cohortDefinition(String cohortDefinition) {
+        this.cohortDefinition = cohortDefinition;
         return this;
     }
 

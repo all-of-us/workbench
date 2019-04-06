@@ -10,9 +10,12 @@ import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} fro
 
 import {
   CohortReview,
+  Filter,
+  Operator,
   PageFilterRequest,
   PageFilterType,
   ParticipantCohortStatus,
+  ParticipantCohortStatusColumns as Columns,
   SortOrder
 } from 'generated/fetch';
 import * as moment from 'moment';
@@ -31,6 +34,12 @@ const css = `
     margin: 0 0 0 25% !important;
     line-height: 1;
   }
+  .detail-page .global-filters {
+    width: 40%;
+  }
+  .detail-page.sidebar-open .global-filters {
+    width: 50%;
+  }
 `;
 
 const styles = reactStyles({
@@ -45,10 +54,11 @@ const styles = reactStyles({
   title: {
     marginTop: 0,
     fontSize: '20px',
+    fontWeight: 600,
     color: '#262262',
   },
   description: {
-    margin: '0.75rem 0',
+    margin: '0.5rem 0',
     color: '#000000',
   },
   headerSection: {
@@ -118,15 +128,18 @@ const otherStyles = {
   navigation: {
     ...styles.headerSection,
     width: '22%',
+    minWidth: '8.5rem',
     padding: '1.15rem 0.4rem'
   },
   filters: {
     ...styles.headerSection,
+    minWidth: '16rem'
   },
   radios: {
     ...styles.headerSection,
     fontSize: '12px',
     width: '24%',
+    minWidth: '8.5rem',
     padding: '0.5rem 0 0.5rem 0.5rem',
   },
   navBtnActive: {
@@ -152,12 +165,12 @@ const otherStyles = {
   },
   filterInput: {
     ...styles.filterDiv,
-    minWidth: '5rem',
+    width: '30%',
   },
   filterSelect: {
     ...styles.filterDiv,
     marginLeft: '1rem',
-    minWidth: '13rem'
+    width: '70%'
   },
   filterText: {
     ...styles.filterDiv,
@@ -221,7 +234,7 @@ export const DetailHeader = withCurrentWorkspace()(
         return;
       }
 
-      const totalPages = Math.floor(review.reviewSize / review.pageSize);
+      const totalPages = Math.ceil(review.queryResultSize / review.pageSize);
 
       this.setState({
         afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
@@ -280,6 +293,7 @@ export const DetailHeader = withCurrentWorkspace()(
         page: page,
         pageSize: size,
         sortOrder: SortOrder.Asc,
+        filters: {items: this.getRequestFilters()},
         pageFilterType: PageFilterType.ParticipantCohortStatuses
       } as PageFilterRequest;
       return from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
@@ -288,6 +302,27 @@ export const DetailHeader = withCurrentWorkspace()(
     navigateById = (id: number): void => {
       const {ns, wsid, cid} = urlParamsStore.getValue();
       navigate(['/workspaces', ns, wsid, 'cohorts', cid, 'review', 'participants', id]);
+    }
+
+    getRequestFilters = () => {
+      const filters = filterStateStore.getValue().participants;
+      return Object.keys(filters).reduce((acc, _type) => {
+        const values = filters[_type];
+        if (_type === Columns[Columns.PARTICIPANTID] && values) {
+          acc.push({
+            property: Columns[_type],
+            values: [values],
+            operator: Operator.LIKE
+          } as Filter);
+        } else if (values.length && !values.includes('Select All')) {
+          acc.push({
+            property: Columns[_type],
+            values: values,
+            operator: Operator.IN
+          } as Filter);
+        }
+        return acc;
+      }, []);
     }
 
     vocabChange = (event: any) => {
@@ -396,7 +431,7 @@ export const DetailHeader = withCurrentWorkspace()(
               <i style={styles.icon} className='pi pi-angle-right' />
             </button>
           </div>
-          <div style={otherStyles.filters}>
+          <div style={otherStyles.filters} className={'global-filters'}>
             <div style={styles.filterHeader}>
               <button
                 style={filterTab === 'date' ? otherStyles.tabActive : styles.filterTab}

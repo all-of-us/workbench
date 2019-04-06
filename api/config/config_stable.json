@@ -43,17 +43,21 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "",
-    "enableElasticsearchBackend": false
+    "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
+    "enableBasicAuth": true,
+    "enableElasticsearchBackend": true
   },
   "moodle": {
-    "host": "aou.nnlm.gov",
-    "enableMoodleBackend": false
+    "host": "aoudev.nnlm.gov",
+    "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
-    "enableEraCommons": false,
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
     "enableDataUseAgreement": false,
     "enableBetaAccess": true
+  },
+  "cohortbuilder": {
+    "enableListSearch": false
   }
 }

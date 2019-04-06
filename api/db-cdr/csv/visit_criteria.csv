@@ -1,4 +1,0 @@
-"id","parent_id","type","subtype","code","name","is_group","is_selectable","est_count","domain_id","concept_id","has_attribute","path","synonyms"
-325341,0,"VISIT","","","Emergency Room Visit",0,1,250632,"Visit",9203,0,"","|[rank1]"
-325342,0,"VISIT","","","Inpatient Visit",0,1,216076,"Visit",9201,0,"","|[rank1]"
-325343,0,"VISIT","","","Outpatient Visit",0,1,917700,"Visit",9202,0,"","|[rank1]"

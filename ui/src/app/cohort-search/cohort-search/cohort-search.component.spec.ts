@@ -34,6 +34,7 @@ import {SearchGroupComponent} from 'app/cohort-search/search-group/search-group.
 import {SelectionInfoComponent} from 'app/cohort-search/selection-info/selection-info.component';
 import {TreeComponent} from 'app/cohort-search/tree/tree.component';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
+import {ConfirmDeleteModalComponent} from 'app/views/confirm-delete-modal/component';
 import {CohortBuilderService, CohortsService, WorkspaceAccessLevel} from 'generated';
 import {fromJS} from 'immutable';
 import {NouisliderModule} from 'ng2-nouislider';
@@ -67,6 +68,7 @@ describe('CohortSearchComponent', () => {
         CodeDropdownComponent,
         CohortSearchComponent,
         ComboChartComponent,
+        ConfirmDeleteModalComponent,
         DemographicsComponent,
         GenderChartComponent,
         ModalComponent,

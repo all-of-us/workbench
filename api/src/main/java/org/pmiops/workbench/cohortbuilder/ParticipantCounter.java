@@ -28,8 +28,14 @@ public class ParticipantCounter {
       "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
+  private static final String RANDOM_SQL_TEMPLATE =
+    "select rand() as x, ${table}.person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime, case when death.person_id is null then false else true end as deceased\n" +
+      "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
+      "left join `${projectId}.${dataSetId}.death` death on (${table}.person_id = death.person_id)\n" +
+      "where\n";
+
   private static final String ID_SQL_TEMPLATE =
-    "select rand() as x, person_id, race_concept_id, gender_concept_id, ethnicity_concept_id, birth_datetime\n" +
+    "select person_id\n" +
       "from `${projectId}.${dataSetId}.${table}` ${table}\n" +
       "where\n";
 
@@ -61,7 +67,7 @@ public class ParticipantCounter {
       "order by count desc, name asc\n" +
       "limit ${limit}\n";
 
-    private static final String ID_SQL_ORDER_BY = "order by x\nlimit";
+    private static final String RANDOM_SQL_ORDER_BY = "order by x\nlimit";
 
     private static final String OFFSET_SUFFIX = " offset ";
 
@@ -102,16 +108,22 @@ public class ParticipantCounter {
       return buildQuery(participantCriteria, DOMAIN_CHART_INFO_SQL_TEMPLATE, endSqlTemplate, QueryBuilderConstants.REVIEW_TABLE);
     }
 
-  public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria,
-                                                       long resultSize,
-                                                       long offset) {
-        String endSql = ID_SQL_ORDER_BY + " " + resultSize;
+  public QueryJobConfiguration buildRandomParticipantQuery(ParticipantCriteria participantCriteria,
+                                                           long resultSize,
+                                                           long offset) {
+        String endSql = RANDOM_SQL_ORDER_BY + " " + resultSize;
         if (offset > 0) {
             endSql += OFFSET_SUFFIX + offset;
         }
-        return buildQuery(participantCriteria, ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE),
+        return buildQuery(participantCriteria, RANDOM_SQL_TEMPLATE.replace("${table}", PERSON_TABLE),
           endSql, PERSON_TABLE);
     }
+
+  //TODO: implemented for use with the Data Set Builder. Please remove it this does not become the preferred solution
+  //https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
+  public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
+    return buildQuery(participantCriteria, ID_SQL_TEMPLATE.replace("${table}", PERSON_TABLE), "", PERSON_TABLE);
+  }
 
     public QueryJobConfiguration buildQuery(ParticipantCriteria participantCriteria,
         String sqlTemplate, String endSql, String mainTable) {

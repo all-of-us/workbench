@@ -164,6 +164,7 @@ public class ElasticDocument {
       Object val;
       switch (esType) {
         case INTEGER:
+        case FLOAT:
           if (isRepeated) {
             val = fv.getRepeatedValue().stream().map(FieldValue::getNumericValue)
                 .collect(Collectors.toList());

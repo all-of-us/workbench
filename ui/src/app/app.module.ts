@@ -27,6 +27,7 @@ import {AdminUserComponent} from './views/admin-user/component';
 import {AppComponent, overriddenUrlKey} from './views/app/component';
 import {BreadcrumbComponent} from './views/breadcrumb/component';
 import {BugReportComponent} from './views/bug-report/component';
+import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 import {CohortListComponent} from './views/cohort-list/component';
 import {ConceptAddModalComponent} from './views/concept-add-modal/component';
 import {ConceptHomepageComponent} from './views/concept-homepage/component';
@@ -34,7 +35,6 @@ import {ConceptSetDetailsComponent} from './views/concept-set-details/component'
 import {ConceptSetListComponent} from './views/concept-set-list/component';
 import {ConceptTableComponent} from './views/concept-table/component';
 import {CreateConceptSetModalComponent} from './views/conceptset-create-modal/component';
-import {ConfirmDeleteModalComponent} from './views/confirm-delete-modal/component';
 import {ErrorHandlerComponent} from './views/error-handler/component';
 import {HomepageComponent} from './views/homepage/component';
 import {InitialErrorComponent} from './views/initial-error/component';
@@ -140,13 +140,13 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     BreadcrumbComponent,
     BugReportComponent,
     CreateConceptSetModalComponent,
+    CohortActionsComponent,
     CohortListComponent,
     ConceptAddModalComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
     ConceptTableComponent,
     ConceptSetListComponent,
-    ConfirmDeleteModalComponent,
     DataPageComponent,
     DataSetComponent,
     ErrorHandlerComponent,

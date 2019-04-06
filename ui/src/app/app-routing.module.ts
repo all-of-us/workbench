@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {NavigationEnd, Router, RouterModule, Routes} from '@angular/router';
 
+import {DataSetGuard} from './guards/dataset-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
@@ -26,6 +27,7 @@ import {DataPageComponent} from 'app/views/data-page/component';
 import {DataSetComponent} from 'app/views/dataset/component';
 import {environment} from 'environments/environment';
 import {BreadcrumbType, NavStore} from './utils/navigation';
+import {CohortActionsComponent} from './views/cohort-actions/cohort-actions.component';
 import {SignInComponent} from './views/sign-in/component';
 
 declare let gtag: Function;
@@ -131,6 +133,14 @@ const routes: Routes = [
                     },
                   },
                   {
+                    path: ':cid/actions',
+                    component: CohortActionsComponent,
+                    data: {
+                      title: 'Cohort Actions',
+                      breadcrumb: BreadcrumbType.Cohort
+                    },
+                  },
+                  {
                     path: 'build',
                     loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
                   },
@@ -153,19 +163,26 @@ const routes: Routes = [
               },
               {
                 path: 'data',
-                component: DataPageComponent,
-                data: {
-                  title: 'Data Page',
-                  breadcrumb: BreadcrumbType.Workspace
-                }
-              },
-              {
-                path: 'data/datasets',
-                component: DataSetComponent,
-                data: {
-                  title: 'Dataset Page',
-                  breadcrumb: BreadcrumbType.Dataset
-                }
+                canActivate: [DataSetGuard],
+                canActivateChild: [DataSetGuard],
+                children: [
+                  {
+                    path: '',
+                    component: DataPageComponent,
+                    data: {
+                      title: 'Data Page',
+                      breadcrumb: BreadcrumbType.Workspace
+                    }
+                  },
+                  {
+                    path: 'datasets',
+                    component: DataSetComponent,
+                    data: {
+                      title: 'Dataset Page',
+                      breadcrumb: BreadcrumbType.Dataset
+                    }
+                  },
+                ]
               },
               {
                 path: 'concepts/sets',
@@ -217,6 +234,7 @@ const routes: Routes = [
     {onSameUrlNavigation: 'reload', paramsInheritanceStrategy: 'always'})],
   exports: [RouterModule],
   providers: [
+    DataSetGuard,
     RegistrationGuard,
     SignInGuard,
   ]

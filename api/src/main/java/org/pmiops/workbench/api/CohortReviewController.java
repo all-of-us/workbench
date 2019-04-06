@@ -117,7 +117,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .genderConceptId(participant.getGenderConceptId())
           .gender(participant.getGender())
           .raceConceptId(participant.getRaceConceptId())
-          .race(participant.getRace());
+          .race(participant.getRace())
+          .deceased(participant.getDeceased());
       }
     };
 
@@ -135,6 +136,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .cohortId(cohortReview.getCohortId())
           .cdrVersionId(cohortReview.getCdrVersionId())
           .creationTime(cohortReview.getCreationTime().toString())
+          .cohortDefinition(cohortReview.getCohortDefinition())
+          .cohortName(cohortReview.getCohortName())
           .matchedParticipantCount(cohortReview.getMatchedParticipantCount())
           .reviewedCount(cohortReview.getReviewedCount())
           .reviewStatus(cohortReview.getReviewStatusEnum())
@@ -254,7 +257,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result = bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(
-      participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest),
+      participantCounter.buildRandomParticipantQuery(new ParticipantCriteria(searchRequest),
         request.getSize(), 0L)));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
@@ -263,7 +266,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     cohortReview
       .reviewSize(participantCohortStatuses.size())
-      .reviewStatusEnum(ReviewStatus.CREATED);
+      .reviewStatusEnum(ReviewStatus.CREATED)
+      .cohortDefinition(getCohortDefinition(cohort))
+      .cohortName(cohort.getName());
 
     //when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
@@ -634,7 +639,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           .birthDate(new Date(birthDate.getTime()))
           .genderConceptId(bigQueryService.getLong(row, rm.get("gender_concept_id")))
           .raceConceptId(bigQueryService.getLong(row, rm.get("race_concept_id")))
-          .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id"))));
+          .ethnicityConceptId(bigQueryService.getLong(row, rm.get("ethnicity_concept_id")))
+          .deceased(bigQueryService.getBoolean(row, rm.get("deceased"))));
     }
     return participantCohortStatuses;
   }

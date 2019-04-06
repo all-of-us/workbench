@@ -10,7 +10,6 @@ import {Observable} from 'rxjs/Observable';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {hasRegisteredAccess} from 'app/utils';
-import {environment} from 'environments/environment';
 
 
 @Injectable()
@@ -33,18 +32,12 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
           return Observable.from([true]);
         }
         return this.profileStorageService.profile$.flatMap((profile) => {
-          // TODO: Remove this logic when enableComplianceLockout feature goes in
-          //   Since dataAccessLevel is computed using the the training and eraCommons modules,
-          //   for now recalculate it using only betaAccess and emailVerification.
-          const hasAccess = environment.enableComplianceLockout ?
-              hasRegisteredAccess(profile.dataAccessLevel) :
-              (!!profile.betaAccessBypassTime &&
-                profile.emailVerificationStatus === 'subscribed');
-          if (hasAccess) {
+          if (hasRegisteredAccess(profile.dataAccessLevel)) {
             return Observable.from([true]);
+          } else {
+            this.router.navigate(['/']);
+            return Observable.from([false]);
           }
-          this.router.navigate(['/']);
-          return Observable.from([false]);
         });
       });
   }

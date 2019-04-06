@@ -100,8 +100,8 @@
                          [placeholderValue]="placeholderValue"
                          (getSelectedConcepts)="selectConcept($event)">
       </app-concept-table>
-      <app-sliding-fab [expanded]=addToSetText (submit)="openAddModal()" [disable]="activeSelectedConceptCount === 0">
-        <clr-icon class="add-icon" shape="plus"></clr-icon>
+      <app-sliding-fab [expanded]=addToSetText [submitFunction]="openAddModal"
+                       [disable]="activeSelectedConceptCount === 0" [iconShape]="'plus'">
       </app-sliding-fab>
     </div>
   </app-top-box>

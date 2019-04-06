@@ -133,7 +133,7 @@ public class FireCloudIntegrationTest {
   }
 
   /**
-   * Ensure swe can successfully use delegation of authority to make FireCloud API calls on behalf
+   * Ensures we can successfully use delegation of authority to make FireCloud API calls on behalf
    * of AoU users.
    * <p>
    * This test depends on there being an active account in FireCloud dev with the email address

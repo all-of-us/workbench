@@ -3,9 +3,11 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
 
 import java.util.Collections;
@@ -22,9 +24,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.ServerUnavailableException;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -121,5 +125,24 @@ public class BigQueryService {
             throw new BigQueryException(500, "FieldValue is null at position: " + index);
         }
         return row.get(index).getStringValue();
+    }
+
+    public FieldList getTableFieldsFromDomain(Domain d) {
+        CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+        String tableName;
+        if (Domain.CONDITION.equals(d)) {
+            tableName = "ds_condition_occurrence";
+        } else if (Domain.PROCEDURE.equals(d)) {
+            tableName = "ds_procedure_occurrence";
+        } else if (Domain.DRUG.equals(d)) {
+            tableName = "ds_drug_exposure";
+        } else if (Domain.MEASUREMENT.equals(d)) {
+            tableName = "ds_measurement";
+        } else {
+            throw new BadRequestException("Invalid domain, unable to fetch fields from table");
+        }
+        TableId tableId = TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
+
+        return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
     }
 }

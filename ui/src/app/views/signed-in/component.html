@@ -4,7 +4,12 @@
       <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"
           style="width: 1.5rem; height: 1.5rem; fill: #216FB4"></clr-icon>
     </div>
-    <img [src]="headerImg" class="header-image" routerLink="/">
+    <div>
+      <img [src]="headerImg" class="header-image" routerLink="/">
+      <div *ngIf="shouldShowDisplayTag" class="display-tag">
+        {{ displayTag }}
+      </div>
+    </div>
     <app-breadcrumb></app-breadcrumb>
   </div>
   <div style="display: flex; align-items: center;">

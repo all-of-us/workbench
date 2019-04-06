@@ -44,39 +44,11 @@ public final class ElasticFilters {
   private static final Logger log = Logger.getLogger(ElasticFilters.class.getName());
 
   /**
-   * ElasticFilterResponse wraps value and attaches some additional metadata regarding the
-   * translation of criteria to Elasticsearch query filter. Namely, a query may or may not be
-   * an approximation, depending on the contents of the request.
+   * Translates a Cohort Builder search request into an Elasticsearch filter.
    */
-  public static class ElasticFilterResponse<T> {
-
-    private final T value;
-    private final boolean isApproximate;
-
-    public ElasticFilterResponse(T value, boolean isApproximate) {
-      this.value = value;
-      this.isApproximate = isApproximate;
-    }
-
-    public T value() {
-      return this.value;
-    }
-
-    public boolean isApproximate() {
-      return this.isApproximate;
-    }
-  }
-
-  /**
-   * Translates a Cohort Builder search request into an Elasticsearch filter. If the request
-   * parameters are not supported, this is indicated in the response and a best effort approximation
-   * of the target filter is made.
-   */
-  public static ElasticFilterResponse<QueryBuilder> fromCohortSearch(
-      CriteriaDao criteriaDao, SearchRequest req) {
+  public static QueryBuilder fromCohortSearch(CriteriaDao criteriaDao, SearchRequest req) {
     ElasticFilters f = new ElasticFilters(criteriaDao);
-    QueryBuilder q = f.process(req);
-    return new ElasticFilterResponse<>(q, f.isApproximate);
+    return f.process(req);
   }
 
   /**
@@ -103,7 +75,6 @@ public final class ElasticFilters {
 
   private boolean processed = false;
   private Map<SearchParameter, Set<Long>> childrenByCriteriaGroup;
-  private boolean isApproximate = false;
 
   private ElasticFilters(CriteriaDao criteriaDao) {
     this.criteriaDao = criteriaDao;
@@ -136,9 +107,6 @@ public final class ElasticFilters {
    */
   private QueryBuilder searchGroupToFilter(SearchGroup sg) {
     BoolQueryBuilder filter = QueryBuilders.boolQuery();
-    if (sg.getTemporal()) {
-      this.isApproximate = true;
-    }
 
     for (SearchGroupItem sgi : sg.getItems()) {
       // Modifiers apply to all criteria in this SearchGroupItem, but will be reapplied to each

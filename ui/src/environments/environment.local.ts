@@ -3,6 +3,7 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 
 export const environment: Environment = {
   displayTag: 'Local->Local',
+  shouldShowDisplayTag: true,
   allOfUsApiUrl: 'http://localhost:8081',
   clientId: testEnvironmentBase.clientId,
   tcellappid: 'AoUNonProd-WZFW2',
@@ -18,6 +19,6 @@ export const environment: Environment = {
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   useZendeskForSupport: true,
   enableJupyterLab: true,
-  enableComplianceLockout: true,
   enableDatasetBuilder: true,
+  enableCBListSearch: false,
 };

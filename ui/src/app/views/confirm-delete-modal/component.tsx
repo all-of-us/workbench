@@ -17,6 +17,7 @@ import {
   decamelize,
   ReactWrapperBase
 } from 'app/utils';
+import {ResourceType} from 'app/utils/resourceActions';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -57,7 +58,9 @@ export class ConfirmDeleteModal
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           This will permanently delete
-          the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}.
+          the {ConfirmDeleteModal.transformResourceTypeName(this.props.resourceType)}
+          {this.props.resourceType === ResourceType.COHORT &&
+          <span> and all associated review sets</span>}.
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button

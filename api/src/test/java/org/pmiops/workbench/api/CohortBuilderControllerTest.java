@@ -4,7 +4,9 @@ package org.pmiops.workbench.api;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
@@ -12,10 +14,16 @@ import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
+import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +37,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Provider;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -48,8 +59,25 @@ public class CohortBuilderControllerTest {
   private static final String SUBTYPE_ATC = "ATC";
   private static final String SUBTYPE_BRAND = "BRAND";
 
-  @Autowired
   private CohortBuilderController controller;
+
+  @Mock
+  private BigQueryService bigQueryService;
+
+  @Mock
+  private CloudStorageService cloudStorageService;
+
+  @Mock
+  private ParticipantCounter participantCounter;
+
+  @Mock
+  private CdrVersionDao cdrVersionDao;
+
+  @Mock
+  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
+
+  @Mock
+  private CdrVersionService cdrVersionService;
 
   @Autowired
   private CriteriaDao criteriaDao;
@@ -63,41 +91,25 @@ public class CohortBuilderControllerTest {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
-  @TestConfiguration
-  @Import({
-    CohortBuilderController.class
-  })
-  @MockBean({
-    CdrVersionService.class,
-    CdrVersionDao.class,
-    BigQueryService.class,
-    ParticipantCounter.class,
-    ElasticSearchService.class
-  })
-  static class Configuration {}
+  @Mock
+  private Provider<WorkbenchConfig> configProvider;
 
   @Before
   public void setUp() {
-    jdbcTemplate.execute("delete from criteria");
-  }
+    WorkbenchConfig testConfig = new WorkbenchConfig();
+    testConfig.cohortbuilder = new WorkbenchConfig.CohortBuilderConfig();
+    testConfig.cohortbuilder.enableListSearch = false;
+    when(configProvider.get()).thenReturn(testConfig);
 
-  @Test
-  public void getPPICriteriaParent() throws Exception {
-    Criteria ppiCriteriaParent = criteriaDao.save(
-      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), 0L, "324836",
-        "Are you currently covered by any of the following types of health insurance or health coverage plans? Select all that apply from one group",
-        DomainType.OBSERVATION.name(), "43529119", true, false)
-    );
-    Criteria ppiCriteriaChild = criteriaDao.save(
-      createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), ppiCriteriaParent.getId(), "324836",
-        "child", DomainType.OBSERVATION.name(), "43529119", false, true)
-    );
-    assertEquals(
-      createResponseCriteria(ppiCriteriaParent),
-      controller
-        .getPPICriteriaParent(1L, TreeType.PPI.name(), ppiCriteriaChild.getConceptId())
-        .getBody()
-    );
+    ElasticSearchService elasticSearchService =
+        new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
+
+    controller = new CohortBuilderController(bigQueryService,
+      participantCounter, criteriaDao, criteriaAttributeDao,
+      cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
+      elasticSearchService, configProvider);
+
+    jdbcTemplate.execute("delete from criteria");
   }
 
   @Test
@@ -348,6 +360,55 @@ public class CohortBuilderControllerTest {
 
     criteriaAttributeDao.delete(criteriaAttributeMin.getId());
     criteriaAttributeDao.delete(criteriaAttributeMax.getId());
+  }
+
+  @Test
+  public void isApproximate() throws Exception {
+    SearchParameter inSearchParameter = new SearchParameter();
+    SearchParameter exSearchParameter = new SearchParameter();
+    SearchGroupItem inSearchGroupItem = new SearchGroupItem()
+      .addSearchParametersItem(inSearchParameter);
+    SearchGroupItem exSearchGroupItem = new SearchGroupItem()
+      .addSearchParametersItem(exSearchParameter);
+    SearchGroup inSearchGroup = new SearchGroup()
+      .addItemsItem(inSearchGroupItem);
+    SearchGroup exSearchGroup = new SearchGroup()
+      .addItemsItem(exSearchGroupItem);
+    SearchRequest searchRequest = new SearchRequest()
+      .addIncludesItem(inSearchGroup)
+      .addExcludesItem(exSearchGroup);
+    //Temporal includes
+    inSearchGroup.temporal(true);
+    assertTrue(controller.isApproximate(searchRequest));
+    //BP includes
+    inSearchGroup.temporal(false);
+    inSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Deceased includes
+    inSearchParameter.subtype(TreeSubType.DEC.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Temporal and BP includes
+    inSearchGroup.temporal(true);
+    inSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //No temporal/BP/Decease
+    inSearchGroup.temporal(false);
+    inSearchParameter.subtype(TreeSubType.HR_DETAIL.toString());
+    assertFalse(controller.isApproximate(searchRequest));
+    //Temporal excludes
+    exSearchGroup.temporal(true);
+    assertTrue(controller.isApproximate(searchRequest));
+    //BP excludes
+    exSearchGroup.temporal(false);
+    exSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Deceased excludes
+    exSearchParameter.subtype(TreeSubType.DEC.toString());
+    assertTrue(controller.isApproximate(searchRequest));
+    //Temporal and BP excludes
+    exSearchGroup.temporal(true);
+    exSearchParameter.subtype(TreeSubType.BP.toString());
+    assertTrue(controller.isApproximate(searchRequest));
   }
 
   private Criteria createCriteria(String type, String subtype, long parentId, String code, String name, String domain, String conceptId, boolean group, boolean selectable) {
