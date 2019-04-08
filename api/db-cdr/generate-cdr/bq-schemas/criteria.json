@@ -1,72 +1,92 @@
 [
-      {
-        "mode": "REQUIRED", 
-        "name": "id", 
-        "type": "INTEGER"
-      }, 
-      {
-        "mode": "REQUIRED", 
-        "name": "parent_id", 
-        "type": "INTEGER"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "type", 
-        "type": "STRING"
-      },
-      {
-        "mode": "NULLABLE",
-        "name": "subtype",
-        "type": "STRING"
-      },
-      {
-        "mode": "NULLABLE", 
-        "name": "code", 
-        "type": "STRING"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "name", 
-        "type": "STRING"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "is_group", 
-        "type": "INTEGER"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "is_selectable", 
-        "type": "INTEGER"
-      }, 
-      {
-        "mode": "NULLABLE", 
-        "name": "est_count", 
-        "type": "INTEGER"
-      },
-      {
-        "mode": "NULLABLE", 
-        "name": "domain_id", 
-        "type": "STRING"
-      },
-      {
-        "mode": "NULLABLE",
-        "name": "concept_id",
-        "type": "INTEGER"
-      },
-      {
-        "mode": "NULLABLE",
-        "name": "has_attribute",
-        "type": "INTEGER"
-      },
-      {
-        "mode": "NULLABLE",
-        "name": "path",
-        "type": "STRING"
-      },
-      {
-        "mode": "NULLABLE",
-        "name": "synonyms",
-        "type": "STRING"
-      }
+  {
+    "mode": "REQUIRED",
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "parent_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "subtype",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_group",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_selectable",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "est_count",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "domain_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_attribute",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "path",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "synonyms",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "is_standard",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "value",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_hierarchy",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_ancestor_data",
+    "type": "INTEGER"
+  }
 ]

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-27">
+
+    <comment>The following is a temp fix to allow for use of CriteriaDao for both CB search implementations</comment>
+    <addColumn tableName="criteria">
+      <column name="is_standard" type="BOOL"/>
+      <column name="value" type="VARCHAR(80)"/>
+      <column name="has_hierarchy" type="BOOL"/>
+      <column name="has_ancestor_data" type="BOOL"/>
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>
