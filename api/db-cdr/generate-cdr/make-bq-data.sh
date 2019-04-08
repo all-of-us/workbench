@@ -112,8 +112,7 @@ if [[ $tables =~ $cri_table_check ]]; then
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.criteria\`
      (id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path)
     SELECT id, parent_id, type, subtype, code, name, is_group, is_selectable, est_count, domain_id, concept_id, has_attribute, path
-    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`
-    "
+    FROM \`$BQ_PROJECT.$BQ_DATASET.criteria\`"
 
     echo "Updating SNOMED PCS criteria"
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
