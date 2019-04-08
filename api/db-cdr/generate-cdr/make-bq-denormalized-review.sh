@@ -292,7 +292,7 @@ SELECT P.PERSON_ID,
      case when VALUE_AS_NUMBER is null then VALUE_AS_CONCEPT_ID else VALUE_AS_NUMBER end as VALUE_AS_NUMBER,
      c3.CONCEPT_NAME AS UNIT,
      CAST(FLOOR(DATE_DIFF(t.MEASUREMENT_DATE, DATE(p.YEAR_OF_BIRTH, p.MONTH_OF_BIRTH, p.DAY_OF_BIRTH), MONTH)/12) as INT64) as AGE_AT_EVENT,
-     'PHYSICAL_MEASURE' as domain,
+     'PHYSICAL_MEASUREMENT' as domain,
      case when c4.concept_name is null then '' else c4.concept_name end as visit_type
 FROM
 (select *

@@ -100,7 +100,7 @@ const domains = [
   DomainType.PROCEDURE,
   DomainType.DRUG,
   DomainType.OBSERVATION,
-  DomainType.PHYSICALMEASURE,
+  DomainType.PHYSICALMEASUREMENT,
   DomainType.LAB,
   DomainType.VITAL,
   DomainType.SURVEY,
@@ -291,7 +291,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY]
-        && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
+        && this.props.domain !== DomainType[DomainType.PHYSICALMEASUREMENT]
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
