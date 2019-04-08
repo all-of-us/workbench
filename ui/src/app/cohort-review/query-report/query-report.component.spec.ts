@@ -3,7 +3,7 @@ import {ClarityModule} from '@clr/angular';
 import {NgxChartsModule} from '@swimlane/ngx-charts';
 import {ComboChartComponent} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {OverviewPage} from 'app/cohort-review/overview-page/overview-page';
-import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participant-charts';
+import {ParticipantsChartsComponent} from 'app/cohort-review/participants-charts/participants-charts';
 import {QueryCohortDefinitionComponent} from 'app/cohort-review/query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from 'app/cohort-review/query-descriptive-stats/query-descriptive-stats.component';
 import {QueryReportComponent} from 'app/cohort-review/query-report/query-report.component';
