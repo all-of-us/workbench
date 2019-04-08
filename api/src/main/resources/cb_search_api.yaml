@@ -39,6 +39,27 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/domain/count:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns a collection of domains and corresponding counts per search term/value
+      operationId: "getCriteriaDomainCount"
+      parameters:
+        - in: path
+          name: value
+          type: string
+          required: true
+          description: the specified search term
+      responses:
+        200:
+          description: A collection of domains and search term matches
+          schema:
+            $ref: "#/definitions/DomainCountResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -367,6 +388,30 @@ definitions:
       isStandard:
         description: Reveals if this criteria is standard or source.
         type: boolean
+
+  DomainCountResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainCount"
+
+  DomainCount:
+    type: object
+    required:
+      - domain
+      - count
+    properties:
+      domain:
+        description: An omop domain
+        type: string
+      count:
+        description: number of search term matches
+        type: integer
+        format: int64
 
   CriteriaAttributeListResponse:
     type: object
