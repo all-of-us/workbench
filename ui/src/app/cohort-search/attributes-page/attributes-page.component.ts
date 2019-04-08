@@ -41,7 +41,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   subscription: Subscription;
   loading: boolean;
   selectedCode: any;
-  resetDisable = false;
   options = [
     {
       value: 'EQUAL',
@@ -142,15 +141,17 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
-    this.form.controls.NUM.reset();
-    this.resetDisable = true;
-    this.selectedCode = 'Any';
-    this.preview = this.preview.set('count', this.node.get('count'));
+    if (this.attrs.EXISTS) {
+      this.form.controls.NUM.reset();
+      this.selectedCode = 'Any';
+      this.preview = this.preview.set('count', this.node.get('count'));
+    } else {
+      this.refresh();
+    }
   }
 
   selectChange(index: number, option: any) {
     if (this.attrs.NUM[index].operator !== option.value) {
-      this.resetDisable = true;
       this.attrs.NUM[index].operator = option.value;
       this.dropdowns.selected[index] = option.name;
       if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
@@ -246,8 +247,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   refresh() {
     this.preview = Map();
     this.form.reset();
-    this.attrs.EXISTS = false;
-    this.resetDisable = false;
     this.attrs.NUM.forEach(num => {
       num.operator = null;
       num.operands = [null];
