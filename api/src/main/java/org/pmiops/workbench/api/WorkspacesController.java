@@ -402,7 +402,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               try {
                 dbCohort = cohortDao.save(dbCohort);
               } catch (DataIntegrityViolationException e) {
-                throw new ServerErrorException(String.format(
+                throw new BadRequestException(String.format(
                         "Cohort \"/%s/%s/%d\" already exists.",
                         finalDbWorkspace.getWorkspaceNamespace(), finalDbWorkspace.getWorkspaceId(), dbCohort.getCohortId()));
               }

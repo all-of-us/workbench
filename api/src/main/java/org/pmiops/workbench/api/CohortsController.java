@@ -122,6 +122,13 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
   }
 
+  private void checkForDuplicateCohortNameException(String newCohortName, Workspace workspace) {
+    if (cohortDao.findCohortByNameAndWorkspaceId(newCohortName, workspace.getWorkspaceId()) != null) {
+      throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
+              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohortName));
+    }
+  }
+
   @Override
   public ResponseEntity<Cohort> createCohort(String workspaceNamespace, String workspaceId,
       Cohort cohort) {
@@ -129,13 +136,9 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
+    checkForDuplicateCohortNameException(cohort.getName(), workspace);
+
     org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
-
-    if (cohortDao.findCohortByNameAndWorkspaceId(newCohort.getName(), workspace.getWorkspaceId()) != null) {
-      throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
-              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()));
-    }
-
     try {
       // TODO Make this a pre-check within a transaction?
       newCohort = cohortDao.save(newCohort);
@@ -163,10 +166,7 @@ public class CohortsController implements CohortsApiDelegate {
     org.pmiops.workbench.db.model.Cohort originalCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(originalCohort, userProvider.get());
 
-    if (cohortDao.findCohortByNameAndWorkspaceId(newCohort.getName(), workspace.getWorkspaceId()) != null) {
-      throw new BadRequestException(String.format("Cohort \"/%s/%s/%s\" already exists.",
-              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()));
-    }
+    checkForDuplicateCohortNameException(newCohort.getName(), workspace);
 
     try {
       newCohort = cohortDao.save(newCohort);

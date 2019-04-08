@@ -1099,6 +1099,8 @@ paths:
           description: The cohort definition that was created.
           schema:
             $ref: "#/definitions/Cohort"
+        400:
+          description: 'Bad Request. Cohort name already exists'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/duplicate:
     parameters:
@@ -1115,6 +1117,8 @@ paths:
           description: The cohort definition that was created.
           schema:
             $ref: "#/definitions/Cohort"
+        400:
+          description: 'Bad Request. Cohort name already exists'
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
     parameters:

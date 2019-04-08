@@ -35,10 +35,10 @@ public class CohortFactoryTest {
 
         Cohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
 
-        assertThat(dbCohort.getDescription()).isEqualTo("desc");
-        assertThat(dbCohort.getName()).isEqualTo("name");
-        assertThat(dbCohort.getType()).isEqualTo("type");
-        assertThat(dbCohort.getCriteria()).isEqualTo("criteria");
+        assertThat(dbCohort.getDescription()).isEqualTo(apiCohort.getDescription());
+        assertThat(dbCohort.getName()).isEqualTo(apiCohort.getName());
+        assertThat(dbCohort.getType()).isEqualTo(apiCohort.getType());
+        assertThat(dbCohort.getCriteria()).isEqualTo(apiCohort.getCriteria());
         assertThat(dbCohort.getCreator()).isSameAs(user);
         assertThat(dbCohort.getWorkspaceId()).isEqualTo(workspaceId);
     }
@@ -56,12 +56,12 @@ public class CohortFactoryTest {
         User user = mock(User.class);
         Cohort dbCohort = cohortFactory.duplicateCohort(originalCohort, user);
 
-        assertThat(dbCohort.getDescription()).isEqualTo("desc");
-        assertThat(dbCohort.getName()).isEqualTo("name_2");
-        assertThat(dbCohort.getType()).isEqualTo("type");
-        assertThat(dbCohort.getCriteria()).isEqualTo("criteria");
+        assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
+        assertThat(dbCohort.getName()).isEqualTo(originalCohort.getName() + "_2");
+        assertThat(dbCohort.getType()).isEqualTo(originalCohort.getType());
+        assertThat(dbCohort.getCriteria()).isEqualTo(originalCohort.getCriteria());
         assertThat(dbCohort.getCreator()).isSameAs(user);
-        assertThat(dbCohort.getWorkspaceId()).isEqualTo(1l);
+        assertThat(dbCohort.getWorkspaceId()).isEqualTo(originalCohort.getWorkspaceId());
         assertThat(dbCohort.getCohortReviews()).isNull();
     }
 
