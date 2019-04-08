@@ -53,7 +53,7 @@ for table in ${tables[@]}; do
   echo "Dumping table : $table"
   # It would be nice to use .* for everything but bq extract does a bad job and you end up with a hundred small files
   # for tables that should just be one file without the .*
-  # TODO:Remove criteria
+  # TODO:Remove freemabd remove criteria
   if [[ $table =~ ^(concept|concept_relationship|concept_synonym|criteria|cb_criteria)$ ]]
   then
     bq extract --project_id $PROJECT --compression=GZIP --print_header=false $PROJECT:$DATASET.$table \
