@@ -30,17 +30,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.CdrQuery;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.CohortAnnotationsRequest;
-import org.pmiops.workbench.model.CohortAnnotationsResponse;
-import org.pmiops.workbench.model.CohortListResponse;
-import org.pmiops.workbench.model.DataTableSpecification;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.MaterializeCohortRequest;
-import org.pmiops.workbench.model.MaterializeCohortResponse;
-import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -159,15 +149,14 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Cohort> duplicateCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
+  public ResponseEntity<Cohort> duplicateCohort(String workspaceNamespace, String workspaceId, DuplicateCohortParams params) {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    org.pmiops.workbench.db.model.Cohort originalCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(originalCohort, userProvider.get());
+    checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
-    checkForDuplicateCohortNameException(newCohort.getName(), workspace);
-
+    org.pmiops.workbench.db.model.Cohort originalCohort = getDbCohort(workspaceNamespace, workspaceId, params.getOriginalCohortId());
+    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(params.getNewName(), originalCohort, userProvider.get());
     try {
       newCohort = cohortDao.save(newCohort);
       userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(),

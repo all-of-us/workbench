@@ -31,10 +31,10 @@ public class CohortFactoryImpl implements CohortFactory {
     }
 
     @Override
-    public Cohort duplicateCohort(Cohort original, User creator) {
+    public Cohort duplicateCohort(String newName, Cohort original, User creator) {
         return createCohort(
                 original.getDescription(),
-                original.getName() + "_2",
+                newName,
                 original.getType(),
                 original.getCriteria(),
                 creator,

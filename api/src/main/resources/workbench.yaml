@@ -1102,16 +1102,28 @@ paths:
         400:
           description: 'Bad Request. Cohort name already exists'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/duplicate:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/duplicate:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
     post:
       tags:
         - cohorts
       description: Creates a duplicate of the cohort specified by cohortId
       operationId: "duplicateCohort"
+      parameters:
+        - in: body
+          name: DuplicateCohortParams
+          description: Duplicate Cohort Params
+          required: true
+          schema:
+            type: object
+            properties:
+              originalCohortId:
+                type: integer
+                format: int64
+              newName:
+                type: string
       responses:
         200:
           description: The cohort definition that was created.

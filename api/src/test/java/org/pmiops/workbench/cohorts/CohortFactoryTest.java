@@ -54,10 +54,10 @@ public class CohortFactoryTest {
         originalCohort.setCohortReviews(Collections.singleton(mock(CohortReview.class)));
 
         User user = mock(User.class);
-        Cohort dbCohort = cohortFactory.duplicateCohort(originalCohort, user);
+        Cohort dbCohort = cohortFactory.duplicateCohort("new name", originalCohort, user);
 
         assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
-        assertThat(dbCohort.getName()).isEqualTo(originalCohort.getName() + "_2");
+        assertThat(dbCohort.getName()).isEqualTo("new name");
         assertThat(dbCohort.getType()).isEqualTo(originalCohort.getType());
         assertThat(dbCohort.getCriteria()).isEqualTo(originalCohort.getCriteria());
         assertThat(dbCohort.getCreator()).isSameAs(user);

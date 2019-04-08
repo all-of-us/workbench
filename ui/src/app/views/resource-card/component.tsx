@@ -280,7 +280,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         cohortsApi().duplicateCohort(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.cohort.id
+          {
+            originalCohortId: this.props.resourceCard.cohort.id,
+            newName: `Duplicate of ${this.props.resourceCard.cohort.name}`
+          }
         ).then(() => {
           this.props.onUpdate();
         }).catch(e => {

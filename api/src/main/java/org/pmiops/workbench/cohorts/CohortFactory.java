@@ -9,6 +9,6 @@ public interface CohortFactory {
 
     // duplicateCohort provides the functionality for the "Duplicate" Cohort function in the AoU workspace.
     // It is NOT a deep cloning method so some fields (CohortReviews) will not be copied over
-    Cohort duplicateCohort(Cohort original, User creator);
+    Cohort duplicateCohort(String newName, Cohort original, User creator);
 
 }
