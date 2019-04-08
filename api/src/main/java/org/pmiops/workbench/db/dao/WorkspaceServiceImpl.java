@@ -192,6 +192,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return this.saveWithLastModified(workspace);
   }
+
   @Override
   @Transactional
   public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
@@ -208,6 +209,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return saved;
   }
+
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
     String userAccess = fireCloudService.getWorkspace(

@@ -12,6 +12,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
+import {TextModal} from 'app/views/text-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
@@ -391,21 +392,17 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
-      <Modal>
-        <ModalTitle>Invalid Resource Type</ModalTitle>
-        <ModalBody>Please Report a Bug.</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
-        </ModalFooter>
-      </Modal>}
+        <TextModal
+          title='Invalid Resource Type'
+          body='Please Report a Bug.'
+          onConfirm={() => this.setState({invalidResourceError: false})}/>
+      }
       {this.state.showErrorModal &&
-      <Modal>
-        <ModalTitle>{this.state.errorModalTitle}</ModalTitle>
-        <ModalBody>{this.state.errorModalBody}</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => this.setState({showErrorModal: false})}>OK</Button>
-        </ModalFooter>
-      </Modal>}
+        <TextModal
+          title={this.state.errorModalTitle}
+          body={this.state.errorModalBody}
+          onConfirm={() => this.setState({showErrorModal: false})}/>
+      }
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
