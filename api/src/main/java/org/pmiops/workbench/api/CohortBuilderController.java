@@ -37,6 +37,7 @@ import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
+import org.pmiops.workbench.model.DomainCountResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -302,6 +303,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 
     return ResponseEntity.ok(criteriaResponse);
+  }
+
+  @Override
+  public ResponseEntity<DomainCountResponse> getCriteriaDomainCount(Long cdrVersionId, String value) {
+    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    return null;
   }
 
   @Override
