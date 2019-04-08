@@ -239,34 +239,6 @@ public class ProfileControllerTest {
   }
 
   @Test
-  public void testSubmitEverything_success() throws Exception {
-    createUser();
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    Profile profile = profileController.submitDemographicsSurvey().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    user = userProvider.get();
-    user.setDataUseAgreementCompletionTime(timestamp);
-    user.setEraCommonsCompletionTime(timestamp);
-    user.setComplianceTrainingCompletionTime(timestamp);
-    profile = profileController.submitTermsOfService().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
-    verify(fireCloudService).addUserToGroup("bob@researchallofus.org", "");
-
-    assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
-    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void testCreateAccount_directoryServiceFail() throws Exception {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
-        .thenThrow(new ServerErrorException());
-    profileController.createAccount(createAccountRequest);
-  }
-
-  @Test
   public void testMe_success() throws Exception {
     createUser();
 
