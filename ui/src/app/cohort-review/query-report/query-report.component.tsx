@@ -1,9 +1,14 @@
+import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
+import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
-import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
-import {List} from 'immutable';
+import {DomainType, SearchRequest} from 'generated/fetch';
+import {fromJS} from 'immutable';
 import * as React from 'react';
-import {Observable} from 'rxjs/Observable';
 
 const css = `
   .container {
@@ -49,83 +54,143 @@ const css = `
       padding-left: 2rem;
     }
   }
-`
-export class QueryReport extends React.Component<{}, {cdrName: string}> {
-  data:  Observable<List<any>>;
-  cohort = currentCohortStore.getValue();
-  review = cohortReviewStore.getValue();
+`;
 
-  constructor(props: any) {
-    super(props);
-    this.state = {cdrName: null};
-  }
+const domains = [DomainType[DomainType.CONDITION],
+  DomainType[DomainType.PROCEDURE],
+  DomainType[DomainType.DRUG],
+  DomainType[DomainType.LAB]];
 
-  componentDidMount() {
-    cdrVersionsApi().getCdrVersions().then(resp => {
-      const cdrName = resp.items.find(
-        v => v.cdrVersionId === this.review.cdrVersionId.toString()
-      ).name;
-      this.setState({cdrName});
-    });
-  }
+export interface QueryReportProps {
+  workspace: WorkspaceData;
+}
+export interface QueryReportState {
+  cdrName: string;
+  data: any;
+  loading: boolean;
+}
 
-  getDemoChartData(d) {
-    if (d) {
-      this.data = d.toJS();
+export const QueryReport = withCurrentWorkspace()(
+  class extends React.Component<QueryReportProps, QueryReportState> {
+    cohort = currentCohortStore.getValue();
+    review = cohortReviewStore.getValue();
+
+    constructor(props: any) {
+      super(props);
+      this.state = {
+        cdrName: null,
+        data: null,
+        loading: true
+      };
     }
-  }
 
-  render() {
-    const {cdrName} = this.state;
-    return <React.Fragment>
-      <style>{css}</style>
-      <div className='report-background'>
-        <div className='container'>
-          <div className='row'>
-            <div className='col-sm-6 col-xs-6'>
-              <div className='container'>
-                <div className='row'>
-                  <div className='col-sm-6 col-xs-6'>
-                    <div className='query-title'>
-                      Cohort Name
+    componentDidMount() {
+      const {cdrVersionId} = this.props.workspace;
+      cdrVersionsApi().getCdrVersions().then(resp => {
+        const cdrName = resp.items.find(
+          v => v.cdrVersionId === this.review.cdrVersionId.toString()
+        ).name;
+        this.setState({cdrName});
+      });
+      const request = (JSON.parse(this.review.cohortDefinition)) as SearchRequest;
+      cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request)
+        .then(response => {
+          this.setState({data: fromJS((response).items), loading: false});
+        });
+    }
+
+    render() {
+      const {cdrName, data, loading} = this.state;
+      return <React.Fragment>
+        <style>{css}</style>
+        <div className='report-background'>
+          <div className='container'>
+            <div className='row'>
+              <div className='col-sm-6 col-xs-6'>
+                <div className='container'>
+                  <div className='row'>
+                    <div className='col-sm-6 col-xs-6'>
+                      <div className='query-title'>
+                        Cohort Name
+                      </div>
+                      <div className='query-content'>
+                        {this.review.cohortName}
+                      </div>
+                      <div className='query-title'>
+                        Created By
+                      </div>
+                      <div className='query-content'>
+                        {this.cohort.creator}
+                      </div>
                     </div>
-                    <div className='query-content'>
-                      {this.review.cohortName}
+                    <div className='col-sm-6 col-xs-6'>
+                      <div className='query-title'>
+                        Date created
+                      </div>
+                      <div className='query-content'>
+                        {this.cohort.creationTime}
+                      </div>
+                      <div className='query-title'>
+                        Dataset
+                      </div>
+                      <div className='query-content'>
+                        {cdrName}
+                      </div>
                     </div>
-                    <div className='query-title'>
-                      Created By
-                    </div>
-                    <div className='query-content'>
-                      {this.cohort.creator}
+                    <div className='col-sm-12 col-xs-12'>
+                      // query-cohort-definition
                     </div>
                   </div>
-                  <div className='col-sm-6 col-xs-6'>
-                    <div className='query-title'>
-                      Date created
-                    </div>
-                    <div className='query-content'>
-                      {this.cohort.creationTime}
-                    </div>
-                    <div className='query-title'>
-                      Dataset
-                    </div>
-                    <div className='query-content'>
-                      {cdrName}
+                </div>
+              </div>
+              <div className=' col-sm-6 col-xs-6 stats-left-padding'>
+                // app-descriptive-stats
+              </div>
+            </div>
+          </div>
+          // ov charts
+          <div className='container container-margin'>
+            <div className='row'>
+              <div className='col-sm-12 col-xs-12'>
+                <div className='container container-margin'>
+                  <div className='row'>
+                    <div className='col-sm-12 col-xs-12'>
+                      <div>
+                        <span className='chart-title'>Charts</span>
+                      </div>
                     </div>
                   </div>
-                  <div className='col-sm-12 col-xs-12'>
-                    // query-cohort-definition
+                </div>
+                <div className='container container-margin'>
+                  <div className='row'>
+                    <div className='col-sm-8 col-xs-8 col-lg-8 col-xl-8'>
+                      <div className='chart-container'>
+                        <div className='demography-title '>Demographics</div>
+                        <div className='graph-border'>
+                          <div className='demo-chart-heading'>
+                            Participants by Gender, Age Range & Race
+                          </div>
+                          {data && <ComboChart mode={'stacked'} data={data} />}
+                          {loading && <SpinnerOverlay />}
+                        </div>
+                      </div>
+                    </div>
+                    <div className='col-sm-10 col-xs-10 col-lg-10 col-xl-10'>
+                      <div className='chart-container'>
+                        {domains.map((domain, i) => (
+                          <div key={i}>
+                            <ParticipantsCharts domain={domain}/>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className=' col-sm-6 col-xs-6 stats-left-padding'>
-              // app-descriptive-stats
-            </div>
           </div>
         </div>
-      // overview-charts
-      </div>
-    </React.Fragment>;
+      </React.Fragment>;
+    }
   }
-}
+);
