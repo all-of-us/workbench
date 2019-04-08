@@ -71,7 +71,7 @@ else
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria, criteria_attribute, criteria_relationship and criteria_ancestor
 tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls)
 cri_table_check=\\bcriteria\\b
 cri_attr_table_check=\\bcriteria_attribute\\b
@@ -83,7 +83,7 @@ cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
 cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria, criteria_attribute, criteria_relationship and criteria_ancestor
 schema_path=generate-cdr/bq-schemas
 create_tables=(achilles_results achilles_results_concept achilles_results_dist concept concept_relationship criteria cb_criteria criteria_attribute cb_criteria_attribute criteria_relationship cb_criteria_relationship criteria_ancestor cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info)
 
@@ -102,7 +102,7 @@ do
 done
 
 # Populate some tables from cdr data
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria
 ############
 # criteria #
 ############
@@ -367,7 +367,7 @@ if [[ $tables =~ $cri_table_check ]]; then
         group by name, type, subtype) as crit
         where crit.id = ct.id"
 fi
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria_attribute
 ######################
 # criteria_attribute #
 ######################
@@ -379,7 +379,7 @@ if [[ $tables =~ $cri_attr_table_check ]]; then
     SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
     FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_attribute\`"
 fi
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria_relationship
 #########################
 # criteria_relationship #
 #########################
@@ -391,7 +391,7 @@ if [[ $tables =~ $cri_rel_table_check ]]; then
     SELECT concept_id_1, concept_id_2
     FROM \`$BQ_PROJECT.$BQ_DATASET.criteria_relationship\`"
 fi
-# TODO:Remove criteria
+# TODO:Remove freemabd remove criteria_ancestor
 #########################
 #   criteria_ancestor   #
 #########################
