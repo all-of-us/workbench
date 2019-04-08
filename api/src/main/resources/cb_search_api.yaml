@@ -690,11 +690,6 @@ definitions:
     description: possible types of modifiers
     enum: [AGE_AT_EVENT, NUM_OF_OCCURRENCES, EVENT_DATE, ENCOUNTERS]
 
-  CriteriaDomain:
-    type: string
-    description: possible domain types for criteria table data
-    enum: [CONDITION, DRUG, MEASUREMENT, PERSON, PHYSICALMEASUREMENT, PROCEDURE, SURVEY, VISIT]
-
   CriteriaType:
     type: string
     description: possible criteria types
@@ -705,11 +700,12 @@ definitions:
     description: possible criteria types
     enum: [BASICS, BMI, BP, CLIN, HC, HEIGHT, HR, HR-DETAIL, HR-IRR, HR-NOIRR, LAB, LIFESTYLE, OVERALLHEALTH, PREG, WC, WEIGHT, WHEEL]
 
+  # TODO:Remove freemabd
   TreeType:
     type: string
     description: possible types of trees
     enum: [ICD9, ICD10, CPT, DEMO, VISIT, PM, DRUG, MEAS, CONDITION, PROCEDURE, PPI, SNOMED]
-
+  # TODO:Remove freemabd
   TreeSubType:
       type: string
       description: possible subtypes of trees
