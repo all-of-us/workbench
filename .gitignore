@@ -25,6 +25,7 @@
 /ui/package-lock.json
 /ui/coverage
 /ui/**/*.map
+/ui/report.*.json
 /ui/dist/**
 /ui/sa-key.json
 /ui/yarn-error.log
