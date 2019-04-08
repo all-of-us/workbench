@@ -2,6 +2,7 @@ import {Environment} from 'environments/environment-type';
 
 export const environment: Environment = {
   displayTag: '',
+  shouldShowDisplayTag: false,
   allOfUsApiUrl: 'https://api.workbench.researchallofus.org',
   clientId: '684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com',
   tcellappid: 'AoUProd-35j28',
@@ -19,7 +20,8 @@ export const environment: Environment = {
   //
   // See environment-type.ts for more details on transient flags, including
   // exit criteria and Jira ticket links.
-  useZendeskForSupport: false,
+  useZendeskForSupport: true,
   enableJupyterLab: false,
   enableDatasetBuilder: false,
+  enableCBListSearch: false,
 };

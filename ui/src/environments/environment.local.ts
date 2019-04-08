@@ -3,6 +3,7 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 
 export const environment: Environment = {
   displayTag: 'Local->Local',
+  shouldShowDisplayTag: true,
   allOfUsApiUrl: 'http://localhost:8081',
   clientId: testEnvironmentBase.clientId,
   tcellappid: 'AoUNonProd-WZFW2',
@@ -19,4 +20,5 @@ export const environment: Environment = {
   useZendeskForSupport: true,
   enableJupyterLab: true,
   enableDatasetBuilder: true,
+  enableCBListSearch: false,
 };

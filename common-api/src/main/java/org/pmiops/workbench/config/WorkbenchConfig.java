@@ -20,6 +20,28 @@ public class WorkbenchConfig {
   public ElasticsearchConfig elasticsearch; 
   public MoodleConfig moodle;
   public AccessConfig access;
+  public CohortBuilderConfig cohortbuilder;
+
+  /**
+   * Creates a config with non-null-but-empty member variables, for use in testing.
+   */
+  public static WorkbenchConfig createEmptyConfig() {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new FireCloudConfig();
+    config.auth = new AuthConfig();
+    config.cdr = new CdrConfig();
+    config.googleCloudStorageService = new GoogleCloudStorageServiceConfig();
+    config.googleDirectoryService = new GoogleDirectoryServiceConfig();
+    config.server = new ServerConfig();
+    config.admin = new AdminConfig();
+    config.jira = new JiraConfig();
+    config.mandrill = new MandrillConfig();
+    config.elasticsearch = new ElasticsearchConfig();
+    config.moodle = new MoodleConfig();
+    config.access = new AccessConfig();
+    config.cohortbuilder = new CohortBuilderConfig();
+    return config;
+  }
 
   public static class FireCloudConfig {
     public boolean debugEndpoints;
@@ -80,7 +102,8 @@ public class WorkbenchConfig {
   }
 
   public static class ElasticsearchConfig {
-    public String host;
+    public String baseUrl;
+    public boolean enableBasicAuth;
     public boolean enableElasticsearchBackend;
   }
 
@@ -96,5 +119,9 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+  }
+
+  public static class CohortBuilderConfig {
+    public boolean enableListSearch;
   }
 }

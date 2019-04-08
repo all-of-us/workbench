@@ -9,10 +9,11 @@ import {
   Router,
 } from '@angular/router';
 
-
 import {cookiesEnabled} from 'app/utils';
 import {queryParamsStore, routeConfigDataStore, urlParamsStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
+
+import outdatedBrowserRework from 'outdated-browser-rework';
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 export const overriddenPublicUrlKey = 'publicApiUrlOverride';
@@ -40,6 +41,8 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.checkBrowserSupport();
+
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
     if (this.cookiesEnabled) {
@@ -83,7 +86,7 @@ export class AppComponent implements OnInit {
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
     this.baseTitle = this.titleService.getTitle();
-    if (environment.displayTag) {
+    if (environment.shouldShowDisplayTag) {
       this.baseTitle = `[${environment.displayTag}] ${this.baseTitle}`;
       this.titleService.setTitle(this.baseTitle);
     }
@@ -170,6 +173,38 @@ export class AppComponent implements OnInit {
     s.setAttribute('tcellapikey', environment.tcellapikey);
     const head = this.doc.getElementsByTagName('head')[0];
     head.appendChild(s);
+  }
+
+  private checkBrowserSupport() {
+    const minChromeVersion = 67;
+
+    outdatedBrowserRework({
+      browserSupport: {
+        Chrome: minChromeVersion, // Includes Chrome for mobile devices
+        Edge: false,
+        Safari: false,
+        'Mobile Safari': false,
+        Opera: false,
+        Firefox: false,
+        Vivaldi: false,
+        IE: false
+      },
+      isUnknownBrowserOK: false,
+      messages: {
+        en: {
+          outOfDate: 'Researcher Workbench may not function correctly in this browser.',
+          update: {
+            web: `If you experience issues, please install Google Chrome \
+            version ${minChromeVersion} or greater.`,
+            googlePlay: 'Please install Chrome from Google Play',
+            appStore: 'Please install Chrome from the App Store'
+          },
+          url: 'https://www.google.com/chrome/',
+          callToAction: 'Download Chrome now',
+          close: 'Close'
+        }
+      }
+    });
   }
 
 }

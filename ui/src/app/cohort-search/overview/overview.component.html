@@ -1,5 +1,62 @@
 <div>
   <div class="overview-header">
+    <div class="actions-container">
+      <clr-dropdown *ngIf="cohort" style="float: right">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="(isRequesting$ | async) || saving || (total$ | async) === null || (total$ | async) === -1"
+          [clrLoading]="saving"
+          clrDropdownTrigger>
+          <span style="margin-right: 5px">Save Cohort</span>
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu>
+          <button
+            type="button"
+            class="dropdown-item"
+            [disabled]="unchanged"
+            (click)="saveCohort()"
+            clrDropdownItem>Save</button>
+          <button
+            type="button"
+            class="dropdown-item"
+            (click)="saveModal.open()"
+            clrDropdownItem>Save as</button>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+      <button
+        *ngIf="!cohort"
+        type="button"
+        class="btn btn-primary"
+        style="float: right"
+        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
+        (click)="saveModal.open()">Create Cohort</button>
+      <button
+        class="btn btn-link"
+        (click)="navigateTo('notebook')"
+        disabled
+        [popper]="'Export to notebook'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="export" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        (click)="deleting = true"
+        [disabled]="(isRequesting$ | async) || !cohort"
+        [popper]="'Delete cohort'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="trash" class="is-solid" size="30"></clr-icon>
+      </button>
+      <button
+        class="btn btn-link"
+        (click)="navigateTo('review')"
+        [disabled]="(isRequesting$ | async) || !cohort"
+        [popper]="'Review participant level data'"
+        [popperTrigger]="'hover'">
+        <clr-icon shape="copy" class="is-solid disabled" size="30"></clr-icon>
+      </button>
+    </div>
     <h2 class="count-header" id="total-count">
       Total Count:
       <span *ngIf="(isRequesting$ | async)" class="spinner spinner-sm">
@@ -16,7 +73,7 @@
           size="18"></clr-icon>
       </span>
       <span *ngIf="!(isRequesting$ | async) && ((temporal?.flag && temporal.tempLength && (total$ | async) === null) || (total$ | async) === -1)">
-        - -
+        --
         <clr-icon
           [popper]="errorPopper"
           [popperTrigger]="'hover'"
@@ -24,50 +81,34 @@
           size="18"></clr-icon>
       </span>
     </h2>
-    <div>
-      <button
-        type="button"
-        class="btn btn-primary"
-        [style.margin-left]="'0'"
-        [disabled]="(isRequesting$ | async) || (total$ | async) === null || (total$ | async) === -1"
-        (click)="saveModal.open()">
-        Save Cohort
-      </button>
+  </div>
+<div *ngIf="(total$ | async) > 0 && !(isRequesting$ | async) && chartData$ | async as chartData">
+  <div class="card bg-faded">
+    <div class="card-header header-text">
+      Results by Gender
+    </div>
+    <div *ngIf="showGenderChart" class="card-block">
+      <app-gender-chart *ngIf="chartData.size"
+        [data]="chartData">
+      </app-gender-chart>
     </div>
   </div>
-<ng-container *ngIf="(total$ | async) > 0 && !(isRequesting$ | async)">
-  <ng-container *ngIf="chartData$ | async as chartData">
-    <div class="card bg-faded">
-      <div class="card-header header-text">
-        Results by Gender
-      </div>
-      <div *ngIf="showGenderChart" class="card-block">
-        <app-gender-chart *ngIf="chartData.size"
-          [data]="chartData">
-        </app-gender-chart>
-      </div>
+  <div class="card bg-faded">
+    <div class="card-header header-text">
+      Results By Gender, Age Range, and Race
+      <clr-icon shape="sort-by"
+        [class.is-info]="stackChart"
+        (click)="toggleChartMode()">
+      </clr-icon>
     </div>
-    <div class="card bg-faded">
-      <div class="card-header header-text">
-        Results By Gender, Age Range, and Race
-        <clr-icon shape="sort-by"
-          [class.is-info]="stackChart"
-          (click)="toggleChartMode()">
-        </clr-icon>
-        <!--<clr-icon shape="angle"-->
-          <!--[dir]="showComboChart ? 'up' : 'down'"-->
-          <!--(click)="toggleShowCombo()">-->
-        <!--</clr-icon>-->
-      </div>
-      <div *ngIf="showComboChart" class="card-block">
-        <app-combo-chart *ngIf="chartData.size"
-          [data]="chartData"
-          [mode]="stackChart ? 'stacked' : 'normalized'">
-        </app-combo-chart>
-      </div>
+    <div *ngIf="showComboChart" class="card-block">
+      <app-combo-chart *ngIf="chartData.size"
+        [data]="chartData"
+        [mode]="stackChart ? 'stacked' : 'normalized'">
+      </app-combo-chart>
     </div>
-  </ng-container>
-</ng-container>
+  </div>
+</div>
 </div>
 <popper-content #errorPopper>
   <p   *ngIf="(error$ | async) && !temporal?.flag" [style.margin]="'0'">
@@ -86,11 +127,10 @@
   <div class="modal-title">
     <h2>Save New Cohort</h2>
   </div>
-
   <div class="modal-body">
     <form [formGroup]="cohortForm" (ngSubmit)="submit()">
       <label
-        for="name"
+        for="name-control"
         [class.show]="(name.dirty || name.touched) && cohortForm.invalid">
         <em>*A Cohort Name is Required</em>
       </label>
@@ -122,7 +162,6 @@
       </textarea>
     </form>
   </div>
-
   <div class="modal-footer">
     <button
       type="button"
@@ -130,13 +169,20 @@
       (click)="saveModal.close()">
       Cancel
     </button>
-
     <button
       type="button"
       class="btn btn-primary"
       (click)="submit()"
+      [clrLoading]="saving"
       [disabled]="!cohortForm.valid">
       Save Cohort
     </button>
   </div>
 </clr-modal>
+<app-confirm-delete-modal
+  *ngIf="deleting"
+  [resourceName]="cohort.name"
+  [resourceType]="'cohort'"
+  [receiveDelete]="delete"
+  [closeFunction]="cancel">
+</app-confirm-delete-modal>

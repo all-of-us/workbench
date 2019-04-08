@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-26" runAlways="true" context="local or cloud">
+
+    <validCheckSum>ANY</validCheckSum>
+
+    <delete tableName="cb_criteria"/>
+    <delete tableName="cb_criteria_attribute"/>
+    <delete tableName="cb_criteria_relationship"/>
+
+    <loadData tableName="cb_criteria_attribute" file="csv/cb_criteria_attribute.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="concept_id" type="NUMERIC"/>
+      <column name="value_as_concept_id" type="NUMERIC"/>
+      <column name="concept_name" type="STRING"/>
+      <column name="type" type="STRING"/>
+      <column name="est_count" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria_relationship" file="csv/cb_criteria_relationship.csv" encoding="UTF-8" quotchar='"'>
+      <column name="concept_id_1" type="NUMERIC"/>
+      <column name="concept_id_2" type="NUMERIC"/>
+      <column name="relationship_id" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_condition.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_procedure.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_drug.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_measurement.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_person.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_physical_measurement.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_survey.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+    <loadData tableName="cb_criteria" file="csv/cb_criteria_visit.csv" encoding="UTF-8" quotchar='"'>
+      <column name="id" type="NUMERIC"/>
+      <column name="parent_id" type="NUMERIC"/>
+      <column name="domain_id" type="STRING"/>
+      <column name="is_standard" type="BOOLEAN"/>
+      <column name="type" type="STRING"/>
+      <column name="subtype" type="STRING"/>
+      <column name="concept_id" type="STRING"/>
+      <column name="code" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="value" type="STRING"/>
+      <column name="est_count" type="NUMERIC"/>
+      <column name="is_group" type="BOOLEAN"/>
+      <column name="is_selectable" type="BOOLEAN"/>
+      <column name="has_attribute" type="BOOLEAN"/>
+      <column name="has_hierarchy" type="BOOLEAN"/>
+      <column name="has_ancestor_data" type="BOOLEAN"/>
+      <column name="path" type="STRING"/>
+      <column name="synonyms" type="STRING"/>
+    </loadData>
+
+  </changeSet>
+</databaseChangeLog>

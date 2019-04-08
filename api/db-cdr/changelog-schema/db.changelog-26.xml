@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+  <changeSet author="brianfreeman" id="changelog-26">
+
+    <dropTable tableName="survey_question_map"/>
+    <dropTable tableName="achilles_analysis"/>
+    <dropTable tableName="achilles_results"/>
+    <dropTable tableName="achilles_results_dist"/>
+
+    <createTable tableName="cb_criteria">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="parent_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_standard" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="subtype" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="code" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="name" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_group" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_selectable" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_attribute" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_hierarchy" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_ancestor_data" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="path" type="VARCHAR(500)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="synonyms" type="clob">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_criteria_type_parent_id"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="type"/>
+      <column name="parent_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_concept_id"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
+
+    <sql dbms="mysql">
+      ALTER TABLE cb_criteria
+      ADD FULLTEXT INDEX cb_criteria_synonyms
+      (synonyms);
+    </sql>
+
+    <createTable tableName="cb_criteria_attribute">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value_as_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_criteria_attribute_concept_id"
+      tableName="cb_criteria_attribute"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
+
+    <createTable tableName="cb_criteria_ancestor">
+      <column name="ancestor_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="descendant_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_descendant_ancestor"
+      tableName="cb_criteria_ancestor"
+      unique="false">
+      <column name="descendant_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_ancestor_id"
+      tableName="cb_criteria_ancestor"
+      unique="false">
+      <column name="ancestor_id"/>
+    </createIndex>
+
+    <createTable tableName="cb_criteria_relationship">
+      <column name="concept_id_1" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="INTEGER">
+        <constraints  nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex tableName="cb_criteria_relationship" indexName="idx_cb_criteria_concept_1">
+      <column name="concept_id_1" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="cb_criteria_relationship" indexName="idx_cb_criteria_concept_2">
+      <column name="concept_id_2" type="bigint"></column>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>

@@ -71,7 +71,7 @@ export class ProfileApiStub extends ProfileApi {
     return Promise.resolve(this.profile);
   }
 
-  public syncTrainingStatus() {
+  public syncComplianceTrainingStatus() {
     return Promise.resolve(this.profile);
   }
 

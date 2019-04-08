@@ -232,7 +232,7 @@ describe('ConceptSetDetailsComponent', () => {
       By.css('app-concept-table .datagrid-body input[type="checkbox"]'));
     simulateClick(fixture, checkboxes[0]);
     simulateClick(fixture, checkboxes[2]);
-    simulateClick(fixture, de.query(By.css('.sliding-button')));
+    simulateClickReact(fixture, '[data-test-id="sliding-button"]');
     simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
     updateAndTick(fixture);
 

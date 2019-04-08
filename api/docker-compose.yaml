@@ -102,6 +102,8 @@ services:
     volumes:
       - ..:/w:cached
       - gradle-cache:/.gradle
+      - ~/.config:/.config:cached
+      - ~/.gsutil:/.gsutil:cached
     entrypoint: ['with-uid.sh', 'wait-for', 'db:3306', --]
     env_file:
       - db-cdr/vars.env

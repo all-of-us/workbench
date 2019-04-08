@@ -43,17 +43,21 @@
     "sendRetries": 3
   },
   "elasticsearch": {
-    "host": "",
+    "baseUrl": "",
+    "enableBasicAuth": true,
     "enableElasticsearchBackend": false
   },
   "moodle": {
     "host": "aou.nnlm.gov",
-    "enableMoodleBackend": false
+    "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
-    "enableEraCommons": false,
+    "enableComplianceTraining": true,
+    "enableEraCommons": true,
     "enableDataUseAgreement": false,
     "enableBetaAccess": true
+  },
+  "cohortbuilder": {
+    "enableListSearch": false
   }
 }

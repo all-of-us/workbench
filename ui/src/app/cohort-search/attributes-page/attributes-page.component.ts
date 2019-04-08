@@ -41,7 +41,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   subscription: Subscription;
   loading: boolean;
   selectedCode: any;
-  resetDisable = false;
   options = [
     {
       value: 'EQUAL',
@@ -142,43 +141,47 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   }
 
   radioChange() {
-    this.form.controls.NUM.reset();
-    this.resetDisable = true;
-    this.selectedCode = 'Any';
-    this.preview = this.preview.set('count', this.node.get('count'));
+    if (this.attrs.EXISTS) {
+      this.form.controls.NUM.reset();
+      this.selectedCode = 'Any';
+      this.preview = this.preview.set('count', this.node.get('count'));
+    } else {
+      this.refresh();
+    }
   }
 
   selectChange(index: number, option: any) {
-    this.resetDisable = true;
-    this.attrs.NUM[index].operator = option.value;
-    this.dropdowns.selected[index] = option.name;
-    if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
-      const other = index === 0 ? 1 : 0;
-      if (this.dropdowns.codes[other] === '') {
-        this.dropdowns.codes = [option.code, option.code];
+    if (this.attrs.NUM[index].operator !== option.value) {
+      this.attrs.NUM[index].operator = option.value;
+      this.dropdowns.selected[index] = option.name;
+      if (this.node.get('subtype') === 'BP' && this.dropdowns.oldVals[index] !== option.value) {
+        const other = index === 0 ? 1 : 0;
+        if (this.dropdowns.codes[other] === '') {
+          this.dropdowns.codes = [option.code, option.code];
+        } else {
+          this.dropdowns.codes[index] = option.code;
+        }
+        if (!this.dropdowns.codes.includes('')) {
+          this.selectedCode = (this.dropdowns.codes.join(''));
+        }
+        if (option.value === AttrName.ANY) {
+          this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = AttrName.ANY;
+          this.dropdowns.selected[other] = 'Any';
+        } else if (this.dropdowns.oldVals[index] === AttrName.ANY) {
+          this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
+          this.dropdowns.selected[other] = option.name;
+        }
+        this.dropdowns.oldVals[index] = option.value;
       } else {
-        this.dropdowns.codes[index] = option.code;
+        if (option.value !== 'BETWEEN') {
+          this.form.controls.NUM.get(['num' + index, 'valueB']).reset();
+        }
+        this.selectedCode = option.code;
       }
-      if (!this.dropdowns.codes.includes('')) {
-        this.selectedCode = (this.dropdowns.codes.join(''));
-      }
-      if (option.value === AttrName.ANY) {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = AttrName.ANY;
-        this.dropdowns.selected[other] = 'Any';
-      } else if (this.dropdowns.oldVals[index] === AttrName.ANY) {
-        this.attrs.NUM[other].operator = this.dropdowns.oldVals[other] = option.value;
-        this.dropdowns.selected[other] = option.name;
-      }
-      this.dropdowns.oldVals[index] = option.value;
-    } else {
-      if (option.value !== 'BETWEEN') {
-        this.form.controls.NUM.get(['num' + index, 'valueB']).reset();
-      }
-      this.selectedCode = option.code;
+      this.setValidation(option.name);
+      this.preview = option.value === AttrName.ANY
+        ? this.preview.set('count', this.node.get('count')) : Map();
     }
-    this.setValidation(option.name);
-    this.preview = option.value === AttrName.ANY
-      ? this.preview.set('count', this.node.get('count')) : Map();
   }
 
   setValidation(option: string) {
@@ -244,8 +247,6 @@ export class AttributesPageComponent implements OnDestroy, OnInit {
   refresh() {
     this.preview = Map();
     this.form.reset();
-    this.attrs.EXISTS = false;
-    this.resetDisable = false;
     this.attrs.NUM.forEach(num => {
       num.operator = null;
       num.operands = [null];

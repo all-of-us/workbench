@@ -41,6 +41,7 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
   ) {
     this.receiveDelete = this.receiveDelete.bind(this);
     this.closeConfirmDelete = this.closeConfirmDelete.bind(this);
+    this.removeFab = this.removeFab.bind(this);
   }
 
   ngOnInit() {
@@ -63,6 +64,10 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
 
   validateEdits(): boolean {
     return !!this.editName;
+  }
+
+  removeFab(): void {
+    this.removing = true;
   }
 
   submitEdits() {

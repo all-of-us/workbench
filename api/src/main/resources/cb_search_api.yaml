@@ -39,32 +39,6 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria/{type}/{conceptId}:
-    parameters:
-      - $ref: '#/parameters/cdrVersionId'
-    get:
-      tags:
-        - cohortBuilder
-      description: >
-        Returns a criteria
-      operationId: "getPPICriteriaParent"
-      parameters:
-        - in: path
-          name: type
-          type: string
-          required: true
-          description: the specific type of criteria to get
-        - in: path
-          name: conceptId
-          type: string
-          required: true
-          description: the concept id
-      responses:
-        200:
-          description: A criteria
-          schema:
-            $ref: "#/definitions/Criteria"
-
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'

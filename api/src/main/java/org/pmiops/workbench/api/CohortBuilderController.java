@@ -3,7 +3,10 @@ package org.pmiops.workbench.api;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.base.Strings;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -35,6 +39,8 @@ import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
@@ -131,6 +137,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                       String subtype,
                                                                       Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    if (configProvider.get().cohortbuilder.enableListSearch) {
+      log.info("List search is on: " + configProvider.get().cohortbuilder.enableListSearch);
+    }
     Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
     String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
@@ -177,10 +186,12 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend &&
+        !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName()) && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(elasticSearchService.count(request).value());
+        return ResponseEntity.ok(elasticSearchService.count(request));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
@@ -190,20 +201,20 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     );
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
-
     List<FieldValue> row = result.iterateAll().iterator().next();
     Long count = bigQueryService.getLong(row, rm.get("count"));
-
     return ResponseEntity.ok(count);
   }
 
   @Override
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
-    if (configProvider.get().elasticsearch.enableElasticsearchBackend) {
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
+    if (configProvider.get().elasticsearch.enableElasticsearchBackend &&
+        !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName()) && !isApproximate(request)) {
       try {
-        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request).value()));
+        return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));
       } catch (IOException e) {
         log.log(Level.SEVERE, "Elastic request failed, falling back to BigQuery", e);
       }
@@ -276,22 +287,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<org.pmiops.workbench.model.Criteria> getPPICriteriaParent(Long cdrVersionId, String type, String conceptId) {
-    Optional.ofNullable(type)
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
-    Arrays
-      .stream(TreeType.values())
-      .filter(treeType -> treeType.name().equalsIgnoreCase(type))
-      .findFirst()
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid criteria type. %s is not valid.", type )));
-    Optional.ofNullable(conceptId)
-      .orElseThrow(() -> new BadRequestException(String.format("Bad Request: Please provide a valid conceptId. %s is not valid.", conceptId )));
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(type, conceptId, false);
-    return ResponseEntity.ok(TO_CLIENT_CRITERIA.apply(criteria));
-  }
-
-  @Override
   public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
@@ -309,6 +304,29 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     ParticipantDemographics participantDemographics =
       new ParticipantDemographics().genderList(genderList).raceList(raceList).ethnicityList(ethnicityList);
     return ResponseEntity.ok(participantDemographics);
+  }
+
+  /**
+   * This method helps determine what request can only be approximated by elasticsearch
+   * and must fallback to the BQ implementation.
+   *
+   * @param request
+   * @return
+   */
+  protected boolean isApproximate(SearchRequest request) {
+    List<SearchGroup> allGroups = ImmutableList.copyOf(
+        Iterables.concat(request.getIncludes(), request.getExcludes()));
+    List<SearchParameter> allParams = allGroups.stream()
+        .flatMap(sg -> sg.getItems().stream())
+        .flatMap(sgi -> sgi.getSearchParameters().stream())
+        .collect(Collectors.toList());
+    //currently elasticsearch doesn't implement Temporal/BP/DEC
+    return allGroups.stream().anyMatch(sg -> sg.getTemporal())
+      || allParams.stream()
+        .anyMatch(sp -> TreeSubType.BP.toString().equals(sp.getSubtype()) || TreeSubType.DEC.toString().equals(sp.getSubtype()))
+      || allParams.stream()
+        // TODO(RW-2404): Support these queries.
+        .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
   }
 
   private String modifyKeywordMatch(String value, String type) {

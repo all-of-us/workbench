@@ -11,3 +11,5 @@ other source files but are globally available.
 */
 
 declare var ResizeObserver: any;
+
+declare module 'outdated-browser-rework';

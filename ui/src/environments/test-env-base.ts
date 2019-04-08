@@ -14,4 +14,5 @@ export const testEnvironmentBase = {
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
+  shouldShowDisplayTag: true,
 };

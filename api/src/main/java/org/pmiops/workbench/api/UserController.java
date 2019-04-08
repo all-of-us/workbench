@@ -42,27 +42,6 @@ public class UserController implements UserApiDelegate {
     this.userService = userService;
   }
 
-  /**
-   * Updates moodle information for all User in user Database
-   * @return
-   */
-  @Override
-  public ResponseEntity<Void> bulkSyncTrainingStatus() {
-    List<User> allUsers = userService.getAllUsers();
-    allUsers.parallelStream().forEach(user -> {
-      try {
-        userService.syncUserTraining(user);
-      } catch (NotFoundException ex){
-        log.severe(String.format("User Not found Exception: %s For user id: %s", ex.getMessage(),
-            user.getUserId()));
-      } catch (ApiException ex) {
-        log.severe(String.format("Exception: %s For user id: %s",
-            ex.getMessage(), user.getUserId()));
-      }
-    });
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
   @Override
   public ResponseEntity<UserResponse> user(String term, String pageToken, Integer size, String sortOrder) {
     UserResponse response = new UserResponse();

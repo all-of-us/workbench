@@ -408,8 +408,7 @@ export const rootReducer: Reducer<CohortSearchState> =
           .deleteIn(['wizard', 'calculate', 'count']);
 
       case HIDE_ITEM: {
-        return state = state.setIn(['entities', 'groups', action.groupId, 'count'], null)
-          .setIn(['entities', 'items', action.itemId, 'status'], action.status);
+        return state = state.setIn(['entities', 'items', action.itemId, 'status'], action.status);
       }
 
       case HIDE_GROUP:

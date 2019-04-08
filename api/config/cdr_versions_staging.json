@@ -9,6 +9,7 @@
     "releaseNumber": 1,
     "numParticipants": 946237,
     "cdrDbName": "cdr20181213",
+    "elasticIndexBaseName": "synth_r_2019q1_1",
     "publicDbName": "public20181213"
   },
   {
@@ -22,6 +23,7 @@
     "releaseNumber": 1,
     "numParticipants": 946237,
     "cdrDbName": "synth_r_2019q1_2",
+    "elasticIndexBaseName": "synth_r_2019q1_1",
     "publicDbName": "synth_p_2019q1_1"
   }
 ]

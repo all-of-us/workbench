@@ -73,8 +73,8 @@
   <div *ngIf="conceptSet.concepts?.length" class="concept-table-wrap">
     <app-concept-table [concepts]="conceptSet.concepts" [placeholderValue]="'No Concepts Found'"></app-concept-table>
   </div>
-  <app-sliding-fab [disable]="disableRemoveFab" [expanded]="'Remove from set'" (submit)="removing=true">
-    <clr-icon shape="trash" class="remove-icon"></clr-icon>
+  <app-sliding-fab [disable]="disableRemoveFab" [expanded]="'Remove from set'"
+                   [submitFunction]="removeFab" [iconShape]="'trash'">
   </app-sliding-fab>
 </app-top-box>
 

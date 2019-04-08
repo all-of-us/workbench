@@ -80,7 +80,8 @@ public class User {
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
-  private Timestamp trainingExpirationTime;
+
+  // Access module fields go here. See http://broad.io/aou-access-modules for docs.
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
@@ -90,6 +91,7 @@ public class User {
   private Timestamp dataUseAgreementBypassTime;
   private Timestamp complianceTrainingCompletionTime;
   private Timestamp complianceTrainingBypassTime;
+  private Timestamp complianceTrainingExpirationTime;
   private Timestamp eraCommonsBypassTime;
   private Timestamp emailVerificationCompletionTime;
   private Timestamp emailVerificationBypassTime;
@@ -451,13 +453,6 @@ public class User {
     this.moodleId = moodleId;
   }
 
-  @Column(name = "training_expiration_time")
-  public Timestamp getTrainingExpirationTime() { return trainingExpirationTime; }
-
-  public void setTrainingExpirationTime( Timestamp trainingExpirationTime) {
-    this.trainingExpirationTime = trainingExpirationTime;
-  }
-
   @Column(name = "era_commons_linked_nih_username")
   public String getEraCommonsLinkedNihUsername() { return eraCommonsLinkedNihUsername; }
 
@@ -505,6 +500,13 @@ public class User {
 
   public void setComplianceTrainingBypassTime(Timestamp complianceTrainingBypassTime) {
     this.complianceTrainingBypassTime = complianceTrainingBypassTime;
+  }
+
+  @Column(name = "compliance_training_expiration_time")
+  public Timestamp getComplianceTrainingExpirationTime() {return complianceTrainingExpirationTime; }
+
+  public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
+    this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
   }
 
   @Column(name = "beta_access_bypass_time")

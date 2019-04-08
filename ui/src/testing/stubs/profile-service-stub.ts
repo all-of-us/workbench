@@ -105,5 +105,5 @@ export class ProfileServiceStub extends ProfileService {
     this.profile.demographicSurveyCompletionTime = this.now();
     return Observable.from([this.profile]);
   }
-
+  
 }

@@ -1,7 +1,0 @@
-<div class='sliding-button' [class.disable]="disable"
-     (mouseenter)="hovering=true"
-     (mouseleave)="hovering=false"
-     (click)="attemptSubmit()">
-  <div class="text" [class.hovering]="hovering">{{expanded}}</div>
-  <ng-content></ng-content>
-</div>
