@@ -23,7 +23,7 @@ import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from './individual-participants-charts/individual-participants-charts';
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
-import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
+import {ParticipantsChartsComponent} from './participants-charts/participants-charts';
 import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';

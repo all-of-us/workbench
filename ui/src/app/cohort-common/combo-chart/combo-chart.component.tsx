@@ -66,7 +66,6 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
           text: ''
         }
       },
-      // colors: ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5', '#adcded'],
       colors: ['#adcded', '#aae3f5', '#a27ea8', '#7aa3e5', '#a8385d'],
       legend: {
         enabled: false
@@ -104,15 +103,6 @@ export class ComboChart extends React.Component<ComboChartProps, {options: any}>
       .toJS();
     return Object.keys(series).map(key => series[key]);
   }
-
-  /**
-   * Returns the minimum height of the container as a number representing
-   * pixels.  The min height is calculated as 100 * the number of bars with a
-   * positive value or else just 100.
-   */
-  // get minHeight() {
-  //   return Math.max(this.data.length * 40, 200);
-  // }
 
   render() {
     const {options} = this.state;
