@@ -75,7 +75,7 @@
           (click)="sidenavToggle = false">Review Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="userAdminActive"
-          *ngIf="hasReviewIdVerification"
+          *ngIf="hasAccessModuleAdmin"
           routerLink="/admin/user"
           (click)="sidenavToggle = false">User Admin</button>
       <button class="btn btn-primary nav-link help-desk-item"

@@ -260,12 +260,12 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/id-verification:
+  /v1/beta-access:
     post:
       tags:
         - profile
-      description: Request identity verification.
-      operationId: submitIdVerification
+      description: Request betaAccess.
+      operationId: requestBetaAccess
       responses:
         200:
           description: The user's profile.
@@ -355,20 +355,7 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  # TODO: add other state pertaining to ethics training?
-  /v1/account/complete-ethics-training:
-    post:
-      tags:
-        - profile
-      description: Completes ethics training.
-      operationId: completeEthicsTraining
-      responses:
-        200:
-          description: The user's profile.
-          schema:
-            $ref: "#/definitions/Profile"
-
-  /v1/account/sync-compliance-training-status:
+  /v1/account/sync-training-status:
     post:
       tags:
         - profile
@@ -773,7 +760,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
         403:
-          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             $ref: "#/definitions/ErrorResponse"
         400:
@@ -781,46 +768,23 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-  /v1/admin/users/id-verification/list:
+  /v1/admin/users/list:
     get:
       tags:
         - profile
       description: >
           Returns a list of profiles for users to be reviewed. Requires
-          REVIEW_ID_VERIFICATION authority.
-      operationId: getIdVerificationsForReview
+          ACCESS_CONTROL_ADMIN authority.
+      operationId: getAllUsers
       responses:
         200:
-          description: A list of users to be id verified
+          description: A list of users
           schema:
-            $ref: "#/definitions/IdVerificationListResponse"
+            $ref: "#/definitions/UserListResponse"
         403:
-          description: User doesn't have the REVIEW_ID_VERIFICATION authority
+          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
             $ref: "#/definitions/ErrorResponse"
-
-  /v1/admin/users/id-verification/{userId}/review:
-    parameters:
-      - $ref: '#/parameters/userId'
-    post:
-      tags:
-        - profile
-      consumes:
-        - application/json
-      description: >
-          Manually sets the ID verfication status for a user. Requires
-          REVIEW_ID_VERIFICATION authority.
-      operationId: reviewIdVerification
-      parameters:
-        - in: body
-          name: review
-          schema:
-            $ref: "#/definitions/IdVerificationReviewRequest"
-      responses:
-        200:
-          description: return updated list of profiles
-          schema:
-            $ref: "#/definitions/IdVerificationListResponse"
 
   /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
     parameters:
@@ -1468,7 +1432,7 @@ definitions:
   #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
   #      administrative endpoints, including group management and cluster
   #      management. Intended to be granted for devops needs, e.g. for oncall.
-  #   3) REVIEW_ID_VERIFICATION: This is actually basically a user admin authority, for people
+  #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
   Authority:
     type: string
@@ -1479,7 +1443,7 @@ definitions:
         # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
         REVIEW_RESEARCH_PURPOSE,
         DEVELOPER,
-        REVIEW_ID_VERIFICATION
+        ACCESS_CONTROL_ADMIN
     ]
 
   PageVisit:
@@ -1785,14 +1749,6 @@ definitions:
         type: string
       clusterConfig:
         $ref: "#/definitions/ClusterConfig"
-
-  IdVerificationReviewRequest:
-    type: object
-    required:
-      - newStatus
-    properties:
-      newStatus:
-        $ref: "#/definitions/IdVerificationStatus"
 
   AccessBypassRequest:
     type: object
@@ -2251,9 +2207,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/PageVisit"
-      idVerificationStatus:
-        $ref: "#/definitions/IdVerificationStatus"
-        description: Status of ID verification
       demographicSurveyCompletionTime:
         type: integer
         format: int64
@@ -2270,12 +2223,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
-      requestedIdVerification:
-        type: boolean
-      idVerificationRequestTime:
-        type: integer
-        format: int64
-        description: Timestamp when the user requests identity verification.
       idVerificationCompletionTime:
         type: integer
         format: int64
@@ -2322,6 +2269,10 @@ definitions:
         type: integer
         format: int64
         description: Timestamp when a user was bypassed for beta access
+      betaAccessRequestTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user requests beta access.
       emailVerificationCompletionTime:
         type: integer
         format: int64
@@ -2357,11 +2308,6 @@ definitions:
         type: string
       role:
         type: string
-
-  IdVerificationStatus:
-    type: string
-    description: possible values indicating whether the user's ID has been verified
-    enum: [UNVERIFIED, VERIFIED, REJECTED]
 
   StackTraceElement:
     description: ''
@@ -2515,7 +2461,7 @@ definitions:
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
 
-  IdVerificationListResponse:
+  userListResponse:
     type: object
     required:
       - profileList

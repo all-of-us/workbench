@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -70,23 +69,12 @@ public class ProfileService {
     profile.setFreeTierBillingProjectStatus(user.getFreeTierBillingProjectStatusEnum());
     profile.setAboutYou(user.getAboutYou());
     profile.setAreaOfResearch(user.getAreaOfResearch());
-    profile.setRequestedIdVerification(user.getRequestedIdVerification());
     profile.setTwoFactorEnabled(user.getTwoFactorEnabled());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
-    if (user.getIdVerificationIsValid() == null) {
-      profile.setIdVerificationStatus(IdVerificationStatus.UNVERIFIED);
-    } else if (!user.getIdVerificationIsValid()) {
-      profile.setIdVerificationStatus(IdVerificationStatus.REJECTED);
-    } else {
-      profile.setIdVerificationStatus(IdVerificationStatus.VERIFIED);
-    }
 
     if (user.getTermsOfServiceCompletionTime() != null) {
       profile.setTermsOfServiceCompletionTime(user.getTermsOfServiceCompletionTime().getTime());
-    }
-    if (user.getComplianceTrainingCompletionTime() != null) {
-      profile.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime().getTime());
     }
     if (user.getComplianceTrainingCompletionTime() != null) {
       profile.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime().getTime());
@@ -110,20 +98,20 @@ public class ProfileService {
     if (user.getFirstSignInTime() != null) {
       profile.setFirstSignInTime(user.getFirstSignInTime().getTime());
     }
-    if (user.getIdVerificationRequestTime() != null) {
-      profile.setIdVerificationRequestTime(user.getIdVerificationRequestTime().getTime());
+    if (user.getIdVerificationBypassTime() != null) {
+      profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
     }
     if (user.getIdVerificationCompletionTime() != null) {
       profile.setIdVerificationCompletionTime(user.getIdVerificationCompletionTime().getTime());
-    }
-    if (user.getIdVerificationBypassTime() != null) {
-      profile.setIdVerificationBypassTime(user.getIdVerificationBypassTime().getTime());
     }
     if (user.getDataAccessLevelEnum() != null) {
       profile.setDataAccessLevel(user.getDataAccessLevelEnum());
     }
     if (user.getBetaAccessBypassTime() != null) {
       profile.setBetaAccessBypassTime(user.getBetaAccessBypassTime().getTime());
+    }
+    if (user.getBetaAccessRequestTime() != null) {
+      profile.setBetaAccessRequestTime(user.getBetaAccessRequestTime().getTime());
     }
     if (user.getEmailVerificationCompletionTime() != null) {
       profile.setEmailVerificationCompletionTime(user.getEmailVerificationCompletionTime().getTime());

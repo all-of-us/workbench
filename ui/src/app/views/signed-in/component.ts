@@ -21,7 +21,7 @@ import {Authority, BillingProjectStatus} from 'generated';
 export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
-  hasReviewIdVerification = false;
+  hasAccessModuleAdmin = false;
   showBugReportItem = !environment.useZendeskForSupport;
   showHelpDeskItem = environment.useZendeskForSupport;
   showHubForumItem = environment.useZendeskForSupport;
@@ -84,8 +84,8 @@ export class SignedInComponent implements OnInit, OnDestroy {
 
         this.hasReviewResearchPurpose =
           profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-        this.hasReviewIdVerification =
-          profile.authorities.includes(Authority.REVIEWIDVERIFICATION);
+        this.hasAccessModuleAdmin =
+          profile.authorities.includes(Authority.ACCESSCONTROLADMIN);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
         this.aouAccountEmailAddress = profile.username;
