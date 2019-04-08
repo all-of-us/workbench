@@ -44,7 +44,7 @@ export const initialFilterState = {
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },
-    PHYSICAL_MEASURE: {
+    PHYSICAL_MEASUREMENT: {
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },
