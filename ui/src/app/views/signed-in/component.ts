@@ -85,7 +85,7 @@ export class SignedInComponent implements OnInit, OnDestroy {
         this.hasReviewResearchPurpose =
           profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
         this.hasAccessModuleAdmin =
-          profile.authorities.includes(Authority.ACCESSMODULEADMIN);
+          profile.authorities.includes(Authority.ACCESSCONTROLADMIN);
         this.givenName = profile.givenName;
         this.familyName = profile.familyName;
         this.aouAccountEmailAddress = profile.username;
