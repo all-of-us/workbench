@@ -438,8 +438,8 @@ public class CohortBuilderControllerTest {
       .name(criteria.getName())
       .parentId(criteria.getParentId())
       .selectable(criteria.getSelectable())
-      .subtype(TreeSubType.fromValue(criteria.getSubtype()))
-      .type(TreeType.fromValue(criteria.getType()))
+      .subtype(criteria.getSubtype())
+      .type(criteria.getType())
       .path(criteria.getPath());
   }
 
