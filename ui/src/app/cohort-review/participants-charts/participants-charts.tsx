@@ -1,103 +1,14 @@
 import {Component, Input} from '@angular/core';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import * as React from 'react';
-import {SpinnerOverlay} from '../../components/spinners';
 
 const css = `
-  .data-container {
-    display: -webkit-box;
-  }
-  .data-blue {
-    background-color: #216FB4;
-    color: white;
-    font-size: 10px;
-    text-align: end;
-    padding-right:0.2rem;
-    font-weight: bold;
-  }
-  .light-grey {
-    background-color: #CCCCCC;
-    display: -webkit-box;
-  }
-  .divider {
-    border-right: 1px solid black;
-  }
-  .data-bar-container {
-    padding-left: 1rem;
-    padding-top: 0.5rem;
-    border-left: 1px solid black;
-  }
-  .data-heading {
-    padding-top: 0.5rem;
-    width: 16rem;
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: end;
-    padding-right: 0.5rem;
-  }
-  .data-percent {
-    padding-top: 0.5rem;
-    white-space: nowrap;
-    font-size: 10px;
-    font-weight: bold;
-    color: #4a4a4a;
-  }
-  .count {
-    padding-left: 0.2rem;
-    font-size: 10px;
-    font-weight: bold;
-    color: #4a4a4a;
-  }
-  .btn-outline {
-    pointer-events: none;
-  }
-  .container-margin {
-    margin: 0;
-    min-width: 100%;
-  }
-  .button-padding {
-    padding-top: 1rem;
-  }
-  .button-padding-zero {
-    padding-top: 0rem;
-  }
-  .chart-width {
-    margin: 0;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-  .btn-disable {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-  .btn-disable button {
-    pointer-events: none;
-  }
-  .btn-outline {
-    pointer-events: none;
-  }
   .graph-border {
     padding: 0.3rem;
-  }
-  .chart-heading {
-    text-align: center;
-    color: #4A4A4A;
-    font-size: 12px;
-    font-weight: bold;
-    white-space: nowrap;
-  }
-  .domain-title {
-    margin-top: 2rem;
-    padding-bottom: 0.5rem;
-    font-size: 16px;
-    font-weight: 600;
-    color: #262262;
-    line-height: 22px;
   }
   @media print{
     .graph-border {
@@ -109,6 +20,75 @@ const css = `
     }
   }
 `;
+
+const styles = reactStyles({
+  dataBlue: {
+    backgroundColor: '#216FB4',
+    color: 'white',
+    height: '24px',
+    fontSize: '10px',
+    textAlign: 'end',
+    paddingRight: '0.2rem',
+    fontWeight: 'bold'
+  },
+  lightGrey: {
+    backgroundColor: '#CCCCCC',
+    display: '-webkit-box',
+  },
+  dataBarContainer: {
+    paddingLeft: '1rem',
+    paddingTop: '0.5rem',
+    borderLeft: '1px solid black'
+  },
+  dataHeading: {
+    paddingTop: '0.5rem',
+    width: '16rem',
+    fontSize: '10px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    textAlign: 'end',
+    paddingRight: '0.5rem',
+  },
+  dataPercent: {
+    height: '24px',
+    paddingTop: '0.5rem',
+    whiteSpace: 'nowrap',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    color: '#4a4a4a',
+  },
+  count: {
+    paddingLeft: '0.2rem',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    color: '#4a4a4a',
+  },
+  containerMargin: {
+    margin: 0,
+    minWidth: '100%',
+  },
+  chartWidth: {
+    margin: 0,
+    paddingTop: '1rem',
+    paddingBottom: '1rem',
+  },
+  chartHeading: {
+    textAlign: 'center',
+    color: '#4A4A4A',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+  },
+  domainTitle: {
+    paddingBottom: '0.5rem',
+    fontSize: '16px',
+    fontWeight: 600,
+    color: '#262262',
+    textTransform: 'capitalize',
+    lineHeight: '22px',
+  }
+});
 
 export interface ParticipantsChartsProps {
   domain: string;
@@ -138,7 +118,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
       cohortReviewApi().getCohortChartData(namespace, id, cohort.id, +cdrVersionId, domain, 10)
         .then(resp => {
           const data = resp.items.map(item => {
-            const percentCount = ((item.count / resp.count) * 100);
+            const percentCount = Math.round((item.count / resp.count) * 100);
             return {...item, percentCount};
           });
           this.setState({data, loading: false});
@@ -148,36 +128,36 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     render() {
       const {domain} = this.props;
       const {data, loading} = this.state;
+      const heading = domain.toLowerCase();
       return <React.Fragment>
         <style>{css}</style>
-        {data && <div className='container chart-width page-break'>
-          <div className='domain-title'>Top 10 {domain}s</div>
+        {data && <div className='container page-break' style={styles.chartWidth}>
+          <div style={styles.domainTitle}>Top 10 {heading}s</div>
           <div className='graph-border'>
             {data.map((item, i) => (
-              <div key={i} className='data-container row'>
+              <div key={i} className='row' style={{display: '-webkit-box'}}>
                 {item.name.length >= 40 &&
-                  <div className='data-heading col-sm-4 col-xs-4 col-lg-4 col-xl-4'>
+                  <div className='col-sm-4 col-xs-4 col-lg-4 col-xl-4' style={styles.dataHeading}>
                     {item.name}
                   </div>
                 }
                 {item.name.length < 40 &&
-                  <div className='col-sm-3 col-lg-4 col-xs-4 col-xl-4 data-heading'>
+                  <div className='col-sm-3 col-lg-4 col-xs-4 col-xl-4' style={styles.dataHeading}>
                     {item.name}
                   </div>
                 }
-                <div className='data-bar-container col-sm-7 col-xs-7 col-lg-7 col-xl-7'>
-                  <div className='light-grey'>
-                    <div className='data-blue'
-                      style={{height: '24px', width: `${item.percentCount}%`}}>
+                <div className='col-sm-7 col-xs-7 col-lg-7 col-xl-7'
+                  style={styles.dataBarContainer}>
+                  <div style={styles.lightGrey}>
+                    <div style={{...styles.dataBlue, width: `${item.percentCount}%`}}>
                       {item.percentCount >= 90 && <span>{item.count}</span>}
                     </div>
-                    <div className='count'
-                      style={{height: '24px', width: `${item.percentCount}%`}}>
+                    <div style={{...styles.count, width: `${item.percentCount}%`}}>
                       {item.percentCount < 90 && <span>{item.count}</span>}
                     </div>
                   </div>
                 </div>
-                <div className='data-percent'>
+                <div style={styles.dataPercent}>
                   {item.percentCount} % of Cohort
                 </div>
               </div>

@@ -4,41 +4,13 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import * as React from 'react';
 
 const css = `
-  .container {
-    min-width: 100%;
-  }
-  .report-background {
-    background-color: white;
-    padding-top: 1rem;
-    margin-top: 0.5rem;
-  }
-  .report-background .query-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #262262;
-    line-height: 22px;
-  }
-  .report-background .query-content {
-    font-size: 13px;
-    color: black;
-    line-height: 30px;
-    padding-bottom: 0.6rem;
-  }
-  .header-border .btn-margin {
-    margin-top : 0.7rem;
-  }
-  .temporal-container {
-    padding-left: 1rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
   .stats-left-padding {
     padding-left: 6rem;
   }
@@ -55,6 +27,48 @@ const css = `
     }
   }
 `;
+
+const styles = reactStyles({
+  reportBackground: {
+    backgroundColor: 'white',
+    paddingTop: '1rem',
+    marginTop: '0.5rem',
+  },
+  queryTitle: {
+    fontSize: '16px',
+    fontWeight: 600,
+    color: '#262262',
+    lineHeight: '22px',
+  },
+  queryContent: {
+    fontSize: '13px',
+    color: 'black',
+    lineHeight: '30px',
+    paddingBottom: '0.6rem',
+  },
+  containerMargin: {
+    margin: 0,
+    minWidth: '100%'
+  },
+  chartTitle: {
+    marginLeft: '0.4rem',
+    paddingBottom: '0.5rem',
+    fontSize: '16px',
+    fontWeight: 600,
+    color: '#262262',
+    lineHeight: '22px',
+  },
+  graphBorder: {
+    minHeight: '10rem',
+    padding: '0.3rem',
+  }
+});
+
+const demoTitle = {
+  ...styles.chartTitle,
+  marginLeft: '0.4rem',
+  paddingBottom: '0.5rem'
+}
 
 const domains = [DomainType[DomainType.CONDITION],
   DomainType[DomainType.PROCEDURE],
@@ -103,37 +117,37 @@ export const QueryReport = withCurrentWorkspace()(
       const {cdrName, data, loading} = this.state;
       return <React.Fragment>
         <style>{css}</style>
-        <div className='report-background'>
-          <div className='container'>
+        <div style={styles.reportBackground}>
+          <div className='container' style={{minWidth: '100%'}}>
             <div className='row'>
               <div className='col-sm-6 col-xs-6'>
-                <div className='container'>
+                <div className='container' style={{minWidth: '100%'}}>
                   <div className='row'>
                     <div className='col-sm-6 col-xs-6'>
-                      <div className='query-title'>
+                      <div style={styles.queryTitle}>
                         Cohort Name
                       </div>
-                      <div className='query-content'>
+                      <div style={styles.queryContent}>
                         {this.review.cohortName}
                       </div>
-                      <div className='query-title'>
+                      <div style={styles.queryTitle}>
                         Created By
                       </div>
-                      <div className='query-content'>
+                      <div style={styles.queryContent}>
                         {this.cohort.creator}
                       </div>
                     </div>
                     <div className='col-sm-6 col-xs-6'>
-                      <div className='query-title'>
+                      <div style={styles.queryTitle}>
                         Date created
                       </div>
-                      <div className='query-content'>
+                      <div style={styles.queryContent}>
                         {this.cohort.creationTime}
                       </div>
-                      <div className='query-title'>
+                      <div style={styles.queryTitle}>
                         Dataset
                       </div>
-                      <div className='query-content'>
+                      <div style={styles.queryContent}>
                         {cdrName}
                       </div>
                     </div>
@@ -149,40 +163,33 @@ export const QueryReport = withCurrentWorkspace()(
             </div>
           </div>
           // ov charts
-          <div className='container container-margin'>
+          <div className='container' style={styles.containerMargin}>
             <div className='row'>
               <div className='col-sm-12 col-xs-12'>
-                <div className='container container-margin'>
+                <div className='container' style={styles.containerMargin}>
                   <div className='row'>
                     <div className='col-sm-12 col-xs-12'>
                       <div>
-                        <span className='chart-title'>Charts</span>
+                        <span style={styles.chartTitle}>Charts</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className='container container-margin'>
-                  <div className='row'>
+                <div className='container' style={styles.containerMargin}>
+                  <div className='row' style={{paddingTop: '1rem'}}>
                     <div className='col-sm-8 col-xs-8 col-lg-8 col-xl-8'>
-                      <div className='chart-container'>
-                        <div className='demography-title '>Demographics</div>
-                        <div className='graph-border'>
-                          <div className='demo-chart-heading'>
-                            Participants by Gender, Age Range & Race
-                          </div>
-                          {data && <ComboChart mode={'stacked'} data={data} />}
-                          {loading && <SpinnerOverlay />}
-                        </div>
+                      <div style={demoTitle}>Demographics</div>
+                      <div style={styles.graphBorder}>
+                        {data && <ComboChart mode={'stacked'} data={data} />}
+                        {loading && <SpinnerOverlay />}
                       </div>
                     </div>
                     <div className='col-sm-10 col-xs-10 col-lg-10 col-xl-10'>
-                      <div className='chart-container'>
-                        {domains.map((domain, i) => (
-                          <div key={i}>
-                            <ParticipantsCharts domain={domain}/>
-                          </div>
-                        ))}
-                      </div>
+                      {domains.map((domain, i) => (
+                        <div key={i} style={{minHeight: '10rem', position: 'relative'}}>
+                          <ParticipantsCharts domain={domain}/>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
