@@ -4,11 +4,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {
-  BugReportService
-} from 'generated';
-
-import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -44,7 +39,6 @@ describe('SignedInComponent', () => {
         RoutingSpinnerComponent
       ],
       providers: [
-        {provide: BugReportService, useValue: new BugReportServiceStub()},
         {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {

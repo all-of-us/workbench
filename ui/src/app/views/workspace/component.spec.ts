@@ -25,7 +25,6 @@ import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 import {WorkspaceComponent} from 'app/views/workspace/component';
 
 import {
-  BugReportService,
   ClusterService,
   CohortsService,
   ConceptSetsService,
@@ -42,7 +41,6 @@ import {
   NotebooksService,
 } from 'notebooks-generated';
 
-import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {CdrVersionStorageServiceStub} from 'testing/stubs/cdr-version-storage-service-stub';
 import {ClusterServiceStub} from 'testing/stubs/cluster-service-stub';
 import {CohortsServiceStub} from 'testing/stubs/cohort-service-stub';
@@ -88,7 +86,6 @@ describe('WorkspaceComponent', () => {
         WorkspaceShareComponent
       ],
       providers: [
-        { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ClusterService, useValue: new ClusterServiceStub() },
         { provide: CohortsService, useValue: new CohortsServiceStub() },
         { provide: NotebooksService, useValue: new NotebooksServiceStub() },
