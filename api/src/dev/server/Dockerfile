@@ -5,7 +5,6 @@ FROM alpine:3.7
 #
 
 RUN apk --no-cache add openjdk8
-RUN apk add --no-cache nss
 
 #
 # https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
