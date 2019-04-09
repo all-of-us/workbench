@@ -31,17 +31,10 @@ interface ConceptInfo extends Concept {
 }
 
 @Component({
-  styleUrls: ['../../styles/buttons.css',
-    '../../styles/cards.css',
-    '../../styles/headers.css',
-    '../../styles/inputs.css',
-    '../../styles/errors.css',
-    '../../styles/tooltip.css',
-    './component.css'],
-  templateUrl: './component.html',
+  template: '<div #root></div>'
 })
 
-export class ConceptHomepageComponent implements OnInit {
+export class ConceptsComponent implements OnInit {
   loadingDomains = true;
   searchTerm = '';
   standardConceptsOnly = true;

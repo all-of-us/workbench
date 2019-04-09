@@ -8,7 +8,7 @@ The Public UI is an Angular app in TypeScript. For an intro to Angular, see
 
 All the interesting code is under `src/app/`.
 
-`*.component.ts` are UI components, controlling various widgets; they have
+`*.component.tsx` are UI components, controlling various widgets; they have
 associated `*.component.html` and/or `*.component.css` for their templated DOM
 and style. Angular scopes CSS to its associated component.
 

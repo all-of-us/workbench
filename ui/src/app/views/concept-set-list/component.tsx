@@ -1,0 +1,123 @@
+import {Component} from '@angular/core';
+import * as React from 'react';
+
+import {
+  DomainInfo,
+  RecentResource,
+  WorkspaceAccessLevel,
+} from 'generated/fetch';
+
+import {conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils/index';
+
+import {CreateConceptSetModal} from 'app/views/conceptset-create-modal/component';
+
+import {CardButton} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {convertToResources, ResourceType} from 'app/utils/resourceActions';
+import {ResourceCard} from 'app/views/resource-card/component';
+
+const styles = reactStyles({
+  pageArea: {
+    display: 'flex',
+    justifyContent: 'flex-start'
+  },
+  resourceCardArea: {
+    display: 'flex',
+    flexWrap: 'wrap'
+  }
+});
+
+export const ConceptSetsList = withCurrentWorkspace()(
+  class extends React.Component<{workspace: WorkspaceData},
+      {conceptSetsList: RecentResource[], conceptSetsLoading: boolean,
+        conceptDomainsList: Array<DomainInfo>, createModalOpen: boolean}> {
+    constructor(props) {
+      super(props);
+      this.state = {
+        conceptSetsList: undefined,
+        conceptSetsLoading: true,
+        conceptDomainsList: undefined,
+        createModalOpen: false
+      };
+    }
+
+    componentDidMount() {
+      try {
+        this.getDomainInfo();
+      } finally {
+        this.loadConceptSets();
+      }
+    }
+
+    async getDomainInfo() {
+      const {namespace, id} = this.props.workspace;
+      try {
+        const resp = await conceptsApi().getDomainInfo(namespace, id);
+        this.setState({conceptDomainsList: resp.items});
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    async loadConceptSets() {
+      const {namespace, id, accessLevel} = this.props.workspace;
+      try {
+        const resp = await conceptSetsApi().getConceptSetsInWorkspace(namespace, id);
+        const conceptSets = convertToResources(resp.items, namespace, id,
+          accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET);
+
+        this.setState({conceptSetsList: conceptSets});
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    render() {
+      const {conceptSetsLoading, conceptSetsList, conceptDomainsList, createModalOpen} = this.state;
+      const accessLevel = this.props.workspace.accessLevel as unknown as WorkspaceAccessLevel;
+      const writePermission = accessLevel === WorkspaceAccessLevel.OWNER ||
+          accessLevel === WorkspaceAccessLevel.WRITER;
+
+      return <React.Fragment>
+            <div style={styles.pageArea}>
+              <TooltipTrigger content={!writePermission &&
+              `Write permission required to create cohorts`} side='top'>
+                <CardButton type='small'
+                            onClick={() => this.setState({createModalOpen: true})}
+                            disabled={!writePermission}>
+                  Create a <br/>Concept Set
+                  <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}}/>
+                </CardButton>
+              </TooltipTrigger>
+              <div style={styles.resourceCardArea}>
+                {conceptSetsList && conceptSetsList.map((set: RecentResource) => {
+                  return <ResourceCard resourceCard={set} key={set.conceptSet.name}
+                                       onUpdate={() => this.loadConceptSets()}>
+                  </ResourceCard>;
+                })}
+              </div>
+              {conceptSetsLoading && <SpinnerOverlay />}
+            </div>
+
+        {createModalOpen &&
+        <CreateConceptSetModal onCreate={() => this.loadConceptSets()}
+                                        onClose={() => this.setState({createModalOpen: false})}
+                                        conceptDomainList={conceptDomainsList}
+                                        existingConceptSets={conceptSetsList}/>}
+          </React.Fragment>;
+    }
+
+  });
+
+@Component({
+  template: '<div #root></div>'
+})
+export class ConceptSetListComponent extends ReactWrapperBase {
+  constructor() {
+    super(ConceptSetsList, []);
+  }
+}

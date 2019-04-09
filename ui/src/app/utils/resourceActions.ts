@@ -4,7 +4,7 @@
     FileDetail,
     RecentResource,
     WorkspaceAccessLevel
-  } from 'generated';
+  } from 'generated/fetch';
 
 export enum ResourceType {
     NOTEBOOK = 'notebook',
