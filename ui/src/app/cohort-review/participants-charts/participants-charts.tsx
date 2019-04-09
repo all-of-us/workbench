@@ -36,22 +36,30 @@ const styles = reactStyles({
     display: '-webkit-box',
   },
   dataBarContainer: {
-    paddingLeft: '1rem',
-    paddingTop: '0.5rem',
+    flex: '0 0 58.33333%',
+    position: 'relative',
+    width: '100%',
+    minHeight: '1px',
+    maxWidth: '58.33333%',
+    padding: '0.5rem 0 0 1rem',
     borderLeft: '1px solid black'
   },
   dataHeading: {
-    paddingTop: '0.5rem',
+    flex: '0 0 33.33333%',
+    position: 'relative',
+    minHeight: '1px',
+    maxWidth: '33.33333%',
+    padding: '0.5rem 0.5rem 0',
     width: '16rem',
     fontSize: '10px',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     textAlign: 'end',
-    paddingRight: '0.5rem',
   },
   dataPercent: {
     height: '24px',
+    marginLeft: '0.5rem',
     paddingTop: '0.5rem',
     whiteSpace: 'nowrap',
     fontSize: '10px',
@@ -69,9 +77,9 @@ const styles = reactStyles({
     minWidth: '100%',
   },
   chartWidth: {
+    maxWidth: '100%',
     margin: 0,
-    paddingTop: '1rem',
-    paddingBottom: '1rem',
+    padding: '1rem 0.5rem',
   },
   chartHeading: {
     textAlign: 'center',
@@ -131,23 +139,22 @@ export const ParticipantsCharts = withCurrentWorkspace()(
       const heading = domain.toLowerCase();
       return <React.Fragment>
         <style>{css}</style>
-        {data && <div className='container page-break' style={styles.chartWidth}>
+        {data && <div className='page-break' style={styles.chartWidth}>
           <div style={styles.domainTitle}>Top 10 {heading}s</div>
           <div className='graph-border'>
             {data.map((item, i) => (
               <div key={i} className='row' style={{display: '-webkit-box'}}>
                 {item.name.length >= 40 &&
-                  <div className='col-sm-4 col-xs-4 col-lg-4 col-xl-4' style={styles.dataHeading}>
+                  <div style={styles.dataHeading}>
                     {item.name}
                   </div>
                 }
                 {item.name.length < 40 &&
-                  <div className='col-sm-3 col-lg-4 col-xs-4 col-xl-4' style={styles.dataHeading}>
+                  <div style={styles.dataHeading}>
                     {item.name}
                   </div>
                 }
-                <div className='col-sm-7 col-xs-7 col-lg-7 col-xl-7'
-                  style={styles.dataBarContainer}>
+                <div style={styles.dataBarContainer}>
                   <div style={styles.lightGrey}>
                     <div style={{...styles.dataBlue, width: `${item.percentCount}%`}}>
                       {item.percentCount >= 90 && <span>{item.count}</span>}
@@ -158,7 +165,7 @@ export const ParticipantsCharts = withCurrentWorkspace()(
                   </div>
                 </div>
                 <div style={styles.dataPercent}>
-                  {item.percentCount} % of Cohort
+                  {item.percentCount}% of Cohort
                 </div>
               </div>
             ))}
