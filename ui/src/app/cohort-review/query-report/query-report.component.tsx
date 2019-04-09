@@ -29,6 +29,26 @@ const css = `
 `;
 
 const styles = reactStyles({
+  container: {
+    width: '100%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
+  row: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginRight: '-.5rem',
+    marginLeft: '-.5rem'
+  },
+  col: {
+    position: 'relative',
+    minHeight: '1px',
+    width: '100%',
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem',
+  },
   reportBackground: {
     backgroundColor: 'white',
     paddingTop: '1rem',
@@ -63,12 +83,14 @@ const styles = reactStyles({
     padding: '0.3rem',
   }
 });
-
+const col6 = {
+  ...styles.col, flex: '0 0 50%', maxWidth: '50%'
+};
 const demoTitle = {
   ...styles.chartTitle,
   marginLeft: '0.4rem',
   paddingBottom: '0.5rem'
-}
+};
 
 const domains = [DomainType[DomainType.CONDITION],
   DomainType[DomainType.PROCEDURE],
@@ -118,12 +140,12 @@ export const QueryReport = withCurrentWorkspace()(
       return <React.Fragment>
         <style>{css}</style>
         <div style={styles.reportBackground}>
-          <div className='container' style={{minWidth: '100%'}}>
-            <div className='row'>
-              <div className='col-sm-6 col-xs-6'>
-                <div className='container' style={{minWidth: '100%'}}>
-                  <div className='row'>
-                    <div className='col-sm-6 col-xs-6'>
+          <div style={styles.container}>
+            <div style={styles.row}>
+              <div style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
+                <div style={styles.container}>
+                  <div style={styles.row}>
+                    <div style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
                       <div style={styles.queryTitle}>
                         Cohort Name
                       </div>
@@ -137,7 +159,7 @@ export const QueryReport = withCurrentWorkspace()(
                         {this.cohort.creator}
                       </div>
                     </div>
-                    <div className='col-sm-6 col-xs-6'>
+                    <div style={col6}>
                       <div style={styles.queryTitle}>
                         Date created
                       </div>
@@ -151,40 +173,41 @@ export const QueryReport = withCurrentWorkspace()(
                         {cdrName}
                       </div>
                     </div>
-                    <div className='col-sm-12 col-xs-12'>
+                    <div style={{...styles.col, flex: '0 0 100%', maxWidth: '100%'}}>
                       // query-cohort-definition
                     </div>
                   </div>
                 </div>
               </div>
-              <div className=' col-sm-6 col-xs-6 stats-left-padding'>
+              <div className='stats-left-padding'
+                style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
                 // app-descriptive-stats
               </div>
             </div>
           </div>
           // ov charts
-          <div className='container' style={styles.containerMargin}>
-            <div className='row'>
-              <div className='col-sm-12 col-xs-12'>
-                <div className='container' style={styles.containerMargin}>
-                  <div className='row'>
-                    <div className='col-sm-12 col-xs-12'>
+          <div style={{...styles.container, margin: 0}}>
+            <div style={styles.row}>
+              <div style={{...styles.col, flex: '0 0 100%', maxWidth: '100%'}}>
+                <div style={{...styles.container, margin: 0}}>
+                  <div style={styles.row}>
+                    <div style={{...styles.col, flex: '0 0 100%', maxWidth: '100%'}}>
                       <div>
                         <span style={styles.chartTitle}>Charts</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className='container' style={styles.containerMargin}>
-                  <div className='row' style={{paddingTop: '1rem'}}>
-                    <div className='col-sm-8 col-xs-8 col-lg-8 col-xl-8'>
+                <div style={{...styles.container, margin: 0}}>
+                  <div style={{...styles.row, paddingTop: '1rem'}}>
+                    <div style={{...styles.col, flex: '0 0 66.66667%', maxWidth: '66.66667%'}}>
                       <div style={demoTitle}>Demographics</div>
                       <div style={styles.graphBorder}>
                         {data && <ComboChart mode={'stacked'} data={data} />}
                         {loading && <SpinnerOverlay />}
                       </div>
                     </div>
-                    <div className='col-sm-10 col-xs-10 col-lg-10 col-xl-10'>
+                    <div style={{...styles.col, flex: '0 0 83.33333%', maxWidth: '83.33333%'}}>
                       {domains.map((domain, i) => (
                         <div key={i} style={{minHeight: '10rem', position: 'relative'}}>
                           <ParticipantsCharts domain={domain}/>
