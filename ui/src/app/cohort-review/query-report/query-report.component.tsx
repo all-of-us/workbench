@@ -11,6 +11,7 @@ import {currentCohortStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest} from 'generated/fetch';
 import {fromJS} from 'immutable';
 import * as React from 'react';
+import * as moment from 'moment';
 
 const css = `
   .stats-left-padding {
@@ -207,11 +208,7 @@ export const QueryReport = withCurrentWorkspace()(
 
     groupChartData(data: any) {
       const groups = ['gender', 'ageRange', 'race'];
-      const init = {
-        gender: {},
-        ageRange: {},
-        race: {}
-      };
+      const init = {gender: {}, ageRange: {}, race: {}};
       const groupedData = data.reduce((acc, i) => {
         groups.forEach(group => {
           const key = i[group];
@@ -240,6 +237,7 @@ export const QueryReport = withCurrentWorkspace()(
     render() {
       const {cdrName, data, groupedData, loading} = this.state;
       const totalCount = this.review.matchedParticipantCount;
+      const created = moment(this.cohort.creationTime).format('YYYY-MM-DD');
       return <React.Fragment>
         <style>{css}</style>
         <div style={styles.reportBackground}>
@@ -267,7 +265,7 @@ export const QueryReport = withCurrentWorkspace()(
                         Date created
                       </div>
                       <div style={styles.queryContent}>
-                        {this.cohort.creationTime}
+                        {created}
                       </div>
                       <div style={styles.queryTitle}>
                         Dataset
@@ -284,56 +282,54 @@ export const QueryReport = withCurrentWorkspace()(
               </div>
               <div className='stats-left-padding'
                 style={columns.col6}>
-                <div>
-                  <div style={styles.container}>
-                    <div style={styles.row}>
-                      <div style={{...columns.col10, ...styles.queryTitle}}>
-                        Descriptive Statistics
-                      </div>
-                      <ClrIcon
-                        className='is-solid'
-                        style={{...columns.col2,
-                          ...(groupedData ? styles.print : styles.printDisabled)}}
-                        onClick={() => groupedData && window.print()}
-                        disabled={!groupedData}
-                        shape='printer'
-                        size={32} />
-                  </div>
-                </div>
-                {groupedData && Object.keys(groupedData).map((group, g) => (
-                  <div key={g}>
-                    <div style={styles.container}>
-                      <div style={{...styles.container, ...styles.groupHeader}}>
-                        <div style={{...columns.col7, ...styles.groupText}}>
-                          {group === 'ageRange' ? 'Age' : group}
-                        </div>
-                        {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
-                          Total
-                        </div>}
-                        {g === 0 && <div style={{...columns.col3, ...styles.groupText}}>
-                          % of Cohort
-                        </div>}
-                      </div>
+                <div style={styles.container}>
+                  <div style={styles.row}>
+                    <div style={{...columns.col10, ...styles.queryTitle}}>
+                      Descriptive Statistics
                     </div>
-                    {Object.keys(groupedData[group]).map((row, r) => (
-                      <div key={r} style={styles.container}>
-                        <div style={{...styles.row, ...styles.groupContent}}>
-                          <div style={columns.col7}>
-                            {groupedData[group][row].name}
-                          </div>
-                          <div style={columns.col2}>
-                            {groupedData[group][row].count}
-                          </div>
-                          <div style={columns.col3}>
-                            {Math.round(groupedData[group][row].count / totalCount * 100)}%
-                          </div>
+                    <ClrIcon
+                      className='is-solid'
+                      style={{...columns.col2,
+                        ...(groupedData ? styles.print : styles.printDisabled)}}
+                      onClick={() => groupedData && window.print()}
+                      disabled={!groupedData}
+                      shape='printer'
+                      size={32} />
+                </div>
+              </div>
+              {groupedData && Object.keys(groupedData).map((group, g) => (
+                <div key={g}>
+                  <div style={styles.container}>
+                    <div style={{...styles.container, ...styles.groupHeader}}>
+                      <div style={{...columns.col7, ...styles.groupText}}>
+                        {group === 'ageRange' ? 'Age' : group}
+                      </div>
+                      {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
+                        Total
+                      </div>}
+                      {g === 0 && <div style={{...columns.col3, ...styles.groupText}}>
+                        % of Cohort
+                      </div>}
+                    </div>
+                  </div>
+                  {Object.keys(groupedData[group]).map((row, r) => (
+                    <div key={r} style={styles.container}>
+                      <div style={{...styles.row, ...styles.groupContent}}>
+                        <div style={columns.col7}>
+                          {groupedData[group][row].name}
+                        </div>
+                        <div style={columns.col2}>
+                          {groupedData[group][row].count.toLocaleString()}
+                        </div>
+                        <div style={columns.col3}>
+                          {Math.round(groupedData[group][row].count / totalCount * 100)}%
                         </div>
                       </div>
-                    ))}
-                    {loading && <SpinnerOverlay />}
                     </div>
                   ))}
-                </div>
+                  </div>
+                ))}
+                {loading && <SpinnerOverlay />}
               </div>
             </div>
           </div>

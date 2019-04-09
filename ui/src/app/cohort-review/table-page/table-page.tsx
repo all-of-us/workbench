@@ -514,13 +514,14 @@ export const ParticipantsTable = withCurrentWorkspace()(
           Back to cohort
         </button>
         <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
+        {!cohortDescription && <Button
+          style={{float: 'right'}}
+          disabled={!data}
+          onClick={() => this.setState({cohortDescription: true})}>
+          Cohort Description
+        </Button>}
         <div style={styles.description}>
           {cohort.description}
-          {!cohortDescription && <Button
-            style={{float: 'right', marginBottom: '0.5rem'}}
-            onClick={() => this.setState({cohortDescription: true})}>
-            Cohort Description
-          </Button>}
         </div>
         {cohortDescription && <QueryReport/>}
         {!cohortDescription && data && <DataTable
