@@ -2,9 +2,8 @@ import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {ResourceCardMenu} from 'app/components/resources';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
@@ -12,8 +11,8 @@ import {ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
-import {TextModal} from 'app/views/text-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
+import {TextModal} from 'app/views/text-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -153,7 +152,7 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       showErrorModal: true,
       errorModalTitle: title,
       errorModalBody: body
-    })
+    });
   }
 
   get resourceType(): ResourceType {
@@ -287,7 +286,8 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         ).then(() => {
           this.props.onUpdate();
         }).catch(e => {
-          this.showErrorModal('Duplicating Cohort Error', 'Cohort with the same name already exists.');
+          this.showErrorModal('Duplicating Cohort Error',
+            'Cohort with the same name already exists.');
         });
         break;
       }
