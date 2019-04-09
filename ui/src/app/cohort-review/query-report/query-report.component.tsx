@@ -92,12 +92,22 @@ const styles = reactStyles({
   groupText: {
     display: 'inline-block',
     fontWeight: 600,
-    fontSize: '14px'
+    fontSize: '14px',
+    textTransform: 'capitalize'
   },
   groupContent: {
     paddingTop: '0.2rem',
+    paddingLeft: '0.75rem',
     color: 'black',
     fontSize: '13px'
+  },
+  print: {
+    color: '#262262',
+    cursor: 'pointer'
+  },
+  printDisabled: {
+    color: '#E2E2EA',
+    cursor: 'not-allowed'
   }
 });
 const columns = {
@@ -141,7 +151,7 @@ const columns = {
     flex: '0 0 100%',
     maxWidth: '100%'
   },
-}
+};
 const demoTitle = {
   ...styles.chartTitle,
   marginLeft: '0.4rem',
@@ -279,20 +289,27 @@ export const QueryReport = withCurrentWorkspace()(
                       <div style={{...columns.col10, ...styles.queryTitle}}>
                         Descriptive Statistics
                       </div>
-                      <ClrIcon className='is-solid' style={columns.col2} shape='printer' size={32}/>
+                      <ClrIcon
+                        className='is-solid'
+                        style={{...columns.col2,
+                          ...(groupedData ? styles.print : styles.printDisabled)}}
+                        onClick={() => groupedData && window.print()}
+                        disabled={!groupedData}
+                        shape='printer'
+                        size={32} />
                   </div>
                 </div>
                 {groupedData && Object.keys(groupedData).map((group, g) => (
                   <div key={g}>
                     <div style={styles.container}>
                       <div style={{...styles.container, ...styles.groupHeader}}>
-                        <div className='col-sm-7 col-xs-7' style={{...styles.groupText}}>
+                        <div style={{...columns.col7, ...styles.groupText}}>
                           {group === 'ageRange' ? 'Age' : group}
                         </div>
-                        {g === 0 && <div className='col-sm-2 col-xs-2' style={{...styles.groupText}}>
+                        {g === 0 && <div style={{...columns.col2, ...styles.groupText}}>
                           Total
                         </div>}
-                        {g === 0 && <div className='col-sm-3 col-xs-3' style={{...styles.groupText}}>
+                        {g === 0 && <div style={{...columns.col3, ...styles.groupText}}>
                           % of Cohort
                         </div>}
                       </div>
