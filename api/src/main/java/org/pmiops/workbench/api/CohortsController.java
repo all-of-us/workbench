@@ -36,7 +36,6 @@ import org.pmiops.workbench.model.CohortAnnotationsRequest;
 import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortListResponse;
 import org.pmiops.workbench.model.DataTableSpecification;
-import org.pmiops.workbench.model.DuplicateCohortParams;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
