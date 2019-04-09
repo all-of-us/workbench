@@ -30,7 +30,19 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
+import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.DataTableSpecification;
+import org.pmiops.workbench.model.DuplicateCohortParams;
+import org.pmiops.workbench.model.DuplicateCohortRequest;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.MaterializeCohortRequest;
+import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -124,7 +136,7 @@ public class CohortsController implements CohortsApiDelegate {
       Cohort cohort) {
     // This also enforces registered auth domain.
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+      Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     checkForDuplicateCohortNameException(cohort.getName(), workspace);
 
@@ -135,7 +147,7 @@ public class CohortsController implements CohortsApiDelegate {
       userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(),
               userProvider.get().getUserId(),
               newCohort.getCohortId(),
-              new Timestamp(clock.instant().toEpochMilli()));
+              newCohort.getLastModifiedTime());
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
@@ -149,7 +161,7 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Cohort> duplicateCohort(String workspaceNamespace, String workspaceId, DuplicateCohortParams params) {
+  public ResponseEntity<Cohort> duplicateCohort(String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
@@ -198,7 +210,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(String workspaceNamespace,
-      String workspaceId) {
+                                                                  String workspaceId) {
     // This also enforces registered auth domain.
     workspaceService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
@@ -282,7 +294,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(String workspaceNamespace,
-      String workspaceId, MaterializeCohortRequest request) {
+                                                                     String workspaceId, MaterializeCohortRequest request) {
     // This also enforces registered auth domain.
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
@@ -340,7 +352,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(String workspaceNamespace, String workspaceId,
-      DataTableSpecification request) {
+                                                    DataTableSpecification request) {
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CdrVersion cdrVersion = workspace.getCdrVersion();
@@ -381,7 +393,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(String workspaceNamespace,
-      String workspaceId, CohortAnnotationsRequest request) {
+                                                                        String workspaceId, CohortAnnotationsRequest request) {
     Workspace workspace = workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CdrVersion cdrVersion = workspace.getCdrVersion();

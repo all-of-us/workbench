@@ -1113,17 +1113,10 @@ paths:
       operationId: "duplicateCohort"
       parameters:
         - in: body
-          name: DuplicateCohortParams
-          description: Duplicate Cohort Params
-          required: true
+          name: DuplicateCohortRequest
+          description: Duplicate Cohort Request
           schema:
-            type: object
-            properties:
-              originalCohortId:
-                type: integer
-                format: int64
-              newName:
-                type: string
+            $ref: '#/definitions/DuplicateCohortRequest'
       responses:
         200:
           description: The cohort definition that was created.
@@ -2141,6 +2134,15 @@ definitions:
       profile:
         $ref: '#/definitions/Profile'
       invitationKey:
+        type: string
+
+  DuplicateCohortRequest:
+    type: object
+    properties:
+      originalCohortId:
+        type: integer
+        format: int64
+      newName:
         type: string
 
   InvitationVerificationRequest:
