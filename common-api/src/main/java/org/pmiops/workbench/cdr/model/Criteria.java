@@ -29,6 +29,10 @@ public class Criteria {
     private boolean attribute;
     private String path;
     private String synonyms;
+    private String value;
+    private boolean hierarchy;
+    private boolean ancestorData;
+    private boolean standard;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -228,6 +232,62 @@ public class Criteria {
         return this;
     }
 
+    @Column(name = "value")
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public Criteria value(String value) {
+        this.value = value;
+        return this;
+    }
+
+    @Column(name = "has_hierarchy")
+    public boolean getHierarchy() {
+        return hierarchy;
+    }
+
+    public void setHierarchy(boolean hierarchy) {
+        this.hierarchy = hierarchy;
+    }
+
+    public Criteria hierarchy(boolean hierarchy) {
+        this.hierarchy = hierarchy;
+        return this;
+    }
+
+    @Column(name = "has_ancestor_data")
+    public boolean getAncestorData() {
+        return ancestorData;
+    }
+
+    public void setAncestorData(boolean ancestorData) {
+        this.ancestorData = ancestorData;
+    }
+
+    public Criteria ancestorData(boolean ancestorData) {
+        this.ancestorData = ancestorData;
+        return this;
+    }
+
+    @Column(name = "is_standard")
+    public boolean getStandard() {
+        return standard;
+    }
+
+    public void setStandard(boolean standard) {
+        this.standard = standard;
+    }
+
+    public Criteria standard(boolean standard) {
+        this.standard = standard;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -243,12 +303,17 @@ public class Criteria {
           Objects.equals(conceptId, criteria.conceptId) &&
           Objects.equals(domainId, criteria.domainId) &&
           Objects.equals(attribute, criteria.attribute) &&
-          Objects.equals(path, criteria.path);
+          Objects.equals(path, criteria.path) &&
+          Objects.equals(value, criteria.value) &&
+          Objects.equals(hierarchy, criteria.hierarchy) &&
+          Objects.equals(ancestorData, criteria.ancestorData) &&
+          Objects.equals(standard, criteria.standard);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, path);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId,
+          domainId, attribute, path, value, hierarchy, ancestorData, standard);
     }
 
     @Override
