@@ -10,18 +10,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CohortCloningService {
+
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  @Autowired private CohortDao cohortDao;
-  @Autowired private CohortFactory cohortFactory;
-  @Autowired private CohortReviewDao cohortReviewDao;
-  @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
-  @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-  @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+  @Autowired
+  private CohortDao cohortDao;
+  @Autowired
+  private CohortFactory cohortFactory;
+  @Autowired
+  private CohortReviewDao cohortReviewDao;
+  @Autowired
+  private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Autowired
+  private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+  @Autowired
+  private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
   public Cohort cloneCohortAndReviews(Cohort fromCohort, Workspace targetWorkspace) {
-    Cohort toCohort = cohortFactory.duplicateCohort(fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort);
+    Cohort toCohort = cohortFactory
+        .duplicateCohort(fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace,
+            fromCohort);
     cohortDao.save(toCohort);
     copyCohortAnnotations(fromCohort, toCohort);
 
@@ -36,23 +45,24 @@ public class CohortCloningService {
 
   private void copyCohortAnnotations(Cohort from, Cohort to) {
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
-            from.getCohortId(), to.getCohortId());
+        from.getCohortId(), to.getCohortId());
     //Important: this must follow the above method
     //{@link CohortAnnotationDefinitionDao#bulkCopyCohortAnnotationDefinitionByCohort(long, long)}
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationEnumsByCohort(
-            from.getCohortId(), to.getCohortId());
+        from.getCohortId(), to.getCohortId());
   }
 
-  private void copyCohortReviewAnnotations(Cohort fromCohort, CohortReview fromReview, Cohort toCohort, CohortReview toReview) {
+  private void copyCohortReviewAnnotations(Cohort fromCohort, CohortReview fromReview,
+      Cohort toCohort, CohortReview toReview) {
     participantCohortStatusDao.bulkCopyByCohortReview(
-            fromReview.getCohortReviewId(), toReview.getCohortReviewId());
+        fromReview.getCohortReviewId(), toReview.getCohortReviewId());
     participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(
-            fromCohort.getCohortId(),
-            toCohort.getCohortId(),
-            toReview.getCohortReviewId());
+        fromCohort.getCohortId(),
+        toCohort.getCohortId(),
+        toReview.getCohortReviewId());
     participantCohortAnnotationDao.bulkCopyNonEnumAnnotationsByCohortReviewAndCohort(
-            fromCohort.getCohortId(),
-            toCohort.getCohortId(),
-            toReview.getCohortReviewId());
+        fromCohort.getCohortId(),
+        toCohort.getCohortId(),
+        toReview.getCohortReviewId());
   }
 }

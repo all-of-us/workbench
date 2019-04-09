@@ -7,9 +7,9 @@ import org.pmiops.workbench.db.model.Workspace;
 
 public interface CohortFactory {
 
-    Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId);
+  Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId);
 
-    Cohort duplicateCohort(String newName, User creator, Workspace targetWorkspace, Cohort original);
+  Cohort duplicateCohort(String newName, User creator, Workspace targetWorkspace, Cohort original);
 
-    CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort);
+  CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort);
 }

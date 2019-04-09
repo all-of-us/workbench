@@ -92,10 +92,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortsControllerTest {
+
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_VERSION_NAME = "cdrVersion";
@@ -177,13 +178,15 @@ public class CohortsControllerTest {
   ComplianceService complianceService;
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class, UserService.class,
+  @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
+      UserService.class,
       WorkspacesController.class, CohortsController.class, ConceptSetsController.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, NotebooksService.class,
       CloudStorageService.class, ConceptSetService.class, UserRecentResourceService.class,
       CohortMaterializationService.class, CdrVersionService.class, ConceptService.class,
       ComplianceService.class})
   static class Configuration {
+
     @Bean
     Clock clock() {
       return CLOCK;
@@ -299,33 +302,41 @@ public class CohortsControllerTest {
   @Test
   public void testUpdateCohort() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     cohort.setName("updated-name");
-    Cohort updated = cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort).getBody();
+    Cohort updated = cohortsController
+        .updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort)
+        .getBody();
     cohort.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(cohort);
 
     cohort.setName("updated-name2");
-    updated = cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort).getBody();
+    updated = cohortsController
+        .updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(), cohort)
+        .getBody();
     cohort.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(cohort);
 
-    Cohort got = cohortsController.getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId()).getBody();
+    Cohort got = cohortsController
+        .getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId()).getBody();
     assertThat(got).isEqualTo(cohort);
   }
 
   @Test(expected = NotFoundException.class)
   public void testGetCohortWrongWorkspace() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     cohortsController.getCohort(workspace.getNamespace(), WORKSPACE_NAME_2, cohort.getId());
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateCohortStaleThrows() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(),
         new Cohort().name("updated-name").etag(cohort.getEtag())).getBody();
@@ -338,7 +349,8 @@ public class CohortsControllerTest {
   @Test
   public void testUpdateCohortInvalidEtagsThrow() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     // TODO: Refactor to be a @Parameterized test case.
     List<String> cases = ImmutableList.of("", "hello, world", "\"\"", "\"\"1234\"\"", "\"-1\"");
@@ -347,7 +359,7 @@ public class CohortsControllerTest {
         cohortsController.updateCohort(workspace.getNamespace(), workspace.getId(), cohort.getId(),
             new Cohort().name("updated-name").etag(etag));
         fail(String.format("expected BadRequestException for etag: %s", etag));
-      } catch(BadRequestException e) {
+      } catch (BadRequestException e) {
         // expected
       }
     }
@@ -356,7 +368,8 @@ public class CohortsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testMaterializeCohortWorkspaceNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     WorkspaceAccessLevel owner = WorkspaceAccessLevel.OWNER;
     String workspaceName = "badWorkspace";
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
@@ -365,7 +378,8 @@ public class CohortsControllerTest {
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(
         fcResponse
     );
-    when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName)).thenThrow(new NotFoundException());
+    when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName))
+        .thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     cohortsController.materializeCohort(WORKSPACE_NAMESPACE, workspaceName, request);
@@ -374,7 +388,8 @@ public class CohortsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testMaterializeCohortCdrVersionNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -385,7 +400,8 @@ public class CohortsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testMaterializeCohortCohortNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName("badCohort");
@@ -395,7 +411,8 @@ public class CohortsControllerTest {
   @Test(expected = BadRequestException.class)
   public void testMaterializeCohortNoSpecOrCohortName() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request);
@@ -404,7 +421,8 @@ public class CohortsControllerTest {
   @Test(expected = BadRequestException.class)
   public void testMaterializeCohortPageSizeTooSmall() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -415,7 +433,8 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortPageSizeZero() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -424,7 +443,8 @@ public class CohortsControllerTest {
     adjustedRequest.setCohortName(cohort.getName());
     adjustedRequest.setPageSize(CohortsController.DEFAULT_PAGE_SIZE);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(null, cohortCriteria, null, adjustedRequest))
+    when(
+        cohortMaterializationService.materializeCohort(null, cohortCriteria, null, adjustedRequest))
         .thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -433,7 +453,8 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortPageSizeTooLarge() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -442,7 +463,8 @@ public class CohortsControllerTest {
     adjustedRequest.setCohortName(cohort.getName());
     adjustedRequest.setPageSize(CohortsController.MAX_PAGE_SIZE);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(null, cohortCriteria, null, adjustedRequest))
+    when(
+        cohortMaterializationService.materializeCohort(null, cohortCriteria, null, adjustedRequest))
         .thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -451,7 +473,8 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortNamedCohort() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     MaterializeCohortResponse response = new MaterializeCohortResponse();
@@ -466,13 +489,13 @@ public class CohortsControllerTest {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
     conceptSet = conceptSetsController.createConceptSet(workspace.getNamespace(), workspace.getId(),
         new CreateConceptSetRequest().conceptSet(conceptSet)
             .addedIds(ImmutableList.of(CLIENT_CONCEPT_1.getConceptId(),
                 CLIENT_CONCEPT_2.getConceptId()))).getBody();
-
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -492,7 +515,8 @@ public class CohortsControllerTest {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
     conceptSet = conceptSetsController.createConceptSet(workspace.getNamespace(), workspace.getId(),
         new CreateConceptSetRequest().conceptSet(conceptSet)
@@ -511,7 +535,8 @@ public class CohortsControllerTest {
   @Test(expected = NotFoundException.class)
   public void testMaterializeCohortNamedCohortWithConceptSetNotFound() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     TableQuery tableQuery = new TableQuery().tableName("condition_occurrence")
@@ -524,7 +549,8 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortNamedCohortWithReview() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
     CohortReview cohortReview = new CohortReview();
     cohortReview.setCohortId(cohort.getId());
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
@@ -535,7 +561,8 @@ public class CohortsControllerTest {
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     MaterializeCohortResponse response = new MaterializeCohortResponse();
-    when(cohortMaterializationService.materializeCohort(cohortReview, cohortCriteria, null, request))
+    when(
+        cohortMaterializationService.materializeCohort(cohortReview, cohortCriteria, null, request))
         .thenReturn(response);
     assertThat(cohortsController.materializeCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME,
         request).getBody()).isEqualTo(response);
@@ -544,7 +571,8 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortWithSpec() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortSpec(cohort.getCriteria());
@@ -558,14 +586,16 @@ public class CohortsControllerTest {
   @Test
   public void testMaterializeCohortWithEverything() throws Exception {
     Cohort cohort = createDefaultCohort();
-    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort).getBody();
+    cohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), cohort)
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
     request.setPageSize(123);
     request.setPageToken("token");
     request.setCdrVersionName(CDR_VERSION_NAME);
-    List<CohortStatus> statuses = ImmutableList.of(CohortStatus.INCLUDED, CohortStatus.NOT_REVIEWED);
+    List<CohortStatus> statuses = ImmutableList
+        .of(CohortStatus.INCLUDED, CohortStatus.NOT_REVIEWED);
     request.setStatusFilter(statuses);
     MaterializeCohortResponse response = new MaterializeCohortResponse();
     when(cohortMaterializationService.materializeCohort(null, cohortCriteria, null, request))
