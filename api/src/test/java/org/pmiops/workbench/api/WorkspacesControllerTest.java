@@ -56,7 +56,7 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -176,7 +176,7 @@ public class WorkspacesControllerTest {
     WorkspaceServiceImpl.class,
     CohortsController.class,
     CohortFactoryImpl.class,
-    CohortService.class,
+    CohortCloningService.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,

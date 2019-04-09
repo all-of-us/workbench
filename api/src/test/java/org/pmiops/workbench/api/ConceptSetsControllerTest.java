@@ -28,7 +28,7 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -188,7 +188,7 @@ public class ConceptSetsControllerTest {
 
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, CohortService.class, CohortFactoryImpl.class,
+  @Import({WorkspaceServiceImpl.class, CohortCloningService.class, CohortFactoryImpl.class,
       UserService.class, ConceptSetsController.class, WorkspacesController.class, ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class, FireCloudService.class, CloudStorageService.class,
       ConceptSetService.class, UserRecentResourceService.class, ComplianceService.class})

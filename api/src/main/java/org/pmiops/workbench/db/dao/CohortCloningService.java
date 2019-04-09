@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CohortService {
+public class CohortCloningService {
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   @Autowired private CohortDao cohortDao;
