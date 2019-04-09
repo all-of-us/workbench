@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import {QueryCohortDefinitionComponent} from 'app/cohort-review/query-cohort-definition/query-cohort-definition.component';
+import {QueryCohortDefinitionComponent} from 'app/cohort-review/query-cohort-definition/cohort-definition.component';
 import {CohortBuilderService} from 'generated';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {cohortReviewStub} from 'testing/stubs/cohort-review-service-stub';
