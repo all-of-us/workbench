@@ -1,7 +1,8 @@
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import {reactStyles} from 'app/utils';
+import * as moment from 'moment';
 import * as React from 'react';
-import {reactStyles} from '../../utils';
 
 const css = `
   @media print{
@@ -61,7 +62,6 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
     const review = cohortReviewStore.getValue();
     const def = JSON.parse(review.cohortDefinition);
     const definition = ['includes', 'excludes'].reduce((acc, role) => {
-      console.log(acc);
       if (def[role].length) {
         const roleObj = {role, groups: []};
         def[role].forEach(group => {
@@ -233,8 +233,8 @@ export class CohortDefinition extends React.Component<{}, {definition: any}> {
 
   render() {
     const {definition} = this.state;
-    console.log(definition);
     return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+      <style>{css}</style>
       <div style={styles.defTitle}>
         Cohort Definition
       </div>
