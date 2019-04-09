@@ -1,6 +1,7 @@
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
+import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -81,11 +82,66 @@ const styles = reactStyles({
   graphBorder: {
     minHeight: '10rem',
     padding: '0.3rem',
+  },
+  groupHeader: {
+    backgroundColor: '#E2E2EA',
+    padding: '0.2rem',
+    color: '#262262',
+    marginTop: '1rem'
+  },
+  groupText: {
+    display: 'inline-block',
+    fontWeight: 600,
+    fontSize: '14px'
+  },
+  groupContent: {
+    paddingTop: '0.2rem',
+    color: 'black',
+    fontSize: '13px'
   }
 });
-const col6 = {
-  ...styles.col, flex: '0 0 50%', maxWidth: '50%'
-};
+const columns = {
+  col2: {
+    ...styles.col,
+    flex: '0 0 16.66667%',
+    maxWidth: '16.66667%'
+  },
+  col3: {
+    ...styles.col,
+    flex: '0 0 25%',
+    maxWidth: '25%'
+  },
+  col4: {
+    ...styles.col,
+    flex: '0 0 33.33333%',
+    maxWidth: '33.33333%'
+  },
+  col6: {
+    ...styles.col,
+    flex: '0 0 50%',
+    maxWidth: '50%'
+  },
+  col7: {
+    ...styles.col,
+    flex: '0 0 58.33333%',
+    maxWidth: '58.33333%'
+  },
+  col8: {
+    ...styles.col,
+    flex: '0 0 67.66667%',
+    maxWidth: '67.66667%'
+  },
+  col10: {
+    ...styles.col,
+    flex: '0 0 83.33333%',
+    maxWidth: '83.33333%'
+  },
+  col12: {
+    ...styles.col,
+    flex: '0 0 100%',
+    maxWidth: '100%'
+  },
+}
 const demoTitle = {
   ...styles.chartTitle,
   marginLeft: '0.4rem',
@@ -103,6 +159,7 @@ export interface QueryReportProps {
 export interface QueryReportState {
   cdrName: string;
   data: any;
+  groupedData: any;
   loading: boolean;
 }
 
@@ -116,6 +173,7 @@ export const QueryReport = withCurrentWorkspace()(
       this.state = {
         cdrName: null,
         data: null,
+        groupedData: null,
         loading: true
       };
     }
@@ -131,21 +189,55 @@ export const QueryReport = withCurrentWorkspace()(
       const request = (JSON.parse(this.review.cohortDefinition)) as SearchRequest;
       cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request)
         .then(response => {
-          this.setState({data: fromJS((response).items), loading: false});
+          this.groupChartData(response.items);
+          this.setState({data: response.items, loading: false});
         });
     }
 
+    groupChartData(data: any) {
+      const groups = ['gender', 'ageRange', 'race'];
+      const init = {
+        gender: {},
+        ageRange: {},
+        race: {}
+      };
+      const groupedData = data.reduce((acc, i) => {
+        groups.forEach(group => {
+          const key = i[group];
+          if (acc[group][key]) {
+            acc[group][key].count += i.count;
+          } else {
+            acc[group][key] = {name: this.getFormattedName(key), count: i.count};
+          }
+        });
+        return acc;
+      }, init);
+      this.setState({groupedData});
+    }
+
+    getFormattedName(name: string) {
+      switch (name) {
+        case 'F' :
+          return 'Female';
+        case 'M' :
+          return 'Male';
+        default:
+          return name;
+      }
+    }
+
     render() {
-      const {cdrName, data, loading} = this.state;
+      const {cdrName, data, groupedData, loading} = this.state;
+      const totalCount = this.review.matchedParticipantCount;
       return <React.Fragment>
         <style>{css}</style>
         <div style={styles.reportBackground}>
           <div style={styles.container}>
             <div style={styles.row}>
-              <div style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
+              <div style={columns.col6}>
                 <div style={styles.container}>
                   <div style={styles.row}>
-                    <div style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
+                    <div style={columns.col6}>
                       <div style={styles.queryTitle}>
                         Cohort Name
                       </div>
@@ -159,7 +251,7 @@ export const QueryReport = withCurrentWorkspace()(
                         {this.cohort.creator}
                       </div>
                     </div>
-                    <div style={col6}>
+                    <div style={columns.col6}>
                       <div style={styles.queryTitle}>
                         Date created
                       </div>
@@ -173,19 +265,60 @@ export const QueryReport = withCurrentWorkspace()(
                         {cdrName}
                       </div>
                     </div>
-                    <div style={{...styles.col, flex: '0 0 100%', maxWidth: '100%'}}>
+                    <div style={columns.col12}>
                       // query-cohort-definition
                     </div>
                   </div>
                 </div>
               </div>
               <div className='stats-left-padding'
-                style={{...styles.col, flex: '0 0 50%', maxWidth: '50%'}}>
-                // app-descriptive-stats
+                style={columns.col6}>
+                <div>
+                  <div style={styles.container}>
+                    <div style={styles.row}>
+                      <div style={{...columns.col10, ...styles.queryTitle}}>
+                        Descriptive Statistics
+                      </div>
+                      <ClrIcon className='is-solid' style={columns.col2} shape='printer' size={32}/>
+                  </div>
+                </div>
+                {groupedData && Object.keys(groupedData).map((group, g) => (
+                  <div key={g}>
+                    <div style={styles.container}>
+                      <div style={{...styles.container, ...styles.groupHeader}}>
+                        <div className='col-sm-7 col-xs-7' style={{...styles.groupText}}>
+                          {group === 'ageRange' ? 'Age' : group}
+                        </div>
+                        {g === 0 && <div className='col-sm-2 col-xs-2' style={{...styles.groupText}}>
+                          Total
+                        </div>}
+                        {g === 0 && <div className='col-sm-3 col-xs-3' style={{...styles.groupText}}>
+                          % of Cohort
+                        </div>}
+                      </div>
+                    </div>
+                    {Object.keys(groupedData[group]).map((row, r) => (
+                      <div key={r} style={styles.container}>
+                        <div style={{...styles.row, ...styles.groupContent}}>
+                          <div style={columns.col7}>
+                            {groupedData[group][row].name}
+                          </div>
+                          <div style={columns.col2}>
+                            {groupedData[group][row].count}
+                          </div>
+                          <div style={columns.col3}>
+                            {Math.round(groupedData[group][row].count / totalCount * 100)}%
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {loading && <SpinnerOverlay />}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-          // ov charts
           <div style={{...styles.container, margin: 0}}>
             <div style={styles.row}>
               <div style={{...styles.col, flex: '0 0 100%', maxWidth: '100%'}}>
@@ -203,7 +336,7 @@ export const QueryReport = withCurrentWorkspace()(
                     <div style={{...styles.col, flex: '0 0 66.66667%', maxWidth: '66.66667%'}}>
                       <div style={demoTitle}>Demographics</div>
                       <div style={styles.graphBorder}>
-                        {data && <ComboChart mode={'stacked'} data={data} />}
+                        {data && <ComboChart mode={'stacked'} data={fromJS(data)} />}
                         {loading && <SpinnerOverlay />}
                       </div>
                     </div>
