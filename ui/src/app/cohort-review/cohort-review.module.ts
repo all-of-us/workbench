@@ -24,7 +24,6 @@ import {IndividualParticipantsChartsComponent} from './individual-participants-c
 import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
 import {ParticipantsChartsComponent} from './participants-charts/participants-charts';
-import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
 import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
@@ -70,7 +69,6 @@ import {TablePage} from './table-page/table-page';
     DetailTabsComponent,
     DetailTabTableComponent,
     ParticipantsChartsComponent,
-    QueryCohortDefinitionComponent,
     QueryDescriptiveStatsComponent
   ],
   providers: [
