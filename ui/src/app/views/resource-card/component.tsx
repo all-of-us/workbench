@@ -5,6 +5,7 @@ import * as React from 'react';
 import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {ResourceCardMenu} from 'app/components/resources';
+import {TextModal} from 'app/components/text-modal';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
@@ -12,7 +13,6 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {ConfirmDeleteModal} from 'app/views/confirm-delete-modal/component';
 import {EditModal} from 'app/views/edit-modal/component';
 import {RenameModal} from 'app/views/rename-modal/component';
-import {TextModal} from 'app/views/text-modal/component';
 import {Domain, RecentResource} from 'generated/fetch';
 
 import {cohortsApi, conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';

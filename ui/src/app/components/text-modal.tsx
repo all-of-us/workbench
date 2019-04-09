@@ -26,14 +26,16 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
-    return <React.Fragment>
-      <Modal>
-        <ModalTitle>{this.props.title}</ModalTitle>
-        <ModalBody>{this.props.body}</ModalBody>
-        <ModalFooter>
-          <Button onClick={this.props.onConfirm}>OK</Button>
-        </ModalFooter>
-      </Modal>
-    </React.Fragment>;
+    return (
+      <React.Fragment>
+        <Modal>
+          <ModalTitle>{this.props.title}</ModalTitle>
+          <ModalBody>{this.props.body}</ModalBody>
+          <ModalFooter>
+            <Button onClick={this.props.onConfirm}>OK</Button>
+          </ModalFooter>
+        </Modal>
+      </React.Fragment>
+    );
   }
 }
