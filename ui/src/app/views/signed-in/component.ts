@@ -23,9 +23,6 @@ export class SignedInComponent implements OnInit, OnDestroy {
   hasDataAccess = true;
   hasReviewResearchPurpose = false;
   hasAccessModuleAdmin = false;
-  showBugReportItem = !environment.useZendeskForSupport;
-  showHelpDeskItem = environment.useZendeskForSupport;
-  showHubForumItem = environment.useZendeskForSupport;
   headerImg = '/assets/images/all-of-us-logo.svg';
   displayTag = environment.displayTag;
   shouldShowDisplayTag = environment.shouldShowDisplayTag;

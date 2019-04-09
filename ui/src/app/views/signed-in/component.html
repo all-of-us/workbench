@@ -78,10 +78,8 @@
           routerLink="/admin/user"
           (click)="sidenavToggle = false">User Admin</button>
       <button class="btn btn-primary nav-link help-desk-item"
-          *ngIf="showHelpDeskItem"
           (click)="openZendesk(); sidenavToggle = false;">Contact Support</button>
       <button class="btn btn-primary nav-link hub-forum-item"
-          *ngIf="showHubForumItem"
           (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
     </section>
   </nav>

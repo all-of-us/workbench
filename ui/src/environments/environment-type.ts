@@ -53,12 +53,6 @@ export interface Environment {
 
   // Transient client-side flags.
   //
-  // Whether Zendesk should be used for support requests & bug reports, instead
-  // of Jira. See RW-1885 for details.
-  // Exit criteria: remove flag and change all code to use Zendesk after Athens
-  // release.
-  useZendeskForSupport: boolean;
-
   // Whether users should be able to use JupyterLab as an option.
   // See RW-1966 for details.
   // Exit criteria: remove flag for Athens release.

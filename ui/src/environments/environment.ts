@@ -5,7 +5,6 @@ export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Local->Test',
   debug: true,
-  useZendeskForSupport: true,
   enableJupyterLab: true,
   enableDatasetBuilder: true,
   enableCBListSearch: false,
