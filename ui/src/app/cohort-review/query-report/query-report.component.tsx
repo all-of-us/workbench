@@ -1,6 +1,6 @@
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
 import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
-import {CohortDefinition} from 'app/cohort-review/query-cohort-definition/cohort-definition.component';
+import {CohortDefinition} from 'app/cohort-review/cohort-definition/cohort-definition.component';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';

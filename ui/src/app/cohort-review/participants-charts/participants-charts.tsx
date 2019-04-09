@@ -1,8 +1,7 @@
-import {Component, Input} from '@angular/core';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import * as React from 'react';
 
@@ -176,17 +175,3 @@ export const ParticipantsCharts = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  selector: 'app-participants-charts',
-  template: '<div #root></div>'
-
-})
-export class ParticipantsChartsComponent extends ReactWrapperBase {
-
-  @Input('domain') domain: ParticipantsChartsProps['domain'];
-  constructor() {
-    super(ParticipantsCharts, ['domain']);
-  }
-}
-
