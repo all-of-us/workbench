@@ -1,33 +1,77 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
+import * as React from 'react';
+import {reactStyles} from '../../utils';
 
+const css = `
+  @media print{
+    .page-break {
+      page-break-inside: avoid;
+    }
+  }
+`;
 
-@Component({
-  selector: 'app-query-cohort-definition',
-  templateUrl: './query-cohort-definition.component.html',
-  styleUrls: ['./query-cohort-definition.component.css']
-})
-export class QueryCohortDefinitionComponent implements OnInit {
-  definition: Array<any>;
-  values: Array<any>;
-  @Input() review: any;
-  constructor() {}
+const styles = reactStyles({
+  defTitle: {
+    fontSize: '16px',
+    fontWeight: 600,
+    color: '#262262'
+  },
+  wrapper: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'start'
+  },
+  exclude: {
+    backgroundColor: 'rgb(226, 226, 233)',
+    borderRadius: '1rem',
+    width: '4.5rem',
+    height: '2.2rem',
+    lineHeight: '2.2rem',
+    textAlign: 'center'
+  },
+  andCircle: {
+    backgroundColor: 'rgb(226, 226, 233)',
+    borderRadius: '50%',
+    width: '2.5rem',
+    height: '2.5rem',
+    lineHeight: '2.5rem',
+    textAlign: 'center'
+  },
+  groupBackground: {
+    backgroundColor: '#E2E2EA',
+    color: 'black',
+    padding: '0.3rem 0.6rem',
+    margin: '0.7rem 0rem',
+    display: 'inline-block'
+  }
+});
 
-  ngOnInit() {
+export class CohortDefinition extends React.Component<{}, {definition: any}> {
+  constructor(props: any) {
+    super(props);
+    this.state = {definition: null};
+  }
+
+  componentDidMount() {
     this.mapDefinition();
   }
 
   mapDefinition() {
-    const definition = JSON.parse(this.review.cohortDefinition);
-    this.definition = ['includes', 'excludes'].map(role => {
-      if (definition[role].length) {
+    const review = cohortReviewStore.getValue();
+    const def = JSON.parse(review.cohortDefinition);
+    const definition = ['includes', 'excludes'].reduce((acc, role) => {
+      console.log(acc);
+      if (def[role].length) {
         const roleObj = {role, groups: []};
-        definition[role].forEach(group => {
+        def[role].forEach(group => {
           roleObj.groups.push(this.mapGroup(group));
         });
-        return roleObj;
+        acc.push(roleObj);
       }
-    });
+      return acc;
+    }, []);
+    this.setState({definition});
   }
 
   mapGroup(group: any) {
@@ -185,5 +229,47 @@ export class QueryCohortDefinitionComponent implements OnInit {
       case 'NUM_OF_OCCURRENCES' :
         return 'Num of Occurrences';
     }
+  }
+
+  render() {
+    const {definition} = this.state;
+    console.log(definition);
+    return <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+      <div style={styles.defTitle}>
+        Cohort Definition
+      </div>
+      {definition && definition.map((group, g) => (
+        <React.Fragment key={g}>
+          {group.role === 'excludes' && <div className='page-break' style={styles.wrapper}>
+            <div style={styles.exclude}>EXCLUDING</div>
+          </div>}
+          {group.groups.map((item, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <div className='page-break' style={styles.wrapper}>
+                <div style={styles.andCircle}>AND</div>
+              </div>}
+              <div style={styles.groupBackground}>
+                {item.map((param, p) => (
+                  <React.Fragment key={p}>
+                    {p > 0 && <div>OR</div>}
+                    <div>
+                      {param.map((crit, c) => (
+                        <React.Fragment key={c}>
+                          {c > 0 && <React.Fragment>
+                            {crit.type === 'DEMO' && <div>AND</div>}
+                            {crit.type !== 'DEMO' && <div>OR</div>}
+                          </React.Fragment>}
+                          <div>{crit.items}</div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
+            </React.Fragment>
+          ))}
+        </React.Fragment>
+      ))}
+    </div>;
   }
 }
