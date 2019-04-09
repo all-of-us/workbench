@@ -1,8 +1,7 @@
 import {Component, Input} from '@angular/core';
 import * as React from 'react';
-import {validate} from 'validate.js';
 
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils/index';
+import {ReactWrapperBase, withUserProfile} from 'app/utils/index';
 
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -30,10 +29,6 @@ export const BugReportModal = withUserProfile()
 
   render() {
     const {bugReportDescription, onClose} = this.props;
-    const errors = validate({bugReportDescription}, {
-      shortDescription: {presence: {allowEmpty: false}}
-    });
-
     return <Modal>
       <ModalTitle style={{fontWeight: 400}}>Something went wrong.</ModalTitle>
       <ModalBody>
