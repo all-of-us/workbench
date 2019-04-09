@@ -109,29 +109,6 @@ paths:
           schema:
             $ref: "#/definitions/Profile"
 
-  /v1/sendBugReport:
-    post:
-      tags:
-        - bugReport
-      consumes:
-        - application/json
-      description: Sends an email to developers about a user reported bug
-      operationId: sendBugReport
-      parameters:
-        - in: body
-          name: bugReport
-          description: user reported bug
-          required: true
-          schema:
-            $ref: "#/definitions/BugReport"
-      responses:
-        200:
-          description: Success message
-          schema:
-            $ref: "#/definitions/BugReport"
-        500:
-          description: JIRA Internal Error
-
   # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
   # Error. It should respond with 400 Bad Request.
   /v1/is-username-taken:
@@ -2105,34 +2082,6 @@ definitions:
       creationNonce:
         type: string
         description: The nonce returned from the account creation API.
-
-  BugReport:
-    type: object
-    required:
-      - shortDescription
-      - contactEmail
-    properties:
-      bugType:
-        $ref: "#/definitions/BugReportType"
-      shortDescription:
-        description: A short description of the bug
-        type: string
-      reproSteps:
-        description: Steps to reproduce the bug
-        type: string
-      includeNotebookLogs:
-        description:
-          Whether or not to include notebook server logs in the bug
-          report.
-        type: boolean
-      contactEmail:
-        description: The email with which to contact the bug reporter.
-        type: string
-
-  BugReportType:
-    type: string
-    description: Possible value for bug reports
-    enum: [APPLICATION, DATA]
 
   NihToken:
     required:
