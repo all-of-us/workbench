@@ -1,7 +1,9 @@
 package org.pmiops.workbench.cohorts;
 
 import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,15 +33,31 @@ public class CohortFactoryImpl implements CohortFactory {
     }
 
     @Override
-    public Cohort duplicateCohort(String newName, Cohort original, User creator) {
+    public Cohort duplicateCohort(String newName, User creator, Workspace workspace, Cohort original) {
         return createCohort(
                 original.getDescription(),
                 newName,
                 original.getType(),
                 original.getCriteria(),
                 creator,
-                original.getWorkspaceId()
+                workspace.getWorkspaceId()
         );
+    }
+
+    @Override
+    public CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort) {
+        CohortReview newCohortReview = new CohortReview();
+
+        newCohortReview.setCohortId(targetCohort.getCohortId());
+        newCohortReview.creationTime(targetCohort.getCreationTime());
+        newCohortReview.setLastModifiedTime(targetCohort.getLastModifiedTime());
+        newCohortReview.setCdrVersionId(original.getCdrVersionId());
+        newCohortReview.setMatchedParticipantCount(original.getMatchedParticipantCount());
+        newCohortReview.setReviewSize(original.getReviewSize());
+        newCohortReview.setReviewedCount(original.getReviewedCount());
+        newCohortReview.setReviewStatusEnum(original.getReviewStatusEnum());
+
+        return newCohortReview;
     }
 
     private Cohort createCohort(String desc, String name, String type, String criteria, User creator, long workspaceId) {

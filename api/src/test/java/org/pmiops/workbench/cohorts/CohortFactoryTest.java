@@ -5,11 +5,15 @@ import org.junit.Test;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.ReviewStatus;
 
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 public class CohortFactoryTest {
@@ -54,7 +58,9 @@ public class CohortFactoryTest {
         originalCohort.setCohortReviews(Collections.singleton(mock(CohortReview.class)));
 
         User user = mock(User.class);
-        Cohort dbCohort = cohortFactory.duplicateCohort("new name", originalCohort, user);
+        Workspace workspace = mock(Workspace.class);
+        doReturn(1l).when(workspace).getWorkspaceId();
+        Cohort dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
 
         assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
         assertThat(dbCohort.getName()).isEqualTo("new name");
@@ -63,6 +69,50 @@ public class CohortFactoryTest {
         assertThat(dbCohort.getCreator()).isSameAs(user);
         assertThat(dbCohort.getWorkspaceId()).isEqualTo(originalCohort.getWorkspaceId());
         assertThat(dbCohort.getCohortReviews()).isNull();
+    }
+
+    @Test
+    public void duplicateCohortReview() {
+        Timestamp now = new Timestamp(Clock.systemUTC().millis());
+
+        CohortReview originalCohortReview = new CohortReview();
+        originalCohortReview.setCohortId(1l);
+        originalCohortReview.setCdrVersionId(2l);
+        originalCohortReview.setMatchedParticipantCount(3l);
+        originalCohortReview.setReviewSize(4l);
+        originalCohortReview.setReviewedCount(5l);
+        originalCohortReview.setReviewStatusEnum(ReviewStatus.CREATED);
+
+        Cohort cohort = mock(Cohort.class);
+        doReturn(1l).when(cohort).getCohortId();
+        doReturn(now).when(cohort).getCreationTime();
+        doReturn(now).when(cohort).getLastModifiedTime();
+        CohortReview newReview = cohortFactory.duplicateCohortReview(originalCohortReview, cohort);
+
+        assertThat(newReview.getCohortId()).isEqualTo(originalCohortReview.getCohortId());
+        assertThat(newReview.getCreationTime()).isEqualTo(now);
+        assertThat(newReview.getLastModifiedTime()).isEqualTo(now);
+        assertThat(newReview.getCdrVersionId()).isEqualTo(originalCohortReview.getCdrVersionId());
+        assertThat(newReview.getMatchedParticipantCount()).isEqualTo(originalCohortReview.getMatchedParticipantCount());
+        assertThat(newReview.getReviewSize()).isEqualTo(originalCohortReview.getReviewSize());
+        assertThat(newReview.getReviewedCount()).isEqualTo(originalCohortReview.getReviewedCount());
+        assertThat(newReview.getReviewStatusEnum()).isEqualTo(originalCohortReview.getReviewStatusEnum());
+    }
+
+
+    public CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort) {
+        CohortReview newCohortReview = new CohortReview();
+
+        newCohortReview.setCohortId(targetCohort.getCohortId());
+        newCohortReview.creationTime(targetCohort.getCreationTime());
+        newCohortReview.setLastModifiedTime(targetCohort.getLastModifiedTime());
+        newCohortReview.setCdrVersionId(original.getCdrVersionId());
+        newCohortReview.setMatchedParticipantCount(original.getMatchedParticipantCount());
+        newCohortReview.setReviewSize(original.getReviewSize());
+        newCohortReview.setReviewedCount(original.getReviewedCount());
+        newCohortReview.setReviewStatusEnum(original.getReviewStatusEnum());
+
+        return newCohortReview;
     }
 
 }

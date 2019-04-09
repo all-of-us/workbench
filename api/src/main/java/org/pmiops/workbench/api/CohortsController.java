@@ -156,7 +156,7 @@ public class CohortsController implements CohortsApiDelegate {
     checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
     org.pmiops.workbench.db.model.Cohort originalCohort = getDbCohort(workspaceNamespace, workspaceId, params.getOriginalCohortId());
-    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(params.getNewName(), originalCohort, userProvider.get());
+    org.pmiops.workbench.db.model.Cohort newCohort = cohortFactory.duplicateCohort(params.getNewName(), userProvider.get(), workspace, originalCohort);
     try {
       newCohort = cohortDao.save(newCohort);
       userRecentResourceService.updateCohortEntry(workspace.getWorkspaceId(),
