@@ -35,6 +35,7 @@ import {
   ConfigApi,
   Configuration as FetchConfiguration,
   CronApi,
+  DataSetApi,
   FetchAPI,
   OfflineClusterApi,
   ProfileApi,
@@ -93,6 +94,7 @@ export const conceptsApi = bindCtor(ConceptsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
 export const cronApi = bindCtor(CronApi);
+export const dataSetApi = bindCtor(DataSetApi);
 export const offlineClusterApi = bindCtor(OfflineClusterApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusApi = bindCtor(StatusApi);

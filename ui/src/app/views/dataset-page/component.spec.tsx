@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {DataSet} from 'app/views/dataset/component';
+import {DataSet} from 'app/views/dataset-page/component';
 import {WorkspaceAccessLevel} from 'generated';
 import {CohortsApi, ConceptsApi, ConceptSetsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';

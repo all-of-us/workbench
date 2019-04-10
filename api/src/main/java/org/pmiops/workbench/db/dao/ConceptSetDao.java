@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.model.Domain;
@@ -41,4 +42,6 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
       nativeQuery=true)
   void bulkCopyConceptIds(
       @Param("fromCsId") long fromConceptSetId, @Param("toCsId") long toConceptSetId);
+
+  List<ConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
 }

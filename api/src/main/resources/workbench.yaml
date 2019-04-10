@@ -1344,6 +1344,34 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
+# Data Sets ###############################################################################
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/dataSet/getQuery:
+      # Ideally this would be a get, but we need to pass up a request body for
+      # use in this method, and HTTP standard doesn't have a request type that
+      # does what we want this to do here.
+      post:
+        tags:
+          - dataSet
+        description: >
+          Given a Data Set, return the SQL query built from it.
+        operationId: "getQueryFromDataSet"
+        parameters:
+          - $ref: '#/parameters/workspaceNamespace'
+          - $ref: '#/parameters/workspaceId'
+          - in: body
+            name: dataSet
+            required: true
+            schema:
+              $ref: "#/definitions/DataSet"
+        responses:
+          200:
+            description: >
+              A SQL query for each domain in the Data Set
+            schema:
+              $ref: "#/definitions/DataSetQueryResponse"
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -2016,6 +2044,32 @@ definitions:
           All the selected values in the data set
         items:
           $ref: "#/definitions/ValueSet"
+
+  DataSetQueryResponse:
+    type: object
+    properties:
+      queryList:
+        type: array
+        items:
+          $ref: "#/definitions/DataSetQuery"
+
+  DataSetQuery:
+    type: object
+    required:
+      - domain
+      - query
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      query:
+        type: string
+        description: >
+          The string query to fetch the data set sql for the given domain from BigQuery.
 
   DomainInfoResponse:
     type: object

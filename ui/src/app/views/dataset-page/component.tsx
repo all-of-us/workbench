@@ -7,7 +7,7 @@ import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {ResourceListItem} from 'app/components/resources';
 import {Spinner} from 'app/components/spinners';
-import {cohortsApi, conceptsApi, conceptSetsApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {ReactWrapperBase, toggleIncludes, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
@@ -18,11 +18,13 @@ import {EditModal} from 'app/views/edit-modal/component';
 import {
   Cohort,
   ConceptSet,
+  DataSet,
   Domain,
   DomainInfo,
   DomainValue,
   DomainValuesResponse,
   RecentResource,
+  ValueSet,
   WorkspaceAccessLevel,
 } from 'generated/fetch';
 
@@ -52,11 +54,6 @@ export const styles = {
   }
 };
 
-interface ValueSet {
-  domain: Domain;
-  values: DomainValue[];
-}
-
 interface DomainValuePair {
   domain: Domain;
   value: string;
@@ -73,7 +70,7 @@ export const ValueListItem: React.FunctionComponent <
     </div>;
   };
 
-export const DataSet = withCurrentWorkspace()(class extends React.Component<
+export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
   {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
@@ -215,7 +212,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   async getValuesList(domains: Domain[]): Promise<ValueSet[]> {
     const {namespace, id} = this.props.workspace;
     const valueSets = fp.zipWith((domain: Domain, valueSet: DomainValuesResponse) =>
-        ({domain: domain, values: valueSet.items}),
+        ({domain: domain, values: valueSet}),
       domains,
       await Promise.all(domains.map((domain) =>
         conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
@@ -269,6 +266,26 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     if (this.state.resource) {
       return fp.compact([this.state.resource.cohort, this.state.resource.conceptSet])[0];
     }
+  }
+
+  async generateCode() {
+    const {namespace, id} = this.props.workspace;
+    const valuesByDomain: ValueSet[] = [];
+    this.state.selectedValues.forEach((value) => {
+      const domainSet = fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
+      if (domainSet === undefined) {
+        valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}})
+      }
+    });
+    const dataSet: DataSet = {
+      name: '',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: valuesByDomain,
+    };
+    // console.log(dataSet);
+    const sqlQueries = await dataSetApi().getQueryFromDataSet(namespace, id, dataSet);
+    console.log(sqlQueries);
   }
 
   render() {
@@ -368,7 +385,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
                       <div style={{fontSize: '13px', fontWeight: 600, color: 'black'}}>
                         {fp.capitalize(valueSet.domain.toString())}
                       </div>
-                      {valueSet.values.map(domainValue =>
+                      {valueSet.values.items.map(domainValue =>
                         <ValueListItem key={domainValue.value} domainValue={domainValue} onSelect={
                           () => this.selectDomainValue(valueSet.domain, domainValue)}
                           checked={fp.some({domain: valueSet.domain, value: domainValue.value},
@@ -388,6 +405,9 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
             <div>Preview Dataset</div>
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
+            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}} onClick={() => {this.generateCode()}}>
+              GENERATE CODE
+            </Button>
             {/* Button disabled until this functionality added*/}
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}} disabled={true}>
               SAVE DATASET
@@ -423,8 +443,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
 @Component({
   template: '<div #root></div>'
 })
-export class DataSetComponent extends ReactWrapperBase {
+export class DataSetPageComponent extends ReactWrapperBase {
   constructor() {
-    super(DataSet, []);
+    super(DataSetPage, []);
   }
 }
