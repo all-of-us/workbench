@@ -318,26 +318,26 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => visits === item.visitType);
       }
       /* Column filters */
-      const columns = filterState.tabs[domain];
-      if (!columns) {
+      const columnFilters = filterState.tabs[domain];
+      if (!columnFilters) {
         if (data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
         this.setState({filteredData: data, start: start});
       } else {
-        for (const col in columns) {
-          if (Array.isArray(columns[col])) {
-            if (!columns[col].length) {
+        for (const col in columnFilters) {
+          if (Array.isArray(columnFilters[col])) {
+            if (!columnFilters[col].length) {
               data = [];
               break;
-            } else if (!columns[col].includes('Select All')
+            } else if (!columnFilters[col].includes('Select All')
               && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-              data = data.filter(row => columns[col].includes(row[col]));
+              data = data.filter(row => columnFilters[col].includes(row[col]));
             }
           } else {
-            if (columns[col]) {
+            if (columnFilters[col]) {
               data = data.filter(
-                row => row[col].toLowerCase().includes(columns[col].toLowerCase())
+                row => row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase())
               );
             }
           }
@@ -395,7 +395,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     checkboxFilter(column: string) {
       const {codeResults, data} = this.state;
       const {domain, filterState, filterState: {vocab}} = this.props;
-      const checkedItems = filterState.tabs[domain];
+      const columnFilters = filterState.tabs[domain];
       if (!data) {
         return {};
       }
@@ -420,8 +420,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             return acc;
           }, []);
           options.sort((a, b) => b.count - a.count);
-          if (!checkedItems[column].includes('Select All')) {
-            checkedItems[column].forEach(name => {
+          if (!columnFilters[column].includes('Select All')) {
+            columnFilters[column].forEach(name => {
               if (!options.find(opt => opt.name === name)) {
                 options = [{name, count: 0}, ...options];
               }
@@ -437,8 +437,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           break;
       }
       options.push({name: 'Select All', count: counts.total});
-      if (checkedItems[column].includes('Select All')) {
-        checkedItems[column] = options.map(opt => opt.name);
+      if (columnFilters[column].includes('Select All')) {
+        columnFilters[column] = options.map(opt => opt.name);
       }
       const checkboxes = codeResults && codeResults.length === 0
         ? <em style={styles.noResults}>No matching codes</em>
@@ -447,7 +447,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             acc.push(<React.Fragment key={i}>
               {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
-                       checked={checkedItems[column].includes(opt.name)}
+                       checked={columnFilters[column].includes(opt.name)}
                        onChange={($event) => this.updateData($event, column, options)}/>
                 <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
               </div>}
@@ -472,7 +472,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
-                   checked={checkedItems[column].includes('Select All')}
+                   checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
             <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
           </div>
@@ -481,6 +481,8 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     textFilter(column: string) {
+      const {domain, filterState} = this.props;
+      const columnFilters = filterState.tabs[domain];
       let fl: any;
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
@@ -490,7 +492,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             <i className='pi pi-search' style={{margin: '0 5px'}} />
             <TextInput
               style={styles.textInput}
-              onChange={(e) => this.textInputChange(e, column)}
+              value={columnFilters[column]}
+              onChange={(e) => this.filterText(e, column)}
               placeholder={'Search'} />
           </div>
         </OverlayPanel>
