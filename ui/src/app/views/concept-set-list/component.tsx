@@ -70,7 +70,7 @@ export const ConceptSetsList = withCurrentWorkspace()(
         const conceptSets = convertToResources(resp.items, namespace, id,
           accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET);
 
-        this.setState({conceptSetsList: conceptSets});
+        this.setState({conceptSetsList: conceptSets, conceptSetsLoading: false});
       } catch (error) {
         console.log(error);
       }
