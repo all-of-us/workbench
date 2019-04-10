@@ -53,7 +53,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class CohortBuilderController implements CohortBuilderApiDelegate {
   private static final Logger log = Logger.getLogger(CohortBuilderController.class.getName());
-  private static final Long DEFAULT_LIMIT = 100L;
+  private static final Long DEFAULT_TREE_SEARCH_LIMIT = 100L;
+  private static final Long DEFAULT_CRITERIA_SEARCH_LIMIT = 250L;
 
   private BigQueryService bigQueryService;
   private ParticipantCounter participantCounter;
@@ -140,7 +141,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (configProvider.get().cohortbuilder.enableListSearch) {
       log.info("List search is on: " + configProvider.get().cohortbuilder.enableListSearch);
     }
-    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     String matchExp = modifyKeywordMatch(value, type);
     List<Criteria> criteriaList;
     if (subtype == null) {
@@ -161,7 +162,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                              String value,
                                                                              Long limit) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_TREE_SEARCH_LIMIT);
     final List<Criteria> criteriaList = criteriaDao.findDrugBrandOrIngredientByValue(value, resultLimit);
 
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
@@ -213,9 +214,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                                                                                 Boolean isStandard,
                                                                                 Long limit) {
     CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
-    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    cdrVersionService.setCdrVersion(cdrVersion);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT);
     String matchExp = modifyTermMatch(term);
-    List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+    List<Criteria> criteriaList = criteriaDao.findCriteriaByDomainAndSearchTerm(domain, isStandard, matchExp, new PageRequest(0, resultLimit.intValue()));
     CriteriaListResponse criteriaResponse = new CriteriaListResponse();
     criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
 

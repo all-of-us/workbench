@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaId;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -124,4 +125,14 @@ public interface CriteriaDao extends CrudRepository<Criteria, Long> {
     "and cr.concept_id_1 = :conceptId " +
     "and c1.concept_class_id = 'Ingredient') ) cr1 on c.concept_id = cr1.concept_id_2", nativeQuery = true)
   List<Criteria> findDrugIngredientByConceptId(@Param("conceptId") Long conceptId);
+
+  @Query(value = "select cr from Criteria cr " +
+    "    where cr.domainId = ?1 " +
+    "    and cr.standard = ?2 " +
+    "    and match(synonyms, ?3) > 0 " +
+    "    order by cr.count desc")
+  List<Criteria> findCriteriaByDomainAndSearchTerm(String domain,
+                                                   Boolean isStandard,
+                                                   String term,
+                                                   Pageable page);
 }
