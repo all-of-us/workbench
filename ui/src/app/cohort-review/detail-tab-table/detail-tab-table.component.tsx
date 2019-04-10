@@ -94,13 +94,13 @@ const styles = reactStyles({
     paddingTop: '0.5rem',
     textAlign: 'center',
   },
-  codeSearch: {
+  textSearch: {
     width: '85%',
     borderRadius: '4px',
     backgroundColor: '#dae6ed',
     marginLeft: '5px'
   },
-  codeInput: {
+  textInput: {
     width: 'auto',
     padding: '0 0 0 5px',
     border: 0,
@@ -150,7 +150,8 @@ export interface DetailTabTableState {
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
-    codeInput: Function;
+    codeInputChange: Function;
+    textInputChange: Function;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -163,7 +164,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         expandedRows: [],
         codeResults: null,
       };
-      this.codeInput = fp.debounce(300, (e) => this.filterCodes(e));
+      this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
+      this.textInputChange = fp.debounce(300, (e, col) => this.filterText(e, col));
     }
 
     componentDidMount() {
@@ -316,21 +318,27 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => visits === item.visitType);
       }
       /* Column filters */
-      const checkedItems = filterState.tabs[domain];
-      if (!checkedItems) {
+      const columns = filterState.tabs[domain];
+      if (!columns) {
         if (data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
         this.setState({filteredData: data, start: start});
       } else {
-        for (const col in checkedItems) {
-          if (['domain', `${vocab}Vocabulary`, `${vocab}Code`].includes(col)) {
-            if (!checkedItems[col].length) {
+        for (const col in columns) {
+          if (Array.isArray(columns[col])) {
+            if (!columns[col].length) {
               data = [];
               break;
-            } else if (!checkedItems[col].includes('Select All')
+            } else if (!columns[col].includes('Select All')
               && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-              data = data.filter(row => checkedItems[col].includes(row[col]));
+              data = data.filter(row => columns[col].includes(row[col]));
+            }
+          } else {
+            if (columns[col]) {
+              data = data.filter(
+                row => row[col].toLowerCase().includes(columns[col].toLowerCase())
+              );
             }
           }
         }
@@ -377,7 +385,14 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    filterTemplate(colName: string) {
+    filterText = (input: string, column: string) => {
+      const {domain, filterState} = this.props;
+      filterState.tabs[domain][column] = input;
+      this.props.getFilteredData(filterState);
+      this.getErrorMessage(name);
+    }
+
+    checkboxFilter(column: string) {
       const {codeResults, data} = this.state;
       const {domain, filterState, filterState: {vocab}} = this.props;
       const checkedItems = filterState.tabs[domain];
@@ -387,10 +402,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       const counts = {total: 0};
       let options: Array<any>;
       data.forEach(item => {
-        counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+        counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
         counts.total++;
       });
-      switch (colName) {
+      switch (column) {
         case 'domain':
           options = domains.map(name => {
             return {name, count: counts[name] || 0};
@@ -405,8 +420,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             return acc;
           }, []);
           options.sort((a, b) => b.count - a.count);
-          if (!checkedItems[colName].includes('Select All')) {
-            checkedItems[colName].forEach(name => {
+          if (!checkedItems[column].includes('Select All')) {
+            checkedItems[column].forEach(name => {
               if (!options.find(opt => opt.name === name)) {
                 options = [{name, count: 0}, ...options];
               }
@@ -422,8 +437,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           break;
       }
       options.push({name: 'Select All', count: counts.total});
-      if (checkedItems[colName].includes('Select All')) {
-        checkedItems[colName] = options.map(opt => opt.name);
+      if (checkedItems[column].includes('Select All')) {
+        checkedItems[column] = options.map(opt => opt.name);
       }
       const checkboxes = codeResults && codeResults.length === 0
         ? <em style={styles.noResults}>No matching codes</em>
@@ -432,8 +447,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             acc.push(<React.Fragment key={i}>
               {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
-                       checked={checkedItems[colName].includes(opt.name)}
-                       onChange={($event) => this.updateData($event, colName, options)}/>
+                       checked={checkedItems[column].includes(opt.name)}
+                       onChange={($event) => this.updateData($event, column, options)}/>
                 <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
               </div>}
             </React.Fragment>);
@@ -445,18 +460,38 @@ export const DetailTabTable = withCurrentWorkspace()(
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {colName === `${vocab}Code` && <div style={styles.codeSearch}>
+          {column === `${vocab}Code` && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <TextInput style={styles.codeInput} onChange={this.codeInput} placeholder={'Search'} />
+            <TextInput
+              style={styles.textInput}
+              onChange={this.codeInputChange}
+              placeholder={'Search'}/>
           </div>}
           <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
             {checkboxes}
           </div>
           <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
-                   checked={checkedItems[colName].includes('Select All')}
-                   onChange={($event) => this.updateData($event, colName, options)}/>
+                   checked={checkedItems[column].includes('Select All')}
+                   onChange={($event) => this.updateData($event, column, options)}/>
             <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
+          </div>
+        </OverlayPanel>
+      </span>;
+    }
+
+    textFilter(column: string) {
+      let fl: any;
+      return <span>
+        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+          <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <TextInput
+              style={styles.textInput}
+              onChange={(e) => this.textInputChange(e, column)}
+              placeholder={'Search'} />
           </div>
         </OverlayPanel>
       </span>;
@@ -507,14 +542,24 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const hasFilter = [
+        const hasCheckboxFilter = [
           'domain',
           'sourceVocabulary',
           'standardVocabulary',
           'sourceCode',
           'standardCode'
         ].includes(col.name);
-        const isExpanderNeeded = col.name === 'graph'  &&
+        const hasTextFilter = [
+          'sourceName',
+          'standardName',
+          'value',
+          'numMentions',
+          'firstMention',
+          'lastMention',
+          'itemTime',
+          'survey'
+        ].includes(col.name);
+        const isExpanderNeeded = col.name === 'graph' &&
           (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
@@ -523,7 +568,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {hasFilter && this.filterTemplate(col.name)}
+          {hasCheckboxFilter && this.checkboxFilter(col.name)}
+          {hasTextFilter && this.textFilter(col.name)}
           {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {(desc && !isExpanderNeeded) &&
           <i className='pi pi-arrow-down' style={styles.sortIcon} />}

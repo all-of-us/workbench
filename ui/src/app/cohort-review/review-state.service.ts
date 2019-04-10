@@ -33,31 +33,57 @@ export const initialFilterState = {
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       domain: ['Select All'],
+      sourceName: null,
+      standardName: null,
+      value: null,
     },
     PROCEDURE: {
       standardCode: ['Select All'],
       sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
+      sourceName: null,
+      standardName: null,
     },
     CONDITION: {
       standardCode: ['Select All'],
       sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
+      sourceName: null,
+      standardName: null,
     },
     OBSERVATION: {
       standardCode: ['Select All'],
       sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
+      sourceName: null,
+      standardName: null,
     },
     PHYSICAL_MEASUREMENT: {
       standardCode: ['Select All'],
       sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
+      sourceName: null,
+      standardName: null,
+      value: null,
     },
+    LAB: {
+      itemTime: null,
+      sourceName: null,
+      standardName: null,
+      value: null
+    },
+    VITAL: {
+      itemTime: null,
+      sourceName: null,
+      standardName: null,
+    },
+    SURVEY: {
+      survey: null
+    }
   },
   vocab: 'standard',
 };
