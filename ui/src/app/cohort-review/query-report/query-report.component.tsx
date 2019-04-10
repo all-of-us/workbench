@@ -1,6 +1,6 @@
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
-import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
 import {CohortDefinition} from 'app/cohort-review/cohort-definition/cohort-definition.component';
+import {ParticipantsCharts} from 'app/cohort-review/participants-charts/participants-charts';
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -10,8 +10,8 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore} from 'app/utils/navigation';
 import {DomainType, SearchRequest} from 'generated/fetch';
 import {fromJS} from 'immutable';
-import * as React from 'react';
 import * as moment from 'moment';
+import * as React from 'react';
 
 const css = `
   .stats-left-padding {
