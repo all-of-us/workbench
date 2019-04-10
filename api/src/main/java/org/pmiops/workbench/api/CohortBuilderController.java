@@ -37,7 +37,6 @@ import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
-import org.pmiops.workbench.model.DomainCountResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
@@ -208,6 +207,22 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
+  public ResponseEntity<CriteriaListResponse> findCriteriaByDomainAndSearchTerm(Long cdrVersionId,
+                                                                                String domain,
+                                                                                String term,
+                                                                                Boolean isStandard,
+                                                                                Long limit) {
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    Long resultLimit = Optional.ofNullable(limit).orElse(DEFAULT_LIMIT);
+    String matchExp = modifyTermMatch(term);
+    List<Criteria> criteriaList = criteriaDao.findCriteriaByTypeForCodeOrName(domain, matchExp, term, new PageRequest(0, resultLimit.intValue()));
+    CriteriaListResponse criteriaResponse = new CriteriaListResponse();
+    criteriaResponse.setItems(criteriaList.stream().map(TO_CLIENT_CRITERIA).collect(Collectors.toList()));
+
+    return ResponseEntity.ok(criteriaResponse);
+  }
+
+  @Override
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(Long cdrVersionId, SearchRequest request) {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
     CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
@@ -288,12 +303,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   }
 
   @Override
-  public ResponseEntity<DomainCountResponse> getCriteriaDomainCount(Long cdrVersionId, String value) {
-    cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-    return null;
-  }
-
-  @Override
   public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
 
@@ -336,6 +345,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .anyMatch(sp -> TreeType.DRUG.toString().equals(sp.getType()));
   }
 
+  //TODO:Remove freemabd
   private String modifyKeywordMatch(String value, String type) {
     if (value == null || value.trim().isEmpty()) {
       throw new BadRequestException(
@@ -358,6 +368,29 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       })
       .collect(Collectors.joining())
       + rank1;
+  }
+
+  private String modifyTermMatch(String term) {
+    if (term == null || term.trim().isEmpty()) {
+      throw new BadRequestException(
+        String.format("Bad Request: Please provide a valid search term: \"%s\" is not valid.", term));
+    }
+    String[] keywords = term.split("\\W+");
+    if (keywords.length == 1 && keywords[0].length() <= 3) {
+      return "+\"" + keywords[0] + "\"+\"[rank1]\"";
+    }
+
+    return IntStream
+      .range(0, keywords.length)
+      .filter(i -> keywords[i].length() > 2)
+      .mapToObj(i -> {
+        if ((i + 1) != keywords.length) {
+          return "+\"" + keywords[i] + "\"";
+        }
+        return "+" + keywords[i] + "*";
+      })
+      .collect(Collectors.joining())
+      + "+\"[rank1]\"";
   }
 
 }
