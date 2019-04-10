@@ -53,6 +53,13 @@ export const initialFilterState = {
       sourceName: '',
       standardName: '',
     },
+    DRUG: {
+      sourceName: '',
+      standardName: '',
+      numMentions: '',
+      firstMention: '',
+      lastMention: '',
+    },
     OBSERVATION: {
       standardCode: ['Select All'],
       sourceCode: ['Select All'],

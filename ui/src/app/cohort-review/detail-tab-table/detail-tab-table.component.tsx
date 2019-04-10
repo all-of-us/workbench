@@ -288,7 +288,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       filterState.tabs[domain][colName] = checkedItems;
       this.props.getFilteredData(filterState);
-      this.getErrorMessage(name);
+      this.getErrorMessage();
     }
 
     filterData() {
@@ -349,22 +349,14 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    getErrorMessage = (name?) => {
+    getErrorMessage = () => {
       const {data, filteredData} = this.state;
-      const {domain, filterState} = this.props;
-      const checkedItems = filterState.tabs[domain];
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
-      } else {
-        if (filteredData && filteredData.length === 0) {
-          for (const col in checkedItems) {
-            if (checkedItems[col].find( i => i !== name) || filteredData !== null) {
-              // filtered data null  or if item selected from different participants not
-              // exist in next/previous participants need to show this below message
-              return 'There is data, but it is all currently hidden. Please check your filters';
-            }
-          }
-        }
+      } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
+        // filtered data null  or if item selected from different participants not
+        // exist in next/previous participants need to show this below message
+        return 'There is data, but it is all currently hidden. Please check your filters';
       }
     }
 
@@ -389,7 +381,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState} = this.props;
       filterState.tabs[domain][column] = input;
       this.props.getFilteredData(filterState);
-      this.getErrorMessage(name);
+      this.getErrorMessage();
     }
 
     checkboxFilter(column: string) {
