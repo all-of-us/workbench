@@ -23,7 +23,7 @@ import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.DomainVocabularyInfoDao;
 import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoId;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
@@ -213,7 +213,7 @@ public class ConceptsControllerTest {
   @MockBean({
       BigQueryService.class,
       FireCloudService.class,
-      CohortService.class,
+      CohortCloningService.class,
       ConceptSetService.class,
       Clock.class
   })

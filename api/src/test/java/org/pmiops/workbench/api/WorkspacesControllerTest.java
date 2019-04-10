@@ -53,9 +53,10 @@ import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -174,7 +175,8 @@ public class WorkspacesControllerTest {
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     CohortsController.class,
-    CohortService.class,
+    CohortFactoryImpl.class,
+    CohortCloningService.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
@@ -265,13 +267,13 @@ public class WorkspacesControllerTest {
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
 
-    JSONObject demoCohort = new JSONObject();
-    demoCohort.put("name", "demo");
-    demoCohort.put("description", "demo");
-    demoCohort.put("type", "demo");
-    demoCohort.put("criteria", createDemoCriteria());
-    List<JSONObject> demoCohorts = Collections.singletonList(demoCohort);
-    when(cloudStorageService.readAllDemoCohorts()).thenReturn(demoCohorts);
+    Cohort cohort = new Cohort();
+    cohort.setName("demo");
+    cohort.setDescription("demo");
+    cohort.setType("demo");
+    cohort.setCriteria(createDemoCriteria().toString());
+    when(cloudStorageService.readAllDemoCohorts()).thenReturn(Collections.singletonList(cohort));
+
     doNothing().when(cloudStorageService).copyAllDemoNotebooks(any());
 
     CLOCK.setInstant(NOW);

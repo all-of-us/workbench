@@ -2,10 +2,10 @@ import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {ResourceCardMenu} from 'app/components/resources';
+import {TextModal} from 'app/components/text-modal';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {navigate, navigateByUrl} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
@@ -110,6 +110,9 @@ export interface ResourceCardState {
   editing: boolean;
   confirmDeleting: boolean;
   invalidResourceError: boolean;
+  showErrorModal: boolean;
+  errorModalTitle: string;
+  errorModalBody: string;
 }
 
 export class ResourceCard extends React.Component<ResourceCardProps, ResourceCardState> {
@@ -125,7 +128,10 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       confirmDeleting: false,
       invalidResourceError: !(props.resourceCard.notebook ||
         props.resourceCard.cohort ||
-        props.resourceCard.conceptSet)
+        props.resourceCard.conceptSet),
+      showErrorModal: false,
+      errorModalTitle: 'Error Title',
+      errorModalBody: 'Error Body'
     };
   }
 
@@ -139,6 +145,14 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
       return {...resourceCard, conceptSet: myTempConceptSet};
     }
     return resourceCard;
+  }
+
+  showErrorModal(title: string, body: string) {
+    this.setState({
+      showErrorModal: true,
+      errorModalTitle: title,
+      errorModalBody: body
+    });
   }
 
   get resourceType(): ResourceType {
@@ -262,11 +276,19 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
         break;
       }
       case ResourceType.COHORT: {
-        const url =
-          '/workspaces/' + this.props.resourceCard.workspaceNamespace + '/' +
-          this.props.resourceCard.workspaceFirecloudName + '/cohorts/build?cohortId=';
-        navigateByUrl(url + this.props.resourceCard.cohort.id);
-        this.props.onUpdate();
+        cohortsApi().duplicateCohort(
+          this.props.resourceCard.workspaceNamespace,
+          this.props.resourceCard.workspaceFirecloudName,
+          {
+            originalCohortId: this.props.resourceCard.cohort.id,
+            newName: `Duplicate of ${this.props.resourceCard.cohort.name}`
+          }
+        ).then(() => {
+          this.props.onUpdate();
+        }).catch(e => {
+          this.showErrorModal('Duplicating Cohort Error',
+            'Cohort with the same name already exists.');
+        });
         break;
       }
     }
@@ -373,13 +395,17 @@ export class ResourceCard extends React.Component<ResourceCardProps, ResourceCar
     const marginTop = this.props.marginTop;
     return <React.Fragment>
       {this.state.invalidResourceError &&
-      <Modal>
-        <ModalTitle>Invalid Resource Type</ModalTitle>
-        <ModalBody>Please Report a Bug.</ModalBody>
-        <ModalFooter>
-          <Button onClick={() => this.setState({invalidResourceError: false})}>OK</Button>
-        </ModalFooter>
-      </Modal>}
+        <TextModal
+          title='Invalid Resource Type'
+          body='Please Report a Bug.'
+          onConfirm={() => this.setState({invalidResourceError: false})}/>
+      }
+      {this.state.showErrorModal &&
+        <TextModal
+          title={this.state.errorModalTitle}
+          body={this.state.errorModalBody}
+          onConfirm={() => this.setState({showErrorModal: false})}/>
+      }
       <ResourceCardBase style={{...styles.card, marginTop: marginTop}}
                         data-test-id='card'>
         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>

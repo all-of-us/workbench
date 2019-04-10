@@ -106,6 +106,7 @@ sourceSets {
                   'org/pmiops/workbench/model/ErrorCode.java',
                   'org/pmiops/workbench/model/ErrorResponse.java',
                   'org/pmiops/workbench/model/WorkspaceAccessLevel.java',
+                  'org/pmiops/workbench/model/Cohort.java',
                   'org/pmiops/workbench/model/CohortStatus.java',
                   'org/pmiops/workbench/model/CohortReview.java',
                   'org/pmiops/workbench/model/Domain.java',
@@ -134,7 +135,7 @@ sourceSets {
                   'org/pmiops/workbench/notebooks/NotebooksServiceImpl.java',
                   'org/pmiops/workbench/notebooks/NotebooksConfig.java',
                   'org/pmiops/workbench/notebooks/NotebooksRetryHandler.java',
-                  'org/pmiops/workbench/db/dao/CohortService.java',
+                  'org/pmiops/workbench/db/dao/CohortCloningService.java',
                   'org/pmiops/workbench/db/dao/ParticipantCohortStatusDaoCustom.java',
                   // Exclude all tools which are built as part of the main Gradle config.
                   'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
