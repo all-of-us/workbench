@@ -210,14 +210,6 @@ public class UserService {
     });
   }
 
-  public User submitEthicsTraining() {
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries((user) -> {
-      user.setComplianceTrainingCompletionTime(timestamp);
-      return user;
-    });
-  }
-
   public User submitDemographicSurvey() {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     return updateUserWithRetries((user) -> {
@@ -312,20 +304,8 @@ public class UserService {
     }, user);
   }
 
-  public List<User> getNonVerifiedUsers() {
-    return userDao.findUserNotValidated();
-  }
-
   public List<User> getAllUsers() {
     return userDao.findUsers();
-  }
-
-  public User setIdVerificationApproved(Long userId, boolean blockscoreVerificationIsValid) {
-    User user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries((u) -> {
-      u.setIdVerificationIsValid(blockscoreVerificationIsValid);
-      return u;
-    }, user);
   }
 
   public void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue) {
@@ -420,6 +400,7 @@ public class UserService {
         // training completion & expiration time.
         user.setComplianceTrainingCompletionTime(null);
         user.setComplianceTrainingExpirationTime(null);
+
       }
 
       updateUserWithRetries(dbUser -> {

@@ -75,4 +75,6 @@
   <include file="changelog/db.changelog-65.xml"/>
   <include file="changelog/db.changelog-66.xml"/>
   <include file="changelog/db.changelog-67-compliance-training-expiration.xml"/>
+  <include file="changelog/db.changelog-68-drop-training-completion-time-col.xml"/>
+  <include file="changelog/db.changelog-69-replace-idv-with-beta-access.xml"/>
 </databaseChangeLog>

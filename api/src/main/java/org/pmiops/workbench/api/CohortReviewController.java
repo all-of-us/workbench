@@ -853,7 +853,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
         .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
         .domainType(DomainType.VITAL);
-    } else if(domain.equals(DomainType.PHYSICAL_MEASURE)) {
+    } else if(domain.equals(DomainType.PHYSICAL_MEASUREMENT)) {
       return new PhysicalMeasurement()
         .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
         .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
@@ -864,7 +864,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
         .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
         .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
-        .domainType(DomainType.PHYSICAL_MEASURE);
+        .domainType(DomainType.PHYSICAL_MEASUREMENT);
     } else if (domain.equals(DomainType.SURVEY)) {
       return new Survey()
         .survey(bigQueryService.getString(row, rm.get("survey")))

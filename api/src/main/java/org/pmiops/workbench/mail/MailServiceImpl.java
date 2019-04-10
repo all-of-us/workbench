@@ -1,6 +1,5 @@
 package org.pmiops.workbench.mail;
 
-import com.google.api.services.admin.directory.model.User;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -13,7 +12,6 @@ import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.RecipientAddress;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +32,14 @@ import javax.mail.internet.InternetAddress;
 
 @Service
 public class MailServiceImpl implements MailService {
-  private String ID_VERIFICATION_TEXT = "A new user has requested manual ID verification: ";
+  private String BETA_ACCESS_TEXT = "A new user has requested beta access: ";
 
   private final Provider<MandrillApi> mandrillApiProvider;
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
   private static final String WELCOME_RESOURCE = "emails/welcomeemail/content.html";
-  private static final String ID_VERIFICATION_RESOURCE = "emails/idverificationemail/content.html";
+  private static final String BETA_ACCESS_RESOURCE = "emails/betaaccessemail/content.html";
 
   enum Status {REJECTED, API_ERROR, SUCCESSFUL}
 
@@ -55,18 +53,18 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendIdVerificationRequestEmail(String userName) throws MessagingException {
+  public void sendBetaAccessRequestEmail(String userName) throws MessagingException {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
 
     MandrillMessage msg = new MandrillMessage();
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(workbenchConfig.admin.adminIdVerification);
     msg.setTo(Collections.singletonList(toAddress));
-    msg.setSubject("[Id Verification Request: " + workbenchConfig.server.shortName + "]: " + userName);
-    msg.setHtml(ID_VERIFICATION_TEXT + userName);
+    msg.setSubject("[Beta Access Request: " + workbenchConfig.server.shortName + "]: " + userName);
+    msg.setHtml(BETA_ACCESS_TEXT + userName);
     msg.setFromEmail(workbenchConfig.mandrill.fromEmail);
 
-    sendWithRetries(msg, "IDV submit notification");
+    sendWithRetries(msg, "Beta Access submit notification");
   }
 
   @Override
@@ -82,15 +80,15 @@ public class MailServiceImpl implements MailService {
   }
 
   @Override
-  public void sendIdVerificationCompleteEmail(String contactEmail, IdVerificationStatus status, String username) throws MessagingException {
+  public void sendBetaAccessCompleteEmail(String contactEmail, String username) throws MessagingException {
     try {
       InternetAddress email = new InternetAddress(contactEmail);
       email.validate();
     } catch (AddressException e) {
       throw new MessagingException("Email: " + contactEmail + " is invalid.");
     }
-    MandrillMessage msg = buildIdVerificationCompleteMessage(contactEmail, status, username);
-    sendWithRetries(msg, String.format("ID Verification Complete for %s", contactEmail));
+    MandrillMessage msg = buildBetaAccessCompleteMessage(contactEmail, username);
+    sendWithRetries(msg, String.format("BetaAccess Complete for %s", contactEmail));
   }
 
   private void sendWithRetries(MandrillMessage msg, String description) throws MessagingException {
@@ -171,13 +169,13 @@ public class MailServiceImpl implements MailService {
     return new StrSubstitutor(replaceMap).replace(string);
   }
 
-  private MandrillMessage buildIdVerificationCompleteMessage(String contactEmail, IdVerificationStatus status, String username) throws MessagingException {
+  private MandrillMessage buildBetaAccessCompleteMessage(String contactEmail, String username) throws MessagingException {
     MandrillMessage msg = new MandrillMessage();
     RecipientAddress toAddress = new RecipientAddress();
     toAddress.setEmail(contactEmail);
     msg.setTo(Collections.singletonList(toAddress));
     try {
-      String msgHtml = buildIdVerificationCompleteHtml(status, username);
+      String msgHtml = buildBetaAccessCompleteHtml(username);
       msg.html(msgHtml)
           .subject("All of Us ID Verification Complete")
           .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
@@ -187,28 +185,25 @@ public class MailServiceImpl implements MailService {
     }
   }
 
-  private String buildIdVerificationCompleteHtml(IdVerificationStatus status, String username) throws IOException {
+  private String buildBetaAccessCompleteHtml(String username) throws IOException {
     CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
     StringBuilder contentBuilder = new StringBuilder();
-    URL emailContent = Resources.getResource(ID_VERIFICATION_RESOURCE);
+    URL emailContent = Resources.getResource(BETA_ACCESS_RESOURCE);
     Resources
         .readLines(emailContent, StandardCharsets.UTF_8)
         .forEach(s -> contentBuilder.append(s).append("\n"));
     String string = contentBuilder.toString();
-    String idVerificationReport;
+    String betaAccessReport;
     String action;
-    if (status.equals(IdVerificationStatus.REJECTED)) {
-      idVerificationReport = "rejected";
-      action = "contact our support team at support@researchallofus.org for further information";
-    } else {
-      idVerificationReport = "approved for use";
-      action = "login to the workbench via <a class=\"link\" href=\"" +
-          workbenchConfigProvider.get().admin.loginUrl + "\">" +
-          workbenchConfigProvider.get().admin.loginUrl + "</a>";
-    }
+
+    betaAccessReport = "approved for use";
+    action = "login to the workbench via <a class=\"link\" href=\"" +
+        workbenchConfigProvider.get().admin.loginUrl + "\">" +
+        workbenchConfigProvider.get().admin.loginUrl + "</a>";
+
     ImmutableMap<String, String> replaceMap = new ImmutableMap.Builder<String, String>()
         .put("ACTION", action)
-        .put("ID_VERIFICATION_REPORT", idVerificationReport)
+        .put("BETA_ACCESS_REPORT", betaAccessReport)
         .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
         .put("USERNAME", username)
         .build();

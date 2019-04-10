@@ -431,7 +431,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(28)
       .standardConceptId(1L)
       .sourceConceptId(1L)
-      .domainType(DomainType.PHYSICAL_MEASURE);
+      .domainType(DomainType.PHYSICAL_MEASUREMENT);
     expectedPhysicalMeasure2 = new PhysicalMeasurement()
       .value("1.0")
       .unit("nits")
@@ -442,7 +442,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(28)
       .standardConceptId(1L)
       .sourceConceptId(1L)
-      .domainType(DomainType.PHYSICAL_MEASURE);
+      .domainType(DomainType.PHYSICAL_MEASUREMENT);
     expectedLab1 = new Lab()
       .value("1.0")
       .unit("units")
@@ -733,7 +733,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASUREMENT);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -775,7 +775,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASUREMENT);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);

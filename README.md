@@ -15,7 +15,11 @@ See https://docs.docker.com/docker-for-mac/#advanced for screenshots and instruc
   * [Python](https://www.python.org/downloads/) >= 2.7.9
     * Python is required by some project-specific scripts and by the Google Cloud Platform tools.
   * [gcloud](https://cloud.google.com/sdk/docs/#install_the_latest_cloud_tools_version_cloudsdk_current_version)
+
+For local development, also install:
+
   * [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
+  * [Java 8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 After you've installed `gcloud`, login using your `pmi-ops` account:
 
