@@ -39,26 +39,42 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
-  /v1/cohortbuilder/{cdrVersionId}/criteria/domain/count:
+  /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/{term}:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
     get:
       tags:
         - cohortBuilder
       description: >
-        Returns a collection of domains and corresponding counts per search term/value
-      operationId: "getCriteriaDomainCount"
+        Returns a collection of criteria per search term
+      operationId: "findCriteriaByDomainAndSearchTerm"
       parameters:
         - in: path
-          name: value
+          name: domain
           type: string
           required: true
-          description: the specified search term
+          description: the specific type of domain
+        - in: path
+          name: term
+          type: string
+          required: true
+          description: the term to search for
+        - in: query
+          name: isStandard
+          type: boolean
+          required: true
+          description: specifies if search is standard or source
+        - in: query
+          name: limit
+          type: integer
+          format: int64
+          required: false
+          description: number of criteria matches to return
       responses:
         200:
-          description: A collection of domains and search term matches
+          description: A collection of criteria
           schema:
-            $ref: "#/definitions/DomainCountResponse"
+            $ref: "#/definitions/CriteriaListResponse"
 
   /v1/cohortbuilder/{cdrVersionId}/criteria/{type}:
     parameters:
@@ -388,30 +404,6 @@ definitions:
       isStandard:
         description: Reveals if this criteria is standard or source.
         type: boolean
-
-  DomainCountResponse:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: "array"
-        items:
-          $ref: "#/definitions/DomainCount"
-
-  DomainCount:
-    type: object
-    required:
-      - domain
-      - count
-    properties:
-      domain:
-        description: An omop domain
-        type: string
-      count:
-        description: number of search term matches
-        type: integer
-        format: int64
 
   CriteriaAttributeListResponse:
     type: object
