@@ -5,6 +5,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
+import org.pmiops.workbench.model.CriteriaType;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,6 +180,29 @@ public class CriteriaDaoTest {
       criteriaDao.findCriteriaByTypeAndSubtypeForName(TreeType.ICD9.name(), TreeSubType.CM.name(),"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
     assertEquals(icd9Criteria2, conditions.get(0));
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTerm() throws Exception {
+    //match on code
+    Criteria criteria = new Criteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.MEASUREMENT.toString())
+      .group(true)
+      .selectable(true)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.CPT4.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("001");
+    criteriaDao.save(criteria);
+    List<Criteria> conditions =
+      criteriaDao.findCriteriaByDomainAndSearchTerm(DomainType.CONDITION.toString(), true,"001", new PageRequest(0, 10));
+    assertEquals(1, conditions.size());
+    assertEquals(criteria, conditions.get(0));
   }
 
   @Test

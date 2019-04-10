@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
@@ -262,6 +263,33 @@ public class CohortBuilderControllerTest {
       createResponseCriteria(ppiCriteriaParent),
       controller
         .getCriteriaAutoComplete(1L, TreeType.PPI.name(),"covered", null, null)
+        .getBody()
+        .getItems()
+        .get(0)
+    );
+  }
+
+  @Test
+  public void findCriteriaByDomainAndSearchTerm() throws Exception {
+    Criteria criteria = new Criteria()
+      .code("001")
+      .count("10")
+      .conceptId("123")
+      .domainId(DomainType.MEASUREMENT.toString())
+      .group(Boolean.TRUE)
+      .selectable(Boolean.TRUE)
+      .name("chol blah")
+      .parentId(0)
+      .type(CriteriaType.LOINC.toString())
+      .attribute(Boolean.FALSE)
+      .standard(true)
+      .synonyms("LP12*\"[rank1]\"");
+    Criteria labMeasurement = criteriaDao.save(criteria);
+
+    assertEquals(
+      createResponseCriteria(labMeasurement),
+      controller
+        .findCriteriaByDomainAndSearchTerm(1L, DomainType.MEASUREMENT.name(),"LP12", true, null)
         .getBody()
         .getItems()
         .get(0)
