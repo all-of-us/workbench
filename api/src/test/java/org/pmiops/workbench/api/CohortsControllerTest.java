@@ -62,6 +62,8 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DuplicateCohort;
+import org.pmiops.workbench.model.DuplicateCohortRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
@@ -322,6 +324,29 @@ public class CohortsControllerTest {
     Cohort got = cohortsController
         .getCohort(workspace.getNamespace(), workspace.getId(), cohort.getId()).getBody();
     assertThat(got).isEqualTo(cohort);
+  }
+
+  @Test
+  public void testDuplicateCohort() {
+    Cohort originalCohort = createDefaultCohort();
+    originalCohort = cohortsController.createCohort(workspace.getNamespace(), workspace.getId(), originalCohort)
+        .getBody();
+
+    DuplicateCohortRequest params = new DuplicateCohortRequest();
+    params.setNewName("New Cohort Name");
+    params.setOriginalCohortId(originalCohort.getId());
+
+    Cohort newCohort = cohortsController.duplicateCohort(workspace.getNamespace(), workspace.getId(), params).getBody();
+    long workspaceId = workspaceService.get(workspace.getNamespace(), workspace.getName()).getWorkspaceId();
+    org.pmiops.workbench.db.model.Cohort dbNewCohort = cohortDao.findCohortByNameAndWorkspaceId(
+        newCohort.getName(),
+        workspaceId);
+
+    assertThat(dbNewCohort.getName()).isEqualTo(params.getNewName());
+    assertThat(dbNewCohort.getCriteria()).isEqualTo(originalCohort.getCriteria());
+    assertThat(dbNewCohort.getType()).isEqualTo(originalCohort.getType());
+    assertThat(dbNewCohort.getDescription()).isEqualTo(originalCohort.getDescription());
+
   }
 
   @Test(expected = NotFoundException.class)
