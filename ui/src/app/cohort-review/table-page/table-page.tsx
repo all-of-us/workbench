@@ -97,20 +97,15 @@ const styles = reactStyles({
     width: '2rem',
   },
   sortIcon: {
-    marginTop: '3px',
+    marginTop: '4px',
     color: '#2691D0',
-    fontSize: '0.4rem',
+    fontSize: '0.5rem',
     float: 'right'
   },
   filterIcon: {
-    color: '#262262',
-    float: 'right'
-  },
-  filteredIcon: {
+    marginLeft: '0.3rem',
     padding: '2px 2px 1px 1px',
     borderRadius: '50%',
-    background: '#8bc990',
-    color: '#ffffff',
     fontWeight: 600,
     float: 'right'
   },
@@ -149,7 +144,17 @@ const styles = reactStyles({
     overflow: 'auto'
   }
 });
-
+const filterIcons = {
+  active: {
+    ...styles.filterIcon,
+    background: '#8bc990',
+    color: '#ffffff',
+  },
+  default: {
+    ...styles.filterIcon,
+    color: '#262262',
+  }
+};
 const idColumn = {
   ...styles.columnBody,
   color: '#2691D0'
@@ -417,7 +422,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       return <span>
         {data &&
           <i className='pi pi-filter'
-             style={filtered ? styles.filteredIcon : styles.filterIcon}
+             style={filtered ? filterIcons.active : filterIcons.default}
              onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={styles.filterOverlay} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
