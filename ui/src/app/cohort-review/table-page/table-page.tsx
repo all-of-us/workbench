@@ -146,6 +146,19 @@ const styles = reactStyles({
     paddingTop: '0.5rem',
     textAlign: 'center',
   },
+  textSearch: {
+    width: '85%',
+    borderRadius: '4px',
+    backgroundColor: '#dae6ed',
+    marginLeft: '5px'
+  },
+  textInput: {
+    width: 'auto',
+    padding: '0 0 0 5px',
+    border: 0,
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
   filterOverlay: {
     left: '359.531px!important',
     maxHeight: 'calc(100vh - 360px)',
@@ -433,19 +446,28 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const options = multiFilters[colType];
       const filtered = (column === 'participantId' && filters.PARTICIPANTID)
         || (column !== 'participantId' && !filters[colType].includes('Select All'));
-      let fl: any;
+      let fl: any, ip: any;
       return <span>
         {data &&
           <i className='pi pi-filter'
              style={filtered ? filterIcons.active : filterIcons.default}
-             onClick={(e) => fl.toggle(e)}/>}
+             onClick={(e) => {
+               fl.toggle(e);
+               if (column === 'participantId') {
+                 ip.focus();
+               }
+             }}/>}
         <OverlayPanel style={styles.filterOverlay} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {column === 'participantId' &&
+          {column === 'participantId' && <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
             <TextInput
-              style={{width: '90%', marginLeft: '5%'}}
+              ref={(i) => ip = i}
+              style={styles.textInput}
               value={filters.PARTICIPANTID}
-              onChange={this.onInputChange} />}
+              onChange={this.onInputChange}
+              placeholder={'Search'} />
+          </div>}
           {column !== 'participantId' && options.map((opt, i) => (
             <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
