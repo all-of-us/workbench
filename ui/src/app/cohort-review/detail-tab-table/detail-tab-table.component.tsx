@@ -250,7 +250,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-        <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+        <OverlayPanel className='labOverlay' ref={(el) => vl = el}
                       showCloseIcon={true} dismissable={true}>
           {(rowData.refRange &&  column.field === 'value') &&
           <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
@@ -288,7 +288,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       filterState.tabs[domain][colName] = checkedItems;
       this.props.getFilteredData(filterState);
-      this.getErrorMessage();
     }
 
     filterData() {
@@ -349,14 +348,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    getErrorMessage = () => {
+    emptyMessage = () => {
       const {data, filteredData} = this.state;
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
       } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
-        // filtered data null  or if item selected from different participants not
-        // exist in next/previous participants need to show this below message
-        return 'There is data, but it is all currently hidden. Please check your filters';
+        return 'There is data, but it is currently hidden. Please check your filters';
       }
     }
 
@@ -381,7 +378,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState} = this.props;
       filterState.tabs[domain][column] = input;
       this.props.getFilteredData(filterState);
-      this.getErrorMessage();
     }
 
     checkboxFilter(column: string) {
@@ -451,7 +447,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <span>
         <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
             <TextInput
@@ -475,14 +471,18 @@ export const DetailTabTable = withCurrentWorkspace()(
     textFilter(column: string) {
       const {domain, filterState} = this.props;
       const columnFilters = filterState.tabs[domain];
-      let fl: any;
+      let fl: any, ip: any;
       return <span>
-        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <i className='pi pi-filter' onClick={(e) => {
+          fl.toggle(e);
+          ip.focus();
+        }}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
+                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
             <TextInput
+              ref={(i) => ip = i}
               style={styles.textInput}
               value={columnFilters[column]}
               onChange={(e) => this.filterText(e, column)}
@@ -604,7 +604,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={this.getErrorMessage()}>
+          emptyMessage={this.emptyMessage()}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}
