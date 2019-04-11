@@ -6,6 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {ConceptSetsList} from 'app/views/concept-set-list/component';
 import * as React from 'react';
+import {ConceptWrapper} from "app/views/concepts/component";
 
 const styles = reactStyles({
   headerLinks: {
@@ -76,6 +77,7 @@ export class ConceptHomepage extends React.Component<{}, {showConcepts: boolean}
             <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
           </TooltipTrigger>
         </div>
+        {showConcepts && <ConceptWrapper/>}
         {!showConcepts && <ConceptSetsList/>}
       </FadeBox>
     </React.Fragment>;
