@@ -16,9 +16,8 @@ import {WorkspaceNavBarComponent} from 'app/views/workspace-nav-bar/component';
 import {WorkspaceShareComponent} from 'app/views/workspace-share/component';
 import {WorkspaceWrapperComponent} from 'app/views/workspace-wrapper/component';
 
-import {BugReportService, UserService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
+import {UserService, WorkspaceAccessLevel, WorkspacesService} from 'generated';
 
-import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
@@ -63,7 +62,6 @@ describe('WorkspaceWrapperComponent', () => {
         WorkspaceShareComponent,
       ],
       providers: [
-        {provide: BugReportService, useValue: new BugReportServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: UserService, useValue: new UserServiceStub()},
         {

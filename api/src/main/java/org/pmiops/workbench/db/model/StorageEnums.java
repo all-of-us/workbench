@@ -40,7 +40,7 @@ public final class StorageEnums {
       ImmutableBiMap.<Authority, Short>builder()
       .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
       .put(Authority.DEVELOPER, (short) 1)
-      .put(Authority.REVIEW_ID_VERIFICATION, (short) 2)
+      .put(Authority.ACCESS_CONTROL_ADMIN, (short) 2)
       .build();
 
   public static Authority authorityFromStorage(Short authority) {

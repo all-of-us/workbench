@@ -16,11 +16,6 @@ public interface UserDao extends CrudRepository<User, Long> {
 
   List<User> findUserByContactEmail(String contactEmail);
 
-  /**
-   * Returns the users who's identities have not been validated
-   */
-  @Query("SELECT user FROM User user WHERE user.idVerificationIsValid IS NULL OR user.idVerificationIsValid = false")
-  List<User> findUserNotValidated();
 
   @Query("SELECT user FROM User user")
   List<User> findUsers();

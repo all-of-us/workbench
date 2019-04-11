@@ -55,9 +55,6 @@ import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.IdVerificationListResponse;
-import org.pmiops.workbench.model.IdVerificationReviewRequest;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -174,7 +171,7 @@ public class ProfileControllerTest {
 
     clock = new FakeClock(NOW);
 
-    doNothing().when(mailService).sendIdVerificationRequestEmail(Mockito.any());
+    doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
     UserService userService = new UserService(userProvider, userDao, adminActionHistoryDao, clock,
         new FakeLongRandom(NONCE_LONG), fireCloudService, Providers.of(config),
         complianceTrainingService);
@@ -226,7 +223,6 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitDemographicsSurvey().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
     assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
@@ -237,30 +233,9 @@ public class ProfileControllerTest {
     createUser();
     Profile profile = profileController.submitTermsOfService().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
     assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
     assertThat(profile.getTermsOfServiceCompletionTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(profile.getComplianceTrainingCompletionTime()).isNull();
-  }
-
-  @Test
-  public void testSubmitEthicsTraining_success() throws Exception {
-    createUser();
-    Profile profile = profileController.completeEthicsTraining().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
-    assertThat(profile.getIdVerificationStatus()).isEqualTo(IdVerificationStatus.UNVERIFIED);
-    assertThat(profile.getDemographicSurveyCompletionTime()).isNull();
-    assertThat(profile.getTermsOfServiceCompletionTime()).isNull();
-    assertThat(profile.getComplianceTrainingCompletionTime()).isEqualTo(NOW.toEpochMilli());
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void testCreateAccount_directoryServiceFail() throws Exception {
-    when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
-
-    when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
-        .thenThrow(new ServerErrorException());
-    profileController.createAccount(createAccountRequest);
   }
 
   @Test
@@ -719,18 +694,6 @@ public class ProfileControllerTest {
     //called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
     verify(directoryService, times(1)).resetUserPassword(anyString());
-  }
-
-  @Test
-  public void reviewIdVerification_sendsEmail() throws Exception {
-    createUser();
-    IdVerificationStatus status = IdVerificationStatus.REJECTED;
-    IdVerificationReviewRequest request = new IdVerificationReviewRequest().newStatus(status);
-    doNothing().when(mailService).sendIdVerificationCompleteEmail(any(), any(), any());
-
-    profileController.reviewIdVerification(
-        user.getUserId(), request);
-    verify(mailService, times(1)).sendIdVerificationCompleteEmail(any(), any(), any());
   }
 
   @Test

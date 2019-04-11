@@ -28,23 +28,33 @@ export const initialFilterState = {
   },
   tabs: {
     ALL_EVENTS: {
+      standardCode: ['Select All'],
+      sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       domain: ['Select All'],
     },
     PROCEDURE: {
+      standardCode: ['Select All'],
+      sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },
     CONDITION: {
+      standardCode: ['Select All'],
+      sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },
     OBSERVATION: {
+      standardCode: ['Select All'],
+      sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },
-    PHYSICAL_MEASURE: {
+    PHYSICAL_MEASUREMENT: {
+      standardCode: ['Select All'],
+      sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
     },

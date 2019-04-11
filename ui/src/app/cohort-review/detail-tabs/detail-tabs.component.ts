@@ -176,7 +176,7 @@ export class DetailTabsComponent implements OnInit, OnDestroy {
     }
   }, {
     name: 'Physical Measurements',
-    domain: DomainType.PHYSICALMEASURE,
+    domain: DomainType.PHYSICALMEASUREMENT,
     filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [

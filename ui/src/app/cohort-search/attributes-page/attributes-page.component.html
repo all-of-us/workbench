@@ -13,12 +13,16 @@
     <div *ngIf="isMeasurement">
       <div class="attr-name-color">
         {{displayName}}
-        <div [ngClass]="[resetDisable? 'attr-refresh':'attr-disable']" (click)="refresh()">RESET FORM</div>
       </div>
-      <div class="radio">
-        <input type="radio" name="EXISTS" [value]="true" formControlName="EXISTS" [(ngModel)]="attrs.EXISTS" (change)="radioChange()">
-        <label>Any value (lab exists)</label>
-      </div>
+      <clr-checkbox
+        type="checkbox"
+        name="EXISTS"
+        style="margin-left: 0.5rem"
+        formControlName="EXISTS"
+        [(ngModel)]="attrs.EXISTS"
+        (change)="radioChange()" clrCheckbox>
+        Any value (lab exists)
+      </clr-checkbox>
       <div *ngIf="!attrs.EXISTS && attrs.NUM.length" class="or-circle">OR</div>
     </div>
     <ng-container *ngIf="!attrs.EXISTS" formGroupName="NUM">

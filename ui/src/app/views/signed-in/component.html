@@ -29,7 +29,6 @@
         <a routerLink="/profile" clrDropdownItem>Profile</a>
         <a routerLink="/settings" clrDropdownItem>Settings</a>
         <div class="dropdown-divider"></div>
-        <button id="report-bug" class="btn" style="font-size: 14px" (click)="bugReportOpen = true">Report A Bug</button>
         <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
       </clr-dropdown-menu>
     </clr-dropdown>
@@ -75,18 +74,13 @@
           (click)="sidenavToggle = false">Review Workspaces</button>
       <button class="btn btn-primary nav-link"
           [class.active]="userAdminActive"
-          *ngIf="hasReviewIdVerification"
+          *ngIf="hasAccessModuleAdmin"
           routerLink="/admin/user"
           (click)="sidenavToggle = false">User Admin</button>
       <button class="btn btn-primary nav-link help-desk-item"
-          *ngIf="showHelpDeskItem"
-          (click)="openZendeskWidget(); sidenavToggle = false;">Help Desk</button>
+          (click)="openZendesk(); sidenavToggle = false;">Contact Support</button>
       <button class="btn btn-primary nav-link hub-forum-item"
-          *ngIf="showHubForumItem"
           (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
-      <button class="btn btn-secondary btn-bug-report"
-          *ngIf="showBugReportItem"
-          (click)="bugReportOpen = true; sidenavToggle = false;">Report a Bug</button>
     </section>
   </nav>
   <div class="app-container" [class.minimize-chrome]="minimizeChrome">
@@ -98,6 +92,3 @@
     <app-routing-spinner></app-routing-spinner>
   </div>
 </div>
-<app-bug-report *ngIf="bugReportOpen"
-                [bugReportDescription]=""
-                [onClose]="closeBugReport"></app-bug-report>

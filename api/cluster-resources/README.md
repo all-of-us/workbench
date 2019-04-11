@@ -23,19 +23,24 @@ To manually test updates to this script locally:
   ```
 
 - Restart your dev API server and point a local UI to it
-- Find your existing notebook cluster if any, by authorizing as your
-  fake-research-aou.org user [here](
-  https://notebooks.firecloud.org/#!/cluster/listClusters).
-- Delete your existing clusters, if any [here](
-  https://notebooks.firecloud.org/#!/cluster/deleteCluster).
-- Open your local Workbench UI and wait for the notebook cluster to be created.
-  - Cluster creation will fail with 500s if your old server of the same
-    name is still deleting (https://github.com/DataBiosphere/leonardo/issues/220);
-    this may take a minute.
+- Open your local Workbench UI: top-right dropdown -> settings -> reset notebook server
+- Wait for the notebook cluster to be created.
   - Cluster creation will fail with 500s if the user script is not accessible,
     ensure your script is publicly readable via [cloud console UI](
     https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-cluster-resources?project=all-of-us-workbench-test)
 - Revert changes to `config/config_local.json`
+
+## Debugging Script Issues
+
+- Find your existing notebook cluster if any, by authorizing as your
+  fake-research-aou.org user [here](
+  https://leonardo.dsde-dev.broadinstitute.org/#!/cluster/listClusters).
+- Call `listClusters` and take the returned `stagingBucket` value.
+- `gcloud auth login USER@fake-research-aou.org`
+- `gsutil ls gs://STAGING_BUCKET`
+- Dig through the directories until you find the initialization script output
+  log, as of 4/3/19 the file was named `dataproc-initialization-script-0_output`
+
 
 # playground-extension.js
 
