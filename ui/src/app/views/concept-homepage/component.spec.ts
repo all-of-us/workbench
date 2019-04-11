@@ -28,7 +28,7 @@ import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
 import {
   findElements,
   simulateClickNthElement
-} from 'testing/react-test-helpers';
+} from 'testing/react-testing-utility';
 
 import {
   setupModals,

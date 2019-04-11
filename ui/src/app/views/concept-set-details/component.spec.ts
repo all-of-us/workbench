@@ -32,7 +32,7 @@ import {
   findElements,
   simulateClick as simulateClickReact,
   simulateClickNthElement
-} from 'testing/react-test-helpers';
+} from 'testing/react-testing-utility';
 
 import {
   setupModals,

@@ -25,7 +25,7 @@ import {
   findElements,
   simulateClick,
   simulateInput
-} from 'testing/react-test-helpers';
+} from 'testing/react-testing-utility';
 
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub} from 'testing/stubs/concepts-service-stub';
