@@ -95,7 +95,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
       <DataTable ref={(el) => this.dt = el} value={this.props.concepts}
-                 paginator={true} rows={100} scrollable={true} loading={this.props.loading}
+                 paginator={true} rows={50} scrollable={true} loading={this.props.loading}
                  selection={this.state.selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
