@@ -15,7 +15,7 @@ const styles = reactStyles({
     lineHeight: '0.5rem',
     textAlign: 'center'
   }
-});
+})
 
 interface ConceptTableProps {
   concepts: Concept[];
@@ -60,7 +60,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
   filterByVocabulary(vocabulary) {
     const selectedVocabularies =
         toggleIncludes(vocabulary, this.state.selectedVocabularies) as unknown as string[];
-    this.filterImageSrc = selectedVocabularies.length > 0 ? 'filtered' : 'filter'
+    this.filterImageSrc = selectedVocabularies.length > 0 ? 'filtered' : 'filter';
     this.dt.filter(selectedVocabularies, 'vocabularyId', 'in');
     this.setState({selectedVocabularies: selectedVocabularies});
   }
@@ -90,7 +90,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
       <Clickable
           data-test-id='workspace-menu-button'
           hover={{opacity: 1}}>
-        <img style={{width: '15%'}} src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
+        <img style={{width: '15%', marginLeft: '-2.5rem'}} src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
@@ -98,13 +98,15 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
                  paginator={true} rows={100} scrollable={true} loading={this.props.loading}
                  selection={this.state.selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
-      <Column bodyStyle={{...styles.colStyle}} selectionMode='multiple' />
-      <Column bodyStyle={{...styles.colStyle}} field='conceptName' header='Name'/>
-      <Column bodyStyle={{...styles.colStyle}} field='conceptSynonyms' header='Synonyms'
+      <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
+              selectionMode='multiple' />
+      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'/>
+      <Column bodyStyle={styles.colStyle} field='conceptSynonyms' header='Synonyms'
               body={this.conceptSynonymColTemplate}/>
-      <Column bodyStyle={{...styles.colStyle}} field='conceptCode' header='Code'/>
-      <Column field='vocabularyId' header='Vocabulary'
-              filter={true} headerStyle={{display: 'flex', textAlign: 'center'}}
+      <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
+      <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}
+              filter={true} headerStyle={{display: 'flex', textAlign: 'center', paddingTop: '0.6rem'
+        , paddingLeft: '5rem'}}
               filterElement={vocabularyFilter} />
       <Column style={styles.colStyle} field='countValue' header='Count'/>
     </DataTable>
