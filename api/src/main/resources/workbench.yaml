@@ -1378,6 +1378,33 @@ paths:
             schema:
               $ref: "#/definitions/DomainValuesResponse"
 
+### Data set ############################################
+
+  /v1/data-set/{workspaceNamespace}/{workspaceId}/create:
+    post:
+      tags:
+        - dataSet
+      description: >
+        Creates Data Set
+      operationId: "createDataSet"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: dataSetRequest
+          required: true
+          schema:
+            $ref: "#/definitions/DataSet"
+      responses:
+        200:
+          description: Data set has been created successfully
+          schema:
+            $ref: "#/definitions/DataSet"
+        400:
+          description: Invalid data set request
+        409:
+          description: Data set with same name exist
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
@@ -2038,6 +2065,11 @@ definitions:
     properties:
       name:
         type: string
+      description:
+        type: string
+      workspaceId:
+        type: integer
+        format: int64
       conceptSetIds:
         type: array
         description: >
@@ -2057,7 +2089,22 @@ definitions:
         description: >
           All the selected values in the data set
         items:
-          $ref: "#/definitions/ValueSet"
+          $ref: "#/definitions/DomainValuePair"
+
+  DomainValuePair:
+    type: object
+    properties:
+      domain:
+        description: >
+          Domain corresponding to an OMOP table that can contain rows for the concepts in this
+          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
+          here; it makes sense to specify concepts in these domains in cohort criteria, but
+          there isn't much value in having concept sets defined for them.
+        $ref: "#/definitions/Domain"
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/DomainValue"
 
   DomainInfoResponse:
     type: object

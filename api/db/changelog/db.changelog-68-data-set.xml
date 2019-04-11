@@ -13,7 +13,7 @@
         <constraints nullable="false"/>
       </column>
       <column name="name" type="varchar(80)">
-        <constraints nullable="false"/>
+        <constraints unique="true" nullable="false"/>
       </column>
       <column name="description" type="clob">
         <constraints nullable="true"/>
@@ -41,7 +41,7 @@
 
     <createTable tableName="data_set_concept_set_id">
       <column name="data_set_id" type="bigint">
-        <constraints primaryKey="true" nullable="false"/>
+        <constraints nullable="false"/>
       </column>
       <column name="concept_set_id" type="bigint">
         <constraints nullable="false"/>
@@ -50,7 +50,7 @@
     
     <createTable tableName="data_set_cohort_id">
       <column name="data_set_id" type="bigint">
-        <constraints primaryKey="true" nullable="false"/>
+        <constraints nullable="false"/>
       </column>
       <column name="cohort_id" type="bigint">
         <constraints nullable="false"/>
@@ -64,7 +64,7 @@
       <column name="domain_id" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
-      <column name="values" type="clob">
+      <column name="values" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
     </createTable>

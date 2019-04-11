@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
@@ -271,6 +273,18 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     }
   }
 
+  async saveDataSet() {
+
+    const req = {
+      name: 'name',
+      description: 'description',
+      conceptSetIds: this.state.selectedConceptSetIds,
+      cohortIds: this.state.selectedCohortIds,
+      values: this.state.selectedValues
+    };
+    await dataSetApi().createDataSet(this.props.workspace.namespace, this.props.workspace.id, req);
+  }
+
   render() {
     const {namespace, id} = this.props.workspace;
     const {
@@ -389,7 +403,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             {/* Button disabled until this functionality added*/}
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}} disabled={true}>
+            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}} onClick ={() => this.saveDataSet()}>
               SAVE DATASET
             </Button>
           </div>
