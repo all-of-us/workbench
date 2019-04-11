@@ -151,7 +151,6 @@ export interface DetailTabTableState {
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
     codeInputChange: Function;
-    textInputChange: Function;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -165,7 +164,6 @@ export const DetailTabTable = withCurrentWorkspace()(
         codeResults: null,
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
-      this.textInputChange = fp.debounce(300, (e, col) => this.filterText(e, col));
     }
 
     componentDidMount() {
