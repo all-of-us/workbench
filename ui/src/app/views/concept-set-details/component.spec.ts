@@ -27,13 +27,17 @@ import {ConceptSet as FetchConceptSet} from 'generated/fetch';
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+
 import {
-  findElementsReact,
+  findElements,
+  simulateClickNthElement,
+  simulateClick as simulateClickReact
+} from 'testing/react-test-helpers';
+
+import {
   setupModals,
   simulateClick,
-  simulateClickReact,
   simulateInput,
-  simulateMultipleElementClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -230,20 +234,17 @@ describe('ConceptSetDetailsComponent', () => {
     });
 
     const de = fixture.debugElement;
-    simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
-    simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 3);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 3);
     simulateClickReact(fixture, '[data-test-id="sliding-button"]');
     simulateClick(fixture, de.query(By.css('.confirm-remove-btn')));
     updateAndTick(fixture);
-    const tableRows = findElementsReact(fixture, 'tr');
-    console.log(tableRows);
+    const tableRows = findElements(fixture, 'tr');
     // This includes the header and the row itseld
     expect(tableRows.length).toEqual(2);
     // Just the middle concept should remain.
     const wantConcepts = [origConcepts[1]];
-    console.log(tableRows[1].childNodes[2].textContent);
-    console.log(wantConcepts);
     expect(tableRows[1].childNodes[2].textContent).toEqual(
       wantConcepts[0].conceptSynonyms.join(', '));
   }));

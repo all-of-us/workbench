@@ -24,13 +24,17 @@ import {
 import {ConceptSetsServiceStub} from 'testing/stubs/concept-sets-service-stub';
 import {ConceptsServiceStub, DomainStubVariables} from 'testing/stubs/concepts-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+
 import {
-  findElementsReact,
+  findElements,
+  simulateClickNthElement
+} from 'testing/react-test-helpers';
+
+import {
   setupModals,
   simulateClick,
   simulateEvent,
   simulateInput,
-  simulateMultipleElementClickReact,
   updateAndTick
 } from 'testing/test-helpers';
 
@@ -121,14 +125,14 @@ describe('ConceptHomepageComponent', () => {
     expect(spy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length);
 
     // Tests that it switches to the datagrid view.
-    expect(findElementsReact(fixture, '[data-test-id="conceptTable"]')).toBeTruthy();
-    expect(findElementsReact(fixture, 'tr').length).toBe(2);
-    const firstDomainRowName = findElementsReact(fixture, 'td')[1].textContent;
+    expect(findElements(fixture, '[data-test-id="conceptTable"]')).toBeTruthy();
+    expect(findElements(fixture, 'tr').length).toBe(2);
+    const firstDomainRowName = findElements(fixture, 'td')[1].textContent;
 
     // Tests that it changes the table when a new domain is selected.
     simulateClick(fixture, fixture.debugElement.queryAll(By.css('.domain-selector-button'))[1]);
     updateAndTick(fixture);
-    expect(findElementsReact(fixture, 'td')[1].textContent)
+    expect(findElements(fixture, 'td')[1].textContent)
       .not.toBe(firstDomainRowName);
   }));
 
@@ -164,7 +168,7 @@ describe('ConceptHomepageComponent', () => {
 
     // Test that it pulls back more concepts when all concepts allowed.
     // Rows contains header as well
-    expect(findElementsReact(fixture, 'tr').length).toBe(3);
+    expect(findElements(fixture, 'tr').length).toBe(3);
   }));
 
   it('should display the selected concepts on header', fakeAsync(() => {
@@ -178,7 +182,7 @@ describe('ConceptHomepageComponent', () => {
     simulateEvent(fixture,
       fixture.debugElement.query(By.css('#concept-search-input')), 'keydown.enter');
     updateAndTick(fixture);
-    simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     const pillValue = fixture.debugElement.query(By.css('.pill')).childNodes[0]
         .nativeNode.nodeValue.trim();
@@ -200,7 +204,7 @@ describe('ConceptHomepageComponent', () => {
     let buttonText = fixture.componentInstance.addToSetText;
     // Default value to be Add to set
     expect(buttonText).toBe('Add to set');
-    simulateMultipleElementClickReact(fixture, 'span.p-checkbox-icon.p-clickable', 1);
+    simulateClickNthElement(fixture, 'span.p-checkbox-icon.p-clickable', 1);
     updateAndTick(fixture);
     buttonText = fixture.componentInstance.addToSetText;
 

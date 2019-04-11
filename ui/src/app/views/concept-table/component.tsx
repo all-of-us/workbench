@@ -24,9 +24,9 @@ interface ConceptTableProps {
 }
 
 interface ConceptTableState {
-  selectedConcept: Concept[];
+  selectedConcepts: Concept[];
   concepts: Concept[];
-  selectedVocabulary: string[];
+  selectedVocabularies: string[];
 }
 
 export class ConceptTable extends React.Component<ConceptTableProps, ConceptTableState> {
@@ -35,18 +35,17 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
   constructor(props: ConceptTableProps) {
     super(props);
     this.state = {
-      selectedConcept: [],
-      concepts: this.props.concepts,
-      selectedVocabulary: []
+      selectedConcepts: [],
+      selectedVocabularies: []
     };
   }
 
-  synonymTemplate(rowData) {
+  conceptSynonymColTemplate(rowData) {
     return <div>{fp.uniq(rowData.conceptSynonyms).join(', ')}</div>;
   }
 
   updateSelectedConceptList(selectedConcepts) {
-    this.setState({selectedConcept : selectedConcepts});
+    this.setState({selectedConcepts : selectedConcepts});
     this.props.onSelectedChanged(selectedConcepts);
   }
 
@@ -56,18 +55,19 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
   }
 
 
-  filterVocabulary(vocabulary) {
-    const selectedVocab =
-        toggleIncludes(vocabulary, this.state.selectedVocabulary) as unknown as string[];
-    this.dt.filter(selectedVocab, 'vocabularyId', 'in');
-    this.setState({selectedVocabulary: selectedVocab});
+  filterByVocabulary(vocabulary) {
+    const selectedVocabularies =
+        toggleIncludes(vocabulary, this.state.selectedVocabularies) as unknown as string[];
+    this.dt.filter(selectedVocabularies, 'vocabularyId', 'in');
+    this.setState({selectedVocabularies: selectedVocabularies});
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.concepts !==  this.state.concepts) {
-      if (this.state.selectedVocabulary) {
+    // The purpose of this is to reset the filter on vocabulary on change of domain/concepts
+    if (nextProps.concepts !==  this.props.concepts) {
+      if (this.state.selectedVocabularies) {
         this.dt.filter([], 'vocabularyId', 'in');
-        this.setState({selectedVocabulary : []});
+        this.setState({selectedVocabularies : []});
       }
     }
   }
@@ -79,8 +79,8 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
           this.distinctVocabulary().map((vocabulary, i) => {
             return <div key={i}>
               <CheckBox style={{marginLeft: '0.2rem', marginRight: '0.3rem'}}
-                        checked={fp.includes(vocabulary, this.state.selectedVocabulary)}
-                        onChange={(checked) => this.filterVocabulary(vocabulary)}>
+                        checked={fp.includes(vocabulary, this.state.selectedVocabularies)}
+                        onChange={(checked) => this.filterByVocabulary(vocabulary)}>
               </CheckBox>
               <label style={{marginRight: '0.2rem'}}>{vocabulary}</label></div>;
           })}>
@@ -93,12 +93,12 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
     return <div data-test-id='conceptTable'>
       <DataTable ref={(el) => this.dt = el} value={this.props.concepts}
                  paginator={true} rows={100} scrollable={true} loading={this.props.loading}
-                 selection={this.state.selectedConcept}
+                 selection={this.state.selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle}} selectionMode='multiple' />
       <Column bodyStyle={{...styles.colStyle}} field='conceptName' header='Name'/>
       <Column bodyStyle={{...styles.colStyle}} field='conceptSynonyms' header='Synonyms'
-              body={this.synonymTemplate}/>
+              body={this.conceptSynonymColTemplate}/>
       <Column bodyStyle={{...styles.colStyle}} field='conceptCode' header='Code'/>
       <Column field='vocabularyId' header='Vocabulary'
               filter={true} headerStyle={{display: 'flex', textAlign: 'center'}}
