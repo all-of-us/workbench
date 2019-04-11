@@ -19,6 +19,7 @@ import {
   Cohort,
   ConceptSet,
   DataSet,
+  DataSetQuery,
   Domain,
   DomainInfo,
   DomainValue,
@@ -76,7 +77,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[]
+    valueSets: ValueSet[], selectedValues: DomainValuePair[], queries: DataSetQuery[]
   }> {
 
   constructor(props) {
@@ -95,6 +96,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       selectedCohortIds: [],
       valueSets: [],
       selectedValues: [],
+      queries: [],
     };
   }
 
@@ -274,7 +276,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     this.state.selectedValues.forEach((value) => {
       const domainSet = fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
       if (domainSet === undefined) {
-        valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}})
+        valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}});
       }
     });
     const dataSet: DataSet = {
@@ -285,7 +287,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     };
     // console.log(dataSet);
     const sqlQueries = await dataSetApi().getQueryFromDataSet(namespace, id, dataSet);
-    console.log(sqlQueries);
+    this.setState({queries: sqlQueries.queryList});
   }
 
   render() {
@@ -295,6 +297,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       conceptDomainList,
       conceptSetList,
       loadingResources,
+      queries,
       resource,
       rType,
       selectedValues,
@@ -405,7 +408,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             <div>Preview Dataset</div>
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
-            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}} onClick={() => {this.generateCode()}}>
+            <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}} onClick={() => {this.generateCode();}}>
               GENERATE CODE
             </Button>
             {/* Button disabled until this functionality added*/}
@@ -414,7 +417,33 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             </Button>
           </div>
           {/*TODO: Display dataset preview*/}
-          <div style={{height: '8rem'}}/>
+          <div style={{height: '8rem'}}>
+            {queries.map(query =>
+              <React.Fragment>
+                <div>sql={'"' + query.query + '"'}</div>
+                <div>
+                  query_config = {'{'} <br />
+                  &nbsp;&nbsp;{'\''}query{'\''}: {'{'} <br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;{'\''}parameterMode{'\''}: {'\''}NAMED{'\''}, <br />
+                  &nbsp;&nbsp;&nbsp;&nbsp;{'\''}queryParameters{'\''}: [
+                {query.namedParameters.map(np =>
+                  <div>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{'{'}
+                  {'\'name\': "' + np.value.name + '"'},
+                  {'\'parameterType\': {\'type\': "' + np.value.parameterType + '"}'},
+                  {'\'parameterValue\': {\'value\': "\'' + np.value.parameterValue + '\'"}'}
+                  {'},'}
+                  </div>)
+                }
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+                  {'}'}
+                  {'}'}
+                </div>
+                <div>
+                  df = pandas.read_gbq(sql, configuration=query_config)
+                </div>
+              </React.Fragment>)}
+          </div>
         </div>
       </FadeBox>
       {creatingConceptSet &&

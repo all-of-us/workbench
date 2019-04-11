@@ -1,23 +1,18 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -31,17 +26,16 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.jira.JiraService;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryResponse;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.NamedParameterEntry;
+import org.pmiops.workbench.model.NamedParameterValue;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.ValueSet;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,18 +82,27 @@ public class DataSetController implements DataSetApiDelegate {
 
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
     List<ConceptSet> conceptSetsSelected = this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
-    Map<Domain, List<ConceptSet>> domainConceptSetMap = new HashMap<Domain, List<ConceptSet>>();
+    if (cohortsSelected == null || cohortsSelected.size() == 0 || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
+      throw new BadRequestException("Data Sets must include at least one cohort and concept.");
+    }
     List<Domain> domainList = dataSet.getValues().stream().map(value -> value.getDomain()).collect(Collectors.toList());
-
+    Map<String, QueryParameterValue> cohortParameters = new HashMap<>();
     // Below constructs the union of all cohort queries
     String cohortQueries = cohortsSelected.stream().map(c -> {
-        SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(c), SearchRequest.class);
-        return participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest)).getQuery();
-      }).collect(Collectors.joining(" UNION "));
+      SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(c), SearchRequest.class);
+      QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest)));
+      AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
 
+      participantQueryConfig.getNamedParameters().forEach((npKey, npValue) -> {
+        String newKey = npKey + "_" + c.getCohortId();
+        participantQuery.getAndSet(participantQuery.get().replaceFirst(npKey, newKey));
+        cohortParameters.put(newKey, npValue);
+      });
+      return participantQuery.get();
+    }).collect(Collectors.joining(" UNION "));
 
     DataSetQueryResponse resp = new DataSetQueryResponse();
-    ArrayList<DataSetQuery> respQueryList = new ArrayList<DataSetQuery>();
+    ArrayList<DataSetQuery> respQueryList = new ArrayList<>();
 
     for (Domain d: domainList) {
       String query = "SELECT ";
@@ -110,17 +113,23 @@ public class DataSetController implements DataSetApiDelegate {
       if (!valueSetOpt.isPresent()) {
         continue;
       }
+      List<NamedParameterEntry> parameters = new ArrayList<>();
+      cohortParameters.forEach((key, value) -> {
+        parameters.add(
+            new NamedParameterEntry().key(key).value(new NamedParameterValue().name(key).parameterType(value.getType().toString()).parameterValue(value.getValue()))
+        );
+      });
       List<String> values = valueSetOpt.get()
           .getValues().getItems().stream()
-          .map(domainValue -> "'" + domainValue.getValue() + "'").collect(Collectors.toList());
+          .map(domainValue -> domainValue.getValue()).collect(Collectors.toList());
 
       String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
 
-      String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME unnest (@pValuesList)";
+      String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
       Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
 
-      valuesQueryParams.put("pDomain", QueryParameterValue.string("'" + domainAsName + "'"));
-      valuesQueryParams.put("pValuesList", QueryParameterValue.array(values.stream().toArray(s -> new String[s]), String.class));
+      valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
+      valuesQueryParams.put("pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
 
       TableResult valuesLinking = bigQueryService.executeQuery(
           bigQueryService
@@ -130,28 +139,27 @@ public class DataSetController implements DataSetApiDelegate {
                   .setUseLegacySql(false)
                   .build()));
 
-      List<String> valueJoins = new ArrayList<String>();
-      List<String> valueSelects = new ArrayList<String>();
+      List<String> valueJoins = new ArrayList<>();
+      List<String> valueSelects = new ArrayList<>();
       for (Iterator<FieldValueList> i = valuesLinking.getValues().iterator(); i.hasNext(); ) {
         FieldValueList value = i.next();
         valueJoins.add(value.get("JOIN_VALUE").getStringValue());
         valueSelects.add(value.get("OMOP_SQL").getStringValue());
       }
-      query = query.concat(valueSelects.stream().collect(Collectors.joining(", ")));
-      query = query.concat(" ");
-      query = query.concat(valueJoins.stream().distinct().collect(Collectors.joining(" ")));
+      query = query.concat(valueSelects.stream().collect(Collectors.joining(", ")))
+          .concat(" ")
+          .concat(valueJoins.stream().distinct().collect(Collectors.joining(" ")));
+
 
       // CONCEPT SETS HERE:
       String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
           .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
           .collect(Collectors.joining(", "));
-      query = query.concat(" WHERE CONCEPT_ID IN (" + conceptSetQueries + ")");
+      query = query.concat(" WHERE " + d.toString() + "_CONCEPT_ID IN (" + conceptSetQueries + ")");
       query = query.concat(" AND PERSON_ID IN (" + cohortQueries + ")");
 
-      respQueryList.add(new DataSetQuery().domain(d).query(query));
+      respQueryList.add(new DataSetQuery().domain(d).query(query).namedParameters(parameters));
     }
-    log.log(Level.WARNING, Long.toString(respQueryList.size()));
-
 
     resp.setQueryList(respQueryList);
     return ResponseEntity.ok(new DataSetQueryResponse().queryList(respQueryList));

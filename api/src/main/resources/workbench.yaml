@@ -2070,6 +2070,39 @@ definitions:
         type: string
         description: >
           The string query to fetch the data set sql for the given domain from BigQuery.
+      namedParameters:
+        type: array
+        description: >
+          The set of named parameters to use for the SQL query.
+        items:
+          $ref: "#/definitions/NamedParameterEntry"
+
+  NamedParameterEntry:
+    type: object
+    required:
+      - key
+      - value
+    properties:
+      key:
+        type: string
+      value:
+        $ref: "#/definitions/NamedParameterValue"
+
+  NamedParameterValue:
+    type: object
+    required:
+      - name
+      - parameterType
+      - parameterValue
+    properties:
+      name:
+        type: string
+      parameterType:
+        type: string
+      parameterValue:
+        type: object
+        description: Can be any value
+
 
   DomainInfoResponse:
     type: object
