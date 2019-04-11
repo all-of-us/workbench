@@ -15,7 +15,7 @@ const styles = reactStyles({
     lineHeight: '0.5rem',
     textAlign: 'center'
   }
-})
+});
 
 interface ConceptTableProps {
   concepts: Concept[];
@@ -90,7 +90,8 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
       <Clickable
           data-test-id='workspace-menu-button'
           hover={{opacity: 1}}>
-        <img style={{width: '15%', marginLeft: '-2.5rem'}} src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
+        <img style={{width: '15%', marginLeft: '-2.5rem'}}
+             src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
