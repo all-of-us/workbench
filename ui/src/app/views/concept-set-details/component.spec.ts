@@ -30,8 +30,8 @@ import {WorkspacesServiceStub, WorkspaceStubVariables} from 'testing/stubs/works
 
 import {
   findElements,
-  simulateClickNthElement,
-  simulateClick as simulateClickReact
+  simulateClick as simulateClickReact,
+  simulateClickNthElement
 } from 'testing/react-test-helpers';
 
 import {

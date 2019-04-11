@@ -1,8 +1,6 @@
 import {DebugElement} from '@angular/core';
 import {ComponentFixture, tick} from '@angular/core/testing';
 
-import * as ReactTestUtils from 'react-dom/test-utils';
-
 /** Modal usage requires the existence of a global div. */
 export function setupModals<C>(fixture: ComponentFixture<C>) {
   const popupRoot = document.createElement('div');
