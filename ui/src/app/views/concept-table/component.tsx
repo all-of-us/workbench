@@ -25,19 +25,21 @@ interface ConceptTableProps {
 
 interface ConceptTableState {
   selectedConcepts: Concept[];
-  concepts: Concept[];
   selectedVocabularies: string[];
 }
 
 export class ConceptTable extends React.Component<ConceptTableProps, ConceptTableState> {
 
   private dt: DataTable;
+  private filterImageSrc: string;
+
   constructor(props: ConceptTableProps) {
     super(props);
     this.state = {
       selectedConcepts: [],
       selectedVocabularies: []
     };
+    this.filterImageSrc = 'filter';
   }
 
   conceptSynonymColTemplate(rowData) {
@@ -58,6 +60,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
   filterByVocabulary(vocabulary) {
     const selectedVocabularies =
         toggleIncludes(vocabulary, this.state.selectedVocabularies) as unknown as string[];
+    this.filterImageSrc = selectedVocabularies.length > 0 ? 'filtered' : 'filter'
     this.dt.filter(selectedVocabularies, 'vocabularyId', 'in');
     this.setState({selectedVocabularies: selectedVocabularies});
   }
@@ -87,7 +90,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
       <Clickable
           data-test-id='workspace-menu-button'
           hover={{opacity: 1}}>
-        <img style={{width: '15%'}} src='/assets/icons/filter.svg'/>
+        <img style={{width: '15%'}} src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
