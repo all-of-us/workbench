@@ -61,9 +61,10 @@ const styles = reactStyles({
     fontSize: '20px',
     fontWeight: 600,
     color: '#262262',
+    overflow: 'auto',
   },
   description: {
-    margin: '0.5rem 0',
+    margin: '0 0 0.25rem',
     color: '#000000',
   },
   container: {
@@ -512,41 +513,54 @@ export const ParticipantsTable = withCurrentWorkspace()(
       });
       return <div>
         <style>{css}</style>
-        <button
-          style={styles.backBtn}
-          type='button'
-          onClick={() => this.goBack()}>
-          Back to cohort
-        </button>
-        <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
-        {!cohortDescription && <Button
-          style={{float: 'right'}}
-          disabled={!data}
-          onClick={() => this.setState({cohortDescription: true})}>
-          Cohort Description
-        </Button>}
-        <div style={styles.description}>
-          {cohort.description}
-        </div>
-        {cohortDescription && <QueryReport/>}
-        {!cohortDescription && data && <DataTable
-          style={styles.table}
-          value={data}
-          first={start}
-          sortField={sortField}
-          sortOrder={sortOrder}
-          lazy
-          paginator
-          onPage={this.onPage}
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
-          rows={rows}
-          totalRecords={total}
-          onRowClick={this.onRowClick}
-          scrollable
-          scrollHeight='calc(100vh - 350px)'>
-          {columns}
-        </DataTable>}
+        {!cohortDescription && <React.Fragment>
+          <button
+            style={styles.backBtn}
+            type='button'
+            onClick={() => this.goBack()}>
+            Back to cohort
+          </button>
+          <h4 style={styles.title}>
+            Review Sets for {cohort.name}
+            <Button
+              style={{float: 'right', height: '1.3rem'}}
+              disabled={!data}
+              onClick={() => this.setState({cohortDescription: true})}>
+              Cohort Description
+            </Button>
+          </h4>
+          <div style={styles.description}>
+            {cohort.description}
+          </div>
+          {data && <DataTable
+            style={styles.table}
+            value={data}
+            first={start}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            lazy
+            paginator
+            onPage={this.onPage}
+            paginatorTemplate={data.length ? paginatorTemplate : ''}
+            currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+            rows={rows}
+            totalRecords={total}
+            onRowClick={this.onRowClick}
+            scrollable
+            scrollHeight='calc(100vh - 350px)'>
+            {columns}
+          </DataTable>}
+        </React.Fragment>}
+        {cohortDescription && <React.Fragment>
+          <button
+            style={styles.backBtn}
+            type='button'
+            onClick={() => this.goBack()}>
+            Back to review set
+          </button>
+          <h4 style={styles.title}>{cohort.name} Description</h4>
+          <QueryReport/>
+        </React.Fragment>}
         {loading && <SpinnerOverlay />}
       </div>;
     }
