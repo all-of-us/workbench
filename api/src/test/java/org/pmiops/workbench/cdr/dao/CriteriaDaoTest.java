@@ -200,7 +200,7 @@ public class CriteriaDaoTest {
       .synonyms("001");
     criteriaDao.save(criteria);
     List<Criteria> conditions =
-      criteriaDao.findCriteriaByDomainAndSearchTerm(DomainType.CONDITION.toString(), true,"001", new PageRequest(0, 10));
+      criteriaDao.findCriteriaByDomainAndSearchTerm(DomainType.MEASUREMENT.toString(), true,"001", new PageRequest(0, 10));
     assertEquals(1, conditions.size());
     assertEquals(criteria, conditions.get(0));
   }
