@@ -403,7 +403,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             {/* Button disabled until this functionality added*/}
-            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}} onClick ={() => this.saveDataSet()}>
+            <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
+                    onClick ={() => this.saveDataSet()}>
               SAVE DATASET
             </Button>
           </div>
