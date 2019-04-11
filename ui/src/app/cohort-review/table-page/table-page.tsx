@@ -68,7 +68,7 @@ const styles = reactStyles({
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.6rem'
+    lineHeight: '0.75rem'
   },
   columnHeader: {
     background: '#f4f4f4',
@@ -103,6 +103,15 @@ const styles = reactStyles({
     float: 'right'
   },
   filterIcon: {
+    color: '#262262',
+    float: 'right'
+  },
+  filteredIcon: {
+    padding: '2px 2px 1px 1px',
+    borderRadius: '50%',
+    background: '#8bc990',
+    color: '#ffffff',
+    fontWeight: 600,
     float: 'right'
   },
   overlayHeader: {
@@ -402,11 +411,14 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }
       const colType = reverseColumnEnum[column];
       const options = multiFilters[colType];
+      const filtered = (column === 'participantId' && filters.PARTICIPANTID)
+        || (column !== 'participantId' && !filters[colType].includes('Select All'));
       let fl: any;
-
       return <span>
         {data &&
-          <i className='pi pi-filter' style={styles.filterIcon} onClick={(e) => fl.toggle(e)}/>}
+          <i className='pi pi-filter'
+             style={filtered ? styles.filteredIcon : styles.filterIcon}
+             onClick={(e) => fl.toggle(e)}/>}
         <OverlayPanel style={styles.filterOverlay} className='filterOverlay'
                       ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
           {column === 'participantId' &&

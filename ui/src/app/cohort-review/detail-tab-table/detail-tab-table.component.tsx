@@ -28,7 +28,7 @@ const styles = reactStyles({
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.6rem'
+    lineHeight: '0.75rem'
   },
   columnHeader: {
     background: '#f4f4f4',
@@ -55,10 +55,16 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     width: '2rem',
   },
-
   filterIcon: {
-    color: '#0086C1',
-    fontSize: '0.5rem',
+    color: '#262262',
+    float: 'right'
+  },
+  filteredIcon: {
+    padding: '2px 2px 1px 1px',
+    borderRadius: '50%',
+    background: '#8bc990',
+    color: '#ffffff',
+    fontWeight: 600,
     float: 'right'
   },
   sortIcon: {
@@ -441,9 +447,12 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           return acc;
         }, []);
+      const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
       return <span>
-        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <i className='pi pi-filter'
+           style={filtered ? styles.filteredIcon : styles.filterIcon}
+           onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
@@ -469,12 +478,15 @@ export const DetailTabTable = withCurrentWorkspace()(
     textFilter(column: string) {
       const {domain, filterState} = this.props;
       const columnFilters = filterState.tabs[domain];
+      const filtered = !!columnFilters[column];
       let fl: any, ip: any;
       return <span>
-        <i className='pi pi-filter' onClick={(e) => {
-          fl.toggle(e);
-          ip.focus();
-        }}/>
+        <i className='pi pi-filter'
+          style={filtered ? styles.filteredIcon : styles.filterIcon}
+          onClick={(e) => {
+            fl.toggle(e);
+            ip.focus();
+          }}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           <div style={styles.textSearch}>
