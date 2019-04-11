@@ -377,7 +377,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         const {filterState: {vocab}} = this.props;
         const codeType = `${vocab}Code`;
         const codeResults = data.reduce((acc, item) => {
-          if (item[codeType].includes(input) && !acc.includes(input)) {
+          if (item[codeType].toLowerCase().includes(input.toLowerCase()) && !acc.includes(input)) {
             acc.push(item[codeType]);
           }
           return acc;
