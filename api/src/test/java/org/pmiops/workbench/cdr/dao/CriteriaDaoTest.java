@@ -5,8 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.TreeSubType;
 import org.pmiops.workbench.model.TreeType;
 import org.springframework.beans.factory.annotation.Autowired;
