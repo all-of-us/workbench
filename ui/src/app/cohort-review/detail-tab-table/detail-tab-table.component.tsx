@@ -329,6 +329,18 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => visits === item.visitType);
       }
       /* Column filters */
+      const columnCheck = [
+        'domain',
+        `${vocab}Vocabulary`,
+        `${vocab}Code`,
+        `${vocab}Name`,
+        'value',
+        'numMentions',
+        'firstMention',
+        'lastMention',
+        'itemTime',
+        'survey'
+      ];
       const columnFilters = filterState.tabs[domain];
       if (!columnFilters) {
         if (data.length < start + rows) {
@@ -337,19 +349,23 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({filteredData: data, start: start});
       } else {
         for (const col in columnFilters) {
-          if (Array.isArray(columnFilters[col])) {
-            if (!columnFilters[col].length) {
-              data = [];
-              break;
-            } else if (!columnFilters[col].includes('Select All')
-              && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-              data = data.filter(row => columnFilters[col].includes(row[col]));
-            }
-          } else {
-            if (columnFilters[col]) {
-              data = data.filter(
-                row => row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase())
-              );
+          // Makes sure we only filter by correct concept type (standard/source)
+          if (columnCheck.includes(col)) {
+            if (Array.isArray(columnFilters[col])) {
+              // checkbox filters
+              if (!columnFilters[col].length) {
+                data = [];
+                break;
+              } else if (!columnFilters[col].includes('Select All')
+                && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+                data = data.filter(row => columnFilters[col].includes(row[col]));
+              }
+            } else {
+              // text filters
+              if (columnFilters[col]) {
+                data = data.filter(row =>
+                  row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+              }
             }
           }
         }
