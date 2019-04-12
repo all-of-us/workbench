@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetQuery;
 import org.pmiops.workbench.model.DataSetQueryResponse;
@@ -95,11 +96,11 @@ public class DataSetController implements DataSetApiDelegate {
 
       participantQueryConfig.getNamedParameters().forEach((npKey, npValue) -> {
         String newKey = npKey + "_" + c.getCohortId();
-        participantQuery.getAndSet(participantQuery.get().replaceFirst(npKey, newKey));
+        participantQuery.getAndSet(participantQuery.get().replaceAll("@".concat(npKey), "@".concat(newKey)));
         cohortParameters.put(newKey, npValue);
       });
       return participantQuery.get();
-    }).collect(Collectors.joining(" UNION "));
+    }).collect(Collectors.joining(" OR PERSON_ID IN "));
 
     DataSetQueryResponse resp = new DataSetQueryResponse();
     ArrayList<DataSetQuery> respQueryList = new ArrayList<>();
@@ -114,11 +115,8 @@ public class DataSetController implements DataSetApiDelegate {
         continue;
       }
       List<NamedParameterEntry> parameters = new ArrayList<>();
-      cohortParameters.forEach((key, value) -> {
-        parameters.add(
-            new NamedParameterEntry().key(key).value(new NamedParameterValue().name(key).parameterType(value.getType().toString()).parameterValue(value.getValue()))
-        );
-      });
+      cohortParameters.forEach((key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
+
       List<String> values = valueSetOpt.get()
           .getValues().getItems().stream()
           .map(domainValue -> domainValue.getValue()).collect(Collectors.toList());
@@ -156,13 +154,32 @@ public class DataSetController implements DataSetApiDelegate {
           .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
           .collect(Collectors.joining(", "));
       query = query.concat(" WHERE " + d.toString() + "_CONCEPT_ID IN (" + conceptSetQueries + ")");
-      query = query.concat(" AND PERSON_ID IN (" + cohortQueries + ")");
+      query = query.concat(" AND (PERSON_ID IN (" + cohortQueries + "))");
 
       respQueryList.add(new DataSetQuery().domain(d).query(query).namedParameters(parameters));
     }
 
     resp.setQueryList(respQueryList);
     return ResponseEntity.ok(new DataSetQueryResponse().queryList(respQueryList));
+  }
+
+  private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
+    if (value.getValue() != null) {
+      return new NamedParameterEntry().key(key).value(new NamedParameterValue().name(key).parameterType(value.getType().toString()).parameterValue(value.getValue()));
+    } else if (value.getArrayValues() != null) {
+      List<NamedParameterValue> values = value.getArrayValues().stream()
+          .map(arrayValue -> generateResponseFromQueryParameter(key, arrayValue).getValue())
+          .collect(Collectors.toList());
+      return new NamedParameterEntry()
+          .key(key)
+          .value(new NamedParameterValue()
+              .name(key)
+              .parameterType(value.getType().toString())
+              .arrayType(value.getArrayType() == null ? null : value.getArrayType().toString())
+              .parameterValue(values));
+    } else {
+      throw new ServerErrorException("Unsupported query parameter type in query generation: " + value.getType().toString());
+    }
   }
 
 

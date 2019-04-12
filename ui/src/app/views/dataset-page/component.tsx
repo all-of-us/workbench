@@ -24,6 +24,7 @@ import {
   DomainInfo,
   DomainValue,
   DomainValuesResponse,
+  NamedParameterEntry,
   RecentResource,
   ValueSet,
   WorkspaceAccessLevel,
@@ -258,8 +259,12 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
     if (fp.some(selectObj, origSelected)) {
+      console.log('REMOVING');
+      console.log(domainValue);
       this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
     } else {
+      console.log('ADDING');
+      console.log(domainValue);
       this.setState({selectedValues: (origSelected).concat(selectObj)});
     }
   }
@@ -274,9 +279,12 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     const {namespace, id} = this.props.workspace;
     const valuesByDomain: ValueSet[] = [];
     this.state.selectedValues.forEach((value) => {
-      const domainSet = fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
-      if (domainSet === undefined) {
+      const domainSetFound =
+        fp.find(domainSet => domainSet.domain === value.domain, valuesByDomain);
+      if (domainSetFound === undefined) {
         valuesByDomain.push({domain: value.domain, values: {items: [{value: value.value}]}});
+      } else {
+        domainSetFound.values.items.push({value: value.value});
       }
     });
     const dataSet: DataSet = {
@@ -285,9 +293,29 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       cohortIds: this.state.selectedCohortIds,
       values: valuesByDomain,
     };
-    // console.log(dataSet);
+    console.log(dataSet);
     const sqlQueries = await dataSetApi().getQueryFromDataSet(namespace, id, dataSet);
+    console.log(sqlQueries);
     this.setState({queries: sqlQueries.queryList});
+  }
+
+  buildQueryConfig(np: NamedParameterEntry) {
+    if (np.value) {
+      return <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{'{'}
+        {'\'name\': "' + np.value.name + '"'},
+        {'\'parameterType\': {\'type\': "' + np.value.parameterType + '"' +
+          (np.value.parameterValue instanceof Object ?
+            ',\'arrayType\': {\'type\': "' + np.value.arrayType + '"},' :
+            '') + '}'},
+        {'\'parameterValue\': {'}{((np.value.parameterValue instanceof Object) ?
+          '\'arrayValues\': [' + np.value.parameterValue.map(
+            npv => '{\'value\': ' + npv.parameterValue + '}') + ']' :
+          '\'value\': "' + np.value.parameterValue + '"')}{'}},'}
+      </div>;
+    } else {
+      return;
+    }
   }
 
   render() {
@@ -426,21 +454,17 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                   &nbsp;&nbsp;{'\''}query{'\''}: {'{'} <br />
                   &nbsp;&nbsp;&nbsp;&nbsp;{'\''}parameterMode{'\''}: {'\''}NAMED{'\''}, <br />
                   &nbsp;&nbsp;&nbsp;&nbsp;{'\''}queryParameters{'\''}: [
-                {query.namedParameters.map(np =>
-                  <div>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{'{'}
-                  {'\'name\': "' + np.value.name + '"'},
-                  {'\'parameterType\': {\'type\': "' + np.value.parameterType + '"}'},
-                  {'\'parameterValue\': {\'value\': "\'' + np.value.parameterValue + '\'"}'}
-                  {'},'}
-                  </div>)
+                {query.namedParameters.map((np) => {
+                  return this.buildQueryConfig(np);
+                }
+                )
                 }
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
                   {'}'}
                   {'}'}
                 </div>
                 <div>
-                  df = pandas.read_gbq(sql, configuration=query_config)
+                  df = pandas.read_gbq(sql, dialect="standard", configuration=query_config)
                 </div>
               </React.Fragment>)}
           </div>
@@ -466,6 +490,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
                  onCancel={() => this.closeEditModal()}/>}
     </React.Fragment>;
   }
+
 
 });
 
