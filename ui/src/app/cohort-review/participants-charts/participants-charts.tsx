@@ -1,3 +1,4 @@
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -110,6 +111,7 @@ export interface ParticipantsChartsState {
 
 export const ParticipantsCharts = withCurrentWorkspace()(
   class extends React.Component<ParticipantsChartsProps, ParticipantsChartsState>  {
+    nameRefs: Array<any> = [];
     constructor(props: ParticipantsChartsProps) {
       super(props);
       this.state = {
@@ -125,11 +127,17 @@ export const ParticipantsCharts = withCurrentWorkspace()(
       cohortReviewApi().getCohortChartData(namespace, id, cohort.id, +cdrVersionId, domain, 10)
         .then(resp => {
           const data = resp.items.map(item => {
+            this.nameRefs.push(React.createRef());
             const percentCount = Math.round((item.count / resp.count) * 100);
             return {...item, percentCount};
           });
           this.setState({data, loading: false});
         });
+    }
+
+    checkWidth = (i: number) => {
+      const el = this.nameRefs[i].current;
+      return el ? el.offsetWidth >= el.scrollWidth : false;
     }
 
     render() {
@@ -143,16 +151,11 @@ export const ParticipantsCharts = withCurrentWorkspace()(
           <div className='graph-border'>
             {data.map((item, i) => (
               <div key={i} className='row' style={{display: '-webkit-box'}}>
-                {item.name.length >= 40 &&
-                  <div style={styles.dataHeading}>
+                <TooltipTrigger content={<div>{item.name}</div>} disabled={this.checkWidth(i)}>
+                  <div style={styles.dataHeading} ref={this.nameRefs[i]}>
                     {item.name}
                   </div>
-                }
-                {item.name.length < 40 &&
-                  <div style={styles.dataHeading}>
-                    {item.name}
-                  </div>
-                }
+                </TooltipTrigger>
                 <div style={styles.dataBarContainer}>
                   <div style={styles.lightGrey}>
                     <div style={{...styles.dataBlue, width: `${item.percentCount}%`}}>

@@ -1,7 +1,6 @@
 import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {typeToTitle} from 'app/cohort-search/utils';
 import {reactStyles} from 'app/utils';
-import * as moment from 'moment';
 import * as React from 'react';
 
 const css = `
