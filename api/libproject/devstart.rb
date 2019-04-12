@@ -736,17 +736,17 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
   :fn => ->(*args) { generate_criteria_table(*args) }
 })
 
-def generate_criteria_table_new(*args)
+def generate_cb_criteria_tables(*args)
   common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-criteria-table-new.sh} + args
+  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-cb-criteria-tables.sh} + args
 end
 
 Common.register_command({
-                            :invocation => "generate-criteria-table-new",
-                            :description => "generate-criteria-table-new --bq-project <PROJECT> --bq-dataset <DATASET>
+  :invocation => "generate-cb-criteria-tables",
+  :description => "generate-cb-criteria-tables --bq-project <PROJECT> --bq-dataset <DATASET>
 Generates the criteria table in big query. Used by cohort builder. Must be run once when a new cdr is released",
-                            :fn => ->(*args) { generate_criteria_table_new(*args) }
-                        })
+  :fn => ->(*args) { generate_cb_criteria_tables(*args) }
+})
 
 def generate_private_cdr_counts(*args)
   common = Common.new
