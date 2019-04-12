@@ -259,12 +259,8 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
     if (fp.some(selectObj, origSelected)) {
-      console.log('REMOVING');
-      console.log(domainValue);
       this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
     } else {
-      console.log('ADDING');
-      console.log(domainValue);
       this.setState({selectedValues: (origSelected).concat(selectObj)});
     }
   }
@@ -293,9 +289,7 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
       cohortIds: this.state.selectedCohortIds,
       values: valuesByDomain,
     };
-    console.log(dataSet);
     const sqlQueries = await dataSetApi().getQueryFromDataSet(namespace, id, dataSet);
-    console.log(sqlQueries);
     this.setState({queries: sqlQueries.queryList});
   }
 
