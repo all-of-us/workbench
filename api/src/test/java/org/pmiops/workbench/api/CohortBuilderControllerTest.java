@@ -7,9 +7,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.CriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CriteriaDao;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cdr.model.Criteria;
 import org.pmiops.workbench.cdr.model.CriteriaAttribute;
 import org.pmiops.workbench.cdr.model.Concept;
@@ -31,8 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -84,6 +84,9 @@ public class CohortBuilderControllerTest {
   private CriteriaDao criteriaDao;
 
   @Autowired
+  private CBCriteriaDao cbCriteriaDao;
+
+  @Autowired
   private CriteriaAttributeDao criteriaAttributeDao;
 
   @Autowired
@@ -106,7 +109,7 @@ public class CohortBuilderControllerTest {
         new ElasticSearchService(criteriaDao, cloudStorageService, configProvider);
 
     controller = new CohortBuilderController(bigQueryService,
-      participantCounter, criteriaDao, criteriaAttributeDao,
+      participantCounter, criteriaDao, cbCriteriaDao, criteriaAttributeDao,
       cdrVersionDao, genderRaceEthnicityConceptProvider, cdrVersionService,
       elasticSearchService, configProvider);
 
@@ -271,7 +274,7 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTerm() throws Exception {
-    Criteria criteria = new Criteria()
+    CBCriteria criteria = new CBCriteria()
       .code("001")
       .count("10")
       .conceptId("123")
@@ -284,7 +287,7 @@ public class CohortBuilderControllerTest {
       .attribute(Boolean.FALSE)
       .standard(true)
       .synonyms("LP12*\"[rank1]\"");
-    Criteria labMeasurement = criteriaDao.save(criteria);
+    CBCriteria labMeasurement = cbCriteriaDao.save(criteria);
 
     assertEquals(
       createResponseCriteria(labMeasurement),
@@ -454,6 +457,7 @@ public class CohortBuilderControllerTest {
       .path("1.2.3.4");
   }
 
+  //TODO:Remove freemabd
   private org.pmiops.workbench.model.Criteria createResponseCriteria(Criteria criteria) {
     return new org.pmiops.workbench.model.Criteria()
       .code(criteria.getCode())
@@ -469,6 +473,27 @@ public class CohortBuilderControllerTest {
       .subtype(criteria.getSubtype())
       .type(criteria.getType())
       .path(criteria.getPath());
+  }
+
+  private org.pmiops.workbench.model.Criteria createResponseCriteria(CBCriteria cbCriteria) {
+    return new org.pmiops.workbench.model.Criteria()
+      .code(cbCriteria.getCode())
+      .conceptId(cbCriteria.getConceptId() == null ? null : new Long(cbCriteria.getConceptId()))
+      .count(new Long(cbCriteria.getCount()))
+      .domainId(cbCriteria.getDomainId())
+      .group(cbCriteria.getGroup())
+      .hasAttributes(cbCriteria.getAttribute())
+      .id(cbCriteria.getId())
+      .name(cbCriteria.getName())
+      .parentId(cbCriteria.getParentId())
+      .selectable(cbCriteria.getSelectable())
+      .subtype(cbCriteria.getSubtype())
+      .type(cbCriteria.getType())
+      .path(cbCriteria.getPath())
+      .hasAncestorData(cbCriteria.getAncestorData())
+      .hasHierarchy(cbCriteria.getHierarchy())
+      .isStandard(cbCriteria.getStandard())
+      .value(cbCriteria.getValue());
   }
 
   private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(CriteriaAttribute criteriaAttribute) {

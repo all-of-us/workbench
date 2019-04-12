@@ -183,29 +183,6 @@ public class CriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTerm() throws Exception {
-    //match on code
-    Criteria criteria = new Criteria()
-      .code("001")
-      .count("10")
-      .conceptId("123")
-      .domainId(DomainType.MEASUREMENT.toString())
-      .group(true)
-      .selectable(true)
-      .name("chol blah")
-      .parentId(0)
-      .type(CriteriaType.CPT4.toString())
-      .attribute(Boolean.FALSE)
-      .standard(true)
-      .synonyms("001");
-    criteriaDao.save(criteria);
-    List<Criteria> conditions =
-      criteriaDao.findCriteriaByDomainAndSearchTerm(DomainType.MEASUREMENT.toString(), true,"001", new PageRequest(0, 10));
-    assertEquals(1, conditions.size());
-    assertEquals(criteria, conditions.get(0));
-  }
-
-  @Test
   public void findCriteriaByTypeAndSubtypeOrderByIdAsc() throws Exception {
     Criteria parentDemo = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "Race/Ethnicity", "Race/Ethnicity", 0, true, true, null);
     Criteria demoCriteria1 = createCriteria(TreeType.DEMO.name(), TreeSubType.RACE.name(), "AF", "African", parentDemo.getId(), false, true, null);
