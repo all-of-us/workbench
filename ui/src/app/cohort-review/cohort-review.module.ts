@@ -21,12 +21,7 @@ import {DetailPage} from './detail-page/detail-page';
 import {DetailTabTableComponent} from './detail-tab-table/detail-tab-table.component';
 import {DetailTabsComponent} from './detail-tabs/detail-tabs.component';
 import {IndividualParticipantsChartsComponent} from './individual-participants-charts/individual-participants-charts';
-import {OverviewPage} from './overview-page/overview-page';
 import {PageLayout} from './page-layout/page-layout';
-import {ParticipantsChartsComponent} from './participants-charts/participant-charts';
-import {QueryCohortDefinitionComponent} from './query-cohort-definition/query-cohort-definition.component';
-import {QueryDescriptiveStatsComponent} from './query-descriptive-stats/query-descriptive-stats.component';
-import {QueryReportComponent} from './query-report/query-report.component';
 import {CohortReviewRoutingModule} from './routing/routing.module';
 import {SidebarContentComponent} from './sidebar-content/sidebar-content.component';
 import {TablePage} from './table-page/table-page';
@@ -55,9 +50,7 @@ import {TablePage} from './table-page/table-page';
     /* Scaffolding and Pages */
     CreateReviewPage,
     DetailPage,
-    OverviewPage,
     PageLayout,
-    QueryReportComponent,
     TablePage,
 
     /* Annotations */
@@ -71,9 +64,6 @@ import {TablePage} from './table-page/table-page';
     DetailHeaderComponent,
     DetailTabsComponent,
     DetailTabTableComponent,
-    ParticipantsChartsComponent,
-    QueryCohortDefinitionComponent,
-    QueryDescriptiveStatsComponent
   ],
   providers: [
     {

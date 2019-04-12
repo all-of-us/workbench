@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 
+import {QueryReport} from 'app/cohort-review/query-report/query-report.component';
 import {
   cohortReviewStore,
   filterStateStore,
@@ -8,12 +9,18 @@ import {
   vocabOptions
 } from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {Button} from 'app/components/buttons';
 import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {
+  currentCohortStore,
+  navigate,
+  navigateByUrl,
+  urlParamsStore
+} from 'app/utils/navigation';
 
 import {
   CohortStatus,
@@ -54,9 +61,10 @@ const styles = reactStyles({
     fontSize: '20px',
     fontWeight: 600,
     color: '#262262',
+    overflow: 'auto',
   },
   description: {
-    margin: '0.5rem 0',
+    margin: '0 0 0.25rem',
     color: '#000000',
   },
   container: {
@@ -164,6 +172,7 @@ export interface ParticipantsTableState {
   sortOrder: number;
   total: number;
   filters: any;
+  cohortDescription: boolean;
 }
 
 export const ParticipantsTable = withCurrentWorkspace()(
@@ -178,7 +187,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
         sortField: 'participantId',
         sortOrder: 1,
         total: null,
-        filters: filterStateStore.getValue().participants
+        filters: filterStateStore.getValue().participants,
+        cohortDescription: false,
       };
       this.filterInput = fp.debounce(300, () => this.getTableData());
     }
@@ -356,10 +366,15 @@ export const ParticipantsTable = withCurrentWorkspace()(
       }[gender];
     }
 
-    backToCohort() {
-      const {id, namespace} = this.props.workspace;
-      const {cid} = urlParamsStore.getValue();
-      navigateByUrl( `/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+    goBack() {
+      const {cohortDescription} = this.state;
+      if (cohortDescription) {
+        this.setState({cohortDescription: false});
+      } else {
+        const {id, namespace} = this.props.workspace;
+        const {cid} = urlParamsStore.getValue();
+        navigateByUrl(`/workspaces/${namespace}/${id}/cohorts/build?cohortId=${cid}`);
+      }
     }
 
     onRowClick = (event: any) => {
@@ -462,7 +477,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {data, loading, page, sortField, sortOrder, total} = this.state;
+      const {cohortDescription, data, loading, page, sortField, sortOrder, total} = this.state;
       const cohort = currentCohortStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
@@ -498,33 +513,54 @@ export const ParticipantsTable = withCurrentWorkspace()(
       });
       return <div>
         <style>{css}</style>
-        <button
-          style={styles.backBtn}
-          type='button'
-          title='Go back to cohort'
-          onClick={() => this.backToCohort()}>
-          Back to cohort
-        </button>
-        <h4 style={styles.title}>Review Sets for {cohort.name}</h4>
-        <div style={styles.description}>{cohort.description}</div>
-        {data && <DataTable
-          style={styles.table}
-          value={data}
-          first={start}
-          sortField={sortField}
-          sortOrder={sortOrder}
-          lazy
-          paginator
-          onPage={this.onPage}
-          paginatorTemplate={data.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={data.length ? pageReportTemplate : ''}
-          rows={rows}
-          totalRecords={total}
-          onRowClick={this.onRowClick}
-          scrollable
-          scrollHeight='calc(100vh - 350px)'>
-          {columns}
-        </DataTable>}
+        {!cohortDescription && <React.Fragment>
+          <button
+            style={styles.backBtn}
+            type='button'
+            onClick={() => this.goBack()}>
+            Back to cohort
+          </button>
+          <h4 style={styles.title}>
+            Review Sets for {cohort.name}
+            <Button
+              style={{float: 'right', height: '1.3rem'}}
+              disabled={!data}
+              onClick={() => this.setState({cohortDescription: true})}>
+              Cohort Description
+            </Button>
+          </h4>
+          <div style={styles.description}>
+            {cohort.description}
+          </div>
+          {data && <DataTable
+            style={styles.table}
+            value={data}
+            first={start}
+            sortField={sortField}
+            sortOrder={sortOrder}
+            lazy
+            paginator
+            onPage={this.onPage}
+            paginatorTemplate={data.length ? paginatorTemplate : ''}
+            currentPageReportTemplate={data.length ? pageReportTemplate : ''}
+            rows={rows}
+            totalRecords={total}
+            onRowClick={this.onRowClick}
+            scrollable
+            scrollHeight='calc(100vh - 350px)'>
+            {columns}
+          </DataTable>}
+        </React.Fragment>}
+        {cohortDescription && <React.Fragment>
+          <button
+            style={styles.backBtn}
+            type='button'
+            onClick={() => this.goBack()}>
+            Back to review set
+          </button>
+          <h4 style={styles.title}>{cohort.name} Description</h4>
+          <QueryReport/>
+        </React.Fragment>}
         {loading && <SpinnerOverlay />}
       </div>;
     }
