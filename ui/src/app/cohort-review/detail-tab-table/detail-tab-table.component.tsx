@@ -159,7 +159,7 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  codeResults: Array<any>;
+  codeResults: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -377,11 +377,11 @@ export const DetailTabTable = withCurrentWorkspace()(
         const {filterState: {vocab}} = this.props;
         const codeType = `${vocab}Code`;
         const codeResults = data.reduce((acc, item) => {
-          if (item[codeType].toLowerCase().includes(input.toLowerCase()) && !acc.includes(input)) {
-            acc.push(item[codeType]);
+          if (item[codeType].toLowerCase().includes(input.toLowerCase())) {
+            acc.add(item[codeType]);
           }
           return acc;
-        }, []);
+        }, new Set());
         this.setState({codeResults});
       }
     }
@@ -440,10 +440,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (columnFilters[column].includes('Select All')) {
         columnFilters[column] = options.map(opt => opt.name);
       }
-      const checkboxes = codeResults && codeResults.length === 0
+      const checkboxes = codeResults && codeResults.size === 0
         ? <em style={styles.noResults}>No matching codes</em>
         : options.reduce((acc, opt, i) => {
-          if (!codeResults || codeResults.includes(opt.name)) {
+          if (!codeResults || codeResults.has(opt.name)) {
             acc.push(<React.Fragment key={i}>
               {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
