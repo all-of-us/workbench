@@ -1,27 +1,25 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {Subject} from 'rxjs/Subject';
+import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {queryParamsStore, urlParamsStore} from 'app/utils/navigation';
-import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 
-import {ToolTipComponent} from 'app/views/tooltip/component';
+import {AlertDanger} from 'app/components/alert';
+import {Clickable} from 'app/components/buttons';
+import {WorkspaceCardBase} from 'app/components/card';
+import {ClrIcon} from 'app/components/icons';
+import {CheckBox, TextInput} from 'app/components/inputs';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {conceptsApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceData} from 'app/services/workspace-storage.service';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {
   Concept,
-  ConceptsService,
   Domain,
   DomainCount,
   DomainInfo,
-  StandardConceptFilter,
   VocabularyCount,
-} from 'generated';
-import {ReactWrapperBase, withCurrentWorkspace, reactStyles} from "app/utils";
-import {WorkspaceData} from "app/services/workspace-storage.service";
-import {ClrIcon} from "app/components/icons";
-import {ConceptSetsList} from "../concept-set-list/component";
-import {CheckBox, TextInput} from 'app/components/inputs';
-import {AlertClose, AlertDanger} from "../../components/alert";
+} from 'generated/fetch';
 
 const styles = reactStyles({
   searchBar: {
@@ -33,14 +31,44 @@ const styles = reactStyles({
     fontSize: '16px',
     lineHeight: '19px',
     paddingLeft: '2rem'
+  },
+  domainBoxHeader: {
+    color: '#2691D0',
+    fontSize: '18px',
+    lineHeight: '22px'
+  },
+  conceptText: {
+    marginTop: '0.3rem',
+    fontSize: '14px',
+    fontWeight: 400,
+    color: '#4A4A4A',
+    display: 'flex',
+    flexDirection: 'column'
   }
 });
+
+const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
+  standardConceptsOnly: boolean}> =
+    ({conceptDomainInfo, standardConceptsOnly}) => {
+      const conceptCount = standardConceptsOnly ?
+          conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
+      return <WorkspaceCardBase style={{minWidth: '11rem'}}>
+        <div style={styles.domainBoxHeader}>{conceptDomainInfo.name}</div>
+        <div style={styles.conceptText}>
+          <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
+          <b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
+        <Clickable>Browse Domain</Clickable>
+      </WorkspaceCardBase>;
+    };
 
 
 export const ConceptWrapper = withCurrentWorkspace()(
   class extends React.Component<{workspace: WorkspaceData},
       {loadingDomains: boolean, currentSearchString: string, standardConceptsOnly: boolean,
-        searching: boolean, showSearchError: boolean}> {
+        searching: boolean, showSearchError: boolean, selectedDomain: DomainCount,
+        conceptDomainList: Array<DomainInfo>, conceptDomainCounts: Array<DomainCount>,
+        concepts: Array<ConceptInfo>, conceptsCache: Array<ConceptCacheSet>,
+        selectedConceptDomainMap: Map<String, number>}> {
 
     constructor(props) {
       super(props);
@@ -49,8 +77,53 @@ export const ConceptWrapper = withCurrentWorkspace()(
         currentSearchString: '',
         standardConceptsOnly: true,
         searching: false,
-        showSearchError: false
+        showSearchError: false,
+        selectedDomain: {
+          name: '',
+          domain: undefined,
+          conceptCount: 0
+        },
+        conceptDomainList: [],
+        conceptDomainCounts: [],
+        concepts: [],
+        conceptsCache: [],
+        selectedConceptDomainMap: new Map<string, number>()
       };
+    }
+
+    componentDidMount() {
+      this.loadDomains();
+    }
+
+    async loadDomains() {
+      const {namespace, id} = this.props.workspace;
+      try {
+        const conceptsCache: ConceptCacheSet[] = [];
+        const conceptDomainCounts: DomainCount[] = [];
+        const resp = await conceptsApi().getDomainInfo(namespace, id);
+        this.setState({conceptDomainList: resp.items});
+        resp.items.forEach((domain) => {
+          conceptsCache.push({
+            domain: domain.domain,
+            items: [],
+            vocabularyList: []
+          });
+          conceptDomainCounts.push({
+            domain: domain.domain,
+            name: domain.name,
+            conceptCount: 0
+          });
+        });
+        this.setState({
+          conceptsCache: conceptsCache,
+          conceptDomainCounts: conceptDomainCounts,
+          selectedDomain: conceptDomainCounts[0],
+          loadingDomains: false});
+
+        console.log(this.state);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     searchButton(e) {
@@ -66,6 +139,18 @@ export const ConceptWrapper = withCurrentWorkspace()(
       }
     }
 
+    selectDomain(domainCount: DomainCount) {
+      if (!this.state.selectedConceptDomainMap[domainCount.domain]) {
+        this.setState(fp.update(['selectedConceptDomainMap', domainCount.domain], fp.pull(0)));
+      }
+      this.setState({selectedDomain: domainCount});
+      this.setConceptsAndVocabularies();
+    }
+
+    setConceptsAndVocabularies() {
+      // TODO
+    }
+
     searchConcepts() {
       // TODO
     }
@@ -75,10 +160,17 @@ export const ConceptWrapper = withCurrentWorkspace()(
       this.searchConcepts();
     }
 
+    browseDomain(domain: DomainInfo) {
+      const {conceptDomainCounts} = this.state;
+      this.setState({currentSearchString: '',
+        selectedDomain: conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain)});
+      this.searchConcepts();
+    }
+
     render() {
-      const {standardConceptsOnly, showSearchError} = this.state;
+      const {loadingDomains, conceptDomainList, standardConceptsOnly, showSearchError} = this.state;
       return <React.Fragment>
-        <div style={{display: 'flex', alignItems: 'center', marginTop: '1.5%'}}>
+        <div style={{display: 'flex', alignItems: 'center', marginTop: '1.5%', marginBottom: '6%'}}>
           <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
             fill: '#216FB4', left: 'calc(1rem + 4.5%)'}}/>
           <TextInput style={styles.searchBar}
@@ -94,6 +186,14 @@ export const ConceptWrapper = withCurrentWorkspace()(
         {showSearchError && <AlertDanger style={{width: '64.3%', marginLeft: '1%'}}>
           Minimum concept search length is three characters.
         </AlertDanger>}
+        {loadingDomains ? <SpinnerOverlay/> :
+          (<div style={{display: 'flex', flexDirection: 'row', width: '94.3%'}}>
+            {conceptDomainList.map((domain) => {
+              return <DomainBox conceptDomainInfo={domain}
+                                standardConceptsOnly={standardConceptsOnly}/>;
+            })}
+          </div>)
+        }
       </React.Fragment>;
     }
   }
@@ -168,14 +268,6 @@ export class ConceptsComponent extends ReactWrapperBase {
 //   conceptsSavedText = '';
 //
 //   conceptAddOpen = false;
-//
-//   constructor(
-//     private conceptsService: ConceptsService,
-//   ) {
-//     this.closeAddModal = this.closeAddModal.bind(this);
-//     this.afterConceptsSaved = this.afterConceptsSaved.bind(this);
-//     this.openAddModal = this.openAddModal.bind(this);
-//   }
 //
 //   ngOnInit(): void {
 //     const {ns, wsid} = urlParamsStore.getValue();
