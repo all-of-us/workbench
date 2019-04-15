@@ -28,7 +28,7 @@ const styles = reactStyles({
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.6rem'
+    lineHeight: '0.75rem'
   },
   columnHeader: {
     background: '#f4f4f4',
@@ -55,15 +55,18 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     width: '2rem',
   },
-
   filterIcon: {
-    color: '#0086C1',
-    fontSize: '0.5rem',
+    marginLeft: '0.3rem',
+    padding: '2px 2px 1px 1px',
+    borderRadius: '50%',
+    fontWeight: 600,
     float: 'right'
   },
   sortIcon: {
+    marginTop: '4px',
     color: '#2691D0',
-    fontSize: '0.4rem'
+    fontSize: '0.5rem',
+    float: 'right'
   },
   overlayHeader: {
     padding: '0.3rem',
@@ -113,6 +116,17 @@ const styles = reactStyles({
     opacity: 0.5,
   },
 });
+const filterIcons = {
+  active: {
+    ...styles.filterIcon,
+    background: '#8bc990',
+    color: '#ffffff',
+  },
+  default: {
+    ...styles.filterIcon,
+    color: '#262262',
+  }
+};
 const rows = 25;
 const domains = [
   DomainType.CONDITION,
@@ -145,7 +159,7 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
-  codeResults: Array<any>;
+  codeResults: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -315,6 +329,18 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => visits === item.visitType);
       }
       /* Column filters */
+      const columnCheck = [
+        'domain',
+        `${vocab}Vocabulary`,
+        `${vocab}Code`,
+        `${vocab}Name`,
+        'value',
+        'numMentions',
+        'firstMention',
+        'lastMention',
+        'itemTime',
+        'survey'
+      ];
       const columnFilters = filterState.tabs[domain];
       if (!columnFilters) {
         if (data.length < start + rows) {
@@ -323,19 +349,23 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({filteredData: data, start: start});
       } else {
         for (const col in columnFilters) {
-          if (Array.isArray(columnFilters[col])) {
-            if (!columnFilters[col].length) {
-              data = [];
-              break;
-            } else if (!columnFilters[col].includes('Select All')
-              && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-              data = data.filter(row => columnFilters[col].includes(row[col]));
-            }
-          } else {
-            if (columnFilters[col]) {
-              data = data.filter(
-                row => row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase())
-              );
+          // Makes sure we only filter by correct concept type (standard/source)
+          if (columnCheck.includes(col)) {
+            if (Array.isArray(columnFilters[col])) {
+              // checkbox filters
+              if (!columnFilters[col].length) {
+                data = [];
+                break;
+              } else if (!columnFilters[col].includes('Select All')
+                && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+                data = data.filter(row => columnFilters[col].includes(row[col]));
+              }
+            } else {
+              // text filters
+              if (columnFilters[col]) {
+                data = data.filter(row =>
+                  row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+              }
             }
           }
         }
@@ -363,11 +393,11 @@ export const DetailTabTable = withCurrentWorkspace()(
         const {filterState: {vocab}} = this.props;
         const codeType = `${vocab}Code`;
         const codeResults = data.reduce((acc, item) => {
-          if (item[codeType].includes(input) && !acc.includes(input)) {
-            acc.push(item[codeType]);
+          if (item[codeType].toLowerCase().includes(input.toLowerCase())) {
+            acc.add(item[codeType]);
           }
           return acc;
-        }, []);
+        }, new Set());
         this.setState({codeResults});
       }
     }
@@ -426,10 +456,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (columnFilters[column].includes('Select All')) {
         columnFilters[column] = options.map(opt => opt.name);
       }
-      const checkboxes = codeResults && codeResults.length === 0
+      const checkboxes = codeResults && codeResults.size === 0
         ? <em style={styles.noResults}>No matching codes</em>
         : options.reduce((acc, opt, i) => {
-          if (!codeResults || codeResults.includes(opt.name)) {
+          if (!codeResults || codeResults.has(opt.name)) {
             acc.push(<React.Fragment key={i}>
               {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
@@ -441,9 +471,12 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           return acc;
         }, []);
+      const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
       return <span>
-        <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>
+        <i className='pi pi-filter'
+           style={filtered ? filterIcons.active : filterIcons.default}
+           onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           {column === `${vocab}Code` && <div style={styles.textSearch}>
@@ -469,12 +502,15 @@ export const DetailTabTable = withCurrentWorkspace()(
     textFilter(column: string) {
       const {domain, filterState} = this.props;
       const columnFilters = filterState.tabs[domain];
+      const filtered = !!columnFilters[column];
       let fl: any, ip: any;
       return <span>
-        <i className='pi pi-filter' onClick={(e) => {
-          fl.toggle(e);
-          ip.focus();
-        }}/>
+        <i className='pi pi-filter'
+          style={filtered ? filterIcons.active : filterIcons.default}
+          onClick={(e) => {
+            fl.toggle(e);
+            ip.focus();
+          }}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           <div style={styles.textSearch}>
