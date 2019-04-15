@@ -47,7 +47,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    console.log(this.listSearch);
     this.subscription = Observable.combineLatest(
       queryParamsStore, currentWorkspaceStore
     ).subscribe(([params, workspace]) => {
