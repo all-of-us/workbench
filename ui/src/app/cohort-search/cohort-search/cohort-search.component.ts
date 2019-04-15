@@ -7,6 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import {environment} from 'environments/environment';
 import {List} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 
@@ -41,10 +42,12 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   includeSize: number;
   tempLength = {};
   private subscription;
+  listSearch = environment.enableCBListSearch;
 
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
+    console.log(this.listSearch);
     this.subscription = Observable.combineLatest(
       queryParamsStore, currentWorkspaceStore
     ).subscribe(([params, workspace]) => {

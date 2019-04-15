@@ -29,4 +29,5 @@
     </div>
   </div>
 </div>
-<app-modal></app-modal>
+<app-modal *ngIf="!listSearch"></app-modal>
+<app-list-modal *ngIf="listSearch"></app-list-modal>
