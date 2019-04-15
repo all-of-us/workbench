@@ -45,14 +45,6 @@ public class CriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByTypeAndId() throws Exception {
-    Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, false, null);
-    criteriaDao.save(icd9Criteria1);
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(icd9Criteria1.getType(), icd9Criteria1.getConceptId(), false);
-    assertEquals(icd9Criteria1, criteria);
-  }
-
-  @Test
   public void findCriteriaByParentId() throws Exception {
     Criteria icd9Criteria1 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "002", "blah chol", 0, false, true, null);
     Criteria icd9Criteria2 = createCriteria(TreeType.ICD9.name(), TreeSubType.CM.name(), "001", "chol blah", 0, true, true, null).conceptId("123").synonyms("001");
@@ -87,16 +79,6 @@ public class CriteriaDaoTest {
     final List<Criteria> pmList =
       criteriaDao.findCriteriaByTypeAndParentIdOrderByIdAsc(TreeType.PM.name(), 0L);
     assertEquals(pmCriteria, pmList.get(0));
-  }
-
-  @Test
-  public void getPPICriteriaParent() throws Exception {
-    Criteria ppiCriteriaParent = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "", "Race", 3272493, true, false, "3272493").conceptId("1586140");
-    criteriaDao.save(ppiCriteriaParent);
-    Criteria ppiCriteriaChild = createCriteria(TreeType.PPI.name(), TreeSubType.BASICS.name(), "1586146", "White Alone", ppiCriteriaParent.getId(), false, true, ppiCriteriaParent.getPath() + "." + ppiCriteriaParent.getId()).conceptId("1586140");
-    criteriaDao.save(ppiCriteriaChild);
-    Criteria criteria = criteriaDao.findCriteriaByTypeAndConceptIdAndSelectable(ppiCriteriaChild.getType(), ppiCriteriaChild.getConceptId(), false);
-    assertEquals(ppiCriteriaParent, criteria);
   }
 
   @Test
