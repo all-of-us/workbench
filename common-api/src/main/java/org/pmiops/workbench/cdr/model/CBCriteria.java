@@ -1,19 +1,19 @@
 package org.pmiops.workbench.cdr.model;
 
-import javax.persistence.GenerationType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
 
 
 @Entity
-@Table(name = "criteria")
-public class Criteria {
+@Table(name = "cb_criteria")
+public class CBCriteria {
 
     private long id;
     private long parentId;
@@ -29,6 +29,10 @@ public class Criteria {
     private boolean attribute;
     private String path;
     private String synonyms;
+    private String value;
+    private boolean hierarchy;
+    private boolean ancestorData;
+    private boolean standard;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +45,7 @@ public class Criteria {
         this.id = id;
     }
 
-    public Criteria id(long id) {
+    public CBCriteria id(long id) {
         this.id = id;
         return this;
     }
@@ -55,7 +59,7 @@ public class Criteria {
         this.parentId = parentId;
     }
 
-    public Criteria parentId(long parentId) {
+    public CBCriteria parentId(long parentId) {
         this.parentId = parentId;
         return this;
     }
@@ -69,7 +73,7 @@ public class Criteria {
         this.subtype = subtype;
     }
 
-    public Criteria subtype(String subtype) {
+    public CBCriteria subtype(String subtype) {
         this.subtype = subtype;
         return this;
     }
@@ -83,7 +87,7 @@ public class Criteria {
         this.type = type;
     }
 
-    public Criteria type(String type) {
+    public CBCriteria type(String type) {
         this.type = type;
         return this;
     }
@@ -97,7 +101,7 @@ public class Criteria {
         this.code = code;
     }
 
-    public Criteria code(String code) {
+    public CBCriteria code(String code) {
         this.code = code;
         return this;
     }
@@ -111,7 +115,7 @@ public class Criteria {
         this.name = name;
     }
 
-    public Criteria name(String name) {
+    public CBCriteria name(String name) {
         this.name = name;
         return this;
     }
@@ -125,7 +129,7 @@ public class Criteria {
         this.group = group;
     }
 
-    public Criteria group(boolean group) {
+    public CBCriteria group(boolean group) {
         this.group = group;
         return this;
     }
@@ -139,7 +143,7 @@ public class Criteria {
         this.selectable = selectable;
     }
 
-    public Criteria selectable(boolean selectable) {
+    public CBCriteria selectable(boolean selectable) {
         this.selectable = selectable;
         return this;
     }
@@ -153,7 +157,7 @@ public class Criteria {
         this.count = count;
     }
 
-    public Criteria count(String count) {
+    public CBCriteria count(String count) {
         this.count = count;
         return this;
     }
@@ -167,7 +171,7 @@ public class Criteria {
         this.conceptId = conceptId;
     }
 
-    public Criteria conceptId(String conceptId) {
+    public CBCriteria conceptId(String conceptId) {
         this.conceptId = conceptId;
         return this;
     }
@@ -181,7 +185,7 @@ public class Criteria {
         this.domainId = domainId;
     }
 
-    public Criteria domainId(String domainId) {
+    public CBCriteria domainId(String domainId) {
         this.domainId = domainId;
         return this;
     }
@@ -195,7 +199,7 @@ public class Criteria {
         this.attribute = attribute;
     }
 
-    public Criteria attribute(boolean attribute) {
+    public CBCriteria attribute(boolean attribute) {
         this.attribute = attribute;
         return this;
     }
@@ -209,7 +213,7 @@ public class Criteria {
         this.path = path;
     }
 
-    public Criteria path(String path) {
+    public CBCriteria path(String path) {
         this.path = path;
         return this;
     }
@@ -223,8 +227,64 @@ public class Criteria {
         this.synonyms = synonyms;
     }
 
-    public Criteria synonyms(String synonyms) {
+    public CBCriteria synonyms(String synonyms) {
         this.synonyms = synonyms;
+        return this;
+    }
+
+    @Column(name = "value")
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public CBCriteria value(String value) {
+        this.value = value;
+        return this;
+    }
+
+    @Column(name = "has_hierarchy")
+    public boolean getHierarchy() {
+        return hierarchy;
+    }
+
+    public void setHierarchy(boolean hierarchy) {
+        this.hierarchy = hierarchy;
+    }
+
+    public CBCriteria hierarchy(boolean hierarchy) {
+        this.hierarchy = hierarchy;
+        return this;
+    }
+
+    @Column(name = "has_ancestor_data")
+    public boolean getAncestorData() {
+        return ancestorData;
+    }
+
+    public void setAncestorData(boolean ancestorData) {
+        this.ancestorData = ancestorData;
+    }
+
+    public CBCriteria ancestorData(boolean ancestorData) {
+        this.ancestorData = ancestorData;
+        return this;
+    }
+
+    @Column(name = "is_standard")
+    public boolean getStandard() {
+        return standard;
+    }
+
+    public void setStandard(boolean standard) {
+        this.standard = standard;
+    }
+
+    public CBCriteria standard(boolean standard) {
+        this.standard = standard;
         return this;
     }
 
@@ -232,7 +292,7 @@ public class Criteria {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Criteria criteria = (Criteria) o;
+        CBCriteria criteria = (CBCriteria) o;
         return parentId == criteria.parentId &&
           group == criteria.group &&
           selectable == criteria.selectable &&
@@ -243,13 +303,17 @@ public class Criteria {
           Objects.equals(conceptId, criteria.conceptId) &&
           Objects.equals(domainId, criteria.domainId) &&
           Objects.equals(attribute, criteria.attribute) &&
-          Objects.equals(path, criteria.path);
+          Objects.equals(path, criteria.path) &&
+          Objects.equals(value, criteria.value) &&
+          Objects.equals(hierarchy, criteria.hierarchy) &&
+          Objects.equals(ancestorData, criteria.ancestorData) &&
+          Objects.equals(standard, criteria.standard);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId,
-          domainId, attribute, path);
+          domainId, attribute, path, value, hierarchy, ancestorData, standard);
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.Criteria;
-import org.pmiops.workbench.cdr.model.CriteriaId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
