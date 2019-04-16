@@ -4,6 +4,7 @@ import {currentConceptSetStore, currentWorkspaceStore, navigate, urlParamsStore}
 import {ConceptTableComponent} from 'app/views/concept-table/component';
 
 import {
+  Concept,
   ConceptSet,
   ConceptSetsService,
   WorkspaceAccessLevel,
@@ -35,6 +36,7 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
   removing = false;
   removeSubmitting = false;
   confirmDeleting = false;
+  selectedConcepts: Concept[];
 
   constructor(
     private conceptSetsService: ConceptSetsService,
@@ -117,16 +119,18 @@ export class ConceptSetDetailsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // TO-DO: This is a dummy function created because @Output in conceptTable is removed
+  onSelectConcepts(concepts) {
+    this.selectedConcepts = concepts;
+  }
+
   get canEdit(): boolean {
     return this.accessLevel === WorkspaceAccessLevel.OWNER
         || this.accessLevel === WorkspaceAccessLevel.WRITER;
   }
 
   get selectedConceptsCount(): number {
-    if (!this.conceptTable) {
-      return 0;
-    }
-    return this.conceptTable.selectedConcepts.length;
+    return !this.conceptTable ? 0 : this.conceptTable.selectedConcepts.length;
   }
 
   get disableRemoveFab(): boolean {

@@ -94,7 +94,7 @@
       <app-concept-table [concepts]="concepts"
                          [loading]="searchLoading" [searchTerm]="currentSearchString"
                          [placeholderValue]="placeholderValue"
-                         (getSelectedConcepts)="selectConcept($event)">
+                         [getSelectedConcepts]="selectConcept">
       </app-concept-table>
       <app-sliding-fab [expanded]=addToSetText [submitFunction]="openAddModal"
                        [disable]="activeSelectedConceptCount === 0" [iconShape]="'plus'">

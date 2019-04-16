@@ -28,7 +28,9 @@ interface ConceptTableState {
   selectedVocabularies: string[];
 }
 
-export class ConceptTable extends React.Component<ConceptTableProps, ConceptTableState> {
+export class ConceptTable extends React.Component<{concepts: Concept[];
+  loading: boolean; onSelectedChanged: Function; },
+    {selectedConcepts: Concept[]; selectedVocabularies: string[];}> {
 
   private dt: DataTable;
   private filterImageSrc: string;
@@ -67,7 +69,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
 
   componentWillReceiveProps(nextProps) {
     // The purpose of this is to reset the filter on vocabulary on change of domain/concepts
-    if (nextProps.concepts !==  this.props.concepts) {
+    if ((nextProps.concepts !==  this.props.concepts)) {
       if (this.state.selectedVocabularies) {
         this.dt.filter([], 'vocabularyId', 'in');
         this.setState({selectedVocabularies : []});
@@ -76,13 +78,15 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
   }
 
   render() {
+    const {selectedConcepts, selectedVocabularies} = this.state;
+    const {concepts, loading} = this.props;
     const vocabularyFilter = <PopupTrigger
         side='bottom'
         content={
           this.distinctVocabulary().map((vocabulary, i) => {
             return <div key={i}>
               <CheckBox style={{marginLeft: '0.2rem', marginRight: '0.3rem'}}
-                        checked={fp.includes(vocabulary, this.state.selectedVocabularies)}
+                        checked={fp.includes(vocabulary, selectedVocabularies)}
                         onChange={(checked) => this.filterByVocabulary(vocabulary)}>
               </CheckBox>
               <label style={{marginRight: '0.2rem'}}>{vocabulary}</label></div>;
@@ -95,9 +99,9 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
-      <DataTable ref={(el) => this.dt = el} value={this.props.concepts}
-                 paginator={true} rows={50} scrollable={true} loading={this.props.loading}
-                 selection={this.state.selectedConcepts}
+      <DataTable emptyMessage='' ref={(el) => this.dt = el} value={concepts}
+                 paginator={true} rows={50} scrollable={true} loading={loading}
+                 selection={selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
               selectionMode='multiple' />
@@ -121,7 +125,7 @@ export class ConceptTable extends React.Component<ConceptTableProps, ConceptTabl
 })
 export class ConceptTableComponent extends ReactWrapperBase {
   @Input() concepts: Object[];
-  @Output() getSelectedConcepts = new EventEmitter<any>(true);
+  @Input() getSelectedConcepts;
   @Input() loading = false;
   @Input() searchTerm = '';
   @Input() placeholderValue = '';
@@ -135,6 +139,6 @@ export class ConceptTableComponent extends ReactWrapperBase {
 
   onSelectedChanged(selectedConcepts: Concept[]) {
     this.selectedConcepts = selectedConcepts;
-    this.getSelectedConcepts.emit(selectedConcepts);
+    this.getSelectedConcepts(selectedConcepts);
   }
 }

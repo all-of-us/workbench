@@ -186,13 +186,14 @@ export class ConceptHomepageComponent implements OnInit {
   }
 
   searchConcepts() {
+    this.concepts = [];
+    this.searchLoading = true;
     if (this.conceptTable) {
       this.conceptTable.selectedConcepts = [];
       this.conceptsToAdd = [];
       this.rebuildSelectedConceptDomainMap();
     }
     this.searching = true;
-    this.searchLoading = true;
     this.placeholderValue = this.noConceptsConstant;
     let standardConceptFilter: StandardConceptFilter;
     if (this.standardConceptsOnly) {
@@ -227,7 +228,6 @@ export class ConceptHomepageComponent implements OnInit {
           conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
-            this.searchLoading = false;
             this.conceptDomainCounts = response.domainCounts;
             this.selectedDomain =
               this.conceptDomainCounts.find(domainCount => domainCount.domain === request.domain);
