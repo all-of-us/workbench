@@ -28,10 +28,7 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetDb.setCohortSetId(cohortIdList);
     dataSetDb.setConceptSetId(conceptIdList);
     dataSetDb.setValues(values);
-    try {
-      dataSetDb = dataSetDao.save(dataSetDb);
-    } catch (Exception ex) {
-    }
+    dataSetDb = dataSetDao.save(dataSetDb);
     return dataSetDb;
   }
 }

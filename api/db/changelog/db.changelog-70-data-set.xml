@@ -39,7 +39,7 @@
         referencedColumnNames="workspace_id"
         referencedTableName="workspace"/>
 
-    <createTable tableName="data_set_concept_set_id">
+    <createTable tableName="data_set_concept_set">
       <column name="data_set_id" type="bigint">
         <constraints nullable="false"/>
       </column>
@@ -48,7 +48,7 @@
       </column>
     </createTable>
     
-    <createTable tableName="data_set_cohort_id">
+    <createTable tableName="data_set_cohort">
       <column name="data_set_id" type="bigint">
         <constraints nullable="false"/>
       </column>
@@ -59,39 +59,39 @@
 
      <createTable tableName="data_set_values">
       <column name="data_set_id" type="bigint">
-        <constraints primaryKey="true" nullable="false"/>
+        <constraints nullable="false"/>
       </column>
       <column name="domain_id" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
-      <column name="values" type="VARCHAR(20)">
+      <column name="value" type="VARCHAR(400)">
         <constraints nullable="false"/>
       </column>
     </createTable>
 
     <addForeignKeyConstraint baseColumnNames="concept_set_id"
-      baseTableName="data_set_concept_set_id"
+      baseTableName="data_set_concept_set"
       constraintName="fk_data_set_concept_set_id"
       onDelete="CASCADE"
       referencedColumnNames="concept_set_id"
       referencedTableName="concept_set"/>
 
     <addForeignKeyConstraint baseColumnNames="data_set_id"
-      baseTableName="data_set_concept_set_id"
+      baseTableName="data_set_concept_set"
       constraintName="fk_data_set_concept_data_set_id"
       onDelete="CASCADE"
       referencedColumnNames="data_set_id"
       referencedTableName="data_set"/>   
 
     <addForeignKeyConstraint baseColumnNames="cohort_id"
-      baseTableName="data_set_cohort_id"
+      baseTableName="data_set_cohort"
       constraintName="fk_data_set_cohort_cohort_id"
       onDelete="CASCADE"
       referencedColumnNames="cohort_id"
       referencedTableName="cohort"/>
 
     <addForeignKeyConstraint baseColumnNames="data_set_id"
-      baseTableName="data_set_cohort_id"
+      baseTableName="data_set_cohort"
       constraintName="fk_data_set_cohort_data_set_id"
       onDelete="CASCADE"
       referencedColumnNames="data_set_id"

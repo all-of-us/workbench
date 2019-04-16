@@ -4,6 +4,10 @@ import * as React from 'react';
 
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
+import {AlertDanger} from 'app/components/alert';
+import {TextInput} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
@@ -77,16 +81,18 @@ export const ValueListItem: React.FunctionComponent <
 
 export const DataSet = withCurrentWorkspace()(class extends React.Component<
   {workspace: WorkspaceData},
-  {creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
+  {name: string, creatingConceptSet: boolean, conceptDomainList: DomainInfo[],
     conceptSetList: ConceptSet[], cohortList: Cohort[], loadingResources: boolean,
     confirmDeleting: boolean, editing: boolean, resource: RecentResource,
     rType: ResourceType, selectedConceptSetIds: number[], selectedCohortIds: number[],
-    valueSets: ValueSet[], selectedValues: DomainValuePair[]
+    valueSets: ValueSet[], selectedValues: DomainValuePair[], save: boolean, nameRequired: boolean,
+    conflictDataSetName: boolean, missingDataSetInfo: boolean
   }> {
 
   constructor(props) {
     super(props);
     this.state = {
+      name: '',
       creatingConceptSet: false,
       conceptDomainList: undefined,
       conceptSetList: [],
@@ -100,6 +106,10 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       selectedCohortIds: [],
       valueSets: [],
       selectedValues: [],
+      save: false,
+      nameRequired: false,
+      conflictDataSetName: false,
+      missingDataSetInfo: false
     };
   }
 
@@ -274,15 +284,29 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
   }
 
   async saveDataSet() {
-
+    if (!this.state.name) {
+      this.setState({nameRequired: true});
+      return;
+    }
+    this.setState({nameRequired: false, conflictDataSetName: false, missingDataSetInfo: false });
     const req = {
-      name: 'name',
-      description: 'description',
+      name: this.state.name,
+      description: '',
       conceptSetIds: this.state.selectedConceptSetIds,
       cohortIds: this.state.selectedCohortIds,
       values: this.state.selectedValues
     };
-    await dataSetApi().createDataSet(this.props.workspace.namespace, this.props.workspace.id, req);
+    try {
+      await dataSetApi().createDataSet(
+          this.props.workspace.namespace, this.props.workspace.id, req);
+      this.setState({save: false});
+    } catch (e) {
+      if (e.status === 409) {
+        this.setState({conflictDataSetName: true});
+      } else if (e.status === 400) {
+        this.setState({missingDataSetInfo: true});
+      }
+    }
   }
 
   render() {
@@ -404,7 +428,8 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
               of your data table based on the variable and value you selected above</div>
             {/* Button disabled until this functionality added*/}
             <Button style={{position: 'absolute', right: '1rem', top: '.25rem'}}
-                    onClick ={() => this.saveDataSet()}>
+                    onClick ={() => this.setState({save: true, nameRequired: false,
+                      conflictDataSetName: false, missingDataSetInfo: false})}>
               SAVE DATASET
             </Button>
           </div>
@@ -430,6 +455,30 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
       <EditModal resource={resource}
                  onEdit={e => this.receiveEdit(e)}
                  onCancel={() => this.closeEditModal()}/>}
+      {this.state.save && <Modal>
+        <ModalTitle>Save Dataset</ModalTitle>
+        <ModalBody>
+          <div>
+            {this.state.nameRequired && <AlertDanger> Name is required </AlertDanger>}
+            {this.state.conflictDataSetName &&
+            <AlertDanger> Data state with name {this.state.name} already exist</AlertDanger>
+            }
+            {this.state.missingDataSetInfo &&
+            <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
+            }
+            <TextInput type='text' autoFocus placeholder='Dataset Name'
+                       value = {this.state.name}
+                       onChange={v => this.setState({name: v})}/>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick = {() => this.setState({save: false})}
+                  type='secondary' style={{marginRight: '2rem'}}>
+            Cancel
+          </Button>
+          <Button type='primary' onClick={() => this.saveDataSet()}>SAVE</Button>
+        </ModalFooter>
+      </Modal>}
     </React.Fragment>;
   }
 

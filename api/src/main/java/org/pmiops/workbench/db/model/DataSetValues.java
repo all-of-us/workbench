@@ -9,15 +9,16 @@ import javax.persistence.Table;
 public class DataSetValues {
 
   private String domainId;
-  private String values;
+  private String value;
 
   public DataSetValues() {
   }
 
-  public DataSetValues(String domainId, String values) {
+  public DataSetValues(String domainId, String value) {
     this.domainId = domainId;
-    this.values = values;
+    this.value = value;
   }
+
 
   @Column(name = "domain_id")
   public String getDomainId() {
@@ -29,12 +30,12 @@ public class DataSetValues {
   }
 
 
-  @Column(name = "values")
-  public String getValues() {
-    return values;
+  @Column(name = "value")
+  public String getValue() {
+    return value;
   }
 
-  public void setValues(String values) {
-    this.values = values;
+  public void setValue(String value) {
+    this.value = value;
   }
 }

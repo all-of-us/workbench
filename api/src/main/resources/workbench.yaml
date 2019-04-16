@@ -1368,8 +1368,12 @@ paths:
             $ref: "#/definitions/DataSet"
         400:
           description: Invalid data set request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         409:
           description: Data set with same name exist
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -2059,10 +2063,8 @@ definitions:
           here; it makes sense to specify concepts in these domains in cohort criteria, but
           there isn't much value in having concept sets defined for them.
         $ref: "#/definitions/Domain"
-      values:
-        type: "array"
-        items:
-          $ref: "#/definitions/DomainValue"
+      value:
+        type: string
 
   DomainInfoResponse:
     type: object

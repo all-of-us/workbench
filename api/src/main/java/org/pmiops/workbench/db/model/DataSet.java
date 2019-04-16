@@ -107,7 +107,7 @@ public class DataSet {
   }
 
   @ElementCollection
-  @CollectionTable(name = "data_set_concept_set_id", joinColumns = @JoinColumn(name = "data_set_id"))
+  @CollectionTable(name = "data_set_concept_set", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "concept_set_id")
   public List<Long> getConceptSetId() {
     return conceptSetId;
@@ -118,7 +118,7 @@ public class DataSet {
   }
 
   @ElementCollection
-  @CollectionTable(name = "data_set_cohort_id", joinColumns = @JoinColumn(name = "data_set_id"))
+  @CollectionTable(name = "data_set_cohort", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "cohort_id")
   public List<Long> getCohortSetId() {
     return cohortSetId;
