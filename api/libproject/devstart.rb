@@ -216,7 +216,7 @@ Common.register_command({
   :fn => ->() { run_local_migrations() }
 })
 
-def start_local_api()
+def start_local_a pi()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
@@ -1740,7 +1740,7 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = get_cdr_versions_file(ctx.project)
-    update_cdr_versions_for_project("../config/#{versions_file}", op.opts.dry_run)
+    update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
