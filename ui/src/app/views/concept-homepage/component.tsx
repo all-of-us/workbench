@@ -64,13 +64,15 @@ export class ConceptHomepage extends React.Component<{}, {showConcepts: boolean}
       <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{display: 'flex', flexDirection: 'row'}}>
           <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
-                onClick={() => this.setState({showConcepts: true})}>
+            onClick={() => this.setState({showConcepts: true})}
+            data-test-id='concepts-link'>
             Concepts
           </Clickable>
-          <Clickable style={{...
-                (showConcepts ? styles.headerLinks : activatedStyles.headerActivated),
-            marginLeft: '1rem'}}
-                onClick={() => this.setState({showConcepts: false})}>
+          <Clickable
+            style={{...(showConcepts ? styles.headerLinks : activatedStyles.headerActivated),
+              marginLeft: '1rem'}}
+            onClick={() => this.setState({showConcepts: false})}
+            data-test-id='concept-sets-link'>
             Concept Sets
           </Clickable>
           <TooltipTrigger content={tooltipContent}>

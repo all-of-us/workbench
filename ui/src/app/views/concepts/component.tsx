@@ -52,7 +52,7 @@ const DomainBox: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
     ({conceptDomainInfo, standardConceptsOnly}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
-      return <WorkspaceCardBase style={{minWidth: '11rem'}}>
+      return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
         <div style={styles.domainBoxHeader}>{conceptDomainInfo.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: '30px'}}>{conceptCount}</span> concepts in this domain. <p/>
@@ -119,8 +119,6 @@ export const ConceptWrapper = withCurrentWorkspace()(
           conceptDomainCounts: conceptDomainCounts,
           selectedDomain: conceptDomainCounts[0],
           loadingDomains: false});
-
-        console.log(this.state);
       } catch (e) {
         console.error(e);
       }
