@@ -17,6 +17,7 @@ import {DemographicsComponent} from './demographics/demographics.component';
 import {GenderChartComponent} from './gender-chart/gender-chart.component';
 import {ListModalComponent} from './list-modal/list-modal.component';
 import {ListSearchComponent} from './list-search/list-search.component';
+import {ListSelectionInfoComponent} from './list-selection-info/list-selection-info.component';
 import {ModalComponent} from './modal/modal.component';
 import {ModifierPageComponent} from './modifier-page/modifier-page.component';
 import {MultiSelectComponent} from './multi-select/multi-select.component';
@@ -72,6 +73,7 @@ const routes: Routes = [{
     GenderChartComponent,
     ListModalComponent,
     ListSearchComponent,
+    ListSelectionInfoComponent,
     ModalComponent,
     ModifierPageComponent,
     MultiSelectComponent,

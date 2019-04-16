@@ -69,7 +69,7 @@
                   </div>
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-list-search [selections]="listSelections" [wizard]="wizard"></crit-list-search>
+                    <crit-list-search [selections]="selectionIds" [wizard]="wizard"></crit-list-search>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
@@ -103,14 +103,19 @@
             <div class="panel-right-container">
               <h5 class="selection-title">Selected Criteria</h5>
               <div class="panel-right selected">
-                <ng-container *ngFor="let type of objectKeys(selections); let i = index">
-                  <span class="selection-header" *ngIf="isCondOrProc">{{selectionHeader(type)}}</span>
-                  <crit-selection-info
-                    *ngFor="let parameter of selections[type]; let p = index"
-                    [indexes]="[i,p]"
-                    [parameter]="parameter">
-                  </crit-selection-info>
-                </ng-container>
+                <crit-list-selection-info
+                  *ngFor="let parameter of selectionList; let p = index"
+                  [indexes]="[p]"
+                  [parameter]="parameter">
+                </crit-list-selection-info>
+                <!--<ng-container *ngFor="let type of objectKeys(selections); let i = index">-->
+                  <!--<span class="selection-header" *ngIf="isCondOrProc">{{selectionHeader(type)}}</span>-->
+                  <!--<crit-list-selection-info-->
+                    <!--*ngFor="let parameter of selectionList; let p = index"-->
+                    <!--[indexes]="[i,p]"-->
+                    <!--[parameter]="parameter">-->
+                  <!--</crit-list-selection-info>-->
+                <!--</ng-container>-->
               </div>
               <div class="footer">
                 <button type="button"
