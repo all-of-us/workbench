@@ -166,12 +166,12 @@ def dev_up()
   common.status "Updating workbench configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_file=../config/config_local.json
+    -Pconfig_key=main -Pconfig_file=config/config_local.json
   }
   common.status "Updating CDR schema configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json
+    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
   run_api()
 end
@@ -193,6 +193,8 @@ def setup_local_environment()
 end
 
 # TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
+#
+# This command is only ever meant to be run via CircleCI; see .circleci/config.yml
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
@@ -203,14 +205,14 @@ def run_local_migrations()
   Dir.chdir('db-cdr/generate-cdr') do
     common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --version-flag cdr}
   end
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
-  common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['../config/cdr_versions_local.json',false]}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :updateCdrVersions -PappArgs=['config/cdr_versions_local.json',false]}
 end
 
 Common.register_command({
   :invocation => "run-local-migrations",
-  :description => "Runs DB migrations with the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :description => "Runs DB migrations with the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => ->() { run_local_migrations() }
 })
 
@@ -1151,12 +1153,10 @@ def set_authority(cmd_name, *args)
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info setAuthority
-       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-    end
+    common = Common.new
+    common.run_inline %W{
+      gradle --info setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
   end
 end
 
@@ -1172,12 +1172,10 @@ def set_authority_local(cmd_name, *args)
   op = authority_options(cmd_name, args)
   op.parse.validate
 
-  Dir.chdir("tools") do
-    common = Common.new
-    common.run_inline %W{
-        gradle --info setAuthority
-       -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
-  end
+  common = Common.new
+  common.run_inline %W{
+      gradle --info setAuthority
+     -PappArgs=['#{op.opts.email}','#{op.opts.authority}',#{op.opts.remove},#{op.opts.dry_run}]}
 end
 
 Common.register_command({
@@ -1210,12 +1208,10 @@ def delete_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-         gradle --info manageClusters
-        -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
-    end
+    common = Common.new
+    common.run_inline %W{
+       gradle --info manageClusters
+      -PappArgs=['delete','#{api_url}','#{op.opts.min_age_days}','#{op.opts.cluster_ids}',#{op.opts.dry_run}]}
   end
 end
 
@@ -1234,12 +1230,10 @@ def list_clusters(cmd_name, *args)
 
   api_url = get_leo_api_url(gcc.project)
   ServiceAccountContext.new(gcc.project).run do
-    Dir.chdir("tools") do
-      common = Common.new
-      common.run_inline %W{
-        gradle --info manageClusters -PappArgs=['list','#{api_url}']
-      }
-    end
+    common = Common.new
+    common.run_inline %W{
+      gradle --info manageClusters -PappArgs=['list','#{api_url}']
+    }
   end
 end
 
@@ -1332,12 +1326,10 @@ def update_cdr_version_options(cmd_name, args)
 end
 
 def update_cdr_versions_for_project(versions_file, dry_run)
-  Dir.chdir("tools") do
-    common = Common.new
-    common.run_inline %W{
-      gradle --info updateCdrVersions
-     -PappArgs=['#{versions_file}',#{dry_run}]}
-  end
+  common = Common.new
+  common.run_inline %W{
+    gradle --info updateCdrVersions
+   -PappArgs=['#{versions_file}',#{dry_run}]}
 end
 
 def update_cdr_versions(cmd_name, *args)
@@ -1669,10 +1661,8 @@ def load_config(project, dry_run = false)
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  Dir.chdir("tools") do
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
-  end
+  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
+  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
@@ -1750,7 +1740,7 @@ def deploy(cmd_name, args)
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = get_cdr_versions_file(ctx.project)
-    update_cdr_versions_for_project("../config/#{versions_file}", op.opts.dry_run)
+    update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
