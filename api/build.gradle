@@ -274,6 +274,7 @@ compileGeneratedJava.dependsOn generateMoodleClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
+war.dependsOn compileGeneratedJava
 war.dependsOn generate_local_appengine_web_xml
 
 clean.doFirst {
