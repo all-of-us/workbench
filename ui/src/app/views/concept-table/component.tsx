@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Clickable} from 'app/components/buttons';
 import {CheckBox} from 'app/components/inputs';
 import {PopupTrigger} from 'app/components/popups';
