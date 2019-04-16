@@ -23,15 +23,6 @@ def dbProperties = [
   'spring.datasource.password': '${workbench_db_password}'
 ]
 
-// Run this via ./project.rb update-cloud-config or (locally) docker-compose run update-config,
-// which is automatically run during api/project.rb dev-up.
-task loadConfig(type: JavaExec) {
-  classpath sourceSets.main.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ConfigLoader"
-  systemProperties = dbProperties
-  args config_key, config_file
-}
-
 // See api/project.rb set-authority.
 // This evals the value of the -PappArgs flag given to Gradle and passes the
 // result to the Java main method.
@@ -140,6 +131,7 @@ sourceSets {
                   // Exclude all tools which are built as part of the main Gradle config.
                   'org/pmiops/workbench/tools/BackfillGSuiteUserData.java',
                   'org/pmiops/workbench/tools/FetchFireCloudUserProfile.java',
+                  'org/pmiops/workbench/tools/ConfigLoader.java',
                   'org/pmiops/workbench/tools/elastic/*.java',
       ]
     }

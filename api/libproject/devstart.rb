@@ -166,12 +166,12 @@ def dev_up()
   common.status "Updating workbench configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_file=../config/config_local.json
+    -Pconfig_key=main -Pconfig_file=config/config_local.json
   }
   common.status "Updating CDR schema configuration..."
   common.run_inline %W{
     docker-compose run update-config
-    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json
+    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
   run_api()
 end
@@ -193,6 +193,8 @@ def setup_local_environment()
 end
 
 # TODO(RW-605): This command doesn't actually execute locally as it assumes a docker context.
+#
+# This command is only ever meant to be run via CircleCI; see .circleci/config.yml
 def run_local_migrations()
   setup_local_environment
   # Runs migrations against the local database.
@@ -203,14 +205,14 @@ def run_local_migrations()
   Dir.chdir('db-cdr/generate-cdr') do
     common.run_inline %W{./init-new-cdr-db.sh --cdr-db-name cdr --version-flag cdr}
   end
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
-  common.run_inline %W{gradle :tools:loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=../config/config_local.json}
+  common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json}
   common.run_inline %W{gradle :tools:updateCdrVersions -PappArgs=['../config/cdr_versions_local.json',false]}
 end
 
 Common.register_command({
   :invocation => "run-local-migrations",
-  :description => "Runs DB migrations with the local MySQL instance; does not use docker. You must set MYSQL_ROOT_PASSWORD before running this.",
+  :description => "Runs DB migrations with the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
   :fn => ->() { run_local_migrations() }
 })
 
@@ -1669,10 +1671,8 @@ def load_config(project, dry_run = false)
 
   common = Common.new
   common.status "Loading #{config_json} into database..."
-  Dir.chdir("tools") do
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=../config/#{config_json}})
-    run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=../config/cdm/cdm_5_2.json})
-  end
+  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
+  run_inline_or_log(dry_run, %W{gradle --info loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
