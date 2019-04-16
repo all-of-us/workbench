@@ -1,3 +1,2 @@
-include ':common-api', ':tools'
-project(':tools').projectDir = new File(settingsDir, 'tools')
+include ':common-api'
 project(':common-api').projectDir = new File(settingsDir, '../common-api')
