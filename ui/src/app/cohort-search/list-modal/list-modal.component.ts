@@ -14,7 +14,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
-import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
@@ -52,6 +52,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   attributesNode: Map<any, any> = Map();
   selections = {};
+  listSelections: Array<string>;
   objectKeys = Object.keys;
   open = false;
   noSelection = true;
@@ -72,13 +73,14 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.subscription = wizardStore
       .filter(wizard => !!wizard)
       .subscribe(wizard => {
-        console.log(wizard);
         // reset to default each time the modal is opened
         this.mode = 'tree';
         this.title = wizard.domain;
         this.wizard = wizard;
         this.open = true;
       });
+
+    this.subscription.add(selectionsStore.subscribe(list => this.listSelections = list));
 
     this.subscription.add(this.preview$.subscribe(prev => this.preview = prev));
 

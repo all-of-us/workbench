@@ -1,12 +1,10 @@
 import {Component, Input} from '@angular/core';
+import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {DomainType} from 'generated/fetch';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -24,69 +22,101 @@ const styles = reactStyles({
     padding: '0 0.5rem',
     background: 'transparent',
     border: 0,
+  },
+  selectIcon: {
+    color: 'rgb(98, 164, 32)',
+    cursor: 'pointer'
+  },
+  selectedIcon: {
+    color: 'rgb(98, 164, 32)',
+    opacity: 0.4,
+    cursor: 'not-allowed'
   }
 });
 
-const columns = [{
-  field: 'name',
-  header: 'Name'
-}, {
-  field: 'type',
-  header: 'Vocab'
-}, {
-  field: 'count',
-  header: 'Count'
-}];
-
 interface ListSearchProps {
+  selections: Array<string>;
   workspace: WorkspaceData;
   wizard: any;
 }
 
 export const ListSearch = withCurrentWorkspace()(
-  class extends React.Component<ListSearchProps, {data: any}> {
+  class extends React.Component<ListSearchProps, {data: any, selections: Array<string>}> {
     constructor(props: any) {
       super(props);
-      this.state = {data: null};
-    }
-
-    componentDidMount(): void {
-      // const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-      // cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-      //   +cdrVersionId, domain, 'amino', true
-      // ).then(resp => console.log(resp));
+      this.state = {data: null, selections: selectionsStore.getValue()};
     }
 
     handleInput = (event) => {
       if (event.key === 'Enter') {
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        console.log(domain);
         cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
           +cdrVersionId, domain, event.target.value, true
         ).then(resp => {
-          console.log(resp);
           const data = resp.items.length ? resp.items : null;
           this.setState({data});
         });
       }
     }
 
+    selectItem = (row: any) => {
+      const {wizard} = this.props;
+      let {selections} = this.props;
+      const paramId = this.getParamId(row);
+      if (!selections.includes(paramId)) {
+        wizard.item.searchParameters.push({paramId, ...row});
+        selections = [paramId, ...selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
+        // this.setState({selections});
+      }
+    }
+
+    isSelected = (row: any) => {
+      const {selections} = this.props;
+      const paramId = this.getParamId(row);
+      return selections.includes(paramId);
+    }
+
+    getParamId(row: any) {
+      return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
+    }
+
     render() {
       const {data} = this.state;
-      const cols = columns.map((col) => {
-        return <Column
-          key={col.field}
-          field={col.field}
-          header={col.header}/>;
-      });
       return <div>
         <div style={styles.searchBar}>
           <ClrIcon shape='search'/>
           <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
         </div>
-        {data && <DataTable value={data}>
-          {cols}
-        </DataTable>}
+        {data && <table>
+          <thead>
+            <tr>
+              <th> </th>
+              <th>Name</th>
+              <th>Vocab</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, r) => {
+              return <tr key={r}>
+                <td>
+                  {this.isSelected(row) &&
+                    <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
+                  {!this.isSelected(row) &&
+                    <ClrIcon style={styles.selectIcon}
+                      shape='plus-circle' size='20'
+                      onClick={() => this.selectItem(row)}
+                    />}
+                </td>
+                <td>{row.name}</td>
+                <td>{row.type}</td>
+                <td>{row.count}</td>
+              </tr>;
+            })}
+          </tbody>
+        </table>}
       </div>;
     }
   }
@@ -97,8 +127,9 @@ export const ListSearch = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ListSearchComponent extends ReactWrapperBase {
+  @Input('selections') selections: ListSearchProps['selections'];
   @Input('wizard') wizard: ListSearchProps['wizard'];
   constructor() {
-    super(ListSearch, ['wizard']);
+    super(ListSearch, ['selections', 'wizard']);
   }
 }
