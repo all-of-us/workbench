@@ -93,7 +93,7 @@
       </div>
       <app-concept-table [concepts]="concepts"
                          [loading]="searchLoading" [searchTerm]="currentSearchString"
-                         [placeholderValue]="placeholderValue"
+                         [placeholderValue]="noConceptsConstant"
                          [getSelectedConcepts]="selectConcept">
       </app-concept-table>
       <app-sliding-fab [expanded]=addToSetText [submitFunction]="openAddModal"

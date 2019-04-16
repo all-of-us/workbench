@@ -19,7 +19,7 @@ const styles = reactStyles({
 
 
 export class ConceptTable extends React.Component<{concepts: Concept[];
-  loading: boolean; onSelectedChanged: Function; },
+  loading: boolean; placeholderValue: string, onSelectedChanged: Function; },
   {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;
@@ -69,7 +69,7 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
 
   render() {
     const {selectedConcepts, selectedVocabularies} = this.state;
-    const {concepts, loading} = this.props;
+    const {concepts, placeholderValue, loading} = this.props;
     const vocabularyFilter = <PopupTrigger
         side='bottom'
         content={
@@ -89,8 +89,8 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
-      <DataTable emptyMessage='' ref={(el) => this.dt = el} value={concepts}
-                 paginator={true} rows={50} scrollable={true} loading={loading}
+      <DataTable emptyMessage={this.props.loading ? '' : this.props.placeholderValue} ref={(el) => this.dt = el}
+                 value={concepts} paginator={true} rows={50} scrollable={true} loading={loading}
                  selection={selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
@@ -123,7 +123,7 @@ export class ConceptTableComponent extends ReactWrapperBase {
   selectedConcepts: Array<any> = [];
 
   constructor() {
-    super(ConceptTable, ['concepts', 'loading', 'onSelectedChanged']);
+    super(ConceptTable, ['concepts', 'loading', 'placeholderValue', 'onSelectedChanged']);
     this.onSelectedChanged = this.onSelectedChanged.bind(this);
   }
 
