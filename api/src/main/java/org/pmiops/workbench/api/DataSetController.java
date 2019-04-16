@@ -40,6 +40,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+class ValuesLinkingPair {
+  private List<String> selects;
+  private List<String> joins;
+
+  ValuesLinkingPair(List<String> selects, List<String> joins) {
+    this.selects = selects;
+    this.joins = joins;
+  }
+
+  public List<String> getSelects() {
+    return this.selects;
+  }
+
+  public List<String> getJoins() {
+    return this.joins;
+  }
+}
+
 @RestController
 public class DataSetController implements DataSetApiDelegate {
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
@@ -80,7 +98,6 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<DataSetQueryResponse> getQueryFromDataSet(String ns, String wsid, DataSet dataSet) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(ns, wsid, WorkspaceAccessLevel.READER);
 
-
     List<Cohort> cohortsSelected = this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds());
     List<ConceptSet> conceptSetsSelected = this.conceptSetDao.findAllByConceptSetIdIn(dataSet.getConceptSetIds());
     if (cohortsSelected == null || cohortsSelected.size() == 0 || conceptSetsSelected == null || conceptSetsSelected.size() == 0) {
@@ -91,7 +108,8 @@ public class DataSetController implements DataSetApiDelegate {
     // Below constructs the union of all cohort queries
     String cohortQueries = cohortsSelected.stream().map(c -> {
       SearchRequest searchRequest = new Gson().fromJson(getCohortDefinition(c), SearchRequest.class);
-      QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest)));
+      QueryJobConfiguration participantIdQuery = participantCounter.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+      QueryJobConfiguration participantQueryConfig = bigQueryService.filterBigQueryConfig(participantIdQuery);
       AtomicReference<String> participantQuery = new AtomicReference<>(participantQueryConfig.getQuery());
 
       participantQueryConfig.getNamedParameters().forEach((npKey, npValue) -> {
@@ -117,37 +135,11 @@ public class DataSetController implements DataSetApiDelegate {
       List<NamedParameterEntry> parameters = new ArrayList<>();
       cohortParameters.forEach((key, value) -> parameters.add(generateResponseFromQueryParameter(key, value)));
 
-      List<String> values = valueSetOpt.get()
-          .getValues().getItems().stream()
-          .map(domainValue -> domainValue.getValue()).collect(Collectors.toList());
+      ValuesLinkingPair valuesLinkingPair = this.getValueSelectsAndJoins(valueSetOpt.get(), d);
 
-      String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
-
-      String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-      Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
-
-      valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
-      valuesQueryParams.put("pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
-
-      TableResult valuesLinking = bigQueryService.executeQuery(
-          bigQueryService
-              .filterBigQueryConfig(QueryJobConfiguration
-                  .newBuilder(valuesQuery)
-                  .setNamedParameters(valuesQueryParams)
-                  .setUseLegacySql(false)
-                  .build()));
-
-      List<String> valueJoins = new ArrayList<>();
-      List<String> valueSelects = new ArrayList<>();
-      for (Iterator<FieldValueList> i = valuesLinking.getValues().iterator(); i.hasNext(); ) {
-        FieldValueList value = i.next();
-        valueJoins.add(value.get("JOIN_VALUE").getStringValue());
-        valueSelects.add(value.get("OMOP_SQL").getStringValue());
-      }
-      query = query.concat(valueSelects.stream().collect(Collectors.joining(", ")))
+      query = query.concat(valuesLinkingPair.getSelects().stream().collect(Collectors.joining(", ")))
           .concat(" ")
-          .concat(valueJoins.stream().distinct().collect(Collectors.joining(" ")));
-
+          .concat(valuesLinkingPair.getJoins().stream().distinct().collect(Collectors.joining(" ")));
 
       // CONCEPT SETS HERE:
       String conceptSetQueries = conceptSetsSelected.stream().filter(cs -> d == cs.getDomainEnum())
@@ -161,6 +153,49 @@ public class DataSetController implements DataSetApiDelegate {
 
     resp.setQueryList(respQueryList);
     return ResponseEntity.ok(new DataSetQueryResponse().queryList(respQueryList));
+  }
+
+  @VisibleForTesting
+  ValuesLinkingPair getValueSelectsAndJoins(ValueSet valueSet, Domain d) {
+    List<String> values = valueSet
+        .getValues().getItems().stream()
+        .map(domainValue -> domainValue.getValue()).collect(Collectors.toList());
+
+    String domainAsName = d.toString().charAt(0) + d.toString().substring(1).toLowerCase();
+
+    String valuesQuery = "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
+    Map<String, QueryParameterValue> valuesQueryParams = new HashMap<>();
+
+    valuesQueryParams.put("pDomain", QueryParameterValue.string(domainAsName));
+    valuesQueryParams.put("pValuesList", QueryParameterValue.array(values.toArray(new String[0]), String.class));
+
+    TableResult valuesLinking = bigQueryService.executeQuery(
+        bigQueryService
+            .filterBigQueryConfig(QueryJobConfiguration
+                .newBuilder(valuesQuery)
+                .setNamedParameters(valuesQueryParams)
+                .setUseLegacySql(false)
+                .build()));
+
+    List<String> valueJoins = new ArrayList<>();
+    List<String> valueSelects = new ArrayList<>();
+
+    boolean doesNotContainFrom = true;
+
+    for (Iterator<FieldValueList> i = valuesLinking.getValues().iterator(); i.hasNext(); ) {
+      FieldValueList value = i.next();
+      valueJoins.add(value.get("JOIN_VALUE").getStringValue());
+      if (value.get("JOIN_VALUE").getStringValue().contains(" from ")) {
+        doesNotContainFrom = false;
+      }
+      valueSelects.add(value.get("OMOP_SQL").getStringValue());
+    }
+
+    if (doesNotContainFrom) {
+      throw new BadRequestException("You must include at least one value from the parent table");
+    }
+
+    return new ValuesLinkingPair(valueSelects, valueJoins);
   }
 
   private NamedParameterEntry generateResponseFromQueryParameter(String key, QueryParameterValue value) {
