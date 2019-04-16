@@ -145,7 +145,7 @@ def read_db_vars(gcc)
   })
 end
 
-def dev_up(*args)
+def dev_up()
   common = Common.new
 
   account = get_auth_login_account()
@@ -181,7 +181,7 @@ Common.register_command({
   :invocation => "dev-up",
   :description => "Brings up the development environment, including db migrations and config " \
      "update. (You can use run-api instead if database and config are up-to-date.)",
-  :fn => Proc.new { |*args| dev_up(*args) }
+  :fn => ->() { dev_up() }
 })
 
 def start_api_reqs()
