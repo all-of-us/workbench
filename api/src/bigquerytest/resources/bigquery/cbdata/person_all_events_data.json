@@ -425,7 +425,7 @@
     "age_at_event":28,
     "value_as_number":1.0,
     "unit":"nits",
-    "domain":"PHYSICAL_MEASURE"
+    "domain":"PHYSICAL_MEASUREMENT"
   },
   {
     "person_id":102246,
@@ -439,7 +439,7 @@
     "age_at_event":28,
     "value_as_number":1.0,
     "unit":"nits",
-    "domain":"PHYSICAL_MEASURE"
+    "domain":"PHYSICAL_MEASUREMENT"
   },
   {
     "person_id":1,

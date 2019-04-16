@@ -4,12 +4,10 @@ import {FormsModule} from '@angular/forms';
 import {ClarityModule} from '@clr/angular';
 
 import {
-  BugReportService,
   ProfileService,
   WorkspacesService
 } from 'generated';
 
-import {BugReportServiceStub} from 'testing/stubs/bug-report-service-stub';
 import {ProfileServiceStub} from 'testing/stubs/profile-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -38,7 +36,6 @@ describe('AdminReviewWorkspaceComponent', () => {
         BugReportComponent
       ],
       providers: [
-        { provide: BugReportService, useValue: new BugReportServiceStub() },
         { provide: ProfileService, useValue: new ProfileServiceStub() },
         { provide: ProfileStorageService, useValue: new ProfileStorageServiceStub() },
         {

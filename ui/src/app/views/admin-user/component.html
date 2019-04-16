@@ -4,7 +4,7 @@
     <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'familyName'">Name</clr-dg-column>
     <clr-dg-column [style.width.%]="20" [clrDgSortBy]="'username'">User Name</clr-dg-column>
     <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'contactEmail'">Contact Email</clr-dg-column>
-    <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'idVerificationRequestTime'">Beta Access Time Requested</clr-dg-column>
+    <clr-dg-column [style.width.%]="15" [clrDgSortBy]="'betaAccessRequestTime'">Beta Access Time Requested</clr-dg-column>
     <clr-dg-column [style.width.%]="15">User Lockout
       <app-tooltip [direction]="'bottom-left'">
        <div class="tooltip-label">Disable or re-enable a user's access to the Workbench.  This should be used in the case of rejecting a user's request for beta access</div>
@@ -21,7 +21,7 @@
       <clr-dg-cell>{{profile.familyName}}, {{profile.givenName}}</clr-dg-cell>
       <clr-dg-cell>{{profile.username}}</clr-dg-cell>
       <clr-dg-cell>{{profile.contactEmail}}</clr-dg-cell>
-      <clr-dg-cell>{{profile.idVerificationRequestTime | date: 'medium'}}</clr-dg-cell>
+      <clr-dg-cell>{{profile.betaAccessRequestTime | date: 'medium'}}</clr-dg-cell>
       <clr-dg-cell>
           <button *ngIf="!profile.disabled" style="margin-top: 0" class="btn" (click)="updateUserDisabledStatus(true, profile)">Disable</button>
           <button *ngIf="profile.disabled" style="margin-top: 0" class="btn" (click)="updateUserDisabledStatus(false, profile)">Enable</button>

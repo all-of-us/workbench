@@ -24,7 +24,6 @@ import {
   AuditApi,
   AuthDomainApi,
   BaseAPI,
-  BugReportApi,
   CdrVersionsApi,
   ClusterApi,
   CohortAnnotationDefinitionApi,
@@ -84,7 +83,6 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // getters for the API clients, e.g.: clusterApi().listClusters();
 export const auditApi = bindCtor(AuditApi);
 export const authDomainApi = bindCtor(AuthDomainApi);
-export const bugReportApi = bindCtor(BugReportApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const clusterApi = bindCtor(ClusterApi);
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);

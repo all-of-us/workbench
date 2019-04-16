@@ -5,11 +5,11 @@ import {Observable} from 'rxjs/Observable';
 import {
   BillingProjectStatus,
   DataAccessLevel,
-  IdVerificationListResponse,
   PageVisit,
   Profile,
   ProfileService,
-  UsernameTakenResponse,
+  UserListResponse,
+  UsernameTakenResponse
 } from 'generated';
 
 export class ProfileStubVariables {
@@ -84,7 +84,7 @@ export class ProfileServiceStub extends ProfileService {
     return Observable.from([this.profile]);
   }
 
-  public getIdVerificationsForReview(): Observable<IdVerificationListResponse> {
+  public getAllUsers(): Observable<UserListResponse> {
     return new Observable(observer => {
       observer.next({
         profileList: [ProfileStubVariables.PROFILE_STUB]
@@ -94,11 +94,6 @@ export class ProfileServiceStub extends ProfileService {
 
   private now(): number {
     return Math.floor(new Date().getTime() / 1000);
-  }
-
-  public submitIdVerification(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.requestedIdVerification = true;
-    return Observable.from([this.profile]);
   }
 
   public submitTermsOfService(extraHttpRequestParams?: any): Observable<Profile> {
@@ -111,8 +106,4 @@ export class ProfileServiceStub extends ProfileService {
     return Observable.from([this.profile]);
   }
 
-  public completeEthicsTraining(extraHttpRequestParams?: any): Observable<Profile> {
-    this.profile.complianceTrainingCompletionTime = this.now();
-    return Observable.from([this.profile]);
-  }
 }

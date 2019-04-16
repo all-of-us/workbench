@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.Cohort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,12 +37,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     Bucket demoBucket = storage.get(getDemosBucketName());
 
     return StreamSupport
-            .stream(demoBucket.list().getValues().spliterator(), false)
-            .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
-            .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
-            .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase(filterType))
-            .map(jsonObject -> jsonObject.getJSONObject(filterField))
-            .collect(Collectors.toList());
+        .stream(demoBucket.list().getValues().spliterator(), false)
+        .filter(blob -> blob.getBlobId().getName().endsWith(".json"))
+        .map(blob -> new JSONObject(new String(blob.getContent()).trim()))
+        .filter(jsonObject -> jsonObject.getString("type").equalsIgnoreCase(filterType))
+        .map(jsonObject -> jsonObject.getJSONObject(filterField))
+        .collect(Collectors.toList());
   }
 
   @Autowired
@@ -56,7 +57,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String readMandrillApiKey() {
-    JSONObject mandrillKeys = new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+    JSONObject mandrillKeys = new JSONObject(
+        readToString(getCredentialsBucketName(), "mandrill-keys.json"));
     return mandrillKeys.getString("api-key");
   }
 
@@ -72,20 +74,29 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public void copyAllDemoNotebooks(String workspaceBucket)  {
+  public void copyAllDemoNotebooks(String workspaceBucket) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Bucket demoBucket = storage.get(getDemosBucketName());
     StreamSupport
         .stream(demoBucket.list().getValues().spliterator(), false)
         .filter(blob -> blob.getBlobId().getName().endsWith(".ipynb"))
         .map(blob -> ImmutablePair
-            .of(blob.getBlobId(), BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
+            .of(blob.getBlobId(),
+                BlobId.of(workspaceBucket, "notebooks/" + blob.getBlobId().getName())))
         .forEach(pair -> copyBlob(pair.getLeft(), pair.getRight()));
   }
 
   @Override
-  public List<JSONObject> readAllDemoCohorts() {
-    return readJSONObjects("cohort", "cohort");
+  public List<Cohort> readAllDemoCohorts() {
+    return readJSONObjects("cohort", "cohort").stream()
+        .map(jsonObject -> {
+          Cohort cohort = new Cohort();
+          cohort.setName(jsonObject.getString("name"));
+          cohort.setDescription(jsonObject.getString("description"));
+          cohort.setCriteria(jsonObject.get("criteria").toString());
+          cohort.setType(jsonObject.getString("type"));
+          return cohort;
+        }).collect(Collectors.toList());
   }
 
   @Override
@@ -178,11 +189,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
       return ImmutableSet.of();
     }
     return StorageOptions.getDefaultInstance().getService().get(ids)
-      .stream()
-      .filter(Objects::nonNull)
-      // Clear the "generation" of the blob ID for better symmetry to the input.
-      .map(b -> BlobId.of(b.getBucket(), b.getName()))
-      .collect(Collectors.toSet());
-    }
+        .stream()
+        .filter(Objects::nonNull)
+        // Clear the "generation" of the blob ID for better symmetry to the input.
+        .map(b -> BlobId.of(b.getBucket(), b.getName()))
+        .collect(Collectors.toSet());
+  }
 
 }

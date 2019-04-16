@@ -248,7 +248,8 @@ public class Criteria {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId, domainId, attribute, path);
+        return Objects.hash(id, parentId, type, code, name, group, selectable, count, conceptId,
+          domainId, attribute, path);
     }
 
     @Override

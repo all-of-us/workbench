@@ -43,7 +43,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  @Autowired private CohortService cohortService;
+  @Autowired private CohortCloningService cohortCloningService;
   @Autowired private ConceptSetService conceptSetService;
   @Autowired private WorkspaceDao workspaceDao;
 
@@ -192,6 +192,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
     return this.saveWithLastModified(workspace);
   }
+
   @Override
   @Transactional
   public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
@@ -201,13 +202,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     boolean cdrVersionChanged = from.getCdrVersion().getCdrVersionId() !=
         to.getCdrVersion().getCdrVersionId();
     for (Cohort fromCohort : from.getCohorts()) {
-      cohortService.cloneCohortAndReviews(fromCohort, to);
+      cohortCloningService.cloneCohortAndReviews(fromCohort, to);
     }
     for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
       conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
     }
     return saved;
   }
+
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId) {
     String userAccess = fireCloudService.getWorkspace(

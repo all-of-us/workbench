@@ -16,7 +16,6 @@ export const environment: Environment = {
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
-  useZendeskForSupport: true,
   enableJupyterLab: false,
   enableDatasetBuilder: false,
   enableCBListSearch: false,

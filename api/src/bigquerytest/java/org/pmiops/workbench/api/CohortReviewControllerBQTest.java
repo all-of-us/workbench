@@ -13,10 +13,11 @@ import org.pmiops.workbench.cohortbuilder.QueryBuilderFactory;
 import org.pmiops.workbench.cohortbuilder.TemporalQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.CohortService;
+import org.pmiops.workbench.db.dao.CohortCloningService;
 import org.pmiops.workbench.db.dao.ConceptSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -150,7 +151,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     CohortReviewController.class,
     BigQueryService.class,
     ReviewQueryBuilder.class,
-    CohortService.class,
+    CohortCloningService.class,
     ParticipantCounter.class,
     CohortQueryBuilder.class,
     TemporalQueryBuilder.class,
@@ -160,6 +161,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @MockBean({
     FireCloudService.class,
     UserRecentResourceService.class,
+    CohortFactory.class,
     ConceptSetService.class
   })
   static class Configuration {
@@ -431,7 +433,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(28)
       .standardConceptId(1L)
       .sourceConceptId(1L)
-      .domainType(DomainType.PHYSICAL_MEASURE);
+      .domainType(DomainType.PHYSICAL_MEASUREMENT);
     expectedPhysicalMeasure2 = new PhysicalMeasurement()
       .value("1.0")
       .unit("nits")
@@ -442,7 +444,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
       .ageAtEvent(28)
       .standardConceptId(1L)
       .sourceConceptId(1L)
-      .domainType(DomainType.PHYSICAL_MEASURE);
+      .domainType(DomainType.PHYSICAL_MEASUREMENT);
     expectedLab1 = new Lab()
       .value("1.0")
       .unit("units")
@@ -733,7 +735,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASUREMENT);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
 
     //no sort order or column
@@ -775,7 +777,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASURE);
+    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.PHYSICAL_MEASUREMENT);
     testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
     testFilter.page(0);
     testFilter.pageSize(1);

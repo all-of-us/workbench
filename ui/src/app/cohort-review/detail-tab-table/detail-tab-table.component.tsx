@@ -2,6 +2,7 @@ import {Component, Input} from '@angular/core';
 import {ReviewDomainChartsComponent} from 'app/cohort-review/review-domain-charts/review-domain-charts';
 import {vocabOptions} from 'app/cohort-review/review-state.service';
 import {css} from 'app/cohort-review/review-utils/primeReactCss.utils';
+import {TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
@@ -27,7 +28,7 @@ const styles = reactStyles({
   },
   tableBody: {
     textAlign: 'left',
-    lineHeight: '0.6rem'
+    lineHeight: '0.75rem'
   },
   columnHeader: {
     background: '#f4f4f4',
@@ -54,15 +55,18 @@ const styles = reactStyles({
     lineHeight: '0.6rem',
     width: '2rem',
   },
-
   filterIcon: {
-    color: '#0086C1',
-    fontSize: '0.5rem',
+    marginLeft: '0.3rem',
+    padding: '2px 2px 1px 1px',
+    borderRadius: '50%',
+    fontWeight: 600,
     float: 'right'
   },
   sortIcon: {
+    marginTop: '4px',
     color: '#2691D0',
-    fontSize: '0.4rem'
+    fontSize: '0.5rem',
+    float: 'right'
   },
   overlayHeader: {
     padding: '0.3rem',
@@ -92,15 +96,44 @@ const styles = reactStyles({
     margin: 'auto',
     paddingTop: '0.5rem',
     textAlign: 'center',
-  }
+  },
+  textSearch: {
+    width: '85%',
+    borderRadius: '4px',
+    backgroundColor: '#dae6ed',
+    marginLeft: '5px'
+  },
+  textInput: {
+    width: 'auto',
+    padding: '0 0 0 5px',
+    border: 0,
+    backgroundColor: 'transparent',
+    outline: 'none',
+  },
+  noResults: {
+    paddingLeft: '0.5rem',
+    lineHeight: '1.25rem',
+    opacity: 0.5,
+  },
 });
+const filterIcons = {
+  active: {
+    ...styles.filterIcon,
+    background: '#8bc990',
+    color: '#ffffff',
+  },
+  default: {
+    ...styles.filterIcon,
+    color: '#262262',
+  }
+};
 const rows = 25;
 const domains = [
   DomainType.CONDITION,
   DomainType.PROCEDURE,
   DomainType.DRUG,
   DomainType.OBSERVATION,
-  DomainType.PHYSICALMEASURE,
+  DomainType.PHYSICALMEASUREMENT,
   DomainType.LAB,
   DomainType.VITAL,
   DomainType.SURVEY,
@@ -126,10 +159,12 @@ export interface DetailTabTableState {
   sortField: string;
   sortOrder: number;
   expandedRows: Array<any>;
+  codeResults: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
   class extends React.Component<DetailTabTableProps, DetailTabTableState> {
+    codeInputChange: Function;
     constructor(props: DetailTabTableProps) {
       super(props);
       this.state = {
@@ -140,7 +175,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortField: null,
         sortOrder: 1,
         expandedRows: [],
+        codeResults: null,
       };
+      this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
 
     componentDidMount() {
@@ -225,7 +262,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         { column.field === 'standardName' && <span>{rowData.standardName}</span>}
         {(valueField || nameField)
         && <i className='pi pi-caret-down' style={styles.caretIcon} onClick={(e) => vl.toggle(e)}/>}
-        <OverlayPanel className='labOverlay' ref={(el) => {vl = el; }}
+        <OverlayPanel className='labOverlay' ref={(el) => vl = el}
                       showCloseIcon={true} dismissable={true}>
           {(rowData.refRange &&  column.field === 'value') &&
           <div style={{paddingBottom: '0.2rem'}}>Reference Range: {rowData.refRange}</div>}
@@ -238,45 +275,41 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     updateData = (event, colName, namesArray) => {
-      // const {data} = this.state;
+      const {checked, name} = event.target;
       const {domain, filterState} = this.props;
       let checkedItems = filterState.tabs[domain][colName];
-      if (event.target.checked) {
-        if (event.target.name === 'Select All') {
+      if (checked) {
+        if (name === 'Select All') {
           checkedItems = namesArray.map(opt => opt.name);
         } else {
-          checkedItems.push(event.target.name);
+          checkedItems.push(name);
           if (namesArray.length - 1 === checkedItems.length) {
             // we have to add selectall when everything is selected
             checkedItems.push('Select All');
           }
         }
       } else {
-        if (event.target.name === 'Select All') {
+        if (name === 'Select All') {
           checkedItems = [];
         } else {
           if (checkedItems.find(s => s === 'Select All')) {
             checkedItems.splice(checkedItems.indexOf('Select All'), 1);
           }
-          checkedItems.splice(checkedItems.indexOf(event.target.name), 1);
+          checkedItems.splice(checkedItems.indexOf(name), 1);
         }
       }
       filterState.tabs[domain][colName] = checkedItems;
-      // this.setState({filterState: filterState});
       this.props.getFilteredData(filterState);
-      // if (data) {
-      //   this.filterData();
-      // }
-      this.getErrorMessage(event.target.name);
     }
 
     filterData() {
       let {data, start} = this.state;
       const {
-        domain, filterState, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}}
+        domain,
+        filterState,
+        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, vocab}
       } = this.props;
-      const checkedItems = filterState.tabs[domain];
-      const vocab = filterState.vocab;
+      /* Global filters */
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
         const max = dateMax ? Date.parse(dateMax) : 9999999999999;
@@ -291,30 +324,51 @@ export const DetailTabTable = withCurrentWorkspace()(
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
       if (this.props.domain !== DomainType[DomainType.SURVEY]
-        && this.props.domain !== DomainType[DomainType.PHYSICALMEASURE]
+        && this.props.domain !== DomainType[DomainType.PHYSICALMEASUREMENT]
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
-      const empty = [];
-      for (const col in checkedItems) {
-        if ((col === 'domain' || col === `${vocab}Vocabulary`)
-          && checkedItems[col].length
-          && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-          data = data.filter(row => checkedItems[col].includes(row[col]));
-          empty.push(false);
-        } else {
-          empty.push(true);
+      /* Column filters */
+      const columnCheck = [
+        'domain',
+        `${vocab}Vocabulary`,
+        `${vocab}Code`,
+        `${vocab}Name`,
+        'value',
+        'numMentions',
+        'firstMention',
+        'lastMention',
+        'itemTime',
+        'survey'
+      ];
+      const columnFilters = filterState.tabs[domain];
+      if (!columnFilters) {
+        if (data.length < start + rows) {
+          start = Math.floor(data.length / rows) * rows;
         }
-      }
-      if (!empty.includes(false)) {
-        if (checkedItems === undefined ||
-          (vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
-          // as some tab does not have filtered items but have data
-          this.setState({filteredData: data, start: start});
-        } else {
-          this.setState({filteredData: []});
-        }
+        this.setState({filteredData: data, start: start});
       } else {
+        for (const col in columnFilters) {
+          // Makes sure we only filter by correct concept type (standard/source)
+          if (columnCheck.includes(col)) {
+            if (Array.isArray(columnFilters[col])) {
+              // checkbox filters
+              if (!columnFilters[col].length) {
+                data = [];
+                break;
+              } else if (!columnFilters[col].includes('Select All')
+                && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+                data = data.filter(row => columnFilters[col].includes(row[col]));
+              }
+            } else {
+              // text filters
+              if (columnFilters[col]) {
+                data = data.filter(row =>
+                  row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+              }
+            }
+          }
+        }
         if (data.length < start + rows) {
           start = Math.floor(data.length / rows) * rows;
         }
@@ -322,69 +376,152 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    getErrorMessage = (name?) => {
+    emptyMessage = () => {
       const {data, filteredData} = this.state;
-      const {domain, filterState} = this.props;
-      const checkedItems = filterState.tabs[domain];
       if (data && data.length === 0) {
         return  'No ' + this.props.tabName + ' Data';
-      } else {
-        if (filteredData && filteredData.length === 0) {
-          for (const col in checkedItems) {
-            if (checkedItems[col].find( i => i !== name) || filteredData !== null) {
-              // filtered data null  or if item selected from different participants not
-              // exist in next/previous participants need to show this below message
-              return 'There is data, but it is all currently hidden. Please check your filters';
-            }
-          }
-        }
+      } else if (data && data.length > 0 && filteredData && filteredData.length === 0) {
+        return 'There is data, but it is currently hidden. Please check your filters';
       }
     }
 
-    getColumnValue(colName: string) {
-      const {data} = this.state;
+    filterCodes = (input: string) => {
+      if (!input) {
+        this.setState({codeResults: null});
+      } else {
+        const {data} = this.state;
+        const {filterState: {vocab}} = this.props;
+        const codeType = `${vocab}Code`;
+        const codeResults = data.reduce((acc, item) => {
+          if (item[codeType].toLowerCase().includes(input.toLowerCase())) {
+            acc.add(item[codeType]);
+          }
+          return acc;
+        }, new Set());
+        this.setState({codeResults});
+      }
+    }
+
+    filterText = (input: string, column: string) => {
       const {domain, filterState} = this.props;
-      const checkedItems = filterState.tabs[domain];
+      filterState.tabs[domain][column] = input;
+      this.props.getFilteredData(filterState);
+    }
+
+    checkboxFilter(column: string) {
+      const {codeResults, data} = this.state;
+      const {domain, filterState, filterState: {vocab}} = this.props;
+      const columnFilters = filterState.tabs[domain];
       if (!data) {
         return {};
       }
       const counts = {total: 0};
+      let options: Array<any>;
       data.forEach(item => {
-        counts[item[colName]] = !!counts[item[colName]] ? counts[item[colName]] + 1 : 1;
+        counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
         counts.total++;
       });
-      let options: Array<any>;
-      if (colName === 'domain') {
-        options = domains.map(option => {
-          return {name: option, count: counts[option] || 0};
-        });
-      } else {
-        const vocabs = colName === 'standardVocabulary'
-          ? vocabOptions.getValue().Standard
-          : vocabOptions.getValue().Source;
-        options = vocabs[domain] ? vocabs[domain].map(option => {
-          return {name: option, count: counts[option] || 0};
-        }) : [];
+      switch (column) {
+        case 'domain':
+          options = domains.map(name => {
+            return {name, count: counts[name] || 0};
+          });
+          options.sort((a, b) => b.count - a.count);
+          break;
+        case `${vocab}Code`:
+          options = Object.keys(counts).reduce((acc, name) => {
+            if (name !== 'total') {
+              acc.push({name, count: counts[name]});
+            }
+            return acc;
+          }, []);
+          options.sort((a, b) => b.count - a.count);
+          if (!columnFilters[column].includes('Select All')) {
+            columnFilters[column].forEach(name => {
+              if (!options.find(opt => opt.name === name)) {
+                options = [{name, count: 0}, ...options];
+              }
+            });
+          }
+          break;
+        case `${vocab}Vocabulary`:
+          const vocabs = vocabOptions.getValue()[vocab];
+          options = vocabs[domain] ? vocabs[domain].map(name => {
+            return {name, count: counts[name] || 0};
+          }) : [];
+          options.sort((a, b) => b.count - a.count);
+          break;
       }
       options.push({name: 'Select All', count: counts.total});
-      if (checkedItems[colName].find(i => i === 'Select All')) {
-        checkedItems[colName] = options.map(opt => opt.name);
+      if (columnFilters[column].includes('Select All')) {
+        columnFilters[column] = options.map(opt => opt.name);
       }
+      const checkboxes = codeResults && codeResults.size === 0
+        ? <em style={styles.noResults}>No matching codes</em>
+        : options.reduce((acc, opt, i) => {
+          if (!codeResults || codeResults.has(opt.name)) {
+            acc.push(<React.Fragment key={i}>
+              {opt.name !== 'Select All' && <div style={{padding: '0.3rem 0.4rem'}}>
+                <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
+                       checked={columnFilters[column].includes(opt.name)}
+                       onChange={($event) => this.updateData($event, column, options)}/>
+                <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+              </div>}
+            </React.Fragment>);
+          }
+          return acc;
+        }, []);
+      const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
-
       return <span>
-        {data && <i className='pi pi-filter' onClick={(e) => fl.toggle(e)}/>}
+        <i className='pi pi-filter'
+           style={filtered ? filterIcons.active : filterIcons.default}
+           onClick={(e) => fl.toggle(e)}/>
         <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => {fl = el; }} showCloseIcon={true} dismissable={true}>
-          {options.map((opt, i) => (
-            <div key={i} style={{borderTop: opt.name === 'Select All' ? '1px solid #ccc' : 'none',
-              padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'}} >
-              <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name={opt.name}
-                     checked={checkedItems[colName].includes(opt.name)}
-                     onChange={($event) => this.updateData($event, colName, options)}/>
-              <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
-            </div>
-          ))}
+                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+          {column === `${vocab}Code` && <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <TextInput
+              style={styles.textInput}
+              onChange={this.codeInputChange}
+              placeholder={'Search'}/>
+          </div>}
+          <div style={{maxHeight: 'calc(100vh - 450px)', overflow: 'auto'}}>
+            {checkboxes}
+          </div>
+          <div style={{borderTop: '1px solid #ccc', padding: '0.5rem 0.5rem'}}>
+            <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
+                   checked={columnFilters[column].includes('Select All')}
+                   onChange={($event) => this.updateData($event, column, options)}/>
+            <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
+          </div>
+        </OverlayPanel>
+      </span>;
+    }
+
+    textFilter(column: string) {
+      const {domain, filterState} = this.props;
+      const columnFilters = filterState.tabs[domain];
+      const filtered = !!columnFilters[column];
+      let fl: any, ip: any;
+      return <span>
+        <i className='pi pi-filter'
+          style={filtered ? filterIcons.active : filterIcons.default}
+          onClick={(e) => {
+            fl.toggle(e);
+            ip.focus();
+          }}/>
+        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
+                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+          <div style={styles.textSearch}>
+            <i className='pi pi-search' style={{margin: '0 5px'}} />
+            <TextInput
+              ref={(i) => ip = i}
+              style={styles.textInput}
+              value={columnFilters[column]}
+              onChange={(e) => this.filterText(e, column)}
+              placeholder={'Search'} />
+          </div>
         </OverlayPanel>
       </span>;
     }
@@ -434,10 +571,24 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === 'standardName';
-        const filterColName = col.name === 'domain'
-          || col.name === 'sourceVocabulary'
-          || col.name === 'standardVocabulary';
-        const isExpanderNeeded = col.name === 'graph'  &&
+        const hasCheckboxFilter = [
+          'domain',
+          'sourceVocabulary',
+          'standardVocabulary',
+          'sourceCode',
+          'standardCode'
+        ].includes(col.name);
+        const hasTextFilter = [
+          'sourceName',
+          'standardName',
+          'value',
+          'numMentions',
+          'firstMention',
+          'lastMention',
+          'itemTime',
+          'survey'
+        ].includes(col.name);
+        const isExpanderNeeded = col.name === 'graph' &&
           (this.props.tabName === 'Vitals' || this.props.tabName === 'Labs');
         const overlayTemplate = colName && this.overlayTemplate;
         const header = <React.Fragment>
@@ -446,6 +597,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
+          {hasCheckboxFilter && this.checkboxFilter(col.name)}
+          {hasTextFilter && this.textFilter(col.name)}
           {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon} />}
           {(desc && !isExpanderNeeded) &&
           <i className='pi pi-arrow-down' style={styles.sortIcon} />}
@@ -460,8 +613,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           header={header}
           headerStyle={isExpanderNeeded && styles.graphStyle}
           sortable
-          filter={filterColName && true}
-          filterElement= {filterColName && this.getColumnValue(col.name)}
           body={overlayTemplate}/>;
       });
 
@@ -487,7 +638,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
-          emptyMessage={this.getErrorMessage()}>
+          emptyMessage={this.emptyMessage()}>
           {columns}
         </DataTable>}
         {loading && <SpinnerOverlay />}

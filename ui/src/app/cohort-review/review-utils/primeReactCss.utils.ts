@@ -5,7 +5,7 @@ export const css = `
     background-color: #f4f4f4;
   }
   body .p-datatable .p-datatable-thead > tr > th {
-    padding: 10px 5px 10px 10px;
+    padding: 10px;
     vertical-align: middle;
     background: #f4f4f4;
     border: 0;

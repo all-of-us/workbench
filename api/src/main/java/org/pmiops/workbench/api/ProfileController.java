@@ -53,9 +53,6 @@ import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.IdVerificationListResponse;
-import org.pmiops.workbench.model.IdVerificationReviewRequest;
-import org.pmiops.workbench.model.IdVerificationStatus;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
@@ -64,6 +61,7 @@ import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UsernameTakenResponse;
+import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -453,33 +451,25 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitIdVerification() {
+  public ResponseEntity<Profile> requestBetaAccess() {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     User user = userProvider.get();
-    if (user.getRequestedIdVerification() == null || !user.getRequestedIdVerification()) {
-      log.log(Level.INFO, "Sending id verification request email.");
+    if (user.getBetaAccessRequestTime() == null) {
+      log.log(Level.INFO, "Sending beta access request email.");
       try {
-        mailServiceProvider.get().sendIdVerificationRequestEmail(user.getEmail());
+        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getEmail());
       } catch (MessagingException e) {
-        throw new EmailException("Error submitting id verification", e);
+        throw new EmailException("Error submitting beta access request", e);
       }
-      user.setRequestedIdVerification(true);
-      user.setIdVerificationRequestTime(now);
+      user.setBetaAccessRequestTime(now);
       user = saveUserWithConflictHandling(user);
     }
-
     return getProfileResponse(user);
   }
 
   @Override
   public ResponseEntity<Profile> submitDemographicsSurvey() {
     User user = userService.submitDemographicSurvey();
-    return getProfileResponse(saveUserWithConflictHandling(user));
-  }
-
-  @Override
-  public ResponseEntity<Profile> completeEthicsTraining() {
-    User user = userService.submitEthicsTraining();
     return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
@@ -661,9 +651,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<IdVerificationListResponse> getIdVerificationsForReview() {
-    IdVerificationListResponse response = new IdVerificationListResponse();
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
+  public ResponseEntity<UserListResponse> getAllUsers() {
+    UserListResponse response = new UserListResponse();
     List<Profile> responseList = new ArrayList<>();
     for (User user : userDao.findUsers()) {
       responseList.add(profileService.getProfile(user));
@@ -673,7 +663,7 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
+  @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<EmptyResponse> bypassAccessRequirement(Long userId, String moduleName, AccessBypassRequest request) {
     Timestamp valueToSet;
     Boolean bypassed = request.getIsBypassed();
@@ -708,34 +698,6 @@ public class ProfileController implements ProfileApiDelegate {
         throw new BadRequestException("There is no access module named: " + moduleName);
     }
     return ResponseEntity.ok(new EmptyResponse());
-  }
-
-  @Override
-  @AuthorityRequired({Authority.REVIEW_ID_VERIFICATION})
-  public ResponseEntity<IdVerificationListResponse> reviewIdVerification(Long userId, IdVerificationReviewRequest review) {
-    IdVerificationStatus status = review.getNewStatus();
-    User user = userDao.findUserByUserId(userId);
-    Boolean oldVerification = user.getIdVerificationIsValid();
-    String newValue;
-    if (status == IdVerificationStatus.VERIFIED) {
-      userService.setIdVerificationApproved(userId, true);
-      newValue = "true";
-    } else {
-      userService.setIdVerificationApproved(userId, false);
-      newValue = "false";
-    }
-    try {
-      mailServiceProvider.get().sendIdVerificationCompleteEmail(user.getContactEmail(), status, user.getEmail());
-    } catch (MessagingException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-    userService.logAdminUserAction(
-        userId,
-        "manual ID verification",
-        oldVerification,
-        newValue
-    );
-    return getIdVerificationsForReview();
   }
 
   @Override
