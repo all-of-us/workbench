@@ -26,5 +26,4 @@ cat src/main/webapp/WEB-INF/appengine-web.xml.template \
   | sed "s|\${CDR_DB_PASSWORD}|${CDR_DB_PASSWORD}|" \
   > src/main/webapp/WEB-INF/appengine-web.xml
 
-echo "Generated App Engine XML:"
-cat src/main/webapp/WEB-INF/appengine-web.xml
+echo "Generated App Engine XML"
