@@ -1,201 +1,33 @@
 import {Component} from '@angular/core';
 import {navigate, queryParamsStore} from 'app/utils/navigation';
-import {environment} from 'environments/environment';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {AlertClose, AlertWarning} from 'app/components/alert';
 import {
   Button,
   CardButton,
   Clickable,
-  styles as buttonStyles,
 } from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalFooter} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {configApi, profileApi} from 'app/services/swagger-fetch-clients';
-import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withStyle, withUserProfile} from 'app/utils';
+import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {QuickTourReact} from 'app/views/quick-tour-modal/component';
 import {RecentWork} from 'app/views/recent-work/component';
+import {WorkbenchAccessTasks} from 'app/views/registration-page/component';
 import {
   BillingProjectStatus,
   Profile,
 } from 'generated/fetch';
 
-
-const styles = reactStyles({
+export const homepageStyles = reactStyles({
   mainHeader: {
     color: '#FFFFFF', fontSize: 28, fontWeight: 400,
     display: 'flex', letterSpacing: 'normal'
   },
-  minorHeader: {
-    color: '#FFFFFF', fontSize: 18, fontWeight: 600, display: 'flex',
-    marginTop: '1rem', lineHeight: '24px'
-  },
-  text: {
-    color: '#FFFFFF', fontSize: 16, lineHeight: '22px', fontWeight: 150,
-    marginTop: '3%'
-  },
-  infoBox: {
-    padding: '1rem', backgroundColor: '#FFFFFF', borderRadius: '5px', display: 'flex',
-    flexDirection: 'row', justifyContent: 'space-between'
-  },
-  infoBoxHeader: {
-    fontSize: 16, color: '#262262', fontWeight: 600
-  },
-  infoBoxBody: {
-    color: '#000', lineHeight: '18px'
-  },
-  infoBoxButton: {
-    color: '#FFFFFF', height: '49px', borderRadius: '5px', marginLeft: '1rem',
-    maxWidth: '20rem'
-  },
-  error: {
-    fontWeight: 300, color: '#DC5030', fontSize: '14px', marginTop: '.3rem',
-    backgroundColor: '#FFF1F0', borderRadius: '5px', padding: '.3rem',
-  }
-});
-
-export const Error = withStyle(styles.error)('div');
-
-const AccountLinkingButton: React.FunctionComponent<{
-  failed: boolean, completed: boolean, failedText: string,
-  completedText: string, defaultText: string, onClick: Function
-}> = ({failed, completed, defaultText, completedText, failedText, onClick}) => {
-  const dataTestId = fp.lowerCase(defaultText)
-      .replace(/\s/g, '-');
-  if (failed) {
-    return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#f27376'}}
-                      disabled={true} data-test-id={dataTestId}>
-      <ClrIcon shape='exclamation-triangle'/>{failedText}
-    </Clickable>;
-  } else if (completed) {
-    return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#8BC990'}}
-                      disabled={true} data-test-id={dataTestId}>
-      <ClrIcon shape='check'/>{completedText}
-    </Clickable>;
-  } else {
-    return <Clickable style={{...buttonStyles.base,
-      ...styles.infoBoxButton, backgroundColor: '#2691D0'}}
-                      onClick={onClick}
-                      data-test-id={dataTestId}>
-      {defaultText}
-    </Clickable>;
-  }
-};
-
-export interface WorkbenchAccessTasksProps {
-  betaAccessGranted: boolean;
-  eraCommonsLinked: boolean;
-  eraCommonsError: string;
-  trainingCompleted: boolean;
-  firstVisitTraining: boolean;
-}
-
-export class WorkbenchAccessTasks extends
-    React.Component<WorkbenchAccessTasksProps, {trainingWarningOpen: boolean}> {
-
-  constructor(props: WorkbenchAccessTasksProps) {
-    super(props);
-    this.state = {trainingWarningOpen: !props.firstVisitTraining};
-  }
-
-  static redirectToNiH(): void {
-    const url = environment.shibbolethUrl + '/link-nih-account?redirect-url=' +
-        encodeURIComponent(
-          window.location.origin.toString() + '/nih-callback?token={token}');
-    window.location.assign(url);
-  }
-
-  static async redirectToTraining() {
-    await profileApi().updatePageVisits({page: 'moodle'});
-    window.location.assign(environment.trainingUrl + '/static/data-researcher.html?saml=on');
-  }
-
-  render() {
-    const {trainingWarningOpen} = this.state;
-    const {eraCommonsLinked, eraCommonsError, trainingCompleted, betaAccessGranted} = this.props;
-    return <div style={{display: 'flex', flexDirection: 'row'}} data-test-id='access-tasks'>
-        <div style={{display: 'flex', flexDirection: 'column', width: '50%', padding: '3% 0 0 3%'}}>
-          <div style={styles.mainHeader}>Researcher Workbench</div>
-          <div style={{marginLeft: '1rem', flexDirection: 'column'}}>
-            <div style={styles.minorHeader}>In order to get access to data and tools
-              please complete the following:</div>
-            <div style={styles.text}>Please login to your eRA Commons account and complete
-              the online training courses in order to gain full access to the Researcher
-              Workbench data and tools.</div>
-          </div>
-        </div>
-        <div style={{flexDirection: 'column', width: '50%', padding: '1rem'}}>
-          <div style={{...styles.infoBox, flexDirection: 'column'}}>
-              <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                <div style={{flexDirection: 'column', width: '70%'}}>
-                  <div style={styles.infoBoxHeader}>Beta Access</div>
-                  <div style={styles.infoBoxBody}>Beta access should be granted within 24-48 hours
-                    from the time of account creation.  If you are not granted access within
-                    that time frame, please contact support@researchallofus.org.</div>
-                </div>
-                <AccountLinkingButton failed={false}
-                                      completed={betaAccessGranted}
-                                      defaultText='Pending'
-                                      completedText='Granted'
-                                      failedText='Denied'
-                                      onClick={() => {}}/>
-              </div>
-          </div>
-          <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
-            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-              <div style={{flexDirection: 'column', width: '70%'}}>
-                <div style={styles.infoBoxHeader}>Login to eRA Commons</div>
-                <div style={styles.infoBoxBody}>Clicking the login link will bring you
-                  to the eRA Commons Portal and redirect you back to the
-                  Workbench once you are logged in.</div>
-              </div>
-              <AccountLinkingButton failed={false}
-                                    completed={eraCommonsLinked}
-                                    defaultText='Login'
-                                    completedText='Linked'
-                                    failedText='Error Linking Accounts'
-                                    onClick={WorkbenchAccessTasks.redirectToNiH}/>
-            </div>
-            {eraCommonsError && <Error data-test-id='era-commons-error'>
-              <ClrIcon shape='exclamation-triangle' class='is-solid'/>
-              Error Linking NIH Username: {eraCommonsError} Please try again!
-            </Error>}
-          </div>
-          <div style={{...styles.infoBox, marginTop: '0.7rem'}}>
-            <div style={{flexDirection: 'column', width: '65%'}}>
-              <div style={styles.infoBoxHeader}>Complete Online Training</div>
-              <div style={styles.infoBoxBody}>Clicking the training link will bring you to
-                the All of Us Compliance Training Portal, which will show you any
-                outstanding training material to be completed.</div>
-            </div>
-            <AccountLinkingButton failed={false}
-                                  completed={trainingCompleted}
-                                  defaultText={'Complete Training'}
-                                  completedText='Completed'
-                                  failedText=''
-                                  onClick={WorkbenchAccessTasks.redirectToTraining}/>
-          </div>
-          {trainingWarningOpen && !trainingCompleted &&
-          <AlertWarning>
-            <ClrIcon shape='exclamation-triangle' class='is-solid'
-                     style={{width: '8%', height: '40px', marginRight: '.1rem'}}/>
-            <div>It may take several minutes for Moodle to update your Online Training
-            status once you have completed compliance training.</div>
-            <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
-          </AlertWarning>}
-        </div>
-      </div>;
-  }
-}
-
-export const homepageStyles = reactStyles({
   backgroundImage: {
     backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
     backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
@@ -461,7 +293,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 ) : (
                   <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
                     <div style={homepageStyles.contentWrapperLeft}>
-                      <div style={styles.mainHeader}>Researcher Workbench</div>
+                      <div style={homepageStyles.mainHeader}>Researcher Workbench</div>
                       <TooltipTrigger content={<div>Your Firecloud billing project is still being
                         initialized. Workspace creation will be available in a few minutes.</div>}
                                       disabled={billingProjectInitialized}>
