@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cp src/main/webapp/WEB-INF/appengine-web.xml.template src/main/webapp/WEB-INF/appengine-web.xml
+
 for line in $(awk '!/^ *#/ && NF' db/vars.env); do
   IFS='=' read -r var val <<< "$line"
 
@@ -11,19 +13,8 @@ for line in $(awk '!/^ *#/ && NF' db/vars.env); do
   evaluatedString=$(echo $(eval "echo $val"))
   echo "Exporting value $var=$evaluatedString"
   export $var=$evaluatedString
+
+  sed -i '' 's/${$var}/($evaluatedString)/g' ./src/main/webapp/WEB-INF/appengine-web.xml
 done
-
-set -euo pipefail
-IFS=$'\n\t'
-
-< src/main/webapp/WEB-INF/appengine-web.xml.template \
-  sed "s|\${DB_DRIVER}|${DB_DRIVER}|" \
-  | sed "s|\${DB_CONNECTION_STRING}|${DB_CONNECTION_STRING}|" \
-  | sed "s|\${WORKBENCH_DB_USER}|${WORKBENCH_DB_USER}|" \
-  | sed "s|\${WORKBENCH_DB_PASSWORD}|${WORKBENCH_DB_PASSWORD}|" \
-  | sed "s|\${CDR_DB_CONNECTION_STRING}|${CDR_DB_CONNECTION_STRING}|" \
-  | sed "s|\${CDR_DB_USER}|${CDR_DB_USER}|" \
-  | sed "s|\${CDR_DB_PASSWORD}|${CDR_DB_PASSWORD}|" \
-  > src/main/webapp/WEB-INF/appengine-web.xml
 
 echo "Generated App Engine XML"
