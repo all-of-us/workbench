@@ -14,6 +14,7 @@ import {
   subtreeSelected,
   wizardOpen,
 } from 'app/cohort-search/redux';
+import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {DomainType, TreeSubType, TreeType} from 'generated';
 import {Map} from 'immutable';
@@ -63,15 +64,19 @@ export class ListModalComponent implements OnInit, OnDestroy {
   modifiersDisabled = false;
   preview = Map();
   conceptType: string = null;
+  wizard: any;
 
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
-    this.subscription = this.open$
-      .filter(open => !!open)
-      .subscribe(_ => {
+    this.subscription = wizardStore
+      .filter(wizard => !!wizard)
+      .subscribe(wizard => {
+        console.log(wizard);
         // reset to default each time the modal is opened
         this.mode = 'tree';
+        this.title = wizard.domain;
+        this.wizard = wizard;
         this.open = true;
       });
 
@@ -134,7 +139,7 @@ export class ListModalComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.item$.subscribe(item => {
       this.itemType = item.get('type');
-      this.title = 'Codes';
+      // this.title = 'Codes';
       for (const crit of DOMAIN_TYPES) {
         const regex = new RegExp(`.*${crit.type}.*`, 'i');
         if (regex.test(this.itemType)) {
