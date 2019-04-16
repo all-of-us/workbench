@@ -248,6 +248,7 @@ def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
+  ENV["OVERWRITE_WORKBENCH_DB_HOST"] = "true"
   common.run_inline %W{gradle appengineStart}
 end
 
