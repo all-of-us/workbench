@@ -103,11 +103,11 @@ The above steps for starting the API server can take upwards of 8-10 minutes on 
 All commands should be run from `workbench/api`
 
 ##### Setup
-* Go through the [normal docker developer startup process](#API:-dev-AppEngine-appserver) at least once successfully
-* Install Java 8 and set JAVA_HOME.
+* Go through the [normal docker developer startup process](#api-dev-appengine-appserver) at least once successfully
+* Install Java 8 and set JAVA_HOME. Note: Your Java8 library directory may be different
     * ```Shell
       export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home
-       ```
+      ```
     * Optional - Add the export command to your `.bash_profile` or `.bashrc` and `source` it 
 * Install envsubst
     * ```Shell
