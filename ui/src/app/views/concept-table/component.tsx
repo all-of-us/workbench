@@ -89,7 +89,7 @@ export class ConceptTable extends React.Component<{concepts: Concept[];
       </Clickable>
     </PopupTrigger>;
     return <div data-test-id='conceptTable'>
-      <DataTable emptyMessage={this.props.loading ? '' : this.props.placeholderValue} ref={(el) => this.dt = el}
+      <DataTable emptyMessage={loading ? '' : placeholderValue} ref={(el) => this.dt = el}
                  value={concepts} paginator={true} rows={50} scrollable={true} loading={loading}
                  selection={selectedConcepts}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
