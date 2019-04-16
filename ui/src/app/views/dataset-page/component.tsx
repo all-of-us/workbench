@@ -259,8 +259,14 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
     const origSelected = this.state.selectedValues;
     const selectObj = {domain: domain, value: domainValue.value};
     if (fp.some(selectObj, origSelected)) {
-      this.setState({selectedValues: fp.remove((dv) => dv === selectObj, origSelected)});
+      console.log('Removing');
+      console.log(domainValue);
+      this.setState({selectedValues:
+        fp.remove((dv) => dv.domain === selectObj.domain
+        && dv.value === selectObj.value, origSelected)});
     } else {
+      console.log('Adding');
+      console.log(domainValue);
       this.setState({selectedValues: (origSelected).concat(selectObj)});
     }
   }
