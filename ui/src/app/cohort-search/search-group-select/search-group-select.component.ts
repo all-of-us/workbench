@@ -6,7 +6,7 @@ import {searchRequestStore, wizardStore} from 'app/cohort-search/search-state.se
 import {environment} from 'environments/environment';
 
 import {SearchRequest} from 'generated';
-import {SearchGroup} from '../../../generated/fetch';
+import {SearchGroup} from 'generated/fetch';
 
 @Component({
   selector: 'app-search-group-select',
