@@ -228,6 +228,7 @@ export class ConceptHomepageComponent implements OnInit {
           conceptDomain.items = this.convertToConceptInfo(response.items);
           conceptDomain.vocabularyList = response.vocabularyCounts;
           if (activeTabSearch) {
+            this.searchLoading = false;
             this.conceptDomainCounts = response.domainCounts;
             this.selectedDomain =
               this.conceptDomainCounts.find(domainCount => domainCount.domain === request.domain);
