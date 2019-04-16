@@ -103,16 +103,15 @@ The above steps for starting the API server can take upwards of 8-10 minutes on 
 All commands should be run from `workbench/api`
 
 ##### Setup
-* Go through the [normal docker developer startup process](#api-dev-appengine-appserver) at least once successfully
-* Install Java 8 and set JAVA_HOME. Note: Your Java8 library directory may be different
+* Install Java 8
+* Add following to `~/.bash_profile`. Note: Your Java8 library directory may be different
     * ```Shell
       export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home
+      export OVERWRITE_WORKBENCH_DB_HOST=true
       ```
-    * Optional - Add the export command to your `.bash_profile` or `.bashrc` and `source` it 
-* Install envsubst
-    * ```Shell
-      brew install gettext
-      brew link --force gettext
+    * Source your bash profile or open a new terminal
+      ```Shell
+      source `~/.bash_profile`
       ```
 * Install Java App Engine components
     * ```Shell
@@ -124,6 +123,7 @@ All commands should be run from `workbench/api`
       ```
 
 ##### Usage
+* If you have schema migrations or pending configuration updates, run through the [normal docker developer startup process](#api-dev-appengine-appserver) at least once successfully. This is typically only necessary when switching between branches.
 * Start services required for API server
     * ```Shell
       ./project-rb start-api-reqs
