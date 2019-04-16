@@ -216,7 +216,7 @@ Common.register_command({
   :fn => ->() { run_local_migrations() }
 })
 
-def start_local_a pi()
+def start_local_api()
   setup_local_environment
   common = Common.new
   common.status "Starting API server..."
