@@ -97,6 +97,43 @@ Other available operations may be discovered by running:
 ./project.rb
 ```
 
+#### API: Faster API startup for MacOS
+The above steps for starting the API server can take upwards of 8-10 minutes on MacOS, most likely due to performance issues with Docker for Mac. Follow these steps to set up your developer environment to start the API server outside of docker. A full restart should take ~30 seconds with this method.
+
+All commands should be run from `workbench/api`
+
+##### Setup
+* Go through the [normal docker developer startup process](#API:-dev-AppEngine-appserver) at least once successfully
+* Install Java 8 and set JAVA_HOME.
+    * ```Shell
+      export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home
+       ```
+    * Optional - Add the export command to your `.bash_profile` or `.bashrc` and `source` it 
+* Install envsubst
+    * ```Shell
+      brew install gettext
+      brew link --force gettext
+      ```
+* Install Java App Engine components
+    * ```Shell
+      gcloud components install app-engine-java
+      ```
+* Generate Google Cloud access token
+    * ```Shell
+      ./project.rb get-test-service-creds
+      ```
+
+##### Usage
+* Start services required for API server
+    * ```Shell
+      ./project-rb start-api-reqs
+      # the counterpart command is ./project.rb stop-api-reqs
+      ```
+* Start API server through gradle
+    * ```Shell
+      ./gradlew appengineRun
+      ```
+
 #### Hot Code Swapping
 
 While the API is running locally, saving a .java file should cause a recompile and reload of that class. Status is logged to the console. Not all changes reload correctly (e.g., model classes do not appear to reload more than once).
