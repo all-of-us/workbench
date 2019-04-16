@@ -17,25 +17,15 @@ const styles = reactStyles({
   }
 });
 
-interface ConceptTableProps {
-  concepts: Concept[];
-  loading: boolean;
-  onSelectedChanged: Function;
-}
-
-interface ConceptTableState {
-  selectedConcepts: Concept[];
-  selectedVocabularies: string[];
-}
 
 export class ConceptTable extends React.Component<{concepts: Concept[];
   loading: boolean; onSelectedChanged: Function; },
-    {selectedConcepts: Concept[]; selectedVocabularies: string[];}> {
+  {selectedConcepts: Concept[]; selectedVocabularies: string[]; }> {
 
   private dt: DataTable;
   private filterImageSrc: string;
 
-  constructor(props: ConceptTableProps) {
+  constructor(props) {
     super(props);
     this.state = {
       selectedConcepts: [],
