@@ -24,14 +24,42 @@ const styles = reactStyles({
     border: 0,
   },
   selectIcon: {
+    marginRight: '0.4rem',
     color: 'rgb(98, 164, 32)',
     cursor: 'pointer'
   },
   selectedIcon: {
+    marginRight: '0.4rem',
     color: 'rgb(98, 164, 32)',
     opacity: 0.4,
     cursor: 'not-allowed'
-  }
+  },
+  table: {
+    margin: '1rem 0',
+    fontSize: '12px',
+    textAlign: 'left',
+    border: '1px solid #c8c8c8'
+  },
+  columnHeader: {
+    padding: '10px',
+    background: '#f4f4f4',
+    color: '#262262',
+    border: 0,
+    borderBottom: '1px solid #c8c8c8',
+    fontWeight: 600,
+    textAlign: 'left',
+    verticalAlign: 'middle',
+    lineHeight: '0.75rem'
+  },
+  columnBody: {
+    background: '#ffffff',
+    padding: '0.4rem',
+    verticalAlign: 'top',
+    textAlign: 'left',
+    border: 0,
+    borderBottom: '1px solid #c8c8c8',
+    lineHeight: '0.6rem',
+  },
 });
 
 interface ListSearchProps {
@@ -89,30 +117,29 @@ export const ListSearch = withCurrentWorkspace()(
           <ClrIcon shape='search'/>
           <TextInput style={styles.searchInput} onKeyPress={this.handleInput} />
         </div>
-        {data && <table>
-          <thead>
+        {data && <table className='p-datatable' style={styles.table}>
+          <thead className='p-datatable-thead'>
             <tr>
-              <th> </th>
-              <th>Name</th>
-              <th>Vocab</th>
-              <th>Count</th>
+              <th style={styles.columnHeader}>Name</th>
+              <th style={styles.columnHeader}>Vocab</th>
+              <th style={styles.columnHeader}>Count</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className='p-datatable-tbody'>
             {data.map((row, r) => {
               return <tr key={r}>
-                <td>
+                <td style={styles.columnBody}>
                   {this.isSelected(row) &&
                     <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
                   {!this.isSelected(row) &&
                     <ClrIcon style={styles.selectIcon}
-                      shape='plus-circle' size='20'
+                      shape='plus-circle' size='16'
                       onClick={() => this.selectItem(row)}
                     />}
+                  <div style={{display: 'inline-block'}}>{row.name}</div>
                 </td>
-                <td>{row.name}</td>
-                <td>{row.type}</td>
-                <td>{row.count}</td>
+                <td style={styles.columnBody}>{row.type}</td>
+                <td style={styles.columnBody}>{row.count}</td>
               </tr>;
             })}
           </tbody>
