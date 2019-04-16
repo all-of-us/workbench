@@ -5,11 +5,11 @@ import {ClarityModule} from '@clr/angular';
 import {CohortSearchActions} from 'app/cohort-search/redux';
 import {fromJS} from 'immutable';
 import {NgxPopperModule} from 'ngx-popper';
-import {SelectionInfoComponent} from './selection-info.component';
+import {ListSelectionInfoComponent} from './list-selection-info.component';
 
 describe('ListSelectionInfoComponent', () => {
-  let component: SelectionInfoComponent;
-  let fixture: ComponentFixture<SelectionInfoComponent>;
+  let component: ListSelectionInfoComponent;
+  let fixture: ComponentFixture<ListSelectionInfoComponent>;
   let mockReduxInst;
 
   beforeEach(async(() => {
@@ -19,7 +19,7 @@ describe('ListSelectionInfoComponent', () => {
     mockReduxInst.getState = _wrapped;
 
     TestBed.configureTestingModule({
-      declarations: [SelectionInfoComponent],
+      declarations: [ListSelectionInfoComponent],
       imports: [ClarityModule, NgxPopperModule],
       providers: [
         {provide: NgRedux, useValue: mockReduxInst},
@@ -30,7 +30,7 @@ describe('ListSelectionInfoComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SelectionInfoComponent);
+    fixture = TestBed.createComponent(ListSelectionInfoComponent);
     component = fixture.componentInstance;
     component.parameter = fromJS({
       code: '',
