@@ -298,7 +298,7 @@ export const DataSet = withCurrentWorkspace()(class extends React.Component<
     };
     try {
       await dataSetApi().createDataSet(
-          this.props.workspace.namespace, this.props.workspace.id, req);
+        this.props.workspace.namespace, this.props.workspace.id, req);
       this.setState({save: false});
     } catch (e) {
       if (e.status === 409) {

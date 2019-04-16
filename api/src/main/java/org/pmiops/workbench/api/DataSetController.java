@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.inject.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
