@@ -883,7 +883,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
