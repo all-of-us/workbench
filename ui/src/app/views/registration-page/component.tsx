@@ -5,11 +5,13 @@ import {ResourceCardBase} from 'app/components/card';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles} from 'app/utils';
 import {environment} from 'environments/environment';
+import {baseStyles} from 'app/components/card';
+import {ClrIcon} from "../../components/icons";
 
 const styles = reactStyles({
   mainHeader: {
     color: '#FFFFFF', fontSize: 28, fontWeight: 400,
-    letterSpacing: 'normal', paddingTop: '3%', paddingLeft: '3%'
+    letterSpacing: 'normal', marginBottom: '1rem'
   },
   cardStyle: {
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
@@ -26,6 +28,14 @@ const styles = reactStyles({
   infoBoxButton: {
     color: '#FFFFFF', height: '49px', borderRadius: '5px', marginLeft: '1rem',
     maxWidth: '20rem'
+  },
+  warningIcon: {
+    color: '#F7981C', position: 'relative', top: 'calc(50% - 10px)',
+    height: '20px', width: '20px'
+  },
+  warningModal: {
+    color: '#262262', fontSize: '18px', lineHeight: '28px', flexDirection: 'row',
+    boxShadow: 'none', fontWeight: 600, display: 'flex', justifyContent: 'center'
   }
 });
 
@@ -78,8 +88,15 @@ export class WorkbenchAccessTasks extends
   render() {
     const {trainingWarningOpen} = this.state;
     const {eraCommonsLinked, eraCommonsError, trainingCompleted, betaAccessGranted} = this.props;
-    return <div style={{display: 'flex', flexDirection: 'column'}} data-test-id='access-tasks'>
+    return <div style={{display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%'}}
+                data-test-id='access-tasks'>
       <div style={styles.mainHeader}>Researcher Workbench</div>
+      {!betaAccessGranted && <div style={{...baseStyles.card, ...styles.warningModal}}>
+        <ClrIcon shape='warning-standard' class='is-solid'
+                 style={styles.warningIcon}/>
+        You have not been granted beta access. Please contact help@research-aou.org.
+      </div>}
+
       <div style={{display: 'flex', flexDirection: 'row', margin: '3%'}}>
         {this.registrationTasks.map((card, i) => {
           return <ResourceCardBase style={styles.cardStyle}>
