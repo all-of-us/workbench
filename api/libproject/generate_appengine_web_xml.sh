@@ -3,7 +3,7 @@
 for line in `awk '!/^ *#/ && NF' db/vars.env`; do
   IFS='=' read -r var val <<< "$line"
 
-  if [ "$var" == "DB_HOST" ]; then
+  if [ "$var" == "DB_HOST" ] && [ $OVERWRITE_WORKBENCH_DB_HOST ]; then
     export DB_HOST=localhost
     continue
   fi
