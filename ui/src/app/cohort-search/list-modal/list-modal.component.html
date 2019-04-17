@@ -6,7 +6,7 @@
           <div class="title-bar">
             <div class="btn-group btn-link">
               <ng-container>
-                <button  *ngIf="!altTab"
+                <button  *ngIf="!attributesCrit"
                  type="button"
                  class="btn tab"
                  [disabled]="!noSelection && conceptType === 'standard'"
@@ -22,7 +22,7 @@
                   (click)="setMode('snomed')">
                   Search SNOMED
                 </button>
-                <button *ngIf="attributesNode.size > 0"
+                <button *ngIf="attributesCrit"
                   type="button"
                   class="btn tab-node">
                   {{attributeTitle}}
@@ -45,7 +45,7 @@
               </a>
               drugs by brand names outside of All of Us
             </div>
-            <button *ngIf="altTab"
+            <button *ngIf="attributesCrit"
               (click)="back()"
               class="btn btn-link btn-icon">
               <clr-icon size="24" shape="close"></clr-icon>
@@ -69,7 +69,7 @@
                   </div>
                   <!-- Tree Page -->
                   <div class="panel-left" [class.show]="mode === 'tree'">
-                    <crit-list-search [selections]="selectionIds" [wizard]="wizard"></crit-list-search>
+                    <crit-list-search [addAttributes]="launchAttributes" [selections]="selectionIds" [wizard]="wizard"></crit-list-search>
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
@@ -77,7 +77,9 @@
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">
-                    <crit-attributes-page *ngIf="mode === 'attributes'"></crit-attributes-page>
+                    <crit-list-attributes-page *ngIf="mode === 'attributes'"
+                      [criterion]="attributesCrit"
+                      [close]="back"></crit-list-attributes-page>
                   </div>
                 </div>
               </ng-container>

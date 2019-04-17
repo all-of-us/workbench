@@ -25,6 +25,11 @@ const styles = reactStyles({
     border: 0,
     outline: 'none',
   },
+  attrIcon: {
+    marginRight: '0.5rem',
+    color: '#216FB4',
+    cursor: 'pointer'
+  },
   selectIcon: {
     margin: '2px 0.5rem 2px 2px',
     color: 'rgb(98, 164, 32)',
@@ -76,6 +81,7 @@ const styles = reactStyles({
 });
 
 interface ListSearchProps {
+  addAttributes: Function;
   selections: Array<string>;
   workspace: WorkspaceData;
   wizard: any;
@@ -110,8 +116,11 @@ export const ListSearch = withCurrentWorkspace()(
         selections = [paramId, ...selections];
         selectionsStore.next(selections);
         wizardStore.next(wizard);
-        // this.setState({selections});
       }
+    }
+
+    launchAttributes = (row: any) => {
+      this.props.addAttributes(row);
     }
 
     isSelected = (row: any) => {
@@ -144,13 +153,19 @@ export const ListSearch = withCurrentWorkspace()(
               return <tr key={r}>
                 <td style={styles.columnBody}>
                   <div style={{...styles.selectDiv}}>
-                    {this.isSelected(row) &&
-                      <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
-                    {!this.isSelected(row) &&
+                    {row.hasAttributes &&
+                      <ClrIcon style={styles.attrIcon}
+                        shape='slider' dir='right' size='20'
+                        onClick={() => this.launchAttributes(row)}/>
+                    }
+                    {!row.hasAttributes && this.isSelected(row) &&
+                      <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
+                    }
+                    {!row.hasAttributes && !this.isSelected(row) &&
                       <ClrIcon style={styles.selectIcon}
                         shape='plus-circle' size='16'
-                        onClick={() => this.selectItem(row)}
-                      />}
+                        onClick={() => this.selectItem(row)}/>
+                    }
                   </div>
                   <div style={{...styles.nameDiv}}>{row.name}</div>
                 </td>
@@ -171,9 +186,10 @@ export const ListSearch = withCurrentWorkspace()(
   template: '<div #root></div>'
 })
 export class ListSearchComponent extends ReactWrapperBase {
+  @Input('addAttributes') addAttributes: ListSearchProps['addAttributes'];
   @Input('selections') selections: ListSearchProps['selections'];
   @Input('wizard') wizard: ListSearchProps['wizard'];
   constructor() {
-    super(ListSearch, ['selections', 'wizard']);
+    super(ListSearch, ['addAttributes', 'selections', 'wizard']);
   }
 }

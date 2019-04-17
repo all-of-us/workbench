@@ -16,7 +16,8 @@ import {
 } from 'app/cohort-search/redux';
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {stripHtml, subtypeToTitle, typeToTitle} from 'app/cohort-search/utils';
-import {DomainType, TreeSubType, TreeType} from 'generated';
+import {TreeSubType, TreeType} from 'generated';
+import {DomainType} from 'generated/fetch';
 import {Map} from 'immutable';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
@@ -67,14 +68,38 @@ export class ListModalComponent implements OnInit, OnDestroy {
   preview = Map();
   conceptType: string = null;
   wizard: any;
+  attributesCrit: any;
 
   constructor(private actions: CohortSearchActions) {}
 
   ngOnInit() {
+    // TODO below code is only for dev purposes, remove before merging
+    // this.open = true;
+    // this.attributesCrit = {
+    //   code: '1920-8',
+    //   conceptId: 3013721,
+    //   count: 388001,
+    //   domainId: 'MEASUREMENT',
+    //   group: false,
+    //   hasAncestorData: false,
+    //   hasAttributes: true,
+    //   hasHierarchy: true,
+    //   id: 2989256,
+    //   isStandard: true,
+    //   name: 'Aspartate aminotransferase serum/plasma',
+    //   parentId: 2987428,
+    //   path: '2985909.2985939.2985979.2986335.2987428.2989256',
+    //   selectable: true,
+    //   subtype: 'LAB',
+    //   type: 'LOINC',
+    //   value: ''
+    // };
+    // this.mode = 'attributes';
+    // TODO end of dev code
+
     this.subscription = wizardStore
       .filter(wizard => !!wizard)
       .subscribe(wizard => {
-        console.log(wizard.item.searchParameters);
         // reset to default each time the modal is opened
         this.mode = 'tree';
         this.title = wizard.domain;
@@ -121,9 +146,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
       .subscribe(node => {
         this.attributesNode = node;
         if (node.size === 0) {
-          this.mode = 'tree';
+          // this.mode = 'tree';
         } else {
-          this.mode = 'attributes';
+          // this.mode = 'attributes';
         }
       })
     );
@@ -200,8 +225,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   back() {
-    if (this.attributesNode.size > 0) {
-      this.actions.hideAttributesPage();
+    if (this.attributesCrit) {
+      this.mode = 'tree';
+      this.attributesCrit = undefined;
     }
     if (this.mode === 'snomed') {
       this.setMode('tree');
@@ -240,9 +266,10 @@ export class ListModalComponent implements OnInit, OnDestroy {
   }
 
   get attributeTitle() {
-    return this.ctype === TreeType[TreeType.PM]
-      ? stripHtml(this.attributesNode.get('name'))
-      : typeToTitle(this.ctype) + ' Detail';
+    const domain = this.attributesCrit.domainId;
+    return domain === DomainType[DomainType.PHYSICALMEASUREMENT]
+      ? stripHtml(this.attributesCrit.name)
+      : domain + ' Detail';
   }
 
   get showModifiers() {
@@ -296,8 +323,9 @@ export class ListModalComponent implements OnInit, OnDestroy {
     this.mode = mode;
   }
 
-  get altTab() {
-    return this.attributesNode.size > 0;
+  launchAttributes = (criterion: any) => {
+    this.attributesCrit = criterion;
+    this.mode = 'attributes';
   }
 
   selectionHeader(_type: string) {
