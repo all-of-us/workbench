@@ -12,13 +12,7 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceData} from 'app/services/workspace-storage.service';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {ConceptTable} from 'app/views/concept-table/component';
-import {
-  Concept,
-  Domain,
-  DomainCount,
-  DomainInfo,
-  VocabularyCount,
-} from 'generated/fetch';
+import {Concept, Domain, DomainCount, DomainInfo, StandardConceptFilter, VocabularyCount,} from 'generated/fetch';
 
 const styles = reactStyles({
   searchBar: {
@@ -72,8 +66,10 @@ export const ConceptWrapper = withCurrentWorkspace()(
         searching: boolean, searchLoading: boolean, showSearchError: boolean, selectedDomain: DomainCount,
         conceptDomainList: Array<DomainInfo>, conceptDomainCounts: Array<DomainCount>,
         concepts: Array<ConceptInfo>, conceptsCache: Array<ConceptCacheSet>,
-        selectedConceptDomainMap: Map<String, number>}> {
+        selectedConceptDomainMap: Map<String, number>, completedDomainSearches: Array<Domain>,
+        conceptsToAdd: Concept[]}> {
 
+    private MAX_CONCEPT_FETCH = 100;
     constructor(props) {
       super(props);
       this.state = {
@@ -92,7 +88,9 @@ export const ConceptWrapper = withCurrentWorkspace()(
         conceptDomainCounts: [],
         concepts: [],
         conceptsCache: [],
-        selectedConceptDomainMap: new Map<string, number>()
+        selectedConceptDomainMap: new Map<string, number>(),
+        completedDomainSearches: [],
+        conceptsToAdd: []
       };
     }
 
@@ -136,7 +134,7 @@ export const ConceptWrapper = withCurrentWorkspace()(
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: e.target.value, searching: true});
+          this.setState({currentSearchString: e.target.value});
           this.searchConcepts();
         }
       }
@@ -154,8 +152,31 @@ export const ConceptWrapper = withCurrentWorkspace()(
       // TODO
     }
 
-    searchConcepts() {
-      this.setState({concepts: [], searchLoading: true});
+    async searchConcepts() {
+      const {standardConceptsOnly, currentSearchString, conceptsCache,
+        selectedDomain, completedDomainSearches} = this.state;
+      const {namespace, id} = this.props.workspace;
+      this.setState({concepts: [], searchLoading: true, searching: true});
+      const standardConceptFilter = standardConceptsOnly ?
+        StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+
+      conceptsCache.forEach(async(conceptDomain) => {
+        const activeTabSearch = conceptDomain.domain === selectedDomain.domain;
+        const resp = await conceptsApi().searchConcepts(namespace, id, {
+          query: currentSearchString,
+          standardConceptFilter: standardConceptFilter,
+          domain: conceptDomain.domain,
+          includeDomainCounts: activeTabSearch,
+          includeVocabularyCounts: true,
+          maxResults: this.MAX_CONCEPT_FETCH
+        });
+        completedDomainSearches.push(conceptDomain.domain);
+        conceptDomain.items = this.convertToConceptInfo(resp.items);
+        conceptDomain.vocabularyList = resp.vocabularyCounts;
+        console.log(this.state.conceptsCache);
+
+      });
+
     }
 
     filterList() {
@@ -164,6 +185,24 @@ export const ConceptWrapper = withCurrentWorkspace()(
 
     selectConcept(concepts: ConceptInfo[]) {
       // TODO
+    }
+
+    convertToConceptInfo(concepts: Concept[]): ConceptInfo[] {
+      const conceptInfos = concepts.map((concept) => {
+        return {
+          ...concept,
+          selected: false
+        };
+      });
+      this.filterConceptSelection(conceptInfos);
+      return conceptInfos;
+    }
+
+    private filterConceptSelection(concepts: ConceptInfo[]) {
+      const conceptSet = new Set(this.state.conceptsToAdd.map(c => c.conceptId));
+      concepts.forEach((concept) => {
+        concept.selected = conceptSet.has(concept.conceptId);
+      });
     }
 
     clearSearch() {
