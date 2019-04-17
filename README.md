@@ -126,7 +126,7 @@ All commands should be run from `workbench/api`
 * If you have schema migrations or pending configuration updates, run through the [normal docker developer startup process](#api-dev-appengine-appserver) at least once successfully. This is typically only necessary when switching between branches.
 * Start services required for API server
     * ```Shell
-      ./project-rb start-api-reqs
+      ./project.rb start-api-reqs
       # the counterpart command is ./project.rb stop-api-reqs
       ```
 * Start API server through gradle
