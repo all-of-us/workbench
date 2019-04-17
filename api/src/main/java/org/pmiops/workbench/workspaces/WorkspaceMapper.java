@@ -11,10 +11,19 @@ import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceMapper {
+
+  public WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
+    if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+      return WorkspaceAccessLevel.OWNER;
+    } else {
+      return WorkspaceAccessLevel.fromValue(firecloudAccessLevel);
+    }
+  }
 
   public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);

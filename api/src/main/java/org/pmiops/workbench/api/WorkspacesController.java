@@ -358,40 +358,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
-    List<org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-        fireCloudService.getWorkspaces();
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcUuidWorkspaceMap =
-        fcWorkspaces.stream().collect(
-            Collectors.toMap(
-                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
-
-    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
-        workspaceService.getDao().findAllByFirecloudUuidIn(
-
-            fcUuidWorkspaceMap.keySet().stream().collect(Collectors.toList()));
-
-    List<WorkspaceResponse> responseList = new ArrayList<WorkspaceResponse>();
-
-    for (org.pmiops.workbench.db.model.Workspace dbWorkspace : dbWorkspaces) {
-      org.pmiops.workbench.firecloud.model.WorkspaceResponse fcWorkspace =
-          fcUuidWorkspaceMap.get(dbWorkspace.getFirecloudUuid());
-      if (!(fcUuidWorkspaceMap.containsKey(dbWorkspace.getFirecloudUuid()))) {
-        continue;
-      }
-      WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-      currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
-      if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
-        currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
-      } else {
-        currentWorkspace
-            .setAccessLevel(WorkspaceAccessLevel.fromValue(fcWorkspace.getAccessLevel()));
-      }
-      responseList.add(currentWorkspace);
-    }
-
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(responseList);
+    response.setItems(workspaceService.getWorkspacesWithAccessLevel(WorkspaceAccessLevel.READER));
     return ResponseEntity.ok(response);
   }
 
