@@ -367,6 +367,31 @@ public class DataSetControllerTest {
     assertThat(response.getQueryList().size()).isEqualTo(2);
   }
 
+  @Test
+  public void testGetQueryTwoCohorts() {
+    DataSet dataSet = buildEmptyDataSet();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
+    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    List<DomainValue> domainValues = new ArrayList<>();
+    domainValues.add(new DomainValue().value("PERSON_ID"));
+    ValueSet valueSet = new ValueSet().domain(Domain.CONDITION).values(new DomainValuesResponse().items(domainValues));
+    dataSet.addValuesItem(valueSet);
+
+
+    List<String> selectStrings = new ArrayList<>();
+    selectStrings.add("PERSON_ID");
+    List<String> joinStrings = new ArrayList<>();
+    joinStrings.add("FROM `all-of-us-ehr-dev.synthetic_cdr20180606.condition_occurrence` c_occurrence");
+
+    dataSetController = spy(dataSetController);
+    doReturn(new ValuesLinkingPair(selectStrings, joinStrings)).when(dataSetController).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
+
+    DataSetQueryResponse response = dataSetController.getQueryFromDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet).getBody();
+    assertThat(response.getQueryList().size()).isEqualTo(1);
+    verify(dataSetController, times(1)).getValueSelectsAndJoins(valueSet, Domain.CONDITION);
+    assertThat(response.getQueryList().get(0).getQuery()).matches("SELECT(.*)WHERE CONDITION_CONCEPT_ID IN \\((.*)\\)(.*)PERSON_ID IN \\(SELECT(.*)OR PERSON_ID IN(.*)");
+  }
 
   private DataSet buildEmptyDataSet() {
     return new DataSet()
