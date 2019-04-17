@@ -16,6 +16,7 @@ for line in $(awk '!/^ *#/ && NF' db/vars.env); do
   export $var=$evaluatedString
 
   var="sed -i \"\" 's|\${$var}|$evaluatedString|g' ./src/main/webapp/WEB-INF/appengine-web.xml"
+  echo $var
   eval $var
 
 done
