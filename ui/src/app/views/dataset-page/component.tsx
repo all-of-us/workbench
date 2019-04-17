@@ -442,7 +442,9 @@ export const DataSetPage = withCurrentWorkspace()(class extends React.Component<
             <div style={{marginLeft: '1rem', color: '#000000', fontSize: '14px'}}>A visualization
               of your data table based on the variable and value you selected above</div>
             <Button style={{position: 'absolute', right: '8rem', top: '.25rem'}}
-                    onClick={() => {this.generateCode();}}>
+                    onClick={() => {
+                      this.generateCode();
+                    }}>
               GENERATE CODE
             </Button>
             {/* Button disabled until this functionality added*/}
