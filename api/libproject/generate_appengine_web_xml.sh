@@ -14,7 +14,9 @@ for line in $(awk '!/^ *#/ && NF' db/vars.env); do
   echo "Exporting value $var=$evaluatedString"
   export $var=$evaluatedString
 
-  sed -i '' 's/${$var}/($evaluatedString)/g' ./src/main/webapp/WEB-INF/appengine-web.xml
+  var="sed -i '' 's|\${$var}|$evaluatedString|g' ./src/main/webapp/WEB-INF/appengine-web.xml"
+  eval $var
+
 done
 
 echo "Generated App Engine XML"
