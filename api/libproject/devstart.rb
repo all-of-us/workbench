@@ -272,36 +272,6 @@ Common.register_command({
   :fn => ->() { stop_local_api() }
 })
 
-def start_local_public_api()
-  setup_local_environment
-  common = Common.new
-  Dir.chdir('../public-api') do
-    common.status "Starting public API server..."
-    common.run_inline %W{gradle appengineStart}
-  end
-end
-
-Common.register_command({
-  :invocation => "start-local-public-api",
-  :description => "Starts public-api using the local MySQL instance. You must set MYSQL_ROOT_PASSWORD before running this.",
-  :fn => ->() { start_local_public_api() }
-})
-
-def stop_local_public_api()
-  setup_local_environment
-  common = Common.new
-  Dir.chdir('../public-api') do
-    common.status "Stopping public API server..."
-    common.run_inline %W{gradle appengineStop}
-  end
-end
-
-Common.register_command({
-  :invocation => "stop-local-public-api",
-  :description => "Stops locally running public api.",
-  :fn => ->() { stop_local_public_api() }
-})
-
 def run_local_api_tests()
   common = Common.new
   status = common.capture_stdout %W{curl --silent --fail http://localhost:8081/}
@@ -318,24 +288,6 @@ Common.register_command({
   :invocation => "run-local-api-tests",
   :description => "Runs smoke tests against local api server",
   :fn => ->() { run_local_api_tests() }
-})
-
-def run_local_public_api_tests()
-  common = Common.new
-  status = common.capture_stdout %W{curl --silent --fail http://localhost:8083/}
-  if status != 'AllOfUs Public API'
-    common.error "Error probing public-api; received: #{status}"
-    common.error "Server logs:"
-    common.run_inline %W{cat ../public-api/build/dev-appserver-out/dev_appserver.out}
-    exit 1
-  end
-  common.status "public-api started up."
-end
-
-Common.register_command({
-  :invocation => "run-local-public-api-tests",
-  :description => "Runs smoke tests against public-api server",
-  :fn => ->() { run_local_public_api_tests() }
 })
 
 def get_gsuite_admin_key(project)
@@ -356,21 +308,6 @@ def run_api()
     common.run_inline_swallowing_interrupt %W{docker-compose up api}
   end
 end
-
-def run_public_api_and_db()
-  common = Common.new
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  common.status "Starting public API."
-  common.run_inline_swallowing_interrupt %W{docker-compose up public-api}
-end
-
-Common.register_command({
-  :invocation => "run-public-api",
-  :description => "Runs the public api server (assumes database is up-to-date.)",
-  :fn => ->() { run_public_api_and_db() }
-})
-
 
 def clean()
   common = Common.new
@@ -422,21 +359,6 @@ Common.register_command({
   :fn => ->(*args) { run_api_tests("test-api", args) }
 })
 
-
-def run_public_api_tests(cmd_name, args)
-  ensure_docker cmd_name, args
-  Dir.chdir('../public-api') do
-    Common.new.run_inline %W{gradle :test} + args
-  end
-end
-
-Common.register_command({
-  :invocation => "test-public-api",
-  :description => "Runs public API tests. To run a single test, add (for example) " \
-      "--tests org.pmiops.workbench.cdr.dao.AchillesAnalysisDaoTest",
-  :fn => ->(*args) { run_public_api_tests("test-public-api", args) }
-})
-
 def run_common_api_tests(cmd_name, args)
   ensure_docker cmd_name, args
   Dir.chdir('../common-api') do
@@ -454,12 +376,11 @@ Common.register_command({
 def run_all_tests(cmd_name, args)
   run_common_api_tests(cmd_name, args)
   run_api_tests(cmd_name, args)
-  run_public_api_tests(cmd_name, args)
 end
 
 Common.register_command({
   :invocation => "test",
-  :description => "Runs all tests (api and public-api). To run a single test, add (for example) " \
+  :description => "Runs all tests (api). To run a single test, add (for example) " \
       "--tests org.pmiops.workbench.interceptors.AuthInterceptorTest",
   :fn => ->(*args) { run_all_tests("test", args) }
 })
@@ -697,17 +618,6 @@ Common.register_command({
   :fn => ->() { run_local_data_migrations() }
 })
 
-def run_local_public_data_migrations()
-  init_new_cdr_db %W{--cdr-db-name public --version-flag public}
-  init_new_cdr_db %W{--cdr-db-name public --version-flag public --run-list data --context local}
-end
-
-Common.register_command({
-  :invocation => "run-local-public-data-migrations",
-  :description => "Runs local data migrations for public schemas.",
-  :fn => ->() { run_local_public_data_migrations() }
-})
-
 def make_bq_denormalized_tables(*args)
   common = Common.new
   common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh} + args
@@ -785,25 +695,12 @@ def generate_private_cdr_counts(*args)
   common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh} + args
 end
 
-def generate_public_cdr_counts(*args)
-  common = Common.new
-  common.run_inline %W{docker-compose run db-make-bq-tables ./generate-cdr/generate-public-cdr-counts.sh} + args
-end
-
 Common.register_command({
   :invocation => "generate-private-cdr-counts",
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
  --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts(*args) }
-})
-
-Common.register_command({
-  :invocation => "generate-public-cdr-counts",
-  :description => "generate-public-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --public-project <PROJECT> \
- --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
-Generates databases in bigquery with non de-identified data from a cdr that will be imported to mysql/cloudsql to be used by databrowser.",
-  :fn => ->(*args) { generate_public_cdr_counts(*args) }
 })
 
 def generate_cloudsql_db(cmd_name, *args)
@@ -841,7 +738,7 @@ Common.register_command({
   :invocation => "generate-cloudsql-db",
   :description => "generate-cloudsql-db  --project <PROJECT> --instance <INSTANCE> \
 --database <cdrYYYYMMDD> --bucket <BUCKET>
-Generates a cloudsql database from data in a bucket. Used to make cdr and public count databases.",
+Generates a cloudsql database from data in a bucket. Used to make cdr count databases.",
   :fn => ->(*args) { generate_cloudsql_db("generate-cloudsql-db", *args) }
 })
 
@@ -898,8 +795,8 @@ end
 
 Common.register_command({
   :invocation => "generate-local-cdr-db",
-  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr|public> --bucket <BUCKET>
-Creates and populates local mysql database from data in bucket made by generate-private/public-cdr-counts.",
+  :description => "generate-cloudsql-cdr --cdr-version <''|YYYYMMDD> --cdr-db-prefix <cdr> --bucket <BUCKET>
+Creates and populates local mysql database from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_cdr_db(*args) }
 })
 
@@ -912,7 +809,7 @@ end
 Common.register_command({
   :invocation => "generate-local-count-dbs",
   :description => "generate-local-count-dbs.sh --cdr-version <''|YYYYMMDD> --bucket <BUCKET>
-Creates and populates local mysql databases cdr<VERSION> and public<VERSION> from data in bucket made by generate-private/public-cdr-counts.",
+Creates and populates local mysql databases cdr<VERSION> from data in bucket made by generate-private-cdr-counts.",
   :fn => ->(*args) { generate_local_count_dbs(*args) }
 })
 
@@ -1619,23 +1516,6 @@ Common.register_command({
   :fn => ->(*args) { deploy_api("deploy-api", args) }
 })
 
-
-def deploy_public_api(cmd_name, args)
-  ensure_docker cmd_name, args
-  common = Common.new
-  common.status "Deploying public-api..."
-  Dir.chdir('../public-api') do
-    deploy_app(cmd_name, args, false, false)
-  end
-end
-
-Common.register_command({
-  :invocation => "deploy-public-api",
-  :description => "Deploys the public API server to the specified cloud project.",
-  :fn => ->(*args) { deploy_public_api("deploy-public-api", args) }
-})
-
-
 def create_workbench_db()
   run_with_redirects(
     "cat db/create_db.sql | envsubst | " \
@@ -1752,12 +1632,11 @@ def deploy(cmd_name, args)
     "Deploy, but do not yet serve traffic from this version - DB migrations are still applied"
   )
   op.add_validator ->(opts) { raise ArgumentError if opts.promote.nil?}
-  # TODO(DB-89): Remove this flag and always push public-api.
-  op.opts.skip_public_api = false
+  # TODO(RW-1975): Remove flag entirely.
   op.add_option(
     "--skip-public-api",
     ->(opts, _) { opts.skip_public_api = true},
-    "Whether to skip deployment of the public API service, pushed by default"
+    "Deprecated - public-api is never pushed"
   )
 
   gcc = GcloudContextV2.new(op)
@@ -1786,15 +1665,12 @@ def deploy(cmd_name, args)
       --quiet
     } + dry_flag
     deploy_api(cmd_name, deploy_args)
-    unless op.opts.skip_public_api
-      deploy_public_api(cmd_name, deploy_args)
-    end
   end
 end
 
 Common.register_command({
   :invocation => "deploy",
-  :description => "Run DB migrations and deploy the API and public servers",
+  :description => "Run DB migrations and deploy the API server",
   :fn => ->(*args) { deploy("deploy", args) }
 })
 
