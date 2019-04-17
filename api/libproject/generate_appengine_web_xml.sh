@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 cp src/main/webapp/WEB-INF/appengine-web.xml.template src/main/webapp/WEB-INF/appengine-web.xml
 
