@@ -1,0 +1,160 @@
+.dropdown, .dropdown .dropdown-toggle{
+    text-align: left;
+    width: 12rem;
+}
+
+.btn-info-outline .btn, .btn-outline .btn, .btn.btn-info-outline, .btn.btn-outline, .btn.btn-outline-info, .btn.btn-outline .btn {
+    border : 1px solid #C3C3C3;
+    color: #4A4A4A;
+}
+
+.dropdown .dropdown-toggle.btn clr-icon[shape^=caret] {
+    color: #C3C3C3;
+}
+
+.range-container {
+    padding-left: 0rem;
+    margin-top: -0.2rem;
+}
+
+.range-container .number-container {
+    border-radius: 0.2rem
+}
+
+.modifier-header {
+    color: #262262;
+    font-weight: 500;
+    font-size: 16px;
+    border-bottom: 1px solid #262262;
+    padding-bottom: 0.5rem;
+}
+
+.modifier-event-header {
+    color: #262262;
+    font-weight: 500;
+}
+.modifier-event-indicator {
+    border-radius:0.15rem;
+    border : 1px solid #C3C3C3;
+    width: 1rem;
+    height: 1.4rem;
+    text-align: center;
+}
+
+.count-preview {
+    background-color: #E4F3FC;
+    padding:0.5rem;
+    margin-top: 1rem;
+    position: absolute;
+    width: 93%;
+    bottom: 1rem;
+}
+
+.count-preview  .calculate-btn{
+    background-color: #2691D0;
+    color: white;
+}
+
+.count-preview  .calculate-btn:disabled{
+    opacity: 0.3;
+    background-color: #c3c3c3;
+    border: transparent;
+}
+
+.count-preview  .disable-link {
+    pointer-events: none;
+    opacity: 0.3;
+}
+.count-preview  .add-button {
+    border-color:transparent;
+    outline: none;
+    background-color: transparent;
+    font-weight: 500;
+    color: #2691D0;
+}
+.count-preview .text-bold {
+    font-weight: bold;
+    color: #4A4A4A;
+}
+
+.spin-top-padding {
+    padding-top: 0.5rem;
+}
+
+.count-preview .result-text {
+    color: #262262;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modifier-calender {
+    border-radius: 0.15rem;
+    border : 1px solid #C3C3C3;
+    height: 1.4rem;
+    text-align: center;
+    width: 6rem;
+}
+.modifier-calender .datepicker-trigger .datepicker-trigger-icon {
+   height: 30px;
+    width: 30px;
+}
+
+.dropdown-menu {
+    width: 12rem;
+}
+
+.dropdown-menu.encounters {
+    width: auto;
+}
+
+.modifier-container {
+    display: flex;
+    padding-top: 0.5rem;
+}
+
+.modifier-container .dropdown-width {
+    margin-right: 1rem;
+}
+
+.modifier-container .and-text {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.2rem;
+}
+
+.date-container {
+    width: 8rem !important;
+}
+
+.label-flex {
+    display: flex;
+    padding-top: 1.4rem;
+    padding-bottom: 0.1rem;
+}
+
+.label-flex .label-info {
+    color: #0077b7;
+    margin-left: 0.25rem;
+    /*width: 1rem;*/
+    /*height: 0.7rem;*/
+
+}
+
+.hidden-input {
+    display: none;
+}
+
+@media only screen and (min-width: 1500px) {
+    .modifier-container .and-text {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    ::ng-deep .datepicker-trigger {
+        min-width: 1rem;
+    }
+
+    .modifier-calender {
+        width: 5rem;
+    }
+}

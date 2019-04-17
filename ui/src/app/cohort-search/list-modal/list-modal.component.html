@@ -73,7 +73,7 @@
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
-                    <crit-modifier-page (disabled)="modifiersDisabled = $event"></crit-modifier-page>
+                    <crit-list-modifier-page [disabled]="modifiersFlag"></crit-list-modifier-page>
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">

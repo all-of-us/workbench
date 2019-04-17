@@ -332,6 +332,10 @@ export class ListModalComponent implements OnInit, OnDestroy {
     return this.itemType === TreeType[TreeType.DEMO] ? subtypeToTitle(_type) : typeToTitle(_type);
   }
 
+  modifiersFlag = (disabled: boolean) => {
+    this.modifiersDisabled = disabled;
+  }
+
   get disableFlag() {
     return this.noSelection
       || this.preview.get('requesting')
