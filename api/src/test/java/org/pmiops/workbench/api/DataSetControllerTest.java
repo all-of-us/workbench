@@ -174,7 +174,7 @@ public class DataSetControllerTest {
   @Before
   public void setUp() throws Exception {
 
-    dataSetController = new DataSetController(bigQueryService, userProvider, cohortDao,
+    dataSetController = new DataSetController(bigQueryService, cohortDao,
         conceptSetDao, participantCounter, workspaceService);
     WorkspacesController workspacesController =
         new WorkspacesController(workspaceService, cdrVersionDao, cohortDao, conceptSetDao, userDao,

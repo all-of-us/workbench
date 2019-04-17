@@ -13,9 +13,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.pmiops.workbench.cohortbuilder.ParticipantCounter;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -23,7 +21,6 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -60,11 +57,8 @@ class ValuesLinkingPair {
 
 @RestController
 public class DataSetController implements DataSetApiDelegate {
-  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private BigQueryService bigQueryService;
-
-  private Provider<User> userProvider;
 
   private CohortDao cohortDao;
 
@@ -77,22 +71,15 @@ public class DataSetController implements DataSetApiDelegate {
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
-      Provider<User> userProvider,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       ParticipantCounter participantCounter,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
-    this.userProvider = userProvider;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
     this.participantCounter = participantCounter;
     this.workspaceService = workspaceService;
-  }
-
-  @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
-    this.userProvider = userProvider;
   }
 
   public ResponseEntity<DataSetQueryResponse> getQueryFromDataSet(String ns, String wsid, DataSet dataSet) {
