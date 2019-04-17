@@ -1590,7 +1590,7 @@ public class WorkspacesControllerTest {
   public void testEmptyFireCloudWorkspaces() throws Exception {
     when(fireCloudService.getWorkspaces()).thenReturn(new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>());
     try {
-      ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response = workspacesController.getWorkspaces();
+      ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response = workspacesController.getWorkspaces(WorkspaceAccessLevel.READER);
       assertThat(response.getBody().getItems()).isEmpty();
     } catch (Exception ex) {
       fail();

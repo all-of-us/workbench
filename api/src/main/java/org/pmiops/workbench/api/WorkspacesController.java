@@ -357,9 +357,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
+  public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces(WorkspaceAccessLevel requiredAccessLevel) {
+    if (requiredAccessLevel == null) {
+      // This was the default behavior of getWorkspaces before access levels were introduced
+      requiredAccessLevel = WorkspaceAccessLevel.READER;
+    }
+
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    response.setItems(workspaceService.getWorkspacesWithAccessLevel(WorkspaceAccessLevel.READER));
+    response.setItems(workspaceService.getWorkspacesWithAccessLevel(requiredAccessLevel));
     return ResponseEntity.ok(response);
   }
 

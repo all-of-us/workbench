@@ -588,11 +588,22 @@ paths:
         - workspaces
       description: Returns all workspaces that a user has access to
       operationId: getWorkspaces
+      parameters:
+        - in: body
+          required: false
+          name: requiredAccessLevel
+          description: Return workspaces where the requesting user has the requiredAccessLevel or higher
+          schema:
+            $ref: "#/definitions/WorkspaceAccessLevel"
       responses:
         200:
           description: A list of workspace definitions.
           schema:
             $ref: "#/definitions/WorkspaceResponseListResponse"
+        400:
+          description: Invalid access level given
+          schema:
+            $ref: '#/definitions/ErrorResponse'
     post:
       tags:
         - workspaces
@@ -1609,7 +1620,8 @@ definitions:
 
   WorkspaceAccessLevel:
     type: string
-    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL
+    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.
+    # The access power MUST flow from left to right and we assume that any access level contains the access power of everything to its left
     enum: [NO ACCESS, READER, WRITER, OWNER]
 
   ResearchPurpose:
