@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -14,6 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.db.dao.CohortCloningService;
+import org.pmiops.workbench.db.dao.ConceptSetService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.Workspace;
@@ -30,7 +33,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Autowired private CohortCloningService cohortCloningService;
   @Autowired private ConceptSetService conceptSetService;
   @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceMapper workspaceMapper;
 
   @Autowired private FireCloudService fireCloudService;
   @Autowired private Clock clock;
@@ -97,7 +100,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       }
 
       WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-      currentWorkspace.setWorkspace(TO_CLIENT_WORKSPACE.apply(dbWorkspace));
+      currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
       if (fcWorkspace.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
         currentWorkspace.setAccessLevel(WorkspaceAccessLevel.OWNER);
       } else {

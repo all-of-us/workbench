@@ -1,7 +1,8 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.workspaces;
 
 import java.util.List;
 import java.util.Set;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.WorkspaceUserRole;
 import org.pmiops.workbench.firecloud.FireCloudService;
